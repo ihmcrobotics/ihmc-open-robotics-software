@@ -49,6 +49,19 @@ public abstract class SwingTrajectoryParameters
       return 0.0;
    }
 
+   public double getMinLiftOffVerticalVelocity()
+   {
+      return 0.0;
+   }
+
+   /**
+    * When this value is 0.0, the initial foot velocity is 0.0. When it is 1.0, the initial swing foot velocity is the pelvis velocity.
+    */
+   public double getPelvisVelocityInjectionRatio()
+   {
+      return 0.0;
+   }
+
    /**
     * Useful to relax the desired touchdown velocity when computing the swing trajectory.
     * 
@@ -66,18 +79,6 @@ public abstract class SwingTrajectoryParameters
    public double getBlindFootstepsHeightOffset()
    {
       return 0.03;
-   }
-
-   /**
-    * Returns a ratio to multiply the swing foot velocity adjustment when the swing trajectory is
-    * modified online. 0.0 will eliminate any velocity adjustment. 1.0 will make it try to move to the
-    * new trajectory in 1 dt.
-    * 
-    * @return damping ratio (0.0 to 1.0)
-    */
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return 0.0;
    }
 
    /**

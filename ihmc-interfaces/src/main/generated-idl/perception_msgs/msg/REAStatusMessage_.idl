@@ -1,0 +1,45 @@
+#ifndef __perception_msgs__msg__REAStatusMessage__idl__
+#define __perception_msgs__msg__REAStatusMessage__idl__
+
+#include "perception_msgs/msg/./REASensorDataFilterParametersMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC robot environment awareness module (REA).
+       * It is destined to gather complementary information related to the current state REA is in.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::REAStatusMessage_")
+      struct REAStatusMessage
+      {
+        /**
+         * Informs if REA is currently collecting sensor data and estimating planar regions.
+         * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
+         */
+        boolean is_running;
+        /**
+         * Informs whether REA is collecting LIDAR data or not.
+         */
+        boolean is_using_lidar;
+        /**
+         * Informs whether REA is collecting pointcloud data from a stereo-camera.
+         */
+        boolean is_using_stereo_vision;
+        /**
+         * Informs whether REA's internal data has just been cleared.
+         */
+        boolean has_cleared;
+        /**
+         * Provides the current set of filter parameters used in REA.
+         */
+        perception_msgs::msg::dds::REASensorDataFilterParametersMessage current_sensor_filter_parameters;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,13 +1,13 @@
 package us.ihmc.atlas.sensors;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PerceptionSuiteUI;
 
-public class AtlasPerceptionSuiteLauncher extends Application
+public class AtlasPerceptionSuiteLauncher extends ApplicationNoModule
 {
    private SharedMemoryJavaFXMessager messager;
    private AtlasPerceptionSuite module;

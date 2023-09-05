@@ -8,13 +8,17 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -22,7 +26,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class StepAdjustmentReachabilityConstraint
+public class StepAdjustmentReachabilityConstraint implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -52,6 +56,7 @@ public class StepAdjustmentReachabilityConstraint
 
    public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                SteppingParameters steppingParameters,
+                                               StepAdjustmentParameters.CrossOverReachabilityParameters crossOverParameters,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -63,6 +68,7 @@ public class StepAdjustmentReachabilityConstraint
            new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth()),
            new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth()),
            new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth()),
+           crossOverParameters,
            yoNamePrefix,
            visualize,
            registry,
@@ -75,6 +81,7 @@ public class StepAdjustmentReachabilityConstraint
                                                DoubleProvider innerLimit,
                                                DoubleProvider outerLimit,
                                                DoubleProvider inPlaceWidth,
+                                               StepAdjustmentParameters.CrossOverReachabilityParameters crossOverParameters,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -86,10 +93,14 @@ public class StepAdjustmentReachabilityConstraint
       this.outerLimit = outerLimit;
       this.inPlaceWidth = inPlaceWidth;
 
-      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, 0.05);
-      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, -0.05);
-      this.forwardCrossOverClearanceAngle = new DoubleParameter("forwardCrossOverClearanceAngle", registry, Math.toRadians(25));
-      this.backwardCrossOverClearanceAngle = new DoubleParameter("backwardCrossOverClearanceAngle", registry, Math.toRadians(45));
+      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, crossOverParameters.getForwardCrossOverDistance());
+      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, crossOverParameters.getBackwardCrossOverDistance());
+      this.forwardCrossOverClearanceAngle = new DoubleParameter("forwardCrossOverClearanceAngle",
+                                                                registry,
+                                                                crossOverParameters.getForwardCrossOverClearanceAngle());
+      this.backwardCrossOverClearanceAngle = new DoubleParameter("backwardCrossOverClearanceAngle",
+                                                                 registry,
+                                                                 crossOverParameters.getBackwardCrossOverClearanceAngle());
 
 
       for (RobotSide robotSide : RobotSide.values)
@@ -159,7 +170,7 @@ public class StepAdjustmentReachabilityConstraint
     *
     * @param  supportSide the current support side of the robot
     */
-   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide, FramePose3DReadOnly footstepPose)
+   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide)
    {
       reachabilityPolygon.setMatchingFrame(updateReachabilityPolygon(supportSide), false);
       forwardCrossOverReachability.setMatchingFrame(updateForwardCrossOverPolygon(supportSide), false);
@@ -174,10 +185,14 @@ public class StepAdjustmentReachabilityConstraint
       return reachabilityPolygon;
    }
 
+   FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+
    private FrameConvexPolygon2DReadOnly updateReachabilityPolygon(RobotSide supportSide)
    {
       List<YoFramePoint2D> vertices = reachabilityVertices.get(supportSide);
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
+
+      tempPolygon.clear(polygon.getReferenceFrame());
 
       // create an ellipsoid around the center of the forward and backward reachable limits
       double innerRadius = inPlaceWidth.getValue() - innerLimit.getValue();
@@ -209,13 +224,11 @@ public class StepAdjustmentReachabilityConstraint
             y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
          }
 
-         FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
-         vertex.set(x, y);
+         tempPolygon.addVertex(x, y);
       }
 
-
-      polygon.notifyVerticesChanged();
-      polygon.update();
+      tempPolygon.update();
+      polygon.set(tempPolygon);
 
       return polygon;
    }
@@ -224,7 +237,7 @@ public class StepAdjustmentReachabilityConstraint
    {
       YoFrameConvexPolygon2D forwardPolygon = forwardReachabilityPolygons.get(supportSide);
 
-      double forwardInnerRadius = inPlaceWidth.getValue() + forwardCrossOverDistance.getValue();
+      double forwardInnerRadius = (inPlaceWidth.getValue() + forwardCrossOverDistance.getValue()) / Math.cos(forwardCrossOverClearanceAngle.getValue());
       double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       forwardPolygon.clear();
@@ -258,7 +271,7 @@ public class StepAdjustmentReachabilityConstraint
    {
       YoFrameConvexPolygon2D backwardPolygon = backwardReachabilityPolygons.get(supportSide);
 
-      double backwardInnerRadius = inPlaceWidth.getValue() + backwardCrossOverDistance.getValue();
+      double backwardInnerRadius = (inPlaceWidth.getValue() + backwardCrossOverDistance.getValue()) / Math.cos(backwardCrossOverClearanceAngle.getValue());
       double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       backwardPolygon.clear();
@@ -337,5 +350,15 @@ public class StepAdjustmentReachabilityConstraint
    public FrameConvexPolygon2DReadOnly getTotalReachabilityHull(RobotSide supportSide)
    {
       return totalReachabilityHulls.get(supportSide);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("ReachabilityRegion", reachabilityPolygon, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("ForwardReachabilityRegion", forwardCrossOverReachability, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("BackwardReachabilityRegion", backwardCrossOverReachability, ColorDefinitions.Blue()));
+      return group;
    }
 }

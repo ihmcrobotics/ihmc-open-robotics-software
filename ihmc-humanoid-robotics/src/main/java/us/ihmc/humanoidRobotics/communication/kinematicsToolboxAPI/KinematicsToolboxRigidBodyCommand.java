@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Objects;
 
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.SelectionMatrix3DMessage;
-import controller_msgs.msg.dds.WeightMatrix3DMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
+import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

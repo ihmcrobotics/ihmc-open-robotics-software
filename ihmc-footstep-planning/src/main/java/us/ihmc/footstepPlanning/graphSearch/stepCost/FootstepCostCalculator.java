@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -12,7 +13,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInt
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -35,13 +36,14 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
-   private HeightMapData heightMapData;
+   private final FootstepPlannerEnvironmentHandler environmentHandler;
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstepGraphNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
+                                 FootstepPlannerEnvironmentHandler environmentHandler,
                                  YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -49,6 +51,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
       this.footPolygons = footPolygons;
+      this.environmentHandler = environmentHandler;
       parentRegistry.addChild(registry);
    }
 
@@ -83,7 +86,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
 
-      if (heightMapData != null)
+      if (environmentHandler.hasFallbackHeightMap() && candidateSnapData.getSnappedToHeightMap())
       {
          double rmsError = candidateSnapData.getRMSErrorHeightMap();
          double rmsAlpha = EuclidCoreTools.clamp(
@@ -121,7 +124,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       if (snapData != null)
       {
          double area;
-         if (heightMapData == null)
+         if (!environmentHandler.hasFallbackHeightMap() || !snapData.getSnappedToHeightMap())
          {
             ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
             if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
@@ -144,11 +147,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       {
          return 0.0;
       }
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
    }
 
    public void resetLoggedVariables()

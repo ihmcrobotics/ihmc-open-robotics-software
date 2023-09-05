@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 /**
  * Read-only interface that is implemented by a class holding the parameters necessary to perform
@@ -21,6 +22,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
  */
 public interface JointAccelerationIntegrationParametersReadOnly
 {
+   /**
+    * Whether the acceleration integration should be disabled for this joint regardless of whether
+    * joint acceleration integration is enabled or not for this control session.
+    * 
+    * @return {@code true} to disable acceleration integration for this joint, {@code false} otherwise.
+    */
+   boolean getDisableAccelerationIntegration();
+
    /**
     * The break frequency for the position filter used in the acceleration integration. Increasing this
     * break frequency will cause the integration process to leak more heavily towards the current joint

@@ -1,5 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
@@ -17,14 +18,17 @@ import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -73,6 +77,15 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       robotInitialSetup.setOffset(new Vector3D(x, y, 0.0));
       return robotInitialSetup;
    }
+   
+   default RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw, double x, double y, double z)
+   {
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = getDefaultRobotInitialSetup();
+      robotInitialSetup.setInitialGroundHeight(groundHeight);
+      robotInitialSetup.setInitialYaw(initialYaw);
+      robotInitialSetup.setOffset(new Vector3D(x, y, z));
+      return robotInitialSetup;
+   }
 
    public abstract HandModel getHandModel(RobotSide side);
 
@@ -93,6 +106,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
+
+   default double getStepGeneratorDT()
+   {
+      return 10.0 * getControllerDT();
+   }
 
    public default RobotROSClockCalculator getROSClockCalculator()
    {
@@ -196,9 +214,24 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return null;
+   }
+
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
+   }
+
+   default AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
+   {
+      return null;
+   }
+
+   default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
+   {
+      return new SteppingEnvironmentalConstraintParameters();
    }
 
    default String getStepReachabilityResourceName()
@@ -266,6 +299,16 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return null;
+   }
+
+   default Path getMultiContactScriptPath()
+   {
+      return null;
+   }
+
+   default RobotVersion getRobotVersion()
    {
       return null;
    }

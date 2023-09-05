@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandWrenchTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandWrenchTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "017c82964199a22cb29996f692ce4b0f96f69fb32d47a5fe27f50ab99b8aabd3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

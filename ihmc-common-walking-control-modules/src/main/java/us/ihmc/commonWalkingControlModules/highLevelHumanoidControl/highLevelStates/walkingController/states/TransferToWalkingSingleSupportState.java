@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,11 +44,14 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final DoubleProvider icpErrorThresholdForSlowTransfer;
    private final DoubleProvider minimumSlowTransferDuration;
 
-   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
+   private final FramePose3D actualFootPositionInWorld = new FramePose3D();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
+
+   // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
+   private boolean firstTickInState = true;
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
                                               WalkingMessageHandler walkingMessageHandler,
@@ -80,7 +83,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                                                            "minimumSlowTransferDuration",
                                                                            registry,
                                                                            walkingControllerParameters.getMinimumSlowTransferDuration());
-      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
+      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInTransferEveryTick());
 
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
@@ -110,7 +113,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
@@ -140,7 +142,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.initializeICPPlanForTransfer();
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
-      pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
@@ -163,7 +165,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       RobotSide swingSide = transferToSide.getOppositeSide();
-      feetManager.updateSwingTrajectoryPreview(swingSide);
+      if (!firstTickInState)
+         feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
@@ -192,6 +195,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
          tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
          feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), tempAngularVelocity.getY(), toeOffDuration);
       }
+
+      firstTickInState = false;
    }
 
    private void updateWalkingTrajectoryPath()
@@ -210,6 +215,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void onEntry()
    {
+      firstTickInState = true;
+
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdForSlowTransfer.getValue())
       {
          walkingMessageHandler.peekTiming(0, footstepTimings[0]);
@@ -236,6 +243,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onExit(timeInState);
 
+      touchdownErrorCompensator.commitToFootTouchdownError(transferToSide);
+      touchdownErrorCompensator.clear();
+      firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);
    }
 
@@ -288,7 +298,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
          actualFootPositionInWorld.changeFrame(worldFrame);
 
-         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
+         touchdownErrorCompensator.updateFootTouchdownError(previousSwingSide, actualFootPositionInWorld);
       }
    }
 }

@@ -25,8 +25,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
-
 public class ExploreAreaTurnInPlace extends AsynchronousActionNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -52,14 +50,14 @@ public class ExploreAreaTurnInPlace extends AsynchronousActionNode
       this.footstepPlanner = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       this.footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
-      helper.getMessager().registerTopicListener(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, userRequestedPointToLookAt::set);
+//      helper.getMessager().addTopicListener(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, userRequestedPointToLookAt::set);
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
    }
 
    @Override
    public BehaviorTreeNodeStatus doActionInternal()
    {
-      helper.publish(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
+//      helper.publish(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
       Point2D pointToLookAt2D = new Point2D();
       if (userRequestedPointToLookAt.get() != null)
@@ -86,7 +84,7 @@ public class ExploreAreaTurnInPlace extends AsynchronousActionNode
 
       double heading = Math.atan2(pointToLookAt2D.getX() - robotY, pointToLookAt2D.getY() - robotX);
       double turnYaw = AngleTools.computeAngleDifferenceMinusPiToPi(heading, robotYaw);
-      helper.getMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, pointToLookAt2D);
+//      helper.getMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, pointToLookAt2D);
 
       turnInPlace(turnYaw);
       ThreadTools.sleepSeconds(3.0);

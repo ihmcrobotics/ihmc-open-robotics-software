@@ -1,9 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.JointspaceStreamingMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.SE3StreamingMessage;
-import controller_msgs.msg.dds.SO3StreamingMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
+import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -143,8 +143,8 @@ public class KSTStreamingMessageFactory
       spatialVelocity(handControlFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
       SE3StreamingMessage handStreamingMessage = select(robotSide, output.getLeftHandStreamingMessage(), output.getRightHandStreamingMessage());
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, handStreamingMessage);
-      handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
-      handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+      handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, handStreamingMessage);
 
@@ -193,8 +193,8 @@ public class KSTStreamingMessageFactory
       angularVelocity(chestFrame, worldFrame, enableVelocity, desiredAngularVelocity);
 
       SO3StreamingMessage chestStreamingMessage = output.getChestStreamingMessage();
-      chestStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
-      chestStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+      chestStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      chestStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       packSO3TrajectoryPointMessage(desiredOrientation, desiredAngularVelocity, chestStreamingMessage);
 
@@ -216,8 +216,8 @@ public class KSTStreamingMessageFactory
       spatialVelocity(pelvisFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
 
       SE3StreamingMessage pelvisStreamingMessage = output.getPelvisStreamingMessage();
-      pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
-      pelvisStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+      pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      pelvisStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, pelvisStreamingMessage);
 

@@ -1,16 +1,20 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ControllerCoreOptimizationSettings
 {
@@ -128,19 +132,89 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Whether the desired joint torques coming out of the controller core should be limited.
-    * <p>
-    * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
-    * {@link OneDoFJointReadOnly#getEffortLimitUpper()} are used to clamp the desired joint torque for
-    * each individual joint.
-    * </p>
-    *
-    * @return {@code true} if the desired joint torques should be limited to the joint's limits,
-    *         {@code false} for not limiting the joint torques. Default value: {@code false}.
+    * Whether the joint torques should be constrained and, if so, where they are constrained. Joints
+    * are constrained to their effort limits in the URDF at this time.
+    * <ul>
+    * <li>{@code CONSTRAINTS_IN_QP} will constrain torque inside the QP, which means that acceleration
+    * constraints based on the torque limits will be added to the QP. This ensures that the torque
+    * coming out of the inverse dynamics will respect the torque limits.
+    * <li>{@code CONSTRAINTS_IN_CONTROLLER} will clamp torque in the controller (after the QP).
+    * Choosing this option means that the QP might ask for torque above a joint's torque limit, but it
+    * will be clamped afterward in the controller.
+    * <li>{@code CONSTRAINTS_IN_QP_AND_CONTROLLER} will constrain torque inside the QP and the
+    * controller. This option ensures both the QP and the controller respect a joint's torque limit.
+    * <li>{@code NO_CONSTRAINTS} will not add constraints anywhere.
+    * </ul>
+    * Default value: {@code NO_CONSTRAINTS}.
     */
-   default boolean areJointTorqueLimitsConsidered()
+   public enum JointTorqueLimitEnforcementMethod
    {
-      return false;
+
+      NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER, CONSTRAINTS_IN_QP_AND_CONTROLLER;
+
+   }
+
+   /**
+    * Whether the joint torques should be constrained and, if so, where they are constrained. Joints
+    * are constrained to their effort limits in the URDF at this time. See
+    * {@link JointTorqueLimitEnforcementMethod}. Default value: {@code NO_CONSTRAINTS}.
+    */
+   default JointTorqueLimitEnforcementMethod getJointTorqueLimitEnforcementMethod()
+   {
+      return JointTorqueLimitEnforcementMethod.NO_CONSTRAINTS;
+   }
+
+   /**
+    * Whether the joint power should be constrained and, if so, where they are constrained. The list of
+    * joints to be constrained and their power limits should be provided by overriding
+    * getJointPowerLimits(), typically inside [YourRobotHere]MomentumOptimizationSettings.
+    * <ul>
+    * <li>{@code CONSTRAINTS_IN_QP} will constrain power inside the QP. The power limits are converted
+    * to torque limits (since velocity is known) and fed as a JointTorqueCommand, and are finally
+    * converted into constraints on joint accelerations. This tries to ensure that the power coming out
+    * of the inverse dynamics will respect the power limits, but there may be slight violation of this
+    * limit, since power is only indirectly constrained via the constrained torque.
+    * <li>{@code CONSTRAINTS_IN_CONTROLLER} will clamp power in the controller (after the QP). Choosing
+    * this option means that the QP might ask for power above a joint's power limit, but it will be
+    * clamped (technically torque is clamped) afterward in the controller. There may be slight
+    * violation of this limit, since power is only indirectly clamped via the clamped torque.
+    * <li>{@code CONSTRAINTS_IN_QP_AND_CONTROLLER} will constrain power inside the QP and the
+    * controller. This option tries to ensure both the QP and the controller respect a joint's power
+    * limit.
+    * <li>{@code NO_CONSTRAINTS} will not add constraints anywhere.
+    * </ul>
+    * Default value: {@code NO_CONSTRAINTS}.
+    */
+   public enum JointPowerLimitEnforcementMethod
+   {
+
+      NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER, CONSTRAINTS_IN_QP_AND_CONTROLLER;
+
+   }
+
+   /**
+    * Whether the joint powers should be constrained and, if so, where they are constrained. The list
+    * of joints to be constrained and their power limits should be provided by overriding
+    * getJointPowerLimits(), typically inside [YourRobotHere]MomentumOptimizationSettings. Default
+    * value: {@code NO_CONSTRAINTS}.
+    */
+   default JointPowerLimitEnforcementMethod getJointPowerLimitEnforcementMethod()
+   {
+      return JointPowerLimitEnforcementMethod.NO_CONSTRAINTS;
+   }
+
+   /**
+    * Gets the list of all joints with a constraint on power. This list is typically defined inside
+    * [YourRobotHere]MomentumOptimizationSettings. Each element of the map has a string, which is the
+    * name of a joint (i.e. jointMap.getArmJointName(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH)), and
+    * a double which is that joint's power limit in Watts. Power limits can be enforced in the QP, in
+    * the controller, or in both the QP and the controller {@link JointPowerLimitEnforcementMethod}.
+    * Power limits must be defined for both the LEFT and RIGHT sides if both are desired. For the
+    * default JointPowerLimitEnforcementMethod.NO_CONSTRAINTS, this list is not used.
+    */
+   default TObjectDoubleHashMap<String> getJointPowerLimits()
+   {
+      return null;
    }
 
    /**
@@ -370,7 +444,7 @@ public interface ControllerCoreOptimizationSettings
     * @return a new instance of the QP solver to be used. By default it is the
     *         {@link SimpleEfficientActiveSetQPSolver}.
     */
-   default ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
+   default NativeActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {
       return new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
    }
@@ -421,5 +495,25 @@ public interface ControllerCoreOptimizationSettings
    default public FrictionConeRotationCalculator getFrictionConeRotation()
    {
       return new ZeroConeRotationCalculator();
+   }
+
+   /**
+    * Determines which inverse dynamics calculator is used in {@link WholeBodyInverseDynamicsSolver}.
+    * <p>
+    * If true, {@link DynamicsMatrixCalculator} is used.
+    * <p>
+    * If false, {@link InverseDynamicsCalculator} is used.
+    */
+   default boolean useDynamicMatrixCalculatorForInverseDynamics()
+   {
+      return false;
+   }
+
+   /**
+    * If true, {@link WholeBodyInverseDynamicsSolver} will update the {@link DynamicsMatrixCalculator}.
+    */
+   default boolean updateDynamicMatrixCalculator()
+   {
+      return useDynamicMatrixCalculatorForInverseDynamics() || areJointTorquesMinimized();
    }
 }

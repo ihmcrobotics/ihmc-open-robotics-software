@@ -1,0 +1,59 @@
+#ifndef __atlas_msgs__msg__BDIBehaviorCommandPacket__idl__
+#define __atlas_msgs__msg__BDIBehaviorCommandPacket__idl__
+
+module atlas_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet NONE =
+      0;
+
+      const octet FREEZE =
+      1;
+
+      const octet STAND_PREP =
+      2;
+
+      const octet STAND =
+      3;
+
+      const octet WALK =
+      4;
+
+      const octet STEP =
+      5;
+
+      const octet MANIPULATE =
+      6;
+
+      const octet USER =
+      7;
+
+      const octet CALIBRATE =
+      8;
+
+      const octet SOFT_STOP =
+      9;
+
+
+      /**
+       * Atlas specific message.
+       */
+      @TypeCode(type="atlas_msgs::msg::dds_::BDIBehaviorCommandPacket_")
+      struct BDIBehaviorCommandPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet atlas_bdi_robot_behavior;
+        boolean stop;
+      };
+    };
+  };
+};
+
+#endif

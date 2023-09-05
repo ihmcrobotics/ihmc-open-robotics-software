@@ -70,9 +70,13 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(false);
+      simulationTestHelperFactory.setUseRobotDefinitionCollisions(false);
+
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start(false);
+      ((YoBoolean) simulationTestHelper.getControllerRegistry().findVariable("doToeOffIfPossibleInSingleSupport")).set(true);
 
       Point3D cameraFix = new Point3D(-4.68, -7.8, 0.55);
       Point3D cameraPosition = new Point3D(-8.6, -4.47, 0.58);
@@ -94,8 +98,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       @SuppressWarnings("unchecked")
       YoEnum<FootControlModule.ConstraintType> leftFootState = ((YoEnum<FootControlModule.ConstraintType>) simulationTestHelper.findVariable("rightFootCurrentState"));
-      YoBoolean forceToeOffAtJointLimit = ((YoBoolean) simulationTestHelper.findVariable("forceToeOffAtJointLimit"));
-      forceToeOffAtJointLimit.set(true);
 
       simulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
 
@@ -130,8 +132,12 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(false);
+      simulationTestHelperFactory.setUseRobotDefinitionCollisions(false);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start(false);
+
+      ((YoBoolean) simulationTestHelper.getControllerRegistry().findVariable("doToeOffIfPossibleInSingleSupport")).set(true);
 
       Point3D cameraFix = new Point3D(-4.68, -7.8, 0.55);
       Point3D cameraPosition = new Point3D(-8.6, -4.47, 0.58);
@@ -174,9 +180,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       FootstepDataMessage secondStep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT,
                                                                                       new Point3D(-5.8 - 0.15, -7.471 + 0.15, 0.0),
                                                                                       footRotation);
-
-      YoBoolean forceToeOffAtJointLimit = ((YoBoolean) simulationTestHelper.findVariable("forceToeOffAtJointLimit"));
-      forceToeOffAtJointLimit.set(true);
 
       simulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
 

@@ -1,0 +1,11 @@
+{
+  "title" : "ArUco marker information",
+  "Marker ID" : ,
+  "Marker size" : ,
+  "Marker X translation to parent" : ,
+  "Marker Y translation to parent" : ,
+  "Marker Z translation to parent" : ,
+  "Marker yaw rotation to parent degrees" : ,
+  "Marker pitch rotation to parent degrees" : ,
+  "Marker roll rotation to parent degrees" :
+}

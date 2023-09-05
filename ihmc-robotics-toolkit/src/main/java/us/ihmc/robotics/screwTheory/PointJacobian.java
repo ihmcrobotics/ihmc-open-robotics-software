@@ -4,6 +4,8 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialVector;
 
@@ -26,7 +28,7 @@ public class PointJacobian
    private final Vector3D translation = new Vector3D();
    private final Vector3D tempVector = new Vector3D();
 
-   public void set(GeometricJacobian geometricJacobian, FramePoint3D point)
+   public void set(GeometricJacobian geometricJacobian, FramePoint3DReadOnly point)
    {
       if (geometricJacobian.getBaseFrame() != geometricJacobian.getJacobianFrame())
          throw new RuntimeException("Jacobian must be expressed in base frame");

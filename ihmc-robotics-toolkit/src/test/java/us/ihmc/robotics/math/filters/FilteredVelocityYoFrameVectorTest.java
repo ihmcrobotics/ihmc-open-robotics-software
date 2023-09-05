@@ -51,7 +51,7 @@ public class FilteredVelocityYoFrameVectorTest
             yFiltered.update(unfilteredPoint.getY());
             zFiltered.update(unfilteredPoint.getZ());
 
-            EuclidCoreTestTools.assertTuple3DEquals(new Point3D(xFiltered.getValue(), yFiltered.getValue(), zFiltered.getValue()), filteredPoint, EPSILON);
+            EuclidCoreTestTools.assertEquals(new Point3D(xFiltered.getValue(), yFiltered.getValue(), zFiltered.getValue()), filteredPoint, EPSILON);
          }
       }
    }

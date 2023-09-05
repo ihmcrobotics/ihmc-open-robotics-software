@@ -1,20 +1,26 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointReadOnly;
 
 public class FrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
 {
-   private final FramePoint3D position = new FramePoint3D();
-   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private ReferenceFrame referenceFrame;
+   private final FixedFramePoint3DBasics position = EuclidFrameFactories.newFixedFramePoint3DBasics(this);
+   private final FixedFrameVector3DBasics linearVelocity = EuclidFrameFactories.newFixedFrameVector3DBasics(this);
 
    public FrameEuclideanWaypoint()
    {
+      setToZero(ReferenceFrame.getWorldFrame());
    }
 
    public FrameEuclideanWaypoint(ReferenceFrame referenceFrame)
@@ -22,55 +28,60 @@ public class FrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
       setToZero(referenceFrame);
    }
 
-   @Override
-   public void setPosition(double x, double y, double z)
+   public FrameEuclideanWaypoint(FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
-      position.set(x, y, z);
+      setIncludingFrame(position, linearVelocity);
    }
 
-   @Override
-   public void setLinearVelocity(double x, double y, double z)
+   public FrameEuclideanWaypoint(ReferenceFrame referenceFrame, EuclideanWaypointReadOnly waypoint)
    {
-      linearVelocity.set(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      position.applyTransform(transform);
-      linearVelocity.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      position.applyInverseTransform(transform);
-      linearVelocity.applyInverseTransform(transform);
+      setIncludingFrame(referenceFrame, waypoint);
    }
 
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      position.setReferenceFrame(referenceFrame);
-      linearVelocity.setReferenceFrame(referenceFrame);
+      this.referenceFrame = referenceFrame;
    }
 
    @Override
    public ReferenceFrame getReferenceFrame()
    {
-      position.checkReferenceFrameMatch(linearVelocity);
-      return position.getReferenceFrame();
+      return referenceFrame;
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public FixedFramePoint3DBasics getPosition()
    {
       return position;
    }
 
    @Override
-   public FrameVector3DReadOnly getLinearVelocity()
+   public FixedFrameVector3DBasics getLinearVelocity()
    {
       return linearVelocity;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return EuclidHashCodeTools.toIntHashCode(getPosition(), getLinearVelocity());
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof FrameEuclideanWaypointReadOnly)
+         return equals((FrameEuclideanWaypointReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
+   public String toString()
+   {
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

@@ -1,7 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import perception_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -16,6 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
@@ -32,7 +35,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
 
    public RealSenseREANetworkProvider(ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), inputTopic, stereoOutputTopic);
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), inputTopic, stereoOutputTopic);
    }
 
    public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
@@ -60,8 +63,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PolygonizerParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override
@@ -90,15 +92,18 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.D435_POINT_CLOUD,
-                                           stereoVisionPointCloudHandler);
+      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.D435_POINT_CLOUD, stereoVisionPointCloudHandler);
    }
 
    @Override
    public void registerStereoVisionPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class, stereoVisionPointCloudHandler);
+      new REAModuleROS2Subscription<>(ros2Node,
+                                      messager,
+                                      REASourceType.STEREO_POINT_CLOUD,
+                                      StereoVisionPointCloudMessage.class,
+                                      stereoVisionPointCloudHandler,
+                                      ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override

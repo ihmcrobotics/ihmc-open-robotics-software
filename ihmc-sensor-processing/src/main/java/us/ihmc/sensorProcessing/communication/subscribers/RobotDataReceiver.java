@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -34,17 +34,17 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    {
       this(fullRobotModel, fullRobotModel.getOneDoFJoints(), forceSensorDataHolder);
    }
-   
+
    protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJointBasics[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
    {
-      this.allJoints = allJoints; 
-      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      this.allJoints = allJoints;
+      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
+                                                                           fullRobotModel.getForceSensorDefinitions(),
+                                                                           fullRobotModel.getIMUDefinitions());
 
       rootJoint = fullRobotModel.getRootJoint();
       this.forceSensorDataHolder = forceSensorDataHolder;
    }
-
-
 
    public ForceSensorDataHolder getForceSensorDataHolder()
    {
@@ -82,22 +82,21 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
             allJoints[i].setQ(newJointAngles.get(i));
          }
 
-         Vector3D translation = robotConfigurationData.getRootTranslation();
+         Point3D translation = robotConfigurationData.getRootPosition();
          rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
-         
+
          updateFrames();
-         
 
          if (forceSensorDataHolder != null)
          {
             for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
             {
                SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
-               forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.getAngularPart(),
-                                                                                                             momentAndForceVectorForSensor.getLinearPart());
+               forceSensorDataHolder.getData(forceSensorDataHolder.getForceSensorDefinitions().get(i))
+                                    .setWrench(momentAndForceVectorForSensor.getAngularPart(), momentAndForceVectorForSensor.getLinearPart());
             }
          }
          for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
@@ -113,10 +112,8 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 
    protected void updateFrames()
    {
-      
+
    }
-
-
 
    public long getSimTimestamp()
    {

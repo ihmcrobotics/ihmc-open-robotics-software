@@ -32,6 +32,13 @@ public class ParameterVector3D implements Vector3DReadOnly
       }
    }
 
+   public ParameterVector3D(String prefix, double defaultX, double defaultY, double defaultZ, YoRegistry registry)
+   {
+      x = new DoubleParameter(prefix + "X", registry, defaultX);
+      y = new DoubleParameter(prefix + "Y", registry, defaultY);
+      z = new DoubleParameter(prefix + "Z", registry, defaultZ);
+   }
+
    @Override
    public double getX()
    {
@@ -49,5 +56,4 @@ public class ParameterVector3D implements Vector3DReadOnly
    {
       return z.getValue();
    }
-
 }

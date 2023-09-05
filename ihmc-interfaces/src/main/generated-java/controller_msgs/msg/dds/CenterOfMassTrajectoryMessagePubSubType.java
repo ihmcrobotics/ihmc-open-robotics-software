@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.CenterOfMassTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::CenterOfMassTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b2def8c631881a89794021f60e7a7d778f4fa26aba88aa8c85c971e7a018f3ab";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -42,7 +54,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -60,7 +72,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -70,14 +82,14 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       cdr.write_type_4(data.getSequenceId());
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
 
    }
 
@@ -85,7 +97,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    public final void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+      ser.write_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
 
    }
 
@@ -93,7 +105,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+      ser.read_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
 
    }
 

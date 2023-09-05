@@ -31,12 +31,16 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WholeBodyInverseKinematicsSolver
+public class WholeBodyInverseKinematicsSolver implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -112,6 +116,7 @@ public class WholeBodyInverseKinematicsSolver
       }
 
       DMatrixRMaj jointVelocities = inverseKinematicsSolution.getJointVelocities();
+      DMatrixRMaj jointTorques = inverseKinematicsSolution.getJointTorques();
 
       integrator.integrateJointVelocities(jointsToOptimizeFor, jointVelocities);
 
@@ -134,13 +139,21 @@ public class WholeBodyInverseKinematicsSolver
          OneDoFJointBasics joint = controlledOneDoFJoints[i];
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double desiredVelocity = jointVelocities.get(jointIndex, 0);
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, desiredVelocity);
+         JointDesiredOutputBasics output = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         output.setDesiredVelocity(desiredVelocity);
+
+         if (jointTorques != null)
+         {
+            double desiredTorque = jointTorques.get(jointIndex, 0);
+            output.setDesiredTorque(desiredTorque);
+         }
+
          jointVelocitiesSolution.get(joint).set(desiredVelocity);
 
          if (rootJoint != null)
             jointIndex++; // Because of quaternion :/
          double desiredPosition = jointConfigurations.get(jointIndex, 0);
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, desiredPosition);
+         output.setDesiredPosition(desiredPosition);
          jointPositionsSolution.get(joint).set(desiredPosition);
       }
 
@@ -237,5 +250,15 @@ public class WholeBodyInverseKinematicsSolver
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
       return rootJointDesiredConfiguration;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(optimizationControlModule.getSCS2YoGraphics());
+      if (group.isEmpty())
+         return null;
+      return group;
    }
 }

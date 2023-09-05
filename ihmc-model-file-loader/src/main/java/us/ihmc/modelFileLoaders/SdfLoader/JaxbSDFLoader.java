@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,7 +22,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.sensors.ContactSensorType;
 
 public class JaxbSDFLoader
 {
@@ -154,11 +157,6 @@ public class JaxbSDFLoader
    public void addForceSensor(JointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
       generalizedSDFRobotModels.get(jointMap.getModelName()).addForceSensor(sensorName, parentJointName, transformToParentJoint);
-   }
-
-   public void addContactSensor(JointNameMap jointMap, String sensorName, String parentJointName, ContactSensorType type)
-   {
-      generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
 
    public RobotDescription createRobotDescription(JointNameMap jointNameMap, ContactPointDefinitionHolder contactDefinition)

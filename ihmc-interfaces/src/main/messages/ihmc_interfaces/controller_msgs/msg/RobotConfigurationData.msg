@@ -24,7 +24,7 @@ float32[<=50] joint_angles
 float32[<=50] joint_velocities
 float32[<=50] joint_torques
 
-geometry_msgs/Vector3 root_translation
+geometry_msgs/Point root_position
 geometry_msgs/Quaternion root_orientation
 geometry_msgs/Vector3 pelvis_linear_velocity
 geometry_msgs/Vector3 pelvis_angular_velocity

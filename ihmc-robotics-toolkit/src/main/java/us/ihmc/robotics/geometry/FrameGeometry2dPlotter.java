@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -43,7 +44,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private class FrameLineGroup
    {
-      private ArrayList<FrameLine2D> frameLines = new ArrayList<FrameLine2D>();
+      private ArrayList<FrameLine2DReadOnly> frameLines = new ArrayList<>();
       private final Color color;
 
       public FrameLineGroup(Color color)
@@ -51,7 +52,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          this.color = color;
       }
 
-      public void addFrameLine(FrameLine2D frameLine2d)
+      public void addFrameLine(FrameLine2DReadOnly frameLine2d)
       {
          frameLines.add(frameLine2d);
       }
@@ -187,7 +188,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       addFrameLines2d(frameLines2d, Color.black);
    }
 
-   public synchronized void addFrameLine2d(FrameLine2D frameLine2d, Color color)
+   public synchronized void addFrameLine2d(FrameLine2DReadOnly frameLine2d, Color color)
    {
       FrameLineGroup frameLineGroup = frameLineGroups.get(color);
       if (frameLineGroup == null)
@@ -459,9 +460,9 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       }
    }
 
-   private void drawFrameLines(ArrayList<FrameLine2D> frameLines, Graphics graphics)
+   private void drawFrameLines(ArrayList<FrameLine2DReadOnly> frameLines, Graphics graphics)
    {
-      for (FrameLine2D frameLine : frameLines)
+      for (FrameLine2DReadOnly frameLine : frameLines)
       {
          this.drawLine(frameLine, graphics);
       }
@@ -552,7 +553,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       graphics.drawPolygon(polygon);
    }
 
-   private void drawLine(FrameLine2D frameLine2d, Graphics graphics)
+   private void drawLine(FrameLine2DReadOnly frameLine2d, Graphics graphics)
    {
       Point2D point = new Point2D(frameLine2d.getPoint());
       Vector2D vector = new Vector2D(frameLine2d.getDirection());

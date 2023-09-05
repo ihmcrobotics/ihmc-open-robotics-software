@@ -20,10 +20,6 @@ public interface SteppingParameters extends FootstepParameters
 
    public abstract double getInPlaceWidth();
 
-   public abstract double getDesiredStepForward();
-
-   public abstract double getStepPitch();
-
    public abstract double getMaxStepUp();
 
    public abstract double getMaxStepDown();
@@ -76,14 +72,4 @@ public interface SteppingParameters extends FootstepParameters
     * </ul>
     */
    public abstract double getMaxAngleTurnInwards();
-
-   /**
-    * Returns the minimum percentage of area that the robot can take a step with.
-    */
-   public abstract double getMinAreaPercentForValidFootstep();
-
-   /**
-    * Returns the percentage of footstep area below which large footsteps cannot be taken.
-    */
-   public abstract double getDangerAreaPercentForValidFootstep();
 }

@@ -1,0 +1,36 @@
+#ifndef __perception_msgs__msg__IntrinsicParametersMessage__idl__
+#define __perception_msgs__msg__IntrinsicParametersMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is used to provides additional properties for cameras.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::IntrinsicParametersMessage_")
+      struct IntrinsicParametersMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        long width;
+        long height;
+        double fx;
+        double fy;
+        double skew;
+        double cx;
+        double cy;
+        sequence<double> radial;
+        double t1;
+        double t2;
+      };
+    };
+  };
+};
+
+#endif

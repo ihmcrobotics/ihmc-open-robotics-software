@@ -1,7 +1,10 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
@@ -18,6 +21,7 @@ public abstract class ToolboxController
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    private ScheduledFuture<?> futureToListenTo;
+   private final List<Runnable> updateThreadRunnables = new ArrayList<>();
 
    public ToolboxController(StatusMessageOutputManager statusOutputManager, YoRegistry parentRegistry)
    {
@@ -53,6 +57,11 @@ public abstract class ToolboxController
       try
       {
          updateInternal();
+
+         for (int i = 0; i < updateThreadRunnables.size(); i++)
+         {
+            updateThreadRunnables.get(i).run();
+         }
       }
       catch (Exception e)
       {
@@ -143,4 +152,9 @@ public abstract class ToolboxController
    abstract public void updateInternal() throws Exception;
 
    abstract public boolean isDone();
+
+   public void addUpdateThreadRunnable(Runnable runnable)
+   {
+      updateThreadRunnables.add(runnable);
+   }
 }

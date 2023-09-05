@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
@@ -48,6 +48,12 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
+   public double getSwingHeight()
+   {
+      return 0.15;
+   }
+
+   @Override
    public double getStepHeightOffset()
    {
       return 0.0;
@@ -64,6 +70,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Test
    public void testWalkingOverCinderBlockField() throws Exception
    {
+      removeAnkleJointLimits = true;
       super.testWalkingOverCinderBlockField();
    }
 

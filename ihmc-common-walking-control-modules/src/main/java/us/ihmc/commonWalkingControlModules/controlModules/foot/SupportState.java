@@ -4,13 +4,12 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.PartialFootholdCropperModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdCroppingModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -36,6 +35,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -108,7 +109,7 @@ public class SupportState extends AbstractFootControlState
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
-   private final PartialFootholdCropperModule footRotationCalculationModule;
+   private final FootholdCroppingModule footRotationCalculationModule;
 
    private final YoBoolean liftOff;
    private final YoBoolean touchDown;
@@ -180,13 +181,13 @@ public class SupportState extends AbstractFootControlState
 
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
-      footRotationCalculationModule = new PartialFootholdCropperModule(robotSide,
-                                                                       soleFrame,
-                                                                       footControlHelper.getContactableFoot().getContactPoints2d(),
-                                                                       footControlHelper.getFootholdRotationParameters(),
-                                                                       dt,
-                                                                       registry,
-                                                                       graphicsListRegistry);
+      footRotationCalculationModule = new FootholdCroppingModule(robotSide,
+                                                                 soleFrame,
+                                                                 footControlHelper.getContactableFoot().getContactPoints2d(),
+                                                                 footControlHelper.getFootholdRotationParameters(),
+                                                                 dt,
+                                                                 registry,
+                                                                 graphicsListRegistry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
@@ -242,7 +243,7 @@ public class SupportState extends AbstractFootControlState
       computeFootPolygon();
       controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
-      footSwitch.computeAndPackCoP(cop2d);
+      footSwitch.getCenterOfPressure(cop2d);
       if (cop2d.containsNaN())
          cop2d.setToZero(contactableFoot.getSoleFrame());
 
@@ -277,8 +278,8 @@ public class SupportState extends AbstractFootControlState
       }
 
       // determine foot state
-      copOnEdge.set(footControlHelper.isCoPOnEdge() && !isInLiftOffOrTouchDown());
-      footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < supportStateParameters.getFootLoadThreshold());
+      copOnEdge.set((footControlHelper.isDesiredCoPOnEdge() /*|| footControlHelper.isCurrentCoPOnEdge()*/) && !isInLiftOffOrTouchDown());
+      footBarelyLoaded.set(footSwitch.getFootLoadPercentage() < supportStateParameters.getFootLoadThreshold());
 
       if (supportStateParameters.assumeCopOnEdge())
          copOnEdge.set(true);
@@ -299,7 +300,7 @@ public class SupportState extends AbstractFootControlState
       if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
          contactState.notifyContactStateHasChanged();
 
-      if (footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
+      if (!copOnEdge.getBooleanValue() && footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
       {
          PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
          PID3DGains localOrientationGains = localGains.getOrientationGains();
@@ -574,5 +575,21 @@ public class SupportState extends AbstractFootControlState
    {
       this.angularWeight = angularWeight;
       this.linearWeight = linearWeight;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(explorationHelper.getSCS2YoGraphics());
+      if (group.isEmpty())
+         return null;
+      return group;
+   }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      return true;
    }
 }

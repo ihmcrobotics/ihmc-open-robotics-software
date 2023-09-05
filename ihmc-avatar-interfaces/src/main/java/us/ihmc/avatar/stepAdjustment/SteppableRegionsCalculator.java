@@ -432,7 +432,7 @@ public class SteppableRegionsCalculator
                                                                         ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
                                                                         double zThresholdBeforeOrthogonal)
    {
-      List<Point2D> concaveHull = obstacleRegion.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = obstacleRegion.getConcaveHull();
 
       RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 

@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.PrintTools;
 
 public class CTTaskNode

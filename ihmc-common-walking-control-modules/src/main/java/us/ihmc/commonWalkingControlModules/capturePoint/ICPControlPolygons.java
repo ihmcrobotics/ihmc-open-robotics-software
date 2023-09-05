@@ -13,17 +13,22 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ICPControlPolygons
+public class ICPControlPolygons implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final Color combinedColor = Color.red;
-   private static final Color leftFootColor = new Color(250, 128 , 114);
+   private static final Color leftFootColor = new Color(250, 128, 114);
    private static final Color rightFootColor = new Color(255, 160, 122);
    private static final SideDependentList<Color> feetColors = new SideDependentList<>(leftFootColor, rightFootColor);
 
@@ -65,11 +70,16 @@ public class ICPControlPolygons
 
          if (VISUALIZE)
          {
-            YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "controlFootPolygon", "", worldFrame,
-                                                                                      maxNumberOfContactPointsPerFoot, registry);
+            YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "controlFootPolygon",
+                                                                                      "",
+                                                                                      worldFrame,
+                                                                                      maxNumberOfContactPointsPerFoot,
+                                                                                      registry);
             controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
             YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon",
-                                                                          controlFootPolygonViz, feetColors.get(robotSide), false);
+                                                                          controlFootPolygonViz,
+                                                                          feetColors.get(robotSide),
+                                                                          false);
             artifactList.add(footPolygonArtifact);
          }
       }
@@ -212,5 +222,25 @@ public class ICPControlPolygons
    public ICPControlPlane getIcpControlPlane()
    {
       return icpControlPlane;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (!VISUALIZE)
+         return null;
+
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Combined Control Polygon",
+                                                                      controlPolygonViz,
+                                                                      ColorDefinitions.argb(combinedColor.getRGB())));
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(robotSide.getPascalCaseName() + " Control Foot Polygon",
+                                                                         controlFootPolygonsViz.get(robotSide),
+                                                                         ColorDefinitions.argb(feetColors.get(robotSide).getRGB())));
+      }
+      return group;
    }
 }

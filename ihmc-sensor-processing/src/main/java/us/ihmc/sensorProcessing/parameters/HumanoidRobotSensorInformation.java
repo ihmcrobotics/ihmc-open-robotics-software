@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.parameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSensorInformation, HumanoidForceSensorInformation, IMUSensorInformation
@@ -14,7 +15,7 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
-      return referenceFrames.getPelvisFrame();
+      return referenceFrames.getChestFrame();
    }
 
    public default ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
@@ -41,21 +42,38 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
                                                                              getObjectDetectionCameraTransform());
    }
 
-   public default RigidBodyTransform getHeadZED2CameraTransform()
+   public default RigidBodyTransform getSituationalAwarenessCameraTransform(RobotSide side)
    {
       return new RigidBodyTransform();
    }
 
-   public default ReferenceFrame getHeadZED2CameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   public default ReferenceFrame getSituationalAwarenessCameraParentFrame(RobotSide side, CommonHumanoidReferenceFrames referenceFrames)
    {
       return referenceFrames.getChestFrame();
    }
 
-   public default ReferenceFrame getHeadZED2CameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   public default ReferenceFrame getSituationalAwarenessCameraFrame(RobotSide side, CommonHumanoidReferenceFrames referenceFrames)
    {
-      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("headZED2Camera",
-                                                                             getHeadZED2CameraParentFrame(referenceFrames),
-                                                                             getHeadZED2CameraTransform());
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwarenessLeftCamera",
+                                                                             getSituationalAwarenessCameraParentFrame(side, referenceFrames),
+                                                                             getSituationalAwarenessCameraTransform(side));
+   }
+
+   public default RigidBodyTransform getExperimentalCameraTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
+   public default ReferenceFrame getExperimentalCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
+
+   public default ReferenceFrame getExperimentalCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("experimentalCamera",
+                                                                             getExperimentalCameraParentFrame(referenceFrames),
+                                                                             getExperimentalCameraTransform());
    }
 
    public default RigidBodyTransform getOusterLidarTransform()

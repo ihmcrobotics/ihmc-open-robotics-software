@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,11 +27,15 @@ public class FeetLoadedTransition implements StateTransitionCondition
    private final SideDependentList<YoDouble> prepFootFzs = new SideDependentList<>();
    private final SideDependentList<SimpleMovingAverageFilteredYoVariable> prepFootFzAverages = new SideDependentList<>();
 
-   public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
-                               double controlDT, double gravityZ, double totalMass, YoRegistry parentRegistry)
+   public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                               SideDependentList<String> feetForceSensors,
+                               double controlDT,
+                               double gravityZ,
+                               double totalMass,
+                               YoRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
-         footSensors.put(robotSide, forceSensorDataHolder.getByName(feetForceSensors.get(robotSide)));
+         footSensors.put(robotSide, forceSensorDataHolder.getData(feetForceSensors.get(robotSide)));
 
       int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
 
@@ -41,7 +46,11 @@ public class FeetLoadedTransition implements StateTransitionCondition
       for (RobotSide robotSide : RobotSide.values)
       {
          YoDouble prepFootFz = new YoDouble("prep" + robotSide.getCamelCaseName() + "FootFz", registry);
-         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prep" + robotSide.getCamelCaseName() + "FootFzAverage", windowSize, prepFootFz, registry);
+         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prep" + robotSide.getCamelCaseName()
+                                                                                                             + "FootFzAverage",
+                                                                                                             windowSize,
+                                                                                                             prepFootFz,
+                                                                                                             registry);
 
          prepFootFzs.put(robotSide, prepFootFz);
          prepFootFzAverages.put(robotSide, prepFootFzAverage);
@@ -60,7 +69,8 @@ public class FeetLoadedTransition implements StateTransitionCondition
          YoDouble prepFootFz = prepFootFzs.get(robotSide);
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotSide);
 
-         footSensors.get(robotSide).getWrench(temporaryFootWrench);
+         temporaryFootWrench.setIncludingFrame(footSensors.get(robotSide).getWrench());
+         temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();
 

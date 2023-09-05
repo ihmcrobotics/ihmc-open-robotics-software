@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -28,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -57,7 +58,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, testingEnvironment, simulationTestingParameters);
       simulationTestHelper.start();
       double totalMass = fullRobotModel.getTotalMass();
-      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
 
       simulationTestHelper.setCameraPosition(0.2, -10.0, 1.0);
       simulationTestHelper.setCameraFocusPosition(0.2, 0.0, 1.0);
@@ -66,7 +67,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
 

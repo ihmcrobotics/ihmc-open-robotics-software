@@ -1,11 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication;
 
-import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
@@ -103,7 +104,7 @@ public class PawStepPlannerMessagerAPI
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
 
-   public static final Topic<RobotConfigurationData> RobotConfigurationDataTopic = Root.topic(RobotConfigurationData);
+   public static final Topic<controller_msgs.msg.dds.RobotConfigurationData> RobotConfigurationDataTopic = Root.topic(RobotConfigurationData);
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> AcceptNewPlanarRegionsTopic = Root.child(PlanarRegion).topic(Enable);

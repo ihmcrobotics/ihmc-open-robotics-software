@@ -1,20 +1,26 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointReadOnly;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointReadOnly;
 
 public class FrameSO3Waypoint implements FrameSO3WaypointBasics
 {
-   private final FrameQuaternion orientation = new FrameQuaternion();
-   private final FrameVector3D angularVelocity = new FrameVector3D();
+   private ReferenceFrame referenceFrame;
+   private final FixedFrameQuaternionBasics orientation = EuclidFrameFactories.newFixedFrameQuaternionBasics(this);
+   private final FixedFrameVector3DBasics angularVelocity = EuclidFrameFactories.newFixedFrameVector3DBasics(this);
 
    public FrameSO3Waypoint()
    {
+      setToZero(ReferenceFrame.getWorldFrame());
    }
 
    public FrameSO3Waypoint(ReferenceFrame referenceFrame)
@@ -22,55 +28,60 @@ public class FrameSO3Waypoint implements FrameSO3WaypointBasics
       setToZero(referenceFrame);
    }
 
-   @Override
-   public void setOrientation(double x, double y, double z, double s)
+   public FrameSO3Waypoint(FrameOrientation3DReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
-      orientation.set(x, y, z, s);
+      setIncludingFrame(orientation, angularVelocity);
    }
 
-   @Override
-   public void setAngularVelocity(double x, double y, double z)
+   public FrameSO3Waypoint(ReferenceFrame referenceFrame, SO3WaypointReadOnly waypoint)
    {
-      angularVelocity.set(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      orientation.applyTransform(transform);
-      angularVelocity.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      orientation.applyInverseTransform(transform);
-      angularVelocity.applyInverseTransform(transform);
+      setIncludingFrame(referenceFrame, waypoint);
    }
 
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      orientation.setReferenceFrame(referenceFrame);
-      angularVelocity.setReferenceFrame(referenceFrame);
+      this.referenceFrame = referenceFrame;
    }
 
    @Override
    public ReferenceFrame getReferenceFrame()
    {
-      orientation.checkReferenceFrameMatch(angularVelocity);
-      return orientation.getReferenceFrame();
+      return referenceFrame;
    }
 
    @Override
-   public FrameQuaternionReadOnly getOrientation()
+   public FixedFrameQuaternionBasics getOrientation()
    {
       return orientation;
    }
 
    @Override
-   public FrameVector3DReadOnly getAngularVelocity()
+   public FixedFrameVector3DBasics getAngularVelocity()
    {
       return angularVelocity;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return EuclidHashCodeTools.toIntHashCode(getOrientation(), getAngularVelocity());
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof FrameSO3WaypointReadOnly)
+         return equals((FrameSO3WaypointReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
+   public String toString()
+   {
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

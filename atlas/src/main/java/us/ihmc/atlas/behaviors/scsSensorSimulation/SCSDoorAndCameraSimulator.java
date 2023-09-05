@@ -1,7 +1,7 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
@@ -11,6 +11,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
@@ -169,7 +170,7 @@ public class SCSDoorAndCameraSimulator
       gimbalJoint.addCameraMount(robotCam);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
+      transform.getTranslation().set(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       LidarScanParameters lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
       LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
       lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
@@ -232,7 +233,7 @@ public class SCSDoorAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, PerceptionAPI.REA_NODE_NAME);
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
 //      new SCSDoorAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());

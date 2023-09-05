@@ -34,7 +34,7 @@ class BuildingExplorationBehaviorTraverseStairsState implements State
       isDone.set(false);
 
       String behaviorName = TraverseStairsBehavior.DEFINITION.getName();
-      helper.publish(BehaviorModule.API.BehaviorSelection, behaviorName);
+      helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, behaviorName);
       ThreadTools.sleep(100);
 
       helper.publish(TraverseStairsBehaviorAPI.GOAL_INPUT, new Pose3D(bombPose));
@@ -52,7 +52,7 @@ class BuildingExplorationBehaviorTraverseStairsState implements State
    public void onExit(double timeInState)
    {
       LogTools.info("Exiting " + getClass().getSimpleName());
-      helper.publish(BehaviorModule.API.BehaviorSelection, "null");
+      helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, "null");
    }
 
    @Override

@@ -2,7 +2,7 @@ package us.ihmc.avatar.ros;
 
 import org.ros.message.Time;
 
-import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.robotModels.FullRobotModel;

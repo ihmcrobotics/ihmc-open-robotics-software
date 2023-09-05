@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameTorus3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,7 +20,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -46,7 +50,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    private double mass;
    private Matrix3D inertiaMatrix;
 
-   private FrameTorus3d steeringWheelTorus;
+   private FrameTorus3D steeringWheelTorus;
    protected ArrayList<FrameCylinder3D> spokesCylinders = new ArrayList<FrameCylinder3D>();
 
    protected Link steeringWheelLink;
@@ -204,8 +208,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       invertTransform.set(transform);
       invertTransform.invert();
 
-      steeringWheelTorus = new FrameTorus3d(steeringWheelFrame, steeringWheelRadius, steeringWheelThickness / 2.0);
-      steeringWheelTorus.getTorus3d().applyTransform(transform);
+      steeringWheelTorus = new FrameTorus3D(steeringWheelFrame, steeringWheelRadius, steeringWheelThickness / 2.0);
+      steeringWheelTorus.applyTransform(transform);
       steeringWheelLinkGraphics.transform(transform);
       steeringWheelLinkGraphics.addArcTorus(0.0, 2 * Math.PI, steeringWheelRadius, steeringWheelThickness / 2.0, YoAppearance.DarkRed());
       steeringWheelLinkGraphics.translate(0.0, 0.0, -steeringColunmLength);
@@ -273,7 +277,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       pointToCheck.setIncludingFrame(worldFrame, pointInWorldToCheck);
       pointToCheck.changeFrame(steeringWheelFrame);
 
-      if (steeringWheelTorus.isInsideOrOnSurface(pointToCheck))
+      if (steeringWheelTorus.isPointInside(pointToCheck))
          return true;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
@@ -295,7 +299,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       FramePoint3D pointToCheck = new FramePoint3D(worldFrame, pointInWorldToCheck);
       pointToCheck.changeFrame(steeringWheelFrame);
 
-      if (steeringWheelTorus.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
+      if (steeringWheelTorus.evaluatePoint3DCollision(pointToCheck, intersectionToPack, normalToPack))
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {

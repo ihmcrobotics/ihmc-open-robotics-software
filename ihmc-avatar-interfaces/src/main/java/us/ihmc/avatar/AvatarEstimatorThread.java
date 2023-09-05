@@ -1,12 +1,17 @@
 package us.ihmc.avatar;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -16,17 +21,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class AvatarEstimatorThread extends ModularRobotController
+public class AvatarEstimatorThread extends ModularRobotController implements SCS2YoGraphicHolder
 {
    private final YoRegistry estimatorRegistry;
    private final YoBoolean firstTick;
@@ -35,12 +42,12 @@ public class AvatarEstimatorThread extends ModularRobotController
    private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final StateEstimatorController mainStateEstimator;
    private final PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators;
-   private final ForceSensorStateUpdater forceSensorStateUpdater;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
+   private final List<Runnable> runnables = new ArrayList<>();
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -51,7 +58,6 @@ public class AvatarEstimatorThread extends ModularRobotController
                                 HumanoidRobotContextData humanoidRobotContextData,
                                 StateEstimatorController mainStateEstimator,
                                 PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
-                                ForceSensorStateUpdater forceSensorStateUpdater,
                                 IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
                                 YoRegistry estimatorRegistry,
                                 YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -63,7 +69,6 @@ public class AvatarEstimatorThread extends ModularRobotController
       this.humanoidRobotContextData = humanoidRobotContextData;
       this.mainStateEstimator = mainStateEstimator;
       this.secondaryStateEstimators = secondaryStateEstimators;
-      this.forceSensorStateUpdater = forceSensorStateUpdater;
       this.controllerCrashPublisher = controllerCrashPublisher;
       this.estimatorRegistry = estimatorRegistry;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -98,9 +103,6 @@ public class AvatarEstimatorThread extends ModularRobotController
          {
             initialize();
 
-            if (forceSensorStateUpdater != null)
-               forceSensorStateUpdater.initialize();
-
             firstTick.set(false);
          }
 
@@ -113,9 +115,9 @@ public class AvatarEstimatorThread extends ModularRobotController
 
          doControl();
 
-         if (forceSensorStateUpdater != null)
+         for (int i = 0; i < runnables.size(); i++)
          {
-            forceSensorStateUpdater.updateForceSensorState();
+            runnables.get(i).run();
          }
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
@@ -148,6 +150,13 @@ public class AvatarEstimatorThread extends ModularRobotController
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+      }
    }
 
    public void setupHighLevelControllerCallback(HighLevelHumanoidControllerFactory controllerFactory,
@@ -163,6 +172,11 @@ public class AvatarEstimatorThread extends ModularRobotController
                mainStateEstimator.requestStateEstimatorMode(requestedMode);
          }
       });
+   }
+
+   public void addEstimatorRunnable(Runnable runnable)
+   {
+      this.runnables.add(runnable);
    }
 
    @Deprecated // TODO: Split up the sensor reader and move the part needed outside out of this class!
@@ -182,13 +196,30 @@ public class AvatarEstimatorThread extends ModularRobotController
       return estimatorRegistry;
    }
 
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   @Override
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(mainStateEstimator.getSCS2YoGraphics());
+      for (ImmutablePair<BooleanSupplier, StateEstimatorController> entry : secondaryStateEstimators)
+      {
+         group.addChild(entry.getRight().getSCS2YoGraphics());
+      }
+      return group;
    }
 
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;
+   }
+
+   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return mainStateEstimator.getForceSensorCalibrationModule();
    }
 }

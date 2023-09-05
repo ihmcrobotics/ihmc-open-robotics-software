@@ -143,7 +143,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       footstepMessage1.setOffsetFootstepsHeightWithExecutionError(true);
       footstepMessage2.setOffsetFootstepsHeightWithExecutionError(true);
 
-      YoVariable yoTime = simulationTestHelper.getSimulationSession().getTime();
+      YoVariable yoTime = simulationTestHelper.getSimulationConstructionSet().getTime();
       TimingChecker timingChecker1 = new TimingChecker(simulationTestHelper, footstepMessage1, footstepMessage2);
       yoTime.addListener(timingChecker1);
 

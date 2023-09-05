@@ -25,10 +25,10 @@ public class CoPTrajectoryGeneratorTestTools
 {
    static void assertFootstepEqual(Footstep footstepExpected, DynamicPlanningFootstep footstep, double epsilon)
    {
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(footstepExpected.getFootstepPose().getPosition(),
+      EuclidFrameTestTools.assertGeometricallyEquals(footstepExpected.getFootstepPose().getPosition(),
                                                                  footstep.getFootstepPose().getPosition(),
                                                                  epsilon);
-      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(footstepExpected.getFootstepPose().getOrientation(),
+      EuclidFrameTestTools.assertGeometricallyEquals(footstepExpected.getFootstepPose().getOrientation(),
                                                                     footstep.getFootstepPose().getOrientation(),
                                                                     epsilon);
       Assert.assertEquals(footstepExpected.getRobotSide(), footstep.getRobotSide());
@@ -47,10 +47,10 @@ public class CoPTrajectoryGeneratorTestTools
 
    static void assertFootstepEqual(DynamicPlanningFootstep footstepExpected, DynamicPlanningFootstep footstep, double epsilon)
    {
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(footstepExpected.getFootstepPose().getPosition(),
+      EuclidFrameTestTools.assertGeometricallyEquals(footstepExpected.getFootstepPose().getPosition(),
                                                                  footstep.getFootstepPose().getPosition(),
                                                                  epsilon);
-      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(footstepExpected.getFootstepPose().getOrientation(),
+      EuclidFrameTestTools.assertGeometricallyEquals(footstepExpected.getFootstepPose().getOrientation(),
                                                                     footstep.getFootstepPose().getOrientation(),
                                                                     epsilon);
       Assert.assertEquals(footstepExpected.getRobotSide(), footstep.getRobotSide());

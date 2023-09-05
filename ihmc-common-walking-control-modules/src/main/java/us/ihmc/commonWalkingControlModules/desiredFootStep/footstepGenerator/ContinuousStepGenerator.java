@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -26,23 +27,25 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 /**
  * Use this class to generate a stream of footsteps which path can be controlled given desired
@@ -87,8 +90,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * See {@link #setNumberOfFootstepsToPlan(int)}.
  * <li><u>Method for adjusting footstep height, pitch, and roll:</u><br>
  * Default is behavior is to adjust footsteps based on the current support foot pose. To change this
- * behavior, see {@link #setFootstepAdjustment(FootstepAdjustment)},
- * {@link #setHeightMapBasedFootstepAdjustment(HeightMap)}, and
+ * behavior, see {@link #setFootstepAdjustment(FootstepAdjustment)} and
  * {@link #setSupportFootBasedFootstepAdjustment(boolean)}.
  * <li><u>Method for indicating step validity and providing alternative steps for invalid
  * ones:</u><br>
@@ -103,7 +105,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author Sylvain Bertrand
  */
-public class ContinuousStepGenerator implements Updatable
+public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 {
    private static final int MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE = 3;
    public static final Color defaultLeftColor = new Color(28, 134, 238); // dodgerblue 2, from: http://cloford.com/resources/colours/500col.htm
@@ -118,15 +120,17 @@ public class ContinuousStepGenerator implements Updatable
    private final String variableNameSuffix = "CSG";
 
    private BooleanProvider walkInputProvider;
+   private DoubleProvider swingHeightInputProvider;
+   private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
-
 
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
 
    private final YoContinuousStepGeneratorParameters parameters = new YoContinuousStepGeneratorParameters(variableNameSuffix, registry);
    private final DoubleProvider stepTime = () -> parameters.getSwingDuration() + parameters.getTransferDuration();
+   private final YoLong currentFootstepDataListCommandID = new YoLong("currentFootstepDataListCommandID_" + variableNameSuffix, registry);
 
    private final YoInteger numberOfTicksBeforeSubmittingFootsteps = new YoInteger("numberOfTicksBeforeSubmittingFootsteps" + variableNameSuffix, registry);
 
@@ -135,9 +139,15 @@ public class ContinuousStepGenerator implements Updatable
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
    private StopWalkingMessenger stopWalkingMessenger;
-   private FootstepAdjustment footstepAdjustment;
+   private StartWalkingMessenger startWalkingMessenger;
+   private List<FootstepAdjustment> footstepAdjustments = new ArrayList<>();
+   private FootstepPlanAdjustment footstepPlanAdjustment;
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
+
+   private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
+   private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
+   private final ExecutionTimer stepGeneratorTimer = new ExecutionTimer("stepGeneratorTimer" + variableNameSuffix, registry);
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
@@ -167,6 +177,7 @@ public class ContinuousStepGenerator implements Updatable
 
       parameters.clear();
       numberOfTicksBeforeSubmittingFootsteps.set(2);
+      currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique 
 
       setSupportFootBasedFootstepAdjustment(true);
    }
@@ -185,13 +196,15 @@ public class ContinuousStepGenerator implements Updatable
    @Override
    public void update(double time)
    {
+      stepGeneratorTimer.startMeasurement();
+
       footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
       footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
       footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
 
-      if (walkInputProvider != null)
+      if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
 
       if (!walk.getValue())
@@ -205,6 +218,10 @@ public class ContinuousStepGenerator implements Updatable
 
          walkPreviousValue.set(false);
          return;
+      }
+      else if (startWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
+      {
+         startWalkingMessenger.submitStartWalkingRequest();
       }
 
       if (walk.getValue() != walkPreviousValue.getValue())
@@ -283,9 +300,13 @@ public class ContinuousStepGenerator implements Updatable
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
       }
 
-      for (int i = footsteps.size(); i < parameters.getNumberOfFootstepsToPlan(); i++)
-      {
+      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
+      this.desiredTurningVelocity.set(turningVelocity);
 
+      int startingIndexToAdjust = footsteps.size();
+
+      for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
+      {
          double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocityX, maxStepLength);
          double yDisplacement = stepTime.getValue() * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
          double headingDisplacement = stepTime.getValue() * turningVelocity;
@@ -310,40 +331,103 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(0.0, -halfInPlaceWidth);
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
-         nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
+         nextFootstepPose3D.set(nextFootstepPose2D);
+         FootstepDataMessage footstep = footsteps.add();
+
+         for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
+            footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, footstep);
+
+         //         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
+         //         {
+         //            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
+         //            nextFootstepPose2D.set(nextFootstepPose3D);
+         //         }
+
+         footstep.setRobotSide(swingSide.toByte());
+         if (swingHeightInputProvider == null)
+            footstep.setSwingHeight(parameters.getSwingHeight());
+         else
+            footstep.setSwingHeight(swingHeightInputProvider.getValue());
+
+         footstepPose2D.set(nextFootstepPose2D);
+         swingSide = swingSide.getOppositeSide();
+         previousFootstepPose.getPosition().set(footstep.getLocation());
+         previousFootstepPose.getOrientation().set(footstep.getOrientation());
+      }
+
+      // adjust the whole footstep plan for the environment
+      if (footstepPlanAdjustment != null)
+      {
+         footstepPlanAdjustment.adjustFootstepPlan(currentSupportFootPose, startingIndexToAdjust, footstepDataListMessage);
+
+         if (startingIndexToAdjust == 0)
+         {
+            previousFootstepPose.set(currentSupportFootPose);
+            footstepPose2D.set(currentSupportFootPose);
+         }
+         else
+         {
+            FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(startingIndexToAdjust - 1);
+            previousFootstepPose.getPosition().set(footstepData.getLocation());
+            previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+            footstepPose2D.set(previousFootstepPose);
+         }
+      }
+
+      // run through and make sure these adjusted steps are valid.
+      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+      {
+         FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
+         nextFootstepPose2D.getPosition().set(footstepData.getLocation());
+         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation());
+         nextFootstepPose3D.getPosition().set(footstepData.getLocation());
+         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
+         swingSide = RobotSide.fromByte(footstepData.getRobotSide());
 
          if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
          {
-            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
-            nextFootstepPose2D.set(nextFootstepPose3D);
+            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
+
+            // remove all the other steps after the invalid one.
+            while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
+            {
+               footstepDataListMessage.getFootstepDataList().remove(i + 1);
+            }
          }
 
-         int vizualizerIndex = i / 2;
+         previousFootstepPose.getPosition().set(footstepData.getLocation());
+         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+         footstepPose2D.set(previousFootstepPose);
+      }
+
+      // Update the visualizers
+      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+      {
+         int visualizerIndex = i / 2;
          List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
 
-         if (vizualizerIndex < footstepVisualizers.size())
+         if (visualizerIndex < footstepVisualizers.size())
          {
-            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(vizualizerIndex);
+            FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
+
+            nextFootstepPose3D.getPosition().set(footstepData.getLocation());
+            nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
+
+            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(visualizerIndex);
             nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
          }
-
-         FootstepDataMessage footstep = footsteps.add();
-         footstep.setRobotSide(swingSide.toByte());
-         footstep.getLocation().set(nextFootstepPose3D.getPosition());
-         footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
-         footstep.setSwingHeight(parameters.getSwingHeight());
-
-         footstepPose2D.set(nextFootstepPose2D);
-         swingSide = swingSide.getOppositeSide();
-         previousFootstepPose.set(nextFootstepPose3D);
       }
 
-      if (footstepMessenger != null)
+      if (walk.getValue() && footstepMessenger != null)
       {
          if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
          {
+            currentFootstepDataListCommandID.increment();
+            footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }
@@ -354,6 +438,7 @@ public class ContinuousStepGenerator implements Updatable
       }
 
       walkPreviousValue.set(walk.getValue());
+      stepGeneratorTimer.stopMeasurement();
    }
 
    /**
@@ -406,12 +491,12 @@ public class ContinuousStepGenerator implements Updatable
       parameters.setSwingDuration(swingTime);
       parameters.setTransferDuration(transferTime);
    }
-   
+
    public void setFootstepsAreAdjustable(boolean footstepsAreAdjustable)
    {
       parameters.setStepsAreAdjustable(footstepsAreAdjustable);
    }
-   
+
    public void setSwingHeight(double swingHeight)
    {
       parameters.setSwingHeight(swingHeight);
@@ -443,9 +528,7 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void setYoComponentProviders()
    {
-      DoubleParameter desiredTurningVelocity = new DoubleParameter("desiredTurningVelocity" + variableNameSuffix, registry, 0.0);
-      YoFrameVector2D desiredVelocity = new YoFrameVector2D("desiredVelocity" + variableNameSuffix, worldFrame, registry);
-      setDesiredTurningVelocityProvider(() -> desiredTurningVelocity.getValue());
+      setDesiredTurningVelocityProvider(desiredTurningVelocity::getValue);
       setDesiredVelocityProvider(() -> desiredVelocity);
    }
 
@@ -606,13 +689,49 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
+    * Sets the protocol for start walking requests to the controller.
+    *
+    * @param startWalkingMessenger the callback used to send requests.
+    */
+   public void setStartWalkingMessenger(StartWalkingMessenger startWalkingMessenger)
+   {
+      this.startWalkingMessenger = startWalkingMessenger;
+   }
+
+   /**
     * Sets the method for adjusting height, pitch, and roll of the generated footsteps.
     *
     * @param footstepAdjustment the adjustment method.
     */
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
-      this.footstepAdjustment = footstepAdjustment;
+      clearFootstepAdjustments();
+      addFootstepAdjustment(footstepAdjustment);
+   }
+
+   /**
+    * Sets the method for adjusting height, pitch, and roll of the generated footstep plan.
+    *
+    * @param footstepPlanAdjustment the plan adjustment method.
+    */
+   public void setFootstepPlanAdjustment(FootstepPlanAdjustment footstepPlanAdjustment)
+   {
+      this.footstepPlanAdjustment = footstepPlanAdjustment;
+   }
+
+   public void addFootstepAdjustment(FootstepAdjustment footstepAdjustment)
+   {
+      this.footstepAdjustments.add(footstepAdjustment);
+   }
+
+   public void clearFootstepAdjustments()
+   {
+      this.footstepAdjustments.clear();
+   }
+
+   public List<FootstepAdjustment> getFootstepAdjustments()
+   {
+      return footstepAdjustments;
    }
 
    /**
@@ -645,19 +764,26 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void setSupportFootBasedFootstepAdjustment(boolean adjustPitchAndRoll)
    {
-      setFootstepAdjustment(new FootstepAdjustment()
+      setFootstepAdjustment(createSupportFootBasedFootstepAdjustment(adjustPitchAndRoll));
+   }
+
+   public FootstepAdjustment createSupportFootBasedFootstepAdjustment(boolean adjustPitchAndRoll)
+   {
+      return new FootstepAdjustment()
       {
          private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
-         private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
-         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose,
+                                       FramePose2DReadOnly footstepPose,
+                                       RobotSide footSide,
+                                       FootstepDataMessage adjustedPose)
          {
-            adjustedPose.getPosition().set(footstepPose.getPosition());
-            adjustedPose.setZ(currentSupportFootPose.getZ());
+            adjustedPose.getLocation().set(footstepPose.getPosition());
+            adjustedPose.getLocation().setZ(supportFootPose.getZ());
             if (adjustPitchAndRoll)
             {
-               yawPitchRoll.set(currentSupportFootPose.getOrientation());
+               yawPitchRoll.set(supportFootPose.getOrientation());
                yawPitchRoll.setYaw(footstepPose.getYaw());
                adjustedPose.getOrientation().set(yawPitchRoll);
             }
@@ -665,35 +791,9 @@ public class ContinuousStepGenerator implements Updatable
             {
                adjustedPose.getOrientation().set(footstepPose.getOrientation());
             }
-            return adjustedPose;
+            return true;
          }
-      });
-   }
-
-   /**
-    * Sets a footstep adjustment that uses the height map to adjust the footsteps height and the
-    * current support foot pitch/roll to adjust the footsteps pitch/roll.
-    *
-    * @param heightMap the height map used to adjust footsteps height.
-    */
-   public void setHeightMapBasedFootstepAdjustment(HeightMap heightMap)
-   {
-      setFootstepAdjustment(new FootstepAdjustment()
-      {
-         private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
-         private final FramePose3D adjustedPose = new FramePose3D();
-
-         @Override
-         public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
-         {
-            adjustedPose.getPosition().set(footstepPose.getPosition());
-            adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
-            yawPitchRoll.set(currentSupportFootPose.getOrientation());
-            yawPitchRoll.setYaw(footstepPose.getYaw());
-            adjustedPose.getOrientation().set(yawPitchRoll);
-            return adjustedPose;
-         }
-      });
+      };
    }
 
    /**
@@ -705,6 +805,17 @@ public class ContinuousStepGenerator implements Updatable
    public void setWalkInputProvider(BooleanProvider walkInputProvider)
    {
       this.walkInputProvider = walkInputProvider;
+   }
+
+   /**
+    * Sets a provider that is to be used to update the desired swing height of each foot internally on
+    * each call to {@link #update(double)}
+    *
+    * @param swingHeightInputProvider the provider used to set the swing height
+    */
+   public void setSwingHeightInputProvider(DoubleProvider swingHeightInputProvider)
+   {
+      this.swingHeightInputProvider = swingHeightInputProvider;
    }
 
    /**
@@ -800,12 +911,11 @@ public class ContinuousStepGenerator implements Updatable
          for (int i = 0; i < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE; i++)
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
-            AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
             visualizers.add(new FootstepVisualizer(name,
                                                    graphicListName,
                                                    robotSide,
                                                    footPolygons.get(robotSide),
-                                                   footstepColor,
+                                                   defaultFeetColors.get(robotSide),
                                                    yoGraphicsListRegistry,
                                                    registry));
          }
@@ -861,10 +971,31 @@ public class ContinuousStepGenerator implements Updatable
    private void calculateSquareUpStep(FramePose2DReadOnly stanceFootPose,
                                       FramePose2DReadOnly defaultTouchdownPose,
                                       RobotSide swingSide,
-                                      FramePose3D touchdownPoseToPack)
+                                      FootstepDataMessage touchdownPoseToPack)
    {
       alternateStepPose2D.set(stanceFootPose);
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(parameters.getDefaultStepWidth()));
-      touchdownPoseToPack.set(footstepAdjustment.adjustFootstep(alternateStepPose2D, swingSide));
+      for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
+         footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, alternateStepPose2D, swingSide, touchdownPoseToPack);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<FootstepVisualizer> visualizers = footstepSideDependentVisualizers.get(robotSide);
+         if (visualizers == null || visualizers.isEmpty())
+            return null;
+
+         for (int i = 0; i < visualizers.size(); i++)
+         {
+            group.addChild(visualizers.get(i).getSCS2YoGraphics());
+         }
+      }
+
+      return group;
    }
 }

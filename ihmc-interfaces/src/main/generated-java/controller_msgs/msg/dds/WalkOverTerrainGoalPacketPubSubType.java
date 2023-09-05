@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class WalkOverTerrainGoalPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WalkOverTerrainGoalPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WalkOverTerrainGoalPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "eb74d336172a3eecc094d64c3efedccbb7ca9a5ab73d47f9e542655cb8f69c78";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -37,8 +37,8 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       this.guiRunModuleTopic = guiRunModuleTopic;
       this.guiShowUITopic = guiShowUITopic;
 
-      messager.registerTopicListener(runModuleTopic, run -> run(run, this::startModule, this::stopModule));
-      messager.registerTopicListener(showUITopic, run -> run(run, this::showUI, this::hideUI));
+      messager.addTopicListener(runModuleTopic, run -> run(run, this::startModule, this::stopModule));
+      messager.addTopicListener(showUITopic, run -> run(run, this::showUI, this::hideUI));
    }
 
    public void attachDependentModule(PerceptionSuiteComponent<?, ?> dependentModule)

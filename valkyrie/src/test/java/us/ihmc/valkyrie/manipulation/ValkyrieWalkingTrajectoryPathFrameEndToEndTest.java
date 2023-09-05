@@ -83,6 +83,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+//      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @AfterEach
@@ -166,7 +167,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       //      LogTools.info("Difference w.r.t. mid feet zup frame: angle= "
       //            + midFeetZUpFrameTransform.getRotation().distance(walkingTrajectoryPathFrameTransform.getRotation()) + ", distance= " + diff.length());
       // It doesn't match the mid feet zup yaw. 
-      //      EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
+      //      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
       //                                                                  walkingTrajectoryPathFrameTransform.getRotation(),
       //                                                                  1.0e-3);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(midFeetZUpFrameTransform.getTranslation(),
@@ -262,7 +263,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       SimRigidBodyBasics hand = simulationTestHelper.getRobot().getRigidBody(getHandName());
       SimJointBasics lastWristJoint = hand.getParentJoint();
 
-      ExternalWrenchPoint robotAttachmentPoint = lastWristJoint.getAuxialiryData()
+      ExternalWrenchPoint robotAttachmentPoint = lastWristJoint.getAuxiliaryData()
                                                                .addExternalWrenchPoint(new ExternalWrenchPointDefinition("robotAttachmentPoint",
                                                                                                                          getPendulumOffsetInHand()));
       simulationTestHelper.getRobot().updateFrames();
@@ -273,7 +274,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
 
       if (ADD_PENDULUM)
       {
-         Robot pendulumRobot = simulationTestHelper.getSimulationSession().addRobot(pendulumRobotDefinition);
+         Robot pendulumRobot = simulationTestHelper.getSimulationConstructionSet().addRobot(pendulumRobotDefinition);
 
          pendulumAttachmentController = new PendulumAttachmentController(robotAttachmentPoint, pendulumRobot);
          pendulumRobot.getControllerManager().addController(pendulumAttachmentController);
@@ -301,7 +302,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
                                     .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(0.0, null, gravityComp));
          handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints().add()
                                     .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1000.0, null, gravityComp));
-         handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+         handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
          simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
       }
 
@@ -328,7 +329,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       long expectedFrameIndex = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getWalkingTrajectoryPath()
                                                     .getWalkingTrajectoryPathFrame().getFrameIndex();
       long actualFrameIndex = ((YoLong) simulationTestHelper.findVariable(getHandName() + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName(),
-                                                                          getHandName() + "CurrentPositionFrame")).getValue();
+                                                                          getHandName() + "Frame")).getValue();
       assertEquals(expectedFrameIndex, actualFrameIndex);
    }
 
@@ -356,7 +357,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
          this.robotAttachmentPoint = robotAttachmentPoint;
          rootJoint = (SimFloatingJointBasics) pendulumRobot.getJoint(FreeFloatingPendulumRobotDefinition.rootJointName);
          pendulumBody = rootJoint.getSuccessor();
-         pendulumAttachmentPoint = rootJoint.getAuxialiryData().getExternalWrenchPoints().get(0);
+         pendulumAttachmentPoint = rootJoint.getAuxiliaryData().getExternalWrenchPoints().get(0);
          rootFrame = robotAttachmentPoint.getFrame().getRootFrame();
 
          kp.set(500.0);

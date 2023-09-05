@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -29,6 +30,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -41,7 +46,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ThreePotatoAngularMomentumCalculator
+public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -55,14 +60,11 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final BooleanProvider useHeightScaledAngularMomentum = new BooleanParameter("useHeightScaledAngularMomentum", registry, true);
    private final DoubleProvider idealAngularMomentumSampleDt = new DoubleParameter("idealAngularMomentumSampleDt", registry, 0.05);
-   private final IntegerProvider maxAngularMomentumSamplesPerSegment = new IntegerParameter("maxAngularMomentumSamplesPerSegment", registry, 8);
-   private final IntegerProvider minAngularMomentumSamplesPerSegment = new IntegerParameter("minAngularMomentumSamplesPerSegment", registry, 5);
+   private final IntegerProvider maxAngularMomentumSamplesPerSegment = new IntegerParameter("maxAngularMomentumSamplesPerSegment", registry, 7);
+   private final IntegerProvider minAngularMomentumSamplesPerSegment = new IntegerParameter("minAngularMomentumSamplesPerSegment", registry, 3);
 
    private final YoFrameVector3D desiredAngularMomentum = new YoFrameVector3D("desiredAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D desiredAngularMomentumRate = new YoFrameVector3D("desiredAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
-
-   private final YoFrameVector3D desiredScaledAngularMomentum = new YoFrameVector3D("desiredScaledAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D desiredScaledAngularMomentumRate = new YoFrameVector3D("desiredScaledAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFrameVector3D predictedAngularMomentum = new YoFrameVector3D("predictedAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedAngularMomentumRate = new YoFrameVector3D("predictedAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
@@ -91,9 +93,7 @@ public class ThreePotatoAngularMomentumCalculator
    private final FrameVector3D relativePotatoAcceleration = new FrameVector3D();
 
    private final FixedFramePolynomialEstimator3D angularMomentumEstimator = new FixedFramePolynomialEstimator3D(worldFrame);
-   private final FixedFramePolynomialEstimator3D scaledAngularMomentumEstimator = new FixedFramePolynomialEstimator3D(worldFrame);
    private final MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> angularMomentumTrajectory;
-   private final MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> heightScaledAngularMomentumTrajectory;
 
    private final FootTrajectoryPredictor footTrajectoryPredictor = new FootTrajectoryPredictor(registry);
 
@@ -124,15 +124,10 @@ public class ThreePotatoAngularMomentumCalculator
       this.potatoMassFraction = potatoMassFraction;
 
       angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
-                                                                                   50,
+                                                                                   30,
                                                                                    worldFrame,
                                                                                    () -> new FixedFramePolynomialEstimator3D(worldFrame),
                                                                                    registry);
-      heightScaledAngularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("heightScaledAngularMomentum",
-                                                                                               50,
-                                                                                               worldFrame,
-                                                                                               () -> new FixedFramePolynomialEstimator3D(worldFrame),
-                                                                                               registry);
 
       if (visualize)
       {
@@ -176,13 +171,8 @@ public class ThreePotatoAngularMomentumCalculator
       angularMomentumEstimator.initialize();
 
       angularMomentumTrajectory.clear();
-      heightScaledAngularMomentumTrajectory.clear();
-
       angularMomentumTrajectory.appendSegment(angularMomentumEstimator);
-      heightScaledAngularMomentumTrajectory.appendSegment(angularMomentumEstimator);
-
       angularMomentumTrajectory.initialize();
-      heightScaledAngularMomentumTrajectory.initialize();
    }
 
    public void computeAngularMomentum(double time)
@@ -190,13 +180,9 @@ public class ThreePotatoAngularMomentumCalculator
       angularMomentumPredictionTimer.startMeasurement();
 
       angularMomentumTrajectory.compute(time);
-      heightScaledAngularMomentumTrajectory.compute(time);
 
       desiredAngularMomentum.set(angularMomentumTrajectory.getPosition());
       desiredAngularMomentumRate.set(angularMomentumTrajectory.getVelocity());
-
-      desiredScaledAngularMomentum.set(heightScaledAngularMomentumTrajectory.getPosition());
-      desiredScaledAngularMomentumRate.set(heightScaledAngularMomentumTrajectory.getVelocity());
 
       totalAngularMomentum.setToZero();
       if (centerOfMassStateProvider != null && soleFrames != null)
@@ -216,7 +202,6 @@ public class ThreePotatoAngularMomentumCalculator
          }
          actualModelAngularMomentum.set(totalAngularMomentum);
       }
-
 
       MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
       MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
@@ -267,7 +252,6 @@ public class ThreePotatoAngularMomentumCalculator
    private final FramePoint3D potatoPosition = new FramePoint3D();
    private final FrameVector3D potatoVelocity = new FrameVector3D();
 
-
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
    {
@@ -280,20 +264,16 @@ public class ThreePotatoAngularMomentumCalculator
       MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
 
       angularMomentumTrajectory.clear();
-      heightScaledAngularMomentumTrajectory.clear();
 
       for (int i = 0; i < timeIntervals.size(); i++)
       {
          TimeIntervalReadOnly timeInterval = timeIntervals.get(i).getTimeInterval();
          angularMomentumEstimator.reset();
          angularMomentumEstimator.reshape(5);
-         scaledAngularMomentumEstimator.reset();
-         scaledAngularMomentumEstimator.reshape(5);
 
          double duration = Math.min(timeInterval.getDuration(), 10.0);
 
          angularMomentumEstimator.getTimeInterval().setInterval(timeInterval.getStartTime(), timeInterval.getStartTime() + duration);
-         scaledAngularMomentumEstimator.getTimeInterval().setInterval(timeInterval.getStartTime(), timeInterval.getStartTime() + duration);
 
          double minDt = duration / maxAngularMomentumSamplesPerSegment.getValue();
          double maxDt = duration / minAngularMomentumSamplesPerSegment.getValue();
@@ -334,25 +314,22 @@ public class ThreePotatoAngularMomentumCalculator
 
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
                throw new RuntimeException("Error.");
-            angularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
-
-            if (!MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
+            if (useHeightScaledAngularMomentum.getValue()
+                && !MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
                totalAngularMomentum.scale(gravityZ / (gravityZ + comTrajectories.getAcceleration().getZ()));
 
-            scaledAngularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
+            angularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
+
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
                throw new RuntimeException("Error.");
          }
 
          angularMomentumEstimator.initialize();
-         scaledAngularMomentumEstimator.initialize();
 
          angularMomentumTrajectory.appendSegment(angularMomentumEstimator);
-         heightScaledAngularMomentumTrajectory.appendSegment(scaledAngularMomentumEstimator);
       }
 
       angularMomentumTrajectory.initialize();
-      heightScaledAngularMomentumTrajectory.initialize();
 
       visualize(comTrajectories, predictedLeftFootTrajectory, predictedRightFootTrajectory);
 
@@ -366,7 +343,10 @@ public class ThreePotatoAngularMomentumCalculator
       if (!visualize)
          return;
 
-      double duration = EuclidCoreTools.min(comTrajectories.getEndTime(), secondPotatoTrajectories.getLastWaypointTime(), thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLongTime);
+      double duration = EuclidCoreTools.min(comTrajectories.getEndTime(),
+                                            secondPotatoTrajectories.getLastWaypointTime(),
+                                            thirdPotatoTrajectories.getLastWaypointTime(),
+                                            sufficientlyLongTime);
 
       comTrajectoryVis.reset();
       secondPotatoVis.reset();
@@ -384,21 +364,9 @@ public class ThreePotatoAngularMomentumCalculator
       }
    }
 
-
-   public boolean useHeightScaledAngularMomentum()
-   {
-      return useHeightScaledAngularMomentum.getValue();
-   }
-
-
    public FrameVector3DReadOnly getDesiredAngularMomentum()
    {
       return desiredAngularMomentum;
-   }
-
-   public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentum()
-   {
-      return desiredScaledAngularMomentum;
    }
 
    public FrameVector3DReadOnly getDesiredAngularMomentumRate()
@@ -406,19 +374,9 @@ public class ThreePotatoAngularMomentumCalculator
       return desiredAngularMomentumRate;
    }
 
-   public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentumRate()
-   {
-      return desiredScaledAngularMomentumRate;
-   }
-
    public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getAngularMomentumTrajectories()
    {
       return angularMomentumTrajectory;
-   }
-
-   public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getHeightScaledAngularMomentumTrajectories()
-   {
-      return heightScaledAngularMomentumTrajectory;
    }
 
    private void computeAngularMomentumAtInstant(PositionTrajectoryGenerator comTrajectory,
@@ -464,5 +422,18 @@ public class ThreePotatoAngularMomentumCalculator
 
       angularMomentumToPack.cross(relativePotatoPosition, relativePotatoVelocity);
       angularMomentumToPack.scale(potatoMass);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (!visualize)
+         return null;
+
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("comTrajectoryViz", comTrajectoryVis.getPositions(), 0.01, ColorDefinitions.Black()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("secondPotatoVis", secondPotatoVis.getPositions(), 0.01, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("thirdPotatoVis", thirdPotatoVis.getPositions(), 0.01, ColorDefinitions.Red()));
+      return group;
    }
 }

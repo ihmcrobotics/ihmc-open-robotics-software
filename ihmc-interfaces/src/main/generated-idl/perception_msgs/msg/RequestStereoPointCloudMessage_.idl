@@ -1,0 +1,26 @@
+#ifndef __perception_msgs__msg__RequestStereoPointCloudMessage__idl__
+#define __perception_msgs__msg__RequestStereoPointCloudMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Use this message to request a new point cloud from the stereo camera.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::RequestStereoPointCloudMessage_")
+      struct RequestStereoPointCloudMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+      };
+    };
+  };
+};
+
+#endif

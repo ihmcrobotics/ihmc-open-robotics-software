@@ -7,17 +7,15 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.AdjustFootstepMessage;
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.VehiclePosePacket;
-import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import perception_msgs.msg.dds.VehiclePosePacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -94,25 +92,6 @@ public class MessageTransformerTest
 
       QuadrupedBodyHeightMessage actual = new QuadrupedBodyHeightMessage(original);
 
-      MessageTransformer.transform(actual, transform);
-
-      assertTrue(expected.epsilonEquals(actual, 1.0e-5));
-   }
-
-   @Test
-   public void testAdjustFootstepMessage()
-   {
-      Random random = new Random(6543);
-
-      AdjustFootstepMessage original = RandomHumanoidMessages.nextAdjustFootstepMessage(random);
-
-      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-
-      AdjustFootstepMessage expected = new AdjustFootstepMessage(original);
-      expected.getLocation().applyTransform(transform);
-      expected.getOrientation().applyTransform(transform);
-
-      AdjustFootstepMessage actual = new AdjustFootstepMessage(original);
       MessageTransformer.transform(actual, transform);
 
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));

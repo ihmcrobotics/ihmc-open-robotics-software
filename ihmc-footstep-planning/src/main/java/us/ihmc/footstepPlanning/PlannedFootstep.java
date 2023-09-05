@@ -1,14 +1,20 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.perception.steppableRegions.SteppableRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -22,8 +28,8 @@ import java.util.UUID;
  */
 public class PlannedFootstep implements PlannedFootstepReadOnly
 {
-   private final long sequenceId;
-   private final RobotSide robotSide;
+   private long sequenceId;
+   private RobotSide robotSide;
    private final FramePose3D footstepPose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
 
@@ -32,6 +38,8 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    private final TDoubleArrayList customWaypointProportions = new TDoubleArrayList();
    private final List<Point3D> customWaypointPositions = new ArrayList<>();
    private final List<FrameSE3TrajectoryPoint> swingTrajectory = new ArrayList<>();
+
+   private PlanarRegion regonSnappedTo = null;
 
    private double swingDuration = -1.0;
    private double transferDuration = -1.0;
@@ -61,27 +69,44 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       }
    }
 
-   public PlannedFootstep(PlannedFootstep other)
+   public PlannedFootstep(PlannedFootstepReadOnly other)
    {
-      this.sequenceId = other.sequenceId;
-      this.robotSide = other.robotSide;
-      this.footstepPose.set(other.footstepPose);
-      this.foothold.set(other.foothold);
+      set(other);
+   }
 
-      this.trajectoryType = other.trajectoryType;
-      this.swingHeight = other.swingHeight;
+   public void set(PlannedFootstepReadOnly other)
+   {
+      this.sequenceId = other.getSequenceId();
+      this.robotSide = other.getRobotSide();
+      other.getFootstepPose(this.footstepPose);
+      this.foothold.set(other.getFoothold());
 
-      for (int i = 0; i < other.customWaypointProportions.size(); i++)
+      this.trajectoryType = other.getTrajectoryType();
+      this.swingHeight = other.getSwingHeight();
+
+      for (int i = 0; i < other.getCustomWaypointProportions().size(); i++)
       {
-         customWaypointProportions.add(other.customWaypointProportions.get(i));
+         customWaypointProportions.add(other.getCustomWaypointProportions().get(i));
       }
-      for (int i = 0; i < other.customWaypointPositions.size(); i++)
+      for (int i = 0; i < other.getCustomWaypointPositions().size(); i++)
       {
-         customWaypointPositions.add(new Point3D(other.customWaypointPositions.get(i)));
+         customWaypointPositions.add(new Point3D(other.getCustomWaypointPositions().get(i)));
       }
 
-      this.swingDuration = other.swingDuration;
-      this.transferDuration = other.transferDuration;
+      this.swingDuration = other.getSwingDuration();
+      this.transferDuration = other.getTransferDuration();
+      this.regonSnappedTo = other.getRegionSnappedTo();
+   }
+
+   public void reset()
+   {
+      robotSide = null;
+      footstepPose.setToNaN();
+      foothold.clear();
+      trajectoryType = null;
+      customWaypointPositions.clear();
+      customWaypointProportions.clear();
+      regonSnappedTo = null;
    }
 
    @Override
@@ -90,13 +115,14 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       return robotSide;
    }
 
+   @Override
    public FramePose3D getFootstepPose()
    {
       return footstepPose;
    }
 
    @Override
-   public void getFootstepPose(FramePose3D footstepPoseToPack)
+   public void getFootstepPose(FramePose3DBasics footstepPoseToPack)
    {
       footstepPoseToPack.set(footstepPose);
    }
@@ -113,31 +139,37 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       return !foothold.isEmpty();
    }
 
+   @Override
    public TrajectoryType getTrajectoryType()
    {
       return trajectoryType;
    }
 
+   @Override
    public double getSwingHeight()
    {
       return swingHeight;
    }
 
+   @Override
    public TDoubleArrayList getCustomWaypointProportions()
    {
       return customWaypointProportions;
    }
 
+   @Override
    public List<Point3D> getCustomWaypointPositions()
    {
       return customWaypointPositions;
    }
 
+   @Override
    public double getSwingDuration()
    {
       return swingDuration;
    }
 
+   @Override
    public double getTransferDuration()
    {
       return transferDuration;
@@ -185,54 +217,27 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       }
    }
 
+   public void setRegionSnappedTo(PlanarRegion regionSnappedTo)
+   {
+      this.regonSnappedTo = regionSnappedTo;
+   }
+
+   @Override
+   public PlanarRegion getRegionSnappedTo()
+   {
+      return regonSnappedTo;
+   }
+
+   @Override
    public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
    {
       return swingTrajectory;
    }
 
-   public FootstepDataMessage getAsMessage()
+   @Override
+   public long getSequenceId()
    {
-      FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
-      footstepDataMessage.setSequenceId(sequenceId);
-      footstepDataMessage.setRobotSide(robotSide.toByte());
-      footstepDataMessage.getLocation().set(footstepPose.getPosition());
-      footstepDataMessage.getOrientation().set(footstepPose.getOrientation());
-
-      for (int i = 0; i < foothold.getNumberOfVertices(); i++)
-      {
-         footstepDataMessage.getPredictedContactPoints2d().add().set(foothold.getVertex(i), 0.0);
-      }
-
-      if (trajectoryType != null)
-      {
-         footstepDataMessage.setTrajectoryType(trajectoryType.toByte());
-      }
-
-      footstepDataMessage.setSwingHeight(swingHeight);
-
-      for (int i = 0; i < customWaypointProportions.size(); i++)
-      {
-         footstepDataMessage.getCustomWaypointProportions().add(customWaypointProportions.get(i));
-      }
-      for (int i = 0; i < customWaypointPositions.size(); i++)
-      {
-         footstepDataMessage.getCustomPositionWaypoints().add().set(customWaypointPositions.get(i));
-      }
-
-      for (int i = 0; i < swingTrajectory.size(); i++)
-      {
-         SE3TrajectoryPointMessage swingTrajectoryPointToSet = footstepDataMessage.getSwingTrajectory().add();
-         swingTrajectoryPointToSet.setTime(swingTrajectory.get(i).getTime());
-         swingTrajectoryPointToSet.getPosition().set(swingTrajectory.get(i).getPosition());
-         swingTrajectoryPointToSet.getOrientation().set(swingTrajectory.get(i).getOrientation());
-         swingTrajectoryPointToSet.getLinearVelocity().set(swingTrajectory.get(i).getLinearVelocity());
-         swingTrajectoryPointToSet.getAngularVelocity().set(swingTrajectory.get(i).getAngularVelocity());
-      }
-
-      footstepDataMessage.setSwingDuration(swingDuration);
-      footstepDataMessage.setTransferDuration(transferDuration);
-
-      return footstepDataMessage;
+      return sequenceId;
    }
 
    public static PlannedFootstep getFromMessage(FootstepDataMessage footstepDataMessage)
@@ -274,6 +279,13 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
       plannedFootstep.setSwingDuration(footstepDataMessage.getSwingDuration());
       plannedFootstep.setTransferDuration(footstepDataMessage.getTransferDuration());
+
+      List<StepConstraintRegion> steppableRegions = StepConstraintMessageConverter.convertToStepConstraintRegionList(footstepDataMessage.getStepConstraints());
+      if (steppableRegions != null && steppableRegions.size() > 0)
+      {
+         PlanarRegion constraintRegion = StepConstraintListConverter.convertStepConstraintRegionToPlanarRegion(steppableRegions.get(0));
+         plannedFootstep.setRegionSnappedTo(constraintRegion);
+      }
 
       return plannedFootstep;
    }

@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
-import controller_msgs.msg.dds.DetectedFiducialPacket;
+import perception_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -17,7 +17,6 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.tools.Timer;
@@ -32,9 +31,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
+/**
+ * This was for Atlas to deal with all the state machine stuff involves in doing
+ * stairs autonomously, I think we might be able to simplify it on Nadia.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new);
    private static final int UPDATE_RATE_MILLIS = 100;
    public static final int STAIRS_FIDUCIAL_ID = 350;
 
@@ -103,11 +107,11 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
 
       helper.subscribeViaCallback(START, this::start);
       helper.subscribeViaCallback(STOP, this::stop);
-      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
-      {
-         statusLogger.info("Operator review {}", enabled ? "enabled" : "disabled");
-         operatorReviewEnabled.set(enabled);
-      });
+//      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+//      {
+//         statusLogger.info("Operator review {}", enabled ? "enabled" : "disabled");
+//         operatorReviewEnabled.set(enabled);
+//      });
       helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
       {
          if (detectedFiducialMessage.getFiducialId() == STAIRS_FIDUCIAL_ID)
@@ -115,7 +119,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
             stairsDetectedTimer.reset();
             detectedFiducial.set(detectedFiducialMessage);
             stairsPose.set(detectedFiducialMessage.getFiducialTransformToWorld());
-            helper.publish(DetectedStairsPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
+//            helper.publish(DetectedStairsPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
          }
       });
    }
@@ -141,7 +145,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       factory.addStateChangedListener((from, to) ->
       {
          currentState = to;
-         helper.publish(TraverseStairsBehaviorAPI.State, to.name());
+//         helper.publish(TraverseStairsBehaviorAPI.State, to.name());
       });
 
       factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousStateName(from)));
@@ -159,7 +163,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    {
       FramePose3DReadOnly robotPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
       distanceToStairs = stairsPose.getPosition().distance(robotPose.getPosition());
-      helper.publish(DistanceToStairs, distanceToStairs);
+//      helper.publish(DistanceToStairs, distanceToStairs);
 
       super.clock();
    }
@@ -189,7 +193,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       {
          currentLifeCycleState = TraverseStairsLifecycleStateName.NOT_RUNNING;
       }
-      helper.publish(LifecycleState, currentLifeCycleState.name());
+//      helper.publish(LifecycleState, currentLifeCycleState.name());
 
       return BehaviorTreeNodeStatus.SUCCESS;
    }
@@ -206,7 +210,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       {
          return;
       }
-      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.NOT_RUNNING.name());
+//      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.NOT_RUNNING.name());
 
       if (behaviorTask != null)
       {
@@ -228,7 +232,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
          return;
       }
 
-      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
+//      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
 
       planStepsState.reset();
       pauseState.reset();
@@ -241,14 +245,14 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
 
       BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportRegionParametersMessage.setEnable(false);
-      helper.publish(ROS2Tools::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
+      helper.publish(PerceptionAPI::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
    private void update()
    {
       if (behaviorHasCrashed.get())
       {
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
+//         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
          return;
       }
 
@@ -266,7 +270,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       {
          e.printStackTrace();
          behaviorHasCrashed.set(true);
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
+//         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
       }
    }
 

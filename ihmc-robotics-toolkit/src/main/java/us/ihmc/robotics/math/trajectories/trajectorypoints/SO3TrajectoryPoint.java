@@ -1,11 +1,14 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.SO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 
 public class SO3TrajectoryPoint implements SO3TrajectoryPointBasics
 {
@@ -21,45 +24,21 @@ public class SO3TrajectoryPoint implements SO3TrajectoryPointBasics
       set(other);
    }
 
-   public SO3TrajectoryPoint(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   public SO3TrajectoryPoint(double time, Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       set(time, orientation, angularVelocity);
    }
 
    @Override
-   public QuaternionReadOnly getOrientation()
+   public Quaternion getOrientation()
    {
       return so3Waypoint.getOrientation();
    }
 
    @Override
-   public void setOrientation(double x, double y, double z, double s)
-   {
-      so3Waypoint.setOrientation(x, y, z, s);
-   }
-
-   @Override
-   public Vector3DReadOnly getAngularVelocity()
+   public Vector3D getAngularVelocity()
    {
       return so3Waypoint.getAngularVelocity();
-   }
-
-   @Override
-   public void setAngularVelocity(double x, double y, double z)
-   {
-      so3Waypoint.setAngularVelocity(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      so3Waypoint.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      so3Waypoint.applyInverseTransform(transform);
    }
 
    @Override
@@ -75,8 +54,25 @@ public class SO3TrajectoryPoint implements SO3TrajectoryPointBasics
    }
 
    @Override
+   public int hashCode()
+   {
+      return EuclidHashCodeTools.toIntHashCode(getTime(), getOrientation(), getAngularVelocity());
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof SO3TrajectoryPointReadOnly)
+         return equals((SO3TrajectoryPointReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
    public String toString()
    {
-      return "SO3 trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(so3Waypoint) + ")";
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

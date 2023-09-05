@@ -101,7 +101,7 @@ public class SingleContactImpulseCalculatorTest
          FrameVector3D expectedLinearVelocity = new FrameVector3D();
          contactingBody.getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(contactPoint, expectedLinearVelocity);
 
-         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
+         EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
       }
    }
 
@@ -334,8 +334,8 @@ public class SingleContactImpulseCalculatorTest
          sphereBFinalVelocity.scaleAdd(massB - massA, sphereBInitialVelocity, sphereBFinalVelocity);
          sphereBFinalVelocity.scale(1.0 / (massA + massB));
 
-         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertEquals("Iteration: " + i, sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertEquals("Iteration: " + i, sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
       }
    }
 
@@ -370,7 +370,7 @@ public class SingleContactImpulseCalculatorTest
             FrameVector3D impulseOnB = new FrameVector3D(impulseCalculator.getImpulseB().getLinearPart());
             impulseOnB.changeFrame(impulseOnA.getReferenceFrame());
             impulseOnB.negate();
-            EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, impulseOnA, impulseOnB, epsilon);
+            EuclidCoreTestTools.assertEquals(messagePrefix, impulseOnA, impulseOnB, epsilon);
          }
          else
          {

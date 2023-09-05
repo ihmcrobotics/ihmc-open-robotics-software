@@ -72,7 +72,7 @@ public class StereoPointCloudCompressionTest
 
          assertEquals(inputTimestamp, message.getTimestamp());
          assertEquals(inputNumberOfPoints, message.getNumberOfPoints());
-         EuclidCoreTestTools.assertTuple3DEquals(center, message.getPointCloudCenter(), 1.0e-5);
+         EuclidCoreTestTools.assertEquals(center, message.getPointCloudCenter(), 1.0e-5);
 
          int[] outputColors = StereoPointCloudCompression.decompressColorsToIntArray(message);
          assertEquals(inputNumberOfPoints, outputColors.length);
@@ -83,7 +83,7 @@ public class StereoPointCloudCompressionTest
          for (int j = 0; j < inputNumberOfPoints; j++)
          {
             // The LZ4 compression seems to be messing with the digits that are below the resolution.
-            EuclidCoreTestTools.assertTuple3DEquals("Iteration " + i + ", min resolution " + minimumResolution + ", point index " + j,
+            EuclidCoreTestTools.assertEquals("Iteration " + i + ", min resolution " + minimumResolution + ", point index " + j,
                                                     inputPointCloud[j],
                                                     outputPointCloud[j],
                                                     2.0 * minimumResolution);

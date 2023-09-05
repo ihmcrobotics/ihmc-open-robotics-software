@@ -17,12 +17,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -73,8 +75,8 @@ public class OrientationFeedbackControllerTest
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForAngularControl();
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      QPInputTypeA orientationMotionQPInput = new QPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
-      QPInputTypeA spatialMotionQPInput = new QPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      NativeQPInputTypeA orientationMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      NativeQPInputTypeA spatialMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
       SpatialAccelerationCommand orientationControllerOutput = orientationFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();
@@ -117,6 +119,11 @@ public class OrientationFeedbackControllerTest
          assertEquals(spatialMotionQPInput.taskObjective, orientationMotionQPInput.taskObjective, 1.0e-12);
          assertEquals(spatialMotionQPInput.taskWeightMatrix, orientationMotionQPInput.taskWeightMatrix, 1.0e-12);
       }
+   }
+
+   private static void assertEquals(NativeMatrix expected, NativeMatrix actual, double epsilon)
+   {
+      assertEquals(new DMatrixRMaj(expected), new DMatrixRMaj(actual), epsilon);
    }
 
    private static void assertEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)

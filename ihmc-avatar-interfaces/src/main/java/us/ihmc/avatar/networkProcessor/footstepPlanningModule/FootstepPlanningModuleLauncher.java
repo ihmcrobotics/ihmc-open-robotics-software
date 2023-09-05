@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
@@ -86,6 +87,7 @@ public class FootstepPlanningModuleLauncher
 
       return new FootstepPlanningModule(moduleName,
                                         visibilityGraphsParameters,
+                                        robotModel.getAStarBodyPathPlannerParameters(),
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
                                         walkingControllerParameters,

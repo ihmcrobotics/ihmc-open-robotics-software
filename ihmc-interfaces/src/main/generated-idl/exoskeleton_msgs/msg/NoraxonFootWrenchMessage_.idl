@@ -1,0 +1,46 @@
+#ifndef __exoskeleton_msgs__msg__NoraxonFootWrenchMessage__idl__
+#define __exoskeleton_msgs__msg__NoraxonFootWrenchMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the Noraxon MR3 to Eva Exoskeleton Interface
+       * This message acts as a go-between between the Noraxon HTTP intepreter program and the Eva Controller
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::NoraxonFootWrenchMessage_")
+      struct NoraxonFootWrenchMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Which side the Wrench is on
+         */
+        octet robot_side;
+        /**
+         * This is the wrench at the foot, with respect to the sole frame
+         */
+        double linear_force_x;
+        double linear_force_y;
+        double linear_force_z;
+        double angular_moment_x;
+        double angular_moment_y;
+        double angular_moment_z;
+      };
+    };
+  };
+};
+
+#endif

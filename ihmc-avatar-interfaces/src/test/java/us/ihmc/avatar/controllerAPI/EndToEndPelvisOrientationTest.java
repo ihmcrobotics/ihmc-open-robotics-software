@@ -17,8 +17,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -52,6 +52,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -72,7 +73,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
    private FullHumanoidRobotModel fullRobotModel;
-   private HumanoidReferenceFrames humanoidReferenceFrames;
+   private CommonHumanoidReferenceFrames humanoidReferenceFrames;
 
    @Test
    public void testGoHome()
@@ -507,8 +508,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       SO3TrajectoryPoint currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(simulationTestHelper, pelvis);
       double desiredEpsilon = 6.0e-3;
 
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
+      EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
       EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.0e-2);
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
@@ -517,8 +518,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(simulationTestHelper, pelvis);
       desiredEpsilon = 1.0e-7;
 
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
+      EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
       EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.0e-3);
    }
 
@@ -613,7 +614,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
 
       humanoidReferenceFrames.updateFrames();
    }

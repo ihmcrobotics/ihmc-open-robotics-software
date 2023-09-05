@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import controller_msgs.msg.dds.QuadrupedStepMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

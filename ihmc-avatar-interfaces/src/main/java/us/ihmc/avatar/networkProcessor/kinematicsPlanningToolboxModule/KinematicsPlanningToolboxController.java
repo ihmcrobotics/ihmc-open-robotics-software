@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.fest.swing.util.Pair;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -51,6 +51,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -138,8 +139,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                                                              updateDT,
                                                              yoGraphicsListRegistry,
                                                              parentRegistry);
-      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
-      initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoint());
+      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, ikController.getDesiredReferenceFrames()));
+      initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoints());
 
       indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);
       totalComputationTime = new YoDouble("totalComputationTime", parentRegistry);
@@ -648,5 +649,15 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
+   }
+
+   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
+   {
+      return ikController.getCurrentReferenceFrames();
+   }
+
+   public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
+   {
+      return ikController.getDesiredReferenceFrames();
    }
 }

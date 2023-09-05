@@ -7,18 +7,18 @@
 uint32 sequence_id
 
 # The coordinates in world of the origin of each constraint region.
-geometry_msgs/Point[<=3000] region_origin
+geometry_msgs/Point[<=20] region_origin
 # The orientation with respect to world of each constraint region.
-geometry_msgs/Quaternion[<=3000] region_orientation
+geometry_msgs/Quaternion[<=20] region_orientation
 # The normal expressed in world of each constraint region.
-geometry_msgs/Vector3[<=3000] region_normal
+geometry_msgs/Vector3[<=20] region_normal
 
 # Indicates for each constraint region the number of vertices for the concave hull.
-int32[<=3000] concave_hulls_size
+int32[<=100] concave_hulls_size
 # Indicates for each constraint region the number of holes contained in that region.
-int32[<=3000] number_of_holes_in_region
+int32[<=100] number_of_holes_in_region
 # Indicates successively the number of vertices for each hole of each constraint region.
-int32[<=3000] hole_polygons_size
+int32[<=100] hole_polygons_size
 
 # Single buffer used to store for each constraint the vertices of the concave hull and the convex polygons.
 geometry_msgs/Point[<=50000] vertex_buffer

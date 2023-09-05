@@ -1,0 +1,32 @@
+#ifndef __ihmc_common_msgs__msg__Box3DMessage__idl__
+#define __ihmc_common_msgs__msg__Box3DMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is part of the IHMC Common message package.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::Box3DMessage_")
+      struct Box3DMessage
+      {
+        /**
+         * Size of the box, see Box3D.
+         */
+        geometry_msgs::msg::dds::Vector3 size;
+        /**
+         * Pose of the box
+         */
+        geometry_msgs::msg::dds::Pose pose;
+      };
+    };
+  };
+};
+
+#endif

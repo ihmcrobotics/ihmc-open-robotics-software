@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::JointspaceTrajectoryStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "e3f9617aa3ac28c59776ea90e79338775369d39c4021bb536ed0d252f161e80c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

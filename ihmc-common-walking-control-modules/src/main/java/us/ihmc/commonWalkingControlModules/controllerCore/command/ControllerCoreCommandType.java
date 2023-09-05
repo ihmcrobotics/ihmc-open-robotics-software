@@ -72,6 +72,11 @@ public enum ControllerCoreCommandType
     */
    MOMENTUM,
 
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} given for momentum rate of change. This
+    * allows the user to set custom quadratic cost functions that related to the momentum rate of change
+    * for the {@link WholeBodyInverseDynamicsSolver}.
+    */
    MOMENTUM_COST,
 
    /**
@@ -184,17 +189,24 @@ public enum ControllerCoreCommandType
     * these settings are defined in the {@link ControllerCoreOptimizationSettings}. This command allows
     * changing some of the optimization settings such as bounds on rhos online using the command API.
     */
-   OPTIMIZATION_SETTINGS;
+   OPTIMIZATION_SETTINGS,
+
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} for a custom cost term. This
+    * cost must be quadratic, and can be added directly to the {@link WholeBodyInverseDynamicsSolver}
+    * or {@link WholeBodyVirtualModelControlSolver}.
+    */
+   QP_INPUT;
 
    private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, MOMENTUM_CONVEX_CONSTRAINT,
          PRIVILEGED_CONFIGURATION, PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};
 
    private static final ControllerCoreCommandType[] inverseDynamicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
          PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, JOINT_LIMIT_ENFORCEMENT, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, CENTER_OF_PRESSURE,
-         JOINT_ACCELERATION_INTEGRATION, CONTACT_WRENCH, COMMAND_LIST, OPTIMIZATION_SETTINGS};
+         JOINT_ACCELERATION_INTEGRATION, CONTACT_WRENCH, COMMAND_LIST, OPTIMIZATION_SETTINGS, QP_INPUT};
 
    private static final ControllerCoreCommandType[] virtualModelControlCommands = {MOMENTUM, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, VIRTUAL_WRENCH,
-         VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST};
+         VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST, QP_INPUT};
 
    private static final ControllerCoreCommandType[] feedbackControlCommands = {TASKSPACE, POINT, ORIENTATION, JOINTSPACE, MOMENTUM, COMMAND_LIST};
 

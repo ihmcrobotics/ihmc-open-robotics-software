@@ -16,12 +16,12 @@ int64 timestamp
 # Information for the left hand in task-space
 bool has_left_hand_streaming_message
 
-controller_msgs/SE3StreamingMessage left_hand_streaming_message
+ihmc_common_msgs/SE3StreamingMessage left_hand_streaming_message
 
 # Information for the right hand in task-space
 bool has_right_hand_streaming_message
 
-controller_msgs/SE3StreamingMessage right_hand_streaming_message
+ihmc_common_msgs/SE3StreamingMessage right_hand_streaming_message
 
 # Information for the left arm joints
 bool has_left_arm_streaming_message
@@ -36,7 +36,7 @@ controller_msgs/JointspaceStreamingMessage right_arm_streaming_message
 # Information for the chest
 bool has_chest_streaming_message
 
-controller_msgs/SO3StreamingMessage chest_streaming_message
+ihmc_common_msgs/SO3StreamingMessage chest_streaming_message
 
 # Information for the pelvis
 bool has_pelvis_streaming_message
@@ -44,7 +44,7 @@ bool has_pelvis_streaming_message
 # Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
 bool enable_user_pelvis_control
 
-controller_msgs/SE3StreamingMessage pelvis_streaming_message
+ihmc_common_msgs/SE3StreamingMessage pelvis_streaming_message
 
 # Information for the neck joints
 bool has_neck_streaming_message

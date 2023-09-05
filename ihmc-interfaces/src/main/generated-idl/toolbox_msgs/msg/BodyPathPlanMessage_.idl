@@ -1,0 +1,58 @@
+#ifndef __toolbox_msgs__msg__BodyPathPlanMessage__idl__
+#define __toolbox_msgs__msg__BodyPathPlanMessage__idl__
+
+#include "geometry_msgs/msg/./Pose2D_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "perception_msgs/msg/./PlanarRegionsListMessage_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION =
+      0;
+
+      const octet FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION =
+      1;
+
+      const octet FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION =
+      2;
+
+      const octet FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS =
+      3;
+
+      const octet FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED =
+      4;
+
+      const octet FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED =
+      5;
+
+      const long NO_PLAN_ID =
+      -1;
+
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::BodyPathPlanMessage_")
+      struct BodyPathPlanMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet footstep_planning_result;
+        @defaultValue(value=-1)
+        long plan_id;
+        perception_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
+        sequence<geometry_msgs::msg::dds::Pose> body_path;
+        geometry_msgs::msg::dds::Pose2D path_planner_start_pose;
+        geometry_msgs::msg::dds::Pose2D path_planner_goal_pose;
+      };
+    };
+  };
+};
+
+#endif

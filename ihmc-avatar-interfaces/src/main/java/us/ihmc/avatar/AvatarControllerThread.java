@@ -2,6 +2,8 @@ package us.ihmc.avatar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -12,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
@@ -30,7 +33,10 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -72,12 +78,15 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private final List<Supplier<YoGraphicDefinition>> scs2YoGraphicHolders = new ArrayList<>();
 
    private final ModularRobotController robotController;
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
+
+   private final ExecutionTimer controllerThreadTimer;
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
@@ -87,8 +96,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
-                                 double gravity,
-                                 double estimatorDT)
+                                 double gravity)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
       if (robotInitialSetup != null)
@@ -111,9 +119,16 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                      ControllerCrashNotificationPacket.class,
-                                                                      ROS2Tools.getControllerOutputTopic(robotName));
+      if (realtimeROS2Node != null)
+      {
+         crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                         ControllerCrashNotificationPacket.class,
+                                                                         ROS2Tools.getControllerOutputTopic(robotName));
+      }
+      else
+      {
+         crashNotificationPublisher = null;
+      }
 
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -141,6 +156,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
+
+      controllerThreadTimer = new ExecutionTimer("controllerThreadTimer", registry);
 
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
@@ -228,17 +245,18 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          }
       }
 
-      RobotController robotController = controllerFactory.getController(controllerModel,
-                                                                        controlDT,
-                                                                        gravity,
-                                                                        yoTime,
-                                                                        yoGraphicsListRegistry,
-                                                                        sensorInformation,
-                                                                        forceSensorDataHolderForController,
-                                                                        centerOfMassDataHolderForController,
-                                                                        centerOfPressureDataHolderForEstimator,
-                                                                        lowLevelControllerOutput,
-                                                                        jointsToIgnore);
+      HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
+                                                                                           controlDT,
+                                                                                           gravity,
+                                                                                           yoTime,
+                                                                                           yoGraphicsListRegistry,
+                                                                                           sensorInformation,
+                                                                                           forceSensorDataHolderForController,
+                                                                                           centerOfMassDataHolderForController,
+                                                                                           centerOfPressureDataHolderForEstimator,
+                                                                                           lowLevelControllerOutput,
+                                                                                           jointsToIgnore);
+      scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);
@@ -281,11 +299,20 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+      }
    }
 
    @Override
    public void run()
    {
+      controllerThreadTimer.startMeasurement();
+
       runController.set(humanoidRobotContextData.getEstimatorRan());
       if (!runController.getValue())
       {
@@ -314,10 +341,15 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
       catch (Exception e)
       {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
+         if (crashNotificationPublisher != null)
+         {
+            crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
+         }
 
          throw new RuntimeException(e);
       }
+
+      controllerThreadTimer.stopMeasurement();
    }
 
    @Override
@@ -326,9 +358,20 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       return registry;
    }
 
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   @Override
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < scs2YoGraphicHolders.size(); i++)
+      {
+         group.addChild(scs2YoGraphicHolders.get(i).get());
+      }
+      return group;
    }
 
    /**

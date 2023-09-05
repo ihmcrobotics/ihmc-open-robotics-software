@@ -109,7 +109,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double pushDuration = 0.8 * swingTime;
+      double pushDuration = 0.4 * swingTime;
       double percentInSwing = 0.1;
       RobotSide side = RobotSide.RIGHT;
 
@@ -168,7 +168,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
       ((YoBoolean) simulationTestHelper.findVariable("speedUpTransferDynamicsFromError")).set(true);
       ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.35);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
       simulationTestHelper.setCamera(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
@@ -222,6 +222,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
       }
 
       footsteps.setAreFootstepsAdjustable(true);
+      footsteps.setOffsetFootstepsWithExecutionError(true);
       simulationTestHelper.publishToController(footsteps);
    }
 

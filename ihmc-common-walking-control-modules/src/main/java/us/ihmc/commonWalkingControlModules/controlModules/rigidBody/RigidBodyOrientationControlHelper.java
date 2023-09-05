@@ -119,9 +119,19 @@ public class RigidBodyOrientationControlHelper
       this.gains = gains;
    }
 
+   public PID3DGainsReadOnly getGains()
+   {
+      return gains;
+   }
+
    public void setWeights(Vector3DReadOnly weights)
    {
       this.defaultWeight = weights;
+   }
+
+   public Vector3DReadOnly getDefaultWeight()
+   {
+      return defaultWeight;
    }
 
    private void setDefaultControlFrame()
@@ -169,7 +179,7 @@ public class RigidBodyOrientationControlHelper
 
       desiredOrientation.setIncludingFrame(orientation);
       desiredOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
-      trajectoryPoint.setOrientation(desiredOrientation);
+      trajectoryPoint.getOrientation().set(desiredOrientation);
    }
 
    public void goToOrientation(FrameQuaternionReadOnly orientation, double trajectoryTime)
@@ -182,7 +192,7 @@ public class RigidBodyOrientationControlHelper
 
       desiredOrientation.setIncludingFrame(orientation);
       desiredOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
-      trajectoryPoint.setOrientation(desiredOrientation);
+      trajectoryPoint.getOrientation().set(desiredOrientation);
    }
 
    public void getDesiredOrientation(FrameQuaternion orientationToPack)
@@ -406,7 +416,7 @@ public class RigidBodyOrientationControlHelper
          integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
          integratedOrientation.setRotationVector(integratedRotationVector);
          integratedOrientation.append(integratedPoint.getOrientation());
-         integratedPoint.setOrientation(integratedOrientation);
+         integratedPoint.getOrientation().set(integratedOrientation);
          integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
       else
@@ -444,7 +454,7 @@ public class RigidBodyOrientationControlHelper
       FrameSO3TrajectoryPoint initialPoint = pointQueue.addLast();
       initialPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       initialPoint.setTime(0.0);
-      initialPoint.setOrientation(initialOrientation);
+      initialPoint.getOrientation().set(initialOrientation);
    }
 
    private FrameSO3TrajectoryPoint addPoint()

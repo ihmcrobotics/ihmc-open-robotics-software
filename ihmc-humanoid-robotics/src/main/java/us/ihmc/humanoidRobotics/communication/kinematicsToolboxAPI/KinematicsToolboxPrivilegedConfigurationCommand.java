@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -172,6 +172,16 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
    public double getPrivilegedGain()
    {
       return privilegedGain;
+   }
+
+   public void setPrivilegedWeight(double privilegedWeight)
+   {
+      this.privilegedWeight = privilegedWeight;
+   }
+
+   public void setPrivilegedGain(double privilegedGain)
+   {
+      this.privilegedGain = privilegedGain;
    }
 
    @Override

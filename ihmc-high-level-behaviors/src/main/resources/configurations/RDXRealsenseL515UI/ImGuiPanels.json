@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "L515" : true,
+    "L515 Color" : true,
+    "L515 Depth" : true,
+    "VR Thread Debugger" : false
+  }
+}

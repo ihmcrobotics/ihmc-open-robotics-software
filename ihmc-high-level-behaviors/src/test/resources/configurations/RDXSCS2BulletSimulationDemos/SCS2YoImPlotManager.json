@@ -1,0 +1,14 @@
+{
+  "panels" : [ {
+    "name" : "Statistics",
+    "plots" : [ {
+      "variables" : [ {
+        "variableName" : "root.time[sec]"
+      } ]
+    }, {
+      "variables" : [ {
+        "variableName" : "root.SessionInternalRegistry.runStatistics.runRealtimeRate"
+      } ]
+    } ]
+  } ]
+}

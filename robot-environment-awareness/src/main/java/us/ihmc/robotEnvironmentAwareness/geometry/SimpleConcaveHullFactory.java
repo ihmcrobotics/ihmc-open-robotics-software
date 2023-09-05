@@ -431,7 +431,7 @@ public abstract class SimpleConcaveHullFactory
          if (numberOfBorderVertices != 3)
             throw new RuntimeException("Triangle should have three border vertices, but has: " + numberOfBorderVertices);
 
-         if (parameters.doRemoveAllTrianglesWithTwoBorderEdges() || isEdgeTooLong)
+         if (parameters.getRemoveAllTrianglesWithTwoBorderEdges() || isEdgeTooLong)
          {
             // Here the triangle has only one edge inside the hull. If another border triangle shares the vertex opposite to this edge, the vertex is an intersection vertex.
             QuadEdge uniqueNonBorderEdge = Arrays.stream(candidateTriangle.getEdges()).filter(edge -> !isBorderEdge(edge, borderEdges)).findFirst().get();
@@ -441,7 +441,7 @@ public abstract class SimpleConcaveHullFactory
             boolean isIntersectionTriangle = adjacentTrianglesToVertex.stream().filter(borderTriangles::contains)
                                                                       .filter(triangle -> triangle != candidateTriangle).findAny().isPresent();
             if (isIntersectionTriangle)
-               return parameters.isSplittingConcaveHullAllowed() ? Case.INTERSECTION_TRIANGLE : Case.KEEP_TRIANGLE;
+               return parameters.getAllowSplittingConcaveHull() ? Case.INTERSECTION_TRIANGLE : Case.KEEP_TRIANGLE;
             else
                return Case.TWO_BORDER_EDGES_THREE_BORDER_VERTICES;
          }
@@ -451,7 +451,7 @@ public abstract class SimpleConcaveHullFactory
          }
       }
 
-      if (!parameters.isSplittingConcaveHullAllowed())
+      if (!parameters.getAllowSplittingConcaveHull())
          return Case.KEEP_TRIANGLE;
 
       if (numberOfBorderEdges == 1)

@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
@@ -14,7 +13,6 @@ import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.LiveMapAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PlanarRegionSLAMParametersUIController;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.LiveMapMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +54,7 @@ public class LiveMapUI implements PerceptionUI
 
       meshViewer = new LiveMapMeshViewer(uiMessager);
 
-      slamParametersUIController.setupParameters(configurationFileProject);
+      slamParametersUIController.setupParameters();
       initializeControllers(uiMessager);
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();

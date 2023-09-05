@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;

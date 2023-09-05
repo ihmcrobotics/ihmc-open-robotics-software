@@ -49,14 +49,14 @@ public class StepConstraintsListMessage extends Packet<StepConstraintsListMessag
 
    public StepConstraintsListMessage()
    {
-      region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (3000, new geometry_msgs.msg.dds.PointPubSubType());
-      region_orientation_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion> (3000, new geometry_msgs.msg.dds.QuaternionPubSubType());
-      region_normal_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (3000, new geometry_msgs.msg.dds.Vector3PubSubType());
-      concave_hulls_size_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
+      region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (20, new geometry_msgs.msg.dds.PointPubSubType());
+      region_orientation_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion> (20, new geometry_msgs.msg.dds.QuaternionPubSubType());
+      region_normal_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (20, new geometry_msgs.msg.dds.Vector3PubSubType());
+      concave_hulls_size_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
-      number_of_holes_in_region_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
+      number_of_holes_in_region_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
-      hole_polygons_size_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
+      hole_polygons_size_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
       vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (50000, new geometry_msgs.msg.dds.PointPubSubType());
 

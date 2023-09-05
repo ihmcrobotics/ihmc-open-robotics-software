@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;

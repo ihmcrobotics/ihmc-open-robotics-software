@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;

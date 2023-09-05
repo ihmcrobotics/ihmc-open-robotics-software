@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Tag;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageReplay;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -24,6 +24,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -40,8 +42,10 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -53,7 +57,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
    private FullHumanoidRobotModel fullRobotModel;
-   private HumanoidReferenceFrames humanoidReferenceFrames;
+   private CommonHumanoidReferenceFrames humanoidReferenceFrames;
    private KinematicsStreamingToolboxMessageReplay kinematicsStreamingToolboxMessageReplay;
 
    protected CommandInputManager commandInputManager;
@@ -86,7 +90,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       RobotConfigurationData initialRobotConfigurationData = kinematicsStreamingToolboxMessageReplay.getInitialConfiguration();
 
-      FlatGroundEnvironment environment = new FlatGroundEnvironment();
+      FlatGroundEnvironment environment = new FlatGroundEnvironment(getGroundHeight(initialRobotConfigurationData));
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              environment,
                                                                                                                                              simulationTestingParameters);
@@ -122,7 +126,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       simulationTestHelper.start();
 
-      Point3D cameraFix = new Point3D(initialRobotConfigurationData.getRootTranslation());
+      Point3D cameraFix = new Point3D(initialRobotConfigurationData.getRootPosition());
       Point3D cameraPosition = new Point3D(cameraFix);
       cameraPosition.add(-7.0, -9.0, 4.0);
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
@@ -131,7 +135,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
 
       humanoidReferenceFrames.updateFrames();
 
@@ -139,6 +143,21 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       simulationTestHelper.addSimulationTerminalCondition(() -> !kinematicsStreamingToolboxMessageReplay.update(simulationTestHelper.getSimulationTime()));
       simulationTestHelper.simulateNow(1000.0);
+   }
+
+   private double getGroundHeight(RobotConfigurationData initialRobotConfigurationData)
+   {
+      FullHumanoidRobotModel fullRobotModel = newRobotModel().createFullRobotModel();;
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotConfigurationData = new RobotConfigurationDataInitialSetup(initialRobotConfigurationData,
+                                                                                                                        fullRobotModel);
+
+      robotConfigurationData.initializeFullRobotModel(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      referenceFrames.updateFrames();
+
+      FramePoint3D footHeight = new FramePoint3D(referenceFrames.getMidFeetUnderPelvisFrame());
+      footHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      return footHeight.getZ();
    }
 
    protected static void hideRobot(HumanoidFloatingRootJointRobot robot)

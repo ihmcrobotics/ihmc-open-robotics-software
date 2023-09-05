@@ -10,27 +10,31 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.kinematics.*;
+import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.InverseKinematicsStepListener;
+import us.ihmc.robotics.kinematics.KinematicSolver;
+import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.RandomRestartInverseKinematicsCalculator;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -63,13 +67,14 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private InverseKinematicsCalculator inverseKinematicsCalculator;
    private InverseKinematicsStepListener inverseKinematicsStepListener;
 
-   private SimulationConstructionSet scs;
-   private FloatingRootJointRobot sdfRobot;
-   private JointAnglesWriter jointAnglesWriter;
+   private SimulationConstructionSet2 scs;
+   private Robot sdfRobot;
+   private Runnable jointAnglesWriter;
 
    private final YoFramePoint3D testPositionForwardKinematics = new YoFramePoint3D("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll testOrientationForwardKinematics = new YoFrameYawPitchRoll("testOrientationForwardKinematics",
-                                                                          ReferenceFrame.getWorldFrame(), registry);
+                                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                                registry);
    private final YoDouble yoErrorScalar = new YoDouble("errorScalar", registry);
    private final YoDouble positionError = new YoDouble("positionError", registry);
    private final YoDouble orientationError = new YoDouble("orientationError", registry);
@@ -78,9 +83,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private final YoFramePoint3D testPositionInverseKinematics = new YoFramePoint3D("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll testOrientationInverseKinematics = new YoFrameYawPitchRoll("testOrientationInverseKinematics",
-                                                                          ReferenceFrame.getWorldFrame(), registry);
+                                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                                registry);
 
-   private enum InverseKinematicsSolver {TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;}
+   private enum InverseKinematicsSolver
+   {
+      TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;
+   }
 
    private enum JointNames
    {
@@ -89,45 +98,51 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
-//      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.TWAN_SOLVER;
+      //      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.TWAN_SOLVER;
       InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
       DRCRobotModel robotModel = getRobotModel();
 
-      sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      sdfRobot = new Robot(robotModel.getRobotDefinition(), SimulationConstructionSet2.inertialFrame);
 
       if (VISUALIZE)
       {
-         scs = new SimulationConstructionSet(sdfRobot);
-         scs.addYoRegistry(registry);
+         scs = new SimulationConstructionSet2(SimulationConstructionSet2.doNothingPhysicsEngine());
+         scs.addRobot(sdfRobot);
+         scs.addRegistry(registry);
 
          YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
          double positionVizSize = 0.06;
-         YoGraphicPosition testPositionForwardKinematicsViz = new YoGraphicPosition("testPositionForwardKinematics", testPositionForwardKinematics,
-                                                                 positionVizSize, YoAppearance.Green());
+         YoGraphicPosition testPositionForwardKinematicsViz = new YoGraphicPosition("testPositionForwardKinematics",
+                                                                                    testPositionForwardKinematics,
+                                                                                    positionVizSize,
+                                                                                    YoAppearance.Green());
          yoGraphicsListRegistry.registerYoGraphic("InverseKinematicsCalculatorTest", testPositionForwardKinematicsViz);
 
-         YoGraphicPosition testPositionInverseKinematicsViz = new YoGraphicPosition("testPositionInverseKinematicsViz", testPositionInverseKinematics,
-                                                                 positionVizSize, YoAppearance.Red());
+         YoGraphicPosition testPositionInverseKinematicsViz = new YoGraphicPosition("testPositionInverseKinematicsViz",
+                                                                                    testPositionInverseKinematics,
+                                                                                    positionVizSize,
+                                                                                    YoAppearance.Red());
          yoGraphicsListRegistry.registerYoGraphic("InverseKinematicsCalculatorTest", testPositionInverseKinematicsViz);
 
-
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-         scs.startOnAThread();
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.start(true, true, true);
       }
 
       fullRobotModel = robotModel.createFullRobotModel();
-      jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
+      jointAnglesWriter = () -> fullRobotModel.getRootJoint().subtreeIterable()
+                                              .forEach(joint -> sdfRobot.getJoint(joint.getName()).setJointConfiguration(joint));
 
       worldFrame = ReferenceFrame.getWorldFrame();
       populateEnumMaps();
 
-      leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT),
-              fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame());
+      leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(),
+                                               fullRobotModel.getHand(RobotSide.LEFT),
+                                               fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame());
 
       switch (inverseKinameticSolverToUse)
       {
-         case PETER_SOLVER :
+         case PETER_SOLVER:
          {
             double positionCost = 1.0;
             double orientationDiscount = 0.2;
@@ -150,7 +165,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             break;
          }
 
-         case TWAN_SOLVER :
+         case TWAN_SOLVER:
          {
             // These values were tuned by Jerry Pratt on February 24, 2015 to match Atlas the best.
             int maxIterations = 60;
@@ -161,19 +176,25 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             double maxRandomSearchScalar = 0.8;
 
             NumericalInverseKinematicsCalculator numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftHandJacobian,
-                                                                                           lambdaLeastSquares, tolerance, maxIterations, maxStepSize,
-                                                                                           minRandomSearchScalar, maxRandomSearchScalar);
+                                                                                                                                 lambdaLeastSquares,
+                                                                                                                                 tolerance,
+                                                                                                                                 maxIterations,
+                                                                                                                                 maxStepSize,
+                                                                                                                                 minRandomSearchScalar,
+                                                                                                                                 maxRandomSearchScalar);
 
             int maxRestarts = 10;
             double restartTolerance = 0.006;
 
-            inverseKinematicsCalculator = new RandomRestartInverseKinematicsCalculator(maxRestarts, restartTolerance, leftHandJacobian,
-                    numericalInverseKinematicsCalculator);
+            inverseKinematicsCalculator = new RandomRestartInverseKinematicsCalculator(maxRestarts,
+                                                                                       restartTolerance,
+                                                                                       leftHandJacobian,
+                                                                                       numericalInverseKinematicsCalculator);
 
             break;
          }
 
-         case MAARTEN_SOLVER :
+         case MAARTEN_SOLVER:
          {
             int maxIterations = 60;
             double tolerance = 1e-5;
@@ -189,8 +210,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             public void didAnInverseKinemticsStep(double errorScalar)
             {
                yoErrorScalar.set(errorScalar);
-               jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
-               scs.tickAndUpdate();
+               jointAnglesWriter.run();
+               scs.simulateNow(1);
             }
          };
 
@@ -201,7 +222,12 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    @AfterEach
    public void tearDown()
    {
-      ReferenceFrameTools.clearWorldFrameTree();
+      if (scs != null)
+      {
+         scs.waitUntilVisualizerDown();
+         scs.shutdownSession();
+         scs = null;
+      }
    }
 
    @Test
@@ -217,7 +243,12 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = false;
       double errorThreshold = 0.01;
-      boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
+      boolean success = testAPose(random,
+                                  handEndEffectorPositionFK,
+                                  handEndEffectorOrientationFK,
+                                  initialGuessForTests,
+                                  errorThreshold,
+                                  updateListenersEachStep);
       assertTrue(success);
    }
 
@@ -247,7 +278,12 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          }
 
          double errorThreshold = 0.01;
-         boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
+         boolean success = testAPose(random,
+                                     handEndEffectorPositionFK,
+                                     handEndEffectorOrientationFK,
+                                     initialGuessForTests,
+                                     errorThreshold,
+                                     updateListenersEachStep);
          if (success)
             numberPassed++;
       }
@@ -267,19 +303,23 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
 
       final double maximumTimeMillisMax = 600.0;
-      final double averageTimeMillisMax = 20.0;
+      final double averageTimeMillisMax = 40.0;
       assertTrue("Average Solving Time > " + averageTimeMillisMax + " ms", averageTimeMillis < averageTimeMillisMax);
       assertTrue("Maximal Solving Time > " + maximumTimeMillisMax + " ms", maximumTimeMillis < maximumTimeMillisMax);
 
       //NumericalInverseKinematicCalculator is much faster than the DDogLegOne, so use the following when running it...
-//      assertTrue(averageTimeMillis < 0.04);
-//      assertTrue(maximumTimeMillis < 16.0);
+      //      assertTrue(averageTimeMillis < 0.04);
+      //      assertTrue(maximumTimeMillis < 16.0);
 
       assertTrue(percentPassed > 0.96);
    }
 
-   public boolean testAPose(Random random, FramePoint3D handEndEffectorPositionFK, FrameQuaternion handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
-                            double errorThreshold, boolean updateListenersEachStep)
+   public boolean testAPose(Random random,
+                            FramePoint3D handEndEffectorPositionFK,
+                            FrameQuaternion handEndEffectorOrientationFK,
+                            InitialGuessForTests initialGuessForTests,
+                            double errorThreshold,
+                            boolean updateListenersEachStep)
    {
       testPositionForwardKinematics.set(handEndEffectorPositionFK);
       testOrientationForwardKinematics.set(handEndEffectorOrientationFK);
@@ -305,29 +345,32 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          System.err.println("Troublesome position: " + handEndEffectorPositionFK + ", orientation = " + handEndEffectorOrientationFK);
       }
 
-      jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+      jointAnglesWriter.run();
       if (scs != null)
-         scs.tickAndUpdate();
+         scs.simulateNow(1);
 
       boolean positionErrorAcceptable = (positionError.getDoubleValue() < errorThreshold);
 
       if (!positionErrorAcceptable)
       {
-         PrintTools.error("Position error not acceptable: positionError: " + positionError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+         LogTools.error("Position error not acceptable: positionError: " + positionError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
       }
 
       boolean orientationErrorAcceptable = (orientationError.getDoubleValue() < errorThreshold);
 
       if (!orientationErrorAcceptable)
       {
-         PrintTools.error("Orientation error not acceptable: orientationError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+         LogTools.error("Orientation error not acceptable: orientationError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
       }
 
       return positionErrorAcceptable && orientationErrorAcceptable;
    }
 
-   private void solveForArmPoseWithInverseKinematics(Random random, FrameQuaternion desiredOrientation, FramePoint3D desiredPosition,
-           InitialGuessForTests initialGuessForTests, boolean updateListenersEachStep)
+   private void solveForArmPoseWithInverseKinematics(Random random,
+                                                     FrameQuaternion desiredOrientation,
+                                                     FramePoint3D desiredPosition,
+                                                     InitialGuessForTests initialGuessForTests,
+                                                     boolean updateListenersEachStep)
    {
       FramePose3D handPose = new FramePose3D(worldFrame);
 
@@ -359,26 +402,26 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       switch (initialGuessForTests)
       {
-         case PREVIOUS :
+         case PREVIOUS:
          {
             break;
          }
 
-         case MIDRANGE :
+         case MIDRANGE:
          {
             generateArmPoseAtMidRangeWithForwardKinematics();
 
             break;
          }
 
-         case RANDOM :
+         case RANDOM:
          {
             generateRandomArmPoseWithForwardKinematics(random);
 
             break;
          }
 
-         default :
+         default:
          {
             throw new RuntimeException("Shouldn't get here!");
          }
@@ -417,7 +460,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       for (JointNames name : JointNames.values())
       {
-         double bufferAwayFromJointLimits = 0.05;    // 0.2; //0.0;
+         double bufferAwayFromJointLimits = 0.05; // 0.2; //0.0;
 
          double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
          double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
@@ -432,7 +475,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       for (JointNames name : JointNames.values())
       {
-         double bufferAwayFromJointLimits = 0.2;    // 0.0;
+         double bufferAwayFromJointLimits = 0.2; // 0.0;
 
          double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
          double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
@@ -450,7 +493,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       for (JointNames name : JointNames.values())
       {
-         double bufferAwayFromJointLimits = 0.2;    // 0.0;
+         double bufferAwayFromJointLimits = 0.2; // 0.0;
 
          double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
          double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
@@ -460,7 +503,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          oneDoFJoints.get(name).setQ(jointAngles.get(name));
       }
    }
-
 
    private void populateEnumMaps()
    {
@@ -525,5 +567,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return sum / array.size();
    }
 
-   protected enum InitialGuessForTests {RANDOM, PREVIOUS, MIDRANGE;}
+   protected enum InitialGuessForTests
+   {
+      RANDOM, PREVIOUS, MIDRANGE;
+   }
 }

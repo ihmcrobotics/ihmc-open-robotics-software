@@ -1,9 +1,11 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -122,8 +124,6 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
 
       stepTeleopManager.getXGaitSettings().setQuadrupedSpeed(QuadrupedSpeed.FAST);
-
-      conductor.getScs().setCameraTracking(true, true, true, false);
 
       ROS2Topic footstepPlannerOutputTopic = PawStepPlannerCommunicationProperties.outputTopic(quadrupedTestFactory.getRobotName());
 

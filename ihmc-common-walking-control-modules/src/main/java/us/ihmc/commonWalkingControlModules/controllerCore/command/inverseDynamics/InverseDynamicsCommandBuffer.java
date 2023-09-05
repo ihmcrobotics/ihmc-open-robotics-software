@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotComm
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
@@ -34,6 +35,8 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    private final RecyclingArrayList<JointLimitReductionCommand> jointLimitReductionCommandBuffer = new RecyclingArrayList<>(JointLimitReductionCommand.class);
    private final RecyclingArrayList<PrivilegedJointSpaceCommand> privilegedJointSpaceCommandBuffer = new RecyclingArrayList<>(PrivilegedJointSpaceCommand.class);
    private final RecyclingArrayList<PrivilegedConfigurationCommand> privilegedConfigurationCommandBuffer = new RecyclingArrayList<>(PrivilegedConfigurationCommand.class);
+   private final RecyclingArrayList<QPObjectiveCommand> qPObjectiveCommandBuffer = new RecyclingArrayList<>(QPObjectiveCommand.class);
+   private final RecyclingArrayList<JointTorqueCommand> jointTorqueCommandBuffer = new RecyclingArrayList<>(JointTorqueCommand.class);
 
    public InverseDynamicsCommandBuffer()
    {
@@ -61,6 +64,8 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       jointLimitReductionCommandBuffer.clear();
       privilegedJointSpaceCommandBuffer.clear();
       privilegedConfigurationCommandBuffer.clear();
+      qPObjectiveCommandBuffer.clear();
+      jointTorqueCommandBuffer.clear();
    }
 
    /**
@@ -101,7 +106,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link CenterOfPressureCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public CenterOfPressureCommand addCenterOfPressureCommand()
@@ -113,7 +118,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link ContactWrenchCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public ContactWrenchCommand addContactWrenchCommand()
@@ -125,7 +130,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link ExternalWrenchCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public ExternalWrenchCommand addExternalWrenchCommand()
@@ -138,7 +143,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    /**
     * Gets an available {@link InverseDynamicsOptimizationSettingsCommand} and registers it to this
     * list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public InverseDynamicsOptimizationSettingsCommand addInverseDynamicsOptimizationSettingsCommand()
@@ -150,7 +155,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link JointAccelerationIntegrationCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public JointAccelerationIntegrationCommand addJointAccelerationIntegrationCommand()
@@ -162,7 +167,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link JointLimitEnforcementMethodCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public JointLimitEnforcementMethodCommand addJointLimitEnforcementMethodCommand()
@@ -174,7 +179,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link JointspaceAccelerationCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public JointspaceAccelerationCommand addJointspaceAccelerationCommand()
@@ -186,7 +191,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link MomentumRateCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public MomentumRateCommand addMomentumRateCommand()
@@ -210,7 +215,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link PlaneContactStateCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public PlaneContactStateCommand addPlaneContactStateCommand()
@@ -222,7 +227,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link SpatialAccelerationCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public SpatialAccelerationCommand addSpatialAccelerationCommand()
@@ -234,7 +239,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link JointLimitReductionCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public JointLimitReductionCommand addJointLimitReductionCommand()
@@ -246,7 +251,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link PrivilegedJointSpaceCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public PrivilegedJointSpaceCommand addPrivilegedJointSpaceCommand()
@@ -258,12 +263,36 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 
    /**
     * Gets an available {@link PrivilegedConfigurationCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public PrivilegedConfigurationCommand addPrivilegedConfigurationCommand()
    {
       PrivilegedConfigurationCommand command = privilegedConfigurationCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+
+   /**
+    * Gets an available {@link QPObjectiveCommand} and registers it to this list.
+    *
+    * @return the available command ready to be set.
+    */
+   public QPObjectiveCommand addQPObjectiveCommand()
+   {
+      QPObjectiveCommand command = qPObjectiveCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+
+   /**
+    * Gets an available {@link QPObjectiveCommand} and registers it to this list.
+    *
+    * @return the available command ready to be set.
+    */
+   public JointTorqueCommand addJointTorqueCommand()
+   {
+      JointTorqueCommand command = jointTorqueCommandBuffer.add();
       super.addCommand(command);
       return command;
    }

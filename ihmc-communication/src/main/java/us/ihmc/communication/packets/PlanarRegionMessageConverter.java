@@ -3,10 +3,12 @@ package us.ihmc.communication.packets;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.PlanarRegionMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionMessageConverter
@@ -131,7 +134,7 @@ public class PlanarRegionMessageConverter
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
          {
-            ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
+            ConvexPolygon2DReadOnly convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
             message.getConvexPolygonsSize().add(convexPolygon.getNumberOfVertices());
 
             for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
@@ -146,6 +149,9 @@ public class PlanarRegionMessageConverter
 
    public static PlanarRegionsList convertToPlanarRegionsList(PlanarRegionsListMessage message)
    {
+      if (message == null)
+         return null;
+
       int vertexIndex = 0;
       Object<Vector3D> normals = message.getRegionNormal();
       Object<Point3D> origins = message.getRegionOrigin();
@@ -161,7 +167,7 @@ public class PlanarRegionMessageConverter
       {
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          if (message.getRegionOrientation().isEmpty()
-               || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+             || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
          {
             AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
             transformToWorld.set(regionOrientation, origins.get(regionIndex));
@@ -217,5 +223,35 @@ public class PlanarRegionMessageConverter
             message.getVertexBuffer().add().set(planarRegionMessage.getVertexBuffer().get(i));
       }
       return message;
+   }
+
+   public static FramePlanarRegionsList convertToFramePlanarRegionsList(FramePlanarRegionsListMessage message)
+   {
+      FramePlanarRegionsList framePlanarRegionsListToReturn = new FramePlanarRegionsList();
+
+      PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
+      framePlanarRegionsListToReturn.setPlanarRegionsList(planarRegionsList);
+      framePlanarRegionsListToReturn.getSensorToWorldFrameTransform().set(message.getSensorOrientation(), message.getSensorPosition());
+
+      return framePlanarRegionsListToReturn;
+   }
+
+   public static PlanarRegionsList convertToPlanarRegionsListInWorld(FramePlanarRegionsListMessage message)
+   {
+      PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
+      planarRegionsList.applyTransform(new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition()));
+      return planarRegionsList;
+   }
+
+   public static FramePlanarRegionsListMessage convertToFramePlanarRegionsListMessage(FramePlanarRegionsList frameRegions)
+   {
+      FramePlanarRegionsListMessage messageToReturn = new FramePlanarRegionsListMessage();
+
+      PlanarRegionsListMessage planarRegionsListMessage = convertToPlanarRegionsListMessage(frameRegions.getPlanarRegionsList());
+      messageToReturn.getPlanarRegions().set(planarRegionsListMessage);
+      messageToReturn.getSensorPosition().set(frameRegions.getSensorToWorldFrameTransform().getTranslation());
+      messageToReturn.getSensorOrientation().set(frameRegions.getSensorToWorldFrameTransform().getRotation());
+
+      return messageToReturn;
    }
 }

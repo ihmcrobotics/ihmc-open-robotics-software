@@ -12,19 +12,25 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.StringStretcher2d;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SplinedHeightTrajectory
+public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double constraintWeight = 1000.0;
@@ -187,31 +193,25 @@ public class SplinedHeightTrajectory
       }
    }
 
-   private final Point2D tempPoint = new Point2D();
-
    public double solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack,
-                       FramePoint3DBasics queryPoint,
+                       FixedFramePoint3DBasics queryPointToPack,
                        Point2DBasics pointOnSplineToPack)
    {
-      tempPoint.set(queryPoint);
-      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(tempPoint,
-                                                              contactFrameZeroPosition.getX(),
-                                                              contactFrameZeroPosition.getY(),
-                                                              contactFrameOnePosition.getX(),
-                                                              contactFrameOnePosition.getY(),
-                                                              tempPoint);
-      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(tempPoint.getX(),
-                                                                                    tempPoint.getY(),
+      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(queryPointToPack.getX(),
+                                                                                    queryPointToPack.getY(),
                                                                                     contactFrameZeroPosition.getX(),
                                                                                     contactFrameZeroPosition.getY(),
                                                                                     contactFrameOnePosition.getX(),
                                                                                     contactFrameOnePosition.getY());
-      queryPoint.interpolate(contactFrameZeroPosition, contactFrameOnePosition, percentAlongSegment);
+      percentAlongSegment = MathTools.clamp(percentAlongSegment, 0.0, 1.0);
+      queryPointToPack.interpolate(contactFrameZeroPosition, contactFrameOnePosition, percentAlongSegment);
 
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
 
       double xLength = Math.max(1.0, Math.abs(endWaypoint.getX() - startWaypoint.getX()));
+      double x2 = xLength * xLength;
+      double x3 = x2 * xLength;
       double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
 
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
@@ -238,10 +238,9 @@ public class SplinedHeightTrajectory
          return percentAlongSegment;
       }
 
-
-      double dzds = trajectoryGenerator.getVelocity() / xLength ;
-      double d2zds2 = trajectoryGenerator.getAcceleration() / MathTools.square(xLength);
-      double d3zds3 = trajectoryGenerator.getJerk() / MathTools.pow(xLength, 3);
+      double dzds = trajectoryGenerator.getVelocity() / xLength;
+      double d2zds2 = trajectoryGenerator.getAcceleration() / x2;
+      double d3zds3 = trajectoryGenerator.getJerk() / x3;
       partialDzDs.set(dzds);
       partialD2zDs2.set(d2zds2);
       partialD3zDs3.set(d3zds3);
@@ -288,5 +287,15 @@ public class SplinedHeightTrajectory
    public double getHeightSplineSetpoint()
    {
       return trajectoryGenerator.getPosition();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (bagOfBalls == null)
+         return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("height", bagOfBalls.getPositions(), 0.01, ColorDefinitions.Black()));
+      return group;
    }
 }

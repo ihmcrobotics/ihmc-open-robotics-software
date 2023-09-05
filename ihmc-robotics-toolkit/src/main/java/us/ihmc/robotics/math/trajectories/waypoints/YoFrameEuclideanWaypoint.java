@@ -1,25 +1,50 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
-import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.YoMutableFrameObject;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
-public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
+public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointBasics, YoMutableFrameObject
 {
+   private final YoLong frameId;
+   private final FrameIndexMap frameIndexMap;
    private final YoMutableFramePoint3D position;
    private final YoMutableFrameVector3D linearVelocity;
 
    public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
-      position = new YoMutableFramePoint3D(namePrefix + "Position", nameSuffix, registry);
-      linearVelocity = new YoMutableFrameVector3D(namePrefix + "LinearVelocity", nameSuffix, registry);
+      this(namePrefix,
+           nameSuffix,
+           new YoLong(YoGeometryNameTools.assembleName(namePrefix, "frame", nameSuffix), registry),
+           new FrameIndexMap.FrameIndexHashMap(),
+           registry);
+   }
+
+   public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoLong frameIndex, FrameIndexMap frameIndexMap, YoRegistry registry)
+   {
+      this.frameId = frameIndex;
+      this.frameIndexMap = frameIndexMap;
+
+      YoDouble px = new YoDouble(YoGeometryNameTools.createXName(namePrefix + "Position", nameSuffix), registry);
+      YoDouble py = new YoDouble(YoGeometryNameTools.createYName(namePrefix + "Position", nameSuffix), registry);
+      YoDouble pz = new YoDouble(YoGeometryNameTools.createZName(namePrefix + "Position", nameSuffix), registry);
+      position = new YoMutableFramePoint3D(px, py, pz, frameId, frameIndexMap);
+      YoDouble vx = new YoDouble(YoGeometryNameTools.createXName(namePrefix + "LinearVelocity", nameSuffix), registry);
+      YoDouble vy = new YoDouble(YoGeometryNameTools.createYName(namePrefix + "LinearVelocity", nameSuffix), registry);
+      YoDouble vz = new YoDouble(YoGeometryNameTools.createZName(namePrefix + "LinearVelocity", nameSuffix), registry);
+      linearVelocity = new YoMutableFrameVector3D(vx, vy, vz, frameId, frameIndexMap);
    }
 
    public YoDouble getYoX()
@@ -38,60 +63,61 @@ public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public FixedFramePoint3DBasics getPosition()
    {
       return position;
    }
 
    @Override
-   public FrameVector3DReadOnly getLinearVelocity()
+   public FixedFrameVector3DBasics getLinearVelocity()
    {
       return linearVelocity;
    }
 
    @Override
-   public void setPosition(double x, double y, double z)
-   {
-      position.set(x, y, z);
-   }
-
-   @Override
-   public void setLinearVelocity(double x, double y, double z)
-   {
-      linearVelocity.set(x, y, z);
-   }
-
-   @Override
    public ReferenceFrame getReferenceFrame()
    {
-      position.checkReferenceFrameMatch(linearVelocity);
-      return position.getReferenceFrame();
+      return YoMutableFrameObject.super.getReferenceFrame();
+   }
+
+   @Override
+   public YoLong getYoFrameIndex()
+   {
+      return frameId;
+   }
+
+   @Override
+   public FrameIndexMap getFrameIndexMap()
+   {
+      return frameIndexMap;
    }
 
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      position.setReferenceFrame(referenceFrame);
-      linearVelocity.setReferenceFrame(referenceFrame);
+      YoMutableFrameObject.super.setReferenceFrame(referenceFrame);
    }
 
    @Override
-   public void applyTransform(Transform transform)
+   public int hashCode()
    {
-      position.applyTransform(transform);
-      linearVelocity.applyTransform(transform);
+      return EuclidHashCodeTools.toIntHashCode(getPosition(), getLinearVelocity());
    }
 
    @Override
-   public void applyInverseTransform(Transform transform)
+   public boolean equals(Object object)
    {
-      position.applyInverseTransform(transform);
-      linearVelocity.applyInverseTransform(transform);
+      if (object == this)
+         return true;
+      else if (object instanceof FrameEuclideanWaypointReadOnly)
+         return equals((FrameEuclideanWaypointReadOnly) object);
+      else
+         return false;
    }
 
    @Override
    public String toString()
    {
-      return WaypointToStringTools.waypointToString(this);
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

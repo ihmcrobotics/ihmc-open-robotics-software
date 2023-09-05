@@ -77,7 +77,11 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    public void onEntry()
    {
       for (RobotSide robotSide : RobotSide.values)
-         contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(footContactStates.get(robotSide)));
+      {
+         if (contactStateHolders.get(robotSide) != null)
+            contactStateHolders.get(robotSide).clearFrames();
+         contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(robotSide.getSideNameFirstLowerCaseLetter() + "_step_preview", footContactStates.get(robotSide)));
+      }
 
       walkingInputManager.submitCommand(footstepList);
       numberOfFootstepsRemaining = footstepList.getNumberOfFootsteps();
@@ -95,13 +99,17 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
       switch (status)
       {
       case STARTED:
+         if (contactStateHolders.get(side) != null)
+            contactStateHolders.get(side).clearFrames();
          contactStateHolders.put(side, null);
          footSwitches.get(side).setFootContactState(false);
          currentSwingSide = side;
          break;
       case COMPLETED:
          numberOfFootstepsRemaining--;
-         contactStateHolders.put(side, new WalkingPreviewContactStateHolder(footContactStates.get(side), desiredFootstep));
+         if (contactStateHolders.get(side) != null)
+            contactStateHolders.get(side).clearFrames();
+         contactStateHolders.put(side, new WalkingPreviewContactStateHolder(side.getSideNameFirstLowerCaseLetter() + "_step_complete", footContactStates.get(side), desiredFootstep));
          currentSwingSide = null;
          break;
       default:

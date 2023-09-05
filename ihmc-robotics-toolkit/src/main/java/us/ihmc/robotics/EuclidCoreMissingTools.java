@@ -2,31 +2,57 @@ package us.ihmc.robotics;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextMatrix3D;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
+
+import java.lang.reflect.Field;
+import java.util.Random;
+
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-
 public class EuclidCoreMissingTools
 {
+   public static final String DEGREE_SYMBOL = "\u00B0";
+
+   public static void transform(Matrix3DReadOnly matrix, double xOriginal, double yOriginal, double zOriginal, Tuple3DBasics tupleTransformed)
+   {
+      double x = matrix.getM00() * xOriginal + matrix.getM01() * yOriginal + matrix.getM02() * zOriginal;
+      double y = matrix.getM10() * xOriginal + matrix.getM11() * yOriginal + matrix.getM12() * zOriginal;
+      double z = matrix.getM20() * xOriginal + matrix.getM21() * yOriginal + matrix.getM22() * zOriginal;
+      tupleTransformed.set(x, y, z);
+   }
 
    public static void floorToGivenPrecision(Tuple3DBasics tuple3d, double precision)
    {
@@ -84,7 +110,7 @@ public class EuclidCoreMissingTools
    {
       double dotProduct = rotation.getX() * axis.getX() + rotation.getY() * axis.getY() + rotation.getZ() * axis.getZ();
 
-      double scale = dotProduct / axis.lengthSquared();
+      double scale = dotProduct / axis.normSquared();
       double projectedX = scale * axis.getX();
       double projectedY = scale * axis.getY();
       double projectedZ = scale * axis.getZ();
@@ -1035,5 +1061,449 @@ public class EuclidCoreMissingTools
          intersectionToPack.setZ(d * lineDirectionZ + pointOnLineZ);
          return true;
       }
+   }
+
+   public static boolean intersectionBetweenRay2DAndLine2D(Point2DReadOnly rayOrigin,
+                                                           Vector2DReadOnly rayDirection,
+                                                           Point2DReadOnly lineOrigin,
+                                                           Vector2DReadOnly lineDirection,
+                                                           Point2DBasics intersectionToPack)
+   {
+      return intersectionBetweenRay2DAndLine2D(rayOrigin.getX(),
+                                               rayOrigin.getY(),
+                                               rayDirection.getX(),
+                                               rayDirection.getY(),
+                                               lineOrigin.getX(),
+                                               lineOrigin.getY(),
+                                               lineDirection.getX(),
+                                               lineDirection.getY(),
+                                               intersectionToPack);
+   }
+
+   public static boolean intersectionBetweenRay2DAndLine2D(Point2DReadOnly rayOrigin,
+                                                           Vector2DReadOnly rayDirection,
+                                                           Point2DReadOnly linePoint1,
+                                                           Point2DReadOnly linePoint2,
+                                                           Point2DBasics intersectionToPack)
+   {
+      return intersectionBetweenRay2DAndLine2D(rayOrigin.getX(),
+                                               rayOrigin.getY(),
+                                               rayDirection.getX(),
+                                               rayDirection.getY(),
+                                               linePoint1.getX(),
+                                               linePoint1.getY(),
+                                               linePoint2.getX() - linePoint1.getX(),
+                                               linePoint2.getY() - linePoint1.getY(),
+                                               intersectionToPack);
+   }
+
+   /**
+    * Just a more thorough version
+    */
+   public static boolean intersectionBetweenRay2DAndLine2D(double rayOriginX,
+                                                           double rayOriginY,
+                                                           double rayDirectionX,
+                                                           double rayDirectionY,
+                                                           double lineOriginX,
+                                                           double lineOriginY,
+                                                           double lineDirectionX,
+                                                           double lineDirectionY,
+                                                           Point2DBasics intersectionToPack)
+   {
+      double start1x = rayOriginX;
+      double start1y = rayOriginY;
+      double end1x = rayOriginX + rayDirectionX;
+      double end1y = rayOriginY + rayDirectionY;
+      double start2x = lineOriginX;
+      double start2y = lineOriginY;
+      double end2x = lineOriginX + lineDirectionX;
+      double end2y = lineOriginY + lineDirectionY;
+      return intersectionBetweenTwoLine2DsImpl(start1x, start1y, false, end1x, end1y, true, start2x, start2y, true, end2x, end2y, true, intersectionToPack);
+   }
+
+   /**
+    * This is only included here because it's a private method in the euclid class
+    */
+   private static boolean intersectionBetweenTwoLine2DsImpl(double start1x,
+                                                            double start1y,
+                                                            boolean canIntersectionOccurBeforeStart1,
+                                                            double end1x,
+                                                            double end1y,
+                                                            boolean canIntersectionOccurBeforeEnd1,
+                                                            double start2x,
+                                                            double start2y,
+                                                            boolean canIntersectionOccurBeforeStart2,
+                                                            double end2x,
+                                                            double end2y,
+                                                            boolean canIntersectionOccurBeforeEnd2,
+                                                            Point2DBasics intersectionToPack)
+   {
+      double epsilon = EuclidGeometryTools.ONE_TEN_MILLIONTH;
+
+      double direction1x = end1x - start1x;
+      double direction1y = end1y - start1y;
+      double direction2x = end2x - start2x;
+      double direction2y = end2y - start2y;
+
+      double determinant = -direction1x * direction2y + direction1y * direction2x;
+
+      double zeroish = 0.0 - epsilon;
+
+      if (Math.abs(determinant) < epsilon)
+      { // The lines are parallel
+        // Check if they are collinear
+         double dx = start2x - start1x;
+         double dy = start2y - start1y;
+         double cross = dx * direction1y - dy * direction1x;
+
+         if (Math.abs(cross) < epsilon)
+         {
+            if (canIntersectionOccurBeforeStart1 && canIntersectionOccurBeforeEnd1)
+            { // (start1, end1) represents a line
+               if (canIntersectionOccurBeforeStart2 && canIntersectionOccurBeforeEnd2)
+               { // (start2, end2) represents a line
+                  if (intersectionToPack != null)
+                     intersectionToPack.set(start1x, start1y);
+                  return true;
+               }
+
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start2x, start2y);
+               return true;
+            }
+
+            if (canIntersectionOccurBeforeStart2 && canIntersectionOccurBeforeEnd2)
+            { // (start2, end2) represents a line
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start1x, start1y);
+               return true;
+            }
+
+            // Let's find the first endpoint that is inside the other line segment and return it.
+            double direction1LengthSquare = EuclidCoreTools.normSquared(direction1x, direction1y);
+            double dot;
+
+            // Check if start2 is inside (start1, end1)
+            dx = start2x - start1x;
+            dy = start2y - start1y;
+            dot = dx * direction1x + dy * direction1y;
+
+            if ((canIntersectionOccurBeforeStart1 || zeroish < dot) && (canIntersectionOccurBeforeEnd1 || dot < direction1LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start2x, start2y);
+               return true;
+            }
+
+            // Check if end2 is inside (start1, end1)
+            dx = end2x - start1x;
+            dy = end2y - start1y;
+            dot = dx * direction1x + dy * direction1y;
+
+            if ((canIntersectionOccurBeforeStart1 || zeroish < dot) && (canIntersectionOccurBeforeEnd1 || dot < direction1LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(end2x, end2y);
+               return true;
+            }
+
+            double direction2LengthSquare = EuclidCoreTools.normSquared(direction2x, direction2y);
+
+            // Check if start1 is inside (start2, end2)
+            dx = start1x - start2x;
+            dy = start1y - start2y;
+            dot = dx * direction2x + dy * direction2y;
+
+            if ((canIntersectionOccurBeforeStart2 || zeroish < dot) && (canIntersectionOccurBeforeEnd2 || dot < direction2LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(start1x, start1y);
+               return true;
+            }
+
+            // Check if end1 is inside (start2, end2)
+            dx = end1x - start2x;
+            dy = end1y - start2y;
+            dot = dx * direction2x + dy * direction2y;
+
+            if ((canIntersectionOccurBeforeStart2 || zeroish < dot) && (canIntersectionOccurBeforeEnd2 || dot < direction2LengthSquare + epsilon))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(end1x, end1y);
+               return true;
+            }
+
+            // (start1, end1) and (start2, end2) represent ray and/or line segment and they are collinear but do not overlap.
+            if (intersectionToPack != null)
+               intersectionToPack.setToNaN();
+            return false;
+         }
+         // The lines are parallel but are not collinear, they do not intersect.
+         else
+         {
+            if (intersectionToPack != null)
+               intersectionToPack.setToNaN();
+            return false;
+         }
+      }
+
+      double dx = start2x - start1x;
+      double dy = start2y - start1y;
+
+      double oneOverDeterminant = 1.0 / determinant;
+      double AInverse00 = -direction2y;
+      double AInverse01 = direction2x;
+      double AInverse10 = -direction1y;
+      double AInverse11 = direction1x;
+
+      double alpha = oneOverDeterminant * (AInverse00 * dx + AInverse01 * dy);
+      double beta = oneOverDeterminant * (AInverse10 * dx + AInverse11 * dy);
+
+      double oneish = 1.0 + epsilon;
+
+      boolean areIntersecting = (canIntersectionOccurBeforeStart1 || zeroish < alpha) && (canIntersectionOccurBeforeEnd1 || alpha < oneish);
+      if (areIntersecting)
+         areIntersecting = (canIntersectionOccurBeforeStart2 || zeroish < beta) && (canIntersectionOccurBeforeEnd2 || beta < oneish);
+
+      if (intersectionToPack != null)
+      {
+         if (areIntersecting)
+         {
+            intersectionToPack.set(start1x + alpha * direction1x, start1y + alpha * direction1y);
+         }
+         else
+         {
+            intersectionToPack.setToNaN();
+         }
+      }
+
+      return areIntersecting;
+   }
+
+   /**
+    * Calculate the angular velocity by differentiating orientation.
+    * 
+    * @param qStart                the initial orientation at time t.
+    * @param qEnd                  the final orientation at time t + duration.
+    * @param duration              the time interval between the 2 orientations.
+    * @param angularVelocityToPack the angular velocity.
+    */
+   public static void differentiateOrientation(QuaternionReadOnly qStart, QuaternionReadOnly qEnd, double duration, Vector3DBasics angularVelocityToPack)
+   {
+      double q1x = qStart.getX();
+      double q1y = qStart.getY();
+      double q1z = qStart.getZ();
+      double q1s = qStart.getS();
+
+      double q2x = qEnd.getX();
+      double q2y = qEnd.getY();
+      double q2z = qEnd.getZ();
+      double q2s = qEnd.getS();
+
+      double diffx = q1s * q2x - q1x * q2s - q1y * q2z + q1z * q2y;
+      double diffy = q1s * q2y + q1x * q2z - q1y * q2s - q1z * q2x;
+      double diffz = q1s * q2z - q1x * q2y + q1y * q2x - q1z * q2s;
+      double diffs = q1s * q2s + q1x * q2x + q1y * q2y + q1z * q2z;
+
+      if (diffs < 0.0)
+      {
+         diffx = -diffx;
+         diffy = -diffy;
+         diffz = -diffz;
+         diffs = -diffs;
+      }
+
+      double sinHalfTheta = EuclidCoreTools.norm(diffx, diffy, diffz);
+
+      double angle;
+      if (EuclidCoreTools.epsilonEquals(1.0, diffs, 1.0e-12))
+         angle = 2.0 * sinHalfTheta / diffs;
+      else
+         angle = 2.0 * EuclidCoreTools.atan2(sinHalfTheta, diffs);
+      angularVelocityToPack.set(diffx, diffy, diffz);
+      angularVelocityToPack.scale(angle / (sinHalfTheta * duration));
+   }
+
+   // *** NOTE ***: The 4x4 output matrix produced by this method assumes a Quaternion component ordering of:
+   //   Quat = [ Qs
+   //            Qx
+   //            Qy
+   //            Qz ]
+   public static DMatrixRMaj quaternionDotToOmegaTransform(QuaternionReadOnly rotatingFrameQuaternion)
+   {
+      double qs = rotatingFrameQuaternion.getS();
+      double qx = rotatingFrameQuaternion.getX();
+      double qy = rotatingFrameQuaternion.getY();
+      double qz = rotatingFrameQuaternion.getZ();
+
+      DMatrixRMaj E = new DMatrixRMaj(4,4);
+
+      E.set(0,0, qs); E.set(0,1, qx); E.set(0,2, qy); E.set(0,3, qz);
+      E.set(1,0,-qx); E.set(1,1, qs); E.set(1,2, qz); E.set(1,3,-qy);
+      E.set(2,0,-qy); E.set(2,1,-qz); E.set(2,2, qs); E.set(2,3, qx);
+      E.set(3,0,-qz); E.set(3,1, qy); E.set(3,2,-qx); E.set(3,3, qs);
+      
+      return E;
+   }
+
+   /**
+    * Sets the yaw pitch roll but the doubles are given in degrees.
+    */
+   public static void setYawPitchRollDegrees(Orientation3DBasics orientation3DBasics, double yaw, double pitch, double roll)
+   {
+      orientation3DBasics.setYawPitchRoll(Math.toRadians(yaw), Math.toRadians(pitch), Math.toRadians(roll));
+   }
+
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Says yaw-pitch-roll.
+    */
+   public static String getYawPitchRollStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getYawPitchRollString(EuclidCoreIOTools.DEFAULT_FORMAT,
+                                                     Math.toDegrees(orientation3DBasics.getYaw()),
+                                                     Math.toDegrees(orientation3DBasics.getPitch()),
+                                                     Math.toDegrees(orientation3DBasics.getRoll())) + DEGREE_SYMBOL;
+   }
+
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Doesn't say yaw-pitch-roll.
+    */
+   public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getStringOf("(", ")", ", ",
+                                           EuclidCoreIOTools.DEFAULT_FORMAT,
+                                           Math.toDegrees(orientation3DBasics.getYaw()),
+                                           Math.toDegrees(orientation3DBasics.getPitch()),
+                                           Math.toDegrees(orientation3DBasics.getRoll())) + DEGREE_SYMBOL;
+   }
+
+   /**
+    * Generates a random positive definite matrix.
+    * <p>
+    * {@code matrix}<sub>ij</sub> &in; [-1.0; 1.0].
+    * </p>
+    * <p>
+    * The approach used here generates a random 3D matrix with values in [-1.0, 1.0], and then performs A * A<sup>T</sup> which is guaranteed to result in a
+    * symmetric positive semi-definite matrix. We then add diagonal terms to make the matrix positive definite, and finally scale the matrix by a random double
+    * that upper bounds the absolute values of the positive definite matrix elements to 1.0.
+    * </p>
+    *
+    * @param random the random generator to use.
+    * @return the random positive definite matrix.
+    */
+   public static Matrix3D nextPositiveDefiniteMatrix3D(Random random)
+   {
+      return nextPositiveDefiniteMatrix3D(random, 1.0);
+   }
+
+   /**
+    * Generates a random positive definite matrix.
+    * <p>
+    * {@code matrix}<sub>ij</sub> &in; [-minMaxValue, minMaxValue]
+    * </p>
+    * <p>
+    * The approach used here generates a random 3D matrix with values in [{@code -minMaxValue}, {@code minMaxValue}], and then performs A * A<sup>T</sup>,
+    * which is guaranteed to result in a symmetric positive semi-definite matrix. We then add diagonal terms to make the matrix positive definite, and finally
+    * scale the matrix by a random double that upper bounds the absolute values of the positive definite matrix elements to {@code minMaxValue}.
+    * </p>
+    *
+    * @param random      the random generator to use.
+    * @param minMaxValue the maximum value for each element.
+    * @return the random positive definite matrix.
+    * @throws RuntimeException if {@code minMaxValue < 0}.
+    */
+   public static Matrix3D nextPositiveDefiniteMatrix3D(Random random, double minMaxValue)
+   {
+      Matrix3D matrix3D = nextMatrix3D(random, minMaxValue);
+      matrix3D.multiplyTransposeOther(matrix3D);
+
+      double diagonalDominanceScalar = Math.abs(minMaxValue);
+      matrix3D.addM00(diagonalDominanceScalar);
+      matrix3D.addM11(diagonalDominanceScalar);
+      matrix3D.addM22(diagonalDominanceScalar);
+
+      double scalarToShrinkMatrixWithinBounds = nextDouble(random, 0.0, minMaxValue / matrix3D.maxAbsElement());
+      matrix3D.scale(scalarToShrinkMatrixWithinBounds);
+      return matrix3D;
+   }
+
+   /**
+    * Remove when this issue is fixed:
+    * https://github.com/ihmcrobotics/euclid/issues/57
+    */
+   private static final Field referenceFrameHasBeenRemoved;
+   static
+   {
+      try
+      {
+         referenceFrameHasBeenRemoved = ReferenceFrame.class.getDeclaredField("hasBeenRemoved");
+         referenceFrameHasBeenRemoved.setAccessible(true);
+      }
+      catch (NoSuchFieldException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static boolean hasBeenRemoved(ReferenceFrame referenceFrame)
+   {
+      try
+      {
+         return referenceFrameHasBeenRemoved.getBoolean(referenceFrame);
+      }
+      catch (IllegalAccessException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   /**
+    * Remove when this issue is fixed:
+    * https://github.com/ihmcrobotics/euclid/issues/57
+    */
+   private static final Field referenceFrameName;
+   static
+   {
+      try
+      {
+         referenceFrameName = ReferenceFrame.class.getDeclaredField("frameName");
+         referenceFrameName.setAccessible(true);
+      }
+      catch (NoSuchFieldException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static String frameName(ReferenceFrame referenceFrame)
+   {
+      try
+      {
+         return referenceFrameName.get(referenceFrame).toString();
+      }
+      catch (IllegalAccessException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static FrameVector3DReadOnly newLinkedFrameVector3DReadOnly(ReferenceFrameHolder referenceFrameHolder, DMatrixRMaj source)
+   {
+      return newLinkedFrameVector3DReadOnly(referenceFrameHolder, 0, source);
+   }
+
+   public static FrameVector3DReadOnly newLinkedFrameVector3DReadOnly(ReferenceFrameHolder referenceFrameHolder, int startIndex, DMatrixRMaj source)
+   {
+      int xIndex = startIndex;
+      int yIndex = startIndex + 1;
+      int zIndex = startIndex + 2;
+      return EuclidFrameFactories.newLinkedFrameVector3DReadOnly(referenceFrameHolder,
+                                                                 () -> source.get(xIndex, 0),
+                                                                 () -> source.get(yIndex, 0),
+                                                                 () -> source.get(zIndex, 0));
    }
 }

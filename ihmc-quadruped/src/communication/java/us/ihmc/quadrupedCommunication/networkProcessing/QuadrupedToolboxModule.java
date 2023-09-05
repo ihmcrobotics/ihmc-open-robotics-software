@@ -2,7 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing;
 
 import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;

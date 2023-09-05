@@ -27,27 +27,27 @@ module controller_msgs
         /**
          * The coordinates in world of the origin of each constraint region.
          */
-        sequence<geometry_msgs::msg::dds::Point, 3000> region_origin;
+        sequence<geometry_msgs::msg::dds::Point, 20> region_origin;
         /**
          * The orientation with respect to world of each constraint region.
          */
-        sequence<geometry_msgs::msg::dds::Quaternion, 3000> region_orientation;
+        sequence<geometry_msgs::msg::dds::Quaternion, 20> region_orientation;
         /**
          * The normal expressed in world of each constraint region.
          */
-        sequence<geometry_msgs::msg::dds::Vector3, 3000> region_normal;
+        sequence<geometry_msgs::msg::dds::Vector3, 20> region_normal;
         /**
          * Indicates for each constraint region the number of vertices for the concave hull.
          */
-        sequence<long, 3000> concave_hulls_size;
+        sequence<long, 100> concave_hulls_size;
         /**
          * Indicates for each constraint region the number of holes contained in that region.
          */
-        sequence<long, 3000> number_of_holes_in_region;
+        sequence<long, 100> number_of_holes_in_region;
         /**
          * Indicates successively the number of vertices for each hole of each constraint region.
          */
-        sequence<long, 3000> hole_polygons_size;
+        sequence<long, 100> hole_polygons_size;
         /**
          * Single buffer used to store for each constraint the vertices of the concave hull and the convex polygons.
          */

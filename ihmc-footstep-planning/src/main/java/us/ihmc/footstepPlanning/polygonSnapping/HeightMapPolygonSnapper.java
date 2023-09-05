@@ -1,15 +1,19 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import com.esotericsoftware.minlog.Log;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.heightMap.HeightMapData;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +27,16 @@ public class HeightMapPolygonSnapper
    private final Plane3D bestFitPlane = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
+   private double maxPossibleRMSError;
    private double rootMeanSquaredError;
    private double area;
+
+   private double snapAreaResolution = 0.2;
+
+   public void setSnapAreaResolution(double snapAreaResolution)
+   {
+      this.snapAreaResolution = snapAreaResolution;
+   }
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
    {
@@ -44,39 +56,36 @@ public class HeightMapPolygonSnapper
     */
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold, double minimumHeightToConsider)
    {
-      double areaPerCell = MathTools.square(heightMap.getGridResolutionXY());
-      double epsilonDistance = Math.sqrt(0.5) * heightMap.getGridResolutionXY();
-
       pointsInsidePolyon.clear();
       bestFitPlane.setToNaN();
-      Point2D gridCenter = heightMap.getGridCenter();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
-      int minIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMinX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
-      int maxIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
-      int minIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
-      int maxIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+      // collect all the points in the foot that are valid under the foothold
+      if (polygonToSnap.getNumberOfVertices() != 4)
+         throw new RuntimeException("We aren't set up to use this");
+      Point2DReadOnly corner0 = polygonToSnap.getVertex(0);
+      Point2DReadOnly corner1 = polygonToSnap.getVertex(1);
+      Point2DReadOnly corner2 = polygonToSnap.getVertex(2);
+      Point2DReadOnly corner3 = polygonToSnap.getVertex(3);
 
-      for (int xIndex = minIndexX; xIndex <= maxIndexX; xIndex++)
+      for (double edgeAlpha = 0.0; edgeAlpha <= 1.0; edgeAlpha += snapAreaResolution)
       {
-         for (int yIndex = minIndexY; yIndex <= maxIndexY; yIndex++)
-         {
-            double height = heightMap.getHeightAt(xIndex, yIndex);
+         Point2D pointOnEdge1 = new Point2D();
+         Point2D pointOnEdge2 = new Point2D();
+         pointOnEdge1.interpolate(corner0, corner1, edgeAlpha);
+         pointOnEdge2.interpolate(corner3, corner2, edgeAlpha);
 
+         for (double interiorAlpha = 0.0; interiorAlpha <= 1.0; interiorAlpha += snapAreaResolution)
+         {
+            Point2D point = new Point2D();
+            point.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
+
+            double height = heightMap.getHeightAt(point.getX(), point.getY());
             if (Double.isNaN(height) || height < minimumHeightToConsider)
             {
                continue;
             }
 
-            double x = HeightMapTools.indexToCoordinate(xIndex, gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
-            double y = HeightMapTools.indexToCoordinate(yIndex, gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
-
-            if (polygonToSnap.distance(new Point2D(x, y)) > epsilonDistance)
-            {
-               continue;
-            }
-
-            pointsInsidePolyon.add(new Point3D(x, y, height));
+            pointsInsidePolyon.add(new Point3D(point.getX(), point.getY(), height));
          }
       }
 
@@ -85,15 +94,18 @@ public class HeightMapPolygonSnapper
          return null;
       }
 
+      // FIXME It's worth noting that if a single point is significantly far enough above all the other points, this will remove the other points, making it an
+      // FIXME invalid snap. That may or may not be what we actually want.
       double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
       double minZ = maxZ - snapHeightThreshold;
       pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
-      area = pointsInsidePolyon.size() * areaPerCell;
-
       if (pointsInsidePolyon.size() < 3)
       {
+         area = Double.NaN;
          return null;
       }
+      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(pointsInsidePolyon));
+      area = snappedPolygon.getArea();
 
       planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
       rootMeanSquaredError = 0.0;
@@ -103,6 +115,7 @@ public class HeightMapPolygonSnapper
          double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
          rootMeanSquaredError += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
       }
+      maxPossibleRMSError = MathTools.square(1.0 / snapAreaResolution) * MathTools.square(0.5 * snapHeightThreshold);
 
       if (bestFitPlane.containsNaN())
       {
@@ -128,6 +141,16 @@ public class HeightMapPolygonSnapper
    public double getRMSError()
    {
       return rootMeanSquaredError;
+   }
+
+   public double getMaxPossibleRMSError()
+   {
+      return maxPossibleRMSError;
+   }
+
+   public double getNormalizedRMSError()
+   {
+      return rootMeanSquaredError / maxPossibleRMSError;
    }
 
    public double getArea()

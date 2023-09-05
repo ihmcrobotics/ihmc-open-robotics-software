@@ -42,13 +42,25 @@ public class GlitchFilteredYoBoolean extends YoBoolean
       this(name, "", registry, yoVariableToFilter, windowSize);
    }
 
+   public GlitchFilteredYoBoolean(String name, YoRegistry registry, YoBoolean yoVariableToFilter, YoInteger windowSize)
+   {
+      this(name, "", registry, yoVariableToFilter, windowSize);
+   }
+
    public GlitchFilteredYoBoolean(String name, String description, YoRegistry registry, YoBoolean yoVariableToFilter, int windowSize)
+   {
+      this(name, description, registry, yoVariableToFilter, new YoInteger(name + "WindowSize", description, registry));
+
+      this.windowSize.set(windowSize);
+   }
+
+   public GlitchFilteredYoBoolean(String name, String description, YoRegistry registry, YoBoolean yoVariableToFilter, YoInteger windowSize)
    {
       super(name, description, registry);
       counter = new YoInteger(name + "Count", description, registry);
-      this.windowSize = new YoInteger(name + "WindowSize", description, registry);
+      this.windowSize = windowSize;
 
-      initialize(yoVariableToFilter, windowSize);
+      initialize(yoVariableToFilter, windowSize.getIntegerValue());
    }
 
    private void initialize(YoBoolean yoVariableToFilter, int windowSize)

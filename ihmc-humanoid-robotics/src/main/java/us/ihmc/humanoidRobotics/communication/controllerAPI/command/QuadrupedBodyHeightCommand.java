@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

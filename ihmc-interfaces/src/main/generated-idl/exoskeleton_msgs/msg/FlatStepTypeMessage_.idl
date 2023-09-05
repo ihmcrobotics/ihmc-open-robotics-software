@@ -1,0 +1,40 @@
+#ifndef __exoskeleton_msgs__msg__FlatStepTypeMessage__idl__
+#define __exoskeleton_msgs__msg__FlatStepTypeMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet SQUARE =
+      0;
+
+      const octet SHORT_FORWARD =
+      1;
+
+      const octet MEDIUM_FORWARD =
+      2;
+
+      const octet LONG_FORWARD =
+      3;
+
+
+      /**
+       * This message is part of the Quix controller API.
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::FlatStepTypeMessage_")
+      struct FlatStepTypeMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet flat_step_type_name;
+      };
+    };
+  };
+};
+
+#endif

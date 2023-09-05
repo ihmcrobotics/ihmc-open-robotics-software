@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.attributes.PublisherAttributes;
 import us.ihmc.pubsub.attributes.SubscriberAttributes;
 import us.ihmc.pubsub.common.Guid;
 import us.ihmc.pubsub.common.MatchingInfo;
@@ -82,6 +83,18 @@ public class DelayedROS2Node implements ROS2NodeInterface
    }
 
    @Override
+   public <T> PublisherAttributes createPublisherAttributes(TopicDataType<T> topicDataType, String topicName, ROS2QosProfile qosProfile)
+   {
+      return ros2Node.createPublisherAttributes(topicDataType, topicName,qosProfile);
+   }
+
+   @Override
+   public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, PublisherAttributes publisherAttributes) throws IOException
+   {
+      return createDelayedPublisher(ros2Node.createPublisher(topicDataType, publisherAttributes));
+   }
+
+   @Override
    public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName) throws IOException
    {
       return createDelayedPublisher(ros2Node.createPublisher(topicDataType, topicName));
@@ -96,6 +109,26 @@ public class DelayedROS2Node implements ROS2NodeInterface
    private <T> DelayedROS2Publisher<T> createDelayedPublisher(ROS2PublisherBasics<T> publisher)
    {
       return new DelayedROS2Publisher<>(publisher, delayedPubExecutor);
+   }
+
+   @Override
+   public <T> SubscriberAttributes createSubscriberAttributes(String topicName, TopicDataType<T> topicDataType, ROS2QosProfile qosProfile)
+   {
+      return ros2Node.createSubscriberAttributes(topicName, topicDataType, qosProfile);
+   }
+
+   @Override
+   public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
+                                                     NewMessageListener<T> subscriberListener,
+                                                     SubscriberAttributes subscriberAttributes) throws IOException
+   {
+      return ros2Node.createSubscription(topicDataType, subscriberListener, subscriberAttributes);
+   }
+
+   public <T> QueuedROS2Subscription<T> createQueuedSubscription(TopicDataType<T> topicDataType, SubscriberAttributes subscriberAttributes, int queueSize)
+         throws IOException
+   {
+      return ros2Node.createQueuedSubscription(topicDataType, subscriberAttributes, queueSize);
    }
 
    @Override
@@ -289,18 +322,11 @@ public class DelayedROS2Node implements ROS2NodeInterface
       }
 
       @Override
-      public boolean publish(T data) throws IOException
+      public boolean publish(T data)
       {
          delayedExecutor.execute(() ->
          {
-            try
-            {
-               publisher.publish(data);
-            }
-            catch (IOException e)
-            {
-               e.printStackTrace();
-            }
+            publisher.publish(data);
          });
          return true;
       }

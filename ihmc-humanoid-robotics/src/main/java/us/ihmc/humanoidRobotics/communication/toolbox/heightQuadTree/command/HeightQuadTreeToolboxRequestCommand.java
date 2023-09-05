@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
-import controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
+import toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTreeToolboxRequestCommand, HeightQuadTreeToolboxRequestMessage>

@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedCommunication;
 
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -112,7 +114,7 @@ public class QuadrupedMessageTools
    {
       QuadrupedBodyHeightMessage message = new QuadrupedBodyHeightMessage();
       message.getEuclideanTrajectory().set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
-                                                                                                 trajectoryReferenceFrame.hashCode()));
+                                                                                                 trajectoryReferenceFrame.getFrameNameHashCode()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataReferenceFrame));
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);

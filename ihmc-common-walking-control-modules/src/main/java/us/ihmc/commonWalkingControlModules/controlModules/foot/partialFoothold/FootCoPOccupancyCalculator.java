@@ -26,7 +26,7 @@ public class FootCoPOccupancyCalculator
 
    public FootCoPOccupancyCalculator(String namePrefix,
                                      OccupancyGrid occupancyGrid,
-                                     FootholdRotationParameters explorationParameters,
+                                     YoPartialFootholdModuleParameters.FootholdCroppingParameters croppingParameters,
                                      YoRegistry parentRegistry)
    {
       this.occupancyGrid = occupancyGrid;
@@ -34,8 +34,8 @@ public class FootCoPOccupancyCalculator
       YoRegistry registry = new YoRegistry(namePrefix + name);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "OccupancySideOfFootToCrop", registry, RobotSide.class, true);
 
-      thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
-      distanceFromLineOfRotationToComputeCoPOccupancy = explorationParameters.getDistanceFromLineOfRotationToComputeCoPOccupancy();
+      thresholdForCoPRegionOccupancy = croppingParameters.getThresholdForCoPRegionOccupancy();
+      distanceFromLineOfRotationToComputeCoPOccupancy = croppingParameters.getDistanceFromLineOfRotationToComputeCoPOccupancy();
 
       numberOfOccupiedCellsOnRight = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnRightSideOfLine", registry);
       numberOfOccupiedCellsOnLeft = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnLeftSideOfLine", registry);

@@ -307,7 +307,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
 
       double z = getForcePointOffsetZInChestFrame();
 
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                         simulationTestHelper.getRobot(),
                                                         fullRobotModel.getChest().getParentJoint().getName(),
                                                         new Vector3D(0, 0, z));

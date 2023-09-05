@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -19,8 +20,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointFeedbackController implements FeedbackControllerInterface
 {
-   public static final String shortName = "PDController";
-
    private final JointspaceAccelerationCommand inverseDynamicsOutput = new JointspaceAccelerationCommand();
    private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
    private final JointTorqueCommand virtualModelControlOutput = new JointTorqueCommand();
@@ -66,11 +65,13 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble weightForSolver;
 
-   public OneDoFJointFeedbackController(OneDoFJointBasics joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public OneDoFJointFeedbackController(OneDoFJointBasics joint,
+                                        WholeBodyControlCoreToolbox toolbox,
+                                        FeedbackControllerToolbox feedbackControllerToolbox,
                                         YoRegistry parentRegistry)
    {
       String jointName = joint.getName();
-      YoRegistry registry = new YoRegistry(jointName + shortName);
+      YoRegistry registry = feedbackControllerToolbox.getRegistry();
 
       this.joint = joint;
       isEnabled = new YoBoolean("control_enabled_" + jointName, registry);
@@ -78,30 +79,32 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       double dt = toolbox.getControlDT();
 
-      qCurrent = new YoDouble("q_" + jointName, registry);
-      qDesired = new YoDouble("q_d_" + jointName, registry);
-      qError = new YoDouble("q_err_" + jointName, registry);
+      YoRegistry debugVariableRegistry = WholeBodyControllerCore.REDUCE_YOVARIABLES ? null : registry;
 
-      actionP = new YoDouble("action_P_" + jointName, registry);
-      actionD = new YoDouble("action_D_" + jointName, registry);
+      qCurrent = new YoDouble("q_" + jointName, debugVariableRegistry);
+      qDesired = new YoDouble("q_d_" + jointName, registry);
+      qError = new YoDouble("q_err_" + jointName, debugVariableRegistry);
+
+      actionP = new YoDouble("action_P_" + jointName, debugVariableRegistry);
+      actionD = new YoDouble("action_D_" + jointName, debugVariableRegistry);
 
       qDDesired = new YoDouble("qd_d_" + jointName, registry);
 
-      maxFeedback = new YoDouble("max_fb_" + jointName, registry);
-      maxFeedbackRate = new YoDouble("max_fb_rate_" + jointName, registry);
+      maxFeedback = new YoDouble("max_fb_" + jointName, debugVariableRegistry);
+      maxFeedbackRate = new YoDouble("max_fb_rate_" + jointName, debugVariableRegistry);
 
       kp = new YoDouble("kp_" + jointName, registry);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         qDCurrent = new YoDouble("qd_" + jointName, registry);
-         qDError = new YoDouble("qd_err_" + jointName, registry);
+         qDCurrent = new YoDouble("qd_" + jointName, debugVariableRegistry);
+         qDError = new YoDouble("qd_err_" + jointName, debugVariableRegistry);
 
          DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(jointName);
          if (breakFrequency != null)
          {
             DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
-            qDFilteredError = new AlphaFilteredYoVariable(jointName, registry, alpha, qDError);
+            qDFilteredError = new AlphaFilteredYoVariable(jointName, debugVariableRegistry, alpha, qDError);
          }
          else
          {
@@ -110,11 +113,11 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
          kd = new YoDouble("kd_" + jointName, registry);
 
-         qDDFeedforward = new YoDouble("qdd_ff_" + jointName, registry);
-         qDDFeedback = new YoDouble("qdd_fb_" + jointName, registry);
-         qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
+         qDDFeedforward = new YoDouble("qdd_ff_" + jointName, debugVariableRegistry);
+         qDDFeedback = new YoDouble("qdd_fb_" + jointName, debugVariableRegistry);
+         qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, debugVariableRegistry, maxFeedbackRate, qDDFeedback, dt);
          qDDDesired = new YoDouble("qdd_d_" + jointName, registry);
-         qDDAchieved = new YoDouble("qdd_achieved_" + jointName, registry);
+         qDDAchieved = new YoDouble("qdd_achieved_" + jointName, debugVariableRegistry);
 
       }
       else
@@ -134,10 +137,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         qDFeedforward = new YoDouble("qd_ff_" + jointName, registry);
+         qDFeedforward = new YoDouble("qd_ff_" + jointName, debugVariableRegistry);
 
-         qDFeedback = new YoDouble("qd_fb_" + jointName, registry);
-         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDFeedback, dt);
+         qDFeedback = new YoDouble("qd_fb_" + jointName, debugVariableRegistry);
+         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, debugVariableRegistry, maxFeedbackRate, qDFeedback, dt);
       }
       else
       {
@@ -149,9 +152,9 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       if (toolbox.isEnableVirtualModelControlModule())
       {
-         tauFeedback = new YoDouble("tau_fb_" + jointName, registry);
-         tauFeedforward = new YoDouble("tau_ff_" + jointName, registry);
-         tauFeedbackRateLimited = new RateLimitedYoVariable("tau_fb_rl_" + jointName, registry, maxFeedbackRate, tauFeedback, dt);
+         tauFeedback = new YoDouble("tau_fb_" + jointName, debugVariableRegistry);
+         tauFeedforward = new YoDouble("tau_ff_" + jointName, debugVariableRegistry);
+         tauFeedbackRateLimited = new RateLimitedYoVariable("tau_fb_rl_" + jointName, debugVariableRegistry, maxFeedbackRate, tauFeedback, dt);
 
          tauDesired = new YoDouble("tau_d_" + jointName, registry);
       }
@@ -164,14 +167,12 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          tauDesired = null;
       }
 
-      weightForSolver = new YoDouble("weight_" + jointName, registry);
+      weightForSolver = new YoDouble("weight_" + jointName, debugVariableRegistry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
 
       inverseDynamicsOutput.addJoint(joint, Double.NaN);
       inverseKinematicsOutput.addJoint(joint, Double.NaN);
       virtualModelControlOutput.addJoint(joint, Double.NaN);
-
-      parentRegistry.addChild(registry);
    }
 
    @Override

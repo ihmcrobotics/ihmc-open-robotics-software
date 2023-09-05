@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 
 public class FootstepPlannerTimings
 {
@@ -47,6 +47,16 @@ public class FootstepPlannerTimings
       timePlanningStepsSeconds = -1.0;
       pathPlanningIterations = -1;
       stepPlanningIterations = -1;
+   }
+
+   public void set(FootstepPlannerTimings other)
+   {
+      totalElapsedSeconds = other.totalElapsedSeconds;
+      timeBeforePlanningSeconds = other.timeBeforePlanningSeconds;
+      timePlanningBodyPathSeconds = other.timePlanningBodyPathSeconds;
+      timePlanningStepsSeconds = other.timePlanningStepsSeconds;
+      pathPlanningIterations = other.pathPlanningIterations;
+      stepPlanningIterations = other.stepPlanningIterations;
    }
 
    public void setTotalElapsedSeconds(double totalElapsedSeconds)

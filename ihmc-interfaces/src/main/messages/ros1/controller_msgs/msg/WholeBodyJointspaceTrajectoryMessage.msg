@@ -13,6 +13,6 @@ int32[] joint_hash_codes
 controller_msgs/OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 
 # Properties for queueing trajectories.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 
