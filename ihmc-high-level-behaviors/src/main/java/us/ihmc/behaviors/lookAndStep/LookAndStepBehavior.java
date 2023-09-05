@@ -25,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -207,12 +206,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();
-   }
-
-   @Override
-   public YoRegistry getYoRegistry()
-   {
-      return yoRegistry;
    }
 
    @Override
