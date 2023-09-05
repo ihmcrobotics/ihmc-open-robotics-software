@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 public class RDXAffordanceTemplateEditorUI
 {
+   private static final int REPLAY_FREQUENCY = 5;
    private static final SideDependentList<ColorDefinition> HAND_COLORS;
    static
    {
@@ -57,6 +58,7 @@ public class RDXAffordanceTemplateEditorUI
 
    private RDXActiveAffordanceMenu[] activeMenu;
    private boolean playing = false;
+   private long lastPlayTime = 0;
 
    private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
    private final ImGuiDirectory fileManagerDirectory;
@@ -335,56 +337,56 @@ public class RDXAffordanceTemplateEditorUI
          {
             if (playing)
             {
-               try
-               {
-                  Thread.sleep(112); // about 9Hz
-               }
-               catch (InterruptedException e)
-               {
-               }
-            }
-            switch (activeMenu[0])
-            {
-               case PRE_GRASP ->
-               {
-                  if (!preGraspFrames.isLast())
-                     preGraspFrames.selectNext();
-                  else
+               long currentTime = System.currentTimeMillis();
+               if (currentTime - lastPlayTime >= 1000/REPLAY_FREQUENCY) {
+                  lastPlayTime = currentTime;
+                  switch (activeMenu[0])
                   {
-                     if (graspFrame.isSet(activeSide[0]))
+                     case PRE_GRASP ->
                      {
-                        activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
-                        graspFrame.selectFrame();
+                        if (!preGraspFrames.isLast())
+                           preGraspFrames.selectNext();
+                        else
+                        {
+                           if (graspFrame.isSet(activeSide[0]))
+                           {
+                              activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+                              graspFrame.selectFrame();
+                           }
+                           else if (postGraspFrames.getNumberOfFrames() > 0)
+                           {
+                              activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                              postGraspFrames.resetSelectedIndex();
+                              postGraspFrames.selectNext();
+                           }
+                        }
                      }
-                     else if (postGraspFrames.getNumberOfFrames() > 0)
+                     case GRASP ->
                      {
-                        activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-                        postGraspFrames.resetSelectedIndex();
-                        postGraspFrames.selectNext();
+                        if (postGraspFrames.getNumberOfFrames() > 0)
+                        {
+                           activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                           postGraspFrames.resetSelectedIndex();
+                           postGraspFrames.selectNext();
+                        }
+                     }
+                     case POST_GRASP ->
+                     {
+                        if (!postGraspFrames.isLast())
+                           postGraspFrames.selectNext();
+                        else
+                           playing = false;
                      }
                   }
-               }
-               case GRASP ->
-               {
-                  if (postGraspFrames.getNumberOfFrames() > 0)
-                  {
-                     activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-                     postGraspFrames.resetSelectedIndex();
-                     postGraspFrames.selectNext();
-                  }
-               }
-               case POST_GRASP ->
-               {
-                  if (!postGraspFrames.isLast())
-                     postGraspFrames.selectNext();
-                  else
-                     playing = false;
                }
             }
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Play")))
+         {
             playing = true;
+            lastPlayTime = System.currentTimeMillis();;
+         }
 
          if (ImGui.button("Reset"))
          {

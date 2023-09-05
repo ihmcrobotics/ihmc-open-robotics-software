@@ -37,6 +37,7 @@ public class RDXAffordanceTemplateMirror
    private final RobotSide[] activeSide;
    private final ImBoolean mirrorActive = new ImBoolean(false);
    private final Map<String, Boolean> activeTransformAxisMirror = new LinkedHashMap<>();
+   private final Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
    private boolean negatedAxis = false;
    private final RigidBodyTransform frameActiveSideTransform =  new RigidBodyTransform();
    private final ReferenceFrame frameActiveSide = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
@@ -62,6 +63,10 @@ public class RDXAffordanceTemplateMirror
       activeTransformAxisMirror.put("Yaw", false);
       activeTransformAxisMirror.put("Pitch", false);
       activeTransformAxisMirror.put("Roll", false);
+
+      for (var axisMirror : activeTransformAxisMirror.entrySet())
+         changedColorTranslationAxisButton.put(axisMirror.getKey(), false);
+
    }
 
    public void update()
@@ -155,10 +160,9 @@ public class RDXAffordanceTemplateMirror
                setReferenceFrameMirror();
             }
             ImGui.text("Transform: ");
-            Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
             for (var axisMirror : activeTransformAxisMirror.entrySet())
             {
-               changedColorTranslationAxisButton.put(axisMirror.getKey(), false);
+               changedColorTranslationAxisButton.replace(axisMirror.getKey(), false);
                ImGui.sameLine();
                if (axisMirror.getValue())
                {
