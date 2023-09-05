@@ -34,7 +34,7 @@ public class RDXAffordanceTemplateMirror
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
-   private final RobotSide[] activeSide;
+   private final AffordanceTemplateEditorStatus editorStatus;
    private final ImBoolean mirrorActive = new ImBoolean(false);
    private final Map<String, Boolean> activeTransformAxisMirror = new LinkedHashMap<>();
    private final Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
@@ -50,12 +50,12 @@ public class RDXAffordanceTemplateMirror
    public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableSakeGripper> interactableHands,
                                       SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
-                                      RobotSide[] activeSide)
+                                      AffordanceTemplateEditorStatus editorStatus)
    {
       this.interactableHands = interactableHands;
       this.handPoses = handPoses;
       this.handTransformsToWorld = handTransformsToWorld;
-      this.activeSide = activeSide;
+      this.editorStatus = editorStatus;
 
       activeTransformAxisMirror.put("X", false);
       activeTransformAxisMirror.put("Y", false);
@@ -73,8 +73,8 @@ public class RDXAffordanceTemplateMirror
    {
       if (mirrorActive.get())
       {
-         RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
-         FramePose3D activeHandPose = new FramePose3D(handPoses.get(activeSide[0]));
+         RobotSide nonActiveSide = (editorStatus.getActiveSide() == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
+         FramePose3D activeHandPose = new FramePose3D(handPoses.get(editorStatus.getActiveSide()));
          activeHandPose.changeFrame(frameActiveSide);
 
          FramePose3D nonActiveHandPose = new FramePose3D(handPoses.get(nonActiveSide));
@@ -211,8 +211,8 @@ public class RDXAffordanceTemplateMirror
 
    private void setReferenceFrameMirror()
    {
-      RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
-      frameActiveSideTransform.set((interactableHands.get(activeSide[0]).getReferenceFrameHand().getTransformToWorldFrame()));
+      RobotSide nonActiveSide = (editorStatus.getActiveSide() == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
+      frameActiveSideTransform.set((interactableHands.get(editorStatus.getActiveSide()).getReferenceFrameHand().getTransformToWorldFrame()));
       frameActiveSide.update();
       frameNonActiveSideTransform.set((interactableHands.get(nonActiveSide).getReferenceFrameHand().getTransformToWorldFrame()));
       frameNonActiveSide.update();
