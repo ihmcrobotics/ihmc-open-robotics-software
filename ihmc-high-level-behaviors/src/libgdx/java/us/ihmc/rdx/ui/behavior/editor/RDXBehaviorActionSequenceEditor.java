@@ -639,7 +639,7 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
-         newAction = new RDXArmJointAnglesAction();
+         newAction = new RDXArmJointAnglesAction(robotModel);
       }
       ImGui.text("Add Footstep:");
       ImGui.sameLine();
