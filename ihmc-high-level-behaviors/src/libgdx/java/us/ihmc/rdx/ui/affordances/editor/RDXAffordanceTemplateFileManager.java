@@ -32,9 +32,9 @@ import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
 
 public class RDXAffordanceTemplateFileManager
 {
-   private static final double DEFAULT_DURATION_SECONDS = 1.0;
-   private static final double LINEAR_VELOCITY_METERS_PER_SECOND = 0.1;
-   private static final double ANGULAR_VELOCITY_RADIANS_PER_SECOND = 1.0; // for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
+   private static final double DEFAULT_DURATION = 1.0;
+   private static final double LINEAR_VELOCITY = 0.1;
+   private static final double ANGULAR_VELOCITY = 1.0; // for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
 
    private ReferenceFrame initialObjectFrame;
    private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
@@ -231,10 +231,10 @@ public class RDXAffordanceTemplateFileManager
             double positionDistance = preGraspPoses.get(i).getPositionDistance(preGraspPoses.get(i - 1));
             double angularDistance = preGraspPoses.get(i).getOrientationDistance(preGraspPoses.get(i - 1));
             // take max duration required to achieve the desired linear velocity or angular velocity
-            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY_METERS_PER_SECOND, angularDistance / ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
          }
          else
-            trajectoryDurations.add(DEFAULT_DURATION_SECONDS);
+            trajectoryDurations.add(DEFAULT_DURATION);
       }
 
       if (sizePreGrasp > 0)
@@ -242,10 +242,10 @@ public class RDXAffordanceTemplateFileManager
          double positionDistance = graspPose.getPositionDistance(preGraspPoses.get(sizePreGrasp - 1));
          double angularDistance = graspPose.getOrientationDistance(preGraspPoses.get(sizePreGrasp - 1));
          // take max duration required to achieve the desired linear velocity or angular velocity
-         trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY_METERS_PER_SECOND, angularDistance / ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+         trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
       }
       else
-         trajectoryDurations.add(DEFAULT_DURATION_SECONDS);
+         trajectoryDurations.add(DEFAULT_DURATION);
 
       for (int i = 0; i < postGraspPoses.size(); i++)
       {
@@ -254,17 +254,17 @@ public class RDXAffordanceTemplateFileManager
             double positionDistance = postGraspPoses.get(i).getPositionDistance(postGraspPoses.get(i - 1));
             double angularDistance = postGraspPoses.get(i).getOrientationDistance(postGraspPoses.get(i - 1));
             // take max duration required to achieve the desired linear velocity or angular velocity
-            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY_METERS_PER_SECOND, angularDistance / ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
          }
          else if (graspPose != null)
          {
             double positionDistance = postGraspPoses.get(i).getPositionDistance(graspPose);
             double angularDistance = postGraspPoses.get(i).getOrientationDistance(graspPose);
             // take max duration required to achieve the desired linear velocity or angular velocity
-            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY_METERS_PER_SECOND, angularDistance / ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
          }
          else
-            trajectoryDurations.add(DEFAULT_DURATION_SECONDS);
+            trajectoryDurations.add(DEFAULT_DURATION);
       }
 
       return trajectoryDurations;

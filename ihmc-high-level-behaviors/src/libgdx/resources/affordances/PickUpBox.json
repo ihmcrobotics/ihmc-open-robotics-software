@@ -1,8 +1,10 @@
 {
-  "name" : "Box",
-  "preGraspFrames" : [ {
+  "name" : "PickUpBox",
+  "actions" : [ {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "left",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 1.0,
     "x" : -0.104,
     "y" : 0.4855,
     "z" : 0.437,
@@ -10,8 +12,10 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "right",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 1.0,
     "x" : -0.104,
     "y" : -0.14,
     "z" : 0.437,
@@ -19,8 +23,10 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "left",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 3.4111324179686844,
     "x" : 0.1685,
     "y" : 0.4855,
     "z" : 0.232,
@@ -28,18 +34,21 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "right",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 3.4111324179686924,
     "x" : 0.1685,
     "y" : -0.14,
     "z" : 0.232,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
-  } ],
-  "graspFrames" : [ {
+  }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "left",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 1.2281289121933074,
     "x" : 0.1685,
     "y" : 0.363,
     "z" : 0.232,
@@ -47,18 +56,21 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "right",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 1.2281289121933074,
     "x" : 0.1685,
     "y" : -0.017,
     "z" : 0.232,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
-  } ],
-  "postGraspFrames" : [ {
+  }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "left",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 6.244004453670109E-33,
     "x" : 0.1685,
     "y" : 0.363,
     "z" : 0.232,
@@ -66,8 +78,10 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "right",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 0.0,
     "x" : 0.1685,
     "y" : -0.017,
     "z" : 0.232,
@@ -75,8 +89,10 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "left",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 3.2103237836142906,
     "x" : 0.1685,
     "y" : 0.363,
     "z" : 0.553,
@@ -84,8 +100,10 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "right",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 3.2103237836142906,
     "x" : 0.1685,
     "y" : -0.017,
     "z" : 0.553,
@@ -93,8 +111,10 @@
     "pitchInDegrees" : -27.72,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "left",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 3.8002384123729818,
     "x" : 0.0735,
     "y" : 0.363,
     "z" : 0.921,
@@ -102,8 +122,10 @@
     "pitchInDegrees" : -73.0,
     "yawInDegrees" : 0.0
   }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "Box",
     "side" : "right",
-    "isPoseSet" : true,
+    "trajectoryDuration" : 3.8002384123729818,
     "x" : 0.0735,
     "y" : -0.017,
     "z" : 0.921,
