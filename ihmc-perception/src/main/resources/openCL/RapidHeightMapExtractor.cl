@@ -117,7 +117,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
    cellCenterInWorld.x += params[GRID_OFFSET_X];
 
-   float halfCellWidth = params[LOCAL_CELL_SIZE] / 4.0f;
+   float halfCellWidth = params[GLOBAL_CELL_SIZE] / 2.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
    float maxX = cellCenterInWorld.x + halfCellWidth;
    float minY = cellCenterInWorld.y - halfCellWidth;
@@ -161,17 +161,17 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
-            float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
+            float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
 
             float3 queryPointInSensor;
             float3 queryPointInWorld;
             if (params[MODE] == 0) // Spherical
             {
-               queryPointInSensor = back_project_spherical(yaw_count,pitch_count,radius,params);
+               queryPointInSensor = back_project_spherical(yaw_count,pitch_count,depth,params);
             }
             else if (params[MODE] == 1) // Perspective
             {
-               queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
+               queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), depth, params);
             }
 
             queryPointInWorld = transformPoint3D32_2(
@@ -183,7 +183,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
             //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
             //   xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, projectedPoint.x, projectedPoint.y,
-            //   yaw_count, pitch_count, radius, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
+            //   yaw_count, pitch_count, depth, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
 
 
             //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
