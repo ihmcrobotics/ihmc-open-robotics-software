@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
@@ -90,19 +91,22 @@ public class RDXBehaviorUIManager
 
       if (highestLevelUI != null)
       {
-         rootBehaviorUI.getUIChildren().clear();
+         rootBehaviorUI.clearChildren();
          highestLevelUI.destroy();
+         highestLevelUI = null;
+         behaviorRegistry.setHighestLevelNode(null);
       }
 
-      behaviorRegistry.setHighestLevelNode(behaviorRegistry.getBehaviorFromName(behaviorName));
-      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
-      highestLevelUI.addChildPanelsIncludingChildren(treeViewPanel);
-      highestLevelUI.create(baseUI);
+      if (!behaviorName.equals(BehaviorDefinition.NONE))
+      {
+         behaviorRegistry.setHighestLevelNode(behaviorRegistry.getBehaviorFromName(behaviorName));
+         highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
+         highestLevelUI.addChildPanelsIncludingChildren(treeViewPanel);
+         highestLevelUI.create(baseUI);
 
-      rootBehaviorUI.clearChildren();
-      rootBehaviorUI.addChild(highestLevelUI);
-
-      imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI);
+         rootBehaviorUI.addChild(highestLevelUI);
+         imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI); // rebuilds the UI
+      }
    }
 
    public void create(RDXBaseUI baseUI)
@@ -138,11 +142,16 @@ public class RDXBehaviorUIManager
       if (ImGui.beginMenu(labels.get("Behavior")))
       {
          ImGui.text("Highest level behavior:");
+
+         String selectedBehaviorName = highestLevelUI == null ? BehaviorDefinition.NONE : highestLevelUI.getName();
+         if (ImGui.radioButton(labels.get(BehaviorDefinition.NONE), selectedBehaviorName.equals(BehaviorDefinition.NONE)))
+         {
+            switchHighestLevelBehavior(BehaviorDefinition.NONE);
+         }
          for (RDXBehaviorUIDefinition behaviorUIDefinition : behaviorRegistry.getUIDefinitionEntries())
          {
             String behaviorName = behaviorUIDefinition.getName();
-            boolean selected = behaviorName.equals(highestLevelUI.getName());
-            if (ImGui.radioButton(labels.get(behaviorName), selected))
+            if (ImGui.radioButton(labels.get(behaviorName), selectedBehaviorName.equals(behaviorName)))
             {
                switchHighestLevelBehavior(behaviorName);
             }
