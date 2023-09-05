@@ -51,7 +51,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -69,7 +68,7 @@ public class LookAndStepBodyPathPlanningTask
    protected Consumer<List<? extends Pose3DReadOnly>> output;
 
    protected final Timer planningFailedTimer = new Timer();
-   protected YoDouble bodyPathPlanningDuration;
+   protected double bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
    protected HeightMapData heightMap;
@@ -112,7 +111,6 @@ public class LookAndStepBodyPathPlanningTask
          output = lookAndStep::bodyPathPlanInput;
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
          footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
-         bodyPathPlanningDuration = new YoDouble("bodyPathPlanningDuration", lookAndStep.yoRegistry);
 
          Consumer<Double> commandPitchHeadWithRespectToChest = lookAndStep.robotInterface::pitchHeadWithRespectToChest;
          RobotTarget robotTarget = lookAndStep.helper.getRobotModel().getTarget();
@@ -260,7 +258,7 @@ public class LookAndStepBodyPathPlanningTask
       }
 
       double duration = planningStopwatch.lap();
-      bodyPathPlanningDuration.set(duration);
+      bodyPathPlanningDuration = duration;
 
       double pathLength = BodyPathPlannerTools.calculatePlanLength(result.getRight());
       statusLogger.info(StringTools.format("Body path plan completed with {}, {} waypoint(s), length: {}, planning duration: {} s",
