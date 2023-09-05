@@ -257,15 +257,13 @@ public class LookAndStepBodyPathPlanningTask
          result = performTaskWithFlatGround();
       }
 
-      double duration = planningStopwatch.lap();
-      bodyPathPlanningDuration = duration;
-
+      bodyPathPlanningDuration = planningStopwatch.lap();
       double pathLength = BodyPathPlannerTools.calculatePlanLength(result.getRight());
       statusLogger.info(StringTools.format("Body path plan completed with {}, {} waypoint(s), length: {}, planning duration: {} s",
                                            result.getLeft(),
                                            result.getRight().size(),
                                            FormattingTools.getFormattedDecimal2D(pathLength),
-                                           duration));
+                                           bodyPathPlanningDuration));
 
       if (result.getRight() != null)
       {
