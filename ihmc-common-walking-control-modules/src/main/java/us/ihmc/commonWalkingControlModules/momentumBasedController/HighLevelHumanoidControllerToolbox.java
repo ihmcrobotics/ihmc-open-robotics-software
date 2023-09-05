@@ -45,6 +45,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.nadia.inertialParameterEstimation.NadiaInertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -362,7 +363,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
 
-      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, controlDT, gravity, registry);
+      inertialParameterEstimator = new NadiaInertialParameterEstimator(fullRobotModel, controlDT, gravity, registry);
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
