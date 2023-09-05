@@ -319,48 +319,46 @@ public class RDXAffordanceTemplateEditorUI
          ImGui.sameLine();
          if (ImGui.button(labels.get(">"), 20, 25) || playing)
          {
-            if (playing)
+            long currentTime = System.currentTimeMillis();
+            if ((playing && currentTime - lastPlayTime >= 1000/REPLAY_FREQUENCY) || !playing)
             {
-               long currentTime = System.currentTimeMillis();
-               if (currentTime - lastPlayTime >= 1000/REPLAY_FREQUENCY) {
-                  lastPlayTime = currentTime;
-                  switch (status.getActiveMenu())
+               lastPlayTime = currentTime;
+               switch (status.getActiveMenu())
+               {
+                  case PRE_GRASP ->
                   {
-                     case PRE_GRASP ->
+                     if (!preGraspFrames.isLast())
+                        preGraspFrames.selectNext();
+                     else
                      {
-                        if (!preGraspFrames.isLast())
-                           preGraspFrames.selectNext();
-                        else
+                        if (graspFrame.isSet(status.getActiveSide()))
                         {
-                           if (graspFrame.isSet(status.getActiveSide()))
-                           {
-                              status.setActiveMenu(RDXActiveAffordanceMenu.GRASP);
-                              graspFrame.selectFrame();
-                           }
-                           else if (postGraspFrames.getNumberOfFrames() > 0)
-                           {
-                              status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
-                              postGraspFrames.resetSelectedIndex();
-                              postGraspFrames.selectNext();
-                           }
+                           status.setActiveMenu(RDXActiveAffordanceMenu.GRASP);
+                           graspFrame.selectFrame();
                         }
-                     }
-                     case GRASP ->
-                     {
-                        if (postGraspFrames.getNumberOfFrames() > 0)
+                        else if (postGraspFrames.getNumberOfFrames() > 0)
                         {
                            status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
                            postGraspFrames.resetSelectedIndex();
                            postGraspFrames.selectNext();
                         }
                      }
-                     case POST_GRASP ->
+                  }
+                  case GRASP ->
+                  {
+                     if (postGraspFrames.getNumberOfFrames() > 0)
                      {
-                        if (!postGraspFrames.isLast())
-                           postGraspFrames.selectNext();
-                        else
-                           playing = false;
+                        status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
+                        postGraspFrames.resetSelectedIndex();
+                        postGraspFrames.selectNext();
                      }
+                  }
+                  case POST_GRASP ->
+                  {
+                     if (!postGraspFrames.isLast())
+                        postGraspFrames.selectNext();
+                     else
+                        playing = false;
                   }
                }
             }
