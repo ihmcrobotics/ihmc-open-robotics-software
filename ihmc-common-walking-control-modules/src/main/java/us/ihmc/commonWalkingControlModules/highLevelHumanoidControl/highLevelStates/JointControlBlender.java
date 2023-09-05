@@ -40,7 +40,8 @@ public class JointControlBlender
          tauScale = null;
       }
 
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public void initialize()

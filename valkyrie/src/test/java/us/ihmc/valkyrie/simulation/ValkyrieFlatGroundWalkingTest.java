@@ -12,8 +12,6 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 //This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
-   private DRCRobotModel robotModel;
-
    @Override
    public boolean doPelvisWarmup()
    {
@@ -25,7 +23,6 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 	@Test
    public void testFlatGroundWalking()
    {
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       super.testFlatGroundWalking();
    }
 
@@ -40,7 +37,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return robotModel;
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
    @Override

@@ -14,6 +14,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
@@ -84,7 +85,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       counter = 0;
    }
 
-   public boolean solve(RigidBodyTransform desiredTransform)
+   public boolean solve(RigidBodyTransformReadOnly desiredTransform)
    {
       iterationNumber = 0;
 
@@ -117,7 +118,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       return false;
    }
 
-   public void introduceRandomArmePose(RigidBodyTransform desiredTransform)
+   public void introduceRandomArmePose(RigidBodyTransformReadOnly desiredTransform)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -153,7 +154,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       }
    }
 
-   private void computeError(RigidBodyTransform desiredTransform)
+   private void computeError(RigidBodyTransformReadOnly desiredTransform)
    {
       /*
        * B is base E is end effector D is desired end effector

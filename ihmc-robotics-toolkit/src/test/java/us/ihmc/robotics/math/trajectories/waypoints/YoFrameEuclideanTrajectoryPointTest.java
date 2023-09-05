@@ -75,8 +75,8 @@ public class YoFrameEuclideanTrajectoryPointTest
                                                                                                                     poseFrame);
 
       expectedYoFrameEuclideanTrajectoryPoint.setTime(time);
-      expectedYoFrameEuclideanTrajectoryPoint.setPosition(position);
-      expectedYoFrameEuclideanTrajectoryPoint.setLinearVelocity(linearVelocity);
+      expectedYoFrameEuclideanTrajectoryPoint.getPosition().set(position);
+      expectedYoFrameEuclideanTrajectoryPoint.getLinearVelocity().set(linearVelocity);
 
       assertEquals(3.4, yoFrameEuclideanTrajectoryPoint.getTime(), 1e-7);
       assertEquals(3.4, expectedYoFrameEuclideanTrajectoryPoint.getTime(), 1e-7);
@@ -293,19 +293,19 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity(), epsilon));
 
       FrameEuclideanTrajectoryPoint actualFrameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint(expectedFrame);
-      testedYoFrameEuclideanTrajectoryPoint.get(actualFrameEuclideanTrajectoryPoint);
+      actualFrameEuclideanTrajectoryPoint.set(testedYoFrameEuclideanTrajectoryPoint);
       FrameEuclideanTrajectoryPointTest.assertTrajectoryPointContainsExpectedData(expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity,
                                                                                   actualFrameEuclideanTrajectoryPoint, epsilon);
       actualFrameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint(expectedFrame);
-      testedYoFrameEuclideanTrajectoryPoint.get(actualFrameEuclideanTrajectoryPoint);
+      actualFrameEuclideanTrajectoryPoint.set(testedYoFrameEuclideanTrajectoryPoint);
       FrameEuclideanTrajectoryPointTest.assertTrajectoryPointContainsExpectedData(expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity,
                                                                                   actualFrameEuclideanTrajectoryPoint, epsilon);
 
       Point3D actualPosition = new Point3D();
       Vector3D actualLinearVelocity = new Vector3D();
 
-      testedYoFrameEuclideanTrajectoryPoint.getPosition(actualPosition);
-      testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity(actualLinearVelocity);
+      actualPosition.set(testedYoFrameEuclideanTrajectoryPoint.getPosition());
+      actualLinearVelocity.set(testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity());
 
       assertTrue(expectedPosition.epsilonEquals(actualPosition, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
@@ -313,8 +313,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       FramePoint3D actualFramePosition = new FramePoint3D(expectedFrame);
       FrameVector3D actualFrameLinearVelocity = new FrameVector3D(expectedFrame);
 
-      testedYoFrameEuclideanTrajectoryPoint.getPosition(actualFramePosition);
-      testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity(actualFrameLinearVelocity);
+      actualFramePosition.set(testedYoFrameEuclideanTrajectoryPoint.getPosition());
+      actualFrameLinearVelocity.set(testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity());
 
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
@@ -322,8 +322,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       actualFramePosition = new FramePoint3D();
       actualFrameLinearVelocity = new FrameVector3D();
 
-      testedYoFrameEuclideanTrajectoryPoint.getPositionIncludingFrame(actualFramePosition);
-      testedYoFrameEuclideanTrajectoryPoint.getLinearVelocityIncludingFrame(actualFrameLinearVelocity);
+      actualFramePosition.setIncludingFrame(testedYoFrameEuclideanTrajectoryPoint.getPosition());
+      actualFrameLinearVelocity.setIncludingFrame(testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity());
 
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
@@ -354,8 +354,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       YoFramePoint3D pointForVerification = new YoFramePoint3D("pointForVerification", worldFrame, registry);
       YoFrameVector3D linearVelocityForVerification = new YoFrameVector3D("linearVelocityForVerification", worldFrame, registry);
 
-      yoFrameEuclideanTrajectoryPoint.getPosition(pointForVerification);
-      yoFrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocityForVerification);
+      pointForVerification.set(yoFrameEuclideanTrajectoryPoint.getPosition());
+      linearVelocityForVerification.set(yoFrameEuclideanTrajectoryPoint.getLinearVelocity());
 
       assertEquals(time, yoFrameEuclideanTrajectoryPoint.getTime(), 1e-10);
       assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
@@ -363,17 +363,17 @@ public class YoFrameEuclideanTrajectoryPointTest
 
       // Check NaN calls:
       assertFalse(yoFrameEuclideanTrajectoryPoint.containsNaN());
-      yoFrameEuclideanTrajectoryPoint.setPositionToNaN();
+      yoFrameEuclideanTrajectoryPoint.getPosition().setToNaN();
       assertTrue(yoFrameEuclideanTrajectoryPoint.containsNaN());
-      yoFrameEuclideanTrajectoryPoint.setPositionToZero();
+      yoFrameEuclideanTrajectoryPoint.getPosition().setToZero();
 
       assertFalse(yoFrameEuclideanTrajectoryPoint.containsNaN());
-      yoFrameEuclideanTrajectoryPoint.setLinearVelocityToNaN();
+      yoFrameEuclideanTrajectoryPoint.getLinearVelocity().setToNaN();
       assertTrue(yoFrameEuclideanTrajectoryPoint.containsNaN());
-      yoFrameEuclideanTrajectoryPoint.setLinearVelocityToZero();
+      yoFrameEuclideanTrajectoryPoint.getLinearVelocity().setToZero();
 
-      yoFrameEuclideanTrajectoryPoint.getPosition(position);
-      yoFrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocity);
+      position.set(yoFrameEuclideanTrajectoryPoint.getPosition());
+      linearVelocity.set(yoFrameEuclideanTrajectoryPoint.getLinearVelocity());
 
       // Make sure they are all equal to zero:
       assertTrue(position.epsilonEquals(new Point3D(), 1e-10));
@@ -389,8 +389,8 @@ public class YoFrameEuclideanTrajectoryPointTest
 
       yoFrameEuclideanTrajectoryPoint.set(time, pointForVerification, linearVelocityForVerification);
 
-      yoFrameEuclideanTrajectoryPoint.getPosition(position);
-      yoFrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocity);
+      position.set(yoFrameEuclideanTrajectoryPoint.getPosition());
+      linearVelocity.set(yoFrameEuclideanTrajectoryPoint.getLinearVelocity());
 
       assertEquals(time, yoFrameEuclideanTrajectoryPoint.getTime(), 1e-10);
       assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
@@ -409,7 +409,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(yoFrameEuclideanTrajectoryPoint.epsilonEquals(yoFrameEuclideanTrajectoryPointTwo, 1e-7));
 
       EuclideanTrajectoryPoint simplePoint = new EuclideanTrajectoryPoint();
-      yoFrameEuclideanTrajectoryPoint.get(simplePoint);
+      simplePoint.set(yoFrameEuclideanTrajectoryPoint);
 
       yoFrameEuclideanTrajectoryPoint.setToNaN();
       assertTrue(yoFrameEuclideanTrajectoryPoint.containsNaN());
@@ -425,7 +425,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(yoFrameEuclideanTrajectoryPoint.epsilonEquals(yoFrameEuclideanTrajectoryPointTwo, 1e-7));
 
       String string = yoFrameEuclideanTrajectoryPoint.toString();
-      String expectedString = "Euclidean trajectory point: (time =  9.90, Euclidean waypoint: [position = ( 3.900,  2.200,  1.100), linearVelocity = ( 8.800,  1.400,  9.220), World])";
+      String expectedString = "Euclidean trajectory point: [time= 9.900, position=( 3.900,  2.200,  1.100 ), linear velocity=( 8.800,  1.400,  9.220 )] - World";
       assertEquals(expectedString, string);
    }
 
@@ -446,8 +446,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       FrameVector3D linearVelocity = new FrameVector3D(worldFrame, -0.4, 1.2, 3.3);
 
       yoFrameEuclideanTrajectoryPoint.setTime(time);
-      yoFrameEuclideanTrajectoryPoint.setPosition(position);
-      yoFrameEuclideanTrajectoryPoint.setLinearVelocity(linearVelocity);
+      yoFrameEuclideanTrajectoryPoint.getPosition().set((FramePoint3DReadOnly) position);
+      yoFrameEuclideanTrajectoryPoint.getLinearVelocity().set((FrameVector3DReadOnly) linearVelocity);
 
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose3D(worldFrame));
 
@@ -472,8 +472,8 @@ public class YoFrameEuclideanTrajectoryPointTest
                                                                                                                poseFrame);
 
       yoFrameEuclideanTrajectoryPointTwo.setTime(time);
-      yoFrameEuclideanTrajectoryPointTwo.setPosition(position);
-      yoFrameEuclideanTrajectoryPointTwo.setLinearVelocity(linearVelocity);
+      yoFrameEuclideanTrajectoryPointTwo.getPosition().set((FramePoint3DReadOnly) position);
+      yoFrameEuclideanTrajectoryPointTwo.getLinearVelocity().set((FrameVector3DReadOnly) linearVelocity);
 
       assertTrue(yoFrameEuclideanTrajectoryPointTwo.epsilonEquals(yoFrameEuclideanTrajectoryPointTwo, 1e-10));
    }

@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedPlanning;
 
-import controller_msgs.msg.dds.QuadrupedGaitTimingsPacket;
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import quadruped_msgs.msg.dds.QuadrupedGaitTimingsPacket;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

@@ -42,8 +42,8 @@ public class CapturePointToolsTest
          icpPositionExpected.scaleAdd(1.0 / omega, comVelocity, comPosition);
          icpPosition2dExpected.scaleAdd(1.0 / omega, comVelocity2d, comPosition2d);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(icpPositionExpected, icpPosition, 1e-5);
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(icpPosition2dExpected, icpPosition2d, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(icpPositionExpected, icpPosition, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(icpPosition2dExpected, icpPosition2d, 1e-5);
       }
    }
 
@@ -70,8 +70,8 @@ public class CapturePointToolsTest
          icpVelocityExpected.scaleAdd(1.0 / omega, comAcceleration, comVelocity);
          icpVelocity2dExpected.scaleAdd(1.0 / omega, comAcceleration2d, comVelocity2d);
 
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(icpVelocityExpected, icpVelocity, 1e-5);
-         EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(icpVelocity2dExpected, icpVelocity2d, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(icpVelocityExpected, icpVelocity, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(icpVelocity2dExpected, icpVelocity2d, 1e-5);
 
          FramePoint3D comPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0);
          FramePoint3D vrpPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0);
@@ -80,7 +80,7 @@ public class CapturePointToolsTest
          icpVelocityExpected.sub(comPosition, vrpPosition);
          icpVelocityExpected.scale(omega);
 
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(icpVelocityExpected, icpVelocity, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(icpVelocityExpected, icpVelocity, 1e-5);
       }
    }
 
@@ -107,8 +107,8 @@ public class CapturePointToolsTest
          cmpPositionExpected.scaleAdd(-1.0 / omega, icpVelocity, icpPosition);
          cmpPosition2dExpected.scaleAdd(-1.0 / omega, icpVelocity2d, icpPosition2d);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(cmpPositionExpected, cmpPosition, 1e-5);
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(cmpPosition2dExpected, cmpPosition2d, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(cmpPositionExpected, cmpPosition, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(cmpPosition2dExpected, cmpPosition2d, 1e-5);
       }
    }
 
@@ -144,8 +144,8 @@ public class CapturePointToolsTest
          nextICPPositionExpected.add(cmpPosition);
          nextICPPosition2dExpected.add(cmpPosition2d);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(nextICPPositionExpected, nextICPPosition, 1e-5);
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(nextICPPosition2dExpected, nextICPPosition2D, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(nextICPPositionExpected, nextICPPosition, 1e-5);
+         EuclidFrameTestTools.assertGeometricallyEquals(nextICPPosition2dExpected, nextICPPosition2D, 1e-5);
       }
 
       FramePoint3DReadOnly initialIcpPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0);
@@ -166,7 +166,7 @@ public class CapturePointToolsTest
 
          expectedIcpPosition.scaleAdd(dt, icpVelocity, expectedIcpPosition);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Failed at time " + time, expectedIcpPosition, icpPosition, 1e-2);
+         EuclidFrameTestTools.assertGeometricallyEquals("Failed at time " + time, expectedIcpPosition, icpPosition, 1e-2);
       }
    }
 
@@ -202,8 +202,8 @@ public class CapturePointToolsTest
 //         nextICPPositionExpected.add(cmpPosition);
 //         nextICPPosition2dExpected.add(cmpPosition2d);
 //
-//         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(nextICPPositionExpected, nextICPPosition, 1e-5);
-//         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(nextICPPosition2dExpected, nextICPPosition2D, 1e-5);
+//         EuclidFrameTestTools.assertGeometricallyEquals(nextICPPositionExpected, nextICPPosition, 1e-5);
+//         EuclidFrameTestTools.assertGeometricallyEquals(nextICPPosition2dExpected, nextICPPosition2D, 1e-5);
 //      }
 
       FramePoint2DReadOnly initialIcpPosition = EuclidFrameRandomTools.nextFramePoint2D(random, ReferenceFrame.getWorldFrame(), 10.0);
@@ -228,7 +228,7 @@ public class CapturePointToolsTest
 
          expectedIcpPosition.scaleAdd(dt, icpVelocity, expectedIcpPosition);
 
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals("Failed at time " + time, expectedIcpPosition, icpPosition, 1e-3);
+         EuclidFrameTestTools.assertGeometricallyEquals("Failed at time " + time, expectedIcpPosition, icpPosition, 1e-3);
       }
    }
 

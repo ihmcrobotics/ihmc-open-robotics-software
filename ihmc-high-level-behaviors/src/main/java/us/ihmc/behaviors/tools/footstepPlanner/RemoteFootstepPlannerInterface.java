@@ -1,6 +1,10 @@
 package us.ihmc.behaviors.tools.footstepPlanner;
 
-import controller_msgs.msg.dds.*;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -18,7 +22,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.behaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -62,20 +65,6 @@ public class RemoteFootstepPlannerInterface
    public RemoteFootstepPlannerInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, Messager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      if (messager != null)
-      {
-         messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
-         {
-            DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters(); // TODO: This might not be thread safe
-            parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);              // TODO: Clean this up  - @dcalvert
-            footstepPlannerParameters = settableFootstepPlannerParameters;
-            timeout = parameters.getTimeout();
-            transferTimeFlatUp = parameters.getTransferTimeFlatUp();
-            transferTimeDown   = parameters.getTransferTimeDown  ();
-            swingTimeFlatUp    = parameters.getSwingTimeFlatUp   ();
-            swingTimeDown      = parameters.getSwingTimeDown     ();
-         }); // updated from UI
-      }
 
       toolboxStatePublisher =
             ROS2Tools.createPublisherTypeNamed(ros2Node,

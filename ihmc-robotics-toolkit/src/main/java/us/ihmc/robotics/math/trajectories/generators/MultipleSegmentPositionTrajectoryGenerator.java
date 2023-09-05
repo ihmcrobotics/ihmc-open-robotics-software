@@ -136,6 +136,9 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
          throw new RuntimeException("Trajectory has no segments.");
       }
 
+      if (!TimeIntervalTools.isTimeSequenceContinuous(segments))
+         throw new RuntimeException("The segments do not represent a continuous time trajectory.");
+
       currentSegmentIndex.set(0);
    }
 
@@ -148,9 +151,6 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       }
 
       currentSegmentTime.set(time);
-
-      if (!TimeIntervalTools.isTimeSequenceContinuous(segments))
-         throw new RuntimeException("The segments do not represent a continuous time trajectory.");
 
       if (time < segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getStartTime())
       {

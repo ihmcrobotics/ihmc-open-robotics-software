@@ -152,6 +152,12 @@ public class BipedalSupportPlanarRegionCalculator
 
    public PlanarRegionsList getSupportRegionsAsList()
    {
-      return new PlanarRegionsList(getSupportRegions());
+      ArrayList<PlanarRegion> copiedRegions = new ArrayList<>();
+      List<PlanarRegion> supportRegions = getSupportRegions();
+      for (PlanarRegion supportRegion : supportRegions)
+      {
+         copiedRegions.add(supportRegion.copy());
+      }
+      return new PlanarRegionsList(copiedRegions);
    }
 }

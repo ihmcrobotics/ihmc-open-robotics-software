@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -147,7 +147,7 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
    {
       S oldState = states.put(key, state);
       if (oldState != null)
-         PrintTools.warn("The state " + oldState.getClass().getSimpleName() + " at the key " + key + " has been replaced with "
+         LogTools.warn("The state " + oldState.getClass().getSimpleName() + " at the key " + key + " has been replaced with "
                + state.getClass().getSimpleName());
       return this;
    }

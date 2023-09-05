@@ -1,0 +1,12 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Environment###java.lang.Class:Environment" : true,
+    "Global Visualizers" : true,
+    "/ihmc/big_video###us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer:/ihmc/big_video" : true,
+    "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : true,
+    "Stepping L515 Color###GlobalWidgetIndex:2:Stepping L515 Color" : true,
+    "Stepping L515 Depth###GlobalWidgetIndex:1:Stepping L515 Depth" : false,
+    "VR Thread Debugger" : false
+  }
+}

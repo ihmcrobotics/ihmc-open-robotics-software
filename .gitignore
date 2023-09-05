@@ -46,6 +46,7 @@
 **/pit-test
 **/pit-reports
 **/generated-src2
+**/.vscode*
 
 
 # File types to ignore
@@ -93,3 +94,4 @@
 **/generatedTestSuites/*TestSuite.java
 **/.attach_pid*
 **/*.blend1
+**/*.hdf5

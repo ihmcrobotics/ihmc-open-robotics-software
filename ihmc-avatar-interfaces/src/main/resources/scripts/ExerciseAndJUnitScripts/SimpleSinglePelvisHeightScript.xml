@@ -13,10 +13,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.EuclideanTrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>

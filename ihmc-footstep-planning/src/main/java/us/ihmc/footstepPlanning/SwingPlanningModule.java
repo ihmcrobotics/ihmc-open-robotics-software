@@ -1,9 +1,12 @@
 package us.ihmc.footstepPlanning;
 
+import org.bytedeco.opencl._cl_kernel;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -18,10 +21,22 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 public class SwingPlanningModule
 {
@@ -36,6 +51,9 @@ public class SwingPlanningModule
    private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
 
    private double nominalSwingTrajectoryLength;
+
+   private final List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
+
 
    public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                               SwingPlannerParametersBasics swingPlannerParameters,
@@ -55,7 +73,9 @@ public class SwingPlanningModule
       }
       else
       {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, footstepPlannerParameters, walkingControllerParameters);
+         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters,
+                                                                                        footstepPlannerParameters,
+                                                                                        walkingControllerParameters);
          this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
@@ -76,31 +96,47 @@ public class SwingPlanningModule
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
    {
-      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      computeSwingWaypoints(planarRegionsList, null, footstepPlan, startFootPoses, swingPlannerType);
+   }
+
+
+   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
+                                     HeightMapData heightMapData,
+                                     FootstepPlan footstepPlan,
+                                     SideDependentList<? extends Pose3DReadOnly> startFootPoses,
+                                     SwingPlannerType swingPlannerType)
+   {
+      boolean hasPlanarRegions = (planarRegionsList != null && !planarRegionsList.isEmpty());
+      swingTrajectories.clear();
+      if (!hasPlanarRegions && heightMapData == null)
       {
          return;
       }
 
-      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
+      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null && hasPlanarRegions)
       {
          adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
          adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+            swingTrajectories.add(null);
       }
-      else if (swingPlannerType == SwingPlannerType.TWO_WAYPOINT_POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
+      else if (swingPlannerType == SwingPlannerType.TWO_WAYPOINT_POSITION && swingOverPlanarRegionsTrajectoryExpander != null && hasPlanarRegions)
       {
          computeSwingWaypoints(planarRegionsList, footstepPlan, startFootPoses);
       }
       else if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
       {
          collisionFreeSwingCalculator.setPlanarRegionsList(planarRegionsList);
+         collisionFreeSwingCalculator.setHeightMapData(heightMapData);
          collisionFreeSwingCalculator.computeSwingTrajectories(startFootPoses, footstepPlan);
+         swingTrajectories.addAll(collisionFreeSwingCalculator.getSwingTrajectories());
       }
    }
 
    // TODO make this a method of the swing trajectory solver after moving it to this package
    private void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
-                                     FootstepPlan footstepPlan,
-                                     SideDependentList<? extends Pose3DReadOnly> startFootPoses)
+                                      FootstepPlan footstepPlan,
+                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses)
    {
       swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
       swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(swingPlannerParameters.getFastApproximationLessClearance());
@@ -141,10 +177,7 @@ public class SwingPlanningModule
             stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
          }
 
-         swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
-                                                                                    swingStartPose,
-                                                                                    swingEndPose,
-                                                                                    planarRegionsList);
+         swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
          {
             footstep.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -155,12 +188,14 @@ public class SwingPlanningModule
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength() / nominalSwingTrajectoryLength);
             double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
+            swingTrajectories.add(CollisionFreeSwingCalculator.copySwingTrajectories(swingOverPlanarRegionsTrajectoryExpander.getSwingTrajectory()));
          }
          else
          {
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getInitialTrajectoryLength() / nominalSwingTrajectoryLength);
             double swingTime = swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
+            swingTrajectories.add(null);
          }
       }
    }
@@ -189,5 +224,15 @@ public class SwingPlanningModule
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
    {
       return swingOverPlanarRegionsTrajectoryExpander;
+   }
+
+   public CollisionFreeSwingCalculator getCollisionFreeSwingCalculator()
+   {
+      return collisionFreeSwingCalculator;
+   }
+
+   public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> getSwingTrajectories()
+   {
+      return swingTrajectories;
    }
 }

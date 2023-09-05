@@ -1,0 +1,17 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "Blackfly Monitor" : false,
+    "Blackfly Reader" : true,
+    "Calibration" : true,
+    "Calibration Pattern" : true,
+    "Calibration Source Image" : false,
+    "HDF5 Browsing" : true,
+    "HDF5 Image Browser" : false,
+    "Logging" : true,
+    "Undistorted Fisheye Monitor" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

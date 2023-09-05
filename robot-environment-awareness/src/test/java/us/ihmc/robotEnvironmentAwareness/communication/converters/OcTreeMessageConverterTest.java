@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import controller_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;

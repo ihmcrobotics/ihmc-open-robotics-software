@@ -1,8 +1,0 @@
-<?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="middle_finger_joint_rotation_axes">
-
-<xacro:property name="MiddleFingerPitch1RotationAxis" value="0 0 1"/>
-<xacro:property name="MiddleFingerPitch2RotationAxis" value="0 0 1"/>
-<xacro:property name="MiddleFingerPitch3RotationAxis" value="0 0 1"/>
-
-</robot>

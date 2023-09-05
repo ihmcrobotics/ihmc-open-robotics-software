@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ChestTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ChestTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "db4649d00d1b5ed84428b24465afc5fe97d1cdd5d99990b06301789fd04d588f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -42,7 +54,7 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -60,7 +72,7 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSo3Trajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSo3Trajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -70,14 +82,14 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       cdr.write_type_4(data.getSequenceId());
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getSo3Trajectory(), cdr);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getSo3Trajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.ChestTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getSo3Trajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getSo3Trajectory(), cdr);	
 
    }
 
@@ -85,7 +97,7 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public final void serialize(controller_msgs.msg.dds.ChestTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_a("so3_trajectory", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
+      ser.write_type_a("so3_trajectory", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
 
    }
 
@@ -93,7 +105,7 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ChestTrajectoryMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_a("so3_trajectory", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
+      ser.read_type_a("so3_trajectory", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
 
    }
 

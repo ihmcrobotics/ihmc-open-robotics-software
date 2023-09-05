@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.idl.IDLSequence.Object;

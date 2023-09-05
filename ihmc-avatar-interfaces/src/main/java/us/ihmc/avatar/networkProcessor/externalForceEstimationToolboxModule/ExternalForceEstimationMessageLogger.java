@@ -2,6 +2,11 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessagePubSubType;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;

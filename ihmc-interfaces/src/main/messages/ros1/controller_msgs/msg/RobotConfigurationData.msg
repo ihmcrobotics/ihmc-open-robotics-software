@@ -32,7 +32,7 @@ float32[] joint_velocities
 
 float32[] joint_torques
 
-geometry_msgs/Vector3 root_translation
+geometry_msgs/Point root_position
 
 geometry_msgs/Quaternion root_orientation
 

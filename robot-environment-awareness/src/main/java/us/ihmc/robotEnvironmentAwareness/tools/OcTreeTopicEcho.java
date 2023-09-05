@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.tools;
 
-import controller_msgs.msg.dds.OcTreeKeyListMessage;
-import controller_msgs.msg.dds.OcTreeKeyListMessagePubSubType;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;

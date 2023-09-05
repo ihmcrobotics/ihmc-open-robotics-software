@@ -42,8 +42,8 @@ public class StepConstraintRegionViewer
    public StepConstraintRegionViewer(Messager messager, Topic<List<StepConstraintRegion>> stepConstraintRegionDataTopc, Topic<Boolean> showStepConstraintRegionsTopic)
    {
       this();
-      messager.registerTopicListener(stepConstraintRegionDataTopc, this::buildMeshAndMaterialOnThread);
-      messager.registerTopicListener(showStepConstraintRegionsTopic, this::setVisibile);
+      messager.addTopicListener(stepConstraintRegionDataTopc, this::buildMeshAndMaterialOnThread);
+      messager.addTopicListener(showStepConstraintRegionsTopic, this::setVisibile);
    }
 
    public StepConstraintRegionViewer()

@@ -3,10 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;

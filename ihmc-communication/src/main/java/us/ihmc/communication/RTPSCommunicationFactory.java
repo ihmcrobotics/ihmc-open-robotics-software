@@ -23,7 +23,6 @@ import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
 import us.ihmc.pubsub.participant.Participant;
-import us.ihmc.ros2.ROS2Distro;
 
 /**
  * Creates and Manages participants
@@ -51,13 +50,17 @@ public class RTPSCommunicationFactory
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
-         LogTools.info("Using DDS/ROS 2 Domain ID " + rtpsDomainID);
-         LogTools.info("ROS 2 Distro is set to " + ROS2Distro.fromEnvironment());
+         LogTools.info("Using DDS/ROS 2 Domain ID {}", rtpsDomainID);
       }
       else
       {
-         LogTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to "
-               + rtpsDomainID);
+         LogTools.error("""
+                     Tried to load the RTPS Domain ID from %s, \
+                     but either the key didn't exist or after parsing the string it \
+                     returned a negative number.
+                     It should look like RTPSDomainID=15, if your registered domain ID is 15.
+                     Setting the Default RTPS Domain ID randomly to %s, to avoid interfering with others.\
+                     """.formatted(NetworkParameters.defaultParameterFile, rtpsDomainID));
       }
 
       InetAddress foundAddressRestriction = null;
@@ -73,12 +76,12 @@ public class RTPSCommunicationFactory
                           + "If you are not receiving data, try it using 127.0.0.1/24 or without setting a subnet restriction.");
          }
 
-         LogTools.info("Scanning interfaces for restriction: " +  restrictionHost);
+         LogTools.info("Scanning interfaces for restriction: {}",  restrictionHost);
 
          SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
-         LogTools.debug("Restriction subnet info: " + restrictionSubnetInfo);
-         LogTools.info("Restriction address: " + restrictionSubnetInfo.getAddress());
-         LogTools.info("Restriction Netmask: " + restrictionSubnetInfo.getNetmask());
+         LogTools.debug("Restriction subnet info:\n{}", restrictionSubnetInfo);
+         LogTools.info("Restriction address: {}", restrictionSubnetInfo.getAddress());
+         LogTools.info("Restriction netmask: {}", restrictionSubnetInfo.getNetmask());
 
          for (InterfaceAddress interfaceAddress : MACHINE_INTERFACE_ADDRESSES)
          {
@@ -108,7 +111,7 @@ public class RTPSCommunicationFactory
 
                if (inRange)
                {
-                  LogTools.info("Found address in range: " + address);
+                  LogTools.info("Found address in range: {}", address);
                   foundAddressRestriction = address;
                   break;
                }
@@ -119,7 +122,7 @@ public class RTPSCommunicationFactory
       defaultDomainID = rtpsDomainID;
       defaultAddressRestriction = foundAddressRestriction;
       if (defaultAddressRestriction != null)
-         LogTools.info("Setting IP restriction: " + defaultAddressRestriction.getHostAddress());
+         LogTools.info("Setting IP restriction: {}", defaultAddressRestriction.getHostAddress());
       createParticipant(rtpsDomainID);
    }
 

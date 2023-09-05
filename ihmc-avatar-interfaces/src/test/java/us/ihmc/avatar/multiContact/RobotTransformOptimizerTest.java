@@ -50,7 +50,7 @@ public class RobotTransformOptimizerTest
 
       RigidBodyTransform actualTransform = matcher.getTransformFromBToA();
 
-      EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(expectedTransform.getRotation(), actualTransform.getRotation(), 1.0e-4);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expectedTransform.getRotation(), actualTransform.getRotation(), 1.0e-4);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(expectedTransform.getTranslation(), actualTransform.getTranslation(), 1.0e-3);
    }
 

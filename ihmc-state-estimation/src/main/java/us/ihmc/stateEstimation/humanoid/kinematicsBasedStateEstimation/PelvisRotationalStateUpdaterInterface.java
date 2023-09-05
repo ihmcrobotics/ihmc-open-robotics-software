@@ -1,17 +1,15 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public interface PelvisRotationalStateUpdaterInterface
 {
-
    void initialize();
 
    void updateRootJointOrientationAndAngularVelocity();
 
-   void getEstimatedOrientation(FrameQuaternion estimatedOrientation);
+   FrameOrientation3DReadOnly getEstimatedOrientation();
 
-   void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack);
-
+   FrameVector3DReadOnly getEstimatedAngularVelocity();
 }

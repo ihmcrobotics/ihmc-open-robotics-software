@@ -1,9 +1,12 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import controller_msgs.msg.dds.NormalEstimationParametersMessage;
-import controller_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
-import controller_msgs.msg.dds.PolygonizerParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
+import perception_msgs.msg.dds.NormalEstimationParametersMessage;
+import perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 
@@ -54,6 +57,19 @@ public class REAParametersMessageHelper
       return parameters;
    }
 
+   public static ConcaveHullFactoryParameters convertFromMessage(ConcaveHullFactoryParametersMessage message)
+   {
+      ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
+
+      parameters.setEdgeLengthThreshold(message.getEdgeLengthThreshold());
+      parameters.setRemoveAllTrianglesWithTwoBorderEdges(message.getRemoveAllTrianglesWithTwoBorderEdges());
+      parameters.setAllowSplittingConcaveHull(message.getAllowSplittingConcaveHull());
+      parameters.setMaxNumberOfIterations(message.getMaxNumberOfIterations());
+      parameters.setTriangulationTolerance(message.getTriangulationTolerance());
+
+      return parameters;
+   }
+
    public static NormalEstimationParametersMessage convertToMessage(NormalEstimationParameters parameters)
    {
       NormalEstimationParametersMessage message = new NormalEstimationParametersMessage();
@@ -95,6 +111,19 @@ public class REAParametersMessageHelper
       message.setLengthThreshold(parameters.getLengthThreshold());
       message.setDepthThreshold(parameters.getDepthThreshold());
       message.setCutNarrowPassage(parameters.getCutNarrowPassage());
+
+      return message;
+   }
+
+   public static ConcaveHullFactoryParametersMessage convertToMessage(ConcaveHullFactoryParameters parameters)
+   {
+      ConcaveHullFactoryParametersMessage message = new ConcaveHullFactoryParametersMessage();
+
+      message.setEdgeLengthThreshold(parameters.getEdgeLengthThreshold());
+      message.setRemoveAllTrianglesWithTwoBorderEdges(parameters.getRemoveAllTrianglesWithTwoBorderEdges());
+      message.setAllowSplittingConcaveHull(parameters.getAllowSplittingConcaveHull());
+      message.setMaxNumberOfIterations(parameters.getMaxNumberOfIterations());
+      message.setTriangulationTolerance(parameters.getTriangulationTolerance());
 
       return message;
    }

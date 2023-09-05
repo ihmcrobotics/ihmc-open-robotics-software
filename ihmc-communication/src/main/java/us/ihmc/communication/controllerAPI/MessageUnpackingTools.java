@@ -10,21 +10,22 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceStreamingMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.LegTrajectoryMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.QueueableMessage;
-import controller_msgs.msg.dds.SE3StreamingMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3StreamingMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
+import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
@@ -59,6 +60,8 @@ public final class MessageUnpackingTools
             NeckTrajectoryMessage neckTrajectoryMessage = multipleMessageHolder.getNeckTrajectoryMessage();
             FootTrajectoryMessage leftFootTrajectoryMessage = multipleMessageHolder.getLeftFootTrajectoryMessage();
             FootTrajectoryMessage rightFootTrajectoryMessage = multipleMessageHolder.getRightFootTrajectoryMessage();
+            LegTrajectoryMessage leftLegTrajectoryMessage = multipleMessageHolder.getLeftLegTrajectoryMessage();
+            LegTrajectoryMessage rightLegTrajectoryMessage = multipleMessageHolder.getRightLegTrajectoryMessage();
 
             if (!leftHandTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
             {
@@ -99,6 +102,11 @@ public final class MessageUnpackingTools
             {
                messagesToPack.add(rightArmTrajectoryMessage);
             }
+            
+            if (!rightLegTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(rightLegTrajectoryMessage);
+            if (!leftLegTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(leftLegTrajectoryMessage);
 
             if (!chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(chestTrajectoryMessage);

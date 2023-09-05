@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -80,9 +78,10 @@ public class FootstepPlanningModuleTest
       int numberOfStreamingIntervals = numberOfStreamingStatuses.getValue() - 1;
 
       int expectedStatuses = (int) (totalElapsed / publishPeriod);
-      Assertions.assertTrue(numberOfStreamingIntervals == expectedStatuses,
-                            "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
-                            + ", # of statuses=" + numberOfStreamingStatuses.getValue());
+      Assertions.assertEquals(numberOfStreamingIntervals,
+                              expectedStatuses,
+                              "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
+                              + ", # of statuses=" + numberOfStreamingStatuses.getValue());
    }
    
    @Test
@@ -179,7 +178,7 @@ public class FootstepPlanningModuleTest
       request.setAbortIfGoalStepSnappingFails(true);
 
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult() == FootstepPlanningResult.INVALID_GOAL);
+      Assertions.assertSame(plannerOutput.getFootstepPlanningResult(), FootstepPlanningResult.INVALID_GOAL);
 
       // test that not snapping keeps original requested pose
       double heightOffset = 0.035;
@@ -306,7 +305,7 @@ public class FootstepPlanningModuleTest
       FootstepPlannerOutput output = planningModule.handleRequest(request);
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
       Assertions.assertTrue(timestampPrev.get() < customTimeout);
-      Assertions.assertTrue(output.getPlannerTimings().getTimePlanningStepsSeconds() >= customTimeout - 0.01);
+      Assertions.assertTrue(output.getPlannerTimings().getTotalElapsedSeconds() >= customTimeout);
 
       // test iteration limit
       int iterationLimit = 29;

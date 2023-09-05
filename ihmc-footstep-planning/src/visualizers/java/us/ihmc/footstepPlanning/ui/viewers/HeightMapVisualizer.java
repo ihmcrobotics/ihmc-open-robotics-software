@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -15,7 +15,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

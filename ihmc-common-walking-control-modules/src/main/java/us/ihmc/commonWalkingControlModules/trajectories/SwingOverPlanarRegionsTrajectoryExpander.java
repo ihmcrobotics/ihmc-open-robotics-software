@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -29,6 +27,10 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.YoCounter;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -809,6 +811,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       }
 
       trajectoryLengthToSet.set(distance);
+   }
+
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getSwingTrajectory()
+   {
+      return twoWaypointSwingGenerator.getSwingTrajectory();
    }
 
    /**

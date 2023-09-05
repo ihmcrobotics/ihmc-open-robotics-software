@@ -16,7 +16,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
-import us.ihmc.robotics.sensors.ContactSensorType;
 
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
@@ -79,11 +78,6 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
                if(this.descriptionMutator != null)
                {
                   this.descriptionMutator.mutateJointForModel(this, jointHolder);
-
-                  for (SDFContactSensor sdfContactSensor : jointHolder.getContactSensors())
-                  {
-                     this.descriptionMutator.mutateContactSensorForModel(this, sdfContactSensor);
-                  }
 
                   for (SDFForceSensor sdfForceSensor : jointHolder.getForceSensors())
                   {
@@ -189,12 +183,6 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       SDFForceSensor sdfForceSensor = new SDFForceSensor(sensorName, transformToParentJoint);
       if(joints.get(parentJointName) != null)
          joints.get(parentJointName).addForceSensor(sdfForceSensor);
-   }
-
-   public void addContactSensor(String sensorName, String parentJointName, ContactSensorType type)
-   {
-      SDFContactSensor sdfContactSensor = new SDFContactSensor(sensorName, parentJointName, type);
-      joints.get(parentJointName).addContactSensor(sdfContactSensor);
    }
 
    public SDFDescriptionMutator getSDFDescriptionMutator()

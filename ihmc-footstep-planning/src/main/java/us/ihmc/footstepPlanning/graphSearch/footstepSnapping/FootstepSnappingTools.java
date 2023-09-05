@@ -1,19 +1,23 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepSnappingTools
@@ -47,8 +51,7 @@ public class FootstepSnappingTools
     */
    public static ConvexPolygon2D computeRegionIntersection(PlanarRegion planarRegion, ConvexPolygon2DReadOnly polygonInPlaneFrame)
    {
-      ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
-      planarRegion.getPolygonIntersectionsWhenProjectedVertically(polygonInPlaneFrame, intersections);
+      List<Point2DReadOnly> intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, polygonInPlaneFrame);
       return getConvexHull(intersections);
    }
 
@@ -59,16 +62,9 @@ public class FootstepSnappingTools
     * @param intersections
     * @return
     */
-   private static ConvexPolygon2D getConvexHull(ArrayList<ConvexPolygon2D> intersections)
+   private static ConvexPolygon2D getConvexHull(List<Point2DReadOnly> intersections)
    {
-      ConvexPolygon2D combinedFootholdIntersection = new ConvexPolygon2D();
-      for (int i = 0; i < intersections.size(); i++)
-      {
-         combinedFootholdIntersection.addVertices(intersections.get(i));
-      }
-
-      combinedFootholdIntersection.update();
-      return combinedFootholdIntersection;
+      return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(intersections));
    }
 
    /**

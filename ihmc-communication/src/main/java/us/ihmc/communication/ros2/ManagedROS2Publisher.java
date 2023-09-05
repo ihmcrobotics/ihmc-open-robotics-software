@@ -2,7 +2,6 @@ package us.ihmc.communication.ros2;
 
 import us.ihmc.ros2.ROS2PublisherBasics;
 
-import java.io.IOException;
 import java.util.function.Supplier;
 
 public class ManagedROS2Publisher<T> implements ROS2PublisherBasics<T>
@@ -17,7 +16,7 @@ public class ManagedROS2Publisher<T> implements ROS2PublisherBasics<T>
    }
 
    @Override
-   public boolean publish(T data) throws IOException
+   public boolean publish(T data)
    {
       if (enabled.get())
       {

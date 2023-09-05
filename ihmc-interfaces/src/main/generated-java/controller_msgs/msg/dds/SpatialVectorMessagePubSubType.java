@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SpatialVectorMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SpatialVectorMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "63c5f509f74604a10b703187cfc8be5dda793a6a96333b9751e2c0079b530257";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

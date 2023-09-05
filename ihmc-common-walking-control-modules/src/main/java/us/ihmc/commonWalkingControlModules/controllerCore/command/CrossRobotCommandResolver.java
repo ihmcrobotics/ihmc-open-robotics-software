@@ -14,20 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -86,6 +73,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType.JOINTSPACE;
 
 /**
  * The objective of this class is to help the passing commands between two instances of the same
@@ -174,10 +163,10 @@ public class CrossRobotCommandResolver
       for (int i = 0; i < in.getNumberOfForceSensors(); i++)
       {
          ForceSensorDefinition inDefinition = in.getForceSensorDefinitions().get(i);
-         ForceSensorData inData = in.get(inDefinition);
+         ForceSensorData inData = in.getData(inDefinition);
          out.registerForceSensor(inDefinition);
          ForceSensorDefinition outDefinition = out.getForceSensorDefinitions().get(i);
-         ForceSensorData outData = out.get(outDefinition);
+         ForceSensorData outData = out.getData(outDefinition);
 
          resolveForceSensorDefinition(inDefinition, outDefinition);
          resolveForceSensorData(inData, outData);
@@ -208,6 +197,7 @@ public class CrossRobotCommandResolver
       resolveHumanoidRobotContextDataScheduler(in, out);
       resolveHumanoidRobotContextDataController(in, out);
       resolveHumanoidRobotContextDataEstimator(in, out);
+      resolveHumanoidRobotContextDataPerception(in, out);
    }
 
    /**
@@ -229,6 +219,14 @@ public class CrossRobotCommandResolver
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
       out.setControllerRan(in.getControllerRan());
+   }
+
+   /**
+    * Resolves only the part of the context data that is updated by the perception thread.
+    */
+   public void resolveHumanoidRobotContextDataPerception(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      out.setPerceptionRan(in.getPerceptionRan());
    }
 
    /**
@@ -333,7 +331,12 @@ public class CrossRobotCommandResolver
                resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
                break;
             case JOINTSPACE:
-               resolveJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToResolve, out.addJointspaceAccelerationCommand());
+               if (commandToResolve instanceof JointspaceAccelerationCommand jointspaceAccelerationCommand)
+                  resolveJointspaceAccelerationCommand(jointspaceAccelerationCommand, out.addJointspaceAccelerationCommand());
+               else if (commandToResolve instanceof JointTorqueCommand jointTorqueCommand)
+                  resolveJointTorqueCommand(jointTorqueCommand, out.addJointTorqueCommand());
+               else
+                  throw new RuntimeException("Unknown " + JOINTSPACE +  " command " + commandToResolve.getClass().getSimpleName());
                break;
             case MOMENTUM:
                resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
@@ -358,6 +361,9 @@ public class CrossRobotCommandResolver
                break;
             case LIMIT_REDUCTION:
                resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+               break;
+            case QP_INPUT:
+               resolveQPObjectiveCommand((QPObjectiveCommand) commandToResolve, out.addQPObjectiveCommand());
                break;
             default:
                throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
@@ -461,6 +467,9 @@ public class CrossRobotCommandResolver
             case VIRTUAL_WRENCH:
                resolveVirtualWrenchCommand((VirtualWrenchCommand) commandToResolve, out.addVirtualWrenchCommand());
                break;
+            case QP_INPUT:
+               resolveQPObjectiveCommand((QPObjectiveCommand) commandToResolve, out.addQPObjectiveCommand());
+               break;
             default:
                throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
@@ -538,8 +547,22 @@ public class CrossRobotCommandResolver
 
    public void resolveInverseDynamicsOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand in, InverseDynamicsOptimizationSettingsCommand out)
    {
-      // There is no robot sensitive information in this command, so the output can directly be set to the input.
-      out.set(in);
+      out.setCommandId(in.getCommandId());
+      out.setRhoMin(in.getRhoMin());
+      out.setJointAccelerationMax(in.getJointAccelerationMax());
+      out.setRhoWeight(in.getRhoWeight());
+      out.setRhoRateWeight(in.getRhoRateWeight());
+      out.setCenterOfPressureWeight(in.getCenterOfPressureWeight());
+      out.setCenterOfPressureRateWeight(in.getCenterOfPressureRateWeight());
+      out.setJointAccelerationWeight(in.getJointAccelerationWeight());
+      out.setJointJerkWeight(in.getJointJerkWeight());
+      out.setJointTorqueWeight(in.getJointTorqueWeight());
+      out.getJointsToActivate().clear();
+      for (int i = 0; i < in.getJointsToActivate().size(); i++)
+         out.getJointsToActivate().add(resolveJoint(in.getJointsToActivate().get(i)));
+      out.getJointsToDeactivate().clear();
+      for (int i = 0; i < in.getJointsToDeactivate().size(); i++)
+         out.getJointsToDeactivate().add(resolveJoint(in.getJointsToDeactivate().get(i)));
    }
 
    public void resolveJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand in, JointAccelerationIntegrationCommand out)
@@ -578,6 +601,7 @@ public class CrossRobotCommandResolver
       {
          out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredAcceleration(jointIndex), in.getWeight(jointIndex));
       }
+      out.setConstraintType(in.getConstraintType());
    }
 
    public void resolveMomentumRateCommand(MomentumRateCommand in, MomentumRateCommand out)
@@ -586,6 +610,12 @@ public class CrossRobotCommandResolver
       out.setMomentumRate(in.getMomentumRate());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+      out.setConsiderAllJoints(in.isConsiderAllJoints());
+
+      for (int jointIndex = 0; jointIndex < in.getJointSelection().size(); jointIndex++)
+      {
+         out.addJointToSelection(resolveJoint(in.getJointSelection().get(jointIndex)));
+      }
    }
 
    public void resolveLinearMomentumRateCostCommand(LinearMomentumRateCostCommand in, LinearMomentumRateCostCommand out)
@@ -595,6 +625,16 @@ public class CrossRobotCommandResolver
       out.setMomentumRateGradient(in.getMomentumRateGradient());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveQPObjectiveCommand(QPObjectiveCommand in, QPObjectiveCommand out)
+   {
+      out.setCommandId(in.getCommandId());
+      out.getSelectionMatrix().set(in.getSelectionMatrix());
+      out.getWeightMatrix().set(in.getWeightMatrix());
+      out.getObjective().set(in.getObjective());
+      out.getJacobian().set(in.getJacobian());
+      out.setDoNullSpaceProjection(in.isNullspaceProjected());
    }
 
    public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)
@@ -632,8 +672,18 @@ public class CrossRobotCommandResolver
    public void resolveInverseKinematicsOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand in,
                                                                    InverseKinematicsOptimizationSettingsCommand out)
    {
-      // There is no robot sensitive information in this command, so the output can directly be set to the input.
-      out.set(in);
+      out.setCommandId(in.getCommandId());
+      out.setJointVelocityWeight(in.getJointVelocityWeight());
+      out.setJointAccelerationWeight(in.getJointAccelerationWeight());
+      out.setJointTorqueWeight(in.getJointTorqueWeight());
+      out.setJointVelocityLimitMode(in.getJointVelocityLimitMode());
+      out.setComputeJointTorques(in.getComputeJointTorques());
+      out.getJointsToActivate().clear();
+      for (int i = 0; i < in.getJointsToActivate().size(); i++)
+         out.getJointsToActivate().add(resolveJoint(in.getJointsToActivate().get(i)));
+      out.getJointsToDeactivate().clear();
+      for (int i = 0; i < in.getJointsToDeactivate().size(); i++)
+         out.getJointsToDeactivate().add(resolveJoint(in.getJointsToDeactivate().get(i)));
    }
 
    public void resolveJointLimitReductionCommand(JointLimitReductionCommand in, JointLimitReductionCommand out)
@@ -737,8 +787,10 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
-         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex));
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex), in.getWeight(jointIndex));
       }
+
+      out.setConstraintType(in.getConstraintType());
    }
 
    public void resolveVirtualForceCommand(VirtualForceCommand in, VirtualForceCommand out)
@@ -861,6 +913,7 @@ public class CrossRobotCommandResolver
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
       out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      out.setHasHeightCommand(in.getHasHeightCommand());
       resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
       resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
@@ -873,7 +926,6 @@ public class CrossRobotCommandResolver
    public void resolveLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput in, LinearMomentumRateControlModuleOutput out)
    {
       resolveFrameTuple2D(in.getDesiredCMP(), out.getDesiredCMP());
-      resolveFrameTuple2D(in.getResidualICPErrorForStepAdjustment(), out.getResidualICPErrorForStepAdjustment());
    }
 
    public void resolveSimpleAdjustableFootstep(SimpleFootstep in, SimpleFootstep out)
@@ -950,7 +1002,7 @@ public class CrossRobotCommandResolver
       if (in == null)
          return null;
       else
-         return referenceFrameHashCodeResolver.getReferenceFrame(in.hashCode());
+         return referenceFrameHashCodeResolver.getReferenceFrame(in.getFrameNameHashCode());
    }
 
    private <B extends RigidBodyReadOnly> B resolveRigidBody(B in)

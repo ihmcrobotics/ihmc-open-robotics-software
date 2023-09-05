@@ -1,9 +1,8 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces;
 
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointBasics;
 
-public interface OneDoFTrajectoryPointBasics extends TrajectoryPointBasics, OneDoFWaypointBasics
+public interface OneDoFTrajectoryPointBasics extends OneDoFTrajectoryPointReadOnly, TrajectoryPointBasics, OneDoFWaypointBasics
 {
    default void set(double time, double position, double velocity)
    {
@@ -15,11 +14,6 @@ public interface OneDoFTrajectoryPointBasics extends TrajectoryPointBasics, OneD
    {
       setTime(other.getTime());
       OneDoFWaypointBasics.super.set(other);
-   }
-
-   default boolean epsilonEquals(OneDoFTrajectoryPointBasics other, double epsilon)
-   {
-      return EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon) && OneDoFWaypointBasics.super.epsilonEquals(other, epsilon);
    }
 
    @Override
@@ -39,6 +33,6 @@ public interface OneDoFTrajectoryPointBasics extends TrajectoryPointBasics, OneD
    @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getTime()) || OneDoFWaypointBasics.super.containsNaN();
+      return OneDoFTrajectoryPointReadOnly.super.containsNaN();
    }
 }

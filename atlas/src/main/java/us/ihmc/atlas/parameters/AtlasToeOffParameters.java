@@ -31,12 +31,6 @@ public class AtlasToeOffParameters extends ToeOffParameters
       return true;
    }
 
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return true;
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getMinStepLengthForToeOff()
@@ -56,21 +50,6 @@ public class AtlasToeOffParameters extends ToeOffParameters
    public double getAnkleLowerLimitToTriggerToeOff()
    {
       return -1.0;
-   }
-
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getICPPercentOfStanceForDSToeOff()
-   {
-      return 0.03; // JCarff ToeOff
    }
 
    @Override

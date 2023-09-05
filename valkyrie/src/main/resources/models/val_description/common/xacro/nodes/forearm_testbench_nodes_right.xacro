@@ -1,7 +1,0 @@
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="test_bench_nodes">
-
-	<xacro:property name="testbench_node" value="/right_arm/j5" />
-	<xacro:property name="Athena1Node" value="/right_arm/athena1" />
-	<xacro:property name="Athena2Node" value="/right_arm/athena2" />
-    
-</robot>

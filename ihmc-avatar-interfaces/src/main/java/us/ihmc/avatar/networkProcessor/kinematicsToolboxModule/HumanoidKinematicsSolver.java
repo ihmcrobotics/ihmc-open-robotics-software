@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -74,7 +74,7 @@ public class HumanoidKinematicsSolver
       RobotConfigurationData configurationData = new RobotConfigurationData();
       configurationData.setJointNameHash(kinematicsToolboxOutputStatus.getJointNameHash());
       MessageTools.copyData(kinematicsToolboxOutputStatus.getDesiredJointAngles(), configurationData.getJointAngles());
-      configurationData.getRootTranslation().set(new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootTranslation()));
+      configurationData.getRootPosition().set(new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootPosition()));
       configurationData.getRootOrientation().set(new Quaternion32(kinematicsToolboxOutputStatus.getDesiredRootOrientation()));
       setInitialConfiguration(configurationData);
    }

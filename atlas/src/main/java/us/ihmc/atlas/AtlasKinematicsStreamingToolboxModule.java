@@ -62,9 +62,9 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
    }
 
    @Override
-   public DataServerSettings getYoVariableServerSettings()
+   public DataServerSettings createYoVariableServerSettings()
    {
-      return new DataServerSettings(true);
+      return super.createYoVariableServerSettings(true);
    }
 
    public static void main(String[] args) throws JSAPException

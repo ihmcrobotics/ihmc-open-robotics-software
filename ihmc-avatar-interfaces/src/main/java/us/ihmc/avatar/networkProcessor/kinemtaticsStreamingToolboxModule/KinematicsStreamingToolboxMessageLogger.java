@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;

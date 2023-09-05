@@ -1,0 +1,51 @@
+#ifndef __perception_msgs__msg__FusedSensorHeadPointCloudMessage__idl__
+#define __perception_msgs__msg__FusedSensorHeadPointCloudMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message for sending large colored point clouds,
+       * discretized and compressed with LZ4,
+       * and publishing partial scans at a higher rate to allow smaller message sizes
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::FusedSensorHeadPointCloudMessage_")
+      struct FusedSensorHeadPointCloudMessage
+      {
+        /**
+         * Approximate sensor data aquisition time seconds since epoch
+         * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
+         */
+        long long aquisition_seconds_since_epoch;
+        /**
+         * Approximate sensor data aquisition time additional nanoseconds
+         */
+        long long aquisition_additional_nanos;
+        /**
+         * Total number of segments
+         */
+        unsigned long number_of_segments;
+        /**
+         * Number of points per segment
+         */
+        long points_per_segment;
+        /**
+         * Segment this data represents
+         */
+        unsigned long segment_index;
+        /**
+         * Compressed point cloud data
+         * Sized specifically for our current primary sensor head streaming
+         * 22220 * 4 * 4
+         */
+        sequence<octet, 7000000> scan;
+      };
+    };
+  };
+};
+
+#endif

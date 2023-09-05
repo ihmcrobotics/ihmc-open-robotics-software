@@ -9,6 +9,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
@@ -70,10 +71,11 @@ public class PlanarRegionCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       PlanarRegionCliffAvoider avoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegionsList(planarRegionsList);
-      snapper.setPlanarRegions(planarRegionsList);
+      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -125,7 +127,8 @@ public class PlanarRegionCliffAvoiderTest
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
 
       double centerX = 1.0;
@@ -143,7 +146,7 @@ public class PlanarRegionCliffAvoiderTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       cliffAvoider.setPlanarRegionsList(planarRegionsList);
-      snapper.setPlanarRegions(planarRegionsList);
+      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
       Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - LatticePoint.gridSizeXY, 0.0);
       Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + LatticePoint.gridSizeXY, 0.0);
@@ -204,10 +207,11 @@ public class PlanarRegionCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       PlanarRegionCliffAvoider avoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegionsList(planarRegionsList);
-      snapper.setPlanarRegions(planarRegionsList);
+      environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
       SimulationConstructionSet scs = null;
       if (visualize)

@@ -28,6 +28,7 @@ public class WholeBodyControllerCoreFactory
 
    private LinearMomentumRateControlModule linearMomentumRateControlModule;
    private WholeBodyControllerCore controllerCore;
+   private WholeBodyControlCoreToolbox toolbox;
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
@@ -82,6 +83,37 @@ public class WholeBodyControllerCoreFactory
       this.template = template;
    }
 
+   public WholeBodyControlCoreToolbox getOrCreateWholeBodyControllerCoreToolbox()
+   {
+      if (toolbox != null)
+         return toolbox;
+
+      if (!hasHighLevelHumanoidControllerToolbox(WholeBodyControllerCore.class))
+         return null;
+      if (!hasWalkingControllerParameters(WholeBodyControllerCore.class))
+         return null;
+
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
+      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
+      toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
+                                                controllerToolbox.getGravityZ(),
+                                                rootJoint,
+                                                jointsToOptimizeFor,
+                                                centerOfMassFrame,
+                                                walkingControllerParameters.getMomentumOptimizationSettings(),
+                                                controllerToolbox.getYoGraphicsListRegistry(),
+                                                registry);
+      return toolbox;
+   }
+
+   public WholeBodyControllerCore getWholeBodyControllerCore()
+   {
+      return controllerCore;
+   }
+
    public WholeBodyControllerCore getOrCreateWholeBodyControllerCore()
    {
       if (controllerCore != null)
@@ -94,21 +126,19 @@ public class WholeBodyControllerCoreFactory
       if (!hasFeedbackControllerTemplate(WholeBodyControllerCore.class))
          return null;
 
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+      WholeBodyControlCoreToolbox toolbox = getOrCreateWholeBodyControllerCoreToolbox();
 
-      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
-                                                                            controllerToolbox.getGravityZ(),
-                                                                            rootJoint,
-                                                                            jointsToOptimizeFor,
-                                                                            centerOfMassFrame,
-                                                                            walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                            controllerToolbox.getYoGraphicsListRegistry(),
-                                                                            registry);
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
+
+      String[] inactiveJoints = walkingControllerParameters.getInactiveJoints();
+      if (inactiveJoints != null)
+      {
+         for (String inactiveJoint : inactiveJoints)
+            toolbox.addInactiveJoint(fullRobotModel.getOneDoFJointByName(inactiveJoint));
+      }
+
       toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
       fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
       // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
@@ -118,6 +148,11 @@ public class WholeBodyControllerCoreFactory
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
 
       return controllerCore;
+   }
+
+   public LinearMomentumRateControlModule getLinearMomentumRateControlModule()
+   {
+      return linearMomentumRateControlModule;
    }
 
    public LinearMomentumRateControlModule getOrCreateLinearMomentumRateControlModule(YoRegistry registry)

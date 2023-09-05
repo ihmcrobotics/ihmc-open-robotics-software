@@ -1,16 +1,5 @@
 package us.ihmc.avatar.networkProcessor;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoInputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlModule;
@@ -22,8 +11,6 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
-import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
-import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
@@ -41,7 +28,6 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
@@ -50,6 +36,12 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.CloseableAndDisposable;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class HumanoidNetworkProcessor implements CloseableAndDisposable
 {
@@ -87,8 +79,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
          humanoidNetworkProcessor.setupFootstepPlanningToolboxModule();
-      if (parameters.isUseMocapModule())
-         humanoidNetworkProcessor.setupMocapModule();
       if (parameters.isUseBehaviorModule())
          humanoidNetworkProcessor.setupBehaviorModule(parameters.isVisualizeBehaviorModule(),
                                                       parameters.isUseAutomaticDiagnostic(),
@@ -287,27 +277,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          modulesToClose.add(module);
 
          return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public IHMCMOCAPLocalizationModule setupMocapModule()
-   {
-      checkIfModuleCanBeCreated(IHMCMOCAPLocalizationModule.class);
-
-      try
-      {
-         MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
-
-         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateROS2Node(),
-                                                       PlanarRegionsListMessage.class,
-                                                       REACommunicationProperties.outputTopic,
-                                                       s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
-         return new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
       }
       catch (Throwable e)
       {

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.BoundingBoxesPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::BoundingBoxesPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "0cd676e84e192f81e02d1d8da8e2d1d24ede0f452717401e834829c5d4396f0a";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

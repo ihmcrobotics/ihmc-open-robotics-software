@@ -1,10 +1,30 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalReset;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RenderShiftedWaypoints;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowBodyPath;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterRawPoints;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowCoordinateSystem;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlan;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowGoal;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowGoalVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowHeightMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowInterRegionVisibilityMap;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowLogGraphics;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowOcTree;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPostProcessingInfo;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowRobot;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowStart;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowStartVisibilityMap;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import us.ihmc.messager.javafx.JavaFXMessager;
 
 public class VisualizationController
 {
@@ -89,5 +109,6 @@ public class VisualizationController
    public void reset()
    {
       messager.submitMessage(GlobalReset, true);
+      messager.submitMessage(ShowFootstepPlan, true);
    }
 }

@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -59,6 +59,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -78,13 +79,12 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
-   private static final boolean keepSCSUp = true;
+   private static final boolean keepSCSUp = false;
 
    protected SimulationTestingParameters simulationTestingParameters;
    protected SCS2AvatarTestingSimulation simulationTestHelper;
@@ -184,6 +184,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setBodyBoxBaseZ(0.4);
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
+      footstepPlannerParameters.setMinimumFootholdPercent(0.99);
+      footstepPlannerParameters.setMaximumStepZ(0.32);
+      footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlannerParameters.setMinimumDistanceFromCliffTops(-1.0);
 
       ThreadTools.sleep(1000);
       simulationTestHelper.simulateNow(1.0);
@@ -196,6 +200,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                                environment.getPlanarRegionsList(),
                                                                goalPose,
                                                                footstepPlannerParameters);
+      requestPacket.setTimeout(10.0);
       requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
@@ -209,7 +214,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), emptyEnvironment, simulationTestingParameters);
       simulationTestHelper.start();
 
-      ((YoBoolean) simulationTestHelper.findVariable("doPartialFootholdDetection")).set(false);
+//      ((YoBoolean) simulationTestHelper.findVariable("doPartialFootholdDetection")).set(false);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionTimeOnFootIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfOtherFootHasNoWidth")).set(0.7);
@@ -428,13 +433,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setFromPacket(requestPacket);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
-      footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
-      System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
+      LogTools.info("output. " + plannerOutput.getFootstepPlanningResult());
 
       if (!plannerOutput.getFootstepPlanningResult().validForExecution())
       {

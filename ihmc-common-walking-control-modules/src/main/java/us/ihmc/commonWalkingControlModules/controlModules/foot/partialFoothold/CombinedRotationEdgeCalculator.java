@@ -20,7 +20,7 @@ public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
 
    public CombinedRotationEdgeCalculator(RobotSide side,
                                          MovingReferenceFrame soleFrame,
-                                         FootholdRotationParameters rotationParameters,
+                                         YoPartialFootholdModuleParameters rotationParameters,
                                          double dt,
                                          YoRegistry registry,
                                          YoGraphicsListRegistry graphicsRegistry)

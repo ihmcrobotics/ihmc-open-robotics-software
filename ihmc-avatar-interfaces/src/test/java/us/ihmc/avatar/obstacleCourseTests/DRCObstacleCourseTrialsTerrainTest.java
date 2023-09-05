@@ -127,7 +127,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOntoSlopes();
       Robot robot = simulationTestHelper.getRobot();
       SideDependentList<String> footNames = new SideDependentList<>(side -> fullRobotModel.getFoot(side).getName());
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                                                       robot,
                                                                                                       footNames,
                                                                                                       1201L);
@@ -199,7 +199,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOverHurdles();
       Robot robot = simulationTestHelper.getRobot();
       SideDependentList<String> footNames = new SideDependentList<>(side -> fullRobotModel.getFoot(side).getName());
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(), robot, footNames, 1201L);
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationConstructionSet().getTime(), robot, footNames, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.04, 0.06, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.2, 0.05, 0.02});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 0.1);

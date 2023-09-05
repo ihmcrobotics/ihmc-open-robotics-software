@@ -1,9 +1,5 @@
 package us.ihmc.valkyrie.simulation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -18,6 +14,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class ValkyrieSimulationLowLevelController extends SimpleRobotController
 {
    private final List<OneDoFJointController> jointControllers = new ArrayList<>();
@@ -30,7 +30,9 @@ public class ValkyrieSimulationLowLevelController extends SimpleRobotController
    private final YoDouble unstableVelocityLowDampingScale = new YoDouble("unstableVelocityLowDampingScale", registry);
    private final YoDouble unstableVelocityLowDampingDuration = new YoDouble("unstableVelocityLowDampingDuration", registry);
 
-   public ValkyrieSimulationLowLevelController(FullRobotModel controllerRobot, Robot simulatedRobot, JointDesiredOutputListReadOnly controllerDesiredOutputList,
+   public ValkyrieSimulationLowLevelController(FullRobotModel controllerRobot,
+                                               Robot simulatedRobot,
+                                               JointDesiredOutputListReadOnly controllerDesiredOutputList,
                                                double controlDT)
    {
       this.controllerRobot = controllerRobot;

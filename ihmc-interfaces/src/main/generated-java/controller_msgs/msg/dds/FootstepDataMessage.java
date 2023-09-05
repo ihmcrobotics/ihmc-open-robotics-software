@@ -78,7 +78,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * All waypoints are for the sole frame and expressed in the trajectory frame.
             * The maximum number of points can be found in the Footstep class.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage>  swing_trajectory_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage>  swing_trajectory_;
    /**
             * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
             * If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
@@ -117,6 +117,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * Step constraint regions to be used by this footstep
             */
    public controller_msgs.msg.dds.StepConstraintsListMessage step_constraints_;
+   /**
+            * If the controller should check and fail if the step is not reachable
+            */
+   public boolean should_check_for_reachability_;
 
    public FootstepDataMessage()
    {
@@ -126,7 +130,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       custom_waypoint_proportions_ = new us.ihmc.idl.IDLSequence.Double (2, "type_6");
 
       custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (12, new geometry_msgs.msg.dds.PointPubSubType());
-      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (12, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (12, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       step_constraints_ = new controller_msgs.msg.dds.StepConstraintsListMessage();
 
    }
@@ -166,6 +170,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       liftoff_duration_ = other.liftoff_duration_;
 
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.step_constraints_, step_constraints_);
+      should_check_for_reachability_ = other.should_check_for_reachability_;
+
    }
 
    /**
@@ -300,7 +306,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * All waypoints are for the sole frame and expressed in the trajectory frame.
             * The maximum number of points can be found in the Footstep class.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage>  getSwingTrajectory()
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage>  getSwingTrajectory()
    {
       return swing_trajectory_;
    }
@@ -424,6 +430,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return step_constraints_;
    }
 
+   /**
+            * If the controller should check and fail if the step is not reachable
+            */
+   public void setShouldCheckForReachability(boolean should_check_for_reachability)
+   {
+      should_check_for_reachability_ = should_check_for_reachability;
+   }
+   /**
+            * If the controller should check and fail if the step is not reachable
+            */
+   public boolean getShouldCheckForReachability()
+   {
+      return should_check_for_reachability_;
+   }
+
 
    public static Supplier<FootstepDataMessagePubSubType> getPubSubType()
    {
@@ -488,6 +509,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.liftoff_duration_, other.liftoff_duration_, epsilon)) return false;
 
       if (!this.step_constraints_.epsilonEquals(other.step_constraints_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.should_check_for_reachability_, other.should_check_for_reachability_, epsilon)) return false;
+
 
       return true;
    }
@@ -528,6 +551,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if(this.liftoff_duration_ != otherMyClass.liftoff_duration_) return false;
 
       if (!this.step_constraints_.equals(otherMyClass.step_constraints_)) return false;
+      if(this.should_check_for_reachability_ != otherMyClass.should_check_for_reachability_) return false;
+
 
       return true;
    }
@@ -571,7 +596,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append("liftoff_duration=");
       builder.append(this.liftoff_duration_);      builder.append(", ");
       builder.append("step_constraints=");
-      builder.append(this.step_constraints_);
+      builder.append(this.step_constraints_);      builder.append(", ");
+      builder.append("should_check_for_reachability=");
+      builder.append(this.should_check_for_reachability_);
       builder.append("}");
       return builder.toString();
    }

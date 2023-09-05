@@ -11,4 +11,4 @@ int32[] joint_hash_codes
 # Trajectory for each joint.
 OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 # Properties for queueing trajectories.
-QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties

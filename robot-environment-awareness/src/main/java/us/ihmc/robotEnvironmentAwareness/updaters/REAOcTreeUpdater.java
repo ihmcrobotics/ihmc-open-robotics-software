@@ -5,8 +5,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -77,7 +75,7 @@ public class REAOcTreeUpdater
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
       nodeLifetimeMilliseconds = reaMessager.createInput(REAModuleAPI.OcTreeNodeLifetimeMillis, 60000L);
 
-      reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
+      reaMessager.addTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
    }
 
    public void initializeReferenceOctree(double octreeResolution)

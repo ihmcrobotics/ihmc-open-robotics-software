@@ -115,7 +115,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       balanceManager.computeICPPlan();
 
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
    }
 
    @Override
@@ -123,7 +123,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
 
-      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
+      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGroundFiltered();
    }
 
    @Override
@@ -169,11 +169,11 @@ public class RecoveringSwingState extends PushRecoveryState
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, null, null);
 
-      pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, Double.NaN);
+      pelvisOrientationManager.initializeSwing();
 
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
    }
 
    @Override
@@ -181,7 +181,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       feetManager.touchDown(swingSide, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
@@ -205,8 +205,8 @@ public class RecoveringSwingState extends PushRecoveryState
                                                                                                                                                 swingSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.getToeOffManager().isSteppingUp())
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.isSteppingUp())
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 

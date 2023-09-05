@@ -16,9 +16,9 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.environments.InclinedEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.RampsEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
 import us.ihmc.tools.MemoryTools;
 
 public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMultiRobotTestInterface
@@ -50,7 +50,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    @Test
    public void testWalkingOverShallowRamps() throws IOException
    {
-      RampsGroundProfile groundProfile = new RampsGroundProfile(0.075, 0.75, 1.2);
+      RampsEnvironment groundProfile = new RampsEnvironment(0.075, 0.75, 1.2);
 
       walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
@@ -58,13 +58,13 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    @Test
    public void testWalkingOverAggressiveRamps() throws IOException
    {
-      RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
+      RampsEnvironment groundProfile = new RampsEnvironment(0.15, 0.75, 1.2);
       walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
-   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException
+   private void walkOverRamps(RampsEnvironment groundProfile, double comHeightForRoughTerrain) throws IOException
    {
-      quadrupedTestFactory.setGroundProfile3D(groundProfile);
+      quadrupedTestFactory.setTerrainObject3D(groundProfile.getTerrainObject3D());
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
@@ -120,9 +120,9 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 
    private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
-      InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
+      InclinedEnvironment groundProfile = new InclinedEnvironment(slope);
       quadrupedTestFactory.setInitialPosition(initialPosition);
-      quadrupedTestFactory.setGroundProfile3D(groundProfile);
+      quadrupedTestFactory.setTerrainObject3D(groundProfile.getTerrainObject3D());
       quadrupedTestFactory.setUseStateEstimator(false);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());

@@ -1,9 +1,0 @@
-{
-  "dockspacePanels" : { },
-  "windows" : {
-    "SCS 2 Simulation Session" : true,
-    "Hinge Data" : true,
-    "YoVariable Search" : false,
-    "VR Thread Debugger" : false
-  }
-}

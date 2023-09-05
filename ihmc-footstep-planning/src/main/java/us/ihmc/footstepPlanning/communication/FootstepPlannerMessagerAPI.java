@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -11,7 +14,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -30,8 +35,6 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -47,7 +50,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme FootstepPlanner = apiFactory.createCategoryTheme("FootstepPlanner");
 
    // Robot state
-   public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
+   public static final Topic<controller_msgs.msg.dds.RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
    public static final Topic<DataSetName> DataSetSelected = topic("DataSetSelected");
    public static final Topic<HeightMapDataSetName> HeightMapDataSetSelected = topic("HeightMapDataSetSelected");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
@@ -89,6 +92,7 @@ public class FootstepPlannerMessagerAPI
 
    // Parameters
    public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
+   public static final Topic<AStarBodyPathPlannerParametersReadOnly> AStarBodyPathPlannerParameters = topic("AStarBodyPathPlannerParameters");
    public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<SwingPlannerParametersReadOnly> SwingPlannerParameters = topic("SwingPlannerParameters");
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
@@ -145,15 +149,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<SwingPlannerType> RequestedSwingPlannerType = topic("RequestedSwingPlannerType");
    public static final Topic<Boolean> PlanSingleStep = topic("PlanSingleStep");
 
+   public static final Topic<FootstepPlan> ReferencePlan = topic("ReferencePlan");
+
    // Robot control
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
 
    // Body path planner output
    public static final Topic<Pair<List<? extends Pose3DReadOnly>, List<? extends Point3DReadOnly>>> BodyPathData = topic("BodyPathData");
-   public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = topic("VisibilityMapWithNavigableRegionData");
-   public static final Topic<VisibilityMapHolder> StartVisibilityMap = topic("StartVisibilityMap");
-   public static final Topic<VisibilityMapHolder> GoalVisibilityMap = topic("GoalVisibilityMap");
-   public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = topic("InterRegionVisibilityMap");
 
    // Footstep planner output
    public static final Topic<Boolean> SendPlan = topic("SendPlan");
@@ -200,6 +202,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
+   public static final Topic<RigidBodyTransform> LoggedNominalIdealStep = topic("LoggedNominalIdealStep");
    public static final Topic<List<Box3D>> LoggedCollisionBoxes = topic("LoggedCollisionBoxes");
 
    public static final Topic<Boolean> ShowLoggedStartOfSwingStep = topic("ShowLoggedStartOfSwingStep");
@@ -208,11 +211,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedSnappedCandidateStep = topic("ShowLoggedSnappedCandidateStep");
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
+   public static final Topic<Boolean> ShowLoggedNominalIdealStep = topic("ShowLoggedNominalIdealStep");
    public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
    public static final Topic<Boolean> ShowHeightMap = topic("ShowHeightMap");
 
    public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathStartNodeToVisualize = topic("BodyPathStartNodeToVisualize");
    public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathCandidateNodeToVisualize = topic("BodyPathCandidateNodeToVisualize");
+   public static final Topic<Boolean> ShowBodyPathPlanData = topic("ShowBodyPathPlanData");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");

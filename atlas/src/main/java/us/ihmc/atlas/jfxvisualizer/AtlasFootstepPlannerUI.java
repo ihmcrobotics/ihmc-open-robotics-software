@@ -1,10 +1,12 @@
 package us.ihmc.atlas.jfxvisualizer;
 
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import javafx.application.Application;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Triple;
+
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Triple;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasUIAuxiliaryData;
@@ -20,19 +22,18 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeROS2Node;
-
-import java.util.List;
 
 /**
  * This class provides a visualizer for the footstep planner module.
  * It allows user to create plans, log and load plans from disk, tune parameters,
  * and debug plans.
  */
-public class AtlasFootstepPlannerUI extends Application
+public class AtlasFootstepPlannerUI extends ApplicationNoModule
 {
    private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 
@@ -64,6 +65,7 @@ public class AtlasFootstepPlannerUI extends Application
       ui = FootstepPlannerUI.createUI(primaryStage,
                                       messager,
                                       drcRobotModel.getVisibilityGraphsParameters(),
+                                      drcRobotModel.getAStarBodyPathPlannerParameters(),
                                       drcRobotModel.getFootstepPlannerParameters("ForLookAndStep"),
                                       drcRobotModel.getSwingPlannerParameters(),
                                       drcRobotModel,
@@ -84,8 +86,8 @@ public class AtlasFootstepPlannerUI extends Application
          // Create logger and connect to messager
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanSingleStep, planSingleStep ->
+         messager.addTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
+         messager.addTopicListener(FootstepPlannerMessagerAPI.PlanSingleStep, planSingleStep ->
          {
             if (planSingleStep)
             {
@@ -109,10 +111,6 @@ public class AtlasFootstepPlannerUI extends Application
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
                                 Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getFootstepPlanVariableDescriptors()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getStartMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getGoalMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getInterRegionVisibilityMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getVisibilityGraphPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
    }
 

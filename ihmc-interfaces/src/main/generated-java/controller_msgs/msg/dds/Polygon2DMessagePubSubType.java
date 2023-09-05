@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.Polygon2DMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::Polygon2DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "baad5603602cdd1f156c6cd14741553878c3617142e82daabc86d4b5b8adc618";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

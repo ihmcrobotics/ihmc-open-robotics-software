@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.MultiContactBalanceStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::MultiContactBalanceStatus_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ab3a162abf80a085daa2d9bf39cc79a7980d79ffdeab0c64b36a5269079d79fc";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

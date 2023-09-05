@@ -10,11 +10,16 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 
 public class MultiContactScriptWriter
 {
    private File scriptFile = null;
+
+   private final List<FrameShape3DReadOnly> environmentShapes = new ArrayList<>();
    private final List<KinematicsToolboxSnapshotDescription> messagesToWrite = new ArrayList<>();
 
    public MultiContactScriptWriter()
@@ -58,7 +63,23 @@ public class MultiContactScriptWriter
       return true;
    }
 
-   public void clear()
+   public void clearEnvironment()
+   {
+      environmentShapes.clear();
+   }
+
+   public void addEnvironmentShape(FrameShape3DReadOnly environmentShape)
+   {
+      this.environmentShapes.add(environmentShape);
+   }
+
+   public void setEnvironmentShapes(List<FrameShape3DBasics> environmentShapes)
+   {
+      this.environmentShapes.clear();
+      this.environmentShapes.addAll(environmentShapes);
+   }
+
+   public void clearScript()
    {
       messagesToWrite.clear();
    }
@@ -68,9 +89,29 @@ public class MultiContactScriptWriter
       messagesToWrite.add(description);
    }
 
+   public int getCurrentScriptSize()
+   {
+      return messagesToWrite.size();
+   }
+
+   public KinematicsToolboxSnapshotDescription getKeyFrame(int index)
+   {
+      return messagesToWrite.get(index);
+   }
+
+   public void remove(int index)
+   {
+      messagesToWrite.remove(index);
+   }
+
    public boolean isEmpty()
    {
       return messagesToWrite.isEmpty();
+   }
+
+   public List<KinematicsToolboxSnapshotDescription> getAllItems()
+   {
+      return messagesToWrite;
    }
 
    public boolean removeLast()
@@ -90,14 +131,21 @@ public class MultiContactScriptWriter
          printStream = new PrintStream(scriptFile);
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-         ArrayNode arrayNode = objectMapper.createArrayNode();
+         ObjectNode rootNode = objectMapper.createObjectNode();
+
+         ArrayNode environmentNode = rootNode.putArray(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
+         ArrayNode scriptNode = rootNode.putArray(KinematicsToolboxSnapshotDescription.SCRIPT_JSON);
+
+         for (FrameShape3DReadOnly environmentShape : environmentShapes)
+            environmentNode.add(MultiContactEnvironmentDescription.toJSON(environmentShape));
 
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
-            arrayNode.add(message.toJSON(objectMapper));
+            scriptNode.add(message.toJSON(objectMapper));
 
-         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, arrayNode);
+         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, rootNode);
          printStream.close();
          scriptFile = null;
+
          return true;
       }
       catch (IOException e)

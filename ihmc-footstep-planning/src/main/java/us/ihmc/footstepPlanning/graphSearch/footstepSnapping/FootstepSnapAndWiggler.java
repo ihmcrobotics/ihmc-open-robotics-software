@@ -7,11 +7,12 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -42,28 +42,32 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private double flatGroundHeight = 0.0;
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
-   protected PlanarRegionsList planarRegionsList;
 
-   private HeightMapData heightMapData;
+   private final FootstepPlannerEnvironmentHandler environmentHandler;
+
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+   private final HeightMapSnapWiggler heightMapSnapWiggler;
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    // Use this by default
-   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
+   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters, FootstepPlannerEnvironmentHandler environmentHandler)
    {
-      this(footPolygonsInSoleFrame, parameters, null, null, null);
+      this(footPolygonsInSoleFrame, parameters, null, environmentHandler,null, null);
    }
 
    // Call this constructor only for testing
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
                                  FootstepPlannerParametersReadOnly parameters,
                                  TickAndUpdatable tickAndUpdatable,
+                                 FootstepPlannerEnvironmentHandler environmentHandler,
                                  YoGraphicsListRegistry graphicsListRegistry,
                                  YoRegistry parentRegistry)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
+      this.heightMapSnapWiggler = new HeightMapSnapWiggler(footPolygonsInSoleFrame, wiggleParameters);
+      this.environmentHandler = environmentHandler;
 
       if (tickAndUpdatable == null)
       {
@@ -73,17 +77,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       {
          gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(tickAndUpdatable, graphicsListRegistry, parentRegistry);
       }
-   }
-
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-      snapDataHolder.clear();
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
    }
 
    public void setFlatGroundHeight(double flatGroundHeight)
@@ -96,9 +89,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       updateWiggleParameters(wiggleParameters, parameters);
    }
 
-   private boolean flatGroundMode()
+   public void clearSnapData()
    {
-      return (planarRegionsList == null || planarRegionsList.isEmpty()) && heightMapData == null;
+      snapDataHolder.clear();
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)
@@ -123,7 +116,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
          return snapData;
       }
-      else if (flatGroundMode())
+      else if (environmentHandler.flatGroundMode())
       {
          return FootstepSnapData.identityData(flatGroundHeight);
       }
@@ -158,15 +151,28 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceStep);
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
 
+      FootstepPlannerEnvironmentHandler.EnvironmentToUse environmentToUse = environmentHandler.computeForFootstep(footstepToSnap);
+
       RigidBodyTransform snapTransform;
 
-      if (heightMapData == null)
+      boolean snappedToPlanarReigons = false;
+      boolean snappedToHeightMap = false;
+      PlanarRegionsList planarRegionsListToUse = null;
+      if (environmentToUse.isPlanarRegion())
       {
-         snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
+         planarRegionsListToUse = environmentHandler.getPlanarRegionsForFootstep(environmentToUse);
+
+         snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon,
+                                                                                        planarRegionsListToUse,
+                                                                                        maximumRegionHeightToConsider,
+                                                                                        planarRegionToPack);
+         if (snapTransform != null)
+            snappedToPlanarReigons = true;
       }
       else
       {
-         snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, parameters.getHeightMapSnapThreshold());
+         snappedToHeightMap = true;
+         snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler.getFallbackHeightMap(), parameters.getHeightMapSnapThreshold());
       }
 
       if (snapTransform == null)
@@ -177,17 +183,18 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
-         if (planarRegionsList != null)
+         if (planarRegionsListToUse != null)
          {
-            snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
+            snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsListToUse));
             computeCroppedFoothold(footstepToSnap, snapData);
          }
-         if (heightMapData != null)
+         if (snappedToHeightMap)
          {
-            snapData.getWiggleTransformInWorld().setIdentity();
-            snapData.setRMSErrorHeightMap(heightMapSnapper.getRMSError());
+            snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
             snapData.setHeightMapArea(heightMapSnapper.getArea());
          }
+         snapData.setSnappedToHeightMap(snappedToHeightMap);
+         snapData.setSnappedToPlanarRegions(snappedToPlanarReigons);
 
          return snapData;
       }
@@ -227,125 +234,114 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
-      int regionIndex = snapData.getRegionIndex();
-      if (regionIndex == -1)
+      FootstepPlannerEnvironmentHandler.EnvironmentToUse environmentToUse = environmentHandler.computeForFootstep(footstepToWiggle);
+      if (environmentToUse.isPlanarRegion())
       {
-         LogTools.warn("Could not find matching region id, unable to find wiggle transform. Region id = " + snapData.getRegionIndex());
-         snapData.getWiggleTransformInWorld().setIdentity();
-         return;
-      }
-      else
-      {
-         planarRegionToPack.set(planarRegionsList.getPlanarRegion(regionIndex));
-      }
-
-      DiscreteFootstepTools.getFootPolygon(footstepToWiggle, footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide()), footPolygon);
-      tempTransform.set(snapData.getSnapTransform());
-      tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-      ConvexPolygon2D footPolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
-
-      RigidBodyTransform wiggleTransformInLocal;
-      boolean concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
-      if (concaveWigglerRequested)
-      {
-         gradientDescentStepConstraintInput.clear();
-         gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInRegionFrame);
-         gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
-         gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
-
-         if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+         PlanarRegionsList planarRegionsList = environmentHandler.getPlanarRegionsForFootstep(environmentToUse);
+         int regionIndex = snapData.getRegionIndex();
+         if (regionIndex == -1)
          {
-            FootstepSnapData stanceSnapData = snapDataHolder.get(stanceStep);
-            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
-
-            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
-            ConvexPolygon2D stancePolygonInStanceSnapFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, stanceSnapData.getSnapTransform());
-
-            // transform from stance snap frame to region local
-            tempTransform.set(stanceSnapData.getSnapTransform());
-
-            int stanceRegionIndex = stanceSnapData.getRegionIndex();
-            if (stanceRegionIndex != -1)
-            {
-               PlanarRegion stanceStepRegion = planarRegionsList.getPlanarRegion(stanceRegionIndex);
-               tempTransform.preMultiply(stanceStepRegion.getTransformToLocal());
-               tempTransform.preMultiply(stanceSnapData.getWiggleTransformInWorld());
-               tempTransform.preMultiply(stanceStepRegion.getTransformToWorld());
-            }
-
-            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-
-            Point3D stanceVertex3D = new Point3D();
-            ConvexPolygon2D projectedStanceFoot = new ConvexPolygon2D();
-
-            for (int i = 0; i < stancePolygonInStanceSnapFrame.getNumberOfVertices(); i++)
-            {
-               stanceVertex3D.set(footPolygon.getVertex(i).getX(), footPolygon.getVertex(i).getY(), 0.0);
-               tempTransform.transform(stanceVertex3D);
-
-               // project to xy in region local
-               projectedStanceFoot.addVertex(stanceVertex3D.getX(), stanceVertex3D.getY());
-            }
-
-            projectedStanceFoot.update();
-            gradientDescentStepConstraintInput.setStanceFootPolygon(projectedStanceFoot);
-            gradientDescentStepConstraintSolver.setStanceFootClearance(parameters.getMinClearanceFromStance());
-         }
-
-         if (parameters.getEnableShinCollisionCheck())
-         {
-            RigidBodyTransform snappedStepTransform = snapData.getSnappedStepTransform(footstepToWiggle);
-            tempTransform.set(snappedStepTransform);
-            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-            gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
-
-            ConvexPolygon2D footPolygon = footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide());
-            double forwardPoint = footPolygon.getMaxX() + parameters.getShinToeClearance();
-            double backwardPoint = footPolygon.getMinX() - parameters.getShinHeelClearance();
-            double shinRadius = 0.5 * (forwardPoint - backwardPoint);
-            double shinXOffset = 0.5 * (forwardPoint + backwardPoint);
-
-            legCollisionShape.setSize(parameters.getShinLength(), shinRadius);
-            transformGenerator.identity();
-            transformGenerator.translate(shinXOffset, 0.0, parameters.getShinHeightOffset());
-            transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
-            transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
-            gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, legCollisionShapeToSoleTransform);
-
-            gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
-         }
-
-         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(gradientDescentStepConstraintInput);
-      }
-      else
-      {
-         double initialDeltaInside = computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, false);
-         if (initialDeltaInside > parameters.getWiggleInsideDeltaTarget())
-         {
-            snapData.setAchievedInsideDelta(initialDeltaInside);
+            LogTools.warn("Could not find matching region id, unable to find wiggle transform. Region id = " + snapData.getRegionIndex());
             snapData.getWiggleTransformInWorld().setIdentity();
             return;
          }
          else
          {
-            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
+            planarRegionToPack.set(planarRegionsList.getPlanarRegion(regionIndex));
+         }
+
+         DiscreteFootstepTools.getFootPolygon(footstepToWiggle, footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide()), footPolygon);
+         tempTransform.set(snapData.getSnapTransform());
+         tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+         ConvexPolygon2D footPolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+
+         boolean update0 = footstepToWiggle.getXIndex() == 147 && footstepToWiggle.getYIndex() == 7 && footstepToWiggle.getYawIndex() == 0;
+         boolean update1 = footstepToWiggle.getXIndex() == 146 && footstepToWiggle.getYIndex() == 2 && footstepToWiggle.getYawIndex() == 0;
+         boolean updateSCS = update0 || update1;
+
+         RigidBodyTransform wiggleTransformInLocal;
+         boolean concaveWigglerRequested;
+
+         concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
+         if (concaveWigglerRequested)
+         {
+            gradientDescentStepConstraintInput.clear();
+            gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInRegionFrame);
+            gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
+            gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
+
+            if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
             {
+               DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
+               FootstepSnapData stanceSnapData = snapDataHolder.get(stanceStep);
+               tempTransform.set(stanceSnapData.getSnapTransform());
+               if (!stanceSnapData.getWiggleTransformInWorld().containsNaN())
+                  tempTransform.preMultiply(stanceSnapData.getWiggleTransformInWorld());
+               tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+               ConvexPolygon2D stancePolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+               gradientDescentStepConstraintInput.setStanceFootPolygon(stancePolygonInRegionFrame);
+               gradientDescentStepConstraintSolver.setStanceFootClearance(parameters.getMinClearanceFromStance());
+            }
+
+            if (parameters.getEnableShinCollisionCheck())
+            {
+               RigidBodyTransform snappedStepTransform = snapData.getSnappedStepTransform(footstepToWiggle);
+               tempTransform.set(snappedStepTransform);
+               tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+               gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
+
+               ConvexPolygon2D footPolygon = footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide());
+               double forwardPoint = footPolygon.getMaxX() + parameters.getShinToeClearance();
+               double backwardPoint = footPolygon.getMinX() - parameters.getShinHeelClearance();
+               double shinRadius = 0.5 * (forwardPoint - backwardPoint);
+               double shinXOffset = 0.5 * (forwardPoint + backwardPoint);
+
+               legCollisionShape.setSize(parameters.getShinLength(), shinRadius);
+               transformGenerator.identity();
+               transformGenerator.translate(shinXOffset, 0.0, parameters.getShinHeightOffset());
+               transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
+               transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
+               gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, legCollisionShapeToSoleTransform);
+
+               gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
+            }
+
+            wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(gradientDescentStepConstraintInput);
+         }
+         else
+         {
+            double initialDeltaInside = computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, false);
+            if (initialDeltaInside > parameters.getWiggleInsideDeltaTarget())
+            {
+               snapData.setAchievedInsideDelta(initialDeltaInside);
                snapData.getWiggleTransformInWorld().setIdentity();
                return;
             }
+            else
+            {
+               if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
+               {
+                  snapData.getWiggleTransformInWorld().setIdentity();
+                  return;
+               }
+            }
          }
+
+         // compute achieved delta inside
+         footPolygonInRegionFrame.applyTransform(wiggleTransformInLocal, false);
+         snapData.setAchievedInsideDelta(computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, concaveWigglerRequested));
+
+         // compute wiggle transform in world
+         snapData.getWiggleTransformInWorld().set(planarRegionToPack.getTransformToLocal());
+         snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
+         snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
+      }
+      else
+      {
+         heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler.getFallbackHeightMap(), snapData, parameters.getHeightMapSnapThreshold());
       }
 
-      // compute achieved delta inside
-      footPolygonInRegionFrame.applyTransform(wiggleTransformInLocal, false);
-      snapData.setAchievedInsideDelta(computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, concaveWigglerRequested));
-
-      // compute wiggle transform in world
-      snapData.getWiggleTransformInWorld().set(planarRegionToPack.getTransformToLocal());
-      snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
-      snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
-
-      if (!parameters.getEnableConcaveHullWiggler() && stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
       {
          FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
 
@@ -367,7 +363,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       computeCroppedFoothold(footstepToWiggle, snapData);
    }
 
-   /** Extracted to method for testing purposes */
+   /**
+    * Extracted to method for testing purposes
+    */
    protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
    {
       return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
@@ -378,7 +376,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final ConvexPolygon2D polygon1 = new ConvexPolygon2D();
    private final ConvexPolygon2D polygon2 = new ConvexPolygon2D();
 
-   /** Extracted to method for testing purposes */
+   /**
+    * Extracted to method for testing purposes
+    */
    protected boolean stepsAreTooClose(DiscreteFootstep step1, FootstepSnapData snapData1, DiscreteFootstep step2, FootstepSnapData snapData2)
    {
       DiscreteFootstepTools.getFootPolygon(step1, footPolygonsInSoleFrame.get(step1.getRobotSide()), polygon1);
@@ -402,7 +402,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected void computeCroppedFoothold(DiscreteFootstep footstep, FootstepSnapData snapData)
    {
-      if (flatGroundMode())
+      if (environmentHandler.flatGroundMode())
       {
          snapData.getCroppedFoothold().clearAndUpdate();
          return;
@@ -432,7 +432,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
    }
 
-   /** package-private for testing */
+   /**
+    * package-private for testing
+    */
    static double computeAchievedDeltaInside(ConvexPolygon2DReadOnly footPolygon, PlanarRegion planarRegion, boolean useConcaveHull)
    {
       double achievedDeltaInside = Double.POSITIVE_INFINITY;
@@ -450,7 +452,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
       else
       {
-         deltaInsideCalculator = vertex -> - planarRegion.getConvexHull().signedDistance(vertex);
+         deltaInsideCalculator = vertex -> -planarRegion.getConvexHull().signedDistance(vertex);
       }
 
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)

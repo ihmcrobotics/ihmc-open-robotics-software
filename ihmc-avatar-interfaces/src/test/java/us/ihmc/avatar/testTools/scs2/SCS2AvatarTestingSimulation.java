@@ -28,13 +28,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -44,17 +41,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
-import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
-import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.SimulationSessionControls;
+import us.ihmc.scs2.simulation.SimulationTerminalCondition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.RobotInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -71,10 +64,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
-   private static final double CAMERA_PITCH_FROM_ROBOT = Math.toRadians(-15.0);
-   private static final double CAMERA_YAW_FROM_ROBOT = Math.toRadians(15.0);
-   private static final double CAMERA_DISTANCE_FROM_ROBOT = 6.0;
-
    private final SCS2AvatarSimulation avatarSimulation;
 
    private final ControllerFailureListener exceptionOnFailureListener = fallingDirection ->
@@ -97,33 +86,33 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * Constructors for setting up a custom simulation environment for which the default factory isn't
     * suited.
     * 
-    * @param simulationSession      the simulation session to wrap.
-    * @param robotModel             the robot model for enabling convenience methods. Can be
-    *                               {@code null}.
-    * @param fullRobotModel         the robot to be associated as the controller robot for enabling
-    *                               convenience methods. Can be {@code null}.
-    * @param yoGraphicsListRegistry graphics to be displayed in the GUI. Can be {@code null}.
+    * @param simulationConstructionSet the simulation to wrap.
+    * @param robotModel                the robot model for enabling convenience methods. Can be
+    *                                  {@code null}.
+    * @param fullRobotModel            the robot to be associated as the controller robot for enabling
+    *                                  convenience methods. Can be {@code null}.
+    * @param yoGraphicsListRegistry    graphics to be displayed in the GUI. Can be {@code null}.
     */
-   public SCS2AvatarTestingSimulation(SimulationSession simulationSession,
+   public SCS2AvatarTestingSimulation(SimulationConstructionSet2 simulationConstructionSet,
                                       DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                       SimulationTestingParameters parameters)
    {
       this(new SCS2AvatarSimulation());
-      avatarSimulation.setSimulationSession(simulationSession);
-      avatarSimulation.setRobot(simulationSession.getPhysicsEngine().getRobots().get(0));
+      avatarSimulation.setSimulationConstructionSet(simulationConstructionSet);
+      avatarSimulation.setRobot(simulationConstructionSet.getPhysicsEngine().getRobots().get(0));
       if (robotModel != null)
          avatarSimulation.setRobotModel(robotModel);
       if (fullRobotModel != null)
          avatarSimulation.setFullHumanoidRobotModel(fullRobotModel);
       if (yoGraphicsListRegistry != null)
-         simulationSession.getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
       if (parameters != null)
       {
          avatarSimulation.setShowGUI(parameters.getCreateGUI());
-         simulationSession.initializeBufferSize(parameters.getDataBufferSize());
+         simulationConstructionSet.initializeBufferSize(parameters.getDataBufferSize());
          setCreateVideo(parameters.getCreateSCSVideos());
          setKeepSCSUp(parameters.getKeepSCSUp());
       }
@@ -156,7 +145,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void start(boolean cameraTracksPelvis)
    {
-      getSimulationSessionControls().addSimulationThrowableListener(lastThrowable::set);
+      getSimulationConstructionSet().addSimulationThrowableListener(lastThrowable::set);
       enableExceptionControllerFailure();
 
       // Necessary to be able to restart the GUI during a series of tests.
@@ -165,20 +154,18 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
       avatarSimulation.start();
 
-      if (getSessionVisualizerControls() != null)
+      if (getSimulationConstructionSet().isVisualizerEnabled())
       {
-         getSessionVisualizerControls().waitUntilFullyUp();
-         getSessionVisualizerControls().addVisualizerShutdownListener(() -> isVisualizerGoingDown.set(true));
+         getSimulationConstructionSet().waitUntilVisualizerFullyUp();
+         getSimulationConstructionSet().addVisualizerShutdownListener(() -> isVisualizerGoingDown.set(true));
 
-         SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
-         if (initialRootJointState != null)
-            initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
+         setCameraDefaultRobotView();
          if (cameraTracksPelvis)
-            requestCameraRigidBodyTracking(getRobotModel().getSimpleRobotName(), getRobot().getFloatingRootJoint().getSuccessor().getName());
+            requestCameraRigidBodyTracking(getRobot().getFloatingRootJoint().getSuccessor().getName());
       }
 
       // We park the simulation thread assuming that the calling test will need to run the simulation in their own thread to keep things synchronous.
-      getSimulationSession().stopSessionThread();
+      getSimulationConstructionSet().stopSimulationThread();
    }
 
    public void enableExceptionControllerFailure()
@@ -193,32 +180,31 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          getHighLevelHumanoidControllerFactory().detachControllerFailureListener(exceptionOnFailureListener);
    }
 
-   private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
-   {
-      Point3D focusPosition = new Point3D(robotPosition);
-      Point3D cameraPosition = new Point3D(10, 0, 0);
-      RotationMatrixTools.applyPitchRotation(CAMERA_PITCH_FROM_ROBOT, cameraPosition, cameraPosition);
-      RotationMatrixTools.applyYawRotation(CAMERA_YAW_FROM_ROBOT, cameraPosition, cameraPosition);
-      RotationMatrixTools.applyYawRotation(robotOrientation.getYaw(), cameraPosition, cameraPosition);
-      cameraPosition.scale(CAMERA_DISTANCE_FROM_ROBOT / cameraPosition.distanceFromOrigin());
-      cameraPosition.add(focusPosition);
-
-      setCamera(focusPosition, cameraPosition);
-   }
-
    // Simulation controls:
    /**
     * Adds a terminal condition that will be used in the subsequent simulations to determine when to
     * stop the simulation.
-    * <p>
-    * The condition can be removed with {@link #removeSimulationTerminalCondition(BooleanSupplier)}.
-    * </p>
     * 
     * @param terminalCondition the new condition used to terminate future simulation.
     */
    public void addSimulationTerminalCondition(BooleanSupplier terminalCondition)
    {
-      getSimulationSessionControls().addExternalTerminalCondition(terminalCondition);
+      getSimulationConstructionSet().addExternalTerminalCondition(terminalCondition);
+   }
+
+   /**
+    * Adds a terminal condition that will be used in the subsequent simulations to determine when to
+    * stop the simulation.
+    * <p>
+    * The condition can be removed with
+    * {@link #removeSimulationTerminalCondition(SimulationTerminalCondition)}.
+    * </p>
+    * 
+    * @param terminalCondition the new condition used to terminate future simulation.
+    */
+   public void addSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
+   {
+      getSimulationConstructionSet().addExternalTerminalCondition(terminalCondition);
    }
 
    /**
@@ -226,9 +212,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * 
     * @param terminalCondition the condition to remove.
     */
-   public void removeSimulationTerminalCondition(BooleanSupplier terminalCondition)
+   public void removeSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
    {
-      getSimulationSessionControls().removeExternalTerminalCondition(terminalCondition);
+      getSimulationConstructionSet().removeExternalTerminalCondition(terminalCondition);
    }
 
    /**
@@ -264,7 +250,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public boolean simulateOneBufferRecordPeriodNow()
    {
-      return simulateNow(getSimulationSession().getBufferRecordTickPeriod());
+      return simulateNow(getSimulationConstructionSet().getBufferRecordTickPeriod());
    }
 
    /**
@@ -285,7 +271,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       checkSimulationSessionAlive();
       lastThrowable.set(null);
-      return getSimulationSessionControls().simulateNow(duration);
+      return getSimulationConstructionSet().simulateNow(duration);
    }
 
    /**
@@ -306,7 +292,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       checkSimulationSessionAlive();
       lastThrowable.set(null);
-      return getSimulationSessionControls().simulateNow(numberOfSimulationTicks);
+      return getSimulationConstructionSet().simulateNow(numberOfSimulationTicks);
    }
 
    /**
@@ -332,7 +318,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       checkSimulationSessionAlive();
       lastThrowable.set(null);
-      return getSimulationSessionControls().simulateNow();
+      return getSimulationConstructionSet().simulateNow();
    }
 
    /**
@@ -353,14 +339,14 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    private void checkSimulationSessionAlive()
    {
-      if (getSimulationSession().isSessionShutdown())
+      if (getSimulationConstructionSet().isSessionShutdown())
          throw new IllegalStateException("Simulation has been shutdown");
    }
 
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3DReadOnly boundingBox)
    {
       checkSimulationSessionAlive();
-      RobotInterface robot = getSimulationSession().getPhysicsEngine().getRobots().get(0);
+      RobotInterface robot = getSimulationConstructionSet().getPhysicsEngine().getRobots().get(0);
       FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
       boolean inside = boundingBox.isInsideInclusive(rootJoint.getJointPose().getPosition());
       if (!inside)
@@ -373,51 +359,54 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void cropBuffer()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().cropBuffer();
+      getSimulationConstructionSet().cropBuffer();
    }
 
    public void setInPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferInPointIndexToCurrent();
+      getSimulationConstructionSet().setBufferInPoint();
    }
 
    public void setOutPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferOutPointIndexToCurrent();
+      getSimulationConstructionSet().setBufferOutPoint();
    }
 
    public void gotoInPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferCurrentIndexToInPoint();
+      getSimulationConstructionSet().gotoBufferInPoint();
    }
 
    public void gotoOutPoint()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().setBufferCurrentIndexToOutPoint();
+      getSimulationConstructionSet().gotoBufferOutPoint();
    }
 
    public void stepBufferIndexForward()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().stepBufferIndexForward();
+      getSimulationConstructionSet().stepBufferIndexForward();
    }
 
    public void stepBufferIndexBackward()
    {
       checkSimulationSessionAlive();
-      getSimulationSessionControls().stepBufferIndexBackward();
+      getSimulationConstructionSet().stepBufferIndexBackward();
    }
 
    // GUI controls:
+   public void setCameraDefaultRobotView()
+   {
+      getAvatarSimulation().setCameraDefaultRobotView();
+   }
+
    public void setCameraZoom(double distanceFromFocus)
    {
-      checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().setCameraZoom(distanceFromFocus);
+      getAvatarSimulation().setCameraZoom(distanceFromFocus);
    }
 
    /**
@@ -425,19 +414,24 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
     * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param focus the new focus position.
     */
    public void setCameraFocusPosition(Point3DReadOnly focus)
    {
-      checkSimulationSessionAlive();
-      setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
+      getAvatarSimulation().setCameraFocusPosition(focus);
    }
 
    /**
     * Sets the new focus point the camera is looking at.
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
     * </p>
     *
     * @param x the x-coordinate of the new focus location.
@@ -446,9 +440,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraFocusPosition(double x, double y, double z)
    {
-      checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().setCameraFocusPosition(x, y, z);
+      getAvatarSimulation().setCameraFocusPosition(x, y, z);
    }
 
    /**
@@ -461,7 +453,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(Point3DReadOnly position)
    {
-      setCameraPosition(position.getX(), position.getY(), position.getZ());
+      getAvatarSimulation().setCameraPosition(position);
    }
 
    /**
@@ -476,61 +468,61 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(double x, double y, double z)
    {
-      checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().setCameraPosition(x, y, z);
+      getAvatarSimulation().setCameraPosition(x, y, z);
    }
 
    /**
     * Sets the camera configuration.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param cameraFocus    the new focus position (where the camera is looking at).
-    * @param cameraPosition the new camerate position.
+    * @param cameraPosition the new camera position.
     */
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
-      setCameraFocusPosition(cameraFocus);
-      setCameraPosition(cameraPosition);
+      getAvatarSimulation().setCamera(cameraFocus, cameraPosition);
+   }
+
+   public void requestCameraRigidBodyTracking(String rigidBodyName)
+   {
+      getAvatarSimulation().requestCameraRigidBodyTracking(rigidBodyName);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
    {
-      checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().requestCameraRigidBodyTracking(robotName, rigidBodyName);
+      getAvatarSimulation().requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
    public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
    {
       checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().addStaticVisuals(visualDefinitions);
+      getSimulationConstructionSet().addStaticVisuals(visualDefinitions);
    }
 
    public void addYoGraphicDefinition(YoGraphicDefinition yoGraphicDefinition)
    {
       checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().addYoGraphic(yoGraphicDefinition);
+      getSimulationConstructionSet().addYoGraphic(yoGraphicDefinition);
    }
 
    public void addYoGraphicDefinition(String namespace, YoGraphicDefinition yoGraphicDefinition)
    {
       checkSimulationSessionAlive();
-      if (getSessionVisualizerControls() != null)
-         getSessionVisualizerControls().addYoGraphic(namespace, yoGraphicDefinition);
+      getSimulationConstructionSet().addYoGraphic(namespace, yoGraphicDefinition);
    }
 
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       checkSimulationSessionAlive();
-      SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
+      YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
    }
 
    public void addYoGraphic(YoGraphic yoGraphic)
    {
       checkSimulationSessionAlive();
-      addYoGraphicDefinition(SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic));
+      addYoGraphicDefinition(YoGraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
    // Misc.
@@ -541,28 +533,26 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void finishTest(boolean waitUntilGUIIsDone)
    {
-      if (waitUntilGUIIsDone && getSessionVisualizerControls() != null && !avatarSimulation.hasBeenDestroyed())
+      if (waitUntilGUIIsDone && getSimulationConstructionSet() != null && getSimulationConstructionSet().isVisualizerEnabled()
+            && !avatarSimulation.hasBeenDestroyed())
       {
-         getSimulationSession().setSessionMode(SessionMode.PAUSE);
-         getSimulationSession().startSessionThread();
+         getSimulationConstructionSet().pause();
+         getSimulationConstructionSet().startSimulationThread();
 
          JavaFXMissingTools.runAndWait(getClass(), () ->
          {
             if (!isVisualizerGoingDown.get())
             {
-               Window primaryWindow = getSessionVisualizerControls().getPrimaryWindow();
+               Window primaryWindow = getSimulationConstructionSet().getPrimaryGUIWindow();
                primaryWindow.requestFocus();
                Alert alert = new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK);
                SessionVisualizerIOTools.addSCSIconToDialog(alert);
                alert.initOwner(primaryWindow);
                JavaFXMissingTools.centerDialogInOwner(alert);
-               // TODO Seems that on Ubuntu the changes done to the window position/size are not processed properly until the window is showing.
-               // This may be related to the bug reported when using GTK3: https://github.com/javafxports/openjdk-jfx/pull/446, might be fixed in later version.
-               alert.setOnShown(e -> JavaFXMissingTools.runLater(getClass(), () -> JavaFXMissingTools.centerDialogInOwner(alert)));
                alert.showAndWait();
             }
          });
-         getSessionVisualizerControls().waitUntilDown();
+         getSimulationConstructionSet().waitUntilVisualizerDown();
       }
       else
       {
@@ -718,7 +708,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          @Override
          public void changed(YoVariable v)
          {
-            if (getSimulationSession() == null | getSimulationSession().getActiveMode() != SessionMode.RUNNING)
+            if (getSimulationConstructionSet() == null || !getSimulationConstructionSet().isSimulating())
                return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
 
             desiredICP.setX(desiredICPX.getDoubleValue());
@@ -738,7 +728,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          @Override
          public void changed(YoVariable v)
          {
-            if (getSimulationSession() == null | getSimulationSession().getActiveMode() != SessionMode.RUNNING)
+            if (getSimulationConstructionSet() == null || !getSimulationConstructionSet().isSimulating())
                return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
 
             desiredICP.setY(desiredICPY.getDoubleValue());
@@ -771,7 +761,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public double getSimulationDT()
    {
-      return getSimulationSession().getSessionDTSeconds();
+      return getSimulationConstructionSet().getDT();
    }
 
    public Robot getRobot()
@@ -784,24 +774,14 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return avatarSimulation.getRobotDefinition();
    }
 
-   public SimulationSession getSimulationSession()
+   public SimulationConstructionSet2 getSimulationConstructionSet()
    {
-      return avatarSimulation.getSimulationSession();
-   }
-
-   public SimulationSessionControls getSimulationSessionControls()
-   {
-      return getSimulationSession().getSimulationSessionControls();
-   }
-
-   public SessionVisualizerControls getSessionVisualizerControls()
-   {
-      return avatarSimulation.getSessionVisualizerControls();
+      return avatarSimulation.getSimulationConstructionSet();
    }
 
    public double getSimulationTime()
    {
-      return avatarSimulation.getSimulationSession().getTime().getValue();
+      return avatarSimulation.getSimulationConstructionSet().getTime().getValue();
    }
 
    public double getControllerTime()
@@ -811,7 +791,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public double getTimePerRecordTick()
    {
-      return getSimulationSession().getBufferRecordTimePeriod();
+      return getSimulationConstructionSet().getBufferRecordTimePeriod();
    }
 
    public void createBambooVideo(String simplifiedRobotModelName, int callStackHeight)
@@ -854,7 +834,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          @Override
          public void gotoOutPointNow()
          {
-            getSimulationSessionControls().setBufferCurrentIndexToOutPoint();
+            getSimulationConstructionSet().gotoBufferOutPoint();
          }
 
          @Override
@@ -869,8 +849,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void exportVideo(File videoFile)
    {
-      getSimulationSession().startSessionThread();
-      getSessionVisualizerControls().exportVideo(videoFile);
+      getSimulationConstructionSet().startSimulationThread();
+      getSimulationConstructionSet().exportVideo(videoFile);
    }
 
    public void addRegistry(YoRegistry registry)
@@ -880,7 +860,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public YoRegistry getRootRegistry()
    {
-      return getSimulationSession().getRootRegistry();
+      return getSimulationConstructionSet().getRootRegistry();
    }
 
    @Override

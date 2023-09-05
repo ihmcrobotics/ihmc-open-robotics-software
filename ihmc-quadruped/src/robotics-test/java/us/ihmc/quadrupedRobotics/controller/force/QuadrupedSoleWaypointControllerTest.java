@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

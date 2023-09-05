@@ -7,8 +7,8 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.control.Label;
 import us.ihmc.commons.Conversions;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.javafx.JavaFXMessager;
 
 public class TimeStatisticsManager extends AnimationTimer
 {
@@ -27,7 +27,7 @@ public class TimeStatisticsManager extends AnimationTimer
 
       robotConfigurationDataReference = messager.createInput(robotConfigurationDataTopic, null);
 
-      messager.registerTopicListener(robotConfigurationDataTopic, m ->
+      messager.addTopicListener(robotConfigurationDataTopic, m ->
       {
          if (m != null && newTimeToDisplay.get() == null)
          {

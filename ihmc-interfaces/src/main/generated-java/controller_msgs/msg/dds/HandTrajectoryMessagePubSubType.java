@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "fbf7f1cee0f2224c948116d25730baa239af7aa9c8d518ca2984fc0dee2a20e1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -46,7 +58,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -70,7 +82,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -84,7 +96,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_9(data.getRobotSide());
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -95,7 +107,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
 
    }
 
@@ -105,7 +117,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+      ser.write_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
 
@@ -115,7 +127,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+      ser.read_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
 

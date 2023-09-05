@@ -41,18 +41,10 @@ public enum HighLevelControllerName
 
    static
    {
-      name.put(DO_NOTHING_BEHAVIOR, "DO_NOTHING_BEHAVIOR");
-      name.put(STAND_PREP_STATE, "STAND_PREP_STATE");
-      name.put(STAND_READY, "STAND_READY");
-      name.put(FREEZE_STATE, "FREEZE_STATE");
-      name.put(STAND_TRANSITION_STATE, "STAND_TRANSITION_STATE");
-      name.put(WALKING, "WALKING");
-      name.put(EXIT_WALKING, "EXIT_WALKING");
-      name.put(DIAGNOSTICS, "DIAGNOSTICS");
-      name.put(CALIBRATION, "CALIBRATION");
-      name.put(CUSTOM1, "UNDEFINED");
-      name.put(FALLING_STATE, "FALLING_STATE");
-      name.put(PUSH_RECOVERY, "PUSH_RECOVERY");
+      for (HighLevelControllerName highLevelControllerName : values())
+      {
+         name.put(highLevelControllerName, highLevelControllerName.name());
+      }
    }
 
    public static void setName(HighLevelControllerName state, String newName)

@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
@@ -27,11 +28,12 @@ public class FootTrajectoryPredictor
 {
    private static final double defaultSwingHeight = 0.15;
    private static final double defaultPredictorWaypointProportion = 0.25;
+   private static final int maxFootWaypointsInPrediction = Footstep.maxNumberOfSwingWaypoints + 2;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final MultipleWaypointsPositionTrajectoryGenerator leftFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("leftFootPredictedTrajectory", ReferenceFrame.getWorldFrame(), registry);
-   private final MultipleWaypointsPositionTrajectoryGenerator rightFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("rightFootPredictedTrajectory", ReferenceFrame.getWorldFrame(), registry);
+   private final MultipleWaypointsPositionTrajectoryGenerator leftFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("leftFootPredictedTrajectory", maxFootWaypointsInPrediction, ReferenceFrame.getWorldFrame(), registry);
+   private final MultipleWaypointsPositionTrajectoryGenerator rightFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("rightFootPredictedTrajectory", maxFootWaypointsInPrediction, ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<MultipleWaypointsPositionTrajectoryGenerator> footTrajectories = new SideDependentList<>(leftFootTrajectory, rightFootTrajectory);
 
    private final DoubleProvider predictorSwingHeight = new DoubleParameter("predictorSwingHeight", registry, defaultSwingHeight);
@@ -39,14 +41,6 @@ public class FootTrajectoryPredictor
 
    private final SideDependentList<RecyclingArrayList<SE3TrajectoryPoint>> swingWaypoints = new SideDependentList<>(new RecyclingArrayList<>(SE3TrajectoryPoint::new),
                                                                                                                     new RecyclingArrayList<>(SE3TrajectoryPoint::new));
-
-   private final FramePose3D midFootPosition = new FramePose3D();
-   private final FramePose3D midstancePose = new FramePose3D();
-   private final PoseReferenceFrame midstanceFrame = new PoseReferenceFrame("midstanceFrame", ReferenceFrame.getWorldFrame());
-   private final ZUpFrame midstanceZUpFrame = new ZUpFrame(midstanceFrame, "midstanceZUpFrame");
-   private final FramePose3D goalPose = new FramePose3D();
-   private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
-   private final FramePoint3D footGoalPosition = new FramePoint3D();
 
    public FootTrajectoryPredictor(YoRegistry parentRegistry)
    {

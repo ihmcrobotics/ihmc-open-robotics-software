@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import controller_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import gnu.trove.list.array.TByteArrayList;
 import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.jOctoMap.key.OcTreeKey;

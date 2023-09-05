@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.messageHandling;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.CommandConsumerWithDelayBuffers;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -11,6 +12,7 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootStates;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuadrupedStepCommandConsumer
@@ -27,8 +29,19 @@ public class QuadrupedStepCommandConsumer
                                        QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory managerFactory)
    {
       this.stepMessageHandler = stepMessageHandler;
-      this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager,
-                                                                                 controllerToolbox.getRuntimeEnvironment().getRobotTimestamp());
+
+      List<Class<? extends Command<?, ?>>> commandsToRegister = new ArrayList<>();
+      commandsToRegister.add(QuadrupedTimedStepListCommand.class);
+      commandsToRegister.add(SoleTrajectoryCommand.class);
+      commandsToRegister.add(PlanarRegionsListCommand.class);
+      commandsToRegister.add(PauseWalkingCommand.class);
+      commandsToRegister.add(AbortWalkingCommand.class);
+      commandsToRegister.add(QuadrupedFootLoadBearingCommand.class);
+      commandsToRegister.add(QuadrupedBodyOrientationCommand.class);
+      commandsToRegister.add(QuadrupedBodyTrajectoryCommand.class);
+      commandsToRegister.add(QuadrupedBodyHeightCommand.class);
+
+      commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, controllerToolbox.getRuntimeEnvironment().getRobotTimestamp());
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = managerFactory.getOrCreateBodyOrientationManager();

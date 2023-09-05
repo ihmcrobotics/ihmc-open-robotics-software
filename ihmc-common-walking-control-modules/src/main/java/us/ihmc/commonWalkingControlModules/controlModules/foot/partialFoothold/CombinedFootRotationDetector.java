@@ -25,7 +25,7 @@ public class CombinedFootRotationDetector implements FootRotationDetector
 
    public CombinedFootRotationDetector(RobotSide side,
                                        MovingReferenceFrame soleFrame,
-                                       FootholdRotationParameters rotationParameters,
+                                       YoPartialFootholdModuleParameters rotationParameters,
                                        double dt,
                                        YoRegistry registry)
    {

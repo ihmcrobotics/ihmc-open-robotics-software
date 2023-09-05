@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.buildingExploration;
 
+import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
@@ -10,6 +11,7 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -20,11 +22,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode.*;
 
+/**
+ * This was intended to be an upgrade for the 2019 Atlas building exploration demo but never got used.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
-                                                                              BuildingExplorationBehavior::new,
-                                                                              BuildingExplorationBehaviorAPI.API);
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehavior::new);
    private final BehaviorHelper helper;
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;
@@ -34,7 +38,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final TraverseStairsBehavior traverseStairsBehavior;
    private final BuildingExplorationBehaviorParameters parameters;
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("CommsRelay", true);
-   private String lastTickedThing = "NONE";
+   private String lastTickedNode = "NONE";
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
@@ -49,17 +53,18 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
       traverseStairsBehavior.setSyncedRobot(syncedRobot);
       addChild(traverseStairsBehavior);
-      helper.subscribeViaCallback(Parameters, parameters ->
+      helper.subscribeViaCallback(PARAMETERS.getCommandTopic(), message ->
       {
          helper.getOrCreateStatusLogger().info("Accepting new building exploration parameters");
-         this.parameters.setAllFromStrings(parameters);
+         StoredPropertySetMessageTools.copyToStoredPropertySet(message, parameters, () -> { });
       });
-      helper.subscribeViaCallback(Goal, newGoal ->
+      helper.subscribeViaCallback(GOAL_COMMAND, newGoal ->
       {
          goal.set(newGoal);
       });
-      helper.subscribeViaCallback(Mode, newValue ->
+      helper.subscribeViaCallback(MODE, message ->
       {
+         BuildingExplorationBehaviorMode newValue = values()[message.getData()];
          LogTools.info("Received mode: {}", newValue);
          mode.set(newValue);
       });
@@ -67,7 +72,12 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          mode.set(TELEOP);
          traverseStairsBehavior.reset();
-         executor.submit(() -> helper.publish(Mode, mode.get()));
+         executor.submit(() ->
+         {
+            UInt16 modeMessage = new UInt16();
+            modeMessage.setData(mode.get().ordinal());
+            helper.publish(MODE, modeMessage);
+         });
       });
    }
 
@@ -77,7 +87,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       syncedRobot.update();
 
       BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.RUNNING;
-      lastTickedThing = "NONE";
+      lastTickedNode = "NONE";
       BuildingExplorationBehaviorMode currentMode = mode.get();
       if (currentMode == AUTO)
       {
@@ -112,7 +122,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
          status = tickStairs();
       }
 
-      helper.publish(LastTickedThing, lastTickedThing);
+      helper.publish(LAST_TICKED_NODE, lastTickedNode);
 
       return status;
    }
@@ -121,19 +131,19 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       if (lookAndStepBehavior.isReset())
          lookAndStepBehavior.acceptGoal(goal.get());
-      lastTickedThing = "LOOK_AND_STEP";
+      lastTickedNode = "LOOK_AND_STEP";
       return lookAndStepBehavior.tick();
    }
 
    private BehaviorTreeNodeStatus tickDoor()
    {
-      lastTickedThing = "DOOR";
+      lastTickedNode = "DOOR";
       return doorBehavior.tick();
    }
 
    private BehaviorTreeNodeStatus tickStairs()
    {
-      lastTickedThing = "STAIRS";
+      lastTickedNode = "STAIRS";
       return traverseStairsBehavior.tick();
    }
 

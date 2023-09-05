@@ -6,15 +6,14 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
-import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 /**
- * This class is mostly for using Messager and supporting behaviors defining their
- * Messager APIs in code that depends on this.
+ * FIXME: This class was designed for using Messager and supporting behaviors defining their
+ *  Messager APIs in code that depends on this. We have removed Messager, so the design needs
+ *  to be reconsidered.
  */
 public class BehaviorRegistry
 {
@@ -32,7 +31,6 @@ public class BehaviorRegistry
       ARCHIVED_BEHAVIORS.register(NavigationBehavior.DEFINITION);
    }
 
-   private static volatile MessagerAPI MESSAGER_API;
    private static volatile BehaviorRegistry ACTIVE_REGISTRY;
 
    private BehaviorDefinition highestLevelNode;
@@ -56,32 +54,6 @@ public class BehaviorRegistry
    public void register(BehaviorDefinition definition)
    {
       definitionEntries.add(definition);
-   }
-
-   public void activateRegistry()
-   {
-      getMessagerAPI();
-   }
-
-   public synchronized MessagerAPI getMessagerAPI()
-   {
-      if (MESSAGER_API == null) // MessagerAPI can only be created once
-      {
-         MessagerAPI[] behaviorAPIs = new MessagerAPI[definitionEntries.size()];
-         int i = 0;
-         for (BehaviorDefinition definitionEntry : definitionEntries)
-         {
-            behaviorAPIs[i++] = definitionEntry.getBehaviorAPI();
-         }
-         MESSAGER_API = BehaviorModule.API.create(behaviorAPIs);
-         ACTIVE_REGISTRY = this;
-      }
-      else if (!containsSameSetOfBehaviors(ACTIVE_REGISTRY))
-      {
-         throw new RuntimeException("Only one set of behaviors can be initialized per process.");
-      }
-
-      return MESSAGER_API;
    }
 
    public LinkedHashSet<BehaviorDefinition> getDefinitionEntries()

@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 
@@ -9,12 +12,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -67,6 +72,28 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    /**
+    * Whether this command should be treated considering the full robot or not. Default value is
+    * {@code true}.
+    * <p>
+    * Typically, the momentum rate command is used to control the center of mass of the whole robot, in
+    * which case {@code considerAllJoints} should be {@code true}.
+    * </p>
+    * <p>
+    * If the control of only part of the robot's momentum rate is desired, then this should be
+    * {@code false} and {@link #jointSelection} should contain the list of joint of interest. For
+    * instance, this command can be used to regulate the rate of change of angular momentum generated
+    * by only the arms. In such scenario, {@code considerAllJoints} is {@code false} and
+    * {@code jointSelection} contains only the arm joints.
+    * </p>
+    */
+   private boolean considerAllJoints = true;
+   /**
+    * When {@link #considerAllJoints} is {@code true}, this list is used to select the part of the
+    * robot to be considered.
+    */
+   private final List<JointReadOnly> jointSelection = new ArrayList<>();
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -74,6 +101,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    {
       weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
       weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
+      considerAllJoints = true;
+      jointSelection.clear();
    }
 
    /**
@@ -86,6 +115,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       momentumRateOfChange.set(other.momentumRateOfChange);
+      considerAllJoints = other.considerAllJoints;
+      jointSelection.clear();
+      for (int i = 0; i < other.jointSelection.size(); i++)
+         jointSelection.add(other.jointSelection.get(i));
    }
 
    /**
@@ -138,7 +171,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     *                                         {@code linearMomentumRateOfChange} is not expressed in
     *                                         world frame.
     */
-   public void setMomentumRate(FrameVector3D angularMomentumRateOfChange, FrameVector3D linearMomentumRateOfChange)
+   public void setMomentumRate(FrameVector3DReadOnly angularMomentumRateOfChange, FrameVector3DReadOnly linearMomentumRateOfChange)
    {
       angularMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
@@ -160,7 +193,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} is not expressed
     *                                         in world frame.
     */
-   public void setAngularMomentumRate(FrameVector3D angularMomentumRateOfChange)
+   public void setAngularMomentumRate(FrameVector3DReadOnly angularMomentumRateOfChange)
    {
       angularMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 
@@ -176,7 +209,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed in
     *                                         world frame.
     */
-   public void setLinearMomentumRate(FrameVector3D linearMomentumRateOfChange)
+   public void setLinearMomentumRate(FrameVector3DReadOnly linearMomentumRateOfChange)
    {
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 
@@ -192,7 +225,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed in
     *                                         world frame.
     */
-   public void setLinearMomentumXYRate(FrameVector2D linearMomentumRateOfChange)
+   public void setLinearMomentumXYRate(FrameVector2DReadOnly linearMomentumRateOfChange)
    {
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 
@@ -366,6 +399,21 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
+    *
+    * @param angular the weights to use for the angular part of this command. Not modified.
+    */
+   public void setAngularWeight(double angular)
+   {
+      weightMatrix.setAngularWeights(angular, angular, angular);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each rotational degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
     * 
     * @param angular the weights to use for the angular part of this command. Not modified.
     */
@@ -432,6 +480,42 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public void setLinearWeightsToZero()
    {
       weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
+   }
+
+   /**
+    * Indicates whether this command should be treated considering the full robot or only part of it.
+    * 
+    * @param considerAllJoints {@code true} to consider all the robot, {@code false} to consider only
+    *                          part of it. Default is {@code true}.
+    */
+   public void setConsiderAllJoints(boolean considerAllJoints)
+   {
+      this.considerAllJoints = considerAllJoints;
+   }
+
+   /**
+    * Only used when {@link #isConsiderAllJoints()} is {@code false}, adds a joint to consider when
+    * treating this command.
+    * 
+    * @param joint another joint to consider with this command.
+    */
+   public void addJointToSelection(JointReadOnly joint)
+   {
+      jointSelection.add(joint);
+   }
+
+   /**
+    * Only used when {@link #isConsiderAllJoints()} is {@code false}, adds joints to consider when
+    * treating this command.
+    * 
+    * @param joints other joints to consider with this command.
+    */
+   public void addJointsToSelection(JointReadOnly[] joints)
+   {
+      for (int i = 0; i < joints.length; i++)
+      {
+         jointSelection.add(joints[i]);
+      }
    }
 
    /**
@@ -539,10 +623,33 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param linearPartToPack  frame vector to pack the desired rate of change of linear momentum.
     *                          Modified.
     */
-   public void getMomentumRate(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack)
+   public void getMomentumRate(FrameVector3DBasics angularPartToPack, FrameVector3DBasics linearPartToPack)
    {
       angularPartToPack.setIncludingFrame(worldFrame, 0, momentumRateOfChange);
       linearPartToPack.setIncludingFrame(worldFrame, 3, momentumRateOfChange);
+   }
+
+   /**
+    * Whether the full robot is to be considered when treating this command.
+    * 
+    * @return {@code true} if the full robot is to be considered, {@code false} otherwise in which case
+    *         {@link #getJointSelection()} is used to select the part of the robot that is to be
+    *         considered.
+    */
+   public boolean isConsiderAllJoints()
+   {
+      return considerAllJoints;
+   }
+
+   /**
+    * Only used when {@link #isConsiderAllJoints()} is {@code false}, specifies which part of the robot
+    * is to be considered when treating this command.
+    * 
+    * @return the joint selection.
+    */
+   public List<JointReadOnly> getJointSelection()
+   {
+      return jointSelection;
    }
 
    /**
@@ -587,7 +694,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
             return false;
          if (!selectionMatrix.equals(other.selectionMatrix))
             return false;
-
+         if (considerAllJoints != other.considerAllJoints)
+            return false;
+         if (!jointSelection.equals(other.jointSelection))
+            return false;
          return true;
       }
       else

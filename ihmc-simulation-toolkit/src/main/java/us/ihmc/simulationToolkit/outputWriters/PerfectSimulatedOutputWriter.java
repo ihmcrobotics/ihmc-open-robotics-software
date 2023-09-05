@@ -196,6 +196,8 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       public void updateRobotConfigurationBasedOnFullRobotModel()
       {
          scsJoint.setQ(idJoint.getQ());
+         scsJoint.setQd(idJoint.getQd());
+         scsJoint.setQdd(idJoint.getQdd());
       }
    }
 

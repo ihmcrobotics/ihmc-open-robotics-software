@@ -1,16 +1,18 @@
 package us.ihmc.behaviors.tools;
 
-import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
+import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
@@ -62,18 +64,17 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    private RemoteEnvironmentMapInterface environmentMap;
    private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
+   private RobotLowLevelMessenger lowLevelMessenger;
 
    public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, ros2Node, true);
-   }
-
-   public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, boolean commsEnabledToStart)
-   {
       this.robotModel = robotModel;
       this.ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
+   }
 
-      ros2Helper.setCommunicationCallbacksEnabled(commsEnabledToStart);
+   public ROS2ControllerHelper getControllerHelper()
+   {
+      return ros2Helper;
    }
 
    // Construction-only methods:
@@ -127,9 +128,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
    }
 
-   public RobotLowLevelMessenger newRobotLowLevelMessenger()
+   public RobotLowLevelMessenger getOrCreateRobotLowLevelMessenger()
    {
-      return robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+      if (lowLevelMessenger == null)
+         lowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+
+      return lowLevelMessenger;
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
@@ -168,6 +172,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> void createPublisher(ROS2Topic<T> topic)
+   {
+      ros2Helper.createPublisher(topic);
+   }
+
+   @Override
    public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass)
    {
       return subscribe(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()));
@@ -177,6 +187,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
       subscribeViaCallback(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
+   }
+
+   @Override
+   public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
+   {
+      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
@@ -222,6 +238,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   {
+      return ros2Helper.subscribe(topic, messageFilter);
+   }
+
+   @Override
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
    {
       return ros2Helper.subscribeTypeless(topic);
@@ -231,6 +253,18 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       return ros2Helper.subscribeViaNotification(topic);
+   }
+
+   @Override
+   public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
+   {
+      return ros2Helper.subscribeViaTypedNotification(topic);
+   }
+
+   @Override
+   public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
+   {
+      return ros2Helper.subscribeViaBooleanNotification(topic);
    }
 
    @Override
@@ -258,6 +292,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public void publish(ROS2Topic<Bool> topic, boolean message)
+   {
+      ros2Helper.publish(topic, message);
+   }
+
+   @Override
    public void publishToController(Object message)
    {
       ros2Helper.publishToController(message);
@@ -267,13 +307,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public Notification subscribeToWalkingCompletedViaNotification()
    {
       return ros2Helper.subscribeToWalkingCompletedViaNotification();
-   }
-
-   // Let behaviors manage or manage for them?
-   // Split into finer granularity -- publishers and subscribers?
-   public void setCommunicationCallbacksEnabled(boolean enabled)
-   {
-      ros2Helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    public void destroy()

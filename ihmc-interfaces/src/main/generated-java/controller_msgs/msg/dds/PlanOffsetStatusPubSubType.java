@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PlanOffsetStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PlanOffsetStatus_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ee104895a03eb443468bc32d576726a0d08b25e73faf5b940b0305280233da4e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -1,0 +1,27 @@
+#ifndef __ihmc_common_msgs__msg__Point2DMessage__idl__
+#define __ihmc_common_msgs__msg__Point2DMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::Point2DMessage_")
+      struct Point2DMessage
+      {
+        /**
+         * x coordinate
+         */
+        double x;
+        /**
+         * y coordinate
+         */
+        double y;
+      };
+    };
+  };
+};
+
+#endif

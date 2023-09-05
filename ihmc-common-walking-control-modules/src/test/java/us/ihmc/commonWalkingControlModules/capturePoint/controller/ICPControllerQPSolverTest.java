@@ -50,8 +50,8 @@ public class ICPControllerQPSolverTest
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
       FrameVector2D copFeedbackExpected = new FrameVector2D();
 
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
    }
 
    @Test
@@ -410,8 +410,6 @@ public class ICPControllerQPSolverTest
       DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
       helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallelGain, orthogonalGain);
 
-      FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
-      helper.transformFromDynamicsFrame(transformedMagnitudeLimits, desiredICPVelocity, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
       helper.transformFromDynamicsFrame(scaledCoPFeedbackWeight, desiredICPVelocity, forwardWeight, lateralWeight);
@@ -428,7 +426,7 @@ public class ICPControllerQPSolverTest
       solver.setCopSafeDistanceToEdge(copSafeDistanceToEdge);
       solver.setDesiredFeedbackDirection(unconstrainedFeedbackDelta, feedbackDirectionWeight);
 
-      solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
+      solver.setMaximumFeedbackMagnitude(CommonOps_DDRM.identity(2), Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       solver.setMaximumFeedbackRate(feedbackpartMaxRate, controlDt);
 
       solver.setFeedbackRateWeight(0.0, 5e-8 / (controlDt * controlDt));
@@ -459,7 +457,7 @@ public class ICPControllerQPSolverTest
       FramePoint2D unconstrainedCMPAlt = new FramePoint2D(perfectCMP);
       unconstrainedCMPAlt.add(unconstrainedFeedbackDelta);
 
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(unconstrainedCMPAlt, unconstrainedFeedbackCMP, 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(unconstrainedCMPAlt, unconstrainedFeedbackCMP, 1e-5);
 
       DMatrixRMaj expectedSolution = new DMatrixRMaj(4, 1);
       feedbackCoPDelta.get(expectedSolution);

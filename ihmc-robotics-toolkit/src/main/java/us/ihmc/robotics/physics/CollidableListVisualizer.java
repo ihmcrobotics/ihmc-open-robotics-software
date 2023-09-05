@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CollidableListVisualizer
 {
+   private static final boolean ONLY_SHOW_COLLIDING_SHAPES = true;
    private final static String staticCollidableName = "environment";
 
    private final String groupName;
@@ -75,11 +76,11 @@ public class CollidableListVisualizer
 
    public void update(Collection<Collidable> collidablesToShow)
    {
-      collidablesToShow = collidablesToShow.stream().filter(candidate -> collidableVisualizerMap.containsKey(candidate)).collect(Collectors.toSet());
+      collidablesToShow = collidablesToShow.stream().filter(collidableVisualizerMap::containsKey).collect(Collectors.toSet());
 
       for (Entry<Collidable, CollidableVisualizer> entry : collidableVisualizerMap.entrySet())
       {
-         if (collidablesToShow.contains(entry.getKey()))
+         if (!ONLY_SHOW_COLLIDING_SHAPES || collidablesToShow.contains(entry.getKey()))
          {
             entry.getValue().update();
          }

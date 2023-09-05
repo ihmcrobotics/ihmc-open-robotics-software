@@ -21,10 +21,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +35,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -133,7 +133,7 @@ public class LogDataProcessorHelper
 
       double omega0 = walkingControllerParameters.getOmega0();
       double gravityZ = 9.81;
-      String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
+      String controllerTimeNamespace = null; // FIXME DRCControllerThread.class.getSimpleName();
       yoTime = (YoDouble) scs.findVariable(controllerTimeNamespace, "controllerTime");
 
       controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs,
@@ -161,7 +161,7 @@ public class LogDataProcessorHelper
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
          String namespaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FilteredFootHitGround");
-         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "ForcePastThresh");
+         final YoBoolean forceMagnitudePastThreshold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "ForcePastThresh");
          final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
@@ -173,7 +173,13 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public boolean hasFootHitGround()
+            public boolean hasFootHitGroundSensitive()
+            {
+               return forceMagnitudePastThreshold.getBooleanValue();
+            }
+
+            @Override
+            public boolean hasFootHitGroundFiltered()
             {
                return hasFootHitGround.getBooleanValue();
             }
@@ -185,47 +191,21 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public boolean getForceMagnitudePastThreshhold()
-            {
-               return forceMagnitudePastThreshhold.getBooleanValue();
-            }
-
-            @Override
-            public double computeFootLoadPercentage()
+            public double getFootLoadPercentage()
             {
                return footLoadPercentage.getDoubleValue();
             }
 
             @Override
-            public void computeAndPackFootWrench(Wrench footWrenchToPack)
+            public WrenchReadOnly getMeasuredWrench()
             {
+               return null;
             }
 
             @Override
-            public void computeAndPackCoP(FramePoint2D copToPack)
+            public FramePoint2DReadOnly getCenterOfPressure()
             {
-               copToPack.setIncludingFrame(cops.get(robotSide));
-            }
-
-            @Override
-            public void updateCoP()
-            {
-            }
-
-            @Override
-            @Deprecated
-            public void setFootContactState(boolean hasFootHitGround)
-            {
-            }
-
-            @Override
-            public void trustFootSwitchInSwing(boolean trustFootSwitch)
-            {
-            }
-
-            @Override
-            public void trustFootSwitchInSupport(boolean trustFootSwitch)
-            {
+               return cops.get(robotSide);
             }
          };
 

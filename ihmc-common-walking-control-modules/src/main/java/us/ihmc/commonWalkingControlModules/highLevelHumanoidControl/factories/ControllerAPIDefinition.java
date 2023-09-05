@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateAdjustFootstepMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmDesiredAccelerationsMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmTrajectoryMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateChestTrajectoryMessage;
@@ -26,12 +25,16 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -49,6 +52,7 @@ public class ControllerAPIDefinition
       /** Commands supported by bipedal walking controller {@link WalkingControllerState} */
       commands.add(ArmTrajectoryCommand.class);
       commands.add(HandTrajectoryCommand.class);
+      commands.add(LegTrajectoryCommand.class);
       commands.add(FootTrajectoryCommand.class);
       commands.add(HeadTrajectoryCommand.class);
       commands.add(NeckTrajectoryCommand.class);
@@ -60,7 +64,6 @@ public class ControllerAPIDefinition
       commands.add(PelvisHeightTrajectoryCommand.class);
       commands.add(StopAllTrajectoryCommand.class);
       commands.add(FootstepDataListCommand.class);
-      commands.add(AdjustFootstepCommand.class);
       commands.add(GoHomeCommand.class);
       commands.add(FootLoadBearingCommand.class);
       commands.add(ArmDesiredAccelerationsCommand.class);
@@ -77,14 +80,18 @@ public class ControllerAPIDefinition
       commands.add(ClearDelayQueueCommand.class);
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
-      commands.add(PlanarRegionsListCommand.class);
-      commands.add(StepConstraintRegionCommand.class);
-      commands.add(StepConstraintsListCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
+
+      /** Commands supported by the fast-walking controller, not in this repo */
+      commands.add(DirectionalControlInputCommand.class);
+      commands.add(FastWalkingGaitParametersCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(MultiContactTrajectoryCommand.class);
       commands.add(MultiContactTrajectorySequenceCommand.class);
+      commands.add(MultiContactBalanceStatusCommand.class);
+      commands.add(MultiContactTimedContactSequenceCommand.class);
+
 
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
@@ -108,6 +115,8 @@ public class ControllerAPIDefinition
       statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
       statusMessages.add(JointDesiredOutputMessage.class);
       statusMessages.add(RobotDesiredConfigurationData.class);
+      statusMessages.add(FootstepQueueStatusMessage.class);
+      statusMessages.add(QueuedFootstepStatusMessage.class);
 
       /** Statuses supported by multi-contact controller, not in this repo */
       statusMessages.add(MultiContactBalanceStatus.class);
@@ -153,7 +162,6 @@ public class ControllerAPIDefinition
                      message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
       validators.put(PelvisHeightTrajectoryMessage.class, message -> validatePelvisHeightTrajectoryMessage((PelvisHeightTrajectoryMessage) message));
       validators.put(FootstepDataListMessage.class, message -> validateFootstepDataListMessage((FootstepDataListMessage) message));
-      validators.put(AdjustFootstepMessage.class, message -> validateAdjustFootstepMessage((AdjustFootstepMessage) message));
       validators.put(GoHomeMessage.class, message -> validateGoHomeMessage((GoHomeMessage) message));
       validators.put(FootLoadBearingMessage.class, message -> validateFootLoadBearingMessage((FootLoadBearingMessage) message));
       validators.put(ArmDesiredAccelerationsMessage.class, message -> validateArmDesiredAccelerationsMessage((ArmDesiredAccelerationsMessage) message));
@@ -186,7 +194,6 @@ public class ControllerAPIDefinition
       extractors.put(PelvisHeightTrajectoryMessage.class, m -> ((PelvisHeightTrajectoryMessage) m).getSequenceId());
       extractors.put(StopAllTrajectoryMessage.class, m -> ((StopAllTrajectoryMessage) m).getSequenceId());
       extractors.put(FootstepDataListMessage.class, m -> ((FootstepDataListMessage) m).getSequenceId());
-      extractors.put(AdjustFootstepMessage.class, m -> ((AdjustFootstepMessage) m).getSequenceId());
       extractors.put(GoHomeMessage.class, m -> ((GoHomeMessage) m).getSequenceId());
       extractors.put(FootLoadBearingMessage.class, m -> ((FootLoadBearingMessage) m).getSequenceId());
       extractors.put(ArmDesiredAccelerationsMessage.class, m -> ((ArmDesiredAccelerationsMessage) m).getSequenceId());

@@ -12,10 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType;
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessagePubSubType;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessagePubSubType;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -23,6 +23,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class KinematicsToolboxSnapshotDescription
 {
+   public static final String SCRIPT_JSON = "script";
    public static final String CONFIGURATION_JSON = KinematicsToolboxSnapshotDescription.class.getSimpleName();
    public static final String CONTROLLER_CONFIGURATION_JSON = "controllerConfiguration";
    public static final String IK_SOLUTION_JSON = "ikSolution";
@@ -30,12 +31,14 @@ public class KinematicsToolboxSnapshotDescription
    public static final String COM_ANCHOR_JSON = "centerOfMassAnchor";
    public static final String SIX_DOF_ANCHORS_JSON = "sixDoFAnchors";
    public static final String ONE_DOF_ANCHORS_JSON = "oneDoFAnchors";
+   public static final String EXECUTION_DURATION_JSON = "executionDuration";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
    private static final JSONSerializer<RobotConfigurationData> rcdSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
    private static final JSONSerializer<KinematicsToolboxOutputStatus> ktosSerializer = new JSONSerializer<>(new KinematicsToolboxOutputStatusPubSubType());
    private static final JSONSerializer<KinematicsToolboxPrivilegedConfigurationMessage> ktpcmSerializer = new JSONSerializer<>(new KinematicsToolboxPrivilegedConfigurationMessagePubSubType());
 
+   public double executionDuration = Double.NaN;
    public RobotConfigurationData controllerConfiguration;
    public KinematicsToolboxOutputStatus ikSolution;
    public KinematicsToolboxPrivilegedConfigurationMessage ikPrivilegedConfiguration;
@@ -49,6 +52,7 @@ public class KinematicsToolboxSnapshotDescription
 
    public KinematicsToolboxSnapshotDescription(KinematicsToolboxSnapshotDescription other)
    {
+      executionDuration = other.executionDuration;
       controllerConfiguration = new RobotConfigurationData(other.controllerConfiguration);
       ikSolution = new KinematicsToolboxOutputStatus(other.ikSolution);
       ikPrivilegedConfiguration = new KinematicsToolboxPrivilegedConfigurationMessage(other.ikPrivilegedConfiguration);
@@ -90,6 +94,12 @@ public class KinematicsToolboxSnapshotDescription
             oneDoFAnchors.add(OneDoFMotionControlAnchorDescription.fromJSON(oneDoFAnchorsNode.get(i)));
          description.setOneDoFAnchors(oneDoFAnchors);
 
+         JsonNode executionDurationNode = configurationNode.get(EXECUTION_DURATION_JSON);
+         if (executionDurationNode != null)
+         {
+            description.setExecutionDuration(executionDurationNode.asDouble());
+         }
+
          return description;
       }
       catch (IOException e)
@@ -122,6 +132,40 @@ public class KinematicsToolboxSnapshotDescription
          ArrayNode arrayOneDoFAnchorNode = configurationJSON.arrayNode(oneDoFAnchors.size());
          oneDoFAnchors.forEach(anchor -> arrayOneDoFAnchorNode.add(anchor.toJSON(objectMapper)));
          configurationJSON.set(ONE_DOF_ANCHORS_JSON, arrayOneDoFAnchorNode);
+         configurationJSON.put(EXECUTION_DURATION_JSON, executionDuration);
+
+         return root;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public JsonNode toJSONNew(ObjectMapper objectMapper)
+   {
+      Objects.requireNonNull(controllerConfiguration);
+      Objects.requireNonNull(ikSolution);
+      Objects.requireNonNull(ikPrivilegedConfiguration);
+      Objects.requireNonNull(sixDoFAnchors);
+      Objects.requireNonNull(oneDoFAnchors);
+
+      try
+      {
+         ObjectNode root = objectMapper.createObjectNode();
+
+         root.set(CONTROLLER_CONFIGURATION_JSON, messageToJSON(rcdSerializer, controllerConfiguration));
+         root.set(IK_SOLUTION_JSON, messageToJSON(ktosSerializer, ikSolution));
+         root.set(IK_PRIVILEGED_CONFIGURATION_JSON, messageToJSON(ktpcmSerializer, ikPrivilegedConfiguration));
+         if (centerOfMassAnchor != null)
+            root.set(COM_ANCHOR_JSON, centerOfMassAnchor.toJSON(objectMapper));
+         ArrayNode arraySixDoFAnchorNode = root.arrayNode(sixDoFAnchors.size());
+         sixDoFAnchors.forEach(anchor -> arraySixDoFAnchorNode.add(anchor.toJSON(objectMapper)));
+         root.set(SIX_DOF_ANCHORS_JSON, arraySixDoFAnchorNode);
+         ArrayNode arrayOneDoFAnchorNode = root.arrayNode(oneDoFAnchors.size());
+         oneDoFAnchors.forEach(anchor -> arrayOneDoFAnchorNode.add(anchor.toJSON(objectMapper)));
+         root.set(ONE_DOF_ANCHORS_JSON, arrayOneDoFAnchorNode);
+         root.put(EXECUTION_DURATION_JSON, executionDuration);
 
          return root;
       }
@@ -166,6 +210,11 @@ public class KinematicsToolboxSnapshotDescription
       return oneDoFAnchors;
    }
 
+   public double getExecutionDuration()
+   {
+      return executionDuration;
+   }
+
    public void setControllerConfiguration(RobotConfigurationData controllerConfiguration)
    {
       this.controllerConfiguration = controllerConfiguration;
@@ -196,11 +245,21 @@ public class KinematicsToolboxSnapshotDescription
       this.oneDoFAnchors = oneDoFAnchors;
    }
 
+   public void setExecutionDuration(double executionDuration)
+   {
+      this.executionDuration = executionDuration;
+   }
+
+   public boolean hasExecutionDuration()
+   {
+      return !Double.isNaN(executionDuration);
+   }
+
    public void applyTransform(Transform transform)
    {
-      controllerConfiguration.getRootTranslation().applyTransform(transform);
+      controllerConfiguration.getRootPosition().applyTransform(transform);
       controllerConfiguration.getRootOrientation().applyTransform(transform);
-      ikSolution.getDesiredRootTranslation().applyTransform(transform);
+      ikSolution.getDesiredRootPosition().applyTransform(transform);
       ikSolution.getDesiredRootOrientation().applyTransform(transform);
       ikPrivilegedConfiguration.getPrivilegedRootJointPosition().applyTransform(transform);
       ikPrivilegedConfiguration.getPrivilegedRootJointOrientation().applyTransform(transform);

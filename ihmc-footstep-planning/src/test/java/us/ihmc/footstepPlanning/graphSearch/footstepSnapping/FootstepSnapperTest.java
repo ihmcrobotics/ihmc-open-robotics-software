@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -73,9 +74,22 @@ public class FootstepSnapperTest
    {
       boolean dirtyBit = false;
 
+      private final FootstepPlannerEnvironmentHandler environmentHandler;
+
       public TestSnapper()
       {
-         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
+         this(new FootstepPlannerEnvironmentHandler(PlannerTools.createDefaultFootPolygons()));
+      }
+
+      public TestSnapper(FootstepPlannerEnvironmentHandler environmentHandler)
+      {
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
+         this.environmentHandler = environmentHandler;
+      }
+
+      public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+      {
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
       }
 
       @Override

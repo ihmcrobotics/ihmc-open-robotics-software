@@ -1,0 +1,9 @@
+{
+  "title" : "PlanarRegionSLAMParameters",
+  "Iterations for matching" : 3,
+  "Bounding box height" : 0.025,
+  "Minimum normal dot product" : 0.99,
+  "Damped least squares lambda" : 5.0,
+  "Minimum Region Overlap Distance" : 0.05,
+  "Maximum Point Projection Distance" : 0.03
+}

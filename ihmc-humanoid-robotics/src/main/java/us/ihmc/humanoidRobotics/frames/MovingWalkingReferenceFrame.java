@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.frames;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -37,6 +38,19 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
       if (pelvisFrame == midFootZUpGroundFrame)
          throw new IllegalArgumentException("The frames have to be different.");
       pelvisFrame.verifySameRoots(midFootZUpGroundFrame);
+
+      this.pelvisFrame = pelvisFrame;
+      this.midFootZUpGroundFrame = midFootZUpGroundFrame;
+   }
+
+   public MovingWalkingReferenceFrame(String name, MovingReferenceFrame pelvisFrame, MovingMidFootZUpGroundFrame midFootZUpGroundFrame, ReferenceFrame parentStationaryFrame)
+   {
+      super(name, parentStationaryFrame, true);
+
+      if (pelvisFrame == midFootZUpGroundFrame)
+         throw new IllegalArgumentException("The frames have to be different.");
+      pelvisFrame.verifyIsAncestor(parentStationaryFrame);
+      midFootZUpGroundFrame.verifyIsAncestor(parentStationaryFrame);
 
       this.pelvisFrame = pelvisFrame;
       this.midFootZUpGroundFrame = midFootZUpGroundFrame;

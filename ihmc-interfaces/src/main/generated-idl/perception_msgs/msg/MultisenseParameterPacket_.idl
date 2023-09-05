@@ -1,0 +1,31 @@
+#ifndef __perception_msgs__msg__MultisenseParameterPacket__idl__
+#define __perception_msgs__msg__MultisenseParameterPacket__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::MultisenseParameterPacket_")
+      struct MultisenseParameterPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        boolean initialize;
+        double gain;
+        double motor_speed;
+        boolean led_enable;
+        boolean flash_enable;
+        double duty_cycle;
+        boolean auto_exposure;
+        boolean auto_white_balance;
+      };
+    };
+  };
+};
+
+#endif

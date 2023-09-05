@@ -6,10 +6,11 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -33,12 +34,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class InverseKinematicsOptimizationControlModule
+public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
@@ -56,19 +59,26 @@ public class InverseKinematicsOptimizationControlModule
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumVelocities = new HashMap<>();
    private final DMatrixRMaj qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
+   private final TIntArrayList inactiveJointIndices = new TIntArrayList();
 
+   private final YoBoolean computeJointTorques = new YoBoolean("computeJointTorques", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
    private final InverseKinematicsSolution inverseKinematicsSolution;
+   private final WholeBodyControlCoreToolbox toolbox;
 
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
+      this.toolbox = toolbox;
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       inverseKinematicsSolution = new InverseKinematicsSolution(jointsToOptimizeFor);
+
+      for (OneDoFJointBasics inactiveJoint : toolbox.getInactiveOneDoFJoints())
+         inactiveJointIndices.add(jointIndexHandler.getOneDoFJointIndex(inactiveJoint));
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       qpInput = new QPInputTypeA(numberOfDoFs);
@@ -88,6 +98,11 @@ public class InverseKinematicsOptimizationControlModule
       }
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      if (optimizationSettings != null)
+      {
+         computeJointTorques.set(optimizationSettings.areJointTorquesMinimized());
+      }
+
       ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver;
       if (optimizationSettings == null)
          activeSetQPSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
@@ -116,10 +131,16 @@ public class InverseKinematicsOptimizationControlModule
    {
       NoConvergenceException noConvergenceException = null;
 
+      computeJointTorqueMinimization();
       computePrivilegedJointVelocities();
       computeJointVelocityLimits();
       qpSolver.setMaxJointVelocities(qDotMaxMatrix);
       qpSolver.setMinJointVelocities(qDotMinMatrix);
+
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      {
+         qpSolver.setActiveDoF(inactiveJointIndices.get(i), false);
+      }
 
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
@@ -135,8 +156,8 @@ public class InverseKinematicsOptimizationControlModule
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
-            e.printStackTrace();
-            LogTools.warn("Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            LogTools.warn("First failure for the optimization " + e.getClass().getSimpleName() + ". Only reporting the first failure, see failure counter: "
+                  + hasNotConvergedCounts.getFullNameString());
          }
 
          hasNotConvergedInPast.set(true);
@@ -148,12 +169,27 @@ public class InverseKinematicsOptimizationControlModule
       DMatrixRMaj jointVelocities = qpSolver.getJointVelocities();
       MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
+      if (computeJointTorques.getValue())
+         inverseKinematicsSolution.setJointTorques(toolbox.getGravityGradientCalculator().getTauMatrix());
       inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);
 
       if (noConvergenceException != null)
          throw new InverseKinematicsOptimizationException(noConvergenceException, inverseKinematicsSolution);
 
       return inverseKinematicsSolution;
+   }
+
+   private void computeJointTorqueMinimization()
+   {
+      if (!computeJointTorques.getValue())
+         return;
+
+      boolean success = motionQPInputCalculator.computeGravityCompensationMinimization(qpInput,
+                                                                                       toolbox.getJointTorqueMinimizationWeightCalculator(),
+                                                                                       true,
+                                                                                       toolbox.getControlDT());
+      if (success)
+         qpSolver.addMotionInput(qpInput);
    }
 
    private void computeJointVelocityLimits()
@@ -234,6 +270,28 @@ public class InverseKinematicsOptimizationControlModule
       if (command.hasJointAccelerationWeight())
          qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
       if (command.hashJointVelocityLimitMode())
-         boundCalculator.considerJointVelocityLimits(command.jointVelocityLimitMode == JointVelocityLimitMode.ENABLED);
+         boundCalculator.considerJointVelocityLimits(command.getJointVelocityLimitMode() == ActivationState.ENABLED);
+      if (command.hasComputeJointTorques())
+         computeJointTorques.set(command.getComputeJointTorques() == ActivationState.ENABLED);
+      for (int i = 0; i < command.getJointsToActivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToActivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         inactiveJointIndices.remove(jointIndex);
+      }
+      for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToDeactivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         // Prevent duplicates in the list.
+         if (!inactiveJointIndices.contains(jointIndex))
+            inactiveJointIndices.add(jointIndex);
+      }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

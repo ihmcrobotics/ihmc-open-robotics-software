@@ -1,0 +1,27 @@
+#ifndef __perception_msgs__msg__BigVideoPacket__idl__
+#define __perception_msgs__msg__BigVideoPacket__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Big video packet. Supports up to RGB 8-bit 4K uncompressed images.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::BigVideoPacket_")
+      struct BigVideoPacket
+      {
+        long long acquisition_time_seconds_since_epoch;
+        long long acquisition_time_additional_nanos;
+        unsigned short image_width;
+        unsigned short image_height;
+        sequence<octet, 25000000> data;
+      };
+    };
+  };
+};
+
+#endif

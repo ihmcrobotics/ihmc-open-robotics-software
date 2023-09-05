@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import javax.swing.SwingUtilities;
 
-import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;

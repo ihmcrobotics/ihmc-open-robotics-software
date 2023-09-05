@@ -2,19 +2,19 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import java.util.Collection;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -30,7 +30,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
 
-   private final YoFramePoint2D yoResolvedCoP;
+   private final Wrench footWrench = new Wrench();
 
    public KinematicsBasedFootSwitch(String footName,
                                     SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet,
@@ -49,8 +49,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       soleZ = new YoDouble(footName + "soleZ", registry);
       ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
-
-      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -71,8 +69,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       soleZ = new YoDouble(footName + "soleZ", registry);
       ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
-
-      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -110,8 +106,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
 
-      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
-
       parentRegistry.addChild(registry);
    }
 
@@ -124,11 +118,10 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       return tmpFramePoint;
    }
 
-   /**
-    * is the foot in question within the switchZThreshold of the lowest foot
-    */
+   private final Vector3D footForce = new Vector3D();
+
    @Override
-   public boolean hasFootHitGround()
+   public void update()
    {
       double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
@@ -136,7 +129,15 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue());
       soleZ.set(thisFootZ);
       ankleZ.set(getPointInWorld(foot.getFrameAfterParentJoint()).getZ());
-      return hitGround.getBooleanValue();
+
+      fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
+
+      footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
+      if (hasFootHitGroundFiltered())
+      {
+         footForce.set(0.0, 0.0, totalRobotWeight);
+         footWrench.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), footForce);
+      }
    }
 
    private double getLowestFootZInWorld()
@@ -154,34 +155,36 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public double computeFootLoadPercentage()
+   public boolean hasFootHitGroundSensitive()
+   {
+      return fixedOnGround.getBooleanValue();
+   }
+
+   /**
+    * is the foot in question within the switchZThreshold of the lowest foot
+    */
+   @Override
+   public boolean hasFootHitGroundFiltered()
+   {
+      return hitGround.getBooleanValue();
+   }
+
+   @Override
+   public double getFootLoadPercentage()
    {
       return Double.NaN;
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2D copToPack)
+   public FramePoint2DReadOnly getCenterOfPressure()
    {
-      copToPack.setToNaN(getMeasurementFrame());
+      return null;
    }
 
    @Override
-   public void updateCoP()
+   public WrenchReadOnly getMeasuredWrench()
    {
-      yoResolvedCoP.setToZero();
-   }
-
-   private final Vector3D footForce = new Vector3D();
-
-   @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
-   {
-      footWrenchToPack.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
-      if (hasFootHitGround())
-      {
-         footForce.set(0.0, 0.0, totalRobotWeight);
-         footWrenchToPack.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), footForce);
-      }
+      return footWrench;
    }
 
    @Override
@@ -193,33 +196,5 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void reset()
    {
-   }
-
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      //a more liberal version of hasFootHitGround
-      double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
-      double lowestFootZ = getLowestFootZInWorld();
-      fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
-      return fixedOnGround.getBooleanValue();
-   }
-
-   @Override
-   @Deprecated
-   public void setFootContactState(boolean hasFootHitGround)
-   {
-   }
-
-   @Override
-   public void trustFootSwitchInSwing(boolean trustFootSwitch)
-   {
-
-   }
-
-   @Override
-   public void trustFootSwitchInSupport(boolean trustFootSwitch)
-   {
-
    }
 }

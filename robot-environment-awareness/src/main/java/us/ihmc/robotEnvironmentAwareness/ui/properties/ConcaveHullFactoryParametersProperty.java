@@ -6,8 +6,8 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 public class ConcaveHullFactoryParametersProperty extends ParametersProperty<ConcaveHullFactoryParameters>
 {
    private final DoubleField edgeLengthThreshold = new DoubleField(ConcaveHullFactoryParameters::getEdgeLengthThreshold, (p, v) -> p.setEdgeLengthThreshold(v));
-   private final BooleanField removeAllTrianglesWithTwoBorderEdges = new BooleanField(ConcaveHullFactoryParameters::doRemoveAllTrianglesWithTwoBorderEdges, (p, v) -> p.setRemoveAllTrianglesWithTwoBorderEdges(v));
-   private final BooleanField allowSplittingConcaveHull = new BooleanField(ConcaveHullFactoryParameters::isSplittingConcaveHullAllowed, (p, v) -> p.setAllowSplittingConcaveHull(v));
+   private final BooleanField removeAllTrianglesWithTwoBorderEdges = new BooleanField(ConcaveHullFactoryParameters::getRemoveAllTrianglesWithTwoBorderEdges, (p, v) -> p.setRemoveAllTrianglesWithTwoBorderEdges(v));
+   private final BooleanField allowSplittingConcaveHull = new BooleanField(ConcaveHullFactoryParameters::getAllowSplittingConcaveHull, (p, v) -> p.setAllowSplittingConcaveHull(v));
    private final IntegerField maxNumberOfIterations = new IntegerField(ConcaveHullFactoryParameters::getMaxNumberOfIterations, (p, v) -> p.setMaxNumberOfIterations(v));
 
    public ConcaveHullFactoryParametersProperty(Object bean, String name)

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
@@ -21,6 +22,7 @@ import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 
+@Disabled // TODO Need to either change the ground profile to using a TerrainObject3D or add support for height map in SCS2
 public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
@@ -46,6 +48,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Disabled // TODO Need to either change the ground profile to using a TerrainObject3D or add support for height map in SCS2
    @Test
    public void testWalkingOverShallowBumpyTerrain() throws IOException
    {
@@ -74,12 +77,13 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    private void setup(BumpyGroundProfile groundProfile) throws IOException
    {
       quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setGroundProfile3D(groundProfile);
+//      quadrupedTestFactory.setGroundProfile3D(groundProfile);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
    }
 
+   @Disabled // TODO Need to either change the ground profile to using a TerrainObject3D or add support for height map in SCS2
    @Test
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -98,6 +102,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor.simulate();
    }
 
+   @Disabled // TODO Need to either change the ground profile to using a TerrainObject3D or add support for height map in SCS2
    @Test
    public void testTrottingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

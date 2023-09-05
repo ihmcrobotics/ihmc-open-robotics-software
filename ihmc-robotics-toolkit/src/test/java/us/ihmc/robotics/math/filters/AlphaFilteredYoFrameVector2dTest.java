@@ -48,7 +48,7 @@ public class AlphaFilteredYoFrameVector2dTest
             xFiltered.update(unfilteredVector.getX());
             yFiltered.update(unfilteredVector.getY());
 
-            EuclidCoreTestTools.assertTuple2DEquals(new Vector2D(xFiltered.getValue(), yFiltered.getValue()), filteredVector, EPSILON);
+            EuclidCoreTestTools.assertEquals(new Vector2D(xFiltered.getValue(), yFiltered.getValue()), filteredVector, EPSILON);
          }
       }
    }

@@ -1,5 +1,6 @@
 package us.ihmc.atlas.networkProcessor.kinematicsToolboxModule;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +53,15 @@ public class AtlasHumanoidKinematicsToolboxControllerTest extends HumanoidKinema
    public void testCenterOfMassConstraint() throws Exception
    {
       super.testCenterOfMassConstraint();
+   }
+
+   @Disabled // TODO Need to implement createMultiContactConstraintData()
+   @Override
+   @Tag("humanoid-toolbox")
+   @Test
+   public void testMultiContactCenterOfMassConstraint() throws Exception
+   {
+      super.testMultiContactCenterOfMassConstraint();
    }
 
    @Override

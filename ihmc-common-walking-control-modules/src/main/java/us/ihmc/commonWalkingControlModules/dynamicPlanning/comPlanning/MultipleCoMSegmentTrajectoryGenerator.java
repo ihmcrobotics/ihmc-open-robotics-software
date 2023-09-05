@@ -39,12 +39,12 @@ public class MultipleCoMSegmentTrajectoryGenerator extends MultipleSegmentPositi
       double rateY = (endPosition.getY() - startPosition.getY()) / duration;
       double rateZ = (endPosition.getZ() - startPosition.getZ()) / duration;
 
-      segment.setFirstCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-      segment.setSecondCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-      segment.setThirdCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-      segment.setFourthCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-      segment.setFifthCoefficient(ReferenceFrame.getWorldFrame(), rateX, rateY, rateZ);
-      segment.setSixthCoefficient(ReferenceFrame.getWorldFrame(), startPosition.getX(), startPosition.getY(), startPosition.getZ());
+      segment.setFirstCoefficient(0.0, 0.0, 0.0);
+      segment.setSecondCoefficient(0.0, 0.0, 0.0);
+      segment.setThirdCoefficient(0.0, 0.0, 0.0);
+      segment.setFourthCoefficient(0.0, 0.0, 0.0);
+      segment.setFifthCoefficient(rateX, rateY, rateZ);
+      segment.setSixthCoefficient(startPosition.getX(), startPosition.getY(), startPosition.getZ());
 
       numberOfSegments.increment();
    }

@@ -1,17 +1,21 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 
@@ -61,15 +65,29 @@ public class RobotOperationTabController
    @FXML
    public void homeAll()
    {
+      double duration = 3.0;
+
       GoHomeMessage homeLeftArm = new GoHomeMessage();
+      homeLeftArm.setTrajectoryTime(duration);
       homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
       homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoHomeTopic, homeLeftArm);
 
       GoHomeMessage homeRightArm = new GoHomeMessage();
+      homeRightArm.setTrajectoryTime(duration);
       homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
       homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoHomeTopic, homeRightArm);
+
+      GoHomeMessage homeChest = new GoHomeMessage();
+      homeChest.setTrajectoryTime(duration);
+      homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoHomeTopic, homeChest);
+
+      GoHomeMessage homePelvis = new GoHomeMessage();
+      homePelvis.setTrajectoryTime(duration);
+      homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoHomeTopic, homePelvis);
    }
 
    @FXML

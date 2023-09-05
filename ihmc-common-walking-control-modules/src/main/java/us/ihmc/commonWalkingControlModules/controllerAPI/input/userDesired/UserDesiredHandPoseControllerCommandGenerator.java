@@ -20,12 +20,12 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class UserDesiredHandPoseControllerCommandGenerator
 {
-   
+
    public enum BaseForControl
    {
       CHEST, WORLD, WALKING_PATH
    }
-   
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean userDoHandPose = new YoBoolean("userDoHandPose", registry);
@@ -33,8 +33,8 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
    private final YoDouble userDesiredHandPoseTrajectoryTime = new YoDouble("userDesiredHandPoseTrajectoryTime", registry);
 
-   private final YoEnum<RobotSide> userHandPoseSide = new YoEnum<RobotSide>("userHandPoseSide", registry, RobotSide.class);
-   private final YoEnum<BaseForControl> userHandPoseBaseForControl = new YoEnum<BaseForControl>("userHandPoseBaseForControl", registry, BaseForControl.class);
+   private final YoEnum<RobotSide> userHandPoseSide = new YoEnum<>("userHandPoseSide", registry, RobotSide.class);
+   private final YoEnum<BaseForControl> userHandPoseBaseForControl = new YoEnum<>("userHandPoseBaseForControl", registry, BaseForControl.class);
 
    private final YoFramePoseUsingYawPitchRoll userDesiredHandPose;
 
@@ -42,12 +42,14 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
    private final FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
-   public UserDesiredHandPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoRegistry parentRegistry)
+   public UserDesiredHandPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager,
+                                                        final FullHumanoidRobotModel fullRobotModel,
+                                                        double defaultTrajectoryTime,
+                                                        YoRegistry parentRegistry)
    {
       userDesiredHandPose = new YoFramePoseUsingYawPitchRoll("userDesiredHandPose", ReferenceFrame.getWorldFrame(), registry);
 
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-
 
       userDesiredSetHandPoseToActual.addListener(new YoVariableChangedListener()
       {
@@ -73,6 +75,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
       userDoHandPose.addListener(new YoVariableChangedListener()
       {
+         @Override
          public void changed(YoVariable v)
          {
             if (userDoHandPose.getBooleanValue())
@@ -82,20 +85,21 @@ public class UserDesiredHandPoseControllerCommandGenerator
                ReferenceFrame referenceFrameToUse = getReferenceFrameToUse();
                framePose.setIncludingFrame(referenceFrameToUse, framePose);
 
-//               framePose.changeFrame(ReferenceFrame.getWorldFrame());
-//               System.out.println("framePose " + framePose);
+               //               framePose.changeFrame(ReferenceFrame.getWorldFrame());
+               //               System.out.println("framePose " + framePose);
 
-               HandTrajectoryCommand handTrajectoryControllerCommand = new HandTrajectoryCommand(userHandPoseSide.getEnumValue(), referenceFrameToUse, referenceFrameToUse);
+               HandTrajectoryCommand handTrajectoryControllerCommand = new HandTrajectoryCommand(userHandPoseSide.getEnumValue(),
+                                                                                                 referenceFrameToUse,
+                                                                                                 referenceFrameToUse);
 
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(referenceFrameToUse);
                trajectoryPoint.setTime(userDesiredHandPoseTrajectoryTime.getDoubleValue());
-               trajectoryPoint.setPosition(framePose.getPosition());
-               trajectoryPoint.setOrientation(framePose.getOrientation());
-               trajectoryPoint.setLinearVelocity(new Vector3D());
-               trajectoryPoint.setAngularVelocity(new Vector3D());
+               trajectoryPoint.getPosition().set(framePose.getPosition());
+               trajectoryPoint.getOrientation().set(framePose.getOrientation());
+               trajectoryPoint.getLinearVelocity().set(new Vector3D());
+               trajectoryPoint.getAngularVelocity().set(new Vector3D());
 
                handTrajectoryControllerCommand.getSE3Trajectory().addTrajectoryPoint(trajectoryPoint);
-
 
                System.out.println("Submitting " + handTrajectoryControllerCommand);
                controllerCommandInputManager.submitCommand(handTrajectoryControllerCommand);
@@ -114,26 +118,26 @@ public class UserDesiredHandPoseControllerCommandGenerator
    private ReferenceFrame getReferenceFrameToUse()
    {
       ReferenceFrame referenceFrame;
-      switch(userHandPoseBaseForControl.getEnumValue())
+      switch (userHandPoseBaseForControl.getEnumValue())
       {
-      case CHEST:
-      {
-         referenceFrame = chestFrame;
-         break;
-      }
-      case WORLD:
-      {
-         referenceFrame = ReferenceFrame.getWorldFrame();
-      }
-      case WALKING_PATH:
-      {
-         // TODO: What to do for walking path?
-         referenceFrame = ReferenceFrame.getWorldFrame();
-      }
-      default:
-      {
-         throw new RuntimeException("Shouldn't get here!");
-      }
+         case CHEST:
+         {
+            referenceFrame = chestFrame;
+            break;
+         }
+         case WORLD:
+         {
+            referenceFrame = ReferenceFrame.getWorldFrame();
+         }
+         case WALKING_PATH:
+         {
+            // TODO: What to do for walking path?
+            referenceFrame = ReferenceFrame.getWorldFrame();
+         }
+         default:
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
       }
       return referenceFrame;
    }

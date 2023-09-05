@@ -1,10 +1,10 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import behavior_msgs.msg.dds.StatusLogMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
-import us.ihmc.behaviors.lookAndStep.BehaviorTaskSuppressor;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.ros2.ROS2Topic;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,7 +50,7 @@ public class BehaviorTaskSuppressorTest
       assertFalse(suppressor.evaulateShouldAccept(), "Evaluation failure");
    }
 
-   private <T> void publishToUI(MessagerAPIFactory.Topic<T> tTopic, T t)
+   private void publishToUI(ROS2Topic<StatusLogMessage> statusLogMessageROS2Topic, StatusLogMessage statusLogMessage)
    {
 
    }

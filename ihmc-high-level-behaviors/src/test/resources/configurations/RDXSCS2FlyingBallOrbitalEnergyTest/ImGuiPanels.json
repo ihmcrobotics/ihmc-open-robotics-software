@@ -1,0 +1,11 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "SCS 2 Session" : true,
+    "Statistics" : true,
+    "YoVariable Search" : false,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

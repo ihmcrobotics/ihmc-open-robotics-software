@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication;
 
-import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.BodyPathPlanMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;

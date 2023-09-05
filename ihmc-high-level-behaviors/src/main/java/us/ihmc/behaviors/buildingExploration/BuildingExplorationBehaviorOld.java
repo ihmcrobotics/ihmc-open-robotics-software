@@ -2,7 +2,7 @@ package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
@@ -40,14 +40,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOldAPI.*;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
+/**
+ * This was used for the 2019 Atlas building exploration demo. It is called old because
+ * an upgrade was planned but never finished.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
-                                                                              BuildingExplorationBehaviorOld::new,
-                                                                              BuildingExplorationBehaviorAPI.API);
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehaviorOld::new);
 
    private static final int UPDATE_RATE_MILLIS = 50;
    private final static Pose3D NAN_POSE = new Pose3D();
@@ -98,25 +100,25 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       addChild(lookAndStepBehavior);
 
       syncedRobot = helper.newSyncedRobot();
-      helper.subscribeViaCallback(Goal, this::setGoal);
+//      helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
-      helper.subscribeViaCallback(RequestedState, this::requestState);
-      AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
+//      helper.subscribeViaCallback(RequestedState, this::requestState);
+//      AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
 
-      helper.subscribeViaCallback(Start, start ->
-      {
-         LogTools.info("Starting");
-         setBombPose(goal.get());
-         requestState(requestedState.get());
-         start();
-      });
-      helper.subscribeViaCallback(Stop, s -> stop());
-      setStateChangedCallback(newState -> helper.publish(CurrentState, newState));
-      setDebrisDetectedCallback(() -> helper.publish(DebrisDetected, true));
-      setStairsDetectedCallback(() -> helper.publish(StairsDetected, true));
-      setDoorDetectedCallback(() -> helper.publish(DoorDetected, true));
-      helper.subscribeViaCallback(IgnoreDebris, ignore -> ignoreDebris());
-      helper.subscribeViaCallback(ConfirmDoor, confirm -> proceedWithDoorBehavior());
+//      helper.subscribeViaCallback(Start, start ->
+//      {
+//         LogTools.info("Starting");
+//         setBombPose(goal.get());
+//         requestState(requestedState.get());
+//         start();
+//      });
+//      helper.subscribeViaCallback(Stop, s -> stop());
+//      setStateChangedCallback(newState -> helper.publish(CurrentState, newState));
+//      setDebrisDetectedCallback(() -> helper.publish(DebrisDetected, true));
+//      setStairsDetectedCallback(() -> helper.publish(StairsDetected, true));
+//      setDoorDetectedCallback(() -> helper.publish(DoorDetected, true));
+//      helper.subscribeViaCallback(IgnoreDebris, ignore -> ignoreDebris());
+//      helper.subscribeViaCallback(ConfirmDoor, confirm -> proceedWithDoorBehavior());
       helper.subscribeToDoorLocationViaCallback(doorLocationPacket::set);
       helper.subscribeToRobotConfigurationDataViaCallback(robotConfigurationData::set);
 
@@ -139,7 +141,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       goal.set(newGoal);
       if (!newGoal.containsNaN())
          lookAndStepBehavior.acceptGoal(newGoal);
-      helper.publish(GoalForUI, goal.get());
+//      helper.publish(GoalForUI, goal.get());
    }
 
    private void startWakeUpToolboxesThread()
@@ -321,7 +323,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       }
 
       Point3D doorPosition = doorLocationPacket.getDoorTransformToWorld().getPosition();
-      Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootTranslation());
+      Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootPosition());
 
       double xyDistanceToDoor = doorPosition.distanceXY(robotRootJointPosition);
       boolean doorDetected = xyDistanceToDoor <= xyProximityToDoorToStopWalking;

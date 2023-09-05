@@ -84,7 +84,7 @@ public class PointJacobianTest
       pointVelocityFromNumericalDifferentiation.sub(point);
       pointVelocityFromNumericalDifferentiation.scale(1.0 / dt);
 
-      EuclidFrameTestTools.assertFrameTuple3DEquals(pointVelocityFromNumericalDifferentiation, pointVelocityFromJacobian, 1e-6);
+      EuclidFrameTestTools.assertEquals(pointVelocityFromNumericalDifferentiation, pointVelocityFromJacobian, 1e-6);
    }
 
 	@Test

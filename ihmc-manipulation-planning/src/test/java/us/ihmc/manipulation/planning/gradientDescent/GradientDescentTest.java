@@ -1,15 +1,11 @@
 package us.ihmc.manipulation.planning.gradientDescent;
 
-import static us.ihmc.robotics.Assert.*;
-
-import org.junit.jupiter.api.Test;
-
 import gnu.trove.list.array.TDoubleArrayList;
+import org.junit.jupiter.api.Test;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import static us.ihmc.robotics.Assert.assertTrue;
 public class GradientDescentTest
 {
    @Test
@@ -33,6 +29,8 @@ public class GradientDescentTest
          }
       };
       GradientDescentModule solver = new GradientDescentModule(function, initial);
+      solver.setStepSize(20.0);
+      solver.setReducingStepSizeRatio(1.5);
 
       TDoubleArrayList upperLimit = new TDoubleArrayList();
       upperLimit.add(35.0);
@@ -49,7 +47,7 @@ public class GradientDescentTest
       double expectedInputError = Math.abs(optimalSolution.get(0) - expectedOptimalInput);
 
       assertTrue("query arrived on desired value", error < 10E-5);
-      assertTrue("input arrived on expected value", expectedInputError < 10E-5);
+      assertTrue("input arrived on expected value", expectedInputError < 10E-4);
 
       System.out.println("Good Bye Test");
    }

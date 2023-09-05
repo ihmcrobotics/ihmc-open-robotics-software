@@ -8,12 +8,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -29,6 +29,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
@@ -137,11 +138,11 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       loadConfigurationFile(filePropertyHelper);
 
-      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> stereoVisionBufferUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> depthCloudBufferUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveMainUpdaterConfiguration, (content) -> mainUpdater.saveConfiguration(filePropertyHelper));
-      reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
+      reaMessager.addTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> stereoVisionBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> depthCloudBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveMainUpdaterConfiguration, (content) -> mainUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.addTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
@@ -384,7 +385,7 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
       polygonizerParameters.setConcaveHullThreshold(0.15);
-      reaMessager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParameters);
+      reaMessager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertToMessage(polygonizerParameters));
    }
 
    public void setParametersForDepth()

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ManualHandControlPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ManualHandControlPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d732352a47b4ed06efd720b01295c5d1c9997be09abebcc90f5fa4e54f288af1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

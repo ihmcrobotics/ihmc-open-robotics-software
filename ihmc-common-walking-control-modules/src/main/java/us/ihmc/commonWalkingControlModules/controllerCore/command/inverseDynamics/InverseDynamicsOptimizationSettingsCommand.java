@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 /**
  * A command that can be used to configure the optimization settings inside the controller core.
@@ -22,6 +26,8 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    private double jointAccelerationWeight = Double.NaN;
    private double jointJerkWeight = Double.NaN;
    private double jointTorqueWeight = Double.NaN;
+   private final List<OneDoFJointBasics> jointsToDeactivate = new ArrayList<>();
+   private final List<OneDoFJointBasics> jointsToActivate = new ArrayList<>();
 
    /**
     * Sets the minimum force value to apply at each basis vector of each contact point.
@@ -51,7 +57,7 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
     * Sets the maximum value for the absolute joint accelerations in the optimization problem.
     *
     * @param jointAccelerationMax the maximum joint acceleration, the value has to be in [0,
-    *           {@link Double#POSITIVE_INFINITY}].
+    *                             {@link Double#POSITIVE_INFINITY}].
     */
    public void setJointAccelerationMax(double jointAccelerationMax)
    {
@@ -105,7 +111,7 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
     * </p>
     *
     * @param rhoRateWeight the weight to use for the regularization of the rate of change of contact
-    *           forces.
+    *                      forces.
     */
    public void setRhoRateWeight(double rhoRateWeight)
    {
@@ -122,7 +128,7 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
     * </p>
     *
     * @param centerOfPressureWeight the regularization weight to use on the center of pressure
-    *           location.
+    *                               location.
     */
    public void setCenterOfPressureWeight(Tuple2DReadOnly centerOfPressureWeight)
    {
@@ -139,7 +145,7 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
     * </p>
     *
     * @param centerOfPressureRateWeight the regularization weight to use for center of pressure
-    *           variations.
+    *                                   variations.
     */
    public void setCenterOfPressureRateWeight(Tuple2DReadOnly centerOfPressureRateWeight)
    {
@@ -196,6 +202,34 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    public void setJointTorqueWeight(double jointTorqueWeight)
    {
       this.jointTorqueWeight = jointTorqueWeight;
+   }
+
+   /**
+    * Activates a joint such that it is assumed to be controllable and its acceleration should be
+    * solved by the QP solver.
+    * <p>
+    * If the joint was already active, nothing happens.
+    * </p>
+    *
+    * @param jointToActivate the joint to activate and optimize acceleration for.
+    */
+   public void activateJoint(OneDoFJointBasics jointToActivate)
+   {
+      jointsToActivate.add(jointToActivate);
+   }
+
+   /**
+    * Deactivates a joint such that it is assumed to be uncontrollable. However, its position and
+    * velocity are still considered when optimizing for the other active joints.
+    * <p>
+    * If the joint was already deactivated, nothing happens.
+    * </p>
+    * 
+    * @param jointToDeactivate the joint to deactivate.
+    */
+   public void deactivateJoint(OneDoFJointBasics jointToDeactivate)
+   {
+      jointsToDeactivate.add(jointToDeactivate);
    }
 
    /**
@@ -423,6 +457,26 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
       return jointTorqueWeight;
    }
 
+   /**
+    * Gets the list of joints to activate in the optimization problem.
+    * 
+    * @return the joints to activate.
+    */
+   public List<OneDoFJointBasics> getJointsToActivate()
+   {
+      return jointsToActivate;
+   }
+
+   /**
+    * Gets the list of joints to deactivate in the optimization problem.
+    * 
+    * @return the joints to deactivate.
+    */
+   public List<OneDoFJointBasics> getJointsToDeactivate()
+   {
+      return jointsToDeactivate;
+   }
+
    @Override
    public void set(InverseDynamicsOptimizationSettingsCommand other)
    {
@@ -436,6 +490,12 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
       jointAccelerationWeight = other.jointAccelerationWeight;
       jointJerkWeight = other.jointJerkWeight;
       jointTorqueWeight = other.jointTorqueWeight;
+      jointsToActivate.clear();
+      for (int i = 0; i < other.jointsToActivate.size(); i++)
+         jointsToActivate.add(other.jointsToActivate.get(i));
+      jointsToDeactivate.clear();
+      for (int i = 0; i < other.jointsToDeactivate.size(); i++)
+         jointsToDeactivate.add(other.jointsToDeactivate.get(i));
    }
 
    @Override
@@ -489,6 +549,10 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
          if (Double.compare(jointJerkWeight, other.jointJerkWeight) != 0)
             return false;
          if (Double.compare(jointTorqueWeight, other.jointTorqueWeight) != 0)
+            return false;
+         if (!jointsToActivate.equals(other.jointsToActivate))
+            return false;
+         if (!jointsToDeactivate.equals(other.jointsToDeactivate))
             return false;
          return true;
       }

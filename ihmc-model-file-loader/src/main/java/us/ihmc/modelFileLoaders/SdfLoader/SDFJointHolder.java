@@ -32,7 +32,6 @@ public class SDFJointHolder
 
    // Extra data
    private final ArrayList<SDFForceSensor> forceSensors = new ArrayList<>();
-   private final ArrayList<SDFContactSensor> contactSensors = new ArrayList<>();
 
    // Set by loader
    private SDFLinkHolder parentLinkHolder;
@@ -335,16 +334,6 @@ public class SDFJointHolder
    public void addForceSensor(SDFForceSensor forceSensor)
    {
       forceSensors.add(forceSensor);
-   }
-
-   public ArrayList<SDFContactSensor> getContactSensors()
-   {
-      return contactSensors;
-   }
-
-   public void addContactSensor(SDFContactSensor contactSensor)
-   {
-      contactSensors.add(contactSensor);
    }
 
    public void setLimits(double lowerLimit, double upperLimit)

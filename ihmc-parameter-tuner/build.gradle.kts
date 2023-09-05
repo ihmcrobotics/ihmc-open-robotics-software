@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
-   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -18,10 +18,16 @@ mainDependencies {
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:ihmc-yovariables:0.9.12")
-   api("us.ihmc:ihmc-javafx-toolkit:0.21.0")
-   api("us.ihmc:ihmc-robot-data-logger:0.23.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.6")
+   api("us.ihmc:ihmc-robot-data-logger:0.28.5")
+   api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+
+   var javaFXVersion = "17.0.2"
+   api(ihmc.javaFXModule("base", javaFXVersion))
+   api(ihmc.javaFXModule("controls", javaFXVersion))
+   api(ihmc.javaFXModule("graphics", javaFXVersion))
+   api(ihmc.javaFXModule("fxml", javaFXVersion))
 }
 
 testDependencies {

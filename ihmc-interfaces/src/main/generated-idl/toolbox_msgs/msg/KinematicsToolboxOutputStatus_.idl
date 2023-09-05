@@ -1,0 +1,78 @@
+#ifndef __toolbox_msgs__msg__KinematicsToolboxOutputStatus__idl__
+#define __toolbox_msgs__msg__KinematicsToolboxOutputStatus__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * Nothing reported by the toolbox.
+       */
+      const octet CURRENT_TOOLBOX_STATE_NO_STATUS =
+      0;
+
+      /**
+       * The toolbox just initialized successfully and is about to start running.
+       */
+      const octet CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL =
+      1;
+
+      /**
+       * The toolbox failed its initialization and cannot run until it succeeds.
+       * This failure specifies that the toolbox has not received RobotConfigurationData from the IHMC walking controller.
+       */
+      const octet CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD =
+      2;
+
+      /**
+       * The toolbox has been initialized properly and is running.
+       */
+      const octet CURRENT_TOOLBOX_STATE_RUNNING =
+      3;
+
+
+      /**
+       * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
+       * Main usage is for the IHMC KinematicsToolbox.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_")
+      struct KinematicsToolboxOutputStatus
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+         */
+        octet current_toolbox_state;
+        long joint_name_hash;
+        sequence<float> desired_joint_angles;
+        geometry_msgs::msg::dds::Point desired_root_position;
+        geometry_msgs::msg::dds::Quaternion desired_root_orientation;
+        /**
+         * Desired joint velocities might be empty.
+         */
+        sequence<float> desired_joint_velocities;
+        /**
+         * Desired twist of root might be empty.
+         */
+        geometry_msgs::msg::dds::Vector3 desired_root_linear_velocity;
+        geometry_msgs::msg::dds::Vector3 desired_root_angular_velocity;
+        /**
+         * Support region used by the toolbox
+         */
+        sequence<geometry_msgs::msg::dds::Point, 32> support_region;
+        @defaultValue(value=-1.0)
+        double solution_quality;
+      };
+    };
+  };
+};
+
+#endif

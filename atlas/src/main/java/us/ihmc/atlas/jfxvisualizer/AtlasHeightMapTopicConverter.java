@@ -1,6 +1,6 @@
 package us.ihmc.atlas.jfxvisualizer;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -11,7 +11,7 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
