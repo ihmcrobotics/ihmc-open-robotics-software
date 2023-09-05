@@ -18,6 +18,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -101,6 +102,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final SideDependentList<RDXInteractableHand> interactableHands = new SideDependentList<>();
+   private final SideDependentList<RDXInteractableRobotLink> interactableForearms = new SideDependentList<>();
    private RDXInteractableRobotLink interactableChest;
    private RDXInteractableRobotLink interactablePelvis;
    private final ArrayList<RDXInteractableRobotLink> allInteractableRobotLinks = new ArrayList<>();
@@ -263,17 +265,46 @@ public class RDXTeleoperationManager extends RDXPanel
                      interactableFeet.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (robotHasArms && RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
+               if (robotHasArms)
                {
-                  if (!interactableHands.containsKey(side))
+                  if(RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                   {
-                     RDXInteractableHand interactableHand = new RDXInteractableHand(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
-                     interactableHands.put(side, interactableHand);
-                     allInteractableRobotLinks.add(interactableHand);
+                     if (!interactableHands.containsKey(side))
+                     {
+                        RDXInteractableHand interactableHand = new RDXInteractableHand(side,
+                                                                                       baseUI,
+                                                                                       robotCollidable,
+                                                                                       robotModel,
+                                                                                       syncedRobot,
+                                                                                       yoVariableClientHelper);
+                        interactableHands.put(side, interactableHand);
+                        allInteractableRobotLinks.add(interactableHand);
+                     }
+                     else
+                     {
+                        interactableHands.get(side).addAdditionalRobotCollidable(robotCollidable);
+                     }
                   }
-                  else
+                  if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getForearm(side).getName()))
                   {
-                     interactableHands.get(side).addAdditionalRobotCollidable(robotCollidable);
+                     if (!interactableForearms.containsKey(side))
+                     {
+                        interactableForearms.put(side, new RDXInteractableRobotLink());
+                        interactableForearms.get(side).create(robotCollidable,
+                                                 syncedRobot.getReferenceFrames().getForearmFrame(side),
+                                                 modelFileName,
+                                                 baseUI.getPrimary3DPanel());
+                        interactableForearms.get(side).setOnSpacePressed(() ->
+                                                            {
+//                                                               ros2Helper.publishToController(HumanoidMessageTools.createForearmTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+//                                                                                                                                                interactableForearms.get(side).getPose().getOrientation()));
+                                                            });
+                        allInteractableRobotLinks.add(interactableForearms.get(side));
+                     }
+                     else
+                     {
+                        interactableForearms.get(side).addAdditionalRobotCollidable(robotCollidable);
+                     }
                   }
                }
             }
@@ -372,7 +403,7 @@ public class RDXTeleoperationManager extends RDXPanel
          {
             for (RobotSide side : interactableHands.sides())
             {
-               allAreDeleted &= interactableHands.get(side).isDeleted();
+               allAreDeleted &= interactableHands.get(side).isDeleted() && interactableForearms.get(side).isDeleted();
             }
          }
          for (RobotSide side : interactableFeet.sides())
@@ -456,6 +487,7 @@ public class RDXTeleoperationManager extends RDXPanel
                for (RobotSide side : interactableHands.sides())
                {
                   interactableHands.get(side).process3DViewInput(input);
+                  interactableForearms.get(side).process3DViewInput(input);
                }
             }
          }

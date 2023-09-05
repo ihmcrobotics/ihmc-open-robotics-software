@@ -426,6 +426,12 @@ public class FullRobotModelTestTools
       }
 
       @Override
+      public MovingReferenceFrame getForearmFrame(RobotSide robotSide)
+      {
+         return getForearm(robotSide).getBodyFixedFrame();
+      }
+
+      @Override
       public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return soleFrames;
