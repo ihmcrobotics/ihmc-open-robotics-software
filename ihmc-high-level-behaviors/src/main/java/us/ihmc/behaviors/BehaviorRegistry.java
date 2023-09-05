@@ -1,24 +1,14 @@
 package us.ihmc.behaviors;
 
-import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
-
 import java.util.LinkedHashSet;
 
 /**
- * FIXME: This class was designed for using Messager and supporting behaviors defining their
- *  Messager APIs in code that depends on this. We have removed Messager, so the design needs
- *  to be reconsidered.
+ * The registry exists to enumerate available root behavior tree nodes.
+ * This is needed because they are programmatically defined instead of by
+ * being a directory of JSON files.
  */
 public class BehaviorRegistry
 {
-   public static final BehaviorRegistry DEFAULT_BEHAVIORS = new BehaviorRegistry(LookAndStepBehavior.DEFINITION);
-   static
-   {
-      DEFAULT_BEHAVIORS.register(LookAndStepBehavior.DEFINITION);
-      DEFAULT_BEHAVIORS.register(TraverseStairsBehavior.DEFINITION);
-   }
-
    private BehaviorDefinition highestLevelNode;
    private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
 
