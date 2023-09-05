@@ -10,6 +10,7 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -37,24 +38,23 @@ public class RDXAffordanceTemplateEditorUI
    }
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private AffordanceTemplateEditorStatus status;
+   private final RDXAffordanceTemplateEditorStatus status;
 
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
-   private RDXInteractableObjectBuilder objectBuilder;
+   private final RDXInteractableObjectBuilder objectBuilder;
    private String currentObjectName = "";
-   private String previousObjectName = "";
    private final float[] gripperClosure = new float[1];
 
    // affordance poses
-   private RDXAffordanceTemplateFrame graspFrame;
-   private RDXAffordanceTemplateFrames preGraspFrames;
-   private RDXAffordanceTemplateFrames postGraspFrames;
+   private final RDXAffordanceTemplateFrame graspFrame;
+   private final RDXAffordanceTemplateFrames preGraspFrames;
+   private final RDXAffordanceTemplateFrames postGraspFrames;
 
-   private RDXAffordanceTemplateMirror mirror;
-   private RDXAffordanceTemplateLocker locker;
-   private RDXAffordanceTemplateFileManager fileManager;
+   private final RDXAffordanceTemplateMirror mirror;
+   private final RDXAffordanceTemplateLocker locker;
+   private final RDXAffordanceTemplateFileManager fileManager;
 
    private boolean playing = false;
    private long lastPlayTime = 0;
@@ -82,7 +82,7 @@ public class RDXAffordanceTemplateEditorUI
          handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
       }
 
-      status = new AffordanceTemplateEditorStatus(RobotSide.RIGHT, RDXActiveAffordanceMenu.NONE);
+      status = new RDXAffordanceTemplateEditorStatus(RobotSide.RIGHT, RDXActiveAffordanceMenu.NONE);
       status.setActiveMenu(RDXActiveAffordanceMenu.PRE_GRASP);
       preGraspFrames = new RDXAffordanceTemplateFrames(interactableHands,
                                                        handTransformsToWorld,
@@ -144,19 +144,8 @@ public class RDXAffordanceTemplateEditorUI
          // when editing post grasp poses, we want to move the object frame and the hand together
          locker.update(objectPose);
       }
-      currentObjectName = objectBuilder.getSelectedObjectName();
-      if (!currentObjectName.equals(previousObjectName))
-      {
-         currentObjectName = objectBuilder.getSelectedObjectName();
-         if (!currentObjectName.equals(previousObjectName))
-         {
-            reset();
-            objectBuilder.resetPose();
-            fileManagerDirectory.reindexDirectory();
-            fileManager.setLoadingFile("");
-         }
-         previousObjectName = currentObjectName;
-      }
+      if (objectBuilder.getSelectedObjectNotification().poll())
+         onObjectSelectionChanged();
 
       for (RobotSide side : handPoses.keySet())
       {
@@ -244,16 +233,16 @@ public class RDXAffordanceTemplateEditorUI
       {
          RobotSide activeSide = status.getActiveSide();
          ImGui.text("Hand configuration: ");
-         if (ImGui.button(labels.get("OPEN")))
+         if (ImGui.button(labels.get(HandConfiguration.OPEN.name())))
             interactableHands.get(activeSide).openGripper();
          ImGui.sameLine();
-         if (ImGui.button(labels.get("HALF_CLOSE")))
+         if (ImGui.button(labels.get(HandConfiguration.HALF_CLOSE.name())))
             interactableHands.get(activeSide).setGripperToHalfClose();
          ImGui.sameLine();
-         if (ImGui.button(labels.get("CLOSE")))
+         if (ImGui.button(labels.get(HandConfiguration.CLOSE.name())))
             interactableHands.get(activeSide).closeGripper();
          ImGui.sameLine();
-         if (ImGui.button(labels.get("CRUSH")))
+         if (ImGui.button(labels.get(HandConfiguration.CRUSH.name())))
             interactableHands.get(activeSide).crushGripper();
          if (ImGui.sliderFloat("Set Closure",
                                gripperClosure,
@@ -411,6 +400,15 @@ public class RDXAffordanceTemplateEditorUI
          ImGui.popStyleColor();
       }
 
+   }
+
+   private void onObjectSelectionChanged()
+   {
+      currentObjectName = objectBuilder.getSelectedObjectNotification().read();
+      reset();
+      objectBuilder.resetPose();
+      fileManagerDirectory.reindexDirectory();
+      fileManager.setLoadingFile("");
    }
 
    private void reset()

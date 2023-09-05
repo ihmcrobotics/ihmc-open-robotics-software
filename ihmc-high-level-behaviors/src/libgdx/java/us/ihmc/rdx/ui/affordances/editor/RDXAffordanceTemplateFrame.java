@@ -17,27 +17,31 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+/**
+ * This class deals with an AT frame.
+ * This represented by a pose of the hand, a frame graphics representing that pose, a hand configuration, and an associated object pose
+ */
 public class RDXAffordanceTemplateFrame
 {
-   private SideDependentList<FramePose3D> poses = new SideDependentList<>();
-   private SideDependentList<Boolean> isPoseSet = new SideDependentList<>();
+   private final SideDependentList<FramePose3D> poses = new SideDependentList<>();
+   private final SideDependentList<Boolean> isPoseSet = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> poseFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> frameGraphics = new SideDependentList<>();
-   private SideDependentList<HandConfiguration> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<HandConfiguration> handConfigurations = new SideDependentList<>();
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
    private final RigidBodyTransform objectTransformOfFrame = new RigidBodyTransform();
-   private final AffordanceTemplateEditorStatus editorStatus;
-   private RDXActiveAffordanceMenu menu;
+   private final RDXAffordanceTemplateEditorStatus editorStatus;
+   private final RDXActiveAffordanceMenu menu;
    private boolean changedColor = false;
 
    public RDXAffordanceTemplateFrame(SideDependentList<RDXInteractableSakeGripper> interactableHands,
                                      SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                      SideDependentList<FramePose3D> handPoses,
                                      RigidBodyTransform objectTransformToWorld,
-                                     AffordanceTemplateEditorStatus editorStatus,
+                                     RDXAffordanceTemplateEditorStatus editorStatus,
                                      Color color)
    {
       this.interactableHands = interactableHands;

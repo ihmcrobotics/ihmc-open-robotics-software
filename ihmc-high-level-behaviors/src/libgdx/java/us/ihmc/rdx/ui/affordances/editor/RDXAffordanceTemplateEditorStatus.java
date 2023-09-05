@@ -2,12 +2,13 @@ package us.ihmc.rdx.ui.affordances.editor;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class AffordanceTemplateEditorStatus
+public class RDXAffordanceTemplateEditorStatus
 {
    private RobotSide activeSide;
    private RDXActiveAffordanceMenu activeMenu;
 
-   public AffordanceTemplateEditorStatus(RobotSide activeSide, RDXActiveAffordanceMenu activeMenu) {
+   public RDXAffordanceTemplateEditorStatus(RobotSide activeSide, RDXActiveAffordanceMenu activeMenu)
+   {
       this.activeSide = activeSide;
       this.activeMenu = activeMenu;
    }

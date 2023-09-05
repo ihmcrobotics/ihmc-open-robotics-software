@@ -21,10 +21,10 @@ public class RDXAffordanceTemplateLocker
 {
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
-   private final AffordanceTemplateEditorStatus editorStatus;
+   private final RDXAffordanceTemplateEditorStatus editorStatus;
 
-   private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
-   private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
+   private final SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
+   private final SideDependentList<Boolean> handsLocked = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
    private boolean bothHandsLocked = false;
 
@@ -32,7 +32,7 @@ public class RDXAffordanceTemplateLocker
 
    public RDXAffordanceTemplateLocker(SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
-                                      AffordanceTemplateEditorStatus editorStatus)
+                                      RDXAffordanceTemplateEditorStatus editorStatus)
    {
       this.handPoses = handPoses;
       this.handTransformsToWorld = handTransformsToWorld;
