@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -42,6 +43,8 @@ public class RDXPerceptionUI
    private RDXRemotePerceptionUI remotePerceptionUI;
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
+   private FootstepPlanningModule footstepPlanningModule;
+
    private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230903_222303_PlanarRegionsListLogger.prllog").toString());
    private PlanarRegionsList logLoadedPlanarRegions;
 
@@ -52,10 +55,12 @@ public class RDXPerceptionUI
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
+      footstepPlanningModule = new FootstepPlanningModule("perceptionUI");
+
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
       baseUI = new RDXBaseUI("Perception UI");
 
-      logLoadedPlanarRegions = PlanarRegionFileTools.importPlanarRegionData(logFile);
+      logLoadedPlanarRegions = PlanarRegionFileTools.loadRegionsFromLog(logFile);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
