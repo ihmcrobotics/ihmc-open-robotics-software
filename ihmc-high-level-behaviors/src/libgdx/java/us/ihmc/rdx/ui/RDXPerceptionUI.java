@@ -14,12 +14,16 @@ import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.File;
 import java.net.URISyntaxException;
 
 public class RDXPerceptionUI
@@ -36,6 +40,10 @@ public class RDXPerceptionUI
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
    private RDXRemotePerceptionUI remotePerceptionUI;
+   private RDXPlanarRegionsGraphic planarRegionsGraphic;
+
+   private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230903_222303_PlanarRegionsListLogger.prllog").toString());
+   private PlanarRegionsList logLoadedPlanarRegions;
 
    public RDXPerceptionUI()
    {
@@ -46,6 +54,8 @@ public class RDXPerceptionUI
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
       baseUI = new RDXBaseUI("Perception UI");
+
+      logLoadedPlanarRegions = PlanarRegionFileTools.importPlanarRegionData(logFile);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -187,6 +197,11 @@ public class RDXPerceptionUI
             buildingConstructor.create();
             baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, RDXSceneLevel.MODEL);
+
+            planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
+            planarRegionsGraphic.generateMeshes(logLoadedPlanarRegions);
+            planarRegionsGraphic.update();
 
             globalVisualizersUI.create();
          }

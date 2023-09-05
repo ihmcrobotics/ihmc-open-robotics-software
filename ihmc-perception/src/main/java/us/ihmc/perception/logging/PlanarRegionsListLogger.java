@@ -1,4 +1,4 @@
-package us.ihmc.avatar.logging;
+package us.ihmc.perception.logging;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;

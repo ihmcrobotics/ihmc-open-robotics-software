@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -109,5 +110,27 @@ public class PerceptionFileTools
       }
 
       return listToReturn;
+   }
+
+   static public PlanarRegionsReplayBuffer createPlanarRegionsReplayBuffer(File planarRegionLogDirectory)
+   {
+      PlanarRegionsReplayBuffer regionsReplayBuffer = null;
+      for (File file : planarRegionLogDirectory.listFiles())
+      {
+         if (file.getName().toUpperCase().endsWith(".PRLLOG"))
+         {
+            try
+            {
+               regionsReplayBuffer = new PlanarRegionsReplayBuffer(file, PlanarRegionsList.class);
+            }
+            catch (IOException ioException)
+            {
+               LogTools.error(ioException.getStackTrace());
+            }
+            break;
+         }
+      }
+
+      return regionsReplayBuffer;
    }
 }

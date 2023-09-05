@@ -6,8 +6,8 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.avatar.logging.PlanarRegionsListLogger;
-import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
+import us.ihmc.perception.logging.PlanarRegionsListLogger;
+import us.ihmc.perception.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
@@ -200,28 +200,6 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
-   }
-
-   public PlanarRegionMappingHandler(File planarRegionLogDirectory)
-   {
-      source = DataSource.PLANAR_REGIONS_LOG;
-      planarRegionMap = new PlanarRegionMap(true);
-
-      for (File file : planarRegionLogDirectory.listFiles())
-      {
-         if (file.getName().toUpperCase().endsWith(".PRLLOG"))
-         {
-            try
-            {
-               planarRegionsListBuffer = new PlanarRegionsReplayBuffer(file, FramePlanarRegionsList.class);
-            }
-            catch (IOException ioException)
-            {
-               LogTools.error(ioException.getStackTrace());
-            }
-            break;
-         }
-      }
    }
 
    public void logMapRegions()
