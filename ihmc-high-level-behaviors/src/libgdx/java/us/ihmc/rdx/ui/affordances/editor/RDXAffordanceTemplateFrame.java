@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * This class deals with an AT frame.
- * This represented by a pose of the hand, a frame graphics representing that pose, a hand configuration, and an associated object pose
+ * This includes a pose of the hand, a frame graphics representing that pose, a hand configuration, and an associated object pose
  */
 public class RDXAffordanceTemplateFrame
 {
