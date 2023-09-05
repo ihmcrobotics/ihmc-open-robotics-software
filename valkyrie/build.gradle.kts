@@ -46,7 +46,6 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
-   api("us.ihmc:ihmc-high-level-behaviors-javafx:source")
    api("us.ihmc:ihmc-parameter-tuner:source")
 }
 
