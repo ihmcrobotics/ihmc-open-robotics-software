@@ -6,8 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.ImGui;
+import imgui.internal.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiStyleVar;
+import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -285,10 +287,6 @@ public class RDXBehaviorActionSequenceEditor
          ImGui.beginChild(labels.get("childRegion"));
 
          renderInteractableActionListArea();
-
-         ImGui.separator();
-
-         renderActionCreationArea();
 
          ImGui.endChild();
       }
@@ -568,8 +566,14 @@ public class RDXBehaviorActionSequenceEditor
       }
    }
 
-   private void renderActionCreationArea()
+   protected void renderActionCreationArea()
    {
+      if (workspaceFile == null)
+      {
+         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+         ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
+      }
+
       RDXBehaviorAction newAction = null;
 
       ReferenceFrame nextPreviousParentFrame = findNextPreviousParentFrame();
@@ -674,6 +678,12 @@ public class RDXBehaviorActionSequenceEditor
 
       if (newAction != null)
          insertNewAction(newAction);
+
+      if (workspaceFile == null)
+      {
+         ImGui.popStyleVar();
+         ImGui.popItemFlag();
+      }
    }
 
    /**
