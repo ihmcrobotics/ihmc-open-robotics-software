@@ -29,7 +29,7 @@ public class RDXActionSequenceTools
       {
          case "RDXArmJointAnglesAction" ->
          {
-            return robotHasArms ? new RDXArmJointAnglesAction() : null;
+            return robotHasArms ? new RDXArmJointAnglesAction(robotModel) : null;
          }
          case "RDXChestOrientationAction" ->
          {

@@ -6,6 +6,9 @@ behavior_msgs/ActionInformationMessage action_information
 # Field default value 255
 int8 robot_side
 
+# Preset arm configuration
+int32 preset
+
 # Joint angles
 float64[] joint_angles
 
