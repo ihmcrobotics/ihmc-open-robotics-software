@@ -461,7 +461,6 @@ public class RDXAffordanceTemplateFileManager
             String objectName = jsonNode.get("object").asText();
             if (!objectName.isEmpty())
             {
-               objectBuilder.loadObject(jsonNode.get("object").asText());
                RigidBodyTransform initialTransform = new RigidBodyTransform();
                JSONTools.toEuclid(jsonNode, initialTransform);
                objectBuilder.getSelectedObject().setPose(initialTransform);

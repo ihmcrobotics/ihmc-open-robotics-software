@@ -34,7 +34,7 @@ public class RDXAffordanceTemplateMirror
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
-   private final AffordanceTemplateEditorStatus editorStatus;
+   private final RDXAffordanceTemplateEditorStatus editorStatus;
    private final ImBoolean mirrorActive = new ImBoolean(false);
    private final Map<String, Boolean> activeTransformAxisMirror = new LinkedHashMap<>();
    private final Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
@@ -50,7 +50,7 @@ public class RDXAffordanceTemplateMirror
    public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableSakeGripper> interactableHands,
                                       SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
-                                      AffordanceTemplateEditorStatus editorStatus)
+                                      RDXAffordanceTemplateEditorStatus editorStatus)
    {
       this.interactableHands = interactableHands;
       this.handPoses = handPoses;

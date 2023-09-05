@@ -29,6 +29,7 @@ public class RDXAffordanceTemplateFrames
    private int index = 0;
    private final List<Color> colors;
    private int colorIndex = 0;
+   private boolean changedColor = false;
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<List<HandConfiguration>> handConfigurations = new SideDependentList<>();
@@ -38,15 +39,14 @@ public class RDXAffordanceTemplateFrames
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
    private final List<RigidBodyTransform> objectTransforms = new ArrayList<>();
-   private boolean changedColor = false;
-   private final AffordanceTemplateEditorStatus editorStatus;
+   private final RDXAffordanceTemplateEditorStatus editorStatus;
    private final RDXActiveAffordanceMenu menu;
 
    public RDXAffordanceTemplateFrames(SideDependentList<RDXInteractableSakeGripper> interactableHands,
                                       SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
                                       RigidBodyTransform objectTransformToWorld,
-                                      AffordanceTemplateEditorStatus editorStatus,
+                                      RDXAffordanceTemplateEditorStatus editorStatus,
                                       ArrayList<Color> colors)
    {
       this.interactableHands = interactableHands;
