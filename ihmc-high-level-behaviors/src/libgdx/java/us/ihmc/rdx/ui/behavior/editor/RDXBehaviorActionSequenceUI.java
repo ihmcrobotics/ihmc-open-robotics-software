@@ -87,6 +87,7 @@ public class RDXBehaviorActionSequenceUI
       ImGui.beginMenuBar();
 
       renderFileMenu();
+      renderActionsMenu();
 
 //      if (ImGui.beginMenu(labels.get("View")))
 //      {
@@ -150,6 +151,15 @@ public class RDXBehaviorActionSequenceUI
          if (reindexClicked)
             reindexSequences();
 
+         ImGui.endMenu();
+      }
+   }
+
+   private void renderActionsMenu()
+   {
+      if (ImGui.beginMenu(labels.get("Actions")))
+      {
+         editor.renderActionCreationArea();
          ImGui.endMenu();
       }
    }
