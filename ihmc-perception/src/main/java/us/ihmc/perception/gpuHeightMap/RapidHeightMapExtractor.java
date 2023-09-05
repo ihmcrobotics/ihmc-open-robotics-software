@@ -37,8 +37,10 @@ public class RapidHeightMapExtractor
    private int searchWindowHeight = 250;
    private int searchWindowWidth = 140;
 
-   private float minHeightRegistration = 0.05f;
+   private float minHeightRegistration = -0.1f;
    private float maxHeightRegistration = 0.7f;
+   private float minHeightDifference = -0.05f;
+   private float maxHeightDifference = 0.1f;
 
    private float robotCollisionCylinderRadius = 0.4f;
    private float gridOffsetX = localWidthInMeters / 2.0f;
@@ -205,6 +207,8 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter(heightScalingFactor);
       parametersBuffer.setParameter(minHeightRegistration);
       parametersBuffer.setParameter(maxHeightRegistration);
+      parametersBuffer.setParameter(minHeightDifference);
+      parametersBuffer.setParameter(maxHeightDifference);
       parametersBuffer.setParameter(searchWindowHeight);
       parametersBuffer.setParameter(searchWindowWidth);
 

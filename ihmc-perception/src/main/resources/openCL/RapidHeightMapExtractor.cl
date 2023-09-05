@@ -19,8 +19,10 @@
 #define HEIGHT_SCALING_FACTOR 18
 #define MIN_HEIGHT_REGISTRATION 19
 #define MAX_HEIGHT_REGISTRATION 20
-#define SEARCH_WINDOW_HEIGHT 21
-#define SEARCH_WINDOW_WIDTH 22
+#define MIN_HEIGHT_DIFFERENCE 21
+#define MAX_HEIGHT_DIFFERENCE 22
+#define SEARCH_WINDOW_HEIGHT 23
+#define SEARCH_WINDOW_WIDTH 24
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -208,14 +210,14 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       averageHeightZ = averageHeightZ / (float)(count);
       averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
 
-      write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-
       //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
    else
    {
-      write_imageui(out, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
+      // this is slightly below the floor height of what we'll accept
+      averageHeightZ = params[MIN_HEIGHT_REGISTRATION] - 0.05F;
    }
+   write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
 void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
@@ -256,24 +258,30 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    int localCellsPerAxis = (int) params[LOCAL_CELLS_PER_AXIS];
 
    // Extract the height from the local map at the local cell index (if within bounds)
-   float height = 0.0f;
    float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR];
+   float height = params[MIN_HEIGHT_REGISTRATION] - 0.05f;
 
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
       height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / params[HEIGHT_SCALING_FACTOR];
    }
 
-   float finalHeight = 0.0f;
+   float finalHeight = previousHeight;
 
    // Filter the height value if it is within the registration height range and not colliding with the robot
-   if (height > params[MIN_HEIGHT_REGISTRATION] && height < params[MAX_HEIGHT_REGISTRATION] && !isColliding)
+   if (!isColliding && height > params[MIN_HEIGHT_REGISTRATION] && height < params[MAX_HEIGHT_REGISTRATION])
    {
-       finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + height * (1.0f - params[HEIGHT_FILTER_ALPHA]);
-   }
-   else
-   {
-      finalHeight = previousHeight;
+      // Apply a poor man's mahalanobis filter on the data
+      float height_diff = height - previousHeight;
+      if (height_diff > params[MIN_HEIGHT_DIFFERENCE] && height_diff < params[MAX_HEIGHT_DIFFERENCE])
+      {
+         finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + height * (1.0f - params[HEIGHT_FILTER_ALPHA]);
+      }
+      else
+      {
+         // the difference between the incoming data and the old data was too much, reset it to the incoming data completely
+         finalHeight = height;
+      }
    }
 
    // Put the height value in the global map at the global cell index
