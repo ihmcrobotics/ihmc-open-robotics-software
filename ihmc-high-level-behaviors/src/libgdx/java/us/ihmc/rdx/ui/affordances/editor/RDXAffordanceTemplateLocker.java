@@ -21,8 +21,7 @@ public class RDXAffordanceTemplateLocker
 {
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
-   private final RobotSide[] activeSide;
-   private final RDXActiveAffordanceMenu[] activeMenu;
+   private final AffordanceTemplateEditorStatus editorStatus;
 
    private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
    private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
@@ -33,13 +32,11 @@ public class RDXAffordanceTemplateLocker
 
    public RDXAffordanceTemplateLocker(SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
-                                      RobotSide[] activeSide,
-                                      RDXActiveAffordanceMenu[] activeMenu)
+                                      AffordanceTemplateEditorStatus editorStatus)
    {
       this.handPoses = handPoses;
       this.handTransformsToWorld = handTransformsToWorld;
-      this.activeSide = activeSide;
-      this.activeMenu = activeMenu;
+      this.editorStatus = editorStatus;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -52,7 +49,7 @@ public class RDXAffordanceTemplateLocker
    {
       for (RobotSide side : handPoses.keySet())
       {
-         if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side))
+         if (editorStatus.getActiveMenu() == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side))
          {
             // used to update the hand pose according to object pose in post-grasping once fixed contact with object
             if (!affordancePoseLocked.get(side))
@@ -85,17 +82,17 @@ public class RDXAffordanceTemplateLocker
    public void renderImGuiWidgets(ImGuiUniqueLabelMap labels)
    {
       boolean changedColorLockOneHand = false;
-      if (handPoses.containsKey(activeSide[0]))
+      if (handPoses.containsKey(editorStatus.getActiveSide()))
       {
-         if (handsLocked.get(activeSide[0]))
+         if (handsLocked.get(editorStatus.getActiveSide()))
          {
             ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
             changedColorLockOneHand = true;
          }
          if (!(handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
          {
-            if (ImGui.button(labels.get("Lock Hand To Object")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
-               handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
+            if (ImGui.button(labels.get("Lock Hand To Object")) && editorStatus.getActiveMenu() == RDXActiveAffordanceMenu.POST_GRASP)
+               handsLocked.replace(editorStatus.getActiveSide(), !handsLocked.get(editorStatus.getActiveSide()));
          }
          if (changedColorLockOneHand)
             ImGui.popStyleColor();
@@ -109,7 +106,7 @@ public class RDXAffordanceTemplateLocker
          if (!((handsLocked.get(RobotSide.LEFT) && !handsLocked.get(RobotSide.RIGHT)) || (!handsLocked.get(RobotSide.LEFT)
                                                                                           && handsLocked.get(RobotSide.RIGHT))))
          { // not in alternate state, this means single hand lock is not activate
-            if (ImGui.button(labels.get("Lock Both Hands To Object")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+            if (ImGui.button(labels.get("Lock Both Hands To Object")) && editorStatus.getActiveMenu() == RDXActiveAffordanceMenu.POST_GRASP)
             {
                for (RobotSide side : RobotSide.values)
                   handsLocked.replace(side, !handsLocked.get(side));
