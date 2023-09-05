@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
@@ -45,7 +44,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.nadia.inertialParameterEstimation.NadiaInertialParameterEstimator;
+import us.ihmc.nadia.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -363,7 +362,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
 
-      inertialParameterEstimator = new NadiaInertialParameterEstimator(fullRobotModel, controlDT, gravity, registry);
+      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, footSwitches, controlDT, gravity, registry);
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
