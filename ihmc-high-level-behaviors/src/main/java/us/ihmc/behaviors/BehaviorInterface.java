@@ -5,12 +5,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface BehaviorInterface extends BehaviorTreeControlFlowNodeBasics
 {
-   public default YoRegistry getYoRegistry()
+   default YoRegistry getYoRegistry()
    {
       return null;
    }
 
-   public default void destroy()
+   default void destroy()
    {
       
    }
