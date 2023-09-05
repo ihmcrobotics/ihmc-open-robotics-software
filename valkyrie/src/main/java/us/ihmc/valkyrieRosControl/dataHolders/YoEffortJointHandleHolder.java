@@ -48,6 +48,10 @@ public class YoEffortJointHandleHolder
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
       this.tauMeasured.set(handle.getEffort());
+   }
+
+   public void updateControllerOutput()
+   {
       yoDesiredJointData.set(desiredJointData);
    }
 

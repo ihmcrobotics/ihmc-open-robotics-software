@@ -29,7 +29,7 @@ public class RDXActionSequenceTools
       boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       if (actionType.equals(RDXArmJointAnglesAction.class.getSimpleName()))
       {
-         return robotHasArms ? new RDXArmJointAnglesAction() : null;
+         return robotHasArms ? new RDXArmJointAnglesAction(robotModel) : null;
       }
       if (actionType.equals(RDXChestOrientationAction.class.getSimpleName()))
       {

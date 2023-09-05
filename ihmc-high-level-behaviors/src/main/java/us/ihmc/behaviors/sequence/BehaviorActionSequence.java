@@ -120,7 +120,7 @@ public class BehaviorActionSequence
 
          for (ArmJointAnglesActionMessage message : latestUpdateMessage.getArmJointAnglesActions())
          {
-            ArmJointAnglesAction action = new ArmJointAnglesAction(ros2);
+            ArmJointAnglesAction action = new ArmJointAnglesAction(robotModel, ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
