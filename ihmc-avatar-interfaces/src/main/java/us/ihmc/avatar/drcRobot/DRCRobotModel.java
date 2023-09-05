@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
 import us.ihmc.avatar.factory.DefaultSimulatedHandOutputWriter;
@@ -85,6 +86,16 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       robotInitialSetup.setInitialYaw(initialYaw);
       robotInitialSetup.setOffset(new Vector3D(x, y, z));
       return robotInitialSetup;
+   }
+
+   public default double[] getPresetArmConfiguration(RobotSide side, PresetArmConfiguration presetArmConfiguration)
+   {
+      throw new RuntimeException("Not implemented");
+   }
+
+   public default void getPresetArmConfiguration(RobotSide side, PresetArmConfiguration presetArmConfiguration, double[] jointAnglesToPack)
+   {
+      throw new RuntimeException("Not implemented");
    }
 
    public abstract HandModel getHandModel(RobotSide side);

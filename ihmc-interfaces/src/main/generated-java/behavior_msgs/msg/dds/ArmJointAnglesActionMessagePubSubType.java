@@ -15,7 +15,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "45d21d3a071b753c7a77ea752db40cb8c68850bc6fd1fa5d56a1974bfe1f7458";
+   		return "a81dca3c3abc4f016953ca4e646a4812a61ed0220d7e7af1f05f715882670225";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -78,6 +80,9 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -90,6 +95,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
+
+      cdr.write_type_2(data.getPreset());
 
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
@@ -104,6 +111,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
+      	
+      data.setPreset(cdr.read_type_2());
       	
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
@@ -122,6 +131,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_2("preset", data.getPreset());
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
    }
@@ -132,6 +142,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setPreset(ser.read_type_2("preset"));
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }
