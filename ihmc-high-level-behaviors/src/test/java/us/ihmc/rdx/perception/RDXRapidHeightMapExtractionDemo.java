@@ -34,6 +34,13 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 
+/**
+ * This class loads the depth maps from a perception log and extracts the height map from it. Allows for scrubbing through the log and visualizing the height
+ * map for any given frame.
+ *
+ * To Run: Download the HDF5 file used in this demo from the Google Drive from the following location:
+ *    Fast Behaviors > Perception > Perception Logs > SLAM_RoughTerrain_LinearLoop > IROS_2023 > 20230228_200243_PerceptionLog.hdf5
+ */
 public class RDXRapidHeightMapExtractionDemo
 {
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_200243_PerceptionLog.hdf5").toString();
