@@ -100,8 +100,8 @@ float get_height_on_plane(float x, float y, global float *plane)
 void kernel heightMapUpdateKernel(read_write image2d_t in,
                                   read_write image2d_t out,
                                   global float *params,
-                                  global float *sensorToWorldTf,
-                                  global float *worldToSensorTf)
+                                  global float *sensorToZUpFrameTf,
+                                  global float *zUpToSensorFrameTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -110,27 +110,27 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    float3 centroid;
 
    float averageHeightZ = 0;
-   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.0f);
-   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
+   cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[LOCAL_CELL_SIZE],
                                                params[LOCAL_CENTER_INDEX]);
 
 
-   cellCenterInWorld.x += params[GRID_OFFSET_X];
+   cellCenterInZUp.x += params[GRID_OFFSET_X];
 
-   float halfCellWidth = params[GLOBAL_CELL_SIZE] / 2.0f;
-   float minX = cellCenterInWorld.x - halfCellWidth;
-   float maxX = cellCenterInWorld.x + halfCellWidth;
-   float minY = cellCenterInWorld.y - halfCellWidth;
-   float maxY = cellCenterInWorld.y + halfCellWidth;
+   float halfCellWidth = params[LOCAL_CELL_SIZE] / 2.0f;
+   float minX = cellCenterInZUp.x - halfCellWidth;
+   float maxX = cellCenterInZUp.x + halfCellWidth;
+   float minY = cellCenterInZUp.y - halfCellWidth;
+   float maxY = cellCenterInZUp.y + halfCellWidth;
 
    float3 cellCenterInSensor = transformPoint3D32_2(
-      cellCenterInWorld,
-      (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
-      (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
-      (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
-      (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
+      cellCenterInZUp,
+      (float3)(zUpToSensorFrameTf[0], zUpToSensorFrameTf[1], zUpToSensorFrameTf[2]),
+      (float3)(zUpToSensorFrameTf[4], zUpToSensorFrameTf[5], zUpToSensorFrameTf[6]),
+      (float3)(zUpToSensorFrameTf[8], zUpToSensorFrameTf[9], zUpToSensorFrameTf[10]),
+      (float3)(zUpToSensorFrameTf[3], zUpToSensorFrameTf[7], zUpToSensorFrameTf[11]));
 
    int2 projectedPoint;
    if (params[MODE] == 0) // Spherical Projection
@@ -149,7 +149,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    }
 
    //printf("xIndex: %d, yIndex: %d\tcellCenterWorld: (%f, %f, %f)\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\n",
-   //       xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+   //       xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z,
    //       cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
 
    int count = 0;
@@ -178,18 +178,18 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
             queryPointInWorld = transformPoint3D32_2(
             queryPointInSensor,
-            (float3)(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2]),
-            (float3)(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
-            (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
-            (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
+            (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
+            (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
+            (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
+            (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
 
             //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
-            //   xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, projectedPoint.x, projectedPoint.y,
+            //   xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z, projectedPoint.x, projectedPoint.y,
             //   yaw_count, pitch_count, depth, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
 
 
             //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
-            //      cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+            //      cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z,
             //      cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z,
             //      projectedPoint.x, projectedPoint.y);
 
@@ -223,7 +223,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                         read_write image2d_t globalMap,
                                         global float *params,
-                                        global float *worldToGroundTf)
+                                        global float *worldToZUpFrameTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -235,22 +235,22 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                                params[GLOBAL_CELL_SIZE],
                                                params[GLOBAL_CENTER_INDEX]);
 
-   // Transform the point to the ground frame
-   float3 cellCenterInGround = transformPoint3D32_2(
+   // Transform the point to the ZUp frame
+   float3 cellCenterInZUpFrame = transformPoint3D32_2(
       cellCenterInWorld,
-      (float3)(worldToGroundTf[0], worldToGroundTf[1], worldToGroundTf[2]),
-      (float3)(worldToGroundTf[4], worldToGroundTf[5], worldToGroundTf[6]),
-      (float3)(worldToGroundTf[8], worldToGroundTf[9], worldToGroundTf[10]),
-      (float3)(worldToGroundTf[3], worldToGroundTf[7], worldToGroundTf[11]));
+      (float3)(worldToZUpFrameTf[0], worldToZUpFrameTf[1], worldToZUpFrameTf[2]),
+      (float3)(worldToZUpFrameTf[4], worldToZUpFrameTf[5], worldToZUpFrameTf[6]),
+      (float3)(worldToZUpFrameTf[8], worldToZUpFrameTf[9], worldToZUpFrameTf[10]),
+      (float3)(worldToZUpFrameTf[3], worldToZUpFrameTf[7], worldToZUpFrameTf[11]));
 
    // Check if the point is within the robot's collision radius
-   bool isColliding = length(cellCenterInGround.xy) < params[ROBOT_COLLISION_RADIUS];
+   bool isColliding = length(cellCenterInZUpFrame.xy) < params[ROBOT_COLLISION_RADIUS];
 
-   cellCenterInGround.x -= params[GRID_OFFSET_X];
+   cellCenterInZUpFrame.x -= params[GRID_OFFSET_X];
 
    // Compute the local cell index in the local map
    int2 localCellIndex = coordinate_to_indices(
-      (float2)(cellCenterInGround.x, cellCenterInGround.y),
+      (float2)(cellCenterInZUpFrame.x, cellCenterInZUpFrame.y),
       (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
       params[LOCAL_CELL_SIZE],
       params[LOCAL_CENTER_INDEX]);
