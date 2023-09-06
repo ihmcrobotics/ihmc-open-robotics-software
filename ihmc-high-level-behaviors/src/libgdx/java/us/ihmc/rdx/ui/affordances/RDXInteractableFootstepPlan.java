@@ -259,6 +259,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void clear()
    {
+      stepChecker.clear();
       footsteps.clear();
       selectedFootstep = null;
    }
@@ -281,24 +282,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       communicationHelper.publishToController(messageList);
 
-      // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
-      // Note: delete steps in footStepAffordance.
-
-      if (footsteps.size() == 1)
-      {
-         stepChecker.setPreviousStepPose(footsteps.get(0).getFootPose());
-         stepChecker.setStanceSide(footsteps.get(0).getFootstepSide());
-      }
-      else if (footsteps.size() > 1)
-      {
-         int size = footsteps.size();
-         stepChecker.setPreviousStepPose(footsteps.get(size - 1).getFootPose());
-         stepChecker.setStanceSide(footsteps.get(size - 1).getFootstepSide());
-         stepChecker.setSwingStepPose(footsteps.get(size - 2).getFootPose());
-         stepChecker.setSwingSide(footsteps.get(size - 2).getFootstepSide());
-      }
-
-      stepChecker.clear(footsteps);
       clear();
    }
 
