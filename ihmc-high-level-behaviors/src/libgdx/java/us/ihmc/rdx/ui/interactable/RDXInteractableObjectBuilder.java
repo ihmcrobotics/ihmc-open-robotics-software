@@ -79,7 +79,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
          selectedObject.setInitialPose();
       }
       ImGui.sameLine();
-      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("Reset To Initial Pose") + "##object"))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("Reset To Initial Pose") + "##object")))
       {
          selectedObject.resetToInitialPose();
       }
@@ -107,7 +107,8 @@ public class RDXInteractableObjectBuilder extends RDXPanel
       selectedObject.resetPose();
    }
 
-   public TypedNotification<String> getSelectedObjectNotification() {
+   public TypedNotification<String> getSelectedObjectNotification()
+   {
       return selectedObjectChanged;
    }
 
