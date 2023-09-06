@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -95,10 +96,8 @@ public class RDXFootstepChecker
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-      // use current stance, swing
       if (indexOfFootBeingChecked == 0)
       {
-         // if futureStep has different footSide than current swing, swap current swing and stance.
          reason = stepChecker.checkValidity(candidateStepSide,
                                             candidateFootstepPose,
                                             syncedSolePoses.get(candidateStepSide.getOppositeSide()),
@@ -107,18 +106,51 @@ public class RDXFootstepChecker
       // 0th element will be stance, previous stance will be swing
       else if (indexOfFootBeingChecked == 1)
       {
-         RDXInteractableFootstep tempStance = stepList.get(0);
-         RigidBodyTransformReadOnly tempStanceTransform = tempStance.getFootPose();
-         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, tempStanceTransform, syncedSolePoses.get(candidateStepSide));
+         FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
+         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, syncedSolePoses.get(candidateStepSide));
       }
       else
       {
+         FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
+                                                                                            indexOfFootBeingChecked,
+                                                                                            candidateStepSide.getOppositeSide());
+         FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
+
          reason = stepChecker.checkValidity(candidateStepSide,
                                             candidateFootstepPose,
-                                            stepList.get(indexOfFootBeingChecked - 1).getFootPose(),
-                                            stepList.get(indexOfFootBeingChecked - 2).getFootPose());
+                                            previousFootstepOnOtherSide,
+                                            previousFootstepOnSameSide);
       }
+
       reasons.add(reason);
+   }
+
+   /**
+    * Sets the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot foot
+    */
+   public FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList, int currentIndex, RobotSide candidateFootstepSide)
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      // Need to subtract one if our current index is for the current step that is being placed cause its not in the list
+      if (currentIndex == stepList.size())
+         currentIndex = currentIndex - 1;
+
+      // Moved the index of the list to the last step on the other side
+      int i = currentIndex;
+      while (i >= 0 && stepList.get(i).getFootstepSide() == candidateFootstepSide)
+         --i;
+
+      if (i >= 0)
+      {
+         previousFootstepPose.setIncludingFrame(stepList.get(i).getFootPose());
+      }
+      else
+      {
+         previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(candidateFootstepSide.getOppositeSide()));
+      }
+
+      return previousFootstepPose;
    }
 
    public void makeWarnings()
