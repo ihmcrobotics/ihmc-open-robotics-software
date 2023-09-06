@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.function.DoubleConsumer;
 
-public class LabelGraphic
+public class JavaFXLabelGraphic
 {
    public static boolean TUNING_MODE = false;
 
@@ -72,7 +72,7 @@ public class LabelGraphic
     *
     * @param text
     */
-   public LabelGraphic(String text)
+   public JavaFXLabelGraphic(String text)
    {
       textMesh = new Text3DMesh(text, textMeshHeight.getValue());
       textMesh.setTextureModeNone(Color.BLACK);

@@ -62,7 +62,6 @@ import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,10 +89,10 @@ public class LookAndStepFootstepPlanningTask
    protected Timer planningFailedTimer = new Timer();
    protected Timer successfulPlanExpirationTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
-   protected YoDouble footholdVolume;
-   protected YoDouble planarRegionDelay;
-   protected YoDouble footstepPlanningDuration;
-   protected YoDouble moreInclusivePlanningDuration;
+   protected double footholdVolume;
+   protected double planarRegionDelay;
+   protected double footstepPlanningDuration;
+   protected double moreInclusivePlanningDuration;
    protected FootstepPlan previousFootstepPlan = null;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
@@ -135,10 +134,6 @@ public class LookAndStepFootstepPlanningTask
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
-         footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
-         planarRegionDelay = new YoDouble("planarRegionDelay", lookAndStep.yoRegistry);
-         footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
-         moreInclusivePlanningDuration = new YoDouble("moreInclusivePlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
@@ -211,15 +206,15 @@ public class LookAndStepFootstepPlanningTask
 
       public void acceptPlanarRegions(FramePlanarRegionsListMessage framePlanarRegionsListMessage)
       {
-         planarRegionDelay.set(TimeTools.calculateDelay(framePlanarRegionsListMessage.getPlanarRegions().getLastUpdated().getSecondsSinceEpoch(),
-                                                        framePlanarRegionsListMessage.getPlanarRegions().getLastUpdated().getAdditionalNanos()));
+         planarRegionDelay = TimeTools.calculateDelay(framePlanarRegionsListMessage.getPlanarRegions().getLastUpdated().getSecondsSinceEpoch(),
+                                                      framePlanarRegionsListMessage.getPlanarRegions().getLastUpdated().getAdditionalNanos());
          acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(framePlanarRegionsListMessage));
       }
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
-         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdated().getSecondsSinceEpoch(),
-                                                        planarRegionsListMessage.getLastUpdated().getAdditionalNanos()));
+         planarRegionDelay = TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdated().getSecondsSinceEpoch(),
+                                                      planarRegionsListMessage.getLastUpdated().getAdditionalNanos());
          acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       }
 
@@ -348,7 +343,7 @@ public class LookAndStepFootstepPlanningTask
       ConvexPolytope3D convexPolytope = new ConvexPolytope3D();
       convexPolytope.addVertices(Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon3d()));
       convexPolytope.addVertices(Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getRightFootSupportPolygon3d()));
-      footholdVolume.set(convexPolytope.getVolume());
+      footholdVolume = convexPolytope.getVolume();
 
       SideDependentList<MinimalFootstep> startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
 
@@ -502,7 +497,7 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds(),
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
-      footstepPlanningDuration.set(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds());
+      footstepPlanningDuration = footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds();
 
       String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
       statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
@@ -521,7 +516,7 @@ public class LookAndStepFootstepPlanningTask
          }
       }, "FootstepPlanLogging");
 
-      moreInclusivePlanningDuration.set(moreInclusivePlanningDurationStopwatch.lap());
+      moreInclusivePlanningDuration = moreInclusivePlanningDurationStopwatch.lap();
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?
