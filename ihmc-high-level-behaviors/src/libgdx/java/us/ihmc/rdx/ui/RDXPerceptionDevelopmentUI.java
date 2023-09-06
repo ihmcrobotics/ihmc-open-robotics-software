@@ -224,9 +224,12 @@ public class RDXPerceptionDevelopmentUI
             Pose3D leftGoalPose = new Pose3D();
             Pose3D rightGoalPose = new Pose3D();
             leftStartPose.getPosition().set(0.5, 0.5, 0.0);
-            leftGoalPose.getPosition().set(2.0, 2.0, 0.0);
-            leftStartPose.appendYawRotation(Math.PI / 4.0);
-            leftGoalPose.appendYawRotation(Math.PI / 4.0);
+            leftGoalPose.getPosition().set(1.5, 2.5, 0.0);
+
+            float yaw = (float) Math.atan2(leftGoalPose.getY() - leftStartPose.getY(), leftGoalPose.getX() - leftStartPose.getX());
+
+            leftStartPose.appendYawRotation(yaw);
+            leftGoalPose.appendYawRotation(yaw);
 
             rightStartPose.set(leftStartPose);
             rightStartPose.appendTranslation(0.0, -0.2, 0.0);
