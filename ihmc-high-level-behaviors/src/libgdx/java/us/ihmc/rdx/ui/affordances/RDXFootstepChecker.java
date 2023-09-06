@@ -36,8 +36,8 @@ public class RDXFootstepChecker
    private final RDX3DPanelTooltip tooltip;
 
    // TODO: Swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
-   private RigidBodyTransformReadOnly stanceStepPose;
-   private RigidBodyTransformReadOnly swingStepPose;
+   private RigidBodyTransformReadOnly robotCurrentLeftFootPose;
+   private RigidBodyTransformReadOnly robotCurrentRightFootPose;
 
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private String text = null;
@@ -60,8 +60,8 @@ public class RDXFootstepChecker
 
    public void setInitialFeet()
    {
-      swingStepPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToRoot();
-      stanceStepPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToRoot();
+      robotCurrentRightFootPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToRoot();
+      robotCurrentLeftFootPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToRoot();
    }
 
    public void getInput(ImGui3DViewInput input)
@@ -92,7 +92,7 @@ public class RDXFootstepChecker
 
    // Check the validity of a single step
    public void checkValidSingleStep(RecyclingArrayList<RDXInteractableFootstep> stepList,
-                                    FramePose3DReadOnly candidateStepPose,
+                                    FramePose3DReadOnly candidateFootstepPose,
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
@@ -102,11 +102,11 @@ public class RDXFootstepChecker
          // if futureStep has different footSide than current swing, swap current swing and stance.
          if (candidateStepSide != RobotSide.RIGHT)
          {
-            reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, swingStepPose, stanceStepPose);
+            reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, robotCurrentRightFootPose, robotCurrentLeftFootPose);
          }
          else
          {
-            reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, stanceStepPose, swingStepPose);
+            reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, robotCurrentLeftFootPose, robotCurrentRightFootPose);
          }
       }
       // 0th element will be stance, previous stance will be swing
@@ -114,12 +114,12 @@ public class RDXFootstepChecker
       {
          RDXInteractableFootstep tempStance = stepList.get(0);
          RigidBodyTransformReadOnly tempStanceTransform = tempStance.getFootPose();
-         reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, tempStanceTransform, stanceStepPose);
+         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, tempStanceTransform, robotCurrentLeftFootPose);
       }
       else
       {
          reason = stepChecker.checkValidity(candidateStepSide,
-                                            candidateStepPose,
+                                            candidateFootstepPose,
                                             stepList.get(indexOfFootBeingChecked - 1).getFootPose(),
                                             stepList.get(indexOfFootBeingChecked - 2).getFootPose());
       }

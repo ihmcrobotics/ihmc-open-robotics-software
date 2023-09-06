@@ -199,7 +199,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          }
 
          // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
-         FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedOrLastFootstepPlaced();
+         FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
          stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
                                           candidateStepPose,
                                           currentFootStepSide,
@@ -318,7 +318,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
     * Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
     * Does NOT return footsteps that you already walked on.
     */
-   public FramePose3DReadOnly getFootstepBeingPlacedOrLastFootstepPlaced()
+   public FramePose3DReadOnly getFootstepBeingPlacedPoseORLastFootstepPose()
    {
       if (footstepBeingPlaced != null)
       {
