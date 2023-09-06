@@ -120,10 +120,9 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
             handControlFrames.put(robotSide, hands.get(robotSide).getParentJoint().getFrameAfterJoint());
          }
 
-         if (forearmFrames.get(robotSide) != null)
+         if (forearms.get(robotSide) != null)
          {
             forearmFrames.put(robotSide, forearms.get(robotSide).getParentJoint().getFrameAfterJoint());
-            LogTools.info(forearms.get(robotSide).getParentJoint());
          }
       }
 

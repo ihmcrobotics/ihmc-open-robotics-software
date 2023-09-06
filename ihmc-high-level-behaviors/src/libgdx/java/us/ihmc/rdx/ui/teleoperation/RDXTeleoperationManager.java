@@ -542,6 +542,12 @@ public class RDXTeleoperationManager extends RDXPanel
                   ImGui.sameLine();
                   interactableHands.get(side).renderImGuiWidgets();
                }
+               for (RobotSide side : interactableForearms.sides())
+               {
+                  ImGui.text(side.getPascalCaseName() + " Forearms:");
+                  ImGui.sameLine();
+                  interactableForearms.get(side).renderImGuiWidgets();
+               }
             }
 
             for (RobotSide side : interactableFeet.sides())

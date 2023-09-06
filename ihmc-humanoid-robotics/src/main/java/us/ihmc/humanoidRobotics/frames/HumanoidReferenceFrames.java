@@ -202,11 +202,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          }
 
          MovingReferenceFrame forearmFrame;
-         LogTools.info(fullRobotModel.getForearm(robotSide));
          if (fullRobotModel.getForearm(robotSide) != null)
          {
             forearmFrame = fullRobotModel.getForearmFrame(robotSide);
-            LogTools.info(forearmFrame);
          }
          else
          {
