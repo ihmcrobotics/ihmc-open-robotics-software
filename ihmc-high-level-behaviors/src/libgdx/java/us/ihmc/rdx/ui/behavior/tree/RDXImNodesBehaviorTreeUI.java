@@ -62,8 +62,8 @@ public class RDXImNodesBehaviorTreeUI
 
    public void setRootNode(RDXBehaviorUIInterface rootBehaviorUI)
    {
-      rootNode = new RDXImNodesTreeNode(rootBehaviorUI, rootBehaviorUI.generateUID(), pinIndex);
       allNodesList.clear();
+      rootNode = new RDXImNodesTreeNode(rootBehaviorUI, rootBehaviorUI.generateUID(), pinIndex);
       addNodesToList(rootNode);
    }
 

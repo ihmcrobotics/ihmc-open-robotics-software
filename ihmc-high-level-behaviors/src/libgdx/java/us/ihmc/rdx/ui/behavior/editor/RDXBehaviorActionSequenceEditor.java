@@ -766,9 +766,12 @@ public class RDXBehaviorActionSequenceEditor
 
    public void destroy()
    {
-      automaticExecutionStatusSubscription.destroy();
-      executionNextIndexStatusSubscription.destroy();
-      sequenceStatusSubscription.destroy();
+      if (automaticExecutionStatusSubscription != null)
+      {
+         automaticExecutionStatusSubscription.destroy();
+         executionNextIndexStatusSubscription.destroy();
+         sequenceStatusSubscription.destroy();
+      }
    }
 
    public String getName()
