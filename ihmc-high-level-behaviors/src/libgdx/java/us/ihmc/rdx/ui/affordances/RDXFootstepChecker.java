@@ -103,7 +103,7 @@ public class RDXFootstepChecker
                                             syncedSolePoses.get(candidateStepSide.getOppositeSide()),
                                             syncedSolePoses.get(candidateStepSide));
       }
-      else if (indexOfFootBeingChecked == 1) // One footstep has been placed, check against opposite robot foot
+      else if (indexOfFootBeingChecked == 1) // One footstep has been placed, check against the opposite robot foot
       {
          FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
          reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, syncedSolePoses.get(candidateStepSide));
