@@ -38,7 +38,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new);
 
-   final BehaviorHelper helper;
+   private final BehaviorHelper helper;
    final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    final StatusLogger statusLogger;
    final RemoteHumanoidRobotInterface robotInterface;

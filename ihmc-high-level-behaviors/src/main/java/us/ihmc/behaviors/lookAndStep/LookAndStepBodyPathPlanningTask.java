@@ -97,10 +97,10 @@ public class LookAndStepBodyPathPlanningTask
       private LookAndStepBehavior.State behaviorState;
       private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
 
-      public void initialize(LookAndStepBehavior lookAndStep)
+      public void initialize(BehaviorHelper helper, LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
-         helper = lookAndStep.helper;
+         this.helper = helper;
          uiPublisher = lookAndStep.helper::publish;
          visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
          ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
