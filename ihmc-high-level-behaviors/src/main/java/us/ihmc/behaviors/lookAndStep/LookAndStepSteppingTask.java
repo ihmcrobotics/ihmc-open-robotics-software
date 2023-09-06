@@ -23,7 +23,6 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
@@ -43,7 +42,7 @@ public class LookAndStepSteppingTask
    protected long previousStepMessageId = 0L;
    protected LookAndStepImminentStanceTracker imminentStanceTracker;
    protected ControllerStatusTracker controllerStatusTracker;
-   protected YoDouble stepDuration;
+   protected double stepDuration;
    private final Timer timerSincePlanWasSent = new Timer();
 
    protected final TypedInput<RobotConfigurationData> robotConfigurationData = new TypedInput<>();
@@ -63,7 +62,6 @@ public class LookAndStepSteppingTask
          helper = lookAndStep.helper;
          uiPublisher = lookAndStep.helper::publish;
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
-         stepDuration = new YoDouble("stepDuration", lookAndStep.yoRegistry);
          doneWaitingForSwingOutput = () ->
          {
             if (!lookAndStep.isBeingReset.get())
@@ -214,7 +212,7 @@ public class LookAndStepSteppingTask
          ThreadTools.sleepSeconds(0.01); // Prevent free spinning
       }
 
-      stepDuration.set(stepDurationStopwatch.lap());
+      stepDuration = stepDurationStopwatch.lap();
 
       doneWaitingForSwingOutput.run();
    }
