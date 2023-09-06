@@ -70,7 +70,7 @@ public class ImGuiDirectory
       ImGui.endChild();
    }
 
-   private void reindexDirectory()
+   public void reindexDirectory()
    {
       sortedPaths.clear();
       PathTools.walkFlat(Paths.get(directory.get()), (path, type) ->

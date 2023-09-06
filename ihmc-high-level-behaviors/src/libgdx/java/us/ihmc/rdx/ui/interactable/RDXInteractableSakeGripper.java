@@ -21,6 +21,7 @@ import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 public class RDXInteractableSakeGripper implements RenderableProvider
 {
@@ -70,24 +71,31 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    private final RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
    private final ReferenceFrame referenceFrameHand;
    private final RDXModelInstance[] fingersModelInstances;
+   private final Model[] fingersModel;
    private final RigidBodyTransform[] fingersTransforms;
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private HandConfiguration handConfiguration;
 
-   public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify)
+   public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
       this.referenceFrameHand = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                        transformToParentToModify);
       ModelData handModel = RDXModelLoader.loadModelData("environmentObjects/sakeGripper/sakePalm.g3dj");
       interactableHandFrameModel.create(referenceFrameHand, transformToParentToModify, panel3D, handModel, this::calculateClosestCollision);
+      interactableHandFrameModel.getModelInstance().setColor(color);
 
       ModelData fingerModel = RDXModelLoader.loadModelData("environmentObjects/sakeGripper/sakeFinger.g3dj");
-      this.fingersModelInstances = new RDXModelInstance[] {new RDXModelInstance(new Model(fingerModel)), new RDXModelInstance(new Model(fingerModel))};
+
+      this.fingersModel = new Model[NUMBER_OF_FINGERS];
+      this.fingersModelInstances = new RDXModelInstance[NUMBER_OF_FINGERS];
       this.fingersFrames = new ReferenceFrame[NUMBER_OF_FINGERS];
       this.fingersTransforms = new RigidBodyTransform[NUMBER_OF_FINGERS];
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
       {
+         fingersModel[i] = new Model(fingerModel);
+         fingersModelInstances[i] = new RDXModelInstance(fingersModel[i]);
+         fingersModelInstances[i].setColor(color);
          fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);
          fingersFrames[i] = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrameHand, fingersTransforms[i]);
       }
@@ -199,8 +207,9 @@ public class RDXInteractableSakeGripper implements RenderableProvider
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (int i = 0; i < NUMBER_OF_FINGERS; i++)
-         fingersModelInstances[i].getRenderables(renderables, pool);
+      if (interactableHandFrameModel.isShowing())
+         for (int i = 0; i < NUMBER_OF_FINGERS; i++)
+            fingersModelInstances[i].getRenderables(renderables, pool);
    }
 
    public HandConfiguration getConfiguration()
@@ -211,5 +220,20 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    public ReferenceFrame getReferenceFrameHand()
    {
       return referenceFrameHand;
+   }
+
+   public boolean isSelected()
+   {
+      return interactableHandFrameModel.isSelected();
+   }
+
+   public void setSelected(boolean selected)
+   {
+      interactableHandFrameModel.setSelected(selected);
+   }
+
+   public void setShowing(boolean showing)
+   {
+      interactableHandFrameModel.setShowing(showing);
    }
 }
