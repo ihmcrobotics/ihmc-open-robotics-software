@@ -50,13 +50,13 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionData::getReferenceFrame, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionData::getPlanFrame, baseUI, robotModel, getSelected()::get));
    }
 
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentReferenceFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -69,6 +69,8 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void update()
    {
+      actionData.update();
+
       // Add a footstep to the action data only
       if (userAddedFootstep.poll())
       {
@@ -95,7 +97,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          double aLittleInFront = 0.15;
          newFootstepPose.getPosition().addX(aLittleInFront);
 
-         newFootstepPose.changeFrame(actionData.getReferenceFrame());
+         newFootstepPose.changeFrame(actionData.getPlanFrame());
          addedFootstep.getSolePose().set(newFootstepPose);
       }
 
