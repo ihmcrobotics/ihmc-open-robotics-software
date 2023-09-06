@@ -145,7 +145,13 @@ public class RDXAffordanceTemplateEditorUI
          locker.update(objectPose);
       }
       if (objectBuilder.getSelectedObjectNotification().poll())
-         onObjectSelectionChanged();
+      {
+         currentObjectName = objectBuilder.getSelectedObjectNotification().read();
+         reset();
+         objectBuilder.resetPose();
+         fileManagerDirectory.reindexDirectory();
+         fileManager.setLoadingFile("");
+      }
 
       for (RobotSide side : handPoses.keySet())
       {
@@ -398,15 +404,6 @@ public class RDXAffordanceTemplateEditorUI
          ImGui.popStyleColor();
       }
 
-   }
-
-   private void onObjectSelectionChanged()
-   {
-      currentObjectName = objectBuilder.getSelectedObjectNotification().read();
-      reset();
-      objectBuilder.resetPose();
-      fileManagerDirectory.reindexDirectory();
-      fileManager.setLoadingFile("");
    }
 
    private void reset()
