@@ -3,10 +3,7 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * A library of reference frames. Useful for putting together a specific collection
@@ -19,6 +16,7 @@ public class ReferenceFrameLibrary
    /** Reference frames are have immutable parents, so we must use Suppliers. */
    private final ArrayList<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
    private final HashSet<String> frameNames = new HashSet<>();
+   private final HashMap<String, ReferenceFrameSupplier> frameNameToSupplierMap = new HashMap<>();
    private String[] referenceFrameNames;
 
    public void addAll(List<ReferenceFrameSupplier> referenceFrameSuppliers)
@@ -34,6 +32,7 @@ public class ReferenceFrameLibrary
       if (!frameNames.contains(referenceFrame.get().getName()))
       {
          frameNames.add(referenceFrame.get().getName());
+         frameNameToSupplierMap.put(referenceFrame.get().getName(), referenceFrame);
          referenceFrameSuppliers.add(referenceFrame);
       }
    }
@@ -50,14 +49,11 @@ public class ReferenceFrameLibrary
 
    public ReferenceFrameSupplier findFrameByName(String referenceFrameName)
    {
-      int frameIndex = findFrameIndexByName(referenceFrameName);
-      boolean frameFound = frameIndex >= 0;
-      if (frameFound)
-      {
-         return referenceFrameSuppliers.get(frameIndex);
-      }
-      LogTools.warn("Using world frame.");
-      return ReferenceFrame::getWorldFrame;
+      ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
+      boolean frameFound = frameSupplier != null;
+      if (!frameFound)
+         LogTools.error("Frame not found: {}. Using world frame.", referenceFrameName);
+      return frameFound ? frameSupplier : ReferenceFrame::getWorldFrame;
    }
 
    public int findFrameIndexByName(String referenceFrameName)
