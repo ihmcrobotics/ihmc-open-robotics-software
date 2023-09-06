@@ -186,6 +186,11 @@ public class RDXInteractableRobotLink
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
+      {
+         robotCollidable.calculatePick(input);
+      }
+
       selectablePose3DGizmo.calculate3DViewPick(input);
    }
 
@@ -193,6 +198,7 @@ public class RDXInteractableRobotLink
    {
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
+         robotCollidable.process3DViewInput(input);
          isMouseHovering |= robotCollidable.getMouseHovering();
       }
 
