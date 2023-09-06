@@ -1,16 +1,21 @@
 package us.ihmc.rdx.perception;
 
+import imgui.ImGui;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 
 public class RDXHumanoidPerceptionUI
 {
@@ -54,7 +59,10 @@ public class RDXHumanoidPerceptionUI
 
    public void renderImGuiWidgets()
    {
-      rapidRegionsUI.renderImGuiWidgets();
+      if (ImGui.button("Plan Footsteps"))
+      {
+
+      }
    }
 
    public void render(RigidBodyTransform zUpFrameToWorld)
@@ -82,6 +90,11 @@ public class RDXHumanoidPerceptionUI
       rapidRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
       rapidRegionsVisualizer.setActive(render);
       globalVisualizersUI.addVisualizer(rapidRegionsVisualizer);
+   }
+
+   public void initializeImageMessageVisualizer(String name, ROS2Topic<ImageMessage> topic, RDXGlobalVisualizersPanel globalVisualizersUI)
+   {
+      globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer(name, DomainFactory.PubSubImplementation.FAST_RTPS, topic));
    }
 
    public void initializeHeightMapVisualizer(ROS2Helper ros2Helper, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)

@@ -97,8 +97,7 @@ public class RDXLocomotionManager
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2ControllerHelper ros2Helper,
-                               ControllerStatusTracker controllerStatusTracker,
-                               RDXPanel teleoperationPanel)
+                               ControllerStatusTracker controllerStatusTracker)
    {
       this.robotModel = robotModel;
       this.communicationHelper = communicationHelper;
@@ -110,11 +109,6 @@ public class RDXLocomotionManager
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
-
-      teleoperationPanel.addChild(locomotionParametersTuner);
-      teleoperationPanel.addChild(footstepPlanningParametersTuner);
-      teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
-      teleoperationPanel.addChild(swingFootPlanningParametersTuner);
 
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
@@ -511,5 +505,25 @@ public class RDXLocomotionManager
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
+   }
+
+   public RDXStoredPropertySetTuner getLocomotionParametersTuner()
+   {
+      return locomotionParametersTuner;
+   }
+
+   public RDXStoredPropertySetTuner getFootstepPlannerParametersTuner()
+   {
+      return footstepPlanningParametersTuner;
+   }
+
+   public RDXStoredPropertySetTuner getBodyPathPlanningParametersTuner()
+   {
+      return bodyPathPlanningParametersTuner;
+   }
+
+   public RDXStoredPropertySetTuner getSwingFootPlanningParametersTuner()
+   {
+      return swingFootPlanningParametersTuner;
    }
 }

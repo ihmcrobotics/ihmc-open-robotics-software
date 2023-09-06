@@ -1,24 +1,40 @@
 package us.ihmc.rdx.ui;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import imgui.ImGui;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoggerPanel;
+import us.ihmc.rdx.perception.RDXHumanoidPerceptionUI;
 import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.*;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -27,7 +43,7 @@ import us.ihmc.tools.IHMCCommonPaths;
 import java.io.File;
 import java.net.URISyntaxException;
 
-public class RDXPerceptionUI
+public class RDXPerceptionDevelopmentUI
 {
    private final PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
 
@@ -40,15 +56,20 @@ public class RDXPerceptionUI
 
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
-   private RDXRemotePerceptionUI remotePerceptionUI;
+   private RDXHumanoidPerceptionUI humanoidPerceptionUI;
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
    private FootstepPlanningModule footstepPlanningModule;
+   private RDXFootstepPlanGraphic footstepPlanGraphic;
+
 
    private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230903_222303_PlanarRegionsListLogger.prllog").toString());
    private PlanarRegionsList logLoadedPlanarRegions;
 
-   public RDXPerceptionUI()
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private final HumanoidPerceptionModule perceptionModule = new HumanoidPerceptionModule(openCLManager);
+
+   public RDXPerceptionDevelopmentUI()
    {
       logger = new PerceptionDataLogger();
 
@@ -61,37 +82,37 @@ public class RDXPerceptionUI
       baseUI = new RDXBaseUI("Perception UI");
 
       logLoadedPlanarRegions = PlanarRegionFileTools.loadRegionsFromLog(logFile);
+      PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(10.0f,
+                                                                                           new Point3D(),
+                                                                                           new Quaternion());
+      initialSupportSquareRegion.setRegionId(0);
+      logLoadedPlanarRegions.addPlanarRegion(initialSupportSquareRegion);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
+            footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
+            baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic);
+
             globalVisualizersUI.addVisualizer(new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS));
+
+            humanoidPerceptionUI = new RDXHumanoidPerceptionUI(perceptionModule, ros2Helper);
+            baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getRemotePerceptionUI().getPanel());
+
+            humanoidPerceptionUI.initializePerspectiveRegionsVisualizer(ros2Node, globalVisualizersUI, true);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("Ouster Depth", PerceptionAPI.OUSTER_DEPTH_IMAGE, globalVisualizersUI);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("L515 Color", PerceptionAPI.L515_COLOR_IMAGE, globalVisualizersUI);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("L515 Depth", PerceptionAPI.L515_DEPTH_IMAGE, globalVisualizersUI);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("D455 Color", PerceptionAPI.D455_COLOR_IMAGE, globalVisualizersUI);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("D455 Depth", PerceptionAPI.D455_DEPTH_IMAGE, globalVisualizersUI);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Color", PerceptionAPI.D435_COLOR_IMAGE, globalVisualizersUI);
+            humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Depth", PerceptionAPI.D435_DEPTH_IMAGE, globalVisualizersUI);
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
                                                                                  PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("Ouster Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.OUSTER_DEPTH_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("L515 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.L515_COLOR_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("L515 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.L515_DEPTH_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_COLOR_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_DEPTH_IMAGE));
 
             RDXROS2ColoredPointCloudVisualizer d455ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("D455 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
@@ -101,21 +122,7 @@ public class RDXPerceptionUI
             d455ColoredDepthVisualizer.setActive(true);
             globalVisualizersUI.addVisualizer(d455ColoredDepthVisualizer);
 
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_COLOR_IMAGE));
 
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_DEPTH_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D435_COLOR_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D435_DEPTH_IMAGE));
 
             RDXROS2ColoredPointCloudVisualizer ZEDColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
@@ -175,7 +182,6 @@ public class RDXPerceptionUI
             mocapPoseVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(mocapPoseVisualizer);
 
-
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
@@ -189,12 +195,12 @@ public class RDXPerceptionUI
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
+            RDXPanel evaluationPanel = new RDXPanel("Evaluation Panel");
+            baseUI.getImGuiPanelManager().addPanel(evaluationPanel);
+            evaluationPanel.setRenderMethod(this::renderImGuiWidgets);
+
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
-
-            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
-            remotePerceptionUI.setBlackflyLensProperties(SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
-            baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
 
             environmentBuilder.create();
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
@@ -211,10 +217,56 @@ public class RDXPerceptionUI
             globalVisualizersUI.create();
          }
 
+         public void planFootsteps()
+         {
+            Pose3D leftStartPose = new Pose3D();
+            Pose3D rightStartPose = new Pose3D();
+            Pose3D leftGoalPose = new Pose3D();
+            Pose3D rightGoalPose = new Pose3D();
+            leftStartPose.getPosition().set(0.0, 0.2, 0.0);
+            rightStartPose.getPosition().set(0.0, -0.2, 0.0);
+            leftGoalPose.getPosition().set(1.0, 0.2, 0.0);
+            rightGoalPose.getPosition().set(1.0, -0.2, 0.0);
+
+            FootstepPlannerRequest request = new FootstepPlannerRequest();
+            request.setStartFootPoses(leftStartPose, rightStartPose);
+            request.setGoalFootPoses(leftGoalPose, rightGoalPose);
+            request.setPlanarRegionsList(logLoadedPlanarRegions);
+
+            request.setPlanBodyPath(false);
+            request.setPerformAStarSearch(true);
+
+            FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
+
+            if (plannerOutput != null)
+            {
+               FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+
+               LogTools.info("Result: {}" + String.format("\tPlan Iterations: %d, Plan Time: %.4f, Total Time: %.4f",
+                             plannerOutput.getPlannerTimings().getStepPlanningIterations(),
+                             plannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
+                             plannerOutput.getPlannerTimings().getTotalElapsedSeconds()), footstepPlanningResult);
+
+               FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 0.6, 0.3);
+
+               footstepPlanGraphic.generateMeshesAsync(message, "Evaluation Footstep Plan");
+               footstepPlanGraphic.update();
+            }
+         }
+
+         public void renderImGuiWidgets()
+         {
+            if (ImGui.button("Plan Footsteps"))
+            {
+               planFootsteps();
+            }
+         }
+
          @Override
          public void render()
          {
             globalVisualizersUI.update();
+            footstepPlanGraphic.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -234,7 +286,7 @@ public class RDXPerceptionUI
 
    public static void main(String[] args) throws URISyntaxException
    {
-      new RDXPerceptionUI();
+      new RDXPerceptionDevelopmentUI();
    }
 }
 
