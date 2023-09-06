@@ -53,6 +53,7 @@ public class ImPlotYoGraphPanel
 
    public void create()
    {
+      ImPlotTools.ensureImPlotInitialized();
       ImPlotStyle style = ImPlot.getStyle();
       style.setPlotPadding(new ImVec2(0, 0));
    }
