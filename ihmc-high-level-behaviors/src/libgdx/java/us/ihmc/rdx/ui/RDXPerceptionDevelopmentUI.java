@@ -223,10 +223,16 @@ public class RDXPerceptionDevelopmentUI
             Pose3D rightStartPose = new Pose3D();
             Pose3D leftGoalPose = new Pose3D();
             Pose3D rightGoalPose = new Pose3D();
-            leftStartPose.getPosition().set(0.0, 0.2, 0.0);
-            rightStartPose.getPosition().set(0.0, -0.2, 0.0);
-            leftGoalPose.getPosition().set(1.0, 0.2, 0.0);
-            rightGoalPose.getPosition().set(1.0, -0.2, 0.0);
+            leftStartPose.getPosition().set(0.5, 0.5, 0.0);
+            leftGoalPose.getPosition().set(2.0, 2.0, 0.0);
+            leftStartPose.appendYawRotation(Math.PI / 4.0);
+            leftGoalPose.appendYawRotation(Math.PI / 4.0);
+
+            rightStartPose.set(leftStartPose);
+            rightStartPose.appendTranslation(0.0, -0.2, 0.0);
+
+            rightGoalPose.set(leftGoalPose);
+            rightGoalPose.appendTranslation(0.0, -0.2, 0.0);
 
             FootstepPlannerRequest request = new FootstepPlannerRequest();
             request.setStartFootPoses(leftStartPose, rightStartPose);
