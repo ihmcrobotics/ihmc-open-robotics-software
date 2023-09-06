@@ -76,7 +76,6 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private HandConfiguration handConfiguration;
-   private boolean showing = true;
 
    public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
@@ -236,6 +235,5 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    public void setShowing(boolean showing)
    {
       interactableHandFrameModel.setShowing(showing);
-      this.showing = showing;
    }
 }
