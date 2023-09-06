@@ -21,7 +21,7 @@ import java.util.function.BooleanSupplier;
  */
 public class RDXFootstepAction
 {
-   private final ReferenceFrameSupplier parentFrameSupplier;
+   private final ReferenceFrameSupplier planFrameSupplier;
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final BooleanSupplier planSelected;
@@ -29,12 +29,12 @@ public class RDXFootstepAction
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
-   public RDXFootstepAction(ReferenceFrameSupplier parentFrameSupplier,
+   public RDXFootstepAction(ReferenceFrameSupplier planFrameSupplier,
                             RDXBaseUI baseUI,
                             DRCRobotModel robotModel,
                             BooleanSupplier planSelected)
    {
-      this.parentFrameSupplier = parentFrameSupplier;
+      this.planFrameSupplier = planFrameSupplier;
       this.baseUI = baseUI;
       this.robotModel = robotModel;
       this.planSelected = planSelected;
@@ -51,10 +51,10 @@ public class RDXFootstepAction
          recreateGraphics(actionData.getSide(), stepIndex);
       }
 
-      ReferenceFrame updatedParentFrame = parentFrameSupplier.get();
-      if (updatedParentFrame != getFootstepFrame().getParent())
+      ReferenceFrame updatedPlanFrame = planFrameSupplier.get();
+      if (updatedPlanFrame != getFootstepFrame().getParent())
       {
-         getGizmo().changeParentFrameWithoutMoving(updatedParentFrame);
+         getGizmo().changeParentFrameWithoutMoving(updatedPlanFrame);
       }
 
       getGizmo().update();
