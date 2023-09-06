@@ -157,6 +157,16 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
       return names;
    }
 
+   default List<String> getForearmNames()
+   {
+      List<String> names = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         names.add(getForearmName(robotSide));
+      }
+      return names;
+   }
+
    default List<String> getFootNames()
    {
       List<String> names = new ArrayList<>();

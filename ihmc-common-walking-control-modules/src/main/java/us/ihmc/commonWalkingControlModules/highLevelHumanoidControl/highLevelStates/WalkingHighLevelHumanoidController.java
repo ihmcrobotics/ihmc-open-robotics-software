@@ -202,6 +202,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          RigidBodyBasics handBaseBody = chest != null ? chest : pelvis;
          RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, handBaseBody, handControlFrame, chestBodyFrame);
          bodyManagers.add(handManager);
+
+         RigidBodyBasics forearm = fullRobotModel.getForearm(robotSide);
+         ReferenceFrame forearmFrame = fullRobotModel.getForearmFrame(robotSide);
+         RigidBodyBasics forearmBaseBody = chest != null ? chest : pelvis;
+         RigidBodyControlManager forearmManager = managerFactory.getOrCreateRigidBodyManager(forearm, forearmBaseBody, forearmFrame, chestBodyFrame);
+         bodyManagers.add(forearmManager);
       }
 
       for (RigidBodyControlManager manager : bodyManagers)
