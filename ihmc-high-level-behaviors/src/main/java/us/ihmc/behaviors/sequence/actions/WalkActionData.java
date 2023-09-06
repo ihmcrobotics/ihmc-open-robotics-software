@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.WalkActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,7 +20,7 @@ public class WalkActionData implements BehaviorActionData
 {
    private String description = "Walk";
    private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final ModifiableReferenceFrame goalFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final SideDependentList<RigidBodyTransform> goalFootstepToParentTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
@@ -31,11 +32,17 @@ public class WalkActionData implements BehaviorActionData
    }
 
    @Override
+   public void update()
+   {
+      BehaviorActionSequenceTools.accomodateFrameReplacement(goalFrame, referenceFrameLibrary);
+   }
+
+   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
-      JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
+      jsonNode.put("parentFrame", goalFrame.getReferenceFrame().getParent().getName());
+      JSONTools.toJSON(jsonNode, goalFrame.getTransformToParent());
       for (RobotSide side : RobotSide.values)
       {
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
@@ -49,8 +56,8 @@ public class WalkActionData implements BehaviorActionData
    public void loadFromFile(JsonNode jsonNode)
    {
       description = jsonNode.get("description").textValue();
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
-      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      goalFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
+      goalFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       for (RobotSide side : RobotSide.values)
       {
          JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
@@ -63,8 +70,8 @@ public class WalkActionData implements BehaviorActionData
    public void toMessage(WalkActionMessage message)
    {
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentReferenceFrame().getName());
-      MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
+      message.getParentFrame().add(getParentFrame().getName());
+      MessageTools.toMessage(goalFrame.getTransformToParent(), message.getTransformToParent());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
       message.setSwingDuration(swingDuration);
@@ -73,42 +80,42 @@ public class WalkActionData implements BehaviorActionData
 
    public void fromMessage(WalkActionMessage message)
    {
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
-      modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+      goalFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
+      goalFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.LEFT));
       MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.RIGHT));
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
    }
 
-   public ReferenceFrame getParentReferenceFrame()
+   public ReferenceFrame getParentFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame().getParent();
+      return goalFrame.getReferenceFrame().getParent();
    }
 
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getGoalFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame();
+      return goalFrame.getReferenceFrame();
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+      goalFrame.changeParentFrameWithoutMoving(parentFrame);
    }
 
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrame(parentFrame);
+      goalFrame.changeParentFrame(parentFrame);
    }
 
    public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
    {
-      modifiableReferenceFrame.update(transformToParentConsumer);
+      goalFrame.update(transformToParentConsumer);
    }
 
    public RigidBodyTransform getTransformToParent()
    {
-      return modifiableReferenceFrame.getTransformToParent();
+      return goalFrame.getTransformToParent();
    }
 
    public SideDependentList<RigidBodyTransform> getGoalFootstepToParentTransforms()

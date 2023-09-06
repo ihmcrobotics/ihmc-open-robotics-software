@@ -29,6 +29,8 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
    }
 

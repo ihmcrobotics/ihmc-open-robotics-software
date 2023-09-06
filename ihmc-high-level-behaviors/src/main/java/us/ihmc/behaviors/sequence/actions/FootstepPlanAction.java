@@ -59,6 +59,8 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
    }
 
@@ -68,7 +70,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       footstepPlanToExecute.clear();
       for (FootstepActionData footstep : getFootsteps())
       {
-         solePose.setIncludingFrame(getReferenceFrame(), footstep.getSolePose());
+         solePose.setIncludingFrame(getPlanFrame(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }
@@ -98,7 +100,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else
