@@ -42,7 +42,7 @@ public class RapidHeightMapExtractor
    private float minHeightDifference = -0.05f;
    private float maxHeightDifference = 0.1f;
 
-   private float robotCollisionCylinderRadius = 0.4f;
+   private float robotCollisionCylinderRadius = 0.5f;
    private float gridOffsetX = localWidthInMeters / 2.0f;
    private float heightFilterAlpha = 0.65f;
 
