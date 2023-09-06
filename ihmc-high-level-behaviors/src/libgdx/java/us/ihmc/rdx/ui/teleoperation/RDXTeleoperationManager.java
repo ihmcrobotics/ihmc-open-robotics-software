@@ -18,7 +18,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -264,25 +263,22 @@ public class RDXTeleoperationManager extends RDXPanel
                      interactableFeet.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (robotHasArms)
+               if (robotHasArms && RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                {
-                  if(RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
+                  if (!interactableHands.containsKey(side))
                   {
-                     if (!interactableHands.containsKey(side))
-                     {
-                        RDXInteractableHand interactableHand = new RDXInteractableHand(side,
-                                                                                       baseUI,
-                                                                                       robotCollidable,
-                                                                                       robotModel,
-                                                                                       syncedRobot,
-                                                                                       yoVariableClientHelper);
-                        interactableHands.put(side, interactableHand);
-                        allInteractableRobotLinks.add(interactableHand);
-                     }
-                     else
-                     {
-                        interactableHands.get(side).addAdditionalRobotCollidable(robotCollidable);
-                     }
+                     RDXInteractableHand interactableHand = new RDXInteractableHand(side,
+                                                                                    baseUI,
+                                                                                    robotCollidable,
+                                                                                    robotModel,
+                                                                                    syncedRobot,
+                                                                                    yoVariableClientHelper);
+                     interactableHands.put(side, interactableHand);
+                     allInteractableRobotLinks.add(interactableHand);
+                  }
+                  else
+                  {
+                     interactableHands.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
             }
