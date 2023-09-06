@@ -46,7 +46,6 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
-   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
@@ -186,8 +185,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                            .isComplete(commandedGoalFeetTransformToWorld.get(side),
                                                        syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
-                                                       executionTimer,
-                                                       warningThrottler);
+                                                       executionTimer);
       }
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;
