@@ -267,12 +267,7 @@ public class RDXTeleoperationManager extends RDXPanel
                {
                   if (!interactableHands.containsKey(side))
                   {
-                     RDXInteractableHand interactableHand = new RDXInteractableHand(side,
-                                                                                    baseUI,
-                                                                                    robotCollidable,
-                                                                                    robotModel,
-                                                                                    syncedRobot,
-                                                                                    yoVariableClientHelper);
+                     RDXInteractableHand interactableHand = new RDXInteractableHand(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
                      interactableHands.put(side, interactableHand);
                      allInteractableRobotLinks.add(interactableHand);
                   }
