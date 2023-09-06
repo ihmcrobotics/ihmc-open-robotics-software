@@ -89,6 +89,7 @@ public class RDXInteractableFootstep
 
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
+   private int index;
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -124,7 +125,8 @@ public class RDXInteractableFootstep
     */
    public void updateFootstepIndexText(int index)
    {
-      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
+      this.index = index;
+      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + this.index;
       if (!textRenderablesMap.containsKey(text))
       {
          float textHeight = 0.08f;
@@ -539,5 +541,15 @@ public class RDXInteractableFootstep
       this.isClickedOn = manuallyPlacedFootstep.isClickedOn;
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
       this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
+   }
+
+   public RDXSelectablePose3DGizmo getSelectablePose3DGizmo()
+   {
+      return selectablePose3DGizmo;
+   }
+
+   public int getIndex()
+   {
+      return index;
    }
 }
