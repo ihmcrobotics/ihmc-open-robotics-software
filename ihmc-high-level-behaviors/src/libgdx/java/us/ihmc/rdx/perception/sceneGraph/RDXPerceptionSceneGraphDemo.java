@@ -6,7 +6,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
@@ -33,8 +33,8 @@ public class RDXPerceptionSceneGraphDemo
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private PredefinedSceneNodeLibrary operatorPredefinedSceneNodeLibrary;
-   private PredefinedSceneNodeLibrary onRobotPredefinedSceneNodeLibrary;
+   private SceneGraph operatorSceneGraph;
+   private SceneGraph onRobotSceneGraph;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
@@ -78,8 +78,8 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerDetection.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetection.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
 
-            operatorPredefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
-            onRobotPredefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
+            operatorSceneGraph = SceneGraph.defaultObjects();
+            onRobotSceneGraph = SceneGraph.defaultObjects();
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
                                                                                                                  ros2Helper,
@@ -89,12 +89,12 @@ public class RDXPerceptionSceneGraphDemo
 
             arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
                                                                       ros2Helper,
-                                                                      onRobotPredefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
+                                                                      onRobotSceneGraph.getArUcoMarkerIDsToSizes());
 
-            detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(onRobotPredefinedSceneNodeLibrary.getDetectableSceneNodes(),
+            detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(onRobotSceneGraph.getDetectableSceneNodes(),
                                                                                         ros2Helper,
                                                                                         ROS2IOTopicQualifier.COMMAND);
-            perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(operatorPredefinedSceneNodeLibrary, ros2Helper, baseUI.getPrimary3DPanel());
+            perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(operatorSceneGraph, ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());
 
@@ -116,9 +116,9 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerPublisher.update();
 
             detectableSceneNodesSubscription.update();
-            ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotPredefinedSceneNodeLibrary);
-            onRobotPredefinedSceneNodeLibrary.update(sensorPoseGizmo.getGizmoFrame());
-            detectableSceneObjectsPublisher.publish(onRobotPredefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+            ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotSceneGraph);
+            onRobotSceneGraph.update(sensorPoseGizmo.getGizmoFrame());
+            detectableSceneObjectsPublisher.publish(onRobotSceneGraph.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
 
             perceptionSceneGraphUI.update();
 

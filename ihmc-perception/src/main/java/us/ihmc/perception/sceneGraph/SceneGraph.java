@@ -24,7 +24,7 @@ import java.util.*;
  * nodes, but also to serve the need we have to define things
  * by hand and construct custom heuristics.
  */
-public class PredefinedSceneNodeLibrary
+public class SceneGraph
 {
    private final ArUcoDetectableNode pushDoorPanel;
    private final ArUcoDetectableNode pullDoorPanel;
@@ -42,12 +42,12 @@ public class PredefinedSceneNodeLibrary
    private final List<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
 
-   public static PredefinedSceneNodeLibrary defaultObjects()
+   public static SceneGraph defaultObjects()
    {
-      return new PredefinedSceneNodeLibrary();
+      return new SceneGraph();
    }
 
-   private PredefinedSceneNodeLibrary()
+   private SceneGraph()
    {
       // Add door stuff
       pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel();

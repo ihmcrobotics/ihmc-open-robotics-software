@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class RDXPerceptionSceneGraphUI
 {
-   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final SceneGraph sceneGraph;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
@@ -35,18 +35,18 @@ public class RDXPerceptionSceneGraphUI
    private final ArrayList<RDXPredefinedRigidBodySceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
-   public RDXPerceptionSceneGraphUI(PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
+   public RDXPerceptionSceneGraphUI(SceneGraph sceneGraph,
                                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                     RDX3DPanel panel3D)
    {
-      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+      this.sceneGraph = sceneGraph;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(sceneGraph.getDetectableSceneNodes(),
                                                                                   ros2PublishSubscribeAPI,
                                                                                   ROS2IOTopicQualifier.STATUS);
 
-      for (DetectableSceneNode detectableSceneNode : predefinedSceneNodeLibrary.getDetectableSceneNodes())
+      for (DetectableSceneNode detectableSceneNode : sceneGraph.getDetectableSceneNodes())
       {
          if (detectableSceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
          {
@@ -65,7 +65,7 @@ public class RDXPerceptionSceneGraphUI
       }
 
       if (publishThrottler.run())
-         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+         detectableSceneObjectsPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
    }
 
    public void renderImGuiWidgets()
