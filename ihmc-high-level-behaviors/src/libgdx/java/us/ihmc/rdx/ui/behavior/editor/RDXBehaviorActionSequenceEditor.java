@@ -601,7 +601,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                      robotModel,
                                                                      syncedRobot.getFullRobotModel(),
                                                                      selectionCollisionModel,
-                                                                     referenceFrameLibrary, ros2ControllerHelper);
+                                                                     referenceFrameLibrary,
+                                                                     ros2ControllerHelper);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
@@ -685,15 +686,15 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (actionSequence.get(i) instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            return footstepPlanAction.getActionData().getParentReferenceFrame();
+            return footstepPlanAction.getActionData().getParentFrame();
          }
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
-            return handPoseAction.getActionData().getParentReferenceFrame();
+            return handPoseAction.getActionData().getParentFrame();
          }
          else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
          {
-            return walkAction.getActionData().getParentReferenceFrame();
+            return walkAction.getActionData().getParentFrame();
          }
       }
       return null;
