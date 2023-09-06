@@ -335,25 +335,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-//   public static ForearmTrajectoryMessage createForearmTrajectoryMessage(RobotSide robotSide, SO3TrajectoryMessage trajectoryMessage)
-//   {
-//      ForearmTrajectoryMessage message = new ForearmTrajectoryMessage();
-//      message.getSo3Trajectory().set(trajectoryMessage);
-//      message.setRobotSide(robotSide.toByte());
-//      return message;
-//   }
-//
-//   public static ForearmTrajectoryMessage createForearmTrajectoryMessage(RobotSide robotSide,
-//                                                                         double trajectoryTime,
-//                                                                         Orientation3DReadOnly desiredOrientation,
-//                                                                         long trajectoryReferenceFrameId)
-//   {
-//      ForearmTrajectoryMessage message = new ForearmTrajectoryMessage();
-//      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryReferenceFrameId));
-//      message.setRobotSide(robotSide.toByte());
-//      return message;
-//   }
-
    public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage trajectoryMessage)
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
