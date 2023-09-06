@@ -7,7 +7,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -28,16 +28,16 @@ public class BehaviorActionSequenceModule
    private final BehaviorActionSequence sequence;
    private final Notification stopped = new Notification();
 
-   public BehaviorActionSequenceModule(DRCRobotModel robotModel, PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+   public BehaviorActionSequenceModule(DRCRobotModel robotModel, SceneGraph sceneGraph)
    {
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_action_sequence");
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2ControllerHelper,
+      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(sceneGraph.getDetectableSceneNodes(), ros2ControllerHelper,
                                                                                   ROS2IOTopicQualifier.STATUS);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
-      referenceFrameLibrary.addAll(predefinedSceneNodeLibrary.getReferenceFrameSuppliers());
+      referenceFrameLibrary.addAll(sceneGraph.getReferenceFrameSuppliers());
 
       sequence = new BehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
 

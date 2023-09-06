@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 
 /**
  * This class exists to perform some operations that are like "glue" between the scene based
@@ -10,11 +10,11 @@ import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 public class ArUcoSceneTools
 {
    public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
-                                                             PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+                                                             SceneGraph sceneGraph)
    {
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
-         for (ArUcoDetectableNode arUcoDetectableNode : predefinedSceneNodeLibrary.getArUcoDetectableNodes())
+         for (ArUcoDetectableNode arUcoDetectableNode : sceneGraph.getArUcoDetectableNodes())
          {
             boolean isDetected = arUcoMarkerDetection.isDetected(arUcoDetectableNode.getMarkerID());
             arUcoDetectableNode.setCurrentlyDetected(isDetected);

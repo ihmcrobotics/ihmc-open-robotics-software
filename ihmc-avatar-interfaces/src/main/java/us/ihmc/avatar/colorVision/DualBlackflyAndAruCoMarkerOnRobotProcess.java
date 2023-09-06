@@ -4,7 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
@@ -24,7 +24,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
 
    private final DRCRobotModel robotModel;
-   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final SceneGraph sceneGraph;
    private final BlackflyLensProperties blackflyLensProperties;
 
    private final ROS2Node ros2Node;
@@ -37,11 +37,11 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private volatile boolean running = true;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
-                                                   PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
+                                                   SceneGraph sceneGraph,
                                                    BlackflyLensProperties blackflyLensProperties)
    {
       this.robotModel = robotModel;
-      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+      this.sceneGraph = sceneGraph;
       this.blackflyLensProperties = blackflyLensProperties;
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
@@ -108,8 +108,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                                     syncedRobot::getReferenceFrames,
                                     ros2Node,
                                     spinnakerBlackfly,
-                                    blackflyLensProperties,
-                                    predefinedSceneNodeLibrary);
+                                    blackflyLensProperties, sceneGraph);
    }
 
    private void destroy()

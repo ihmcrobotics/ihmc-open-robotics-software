@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -19,22 +19,22 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = "Object Panel";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final SceneGraph sceneGraph;
    private RDXInteractableObject selectedObject;
    private final SortedMap<String, String> nameModelMap = new TreeMap<>();
    private final SortedMap<String, RigidBodyTransform> visualModelTransformMap = new TreeMap<>();
    private String selectedObjectName = "";
    private final TypedNotification<String> selectedObjectChanged = new TypedNotification<>();
 
-   public RDXInteractableObjectBuilder(RDXBaseUI baseUI, PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+   public RDXInteractableObjectBuilder(RDXBaseUI baseUI, SceneGraph sceneGraph)
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
-      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+      this.sceneGraph = sceneGraph;
 
       selectedObject = new RDXInteractableObject(baseUI);
       //TODO change this to detectable when node library is updated
-      List<ArUcoDetectableNode> availableObjects = predefinedSceneNodeLibrary.getArUcoDetectableNodes();
+      List<ArUcoDetectableNode> availableObjects = sceneGraph.getArUcoDetectableNodes();
       for (var object : availableObjects)
       {
          nameModelMap.put(object.getName(), object.getVisualModelFilePath());
@@ -58,7 +58,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
             selectedObjectChanged.set(selectedObjectName);
 
             // check if object is currently detected, if so use the detected pose as initial pose
-            List<DetectableSceneNode> detectableSceneObjects = predefinedSceneNodeLibrary.getDetectableSceneNodes();
+            List<DetectableSceneNode> detectableSceneObjects = sceneGraph.getDetectableSceneNodes();
             for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
             {
                if (detectableSceneObject.getName().equals(selectedObjectChanged.read()) && detectableSceneObject.getCurrentlyDetected())
