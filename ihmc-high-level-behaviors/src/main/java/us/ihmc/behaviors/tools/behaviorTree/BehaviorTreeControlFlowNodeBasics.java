@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasics
 {
-   public default BehaviorTreeNodeStatus tick()
+   default BehaviorTreeNodeStatus tick()
    {
       if (!getHasBeenClocked())
       {
@@ -18,7 +18,7 @@ public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasic
       return BehaviorTreeNodeBasics.super.tick();
    }
 
-   public default void clock()
+   default void clock()
    {
       setHasBeenClocked(true);
       for (BehaviorTreeNodeBasics child : getChildren())
@@ -28,11 +28,11 @@ public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasic
       BehaviorTreeNodeBasics.super.clock();
    }
 
-   public abstract <T extends BehaviorTreeNodeBasics> T addChild(T child);
+   <T extends BehaviorTreeNodeBasics> T addChild(T child);
 
-   public abstract ArrayList<BehaviorTreeNodeBasics> getChildren();
+   ArrayList<BehaviorTreeNodeBasics> getChildren();
 
-   public abstract void setHasBeenClocked(boolean hasBeenClocked);
+   void setHasBeenClocked(boolean hasBeenClocked);
 
-   public abstract boolean getHasBeenClocked();
+   boolean getHasBeenClocked();
 }

@@ -5,7 +5,7 @@ import us.ihmc.log.LogTools;
 public interface ResettingNodeBasics extends BehaviorTreeControlFlowNodeBasics
 {
    @Override
-   public default void clock()
+   default void clock()
    {
       if (getLastWasClock() && !isReset())
       {
@@ -18,20 +18,20 @@ public interface ResettingNodeBasics extends BehaviorTreeControlFlowNodeBasics
    }
 
    @Override
-   public default BehaviorTreeNodeStatus tick()
+   default BehaviorTreeNodeStatus tick()
    {
       setLastWasClock(false);
       setIsReset(false);
       return BehaviorTreeControlFlowNodeBasics.super.tick();
    }
 
-   public abstract void reset();
+   void reset();
 
-   public abstract boolean getLastWasClock();
+   boolean getLastWasClock();
 
-   public abstract void setLastWasClock(boolean lastWasClock);
+   void setLastWasClock(boolean lastWasClock);
 
-   public abstract boolean isReset();
+   boolean isReset();
 
-   public abstract void setIsReset(boolean isReset);
+   void setIsReset(boolean isReset);
 }
