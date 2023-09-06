@@ -96,20 +96,19 @@ public class RDXFootstepChecker
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-      if (indexOfFootBeingChecked == 0)
+      if (indexOfFootBeingChecked == 0) // No footsteps have been placed, check against robot feet
       {
          reason = stepChecker.checkValidity(candidateStepSide,
                                             candidateFootstepPose,
                                             syncedSolePoses.get(candidateStepSide.getOppositeSide()),
                                             syncedSolePoses.get(candidateStepSide));
       }
-      // 0th element will be stance, previous stance will be swing
-      else if (indexOfFootBeingChecked == 1)
+      else if (indexOfFootBeingChecked == 1) // One footstep has been placed, check against opposite robot foot
       {
          FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
          reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, syncedSolePoses.get(candidateStepSide));
       }
-      else
+      else // Multiple footsteps have been placed, compare to previous footstep on the other side
       {
          FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
                                                                                             indexOfFootBeingChecked,
