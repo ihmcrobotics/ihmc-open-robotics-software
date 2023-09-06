@@ -3,7 +3,6 @@ package us.ihmc.robotModels;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -29,7 +28,6 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    private SideDependentList<EnumMap<ArmJointName, OneDoFJointBasics>> armJointMaps;
    private SideDependentList<MovingReferenceFrame> soleFrames;
    private SideDependentList<MovingReferenceFrame> handControlFrames;
-   private SideDependentList<MovingReferenceFrame> forearmFrames;
    private OneDoFJointBasics[] controllableOneDoFJoints;
 
    public FullHumanoidRobotModelWrapper(FullHumanoidRobotModelWrapper other)
@@ -87,7 +85,6 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
       forearms = new SideDependentList<>();
       soleFrames = new SideDependentList<>();
       handControlFrames = new SideDependentList<>();
-      forearmFrames = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -118,11 +115,6 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
          else if (hands.get(robotSide) != null)
          {
             handControlFrames.put(robotSide, hands.get(robotSide).getParentJoint().getFrameAfterJoint());
-         }
-
-         if (forearms.get(robotSide) != null)
-         {
-            forearmFrames.put(robotSide, forearms.get(robotSide).getParentJoint().getFrameAfterJoint());
          }
       }
 
@@ -240,11 +232,5 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
    {
       return handControlFrames.get(robotSide);
-   }
-
-   @Override
-   public MovingReferenceFrame getForearmFrame(RobotSide robotSide)
-   {
-      return forearmFrames.get(robotSide);
    }
 }

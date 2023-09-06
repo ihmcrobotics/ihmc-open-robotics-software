@@ -5,7 +5,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -23,8 +22,6 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
 
 import java.util.EnumMap;
-
-import static us.ihmc.robotics.partNames.ArmJointName.WRIST_YAW;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 {
@@ -44,7 +41,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final SideDependentList<EnumMap<LegJointName, MovingReferenceFrame>> legJointFrames = SideDependentList.createListOfEnumMaps(LegJointName.class);
 
    private final SideDependentList<MovingReferenceFrame> handZUpFrames = new SideDependentList<>();
-   private final SideDependentList<MovingReferenceFrame> forearmFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> footReferenceFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
@@ -200,18 +196,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
             MovingZUpFrame handZUpFrame = new MovingZUpFrame(handFrame, modelStationaryFrame, robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
             handZUpFrames.put(robotSide, handZUpFrame);
          }
-
-         MovingReferenceFrame forearmFrame;
-         if (fullRobotModel.getForearm(robotSide) != null)
-         {
-            forearmFrame = fullRobotModel.getForearmFrame(robotSide);
-         }
-         else
-         {
-            forearmFrame = null;
-         }
-         forearmFrames.put(robotSide, forearmFrame);
-
          MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
          soleFrames.put(robotSide, soleFrame);
 
@@ -317,11 +301,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return pelvisFrame;
    }
 
-   public MovingReferenceFrame getForearmFrame(RobotSide robotSide)
-   {
-      return forearmFrames.get(robotSide);
-   }
-
    public MovingReferenceFrame getNeckFrame(NeckJointName neckJointName)
    {
       return neckReferenceFrames.get(neckJointName);
@@ -401,11 +380,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          if (handZUpFrame != null)
          {
             handZUpFrame.update();
-         }
-         ReferenceFrame forearmFrame = forearmFrames.get(robotSide);
-         if (forearmFrames != null)
-         {
-            forearmFrame.update();
          }
          footReferenceFrames.get(robotSide).update();
          soleFrames.get(robotSide).update();

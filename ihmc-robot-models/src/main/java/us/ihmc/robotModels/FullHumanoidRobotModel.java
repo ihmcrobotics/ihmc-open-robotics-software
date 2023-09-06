@@ -60,15 +60,6 @@ public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
     */
    MovingReferenceFrame getHandControlFrame(RobotSide robotSide);
 
-   /**
-    * Returns a control frame attached to the right or left forearm (link after the elbow) that the controller uses to control
-    * the forearm in taskspace.
-    *
-    * @param robotSide
-    * @return
-    */
-   MovingReferenceFrame getForearmFrame(RobotSide robotSide);
-
    @Override
    default RobotSide[] getRobotSegments()
    {
