@@ -37,7 +37,7 @@ public class WalkingFailureDetectionControlModule
    private final YoBoolean isUsingNextFootstep;
    private final YoBoolean isFallDetectionActivated;
    private final YoDouble icpDistanceFromFootPolygon;
-   private final YoDouble icpDistanceFromFootPolygonThreshold;
+   private final DoubleProvider icpDistanceFromFootPolygonThreshold;
    private final YoBoolean isRobotFalling;
    private final AtomicBoolean fallWasReported = new AtomicBoolean(false);
    private final FrameVector2D fallingDirection2D = new FrameVector2D();
@@ -67,8 +67,7 @@ public class WalkingFailureDetectionControlModule
       isFallDetectionActivated = new YoBoolean("isFallDetectionActivated", registry);
       isFallDetectionActivated.set(true);
 
-      icpDistanceFromFootPolygonThreshold = new YoDouble("icpDistanceFromFootPolygonThreshold", registry);
-      icpDistanceFromFootPolygonThreshold.set(0.05);
+      icpDistanceFromFootPolygonThreshold = new DoubleParameter("icpDistanceFromFootPolygonThreshold", registry, 0.05);
       icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
       isRobotFalling = new YoBoolean("isRobotFalling", registry);
 
@@ -183,10 +182,5 @@ public class WalkingFailureDetectionControlModule
    public double getICPDistanceFromFootPolygonThreshold()
    {
       return icpDistanceFromFootPolygonThreshold.getValue();
-   }
-
-   public void setICPDistanceFromFootPolygonThreshold(double threshold)
-   {
-      icpDistanceFromFootPolygonThreshold.set(threshold);
    }
 }
