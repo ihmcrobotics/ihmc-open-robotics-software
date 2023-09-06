@@ -163,9 +163,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          stepChecker.getInput(input);
       }
 
-      // Check validity of footsteps
-      stepChecker.checkValidStepList(footsteps);
-
       // Get the warnings and flash if the footstep's placement isn't okay
       ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
       for (int i = 0; i < temporaryReasons.size(); i++)
@@ -212,7 +209,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
-      stepChecker.checkValidStepList(footsteps);
       wasPlanUpdated = true;
    }
 
