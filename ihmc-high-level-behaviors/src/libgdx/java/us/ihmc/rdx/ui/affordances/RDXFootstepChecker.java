@@ -35,10 +35,7 @@ public class RDXFootstepChecker
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
    private final RDX3DPanelTooltip tooltip;
 
-   // TODO: Swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
-   private RigidBodyTransformReadOnly robotCurrentLeftFootPose;
-   private RigidBodyTransformReadOnly robotCurrentRightFootPose;
-
+   private final SideDependentList<RigidBodyTransformReadOnly> syncedSolePoses = new SideDependentList<>();
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private String text = null;
    private boolean renderTooltip = false;
@@ -60,8 +57,10 @@ public class RDXFootstepChecker
 
    public void setInitialFeet()
    {
-      robotCurrentRightFootPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToRoot();
-      robotCurrentLeftFootPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToRoot();
+      for (RobotSide side : RobotSide.values)
+      {
+         syncedSolePoses.put(side, syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToRoot());
+      }
    }
 
    public void getInput(ImGui3DViewInput input)
@@ -100,21 +99,17 @@ public class RDXFootstepChecker
       if (indexOfFootBeingChecked == 0)
       {
          // if futureStep has different footSide than current swing, swap current swing and stance.
-         if (candidateStepSide != RobotSide.RIGHT)
-         {
-            reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, robotCurrentRightFootPose, robotCurrentLeftFootPose);
-         }
-         else
-         {
-            reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, robotCurrentLeftFootPose, robotCurrentRightFootPose);
-         }
+         reason = stepChecker.checkValidity(candidateStepSide,
+                                            candidateFootstepPose,
+                                            syncedSolePoses.get(candidateStepSide.getOppositeSide()),
+                                            syncedSolePoses.get(candidateStepSide));
       }
       // 0th element will be stance, previous stance will be swing
       else if (indexOfFootBeingChecked == 1)
       {
          RDXInteractableFootstep tempStance = stepList.get(0);
          RigidBodyTransformReadOnly tempStanceTransform = tempStance.getFootPose();
-         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, tempStanceTransform, robotCurrentLeftFootPose);
+         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, tempStanceTransform, syncedSolePoses.get(candidateStepSide));
       }
       else
       {
