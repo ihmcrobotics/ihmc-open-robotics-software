@@ -7,7 +7,7 @@ import java.time.Instant;
  */
 public interface BehaviorTreeNodeBasics
 {
-   public default double evaluateUtility()
+   default double evaluateUtility()
    {
       return 1.0;
    }
@@ -16,29 +16,29 @@ public interface BehaviorTreeNodeBasics
     * A method that can be called on every node in the tree every time the root gets ticked
     * in order for parallel nodes to figure out when they are no longer being selected.
     */
-   public default void clock()
+   default void clock()
    {
 
    }
 
-   public default BehaviorTreeNodeStatus tick()
+   default BehaviorTreeNodeStatus tick()
    {
       setPreviousStatus(tickInternal());
       setLastTickInstant(Instant.now());
       return getPreviousStatus();
    }
 
-   public abstract BehaviorTreeNodeStatus tickInternal();
+   BehaviorTreeNodeStatus tickInternal();
 
    /**
     * @return The node's status from the last time it was ticked.
     *         This will be null if the node hasn't been ticked yet.
     */
-   public abstract BehaviorTreeNodeStatus getPreviousStatus();
+   BehaviorTreeNodeStatus getPreviousStatus();
 
-   public abstract void setPreviousStatus(BehaviorTreeNodeStatus status);
+   void setPreviousStatus(BehaviorTreeNodeStatus status);
 
-   public default boolean hasBeenTicked()
+   default boolean hasBeenTicked()
    {
       return getLastTickInstant() != null;
    }
@@ -47,19 +47,19 @@ public interface BehaviorTreeNodeBasics
     * @return The Instant at which this node was last ticked.
     *         This will be null if the node has never been ticked.
     */
-   public abstract Instant getLastTickInstant();
+   Instant getLastTickInstant();
 
-   public abstract void setLastTickInstant(Instant lastTickInstant);
+   void setLastTickInstant(Instant lastTickInstant);
 
-   public abstract String getName();
+   String getName();
 
-   public abstract void setName(String name);
+   void setName(String name);
 
-   public abstract Class<?> getType();
+   Class<?> getType();
 
-   public abstract void setType(Class<?> type);
+   void setType(Class<?> type);
 
-   public static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
+   static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
    {
       if (status == null)
       {
