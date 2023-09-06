@@ -162,13 +162,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          stepChecker.getInput(input);
       }
-
-      // Get the warnings and flash if the footstep's placement isn't okay
-      ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
-      for (int i = 0; i < temporaryReasons.size(); i++)
-      {
-         footsteps.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
-      }
    }
 
    @Override
@@ -227,7 +220,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       wasPlanUpdated |= pollIfAnyStepWasUpdated();
       previousPlanLength = footsteps.size();
 
-      stepChecker.update(footsteps);
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
          PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
@@ -242,6 +234,15 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
          wasPlanUpdated = false;
+      }
+
+      stepChecker.update(footsteps);
+
+      // Get the warnings and flash if the footstep's placement isn't okay
+      ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
+      for (int i = 0; i < temporaryReasons.size(); i++)
+      {
+         footsteps.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
       }
    }
 
