@@ -109,6 +109,7 @@ public class FlamingoStanceState extends SingleSupportState
    @Override
    public boolean isDone(double timeInState)
    {
+//      return false; //just return false to prevent loading while debugging
       if (super.isDone(timeInState))
          return true;
 
