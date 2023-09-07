@@ -74,7 +74,6 @@ public class RDXBehaviorActionSequenceUI
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
-      referenceFrameLibrary.build();
 
       reindexSequences();
    }

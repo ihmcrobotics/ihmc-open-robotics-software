@@ -89,7 +89,6 @@ public class BehaviorActionSequence
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
       addCommonFrames(referenceFrameLibrary, syncedRobot);
-      referenceFrameLibrary.build();
 
       updateSubscription = ros2.subscribe(SEQUENCE_COMMAND_TOPIC);
       manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
