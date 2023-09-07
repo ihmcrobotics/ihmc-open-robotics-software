@@ -27,6 +27,8 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
    }
 

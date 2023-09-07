@@ -3,7 +3,8 @@ package us.ihmc.tools.io;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -18,7 +19,7 @@ public class JSONTools
     * Additionally, we save the orientations in yaw-pitch-roll degrees so it is human
     * understandable.
     */
-   public static void toJSON(ObjectNode jsonNode, RigidBodyTransform rigidBodyTransform)
+   public static void toJSON(ObjectNode jsonNode, RigidBodyTransformReadOnly rigidBodyTransform)
    {
       // Round to half a millimeter
       // Cast to float, otherwise you get numbers like 0.0200000001 showing up in the JSON
@@ -31,7 +32,7 @@ public class JSONTools
       jsonNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(rigidBodyTransform.getRotation().getYaw()), 0.02));
    }
 
-   public static void toEuclid(JsonNode jsonNode, RigidBodyTransform rigidBodyTransform)
+   public static void toEuclid(JsonNode jsonNode, RigidBodyTransformBasics rigidBodyTransform)
    {
       rigidBodyTransform.getTranslation().setX(jsonNode.get("x").asDouble());
       rigidBodyTransform.getTranslation().setY(jsonNode.get("y").asDouble());

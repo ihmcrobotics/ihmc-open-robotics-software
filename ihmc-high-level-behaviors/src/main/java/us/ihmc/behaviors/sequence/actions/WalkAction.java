@@ -25,7 +25,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.UUID;
 
@@ -46,16 +45,14 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
-   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
-   private double startPositionError;
-   private double startOrientationError;
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
+                     WalkingFootstepTracker footstepTracker,
                      FootstepPlanningModule footstepPlanner,
                      FootstepPlannerParametersBasics footstepPlannerParameters,
                      WalkingControllerParameters walkingControllerParameters,
@@ -63,25 +60,30 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
+      this.footstepTracker = footstepTracker;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       setReferenceFrameLibrary(referenceFrameLibrary);
-      footstepTracker = new WalkingFootstepTracker(ros2ControllerHelper.getROS2NodeInterface(), syncedRobot.getRobotModel().getSimpleRobotName());
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
 
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToParentTransforms().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getGoalFrame(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
 
+   /**
+    * TODO: Footstep planning should happen on a thread so it doesn't hang up updates.
+    */
    public void plan()
    {
       FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
@@ -155,13 +157,9 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                                          getTransferDuration(),
                                                                                          walkingControllerParameters.getDefaultFinalTransferTime());
-      startPositionError = 0.0;
-      startOrientationError = 0.0;
       for (RobotSide side : RobotSide.values)
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-         startPositionError += syncedFeetPoses.get(side).getTranslation().differenceNorm(commandedGoalFeetTransformToWorld.get(side).getTranslation());
-         startOrientationError += syncedFeetPoses.get(side).getOrientation().distance(commandedGoalFeetTransformToWorld.get(side).getOrientation());
       }
    }
 
@@ -188,8 +186,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                            .isComplete(commandedGoalFeetTransformToWorld.get(side),
                                                        syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
-                                                       executionTimer,
-                                                       warningThrottler);
+                                                       executionTimer);
       }
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;

@@ -590,7 +590,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       for (RobotSide robotSide : RobotSide.values)
       {
          String footName = bipedFeet.get(robotSide).getName();
-         ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
+         ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getData(footSensorNames.get(robotSide));
          FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName,
                                                                           bipedFeet.get(robotSide),
@@ -619,7 +619,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          {
             return null;
          }
-         ForceSensorDataReadOnly wristForceSensor = forceSensorDataHolder.getByName(wristSensorNames.get(robotSide));
+         ForceSensorDataReadOnly wristForceSensor = forceSensorDataHolder.getData(wristSensorNames.get(robotSide));
          wristForceSensors.put(robotSide, wristForceSensor);
       }
       return wristForceSensors;

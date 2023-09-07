@@ -33,7 +33,7 @@ public class RDXInteractableRobotLinkDemo
             FrameSphere3D frameShape = new FrameSphere3D(ReferenceFrame.getWorldFrame(), 0.03);
             Collidable collidable = new Collidable(rigidBody, 0, 0, frameShape);
 
-            robotRobotCollidable = new RDXRobotCollidable(collidable, Color.GRAY);
+            robotRobotCollidable = new RDXRobotCollidable(collidable, 0, Color.GRAY);
             baseUI.getVRManager().getContext().addVRPickCalculator(robotRobotCollidable::calculateVRPick);
             baseUI.getVRManager().getContext().addVRInputProcessor(robotRobotCollidable::processVRInput);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(robotRobotCollidable::calculatePick);

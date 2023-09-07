@@ -162,16 +162,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          stepChecker.getInput(input);
       }
-
-      // Check validity of footsteps
-      stepChecker.checkValidStepList(footsteps);
-
-      // Get the warnings and flash if the footstep's placement isn't okay
-      ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
-      for (int i = 0; i < temporaryReasons.size(); i++)
-      {
-         footsteps.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
-      }
    }
 
    @Override
@@ -212,7 +202,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
-      stepChecker.checkValidStepList(footsteps);
       wasPlanUpdated = true;
    }
 
@@ -231,7 +220,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       wasPlanUpdated |= pollIfAnyStepWasUpdated();
       previousPlanLength = footsteps.size();
 
-      stepChecker.update(footsteps);
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
          PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
@@ -247,6 +235,15 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
          wasPlanUpdated = false;
       }
+
+      stepChecker.update(footsteps);
+
+      // Get the warnings and flash if the footstep's placement isn't okay
+      ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
+      for (int i = 0; i < temporaryReasons.size(); i++)
+      {
+         footsteps.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
+      }
    }
 
    private boolean pollIfAnyStepWasUpdated()
@@ -259,6 +256,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void clear()
    {
+      stepChecker.clear();
       footsteps.clear();
       selectedFootstep = null;
    }
@@ -281,24 +279,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       communicationHelper.publishToController(messageList);
 
-      // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
-      // Note: delete steps in footStepAffordance.
-
-      if (footsteps.size() == 1)
-      {
-         stepChecker.setPreviousStepPose(footsteps.get(0).getFootPose());
-         stepChecker.setStanceSide(footsteps.get(0).getFootstepSide());
-      }
-      else if (footsteps.size() > 1)
-      {
-         int size = footsteps.size();
-         stepChecker.setPreviousStepPose(footsteps.get(size - 1).getFootPose());
-         stepChecker.setStanceSide(footsteps.get(size - 1).getFootstepSide());
-         stepChecker.setSwingStepPose(footsteps.get(size - 2).getFootPose());
-         stepChecker.setSwingSide(footsteps.get(size - 2).getFootstepSide());
-      }
-
-      stepChecker.clear(footsteps);
       clear();
    }
 

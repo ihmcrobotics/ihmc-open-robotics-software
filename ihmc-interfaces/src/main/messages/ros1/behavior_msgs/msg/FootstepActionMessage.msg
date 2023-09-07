@@ -1,15 +1,10 @@
+# A single footstep
 
-# Used for syncing action sequences
-behavior_msgs/ActionInformationMessage action_information
-
-# Specifies the side of the robot that this message refers to.
+# Side, left or right foot
 # Field default value 255
 int8 robot_side
 
-# Name of the frame the this action is expressed in
-string[] parent_frame
-
-# Transform that expresses the footstep pose in the parent frame
-controller_msgs/RigidBodyTransformMessage transform_to_parent
+# The footstep's sole pose
+geometry_msgs/Pose sole_pose
 
 

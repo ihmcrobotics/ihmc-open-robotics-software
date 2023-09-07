@@ -117,4 +117,9 @@ public class RDXSelectablePose3DGizmo
    {
       return selected;
    }
+
+   public void setSelected(boolean selected)
+   {
+      this.selected.set(selected);
+   }
 }

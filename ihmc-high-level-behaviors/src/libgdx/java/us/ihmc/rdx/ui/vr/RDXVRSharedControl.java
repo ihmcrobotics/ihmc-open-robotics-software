@@ -294,7 +294,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGui.checkbox(labels.get("Shared Control"), enabled))
+      if (ImGui.checkbox(labels.get("Use Assistance"), enabled))
       {
          setEnabled(enabled.get());
       }

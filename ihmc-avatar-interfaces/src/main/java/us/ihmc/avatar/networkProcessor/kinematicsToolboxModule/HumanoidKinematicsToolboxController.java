@@ -268,6 +268,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       for (RobotSide robotSide : RobotSide.values)
       {
          listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
+         listOfControllableRigidBodies.add(desiredFullRobotModel.getForearm(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
 
