@@ -219,9 +219,21 @@ public class PerceptionDebugTools
 
    public static void display(String tag, Mat image, int delay)
    {
+      display(tag, image, delay, -1);
+   }
+
+   public static void display(String tag, Mat image, int delay, int screenSize)
+   {
+      opencv_highgui.namedWindow(tag, opencv_highgui.WINDOW_NORMAL);
       opencv_highgui.imshow(tag, image);
+
+      if (screenSize != -1)
+      {
+         opencv_highgui.resizeWindow(tag, screenSize, screenSize);
+      }
+
       int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113) // Keycode for 'q'
+      if (code == 113 || code != -1) // Keycode for 'q'
       {
          System.exit(0);
       }

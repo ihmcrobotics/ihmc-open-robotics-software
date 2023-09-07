@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -44,22 +45,16 @@ public class RDXFootstepPlanning
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
+   private final RDXLocomotionParameters locomotionParameters;
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final ResettableExceptionHandlingExecutorService executor;
    private final Throttler planningThrottler = new Throttler().setFrequency(5.0);
    private final TypedNotification<Pose3DReadOnly> planningRequestNotification = new TypedNotification<>();
-   private final FramePose3D midFeetZUpPose = new FramePose3D();
    private volatile PlanarRegionsList planarRegionsList = null;
    private volatile HeightMapMessage heightMapMessage = null;
+   private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final FramePose3D startPose = new FramePose3D();
-
-   private final RDXLocomotionParameters locomotionParameters;
-
-   public enum InitialStanceSide
-   {LEFT, RIGHT, AUTO}
-
-   private InitialStanceSide initialStanceSide;
    /**
     * We create this field so that we can terminate a running plan via
     * a custom termination condition so we don't have to wait
@@ -133,7 +128,9 @@ public class RDXFootstepPlanning
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
 
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+      footstepPlannerRequest.setTimeout(locomotionParameters.getFootstepPlannerTimeout());
+
+      footstepPlannerRequest.setGoalFootPoses(locomotionParameters.getIdealGoalFootstepWidth(), goalPose);
 
       if (locomotionParameters.getPlanSwingTrajectories())
          footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
@@ -146,12 +143,12 @@ public class RDXFootstepPlanning
          soleFramePose.get(pose3D);
       });
 
-      if (initialStanceSide == InitialStanceSide.AUTO)
-         footstepPlannerRequest.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(footstepPlannerRequest, goalPose));
-      else if (initialStanceSide == InitialStanceSide.LEFT)
+      if (locomotionParameters.getInitialStanceSide() == InitialStanceSide.LEFT.ordinal())
          footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
-      else
+      else if (locomotionParameters.getInitialStanceSide() == InitialStanceSide.RIGHT.ordinal())
          footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.RIGHT);
+      else // AUTO
+         footstepPlannerRequest.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(footstepPlannerRequest, goalPose));
 
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
@@ -168,7 +165,8 @@ public class RDXFootstepPlanning
          }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
-      footstepPlannerRequest.setSnapGoalSteps(!assumeFlatGround);
+      boolean snapGoalSteps = !assumeFlatGround;
+      footstepPlannerRequest.setSnapGoalSteps(snapGoalSteps);
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
@@ -261,11 +259,6 @@ public class RDXFootstepPlanning
    public void destroy()
    {
       executor.destroy();
-   }
-
-   public void setInitialStanceSide(InitialStanceSide initialStanceSide)
-   {
-      this.initialStanceSide = initialStanceSide;
    }
 
    public boolean isPlanning()

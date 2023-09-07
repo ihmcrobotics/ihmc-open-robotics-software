@@ -1,10 +1,7 @@
 package us.ihmc.rdx.ui.teleoperation.locomotion;
 
 import org.apache.commons.lang3.StringUtils;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
-import us.ihmc.tools.property.StoredPropertyKeyList;
-import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.*;
 
 public class RDXLocomotionParameters extends StoredPropertySet
 {
@@ -16,7 +13,9 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final BooleanStoredPropertyKey planSwingTrajectories = keys.addBooleanKey("Plan swing trajectories");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
-   public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
+   public static final IntegerStoredPropertyKey initialStanceSide = keys.addIntegerKey("Initial stance side");
+   public static final DoubleStoredPropertyKey footstepPlannerTimeout = keys.addDoubleKey("Footstep planner timeout");
+   public static final DoubleStoredPropertyKey idealGoalFootstepWidth = keys.addDoubleKey("Ideal goal footstep width");
 
    public RDXLocomotionParameters(String robotName)
    {
@@ -56,5 +55,20 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public boolean getPlanWithBodyPath()
    {
       return get(planWidthBodyPath);
+   }
+
+   public int getInitialStanceSide()
+   {
+      return get(initialStanceSide);
+   }
+
+   public double getFootstepPlannerTimeout()
+   {
+      return get(footstepPlannerTimeout);
+   }
+
+   public double getIdealGoalFootstepWidth()
+   {
+      return get(idealGoalFootstepWidth);
    }
 }

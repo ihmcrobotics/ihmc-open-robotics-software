@@ -66,12 +66,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       leftFootButton.loadAndSetIcon("icons/leftFoot.png");
-      leftFootButton.setTooltipText("Place left footstep");
+      leftFootButton.setTooltipText("Place left footstep (Keybind: R)");
       leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
 
       RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
-      rightFootButton.setTooltipText("Place right footstep");
+      rightFootButton.setTooltipText("Place right footstep (Keybind: T)");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
@@ -198,10 +198,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
             }
          }
 
-         FramePose3D candidateStepPose = new FramePose3D();
-         candidateStepPose.getPosition().set(pickPointInWorld);
-         candidateStepPose.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
-
+         // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
+         FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
          stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
                                           candidateStepPose,
                                           currentFootStepSide,
@@ -320,15 +318,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
     * Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
     * Does NOT return footsteps that you already walked on.
     */
-   public RDXInteractableFootstep getFootstepBeingPlacedOrLastFootstepPlaced()
+   public FramePose3DReadOnly getFootstepBeingPlacedPoseORLastFootstepPose()
    {
       if (footstepBeingPlaced != null)
       {
-         return footstepBeingPlaced;
+         return footstepBeingPlaced.getFootPose();
       }
       else
       {
-         return footstepPlan.getLastFootstep();
+         return footstepPlan.getLastFootstep().getFootPose();
       }
    }
 

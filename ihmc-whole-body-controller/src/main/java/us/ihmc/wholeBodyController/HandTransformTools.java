@@ -3,51 +3,34 @@ package us.ihmc.wholeBodyController;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandTransformTools
 {
-   public static void getHandGraphicToControlFrameTransform(FullHumanoidRobotModel fullRobotModel,
-                                                            UIParameters uiParameters,
-                                                            RobotSide side,
-                                                            RigidBodyTransform graphicToControlFrameTransform)
+   public static RigidBodyTransformReadOnly getHandGraphicToControlFrameTransform(FullHumanoidRobotModel fullRobotModel,
+                                                                                  UIParameters uiParameters,
+                                                                                  RobotSide side)
    {
-      RigidBodyTransform controlToHandFrameTransform = fullRobotModel.getHandControlFrame(side).getTransformToParent();
       RigidBodyTransform graphicToHandFrameTransform = uiParameters.getHandGraphicToHandFrameTransform(side);
 
-      ReferenceFrame handFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame controlFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(handFrame, controlToHandFrameTransform);
-      ReferenceFrame graphicFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(handFrame, graphicToHandFrameTransform);
+      ReferenceFrame handFrame = fullRobotModel.getHand(side).getParentJoint().getFrameAfterJoint();
+      ReferenceFrame controlFrame = fullRobotModel.getHandControlFrame(side);
 
-      FramePose3D graphicPose = new FramePose3D(graphicFrame);
+      FramePose3D graphicPose = new FramePose3D(handFrame);
+      graphicPose.applyInverseTransform(graphicToHandFrameTransform);
       graphicPose.changeFrame(controlFrame);
 
-      graphicPose.get(graphicToControlFrameTransform);
-
-      controlFrame.remove();
-      graphicFrame.remove();
+      return graphicPose;
    }
 
-   public static void getHandControlToBodyFixedCoMFrameTransform(FullHumanoidRobotModel fullRobotModel,
-                                                                 RobotSide side,
-                                                                 RigidBodyTransform controlToBodyFixedCoMFrameTransform)
+   public static RigidBodyTransformReadOnly getHandLinkToControlFrameTransform(FullHumanoidRobotModel fullRobotModel, RobotSide side)
    {
-      RigidBodyTransform controlToHandFrameTransform = fullRobotModel.getHandControlFrame(side).getTransformToParent();
-      RigidBodyTransform bodyFixedCoMToHandFrameTransform = fullRobotModel.getHand(side).getBodyFixedFrame().getTransformToParent();
-
-      ReferenceFrame handFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame controlFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(handFrame, controlToHandFrameTransform);
-      ReferenceFrame bodyFixedCoMFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(handFrame, bodyFixedCoMToHandFrameTransform);
-
-      FramePose3D controlPose = new FramePose3D(controlFrame);
-      controlPose.changeFrame(bodyFixedCoMFrame);
-
-      controlPose.get(controlToBodyFixedCoMFrameTransform);
-
-      controlFrame.remove();
-      bodyFixedCoMFrame.remove();
+      RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
+      getHandLinkToControlFrameTransform(fullRobotModel, side, linkToControlFrameTransform);
+      return linkToControlFrameTransform;
    }
 
    public static void getHandLinkToControlFrameTransform(FullHumanoidRobotModel fullRobotModel, RobotSide side, RigidBodyTransform linkToControlFrameTransform)

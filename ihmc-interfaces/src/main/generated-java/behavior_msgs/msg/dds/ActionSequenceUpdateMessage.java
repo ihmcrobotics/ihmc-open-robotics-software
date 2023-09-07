@@ -14,7 +14,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    public int sequence_size_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionMessage>  arm_joint_angles_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionMessage>  chest_orientation_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage>  footstep_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionMessage>  footstep_plan_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandConfigurationActionMessage>  hand_configuration_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionMessage>  hand_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionMessage>  hand_wrench_actions_;
@@ -26,7 +26,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    {
       arm_joint_angles_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionMessage> (200, new behavior_msgs.msg.dds.ArmJointAnglesActionMessagePubSubType());
       chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionMessage> (200, new behavior_msgs.msg.dds.ChestOrientationActionMessagePubSubType());
-      footstep_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage> (200, new behavior_msgs.msg.dds.FootstepActionMessagePubSubType());
+      footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionMessagePubSubType());
       hand_configuration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandConfigurationActionMessage> (200, new behavior_msgs.msg.dds.HandConfigurationActionMessagePubSubType());
       hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionMessage> (200, new behavior_msgs.msg.dds.HandPoseActionMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionMessagePubSubType());
@@ -48,7 +48,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
 
       arm_joint_angles_actions_.set(other.arm_joint_angles_actions_);
       chest_orientation_actions_.set(other.chest_orientation_actions_);
-      footstep_actions_.set(other.footstep_actions_);
+      footstep_plan_actions_.set(other.footstep_plan_actions_);
       hand_configuration_actions_.set(other.hand_configuration_actions_);
       hand_pose_actions_.set(other.hand_pose_actions_);
       hand_wrench_actions_.set(other.hand_wrench_actions_);
@@ -85,9 +85,9 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage>  getFootstepActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionMessage>  getFootstepPlanActions()
    {
-      return footstep_actions_;
+      return footstep_plan_actions_;
    }
 
 
@@ -160,11 +160,11 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
          {  if (!this.chest_orientation_actions_.get(i).epsilonEquals(other.chest_orientation_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.footstep_actions_.size() != other.footstep_actions_.size()) { return false; }
+      if (this.footstep_plan_actions_.size() != other.footstep_plan_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.footstep_actions_.size(); i++)
-         {  if (!this.footstep_actions_.get(i).epsilonEquals(other.footstep_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.footstep_plan_actions_.size(); i++)
+         {  if (!this.footstep_plan_actions_.get(i).epsilonEquals(other.footstep_plan_actions_.get(i), epsilon)) return false; }
       }
 
       if (this.hand_configuration_actions_.size() != other.hand_configuration_actions_.size()) { return false; }
@@ -226,7 +226,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
 
       if (!this.arm_joint_angles_actions_.equals(otherMyClass.arm_joint_angles_actions_)) return false;
       if (!this.chest_orientation_actions_.equals(otherMyClass.chest_orientation_actions_)) return false;
-      if (!this.footstep_actions_.equals(otherMyClass.footstep_actions_)) return false;
+      if (!this.footstep_plan_actions_.equals(otherMyClass.footstep_plan_actions_)) return false;
       if (!this.hand_configuration_actions_.equals(otherMyClass.hand_configuration_actions_)) return false;
       if (!this.hand_pose_actions_.equals(otherMyClass.hand_pose_actions_)) return false;
       if (!this.hand_wrench_actions_.equals(otherMyClass.hand_wrench_actions_)) return false;
@@ -249,8 +249,8 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
       builder.append(this.arm_joint_angles_actions_);      builder.append(", ");
       builder.append("chest_orientation_actions=");
       builder.append(this.chest_orientation_actions_);      builder.append(", ");
-      builder.append("footstep_actions=");
-      builder.append(this.footstep_actions_);      builder.append(", ");
+      builder.append("footstep_plan_actions=");
+      builder.append(this.footstep_plan_actions_);      builder.append(", ");
       builder.append("hand_configuration_actions=");
       builder.append(this.hand_configuration_actions_);      builder.append(", ");
       builder.append("hand_pose_actions=");
