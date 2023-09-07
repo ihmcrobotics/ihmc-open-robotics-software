@@ -5,8 +5,11 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -16,12 +19,18 @@ import us.ihmc.tools.Timer;
 
 public class ChestOrientationAction extends ChestOrientationActionData implements BehaviorAction
 {
+   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
+
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
+   private final FramePose3D desiredChestPose = new FramePose3D();
+   private final FramePose3D syncedChestPose = new FramePose3D();
+   private double startOrientationDistanceToGoal;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
+   private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public ChestOrientationAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -41,14 +50,14 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    @Override
    public void triggerActionExecution()
    {
-      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(getReferenceFrame());
-      frameChestYawPitchRoll.set(getYawPitchRoll());
-      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
+      frameChestQuaternion.set(getRotation());
+      frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
              .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
-                                                                  frameChestYawPitchRoll,
+                                                                  frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
                                                                   syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
@@ -56,16 +65,33 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
+
+      desiredChestPose.setFromReferenceFrame(getReferenceFrame());
+      syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
+      desiredChestPose.getRotation().set(syncedChestPose.getRotation());
+      startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      isExecuting = executionTimer.isRunning(getTrajectoryDuration());
+      desiredChestPose.setFromReferenceFrame(getReferenceFrame());
+      syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+      desiredChestPose.getRotation().set(syncedChestPose.getRotation());
+
+      isExecuting = !completionCalculator.isComplete(desiredChestPose,
+                                                     syncedChestPose, Double.NaN, ORIENTATION_TOLERANCE,
+                                                     getTrajectoryDuration(),
+                                                     executionTimer,
+                                                     BehaviorActionCompletionCalculator.Component.ROTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 

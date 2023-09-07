@@ -120,7 +120,9 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
                                            .isComplete(goalFeetPoses.get(side),
                                                        syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
-                                                       executionTimer);
+                                                       executionTimer,
+                                                       BehaviorActionCompletionCalculator.Component.TRANSLATION,
+                                                       BehaviorActionCompletionCalculator.Component.ROTATION);
       }
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;

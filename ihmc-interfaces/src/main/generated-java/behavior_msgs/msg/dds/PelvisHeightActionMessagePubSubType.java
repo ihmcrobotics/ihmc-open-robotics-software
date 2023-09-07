@@ -15,7 +15,7 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "12b68f4a7e1abd6c90edff53691a8c5dfb6a959cba764c02e32a9085425c4fa0";
+   		return "c3b85bc4adb21a6311f889f3606e9ed42cb6674183412e8645b77974a7ca055c";
    }
    
    @Override
@@ -54,7 +54,11 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,8 +77,12 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrame().get(i0).length() + 1;
+      }
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToParent(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -86,18 +94,21 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    public static void write(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
-      cdr.write_type_6(data.getTrajectoryDuration());
+      if(data.getParentFrame().size() <= 1000)
+      cdr.write_type_e(data.getParentFrame());else
+          throw new RuntimeException("parent_frame field exceeds the maximum length");
 
-      cdr.write_type_6(data.getHeightInWorld());
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
+      cdr.write_type_6(data.getTrajectoryDuration());
 
    }
 
    public static void read(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
+      cdr.read_type_e(data.getParentFrame());	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
-      	
-      data.setHeightInWorld(cdr.read_type_6());
       	
 
    }
@@ -107,8 +118,10 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
+      ser.write_type_e("parent_frame", data.getParentFrame());
+      ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
+
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
-      ser.write_type_6("height_in_world", data.getHeightInWorld());
    }
 
    @Override
@@ -116,8 +129,10 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
+      ser.read_type_e("parent_frame", data.getParentFrame());
+      ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
+
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
-      data.setHeightInWorld(ser.read_type_6("height_in_world"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.PelvisHeightActionMessage src, behavior_msgs.msg.dds.PelvisHeightActionMessage dest)
