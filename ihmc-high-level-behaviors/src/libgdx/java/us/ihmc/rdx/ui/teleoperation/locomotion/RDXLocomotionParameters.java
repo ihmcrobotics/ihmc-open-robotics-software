@@ -12,6 +12,7 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
    public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final BooleanStoredPropertyKey planSwingTrajectories = keys.addBooleanKey("Plan swing trajectories");
+   public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
    public static final IntegerStoredPropertyKey initialStanceSide = keys.addIntegerKey("Initial stance side");
    public static final DoubleStoredPropertyKey footstepPlannerTimeout = keys.addDoubleKey("Footstep planner timeout");
