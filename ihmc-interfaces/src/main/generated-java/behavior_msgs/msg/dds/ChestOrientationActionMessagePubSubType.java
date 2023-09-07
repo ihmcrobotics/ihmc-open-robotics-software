@@ -15,7 +15,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "216da750a24a1c4a091178333bba3e77bb99d28f33cab13056a58a92b5e9d7cb";
+   		return "1bc27f10b3671b91ce869e339069463ca942ebf0c9019094c70cbbef2067bf2d";
    }
    
    @Override
@@ -54,7 +54,11 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +77,12 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
 
-      current_alignment += ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrame().get(i0).length() + 1;
+      }
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToParent(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -85,7 +94,11 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    public static void write(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
-      ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.write(data.getOrientation(), cdr);
+      if(data.getParentFrame().size() <= 1000)
+      cdr.write_type_e(data.getParentFrame());else
+          throw new RuntimeException("parent_frame field exceeds the maximum length");
+
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
    }
@@ -93,7 +106,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    public static void read(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
-      ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.read(data.getOrientation(), cdr);	
+      cdr.read_type_e(data.getParentFrame());	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
 
@@ -104,7 +118,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
-      ser.write_type_a("orientation", new ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType(), data.getOrientation());
+      ser.write_type_e("parent_frame", data.getParentFrame());
+      ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
    }
@@ -114,7 +129,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
-      ser.read_type_a("orientation", new ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType(), data.getOrientation());
+      ser.read_type_e("parent_frame", data.getParentFrame());
+      ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }

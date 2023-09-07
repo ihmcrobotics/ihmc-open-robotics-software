@@ -2,7 +2,6 @@ package us.ihmc.behaviors.sequence;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
 
 /**
  * This class will probably change a lot as actions have
@@ -13,8 +12,8 @@ public class BehaviorActionCompletionCalculator
 {
    private double translationError;
    private double rotationError;
-   private boolean desiredTranslationAcheived;
-   private boolean desiredRotationAcheived;
+   private boolean desiredTranslationAchieved;
+   private boolean desiredRotationAchieved;
    private boolean desiredPoseAchieved;
 
    public boolean isComplete(FramePose3DReadOnly desired,
@@ -27,14 +26,28 @@ public class BehaviorActionCompletionCalculator
       boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
 
       translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
-      desiredTranslationAcheived = translationError <= translationTolerance;
+      desiredTranslationAchieved = translationError <= translationTolerance;
 
       rotationError = actual.getRotation().distance(desired.getRotation(), true);
-      desiredRotationAcheived = rotationError <= rotationTolerance;
+      desiredRotationAchieved = rotationError <= rotationTolerance;
 
-      desiredPoseAchieved = desiredTranslationAcheived && desiredRotationAcheived;
+      desiredPoseAchieved = desiredTranslationAchieved && desiredRotationAchieved;
 
       return timeIsUp && desiredPoseAchieved;
+   }
+
+   public boolean isComplete(FramePose3DReadOnly desired,
+                             FramePose3DReadOnly actual,
+                             double translationTolerance,
+                             double actionNominalDuration,
+                             Timer executionTimer)
+   {
+      boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
+
+      translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
+      desiredTranslationAchieved = translationError <= translationTolerance;
+
+      return timeIsUp && desiredTranslationAchieved;
    }
 
    public double getTranslationError()
