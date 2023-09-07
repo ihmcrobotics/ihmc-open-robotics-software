@@ -81,7 +81,6 @@ public class RDXFootstepChecker
       }
    }
 
-   // Check the validity of a single step
    public void checkValidSingleStep(RecyclingArrayList<RDXInteractableFootstep> stepList,
                                     FramePose3DReadOnly candidateFootstepPose,
                                     RobotSide candidateStepSide,
