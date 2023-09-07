@@ -13,7 +13,7 @@ public class BehaviorActionSequenceTools
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
       actionSequenceUpdateMessage.getChestOrientationActions().clear();
-      actionSequenceUpdateMessage.getFootstepActions().clear();
+      actionSequenceUpdateMessage.getFootstepPlanActions().clear();
       actionSequenceUpdateMessage.getHandConfigurationActions().clear();
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
@@ -36,11 +36,11 @@ public class BehaviorActionSequenceTools
             chestOrientationActionMessage.getActionInformation().setActionIndex(i);
             chestOrientationActionData.toMessage(chestOrientationActionMessage);
          }
-         else if (action instanceof FootstepActionData footstepActionData)
+         else if (action instanceof FootstepPlanActionData footstepPlanActionData)
          {
-            FootstepActionMessage footstepActionMessage = actionSequenceUpdateMessage.getFootstepActions().add();
-            footstepActionMessage.getActionInformation().setActionIndex(i);
-            footstepActionData.toMessage(footstepActionMessage);
+            FootstepPlanActionMessage footstepPlanActionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
+            footstepPlanActionMessage.getActionInformation().setActionIndex(i);
+            footstepPlanActionData.toMessage(footstepPlanActionMessage);
          }
          else if (action instanceof HandConfigurationActionData handConfigurationActionData)
          {

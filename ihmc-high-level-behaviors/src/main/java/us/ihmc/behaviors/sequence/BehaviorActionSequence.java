@@ -130,9 +130,9 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (FootstepActionMessage message : latestUpdateMessage.getFootstepActions())
+         for (FootstepPlanActionMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
-            FootstepAction action = new FootstepAction(ros2, referenceFrameLibrary);
+            FootstepPlanAction action = new FootstepPlanAction(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
