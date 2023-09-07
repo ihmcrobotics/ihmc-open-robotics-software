@@ -14,6 +14,12 @@ public interface BehaviorActionData
 
    }
 
+   /** Needed to keep replaced reference frames up to date. */
+   default void update()
+   {
+
+   }
+
    void saveToFile(ObjectNode jsonNode);
 
    void loadFromFile(JsonNode jsonNode);
