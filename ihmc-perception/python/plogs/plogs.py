@@ -19,7 +19,6 @@ def convert_main(path, src_file_name, dst_file_name):
     if dst_file_name is None:
         new_file = src_file_name.replace('.hdf5', 'Fixed.hdf5')
 
-
     data = h5py.File(path + src_file_name, 'r')
 
     channels = collect_channels(data)
