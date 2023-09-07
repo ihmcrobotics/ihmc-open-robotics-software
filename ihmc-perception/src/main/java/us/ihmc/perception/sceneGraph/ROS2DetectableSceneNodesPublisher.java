@@ -9,7 +9,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 /**
@@ -49,14 +49,14 @@ public class ROS2DetectableSceneNodesPublisher
 
          // We must syncronize the ArUco marker frames so we can reset overriden node
          // poses back to ArUco relative ones.
-         if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+         if (detectableSceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
          {
-            arUcoMarkerPose.setToZero(arUcoDetectableNode.getMarkerFrame());
+            arUcoMarkerPose.setToZero(arUcoMarkerNode.getNodeFrame());
             arUcoMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
             arUcoMarkerPose.get(arUcoMarkerToWorldTransform);
             MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
 
-            detectableSceneNodeMessage.setBreakFrequency((float) arUcoDetectableNode.getBreakFrequency());
+            detectableSceneNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
          }
          if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
          {

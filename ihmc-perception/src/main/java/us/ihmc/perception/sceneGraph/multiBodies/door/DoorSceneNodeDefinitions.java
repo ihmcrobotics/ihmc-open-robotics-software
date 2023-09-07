@@ -3,9 +3,10 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 /**
@@ -117,40 +118,41 @@ public class DoorSceneNodeDefinitions
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
    }
 
-   public static ArUcoDetectableNode createPullDoorPanel()
+   public static PredefinedRigidBodySceneNode createPullDoorPanel()
    {
-      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                     "PullDoorPanel",
-                                     DoorModelParameters.PULL_DOOR_MARKER_ID,
-                                     DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
-                                     PULL_DOOR_MARKER_TO_PANEL_TRANSFORM,
-                                     DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                     PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                                                           "PullDoorPanel",
+                                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                                                           PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
+      return node;
    }
 
-   public static ArUcoDetectableNode createPushDoorPanel()
+   public static PredefinedRigidBodySceneNode createPushDoorPanel()
    {
-      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                     "PushDoorPanel",
-                                     DoorModelParameters.PUSH_DOOR_MARKER_ID,
-                                     DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
-                                     PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM,
-                                     DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                     PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                                                           "PushDoorPanel",
+                                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                                                           PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
+      return node;
    }
 
-   public static StaticRelativeSceneNode createPullDoorFrame(ArUcoDetectableNode pullDoorPanel)
+   public static StaticRelativeSceneNode createPullDoorFrame(ArUcoMarkerNode pullDoorPanel)
    {
-      return new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                         "PullDoorFrame",
-                                         pullDoorPanel,
-                                         PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
-                                         DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
-                                         PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+      StaticRelativeSceneNode node = new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                                                 "PullDoorFrame",
+                                                                 DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                                                 PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                 DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+      node.getNodeToParentFrameTransform().set(PULL_DOOR_FRAME_TO_PANEL_TRANSFORM);
+      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
+      return node;
    }
 
-   public static StaticRelativeSceneNode createPushDoorFrame(ArUcoDetectableNode pushDoorPanel)
+   public static StaticRelativeSceneNode createPushDoorFrame(ArUcoMarkerNode pushDoorPanel)
    {
       return new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
                                          "PushDoorFrame",
@@ -161,34 +163,34 @@ public class DoorSceneNodeDefinitions
                                          DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
-   public static ArUcoDetectableNode createPushDoorLeverHandle()
+   public static ArUcoMarkerNode createPushDoorLeverHandle()
    {
-      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                     "PushDoorLeverHandle",
-                                     DoorModelParameters.PUSH_DOOR_MARKER_ID,
-                                     DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
-                                     PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,
-                                     DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                     PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      return new ArUcoMarkerNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                 "PushDoorLeverHandle",
+                                 DoorModelParameters.PUSH_DOOR_MARKER_ID,
+                                 DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
+                                 PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,
+                                 DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                 PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
-   public static ArUcoDetectableNode createPullDoorLeverHandle()
+   public static ArUcoMarkerNode createPullDoorLeverHandle()
    {
-      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                     "PullDoorLeverHandle",
-                                     DoorModelParameters.PULL_DOOR_MARKER_ID,
-                                     DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
-                                     PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,
-                                     DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                     PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      return new ArUcoMarkerNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                 "PullDoorLeverHandle",
+                                 DoorModelParameters.PULL_DOOR_MARKER_ID,
+                                 DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
+                                 PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,
+                                 DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                 PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    public static void addDefaultObjects(SceneGraph sceneGraph)
    {
-      ArUcoDetectableNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel();
-      ArUcoDetectableNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
-      ArUcoDetectableNode pushDoorLeverHandle = DoorSceneNodeDefinitions.createPushDoorLeverHandle();
-      ArUcoDetectableNode pullDoorLeverHandle = DoorSceneNodeDefinitions.createPullDoorLeverHandle();
+      ArUcoMarkerNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel();
+      ArUcoMarkerNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
+      ArUcoMarkerNode pushDoorLeverHandle = DoorSceneNodeDefinitions.createPushDoorLeverHandle();
+      ArUcoMarkerNode pullDoorLeverHandle = DoorSceneNodeDefinitions.createPullDoorLeverHandle();
       sceneGraph.registerArUcoDetectableSceneNode(pushDoorPanel);
       sceneGraph.registerArUcoDetectableSceneNode(pullDoorPanel);
       sceneGraph.registerArUcoDetectableSceneNode(pushDoorLeverHandle);

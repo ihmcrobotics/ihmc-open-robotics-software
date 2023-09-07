@@ -3,5 +3,8 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
+# The ID to assign to the next instantiated node
+uint32 next_id
+
 # The current state of the complete collection of detectable scene nodes
 perception_msgs/DetectableSceneNodeMessage[<=5000] detectable_scene_nodes
