@@ -13,6 +13,7 @@ from geometry_msgs.msg import PoseStamped
 from perception_msgs.msg import ImageMessage
 
 import cv2
+import time
 
 class Image2CenterPose_node(Node):
     def __init__(self):
@@ -33,6 +34,9 @@ class Image2CenterPose_node(Node):
         # Default setting
         self.opt.nms = True
         self.opt.obj_scale = True
+        self.image_process_frequency = 10
+        self.image_process_period_ns = int(1e9 / self.image_process_frequency)
+        self.last_image_process_time_ns = 0
 
         # Tracking stuff
         if self.opt.tracking_task == True:
@@ -99,7 +103,12 @@ class Image2CenterPose_node(Node):
         self.get_logger().info("Waiting for an Image...")
 
     def listener_callback(self, msg):
-        self.get_logger().info("ImageMessage #" + str(msg.sequence_number))
+        # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU
+        if time.time_ns() - self.last_image_process_time_ns < self.image_process_period_ns:
+            return
+        self.last_image_process_time_ns = time.time_ns()
+
+        self.get_logger().info("Processing ImageMessage #" + str(msg.sequence_number))
         image_np = np.frombuffer(b''.join(msg.data), dtype=np.uint8)
         image = cv2.imdecode(image_np, cv2.COLOR_YUV2RGB)
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
