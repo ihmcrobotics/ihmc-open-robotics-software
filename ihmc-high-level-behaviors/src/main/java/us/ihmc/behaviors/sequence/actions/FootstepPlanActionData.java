@@ -1,26 +1,27 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.WalkActionMessage;
+import behavior_msgs.msg.dds.FootstepActionMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.function.Consumer;
 
-public class WalkActionData implements BehaviorActionData
+public class FootstepPlanActionData implements BehaviorActionData
 {
-   private String description = "Walk";
+   private String description = "Footstep plan";
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
-   private final SideDependentList<RigidBodyTransform> goalFootstepToParentTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
+   private final RecyclingArrayList<FootstepActionData> footsteps = new RecyclingArrayList<>(FootstepActionData::new);
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
 
@@ -35,14 +36,15 @@ public class WalkActionData implements BehaviorActionData
    {
       jsonNode.put("description", description);
       jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
-      JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
-      for (RobotSide side : RobotSide.values)
-      {
-         ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toJSON(goalFootNode, goalFootstepToParentTransforms.get(side));
-      }
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
+
+      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
+      for (FootstepActionData footstep : footsteps)
+      {
+         ObjectNode footstepNode = foostepsArrayNode.addObject();
+         footstep.saveToFile(footstepNode);
+      }
    }
 
    @Override
@@ -50,35 +52,40 @@ public class WalkActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
-      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
-      for (RobotSide side : RobotSide.values)
-      {
-         JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toEuclid(goalFootNode, goalFootstepToParentTransforms.get(side));
-      }
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
+
+      footsteps.clear();
+      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
 
-   public void toMessage(WalkActionMessage message)
+   public void toMessage(FootstepPlanActionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentReferenceFrame().getName());
       MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
-      MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
-      MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
+
+      message.getFootsteps().clear();
+      for (FootstepActionData footstep : footsteps)
+      {
+         footstep.toMessage(message.getFootsteps().add());
+      }
    }
 
-   public void fromMessage(WalkActionMessage message)
+   public void fromMessage(FootstepPlanActionMessage message)
    {
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
-      MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.LEFT));
-      MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.RIGHT));
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
+
+      footsteps.clear();
+      for (FootstepActionMessage footstep : message.getFootsteps())
+      {
+         footsteps.add().fromMessage(footstep);
+      }
    }
 
    public ReferenceFrame getParentReferenceFrame()
@@ -111,9 +118,9 @@ public class WalkActionData implements BehaviorActionData
       return modifiableReferenceFrame.getTransformToParent();
    }
 
-   public SideDependentList<RigidBodyTransform> getGoalFootstepToParentTransforms()
+   public RecyclingArrayList<FootstepActionData> getFootsteps()
    {
-      return goalFootstepToParentTransforms;
+      return footsteps;
    }
 
    public double getSwingDuration()

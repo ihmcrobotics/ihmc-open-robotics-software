@@ -30,6 +30,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -73,6 +74,7 @@ public class RDXBehaviorActionSequenceEditor
    private WorkspaceResourceFile workspaceFile = null;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
+   private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
    private DRCRobotModel robotModel;
    private ROS2SyncedRobotModel syncedRobot;
@@ -121,13 +123,15 @@ public class RDXBehaviorActionSequenceEditor
       pascalCasedName = FormattingTools.titleToPascalCase(name);
    }
 
-   public void create(RDX3DPanel panel3D,
+   public void create(RDXBaseUI baseUI,
+                      RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
                       RobotCollisionModel selectionCollisionModel,
                       ReferenceFrameLibrary referenceFrameLibrary)
    {
+      this.baseUI = baseUI;
       this.panel3D = panel3D;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -163,6 +167,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 robotModel,
                                                                                 syncedRobot,
                                                                                 selectionCollisionModel,
+                                                                                baseUI,
                                                                                 panel3D,
                                                                                 referenceFrameLibrary,
                                                                                 ros2ControllerHelper);
@@ -645,31 +650,12 @@ public class RDXBehaviorActionSequenceEditor
       {
          newAction = new RDXArmJointAnglesAction(robotModel);
       }
-      ImGui.text("Add Footstep:");
-      ImGui.sameLine();
-      for (var side : RobotSide.values)
+      if (ImGui.button(labels.get("Add Footstep Plan")))
       {
-         if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
-         {
-            RDXFootstepAction footstepAction = new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
-            // Set the new action to where the last one was for faster authoring
-            footstepAction.setSide(side);
-            RDXFootstepAction nextPreviousFootstepAction = findNextPreviousFootstepAction();
-            if (nextPreviousFootstepAction != null)
-            {
-               footstepAction.setIncludingFrame(nextPreviousFootstepAction.getReferenceFrame().getParent(),
-                                                nextPreviousFootstepAction.getReferenceFrame().getTransformToParent());
-            }
-            else // set to current robot's foot pose
-            {
-               footstepAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-            }
-            if (nextPreviousParentFrame != null)
-               footstepAction.getActionData().changeParentFrameWithoutMoving(nextPreviousParentFrame);
-            newAction = footstepAction;
-         }
-         if (side.ordinal() < 1)
-            ImGui.sameLine();
+         RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
+         if (nextPreviousParentFrame != null)
+            footstepPlanAction.getActionData().changeParentFrame(nextPreviousParentFrame);
+         newAction = footstepPlanAction;
       }
       if (ImGui.button(labels.get("Add Wait")))
       {
@@ -697,9 +683,9 @@ public class RDXBehaviorActionSequenceEditor
    {
       for (int i = Math.min(executionNextIndexStatus, actionSequence.size() - 1); i >= 0; i--)
       {
-         if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
+         if (actionSequence.get(i) instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            return footstepAction.getActionData().getParentReferenceFrame();
+            return footstepPlanAction.getActionData().getParentReferenceFrame();
          }
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
@@ -711,19 +697,6 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
       return null;
-   }
-
-   private RDXFootstepAction findNextPreviousFootstepAction()
-   {
-      RDXFootstepAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
-      {
-         if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
-         {
-            previousAction = footstepAction;
-         }
-      }
-      return previousAction;
    }
 
    private RDXHandPoseAction findNextPreviousHandPoseAction(RobotSide side)
