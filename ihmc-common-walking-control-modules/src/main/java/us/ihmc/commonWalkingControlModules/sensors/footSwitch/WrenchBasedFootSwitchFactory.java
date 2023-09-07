@@ -63,9 +63,13 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    }
 
    @Override
-   public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
+   public FootSwitchInterface newFootSwitch(String namePrefix,
+                                            ContactablePlaneBody foot,
+                                            Collection<? extends ContactablePlaneBody> otherFeet,
                                             RigidBodyBasics rootBody,
-                                            ForceSensorDataReadOnly footForceSensor, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                            ForceSensorDataReadOnly footForceSensor,
+                                            double totalRobotWeight,
+                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdForceParameter == null)
@@ -75,7 +79,14 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
          secondContactThresholdForceParameter = new DoubleParameter("SecondContactThresholdForce", registry, defaultSecondContactThresholdForceIgnoringCoP);
       }
 
-      return new WrenchBasedFootSwitch(namePrefix, footForceSensor, totalRobotWeight, foot, contactThresholdForceParameter,
-                                       secondContactThresholdForceParameter, copThresholdFractionParameter, yoGraphicsListRegistry, registry);
+      return new WrenchBasedFootSwitch(namePrefix,
+                                       footForceSensor,
+                                       totalRobotWeight,
+                                       foot,
+                                       contactThresholdForceParameter,
+                                       secondContactThresholdForceParameter,
+                                       copThresholdFractionParameter,
+                                       yoGraphicsListRegistry,
+                                       registry);
    }
 }

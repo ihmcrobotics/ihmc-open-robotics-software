@@ -3,10 +3,7 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * A library of reference frames. Useful for putting together a specific collection
@@ -17,9 +14,8 @@ import java.util.List;
 public class ReferenceFrameLibrary
 {
    /** Reference frames are have immutable parents, so we must use Suppliers. */
-   private final ArrayList<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
-   private final HashSet<String> frameNames = new HashSet<>();
-   private String[] referenceFrameNames;
+   private final HashMap<String, ReferenceFrameSupplier> frameNameToSupplierMap = new HashMap<>();
+   private transient String[] referenceFrameNameArray;
 
    public void addAll(List<ReferenceFrameSupplier> referenceFrameSuppliers)
    {
@@ -31,55 +27,49 @@ public class ReferenceFrameLibrary
 
    public void add(ReferenceFrameSupplier referenceFrame)
    {
-      if (!frameNames.contains(referenceFrame.get().getName()))
+      if (!frameNameToSupplierMap.containsKey(referenceFrame.get().getName()))
       {
-         frameNames.add(referenceFrame.get().getName());
-         referenceFrameSuppliers.add(referenceFrame);
+         frameNameToSupplierMap.put(referenceFrame.get().getName(), referenceFrame);
       }
    }
 
-   public void build()
+   public ReferenceFrameSupplier findFrameByIndex(int referenceFrameIndex)
    {
-      referenceFrameNames = new String[referenceFrameSuppliers.size()];
-      for (int i = 0; i < referenceFrameSuppliers.size(); i++)
-      {
-         String fullName = referenceFrameSuppliers.get(i).get().getName();
-         referenceFrameNames[i] = fullName.substring(fullName.lastIndexOf(".") + 1);
-      }
+      return findFrameByName(getReferenceFrameNameArray()[referenceFrameIndex]);
    }
 
    public ReferenceFrameSupplier findFrameByName(String referenceFrameName)
    {
-      int frameIndex = findFrameIndexByName(referenceFrameName);
-      boolean frameFound = frameIndex >= 0;
-      if (frameFound)
-      {
-         return referenceFrameSuppliers.get(frameIndex);
-      }
-      LogTools.warn("Using world frame.");
-      return ReferenceFrame::getWorldFrame;
+      ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
+      boolean frameFound = frameSupplier != null;
+      if (!frameFound)
+         LogTools.error("Frame not found: {}. Using world frame.", referenceFrameName);
+      return frameFound ? frameSupplier : ReferenceFrame::getWorldFrame;
    }
 
    public int findFrameIndexByName(String referenceFrameName)
    {
-      for (int i = 0; i < referenceFrameNames.length; i++)
+      String[] referenceFrameNameArray = getReferenceFrameNameArray();
+      for (int i = 0; i < referenceFrameNameArray.length; i++)
       {
-         if (referenceFrameName.equals(referenceFrameNames[i]))
+         if (referenceFrameName.equals(referenceFrameNameArray[i]))
          {
             return i;
          }
       }
-      LogTools.error("Frame {} is not present in library! {}", referenceFrameName, Arrays.toString(referenceFrameNames));
+      LogTools.error("Frame {} is not present in library! {}", referenceFrameName, Arrays.toString(referenceFrameNameArray));
       return -1;
    }
 
-   public List<ReferenceFrameSupplier> getReferenceFrameSuppliers()
+   public String[] getReferenceFrameNameArray()
    {
-      return referenceFrameSuppliers;
-   }
+      if (referenceFrameNameArray == null || referenceFrameNameArray.length != frameNameToSupplierMap.size())
+      {
+         // Sort in alphabetical order
+         SortedSet<String> referenceFrameNameSet = new TreeSet<>(frameNameToSupplierMap.keySet());
+         referenceFrameNameArray = referenceFrameNameSet.toArray(new String[referenceFrameNameSet.size()]);
+      }
 
-   public String[] getReferenceFrameNames()
-   {
-      return referenceFrameNames;
+      return referenceFrameNameArray;
    }
 }
