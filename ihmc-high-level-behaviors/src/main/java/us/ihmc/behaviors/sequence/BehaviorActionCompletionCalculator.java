@@ -5,7 +5,7 @@ import us.ihmc.tools.Timer;
 
 /**
  * This class will probably change a lot as actions have
- * more complex conditions and decision making logic. It'll
+ * more complex conditions and decision-making logic. It'll
  * morph into something else entirely, probably.
  */
 public class BehaviorActionCompletionCalculator
@@ -15,6 +15,11 @@ public class BehaviorActionCompletionCalculator
    private boolean desiredTranslationAchieved;
    private boolean desiredRotationAchieved;
    private boolean desiredPoseAchieved;
+
+   public enum Component
+   {
+      TRANSLATION, ROTATION
+   }
 
    public boolean isComplete(FramePose3DReadOnly desired,
                              FramePose3DReadOnly actual,
@@ -48,6 +53,36 @@ public class BehaviorActionCompletionCalculator
       desiredTranslationAchieved = translationError <= translationTolerance;
 
       return timeIsUp && desiredTranslationAchieved;
+   }
+
+
+   public boolean isComplete(FramePose3DReadOnly desired,
+                             FramePose3DReadOnly actual,
+                             double translationTolerance,
+                             double rotationTolerance,
+                             double actionNominalDuration,
+                             Timer executionTimer,
+                             Component... components)
+   {
+      boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
+      boolean desiredPoseAchieved = true;
+      for (Component component : components) {
+         switch (component)
+         {
+            case TRANSLATION ->
+            {
+               double translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
+               desiredPoseAchieved = desiredPoseAchieved && (translationError <= translationTolerance);
+            }
+            case ROTATION ->
+            {
+               double rotationError = actual.getRotation().distance(desired.getRotation(), true);
+               desiredPoseAchieved = desiredPoseAchieved && (rotationError <= rotationTolerance);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + component);
+         }
+      }
+      return timeIsUp && desiredPoseAchieved;
    }
 
    public double getTranslationError()
