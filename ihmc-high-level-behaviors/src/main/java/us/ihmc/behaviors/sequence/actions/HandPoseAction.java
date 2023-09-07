@@ -35,7 +35,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
-   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double startPositionDistanceToGoal;
@@ -123,8 +122,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
                                                      syncedHandControlPose, POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
-                                                     executionTimer,
-                                                     warningThrottler);
+                                                     executionTimer);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());

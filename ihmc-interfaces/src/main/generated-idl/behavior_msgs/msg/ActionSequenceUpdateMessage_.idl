@@ -3,7 +3,7 @@
 
 #include "behavior_msgs/msg/./ArmJointAnglesActionMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionMessage_.idl"
-#include "behavior_msgs/msg/./FootstepActionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionMessage_.idl"
 #include "behavior_msgs/msg/./HandConfigurationActionMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionMessage_.idl"
@@ -26,7 +26,7 @@ module behavior_msgs
         unsigned short sequence_size;
         sequence<behavior_msgs::msg::dds::ArmJointAnglesActionMessage, 200> arm_joint_angles_actions;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionMessage, 200> chest_orientation_actions;
-        sequence<behavior_msgs::msg::dds::FootstepActionMessage, 200> footstep_actions;
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionMessage, 200> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::HandConfigurationActionMessage, 200> hand_configuration_actions;
         sequence<behavior_msgs::msg::dds::HandPoseActionMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionMessage, 200> hand_wrench_actions;

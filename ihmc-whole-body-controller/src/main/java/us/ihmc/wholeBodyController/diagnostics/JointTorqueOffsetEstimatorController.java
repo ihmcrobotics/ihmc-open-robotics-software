@@ -327,6 +327,11 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
          pdController.setDerivativeGain(kd);
       }
    }
+   
+   public void setMaximumTorqueOffset(double maxValue)
+   {
+      maximumTorqueOffset.set(maxValue);
+   }
 
    public void estimateTorqueOffset(boolean estimate)
    {

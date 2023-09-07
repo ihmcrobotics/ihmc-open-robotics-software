@@ -16,6 +16,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -171,10 +173,18 @@ public class RDXPose3DGizmo implements RenderableProvider
     * Use of this method is assuming that this Gizmo is the owner of this frame
     * and not based on a frame managed externally.
     */
-   public void setParentFrame(ReferenceFrame parentReferenceFrame)
+   public void setParentFrame(ReferenceFrame newParentFrame)
    {
       gizmoFrame.remove();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
+   }
+
+   public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
+   {
+      RigidBodyTransform newTransformToParent = new RigidBodyTransform();
+      gizmoFrame.getTransformToDesiredFrame(newTransformToParent, newParentFrame);
+      transformToParent.set(newTransformToParent);
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
    }
 
    public void createAndSetupDefault(RDX3DPanel panel3D)
@@ -411,7 +421,14 @@ public class RDXPose3DGizmo implements RenderableProvider
       {
          framePose3D.setToZero(gizmoFrame);
          framePose3D.getOrientation().setAndNormalize(axisRotations.get(axis));
-         framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         try // Getting an exception here a lot, it's not really a failure, so
+         {   // prevent crashing the whole application.
+            framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         catch (NotARotationMatrixException notARotationMatrixException)
+         {
+            LogTools.error(notARotationMatrixException.getMessage());
+         }
          framePose3D.get(axisTransformToWorlds[axis.ordinal()]);
       }
       // The above Axis calculations actually end up on Z, so we don't have to recalculate this
