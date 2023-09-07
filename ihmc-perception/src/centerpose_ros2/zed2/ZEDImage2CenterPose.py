@@ -103,7 +103,8 @@ class Image2CenterPose_node(Node):
         self.get_logger().info("Waiting for an Image...")
 
     def listener_callback(self, msg):
-        # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU
+        # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU - it can't
+        # keep up at 30hz even on an i7 13700 -danderson
         if time.time_ns() - self.last_image_process_time_ns < self.image_process_period_ns:
             return
         self.last_image_process_time_ns = time.time_ns()

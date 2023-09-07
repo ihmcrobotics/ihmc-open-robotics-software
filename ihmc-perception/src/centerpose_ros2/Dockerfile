@@ -1,4 +1,5 @@
 # NVLabs centerpose_ros2 version 0.0.1
+# Do not upload to dockerhub
 
 FROM nvcr.io/nvidia/cuda:11.6.2-devel-ubuntu20.04
 LABEL Name=centerpose_ros2 Version=0.0.1
@@ -6,7 +7,8 @@ LABEL Name=centerpose_ros2 Version=0.0.1
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip python3-dev locales software-properties-common curl git
+    apt-get install -y --no-install-recommends python3-pip python3-dev locales software-properties-common curl git && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install numba progress matplotlib scipy albumentations pyrr simplejson tqdm opencv-python-headless numpy scikit-learn scipy filterpy frozendict tensorflow requests
 
@@ -23,10 +25,9 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
 
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends ros-galactic-ros-base
-
-RUN apt-get install -y --no-install-recommends python3-colcon-common-extensions
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ros-galactic-ros-base python3-colcon-common-extensions && \
+    rm -rf /var/lib/apt/lists/*
 
 # Setup ros2 ws --------------------------------------------------------------------
 WORKDIR /home/ros2ws
@@ -39,8 +40,17 @@ RUN . /opt/ros/galactic/setup.sh && \
 
 # Setting up CenterPose -----------------------------------------------------------------------
 ENV CenterPose_ROOT=/home/CenterPose
-RUN git clone -b replace_linear_assignment https://github.com/ihmcrobotics/CenterPose.git $CenterPose_ROOT
+RUN git clone -b replace_linear_assignment https://github.com/ihmcrobotics/CenterPose.git $CenterPose_ROOT && \
+    rm -rf $CenterPose_ROOT/.git
 RUN rm -r $CenterPose_ROOT/src/lib/models/networks/DCNv2
-RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CenterPose_ROOT/src/lib/models/networks/DCNv2
+RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CenterPose_ROOT/src/lib/models/networks/DCNv2 && \
+    rm -rf $CenterPose_ROOT/src/lib/models/networks/DCNv2/.git
+
+# Cleanup to reduce image size
+RUN apt-get remove curl git -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN rm -rf /root/.cache
 
 WORKDIR /home/CenterPose_ws
