@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -118,7 +119,8 @@ public class DoorSceneNodeDefinitions
 
    public static ArUcoDetectableNode createPullDoorPanel()
    {
-      return new ArUcoDetectableNode("PullDoorPanel",
+      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                     "PullDoorPanel",
                                      DoorModelParameters.PULL_DOOR_MARKER_ID,
                                      DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
                                      PULL_DOOR_MARKER_TO_PANEL_TRANSFORM,
@@ -128,7 +130,8 @@ public class DoorSceneNodeDefinitions
 
    public static ArUcoDetectableNode createPushDoorPanel()
    {
-      return new ArUcoDetectableNode("PushDoorPanel",
+      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                     "PushDoorPanel",
                                      DoorModelParameters.PUSH_DOOR_MARKER_ID,
                                      DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
                                      PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM,
@@ -138,7 +141,8 @@ public class DoorSceneNodeDefinitions
 
    public static StaticRelativeSceneNode createPullDoorFrame(ArUcoDetectableNode pullDoorPanel)
    {
-      return new StaticRelativeSceneNode("PullDoorFrame",
+      return new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                         "PullDoorFrame",
                                          pullDoorPanel,
                                          PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                          DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
@@ -148,7 +152,8 @@ public class DoorSceneNodeDefinitions
 
    public static StaticRelativeSceneNode createPushDoorFrame(ArUcoDetectableNode pushDoorPanel)
    {
-      return new StaticRelativeSceneNode("PushDoorFrame",
+      return new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                         "PushDoorFrame",
                                          pushDoorPanel,
                                          PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                          DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
@@ -158,7 +163,8 @@ public class DoorSceneNodeDefinitions
 
    public static ArUcoDetectableNode createPushDoorLeverHandle()
    {
-      return new ArUcoDetectableNode("PushDoorLeverHandle",
+      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                     "PushDoorLeverHandle",
                                      DoorModelParameters.PUSH_DOOR_MARKER_ID,
                                      DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
                                      PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,
@@ -168,7 +174,8 @@ public class DoorSceneNodeDefinitions
 
    public static ArUcoDetectableNode createPullDoorLeverHandle()
    {
-      return new ArUcoDetectableNode("PullDoorLeverHandle",
+      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                     "PullDoorLeverHandle",
                                      DoorModelParameters.PULL_DOOR_MARKER_ID,
                                      DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
                                      PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,

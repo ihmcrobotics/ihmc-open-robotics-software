@@ -28,14 +28,15 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
     * @param markerToNodeFrameTransform we measure the marker like it's a child of the node
     *                                   but really it's the parent, so we'll invert it in here
     */
-   public ArUcoDetectableNode(String name,
+   public ArUcoDetectableNode(long id,
+                              String name,
                               int markerID,
                               double markerSize,
                               RigidBodyTransform markerToNodeFrameTransform,
                               String visualModelFilePath,
                               RigidBodyTransform visualModelToNodeFrameTransform)
    {
-      super(name, visualModelFilePath, visualModelToNodeFrameTransform);
+      super(id, name, visualModelFilePath, visualModelToNodeFrameTransform);
 
       markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
       changeParentFrame(markerFrame.getReferenceFrame());

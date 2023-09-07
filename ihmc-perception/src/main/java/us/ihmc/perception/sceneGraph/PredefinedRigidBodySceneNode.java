@@ -16,9 +16,9 @@ public abstract class PredefinedRigidBodySceneNode extends DetectableSceneNode
    private final String visualModelFilePath;
    private final RigidBodyTransform visualModelToNodeFrameTransform;
 
-   public PredefinedRigidBodySceneNode(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
+   public PredefinedRigidBodySceneNode(long id, String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
    {
-      super(name);
+      super(id, name);
       this.visualModelFilePath = visualModelFilePath;
       this.visualModelToNodeFrameTransform = visualModelToNodeFrameTransform;
    }

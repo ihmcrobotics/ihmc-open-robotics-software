@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
@@ -26,6 +27,8 @@ import java.util.*;
  */
 public class SceneGraph
 {
+   public static final MutableInt NEXT_ID = new MutableInt();
+
    private final ArUcoDetectableNode pushDoorPanel;
    private final ArUcoDetectableNode pullDoorPanel;
    private final ArUcoDetectableNode pushDoorLeverHandle;

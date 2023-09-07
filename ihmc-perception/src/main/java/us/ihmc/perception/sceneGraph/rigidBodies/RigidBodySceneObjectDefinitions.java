@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
@@ -52,7 +53,8 @@ public class RigidBodySceneObjectDefinitions
 
    public static ArUcoDetectableNode createBox()
    {
-      return new ArUcoDetectableNode("Box",
+      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                     "Box",
                                      BOX_MARKER_ID,
                                      BOX_MARKER_WIDTH,
                                      BOX_TRANSFORM_TO_MARKER,
@@ -66,7 +68,8 @@ public class RigidBodySceneObjectDefinitions
     */
    public static ArUcoDetectableNode createCanOfSoup()
    {
-      return new ArUcoDetectableNode("CanOfSoup",
+      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                     "CanOfSoup",
                                      CAN_OF_SOUP_MARKER_ID,
                                      CAN_OF_SOUP_MARKER_SIZE,
                                      MARKER_TO_CAN_OF_SOUP_TRANSFORM,

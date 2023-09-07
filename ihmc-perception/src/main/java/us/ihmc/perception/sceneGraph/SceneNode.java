@@ -11,18 +11,21 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
  */
 public abstract class SceneNode
 {
+   /** A linearly increasing ID */
+   private final long id;
    private final String name;
    private final ModifiableReferenceFrame nodeFrame;
 
-   public SceneNode(String name)
+   public SceneNode(long id, String name)
    {
-      this(name, ReferenceFrame.getWorldFrame());
+      this.id = id;
+      this.name = name;
+      this.nodeFrame = new ModifiableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public SceneNode(String name, ReferenceFrame parentFrame)
+   public long getID()
    {
-      this.name = name;
-      this.nodeFrame = new ModifiableReferenceFrame(name, parentFrame);
+      return id;
    }
 
    public String getName()
