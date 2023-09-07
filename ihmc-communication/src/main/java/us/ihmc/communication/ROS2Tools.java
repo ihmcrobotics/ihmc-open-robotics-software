@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
@@ -91,6 +92,8 @@ public class ROS2Tools
    private static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
    private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput()
                                                                                                            .withTypeName(HandDesiredConfigurationMessage.class);
+   private static final ROS2Topic<HandSakeDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
+                                                                                                                .withTypeName(HandSakeDesiredCommandMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
@@ -105,6 +108,11 @@ public class ROS2Tools
    public static ROS2Topic<HandDesiredConfigurationMessage> getHandConfigurationTopic(String robotName)
    {
       return HAND_CONFIGURATION.withRobot(robotName);
+   }
+
+   public static ROS2Topic<HandSakeDesiredCommandMessage> getHandSakeCommandTopic(String robotName)
+   {
+      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName);
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)

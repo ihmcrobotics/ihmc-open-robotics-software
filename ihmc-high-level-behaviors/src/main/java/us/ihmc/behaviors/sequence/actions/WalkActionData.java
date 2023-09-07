@@ -56,12 +56,8 @@ public class WalkActionData implements BehaviorActionData
          JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
          JSONTools.toEuclid(goalFootNode, goalFootstepToParentTransforms.get(side));
       }
-      JsonNode swingDurationNode = jsonNode.get("swingDuration");
-      if (swingDurationNode != null)
-         swingDuration = swingDurationNode.asDouble();
-      JsonNode transferDurationNode = jsonNode.get("transferDuration");
-      if (transferDurationNode != null)
-         transferDuration = transferDurationNode.asDouble();
+      swingDuration = jsonNode.get("swingDuration").asDouble();
+      transferDuration = jsonNode.get("transferDuration").asDouble();
    }
 
    public void toMessage(WalkActionMessage message)

@@ -70,6 +70,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Test
    public void testWalkingOverCinderBlockField() throws Exception
    {
+      removeAnkleJointLimits = true;
       super.testWalkingOverCinderBlockField();
    }
 

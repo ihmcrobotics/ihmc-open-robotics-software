@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,10 +123,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
-      double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
-
-      success = simulationTestHelper.simulateNow(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters) + 1.0);
       assertTrue(success);
 
       Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
@@ -467,8 +464,10 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       int length = 20;
       int[][] stackSizes = new int[length][width];
       CinderBlockType[][] types = new CinderBlockType[length][width];
-      CinderBlockType[] allSlantedTypes = {CinderBlockType.SLANTED_LEFT, CinderBlockType.SLANTED_FORWARD, CinderBlockType.SLANTED_RIGHT,
-            CinderBlockType.SLANTED_BACK};
+      CinderBlockType[] allSlantedTypes = {CinderBlockType.SLANTED_LEFT,
+                                           CinderBlockType.SLANTED_FORWARD,
+                                           CinderBlockType.SLANTED_RIGHT,
+                                           CinderBlockType.SLANTED_BACK};
 
       for (int i = 0; i < stackSizes.length; i++)
       {
