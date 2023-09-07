@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,7 +21,7 @@ public class FootstepPlanActionData implements BehaviorActionData
 {
    private String description = "Footstep plan";
    private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final ModifiableReferenceFrame planFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final RecyclingArrayList<FootstepActionData> footsteps = new RecyclingArrayList<>(FootstepActionData::new);
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
@@ -32,10 +33,16 @@ public class FootstepPlanActionData implements BehaviorActionData
    }
 
    @Override
+   public void update()
+   {
+      BehaviorActionSequenceTools.accomodateFrameReplacement(planFrame, referenceFrameLibrary);
+   }
+
+   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
+      jsonNode.put("parentFrame", planFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
 
@@ -51,7 +58,7 @@ public class FootstepPlanActionData implements BehaviorActionData
    public void loadFromFile(JsonNode jsonNode)
    {
       description = jsonNode.get("description").textValue();
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
+      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
 
@@ -62,8 +69,8 @@ public class FootstepPlanActionData implements BehaviorActionData
    public void toMessage(FootstepPlanActionMessage message)
    {
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentReferenceFrame().getName());
-      MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
+      message.getParentFrame().add(getParentFrame().getName());
+      MessageTools.toMessage(planFrame.getTransformToParent(), message.getTransformToParent());
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
 
@@ -76,8 +83,8 @@ public class FootstepPlanActionData implements BehaviorActionData
 
    public void fromMessage(FootstepPlanActionMessage message)
    {
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
-      modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
+      planFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
 
@@ -88,34 +95,34 @@ public class FootstepPlanActionData implements BehaviorActionData
       }
    }
 
-   public ReferenceFrame getParentReferenceFrame()
+   public ReferenceFrame getParentFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame().getParent();
+      return planFrame.getReferenceFrame().getParent();
    }
 
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getPlanFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame();
+      return planFrame.getReferenceFrame();
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+      planFrame.changeParentFrameWithoutMoving(parentFrame);
    }
 
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrame(parentFrame);
+      planFrame.changeParentFrame(parentFrame);
    }
 
    public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
    {
-      modifiableReferenceFrame.update(transformToParentConsumer);
+      planFrame.update(transformToParentConsumer);
    }
 
    public RigidBodyTransform getTransformToParent()
    {
-      return modifiableReferenceFrame.getTransformToParent();
+      return planFrame.getTransformToParent();
    }
 
    public RecyclingArrayList<FootstepActionData> getFootsteps()
