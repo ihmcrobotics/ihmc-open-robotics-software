@@ -182,11 +182,6 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
 
-   public boolean createFusedIMUSensor()
-   {
-      return false;
-   }
-
    public boolean createFootWrenchSensorDriftEstimator()
    {
       return false;

@@ -2,11 +2,9 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class BehaviorActionSequenceTools
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
       actionSequenceUpdateMessage.getChestOrientationActions().clear();
-      actionSequenceUpdateMessage.getFootstepActions().clear();
+      actionSequenceUpdateMessage.getFootstepPlanActions().clear();
       actionSequenceUpdateMessage.getHandConfigurationActions().clear();
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
@@ -41,11 +39,11 @@ public class BehaviorActionSequenceTools
             chestOrientationActionMessage.getActionInformation().setActionIndex(i);
             chestOrientationActionData.toMessage(chestOrientationActionMessage);
          }
-         else if (action instanceof FootstepActionData footstepActionData)
+         else if (action instanceof FootstepPlanActionData footstepPlanActionData)
          {
-            FootstepActionMessage footstepActionMessage = actionSequenceUpdateMessage.getFootstepActions().add();
-            footstepActionMessage.getActionInformation().setActionIndex(i);
-            footstepActionData.toMessage(footstepActionMessage);
+            FootstepPlanActionMessage footstepPlanActionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
+            footstepPlanActionMessage.getActionInformation().setActionIndex(i);
+            footstepPlanActionData.toMessage(footstepPlanActionMessage);
          }
          else if (action instanceof HandConfigurationActionData handConfigurationActionData)
          {
@@ -86,63 +84,16 @@ public class BehaviorActionSequenceTools
       }
    }
 
-   public static boolean isExecuting(FramePose3DReadOnly desired,
-                                     FramePose3DReadOnly actual,
-                                     double translationTolerance,
-                                     double rotationTolerance,
-                                     double actionNominalDuration,
-                                     Timer executionTimer,
-                                     Throttler warningThrottler)
+   /**
+    * ReferenceFrames don't have mutable parents, so they get recreated. This accomodates for that.
+    */
+   public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      boolean trajectoryTimerRunning = executionTimer.isRunning(actionNominalDuration);
-
-      boolean shouldBeAchieved = !trajectoryTimerRunning;
-
-      // If the timer was ever set, we check if the timer is up and add 100 ms of lee-way
-      // before we start printing out warnings.
-      if (executionTimer.hasBeenSet())
-         shouldBeAchieved &= (actionNominalDuration + 0.1 - executionTimer.getElapsedTime()) <= 0.0;
-
-      boolean desiredPoseAchieved = BehaviorActionSequenceTools.isDesiredPoseAchieved(desired,
-                                                                                      actual,
-                                                                                      translationTolerance,
-                                                                                      rotationTolerance,
-                                                                                      shouldBeAchieved,
-                                                                                      warningThrottler);
-
-      return trajectoryTimerRunning | !desiredPoseAchieved;
-   }
-
-   public static boolean isDesiredPoseAchieved(FramePose3DReadOnly desired,
-                                               FramePose3DReadOnly actual,
-                                               double translationTolerance,
-                                               double rotationTolerance,
-                                               boolean shouldBeAchieved,
-                                               Throttler warningThrottler)
-   {
-      double translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
-      boolean desiredTranslationAcheived = translationError <= translationTolerance;
-
-      double rotationError = actual.getRotation().distance(desired.getRotation(), true);
-      boolean desiredRotationAcheived = rotationError <= rotationTolerance;
-
-      boolean desiredAchieved = desiredTranslationAcheived && desiredRotationAcheived;
-
-      if (!desiredAchieved && shouldBeAchieved && warningThrottler.run())
+      ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
+      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByName(previousParentFrame.getName()).get();
+      if (previousParentFrame != nextParentFrame)
       {
-         LogTools.warn("""
-                       Desired not achieved.
-                          Desired translation acheived: %b
-                          Translation error: %.5f
-                          Desired rotation achieved: %b
-                          Rotation error: %.5f%s
-                       """.formatted(desiredTranslationAcheived,
-                                     translationError,
-                                     desiredRotationAcheived,
-                                     Math.toDegrees(rotationError),
-                                     EuclidCoreMissingTools.DEGREE_SYMBOL));
+         frameToUpdate.changeParentFrame(nextParentFrame);
       }
-
-      return desiredAchieved;
    }
 }

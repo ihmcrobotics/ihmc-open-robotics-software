@@ -143,7 +143,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public void update()
    {
-      forceSensorData.getWrench(footWrench);
+      footWrench.setIncludingFrame(forceSensorData.getWrench());
 
       yoFootForceTorque.set(footWrench);
       yoFootForceTorqueInSole.setMatchingFrame(footWrench);
