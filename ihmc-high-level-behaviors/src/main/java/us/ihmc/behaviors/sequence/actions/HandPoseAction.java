@@ -123,7 +123,9 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
                                                      syncedHandControlPose, POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
-                                                     executionTimer);
+                                                     executionTimer,
+                                                     BehaviorActionCompletionCalculator.Component.TRANSLATION,
+                                                     BehaviorActionCompletionCalculator.Component.ROTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
