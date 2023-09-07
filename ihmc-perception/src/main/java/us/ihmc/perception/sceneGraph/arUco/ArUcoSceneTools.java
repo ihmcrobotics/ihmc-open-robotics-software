@@ -14,6 +14,9 @@ public class ArUcoSceneTools
    {
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
+         // TODO: Add objects to scene if they are missing
+         arUcoMarkerDetection.getDetectedIDs();
+
          for (ArUcoDetectableNode arUcoDetectableNode : sceneGraph.getArUcoDetectableNodes())
          {
             boolean isDetected = arUcoMarkerDetection.isDetected(arUcoDetectableNode.getMarkerID());
