@@ -15,7 +15,6 @@ public class ReferenceFrameLibrary
 {
    /** Reference frames are have immutable parents, so we must use Suppliers. */
    private final ArrayList<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
-   private final HashSet<String> frameNames = new HashSet<>();
    private final HashMap<String, ReferenceFrameSupplier> frameNameToSupplierMap = new HashMap<>();
    private String[] referenceFrameNames;
 
@@ -29,9 +28,8 @@ public class ReferenceFrameLibrary
 
    public void add(ReferenceFrameSupplier referenceFrame)
    {
-      if (!frameNames.contains(referenceFrame.get().getName()))
+      if (!frameNameToSupplierMap.containsKey(referenceFrame.get().getName()))
       {
-         frameNames.add(referenceFrame.get().getName());
          frameNameToSupplierMap.put(referenceFrame.get().getName(), referenceFrame);
          referenceFrameSuppliers.add(referenceFrame);
       }
