@@ -25,14 +25,15 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    private double distanceToDisableTracking;
    private double currentDistance = Double.NaN;
 
-   public StaticRelativeSceneNode(String name,
+   public StaticRelativeSceneNode(long id,
+                                  String name,
                                   DetectableSceneNode parentNode,
                                   RigidBodyTransform transformToParentNode,
                                   String visualModelFilePath,
                                   RigidBodyTransform visualModelToNodeFrameTransform,
                                   double distanceToDisableTracking)
    {
-      super(name, visualModelFilePath, visualModelToNodeFrameTransform);
+      super(id, name, visualModelFilePath, visualModelToNodeFrameTransform);
       this.parentNode = parentNode;
 
       parentNode.getChildren().add(this);

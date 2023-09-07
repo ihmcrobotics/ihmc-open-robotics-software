@@ -39,14 +39,9 @@ public abstract class DetectableSceneNode extends SceneNode
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
 
-   public DetectableSceneNode(String name)
+   public DetectableSceneNode(long id, String name)
    {
-      super(name);
-   }
-
-   public DetectableSceneNode(String name, ReferenceFrame parentFrame)
-   {
-      super(name, parentFrame);
+      super(id, name);
    }
 
    public void setParentFrame(ReferenceFrameSupplier parentFrameSupplier)
