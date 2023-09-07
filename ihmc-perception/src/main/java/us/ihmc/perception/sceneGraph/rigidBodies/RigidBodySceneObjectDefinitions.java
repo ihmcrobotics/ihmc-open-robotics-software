@@ -75,12 +75,4 @@ public class RigidBodySceneObjectDefinitions
                                  CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                  CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
-
-   public static void addDefaultObjects(SceneGraph sceneGraph)
-   {
-      ArUcoMarkerNode box = RigidBodySceneObjectDefinitions.createBox();
-      ArUcoMarkerNode canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
-      sceneGraph.registerArUcoDetectableSceneNode(box);
-      sceneGraph.registerArUcoDetectableSceneNode(canOfSoup);
-   }
 }
