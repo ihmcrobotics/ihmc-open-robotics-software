@@ -31,6 +31,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       heightInWorld = jsonNode.get("heightInWorld").asDouble();
+      setHeight(heightInWorld);
    }
 
    public void toMessage(PelvisHeightActionMessage message)
