@@ -12,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -64,7 +66,10 @@ public class RDXAffordanceTemplateEditorUI
 
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
    {
-      objectBuilder = new RDXInteractableObjectBuilder(baseUI, SceneGraph.defaultObjects());
+      SceneGraph sceneGraph = new SceneGraph();
+      DoorSceneNodeDefinitions.addDefaultObjects(sceneGraph);
+      RigidBodySceneObjectDefinitions.addDefaultObjects(sceneGraph);
+      objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
       baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
 
       for (RobotSide side : RobotSide.values)

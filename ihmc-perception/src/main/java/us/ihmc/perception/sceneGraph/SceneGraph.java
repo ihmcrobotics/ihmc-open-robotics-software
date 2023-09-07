@@ -4,8 +4,6 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
@@ -23,15 +21,6 @@ public class SceneGraph
 {
    public static final MutableInt NEXT_ID = new MutableInt();
 
-   private final ArUcoDetectableNode pushDoorPanel;
-   private final ArUcoDetectableNode pullDoorPanel;
-   private final ArUcoDetectableNode pushDoorLeverHandle;
-   private final ArUcoDetectableNode pullDoorLeverHandle;
-   private final StaticRelativeSceneNode pushDoorFrame;
-   private final StaticRelativeSceneNode pullDoorFrame;
-   private final ArUcoDetectableNode box;
-   private final ArUcoDetectableNode canOfSoup;
-
    private final List<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
    private final List<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
    private final List<StaticRelativeSceneNode> staticArUcoRelativeDetectableNodes = new ArrayList<>();
@@ -39,35 +28,8 @@ public class SceneGraph
    private final List<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
 
-   public static SceneGraph defaultObjects()
+   public SceneGraph()
    {
-      return new SceneGraph();
-   }
-
-   private SceneGraph()
-   {
-      // Add door stuff
-      pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel();
-      pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
-      pushDoorLeverHandle = DoorSceneNodeDefinitions.createPushDoorLeverHandle();
-      pullDoorLeverHandle = DoorSceneNodeDefinitions.createPullDoorLeverHandle();
-      registerArUcoDetectableSceneNode(pushDoorPanel);
-      registerArUcoDetectableSceneNode(pullDoorPanel);
-      registerArUcoDetectableSceneNode(pushDoorLeverHandle);
-      registerArUcoDetectableSceneNode(pullDoorLeverHandle);
-
-      // The frames stay in place after being seen
-      pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame(pushDoorPanel);
-      pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame(pullDoorPanel);
-      registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
-      registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
-
-      box = RigidBodySceneObjectDefinitions.createBox();
-      canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
-      registerArUcoDetectableSceneNode(box);
-      registerArUcoDetectableSceneNode(canOfSoup);
-
-      // TODO: Add non-ArUco cup -- detected by neural net
 
    }
 
