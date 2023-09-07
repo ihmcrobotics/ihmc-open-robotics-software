@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -16,22 +15,21 @@ import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.sensorHead.SensorHeadParameters;
+import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoggerPanel;
 import us.ihmc.rdx.perception.RDXHumanoidPerceptionUI;
-import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.*;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -81,13 +79,6 @@ public class RDXPerceptionDevelopmentUI
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
       baseUI = new RDXBaseUI("Perception UI");
 
-      logLoadedPlanarRegions = PlanarRegionFileTools.loadRegionsFromLog(logFile);
-      PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(10.0f,
-                                                                                           new Point3D(),
-                                                                                           new Quaternion());
-      initialSupportSquareRegion.setRegionId(0);
-      logLoadedPlanarRegions.addPlanarRegion(initialSupportSquareRegion);
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -109,6 +100,14 @@ public class RDXPerceptionDevelopmentUI
             humanoidPerceptionUI.initializeImageMessageVisualizer("D455 Depth", PerceptionAPI.D455_DEPTH_IMAGE, globalVisualizersUI);
             humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Color", PerceptionAPI.D435_COLOR_IMAGE, globalVisualizersUI);
             humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Depth", PerceptionAPI.D435_DEPTH_IMAGE, globalVisualizersUI);
+
+            logLoadedPlanarRegions = PlanarRegionFileTools.loadRegionsFromLog(logFile);
+            PerceptionFilterTools.applyConcaveHullReduction(logLoadedPlanarRegions, new PolygonizerParameters("ForGPURegions"));
+            PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(10.0f,
+                                                                                                 new Point3D(),
+                                                                                                 new Quaternion());
+            initialSupportSquareRegion.setRegionId(0);
+            logLoadedPlanarRegions.addPlanarRegion(initialSupportSquareRegion);
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
@@ -223,8 +222,8 @@ public class RDXPerceptionDevelopmentUI
             Pose3D rightStartPose = new Pose3D();
             Pose3D leftGoalPose = new Pose3D();
             Pose3D rightGoalPose = new Pose3D();
-            leftStartPose.getPosition().set(0.5, 0.5, 0.0);
-            leftGoalPose.getPosition().set(1.5, 2.5, 0.0);
+            leftStartPose.getPosition().set(-0.5, -0.5, 0.0);
+            leftGoalPose.getPosition().set(2.5, 4.5, 0.0);
 
             float yaw = (float) Math.atan2(leftGoalPose.getY() - leftStartPose.getY(), leftGoalPose.getX() - leftStartPose.getX());
 
@@ -251,10 +250,12 @@ public class RDXPerceptionDevelopmentUI
             {
                FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
 
-               LogTools.info("Result: {}" + String.format("\tPlan Iterations: %d, Plan Time: %.4f, Total Time: %.4f",
-                             plannerOutput.getPlannerTimings().getStepPlanningIterations(),
-                             plannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
-                             plannerOutput.getPlannerTimings().getTotalElapsedSeconds()), footstepPlanningResult);
+               LogTools.info("Result: {}" + String.format("\tPlan Iterations: %d, Plan Time: %.4f, Total Time: %.4f, Steps: %d",
+                              plannerOutput.getPlannerTimings().getStepPlanningIterations(),
+                              plannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
+                              plannerOutput.getPlannerTimings().getTotalElapsedSeconds(),
+                              plannerOutput.getFootstepPlan().getNumberOfSteps()),
+                              footstepPlanningResult);
 
                FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 0.6, 0.3);
 
