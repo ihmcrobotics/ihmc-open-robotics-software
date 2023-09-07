@@ -842,11 +842,7 @@ public abstract class WalkingControllerParameters
       return Double.POSITIVE_INFINITY;
    }
 
-   // TODO: Take out the registries here. They should be passed in wherever the
-   // HumanoidRobotNaturalPosture is made, which should not be here...
-   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel,
-                                                        YoRegistry registry,
-                                                        YoGraphicsListRegistry yoGraphicsListRegistry)
+   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel)
    {
       return null;
    }

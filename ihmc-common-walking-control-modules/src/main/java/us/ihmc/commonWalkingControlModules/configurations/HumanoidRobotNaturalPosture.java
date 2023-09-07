@@ -5,29 +5,33 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface HumanoidRobotNaturalPosture
 {
-   public abstract void initialize();
+   public void initialize();
    
-   public abstract Quaternion getNominalStandingPoseQoffset();
+   public Quaternion getNominalStandingPoseQoffset();
    
-   public abstract void setNaturalPostureOffset(QuaternionReadOnly Qoffset);
+   public void setNaturalPostureOffset(QuaternionReadOnly Qoffset);
 
-   public abstract double[] getJointPositionArray();
+   public double[] getJointPositionArray();
 
    default void compute(Orientation3DReadOnly Qbase)
    {
       compute(getJointPositionArray(), Qbase);
    }
 
-   public abstract void compute(double[] q, Orientation3DReadOnly Qbase);
+   public void compute(double[] q, Orientation3DReadOnly Qbase);
 
-   public abstract Quaternion getNaturalPostureQuaternion();
+   public Quaternion getNaturalPostureQuaternion();
 
-   public abstract Quaternion getNaturalPostureQuaternionrtBase();
+   public Quaternion getNaturalPostureQuaternionrtBase();
    
-   public abstract DMatrixRMaj getNaturalPostureJacobian();
+   public DMatrixRMaj getNaturalPostureJacobian();
    // For testing
-   public abstract DMatrixRMaj getNaturalPostureJacobianRtBaseEwrtBase();
+   public DMatrixRMaj getNaturalPostureJacobianRtBaseEwrtBase();
+
+   public void addNaturalPostureParametersToSCS(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry);
 }
