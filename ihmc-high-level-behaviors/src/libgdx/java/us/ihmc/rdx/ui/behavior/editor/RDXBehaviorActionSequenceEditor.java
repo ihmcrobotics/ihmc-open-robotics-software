@@ -644,7 +644,20 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Pelvis Height")))
       {
-         newAction = new RDXPelvisHeightAction();
+         RDXPelvisHeightAction pelvisHeightAction = new RDXPelvisHeightAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
+         // Set the new action to where the last one was for faster authoring
+         RDXPelvisHeightAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightAction.class);
+         if (nextPreviousPelvisHeightAction != null)
+         {
+            pelvisHeightAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
+                                             nextPreviousPelvisHeightAction.getReferenceFrame().getTransformToParent());
+         }
+         else // set to current robot's pelvis pose
+         {
+            pelvisHeightAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+         }
+         pelvisHeightAction.getActionData().changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+         newAction = pelvisHeightAction;
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
@@ -710,6 +723,19 @@ public class RDXBehaviorActionSequenceEditor
             {
                previousAction = (RDXHandPoseAction) actionSequence.get(i);
             }
+         }
+      }
+      return previousAction;
+   }
+
+   private <T extends RDXBehaviorAction> T findNextPreviousAction(Class<T> actionClass)
+   {
+      T previousAction = null;
+      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
+      {
+         if (actionClass.isInstance(actionSequence.get(i)))
+         {
+            previousAction = actionClass.cast(actionSequence.get(i));
          }
       }
       return previousAction;
