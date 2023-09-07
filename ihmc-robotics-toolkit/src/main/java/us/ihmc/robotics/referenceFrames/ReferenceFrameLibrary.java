@@ -29,11 +29,7 @@ public class ReferenceFrameLibrary
    {
       if (!frameNameToSupplierMap.containsKey(referenceFrame.get().getName()))
       {
-         String fullName = referenceFrame.get().getName();
-         String simpleName = fullName.substring(fullName.lastIndexOf(".") + 1);
-         if (!fullName.equals(simpleName))
-            LogTools.warn("Full name not equal to simple name: {}, {}", fullName, simpleName);
-         frameNameToSupplierMap.put(simpleName, referenceFrame);
+         frameNameToSupplierMap.put(referenceFrame.get().getName(), referenceFrame);
       }
    }
 
@@ -67,7 +63,7 @@ public class ReferenceFrameLibrary
 
    public String[] getReferenceFrameNameArray()
    {
-      if (referenceFrameNameArray.length != frameNameToSupplierMap.size())
+      if (referenceFrameNameArray == null || referenceFrameNameArray.length != frameNameToSupplierMap.size())
       {
          // Sort in alphabetical order
          SortedSet<String> referenceFrameNameSet = new TreeSet<>(frameNameToSupplierMap.keySet());
