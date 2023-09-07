@@ -55,7 +55,7 @@ public class RDXActionSequenceTools
       }
       if (actionType.equals(RDXPelvisHeightAction.class.getSimpleName()))
       {
-         return new RDXPelvisHeightAction();
+         return new RDXPelvisHeightAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
       }
       if (actionType.equals(RDXWaitDurationAction.class.getSimpleName()))
       {

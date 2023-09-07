@@ -4,12 +4,18 @@ import behavior_msgs.msg.dds.PelvisHeightActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+
+import java.util.function.Consumer;
 
 public class PelvisHeightActionData implements BehaviorActionData
 {
    private String description = "Pelvis height";
    private double heightInWorld = 0.0;
-   private double trajectoryDuration = 1000.0;
+   private double trajectoryDuration = 4.0;
+   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -49,14 +55,50 @@ public class PelvisHeightActionData implements BehaviorActionData
       this.trajectoryDuration = trajectoryDuration;
    }
 
+   public double getHeight()
+   {
+      return getTransformToParent().getTranslationZ();
+   }
+
    public double getHeightInWorld()
    {
       return heightInWorld;
    }
 
-   public void setHeightInWorld(double heightInWorld)
+   public void setHeight(double height)
    {
-      this.heightInWorld = heightInWorld;
+      getTransformToParent().setTranslationAndIdentityRotation(0, 0, height);
+      this.heightInWorld = getReferenceFrame().getTransformToWorldFrame().getTranslationZ();
+   }
+
+   public ReferenceFrame getParentReferenceFrame()
+   {
+      return modifiableReferenceFrame.getReferenceFrame().getParent();
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return modifiableReferenceFrame.getReferenceFrame();
+   }
+
+   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+   }
+
+   public void changeParentFrame(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrame(parentFrame);
+   }
+
+   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
+   {
+      modifiableReferenceFrame.update(transformToParentConsumer);
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      return modifiableReferenceFrame.getTransformToParent();
    }
 
    @Override
