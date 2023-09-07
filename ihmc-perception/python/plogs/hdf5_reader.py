@@ -195,8 +195,8 @@ def load_image(data, index, namespace):
     buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_ANYDEPTH)
     return buffer_image
 
-def display_image(data, index, namespace, delay):
-    buffer = data[namespace + str(index)][:].byteswap().view('uint8')
+def display_image(data, index, namespace, delay, name="Depth Image"):
+    buffer = data[namespace + '/' + str(index)][:].byteswap().view('uint8')
     buffer_image = np.asarray(buffer, dtype=np.uint8)
     buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_GRAYSCALE)
     
@@ -212,7 +212,7 @@ def display_image(data, index, namespace, delay):
     # buffer_image = cv2.normalize(buffer_image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
 
 
-    cv2.imshow("Depth Image", buffer_image)
+    cv2.imshow(name, buffer_image)
     code = cv2.waitKeyEx(delay)
 
     # print("Code: ", code)

@@ -16,6 +16,20 @@ def draw_registration_result(source, target, transformation):
                                       lookat=[1.6784, 2.0612, 1.4451],
                                       up=[-0.3402, -0.9189, -0.1996])
 
+def filter_by_distance(points, near, far):
+    # Remove all point sthat are too far or too close
+    lateral_dists = np.sqrt(points[:, 0] * points[:, 0] + points[:, 1] * points[:, 1])
+
+    print("Lateral Shape: ", lateral_dists.shape, points.shape)
+
+    condition_within_cylinder = lateral_dists > 0.4
+    condition_too_close = points[:, 2] > near
+    points = points[condition_too_close]
+
+    condition_too_far = points[:, 2] < far
+    points = points[condition_too_far]
+    return points
+
 def fast_convert_depth_to_cloud(depth_map, K):
     # Create a grid of pixel coordinates
     h, w = depth_map.shape
@@ -52,6 +66,14 @@ def fast_convert_depth_to_cloud(depth_map, K):
 
     return points
 
+def get_point_cloud(data, i):
+    depth = load_depth(data, i, "/l515/depth/")
+    depth_metric = np.array(depth * 0.001, dtype=np.float32)
+    depth_map = torch.tensor(depth_metric, dtype=torch.float32)
+    points = fast_convert_depth_to_cloud(depth_map, K)
+    points = filter_by_distance(points, 0.5, 2.0)
+    return points, depth
+
 def convert_depth_to_cloud(depth, params):
     fx, fy, cx, cy = params
     points = []
@@ -71,39 +93,36 @@ if __name__ == "__main__":
 
     list_files()
     
-    data = load_file('IROS_2023/20230228_201947_PerceptionLog.hdf5')
-
-    depth = load_depth(data, 1, "/l515/depth/")
-
-    depth = np.array(depth * 0.001, dtype=np.float32)
-
-    # Assuming depth is an OpenCV-loaded NumPy array
-    # Make sure it's converted to a PyTorch tensor
-    depth_map = torch.tensor(depth, dtype=torch.float32)
-
     # Set K to be the 3x3 camera projection matrix using fx, fy, cx and cy
     fx, fy, cx, cy = 654.29, 654.29, 651.14, 361.89
     K = torch.Tensor([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
     params = (fx, fy, cx, cy)
 
-    points = fast_convert_depth_to_cloud(depth_map, K)
+    data = load_file('IROS_2023/20230228_201947_PerceptionLog.hdf5')
 
-    # Remove all point sthat are too far or too close
-    lateral_dists = np.sqrt(points[:, 0] * points[:, 0] + points[:, 1] * points[:, 1])
+    source = 0
+    target = 80
 
-    print("Lateral Shape: ", lateral_dists.shape, points.shape)
+    points_source, depth_source = get_point_cloud(data, source)
+    points_target, depth_target = get_point_cloud(data, target)
 
-    condition_within_cylinder = lateral_dists > 0.4
-    condition_too_close = points[:, 2] > 0.8
-    points = points[condition_too_close]
 
-    condition_too_far = points[:, 2] < 2.0
-    points = points[condition_too_far]
+    pcd_source = o3d.geometry.PointCloud()
+    pcd_source.points = o3d.utility.Vector3dVector(points_source)
 
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(points)
+    # Set all source points to be bluish gradient
+    pcd_source.colors = o3d.utility.Vector3dVector(np.array([[0, 0, i / len(points_source)] for i in range(len(points_source))]))
 
-    o3d.visualization.draw_geometries([pcd])
+    # Set all source points to be redish gradient
+    pcd_target = o3d.geometry.PointCloud()
+    pcd_target.points = o3d.utility.Vector3dVector(points_target)
+    pcd_target.colors = o3d.utility.Vector3dVector(np.array([[i / len(points_target), 0, 0] for i in range(len(points_target))]))
+    
+    display_image(data, source, "l515/depth", 0, "Depth Source")
+    display_image(data, target, "l515/depth", 0, "Depth Target")
+
+    o3d.visualization.draw_geometries([pcd_source, pcd_target])
+    
 
 
 
