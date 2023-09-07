@@ -6,7 +6,7 @@ behavior_msgs/ArmJointAnglesActionMessage[] arm_joint_angles_actions
 
 behavior_msgs/ChestOrientationActionMessage[] chest_orientation_actions
 
-behavior_msgs/FootstepActionMessage[] footstep_actions
+behavior_msgs/FootstepPlanActionMessage[] footstep_plan_actions
 
 behavior_msgs/HandConfigurationActionMessage[] hand_configuration_actions
 

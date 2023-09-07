@@ -26,7 +26,7 @@ import java.util.LinkedList;
 
 /**
  * Manages running a sequence of actions on the robot with shared autonomy.
- * Since this class always currently gets it's instructions from the operator, it never loads
+ * Since this class always currently gets its instructions from the operator, it never loads
  * a sequence from file, and the sequence is always completely updated by the operator, even
  * when switching sequences entirely.
  */
@@ -130,9 +130,9 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (FootstepActionMessage message : latestUpdateMessage.getFootstepActions())
+         for (FootstepPlanActionMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
-            FootstepAction action = new FootstepAction(ros2, referenceFrameLibrary);
+            FootstepPlanAction action = new FootstepPlanAction(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
