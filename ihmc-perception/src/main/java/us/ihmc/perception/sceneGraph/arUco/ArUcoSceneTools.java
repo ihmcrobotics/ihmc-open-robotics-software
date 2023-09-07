@@ -1,7 +1,16 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 
 /**
  * This class exists to perform some operations that are like "glue" between the scene based
@@ -14,23 +23,75 @@ public class ArUcoSceneTools
    {
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
-         // TODO: Add objects to scene if they are missing
-         arUcoMarkerDetection.getDetectedIDs();
+         // Add objects to scene if they are missing
+         TIntSet missingIDSet = new TIntHashSet(arUcoMarkerDetection.getDetectedIDs());
 
-         for (ArUcoDetectableNode arUcoDetectableNode : sceneGraph.getArUcoDetectableNodes())
+         // ArUco markers are all at the first level
+         for (SceneNode child : sceneGraph.getRootNode().getChildren())
          {
-            boolean isDetected = arUcoMarkerDetection.isDetected(arUcoDetectableNode.getMarkerID());
-            arUcoDetectableNode.setCurrentlyDetected(isDetected);
-            if (isDetected)
+            if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               arUcoMarkerDetection.getPose(arUcoDetectableNode.getMarkerID(),
-                                            arUcoDetectableNode.getMarkerSize(),
-                                            arUcoDetectableNode.getMarkerFrame().getParent(),
-                                            arUcoDetectableNode.getMarkerToWorldFrameTransform());
-               arUcoDetectableNode.applyFilter();
-               arUcoDetectableNode.getMarkerFrame().update();
+               missingIDSet.remove(arUcoMarkerNode.getMarkerID());
+            }
+         }
+
+         for (TIntIterator iterator = missingIDSet.iterator(); iterator.hasNext(); )
+         {
+            int missingMarkerID = iterator.next();
+            LogTools.info("Adding detected ArUco marker to scene graph: {}", missingMarkerID);
+            ArUcoMarkerNode arUcoMarkerNode = new ArUcoMarkerNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                                                  "ArUcoMarker%d".formatted(missingMarkerID),
+                                                                  missingMarkerID,
+                                                                  RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+            sceneGraph.getRootNode().getChildren().add(arUcoMarkerNode);
+         }
+
+         for (SceneNode child : sceneGraph.getRootNode().getChildren())
+         {
+            if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
+            {
+               addPredfinedChildrenIfMissing(arUcoMarkerNode);
+
+               boolean isDetected = arUcoMarkerDetection.isDetected(arUcoMarkerNode.getMarkerID());
+               arUcoMarkerNode.setCurrentlyDetected(isDetected);
+               if (isDetected)
+               {
+                  arUcoMarkerDetection.getPose(arUcoMarkerNode.getMarkerID(),
+                                               arUcoMarkerNode.getMarkerSize(),
+                                               arUcoMarkerNode.getNodeFrame().getParent(), arUcoMarkerNode.getNodeToParentFrameTransform());
+                  arUcoMarkerNode.applyFilter();
+                  arUcoMarkerNode.getNodeFrame().update();
+               }
             }
          }
       }
+   }
+
+   public static void addPredfinedChildrenIfMissing(ArUcoMarkerNode arUcoMarkerNode)
+   {
+      switch (arUcoMarkerNode.getMarkerID())
+      {
+         case DoorModelParameters.PULL_DOOR_MARKER_ID:
+         {
+            PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
+            pullDoorPanel.setOriginalParentFrame(arUcoMarkerNode::getNodeFrame);
+            arUcoMarkerNode.getChildren().add(pullDoorPanel);
+            arUcoMarkerNode.getChildren().add(DoorSceneNodeDefinitions.createPullDoorFrame());
+         }
+         case DoorModelParameters.PUSH_DOOR_MARKER_ID:
+         {
+
+         }
+         case RigidBodySceneObjectDefinitions.BOX_MARKER_ID:
+         {
+
+         }
+         case RigidBodySceneObjectDefinitions.CAN_OF_SOUP_MARKER_ID:
+         {
+
+         }
+      }
+
+      arUcoMarkerNode.update();
    }
 }

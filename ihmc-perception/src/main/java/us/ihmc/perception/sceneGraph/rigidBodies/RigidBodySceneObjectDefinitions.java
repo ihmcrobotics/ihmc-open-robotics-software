@@ -1,8 +1,9 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -51,36 +52,34 @@ public class RigidBodySceneObjectDefinitions
       MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
    }
 
-   public static ArUcoDetectableNode createBox()
+   public static ArUcoMarkerNode createBox()
    {
-      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                     "Box",
-                                     BOX_MARKER_ID,
-                                     BOX_MARKER_WIDTH,
-                                     BOX_TRANSFORM_TO_MARKER,
-                                     BOX_VISUAL_MODEL_FILE_PATH,
-                                     BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      return new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                              "Box",
+                                              BOX_VISUAL_MODEL_FILE_PATH,
+                                              BOX_TRANSFORM_TO_MARKER,
+                                              BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    /**
     * Represents a can of soup detected by a statically nearby placed ArUco
     * marker,
     */
-   public static ArUcoDetectableNode createCanOfSoup()
+   public static ArUcoMarkerNode createCanOfSoup()
    {
-      return new ArUcoDetectableNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                     "CanOfSoup",
-                                     CAN_OF_SOUP_MARKER_ID,
-                                     CAN_OF_SOUP_MARKER_SIZE,
-                                     MARKER_TO_CAN_OF_SOUP_TRANSFORM,
-                                     CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
-                                     CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      return new ArUcoMarkerNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                 "CanOfSoup",
+                                 CAN_OF_SOUP_MARKER_ID,
+                                 CAN_OF_SOUP_MARKER_SIZE,
+                                 MARKER_TO_CAN_OF_SOUP_TRANSFORM,
+                                 CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
+                                 CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    public static void addDefaultObjects(SceneGraph sceneGraph)
    {
-      ArUcoDetectableNode box = RigidBodySceneObjectDefinitions.createBox();
-      ArUcoDetectableNode canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
+      ArUcoMarkerNode box = RigidBodySceneObjectDefinitions.createBox();
+      ArUcoMarkerNode canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
       sceneGraph.registerArUcoDetectableSceneNode(box);
       sceneGraph.registerArUcoDetectableSceneNode(canOfSoup);
    }

@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -34,7 +34,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 
       selectedObject = new RDXInteractableObject(baseUI);
       //TODO change this to detectable when node library is updated
-      List<ArUcoDetectableNode> availableObjects = sceneGraph.getArUcoDetectableNodes();
+      List<ArUcoMarkerNode> availableObjects = sceneGraph.getArUcoDetectableNodes();
       for (var object : availableObjects)
       {
          nameModelMap.put(object.getName(), object.getVisualModelFilePath());

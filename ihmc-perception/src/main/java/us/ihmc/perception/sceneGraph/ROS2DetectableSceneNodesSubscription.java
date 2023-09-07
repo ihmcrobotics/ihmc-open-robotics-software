@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 import java.util.List;
@@ -79,13 +79,13 @@ public class ROS2DetectableSceneNodesSubscription
                // We must synchronize the ArUco marker frames so we can reset overriden node
                // poses back to ArUco relative ones.
                // The ArUco frame is the parent so we should update it first.
-               if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+               if (detectableSceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
                {
                   MessageTools.toEuclid(detectableSceneNodeMessage.getArucoMarkerTransformToWorld(), arUcoMarkerToWorldTransform);
                   arUcoMarkerPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), arUcoMarkerToWorldTransform);
-                  arUcoMarkerPose.changeFrame(arUcoDetectableNode.getMarkerFrame().getParent());
-                  arUcoMarkerPose.get(arUcoDetectableNode.getMarkerToWorldFrameTransform());
-                  arUcoDetectableNode.getMarkerFrame().update();
+                  arUcoMarkerPose.changeFrame(arUcoMarkerNode.getNodeFrame().getParent());
+                  arUcoMarkerPose.get(arUcoMarkerNode.getNodeToParentFrameTransform());
+                  arUcoMarkerNode.getNodeFrame().update();
                }
                if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
                {
@@ -99,9 +99,9 @@ public class ROS2DetectableSceneNodesSubscription
                if (operatorHasntModifiedAnythingRecently)
                {
                   detectableSceneNode.setTrackDetectedPose(detectableSceneNodeMessage.getTrackDetectedPose());
-                  if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+                  if (detectableSceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
                   {
-                     arUcoDetectableNode.setBreakFrequency(detectableSceneNodeMessage.getBreakFrequency());
+                     arUcoMarkerNode.setBreakFrequency(detectableSceneNodeMessage.getBreakFrequency());
                   }
                   if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
                   {

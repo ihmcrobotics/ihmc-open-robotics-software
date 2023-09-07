@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -65,11 +65,11 @@ public class RDXPredefinedRigidBodySceneNode
 
       currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName());
 
-      if (sceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+      if (sceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
          alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
-                                                               arUcoDetectableNode::getBreakFrequency,
-                                                               arUcoDetectableNode::setBreakFrequency,
+                                                               arUcoMarkerNode::getBreakFrequency,
+                                                               arUcoMarkerNode::setBreakFrequency,
                                                                sceneNode::markModifiedByOperator);
       }
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
@@ -128,7 +128,7 @@ public class RDXPredefinedRigidBodySceneNode
          ensureGizmoFrameIsSceneNodeFrame();
          sceneNode.markModifiedByOperator();
       }
-      if (sceneNode instanceof ArUcoDetectableNode)
+      if (sceneNode instanceof ArUcoMarkerNode)
       {
          alphaFilterValueSlider.render();
       }

@@ -1,9 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.SceneNode;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -17,7 +15,6 @@ import us.ihmc.perception.sceneGraph.SceneNode;
  */
 public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 {
-   private final DetectableSceneNode parentNode;
    /**
     * We don't want to lock in the static pose until we are close enough
     * for it to matter and also to get higher accuracy.
@@ -27,28 +24,13 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 
    public StaticRelativeSceneNode(long id,
                                   String name,
-                                  DetectableSceneNode parentNode,
-                                  RigidBodyTransform transformToParentNode,
                                   String visualModelFilePath,
                                   RigidBodyTransform visualModelToNodeFrameTransform,
                                   double distanceToDisableTracking)
    {
       super(id, name, visualModelFilePath, visualModelToNodeFrameTransform);
-      this.parentNode = parentNode;
-
-      parentNode.getChildren().add(this);
-      setParentFrame(parentNode::getNodeFrame);
-      changeParentFrame(parentNode.getNodeFrame());
-      getNodeToParentFrameTransform().set(transformToParentNode);
-      getNodeFrame().update();
 
       this.distanceToDisableTracking = distanceToDisableTracking;
-   }
-
-   @Override
-   public boolean getCurrentlyDetected()
-   {
-      return !getTrackDetectedPose() || parentNode.getCurrentlyDetected();
    }
 
    public void setDistanceToDisableTracking(double distanceToDisableTracking)
@@ -69,10 +51,5 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    public double getCurrentDistance()
    {
       return currentDistance;
-   }
-
-   public SceneNode getParentNode()
-   {
-      return parentNode;
    }
 }
