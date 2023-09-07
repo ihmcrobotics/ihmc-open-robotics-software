@@ -13,9 +13,13 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
             */
    public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
    /**
-            * The orientation as a yaw-pitch-roll
+            * Name of the frame the this action is expressed in
             */
-   public ihmc_common_msgs.msg.dds.YawPitchRollMessage orientation_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
+   /**
+            * Transform that expresses the chest pose in the parent frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
    /**
             * The trajectory duration
             */
@@ -24,7 +28,8 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
    public ChestOrientationActionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
-      orientation_ = new ihmc_common_msgs.msg.dds.YawPitchRollMessage();
+      parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
+      transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public ChestOrientationActionMessage(ChestOrientationActionMessage other)
@@ -36,7 +41,8 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
    public void set(ChestOrientationActionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
-      ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.staticCopy(other.orientation_, orientation_);
+      parent_frame_.set(other.parent_frame_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       trajectory_duration_ = other.trajectory_duration_;
 
    }
@@ -52,11 +58,20 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
 
 
    /**
-            * The orientation as a yaw-pitch-roll
+            * Name of the frame the this action is expressed in
             */
-   public ihmc_common_msgs.msg.dds.YawPitchRollMessage getOrientation()
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getParentFrame()
    {
-      return orientation_;
+      return parent_frame_;
+   }
+
+
+   /**
+            * Transform that expresses the chest pose in the parent frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToParent()
+   {
+      return transform_to_parent_;
    }
 
    /**
@@ -93,7 +108,9 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
       if(other == this) return true;
 
       if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
-      if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
+
+      if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
 
@@ -110,7 +127,8 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
       ChestOrientationActionMessage otherMyClass = (ChestOrientationActionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
-      if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
+      if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
+      if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
 
@@ -125,8 +143,10 @@ public class ChestOrientationActionMessage extends Packet<ChestOrientationAction
       builder.append("ChestOrientationActionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
-      builder.append("orientation=");
-      builder.append(this.orientation_);      builder.append(", ");
+      builder.append("parent_frame=");
+      builder.append(this.parent_frame_);      builder.append(", ");
+      builder.append("transform_to_parent=");
+      builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);
       builder.append("}");

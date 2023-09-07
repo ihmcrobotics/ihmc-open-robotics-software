@@ -93,7 +93,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentReferenceFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
@@ -113,6 +113,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void update()
    {
+      actionData.update();
+
       if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
       {
          poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
