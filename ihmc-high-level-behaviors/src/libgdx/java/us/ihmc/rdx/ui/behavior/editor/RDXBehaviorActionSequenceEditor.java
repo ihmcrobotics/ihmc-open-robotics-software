@@ -640,11 +640,32 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
-         newAction = new RDXChestOrientationAction();
+         RDXChestOrientationAction chestOrientationAction = new RDXChestOrientationAction(panel3D,
+                                                   robotModel,
+                                                   syncedRobot.getFullRobotModel(),
+                                                   selectionCollisionModel,
+                                                   referenceFrameLibrary);
+         // Set the new action to where the last one was for faster authoring
+         RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
+         if (nextPreviousChestOrientationAction != null)
+         {
+            chestOrientationAction.setIncludingFrame(nextPreviousChestOrientationAction.getReferenceFrame().getParent(),
+                                                     nextPreviousChestOrientationAction.getReferenceFrame().getTransformToParent());
+         }
+         else // set to current robot's chest pose
+         {
+            chestOrientationAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getChestFrame());
+         }
+         chestOrientationAction.getActionData().changeParentFrameWithoutMoving(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+         newAction = chestOrientationAction;
       }
       if (ImGui.button(labels.get("Add Pelvis Height")))
       {
-         RDXPelvisHeightAction pelvisHeightAction = new RDXPelvisHeightAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
+         RDXPelvisHeightAction pelvisHeightAction = new RDXPelvisHeightAction(panel3D,
+                                                                              robotModel,
+                                                                              syncedRobot.getFullRobotModel(),
+                                                                              selectionCollisionModel,
+                                                                              referenceFrameLibrary);
          // Set the new action to where the last one was for faster authoring
          RDXPelvisHeightAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightAction.class);
          if (nextPreviousPelvisHeightAction != null)

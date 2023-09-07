@@ -4,13 +4,21 @@ import behavior_msgs.msg.dds.ChestOrientationActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+
+import java.util.function.Consumer;
 
 public class ChestOrientationActionData implements BehaviorActionData
 {
    private String description = "Chest orientation";
    private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
    private double trajectoryDuration = 4.0;
+   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -53,6 +61,12 @@ public class ChestOrientationActionData implements BehaviorActionData
       return yawPitchRoll;
    }
 
+   public void setYawPitchRoll(RigidBodyTransform transformToParent)
+   {
+      RotationMatrixBasics rotationToParent = transformToParent.getRotation();
+      this.yawPitchRoll.setYawPitchRoll(rotationToParent.getYaw(), rotationToParent.getPitch(), rotationToParent.getRoll());
+   }
+
    public double getTrajectoryDuration()
    {
       return trajectoryDuration;
@@ -61,6 +75,36 @@ public class ChestOrientationActionData implements BehaviorActionData
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
+   }
+
+   public ReferenceFrame getParentReferenceFrame()
+   {
+      return modifiableReferenceFrame.getReferenceFrame().getParent();
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return modifiableReferenceFrame.getReferenceFrame();
+   }
+
+   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+   }
+
+   public void changeParentFrame(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrame(parentFrame);
+   }
+
+   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
+   {
+      modifiableReferenceFrame.update(transformToParentConsumer);
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      return modifiableReferenceFrame.getTransformToParent();
    }
 
    @Override
