@@ -73,14 +73,15 @@ public class ArUcoSceneTools
       {
          case DoorModelParameters.PULL_DOOR_MARKER_ID:
          {
-            PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
-            pullDoorPanel.setOriginalParentFrame(arUcoMarkerNode::getNodeFrame);
-            arUcoMarkerNode.getChildren().add(pullDoorPanel);
-            arUcoMarkerNode.getChildren().add(DoorSceneNodeDefinitions.createPullDoorFrame());
+            DoorSceneNodeDefinitions.createPullDoorLeverHandle(arUcoMarkerNode);
+            PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel(arUcoMarkerNode);
+            DoorSceneNodeDefinitions.createPullDoorFrame(pullDoorPanel);
          }
          case DoorModelParameters.PUSH_DOOR_MARKER_ID:
          {
-
+            DoorSceneNodeDefinitions.createPushDoorLeverHandle(arUcoMarkerNode);
+            PredefinedRigidBodySceneNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel(arUcoMarkerNode);
+            DoorSceneNodeDefinitions.createPushDoorFrame(pushDoorPanel);
          }
          case RigidBodySceneObjectDefinitions.BOX_MARKER_ID:
          {
