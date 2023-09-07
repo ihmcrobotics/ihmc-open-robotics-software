@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ChestOrientationActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +22,7 @@ public class ChestOrientationActionData implements BehaviorActionData
    private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
    private double trajectoryDuration = 4.0;
    private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -30,14 +31,19 @@ public class ChestOrientationActionData implements BehaviorActionData
    }
 
    @Override
+   public void update()
+   {
+      BehaviorActionSequenceTools.accomodateFrameReplacement(chestInteractableReferenceFrame, referenceFrameLibrary);
+   }
+
+
+   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
+      jsonNode.put("parentFrame", chestInteractableReferenceFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("yaw", yawPitchRoll.getYaw());
-      jsonNode.put("pitch", yawPitchRoll.getPitch());
-      jsonNode.put("roll", yawPitchRoll.getRoll());
+      JSONTools.toJSON(jsonNode, chestInteractableReferenceFrame.getTransformToParent());
    }
 
    @Override
@@ -45,29 +51,31 @@ public class ChestOrientationActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
-      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
+      chestInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
    public void toMessage(ChestOrientationActionMessage message)
    {
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentReferenceFrame().getName());
-      MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
+      message.getParentFrame().add(getParentFrame().getName());
+      MessageTools.toMessage(chestInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
+      setYawPitchRoll();
    }
 
    public void fromMessage(ChestOrientationActionMessage message)
    {
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
-      modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
+      chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
       setYawPitchRoll();
    }
 
-   public YawPitchRoll getYawPitchRoll()
+   private void setYawPitchRoll()
    {
-      return yawPitchRoll;
+      RotationMatrixBasics rotation = getTransformToParent().getRotation();
+      yawPitchRoll.setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), rotation.getRoll());
    }
 
    public void setYaw(double yaw)
@@ -94,10 +102,9 @@ public class ChestOrientationActionData implements BehaviorActionData
       setYawPitchRoll();
    }
 
-   private void setYawPitchRoll()
+   public YawPitchRoll getYawPitchRoll()
    {
-      RotationMatrixBasics rotation = getTransformToParent().getRotation();
-      yawPitchRoll.setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), rotation.getRoll());
+      return yawPitchRoll;
    }
 
    public double getTrajectoryDuration()
@@ -110,34 +117,34 @@ public class ChestOrientationActionData implements BehaviorActionData
       this.trajectoryDuration = trajectoryDuration;
    }
 
-   public ReferenceFrame getParentReferenceFrame()
+   public ReferenceFrame getParentFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame().getParent();
+      return chestInteractableReferenceFrame.getReferenceFrame().getParent();
    }
 
    public ReferenceFrame getReferenceFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame();
+      return chestInteractableReferenceFrame.getReferenceFrame();
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+      chestInteractableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
    }
 
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrame(parentFrame);
+      chestInteractableReferenceFrame.changeParentFrame(parentFrame);
    }
 
    public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
    {
-      modifiableReferenceFrame.update(transformToParentConsumer);
+      chestInteractableReferenceFrame.update(transformToParentConsumer);
    }
 
    public RigidBodyTransform getTransformToParent()
    {
-      return modifiableReferenceFrame.getTransformToParent();
+      return chestInteractableReferenceFrame.getTransformToParent();
    }
 
    @Override

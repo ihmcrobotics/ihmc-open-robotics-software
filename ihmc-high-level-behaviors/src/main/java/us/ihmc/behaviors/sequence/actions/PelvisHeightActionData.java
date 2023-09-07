@@ -4,25 +4,43 @@ import behavior_msgs.msg.dds.PelvisHeightActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.JSONTools;
 
 import java.util.function.Consumer;
 
 public class PelvisHeightActionData implements BehaviorActionData
 {
    private String description = "Pelvis height";
-   private double heightInWorld = 0.0;
    private double trajectoryDuration = 4.0;
-   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private ReferenceFrameLibrary referenceFrameLibrary;
+   private final ModifiableReferenceFrame pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+
+   @Override
+   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   {
+      this.referenceFrameLibrary = referenceFrameLibrary;
+   }
+
+   @Override
+   public void update()
+   {
+      BehaviorActionSequenceTools.accomodateFrameReplacement(pelvisInteractableReferenceFrame, referenceFrameLibrary);
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
+      jsonNode.put("parentFrame", pelvisInteractableReferenceFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("heightInWorld", heightInWorld);
+      JSONTools.toJSON(jsonNode, pelvisInteractableReferenceFrame.getTransformToParent());
    }
 
    @Override
@@ -30,20 +48,33 @@ public class PelvisHeightActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      heightInWorld = jsonNode.get("heightInWorld").asDouble();
-      setHeight(heightInWorld);
+      pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
+      pelvisInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
    public void toMessage(PelvisHeightActionMessage message)
    {
+      message.getParentFrame().resetQuick();
+      message.getParentFrame().add(getParentFrame().getName());
+      MessageTools.toMessage(pelvisInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setHeightInWorld(heightInWorld);
    }
 
    public void fromMessage(PelvisHeightActionMessage message)
    {
+      pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
+      pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
-      heightInWorld = message.getHeightInWorld();
+   }
+
+   public double getHeight()
+   {
+      return getTransformToParent().getTranslationZ();
+   }
+
+   public void setHeight(double height)
+   {
+      getTransformToParent().getTranslation().set(getTransformToParent().getTranslationX(), getTransformToParent().getTranslationY(), height);
    }
 
    public double getTrajectoryDuration()
@@ -56,50 +87,34 @@ public class PelvisHeightActionData implements BehaviorActionData
       this.trajectoryDuration = trajectoryDuration;
    }
 
-   public double getHeight()
+   public ReferenceFrame getParentFrame()
    {
-      return getTransformToParent().getTranslationZ();
-   }
-
-   public double getHeightInWorld()
-   {
-      return heightInWorld;
-   }
-
-   public void setHeight(double height)
-   {
-      getTransformToParent().setTranslationAndIdentityRotation(0, 0, height);
-      this.heightInWorld = getReferenceFrame().getTransformToWorldFrame().getTranslationZ();
-   }
-
-   public ReferenceFrame getParentReferenceFrame()
-   {
-      return modifiableReferenceFrame.getReferenceFrame().getParent();
+      return pelvisInteractableReferenceFrame.getReferenceFrame().getParent();
    }
 
    public ReferenceFrame getReferenceFrame()
    {
-      return modifiableReferenceFrame.getReferenceFrame();
+      return pelvisInteractableReferenceFrame.getReferenceFrame();
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+      pelvisInteractableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
    }
 
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
-      modifiableReferenceFrame.changeParentFrame(parentFrame);
+      pelvisInteractableReferenceFrame.changeParentFrame(parentFrame);
    }
 
    public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
    {
-      modifiableReferenceFrame.update(transformToParentConsumer);
+      pelvisInteractableReferenceFrame.update(transformToParentConsumer);
    }
 
    public RigidBodyTransform getTransformToParent()
    {
-      return modifiableReferenceFrame.getTransformToParent();
+      return pelvisInteractableReferenceFrame.getTransformToParent();
    }
 
    @Override

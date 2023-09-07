@@ -2,7 +2,7 @@
 #define __behavior_msgs__msg__ChestOrientationActionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionInformationMessage_.idl"
-#include "ihmc_common_msgs/msg/./YawPitchRollMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -18,9 +18,13 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::ActionInformationMessage action_information;
         /**
-         * The orientation as a yaw-pitch-roll
+         * Name of the frame the this action is expressed in
          */
-        ihmc_common_msgs::msg::dds::YawPitchRollMessage orientation;
+        sequence<string, 1000> parent_frame;
+        /**
+         * Transform that expresses the chest pose in the parent frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_parent;
         /**
          * The trajectory duration
          */
