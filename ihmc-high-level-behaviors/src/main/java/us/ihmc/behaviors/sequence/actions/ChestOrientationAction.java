@@ -42,7 +42,6 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(getReferenceFrame());
       frameChestYawPitchRoll.set(getYawPitchRoll());
       frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-      frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
