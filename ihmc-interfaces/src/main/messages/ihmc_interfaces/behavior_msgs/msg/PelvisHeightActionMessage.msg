@@ -1,8 +1,11 @@
 # Used for syncing action sequences
 behavior_msgs/ActionInformationMessage action_information
 
+# Name of the frame the this action is expressed in
+string[<=1000] parent_frame
+
+# Transform that expresses the pelvis pose in the parent frame
+controller_msgs/RigidBodyTransformMessage transform_to_parent
+
 # Duration of the trajectory
 float64 trajectory_duration
-
-# Z height in world frame
-float64 height_in_world

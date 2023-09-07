@@ -37,13 +37,13 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
 {
    private final ChestOrientationActionData actionData = new ChestOrientationActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getYaw(),
+   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> actionData.getRotation().getYaw(),
                                                                  yaw -> actionData.setYaw(yaw),
                                                                  imDouble -> ImGui.inputDouble(labels.get("Yaw"), imDouble));
-   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getPitch(),
+   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> actionData.getRotation().getPitch(),
                                                                    pitch -> actionData.setPitch(pitch),
                                                                    imDouble -> ImGui.inputDouble(labels.get("Pitch"), imDouble));
-   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getRoll(),
+   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> actionData.getRotation().getRoll(),
                                                                   roll -> actionData.setRoll(roll),
                                                                   imDouble -> ImGui.inputDouble(labels.get("Roll"), imDouble));
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
@@ -123,7 +123,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       }
 
       poseGizmo.getPoseGizmo().update();
-      actionData.setRotation(poseGizmo.getPoseGizmo().getGizmoFrame().getTransformToParent().getRotation());
       highlightModel.setPose(graphicFrame.getReferenceFrame());
 
       if (poseGizmo.isSelected() || isMouseHovering)

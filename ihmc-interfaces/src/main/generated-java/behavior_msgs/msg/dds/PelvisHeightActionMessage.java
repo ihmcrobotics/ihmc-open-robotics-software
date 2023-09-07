@@ -13,17 +13,23 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
             */
    public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
    /**
+            * Name of the frame the this action is expressed in
+            */
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
+   /**
+            * Transform that expresses the pelvis pose in the parent frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
+   /**
             * Duration of the trajectory
             */
    public double trajectory_duration_;
-   /**
-            * Z height in world frame
-            */
-   public double height_in_world_;
 
    public PelvisHeightActionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
+      parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
+      transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public PelvisHeightActionMessage(PelvisHeightActionMessage other)
@@ -35,9 +41,9 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
    public void set(PelvisHeightActionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
+      parent_frame_.set(other.parent_frame_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       trajectory_duration_ = other.trajectory_duration_;
-
-      height_in_world_ = other.height_in_world_;
 
    }
 
@@ -48,6 +54,24 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
    public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
    {
       return action_information_;
+   }
+
+
+   /**
+            * Name of the frame the this action is expressed in
+            */
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getParentFrame()
+   {
+      return parent_frame_;
+   }
+
+
+   /**
+            * Transform that expresses the pelvis pose in the parent frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToParent()
+   {
+      return transform_to_parent_;
    }
 
    /**
@@ -63,21 +87,6 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
    public double getTrajectoryDuration()
    {
       return trajectory_duration_;
-   }
-
-   /**
-            * Z height in world frame
-            */
-   public void setHeightInWorld(double height_in_world)
-   {
-      height_in_world_ = height_in_world;
-   }
-   /**
-            * Z height in world frame
-            */
-   public double getHeightInWorld()
-   {
-      return height_in_world_;
    }
 
 
@@ -99,9 +108,10 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
       if(other == this) return true;
 
       if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_in_world_, other.height_in_world_, epsilon)) return false;
+      if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
 
       return true;
@@ -117,9 +127,9 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
       PelvisHeightActionMessage otherMyClass = (PelvisHeightActionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
+      if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
+      if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
-
-      if(this.height_in_world_ != otherMyClass.height_in_world_) return false;
 
 
       return true;
@@ -133,10 +143,12 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
       builder.append("PelvisHeightActionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
+      builder.append("parent_frame=");
+      builder.append(this.parent_frame_);      builder.append(", ");
+      builder.append("transform_to_parent=");
+      builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("trajectory_duration=");
-      builder.append(this.trajectory_duration_);      builder.append(", ");
-      builder.append("height_in_world=");
-      builder.append(this.height_in_world_);
+      builder.append(this.trajectory_duration_);
       builder.append("}");
       return builder.toString();
    }

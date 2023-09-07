@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONTools;
@@ -19,7 +18,6 @@ import java.util.function.Consumer;
 public class ChestOrientationActionData implements BehaviorActionData
 {
    private String description = "Chest orientation";
-   private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
    private double trajectoryDuration = 4.0;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
@@ -35,7 +33,6 @@ public class ChestOrientationActionData implements BehaviorActionData
    {
       BehaviorActionSequenceTools.accomodateFrameReplacement(chestInteractableReferenceFrame, referenceFrameLibrary);
    }
-
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -61,7 +58,6 @@ public class ChestOrientationActionData implements BehaviorActionData
       message.getParentFrame().add(getParentFrame().getName());
       MessageTools.toMessage(chestInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
-      setYawPitchRoll();
    }
 
    public void fromMessage(ChestOrientationActionMessage message)
@@ -69,42 +65,29 @@ public class ChestOrientationActionData implements BehaviorActionData
       chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
-      setYawPitchRoll();
-   }
-
-   private void setYawPitchRoll()
-   {
-      RotationMatrixBasics rotation = getTransformToParent().getRotation();
-      yawPitchRoll.setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), rotation.getRoll());
    }
 
    public void setYaw(double yaw)
    {
-      yawPitchRoll.setYaw(yaw);
-      getTransformToParent().getRotation().setYawPitchRoll(yaw, yawPitchRoll.getPitch(), yawPitchRoll.getRoll());
+      RotationMatrixBasics rotation = getTransformToParent().getRotation();
+      getTransformToParent().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      yawPitchRoll.setPitch(pitch);
-      getTransformToParent().getRotation().setYawPitchRoll(yawPitchRoll.getYaw(), pitch, yawPitchRoll.getRoll());
+      RotationMatrixBasics rotation = getTransformToParent().getRotation();
+      getTransformToParent().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      yawPitchRoll.setRoll(roll);
-      getTransformToParent().getRotation().setYawPitchRoll(yawPitchRoll.getYaw(), yawPitchRoll.getPitch(), roll);
+      RotationMatrixBasics rotation = getTransformToParent().getRotation();
+      getTransformToParent().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
-   public void setRotation(RotationMatrixBasics rotation)
+   public RotationMatrixBasics getRotation()
    {
-      getTransformToParent().getRotation().set(rotation);
-      setYawPitchRoll();
-   }
-
-   public YawPitchRoll getYawPitchRoll()
-   {
-      return yawPitchRoll;
+      return getTransformToParent().getRotation();
    }
 
    public double getTrajectoryDuration()
