@@ -5,17 +5,16 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
-from geometry_msgs.msg import PoseStamped
-
-from perception_msgs.msg import ImageMessage
 
 from lib.opts import opts
 from lib.detectors.object_pose import ObjectPoseDetector
 
+from geometry_msgs.msg import PoseStamped
+from perception_msgs.msg import ImageMessage
+
 import cv2
 
 class Image2CenterPose_node(Node):
-
     def __init__(self):
         super().__init__('Image2CenterPose_node')
         qos_profile = QoSProfile(
@@ -29,7 +28,7 @@ class Image2CenterPose_node(Node):
 
         self.opt.arch = 'dlav1_34'
         self.opt.load_model = f"/home/CenterPose_ws/models/chair_v1_140.pth"
-        self.opt.debug = 4
+        self.opt.debug = 5
 
         # Default setting
         self.opt.nms = True
@@ -100,7 +99,7 @@ class Image2CenterPose_node(Node):
         self.get_logger().info("Waiting for an Image...")
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard it!')
+        self.get_logger().info("ImageMessage #" + str(msg.sequence_number))
         image_np = np.frombuffer(b''.join(msg.data), dtype=np.uint8)
         image = cv2.imdecode(image_np, cv2.COLOR_YUV2RGB)
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
@@ -118,7 +117,12 @@ class Image2CenterPose_node(Node):
             self.pose_pub.publish(self.pose_msg)
 
 def main(args=None):
-    print(os.environ['ROS_DOMAIN_ID'])
+    # Check if models directory exists
+    # Download pretrained models from here https://drive.google.com/drive/folders/16HbCnUlCaPcTg4opHP_wQNPsWouUlVZe
+    if not os.path.exists('models'):
+        print('Could not find models directory')
+        return
+
     rclpy.init(args=args)
 
     node = Image2CenterPose_node()
