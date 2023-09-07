@@ -22,6 +22,8 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
    }
 
