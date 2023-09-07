@@ -38,13 +38,13 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final ChestOrientationActionData actionData = new ChestOrientationActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getYaw(),
-                                                                 yaw -> actionData.getYawPitchRoll().setYaw(yaw),
+                                                                 yaw -> actionData.setYaw(yaw),
                                                                  imDouble -> ImGui.inputDouble(labels.get("Yaw"), imDouble));
    private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getPitch(),
-                                                                   pitch -> actionData.getYawPitchRoll().setPitch(pitch),
+                                                                   pitch -> actionData.setPitch(pitch),
                                                                    imDouble -> ImGui.inputDouble(labels.get("Pitch"), imDouble));
    private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getRoll(),
-                                                                  roll -> actionData.getYawPitchRoll().setRoll(roll),
+                                                                  roll -> actionData.setRoll(roll),
                                                                   imDouble -> ImGui.inputDouble(labels.get("Roll"), imDouble));
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
@@ -121,7 +121,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       }
 
       poseGizmo.getPoseGizmo().update();
-      actionData.setYawPitchRoll(poseGizmo.getPoseGizmo().getGizmoFrame().getTransformToParent());
+      actionData.setRotation(poseGizmo.getPoseGizmo().getGizmoFrame().getTransformToParent().getRotation());
       highlightModel.setPose(graphicFrame.getReferenceFrame());
 
       if (poseGizmo.isSelected() || isMouseHovering)

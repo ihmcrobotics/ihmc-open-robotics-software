@@ -1,8 +1,11 @@
 # Used for syncing action sequences
 behavior_msgs/ActionInformationMessage action_information
 
-# The orientation as a yaw-pitch-roll
-ihmc_common_msgs/YawPitchRollMessage orientation
+# Name of the frame the this action is expressed in
+string[<=1000] parent_frame
+
+# Transform that expresses the chest pose in the parent frame
+controller_msgs/RigidBodyTransformMessage transform_to_parent
 
 # The trajectory duration
 float64 trajectory_duration
