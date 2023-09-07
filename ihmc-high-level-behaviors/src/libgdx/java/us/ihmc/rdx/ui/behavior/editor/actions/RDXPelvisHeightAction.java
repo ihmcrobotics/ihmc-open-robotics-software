@@ -87,7 +87,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentReferenceFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
@@ -107,6 +107,8 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    @Override
    public void update()
    {
+      actionData.update();
+
       if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
       {
          poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
@@ -115,7 +117,6 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
       }
 
       poseGizmo.getPoseGizmo().update();
-      actionData.setHeight(poseGizmo.getPoseGizmo().getGizmoFrame().getTransformToParent().getTranslationZ());
       highlightModel.setPose(graphicFrame.getReferenceFrame());
 
       if (poseGizmo.isSelected() || isMouseHovering)

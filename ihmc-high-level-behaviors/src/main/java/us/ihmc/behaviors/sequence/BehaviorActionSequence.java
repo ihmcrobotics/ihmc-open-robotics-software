@@ -125,7 +125,7 @@ public class BehaviorActionSequence
          }
          for (ChestOrientationActionMessage message : latestUpdateMessage.getChestOrientationActions())
          {
-            ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot);
+            ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -155,7 +155,7 @@ public class BehaviorActionSequence
          }
          for (PelvisHeightActionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
-            PelvisHeightAction action = new PelvisHeightAction(ros2);
+            PelvisHeightAction action = new PelvisHeightAction(ros2, referenceFrameLibrary, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
