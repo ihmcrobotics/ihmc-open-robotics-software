@@ -7,7 +7,6 @@
 /pit-reports
 /install
 /src/*/bin
-/ihmc-perception/src/centerpose/models/
 
 # Top level directories in sub-projects
 */target
