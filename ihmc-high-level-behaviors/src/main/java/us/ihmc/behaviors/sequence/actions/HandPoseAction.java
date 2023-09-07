@@ -19,7 +19,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
@@ -61,13 +60,15 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
 
       if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copyActualToWork();
-         armIKSolver.update(getReferenceFrame());
+         armIKSolver.update(getPalmFrame());
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
@@ -106,7 +107,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       executionTimer.reset();
 
-      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
+      desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
       startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
       startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
@@ -115,7 +116,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
+      desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
       // Left hand broke on Nadia and not in the robot model?
