@@ -3,11 +3,13 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    file = open('data/map_console_output_201947.txt', 'r')
+    file = open('data/map_console_output_201455.txt', 'r')
 
     lines = file.readlines()
 
-    data = np.zeros(shape=(len(lines), 8))
+    
+
+    data = []
 
     fields = None
 
@@ -22,18 +24,29 @@ if __name__ == "__main__":
                 print(fields)
 
             row = np.array([float(word.split(':')[1]) for word in words])
-            data[i,:] = row
+            data.append(row)
 
-    time = np.arange(0, len(lines), 1)
+    time = np.arange(0, len(data), 1)
+    data = np.vstack(data)
     
+    f, ax = plt.subplots(3, 1, figsize=(15,8))
+    
+    ax[0].set_title("Area")
+    ax[1].set_title("Regions")
+    ax[2].set_title("Vertices")
+
+    ax[0].plot(time, data[:, fields['Area']], 'r-')
+    ax[1].plot(time, data[:, fields['Regions']], 'r-')
+    ax[2].plot(time, data[:, fields['Vertices']], 'r-')
+
     # plt.plot(time, data[:, fields['ExtractionTime']], label='Extraction Time')
     # plt.plot(time, data[:, fields['RegistrationTime']], label='Registration Time')
     # plt.plot(time, data[:, fields['MergingTime']], label='Merging Time')
     # plt.plot(time, data[:, fields['OptimizationTime']], label='Optimization Time')
     # plt.plot(time, data[:, fields['TotalTime']], label='Total Time')
-    plt.plot(time, data[:, fields['Area']], label='Area')
-    plt.plot(time, data[:, fields['Regions']], label='Regions')
-    plt.plot(time, data[:, fields['Vertices']], label='Vertices')
+    # plt.plot(time, data[:, fields['Area']], label='Area')
+    # plt.plot(time, data[:, fields['Regions']], label='Regions')
+    # plt.plot(time, data[:, fields['Vertices']], label='Vertices')
 
     # Create subplots for each of these in a single pplot
     

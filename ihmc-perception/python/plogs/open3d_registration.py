@@ -22,12 +22,12 @@ def fast_convert_depth_to_cloud(depth_map, K):
     y, x = torch.meshgrid(torch.arange(h), torch.arange(w))
 
     # Flatten depth and pixel coordinates
-    depth_values = depth_map.view(-1)  # Flatten the depth map
+    depth_values = depth_map.reshape(-1)  # Flatten the depth map
 
 
-    X, Y, Z = x.reshape(-1), y.reshape(-1), torch.ones_like(depth_values)
+    X, Y, Z = x.reshape(-1), y.reshape(-1), torch.ones_like(depth_values, dtype=torch.float32)
 
-    print("Min: ", torch.min(depth_values), "Max: ", torch.max(depth_values))
+    print("Min: ", torch.min(depth_values), "Max: ", torch.max(depth_values), "Avg: ", torch.mean(depth_values))
 
     print(X, Y, depth_values)
 
@@ -36,15 +36,16 @@ def fast_convert_depth_to_cloud(depth_map, K):
     # Calculate the inverse of K
     K_inv = torch.inverse(K)
 
+    print("K_inv: ", K_inv)
+
     # Multiply the inverse of K with the pixel coordinates
     homo_world_coordinates = torch.matmul(K_inv, pixel_coordinates)
 
-    print(homo_world_coordinates)
-    print(depth_values)
+    print(homo_world_coordinates.numpy()[:,:100])
 
     world_coordinates = homo_world_coordinates * depth_values
 
-    print(world_coordinates)
+    print(world_coordinates.numpy()[:,:100])
 
     # Transpose to get a list of 3D points (shape: Nx3)
     points = world_coordinates.transpose(0, 1).numpy()
@@ -65,15 +66,20 @@ def convert_depth_to_cloud(depth, params):
 
 if __name__ == "__main__":
 
+    import sys
+    np.set_printoptions(threshold=sys.maxsize)
+
     list_files()
     
     data = load_file('IROS_2023/20230228_201947_PerceptionLog.hdf5')
 
     depth = load_depth(data, 1, "/l515/depth/")
 
+    depth = np.array(depth * 0.001, dtype=np.float32)
+
     # Assuming depth is an OpenCV-loaded NumPy array
     # Make sure it's converted to a PyTorch tensor
-    depth_map = torch.tensor(depth, dtype=torch.int16)
+    depth_map = torch.tensor(depth, dtype=torch.float32)
 
     # Set K to be the 3x3 camera projection matrix using fx, fy, cx and cy
     fx, fy, cx, cy = 654.29, 654.29, 651.14, 361.89
@@ -83,8 +89,16 @@ if __name__ == "__main__":
     points = fast_convert_depth_to_cloud(depth_map, K)
 
     # Remove all point sthat are too far or too close
-    # points = points[points[:, 2] < 4.0]
-    # points = points[points[:, 2] > 0.1]
+    lateral_dists = np.sqrt(points[:, 0] * points[:, 0] + points[:, 1] * points[:, 1])
+
+    print("Lateral Shape: ", lateral_dists.shape, points.shape)
+
+    condition_within_cylinder = lateral_dists > 0.4
+    condition_too_close = points[:, 2] > 0.8
+    points = points[condition_too_close]
+
+    condition_too_far = points[:, 2] < 2.0
+    points = points[condition_too_far]
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
