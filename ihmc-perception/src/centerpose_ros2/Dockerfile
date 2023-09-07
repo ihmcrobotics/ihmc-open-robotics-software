@@ -1,6 +1,7 @@
+# NVLabs centerpose_ros2 version 0.0.1
+
 FROM nvcr.io/nvidia/cuda:11.6.2-devel-ubuntu20.04
-#FROM nvcr.io/nvidia/cuda:11.8.0-devel-ubuntu22.04
-LABEL Name=CenterPose Version=0.0.1
+LABEL Name=centerpose_ros2 Version=0.0.1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -12,8 +13,6 @@ RUN pip install numba progress matplotlib scipy albumentations pyrr simplejson t
 RUN pip install torch==1.12.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
 
 # Install ROS -----------------------------------------------------------
-ENV ROS_DOMAIN_ID 9
-
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 RUN export LANG=en_US.UTF-8
@@ -45,10 +44,3 @@ RUN rm -r $CenterPose_ROOT/src/lib/models/networks/DCNv2
 RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CenterPose_ROOT/src/lib/models/networks/DCNv2
 
 WORKDIR /home/CenterPose_ws
-
-## Build and Run the Container
-# docker build --pull --progress=plain --rm -f "Dockerfile" -t centerposews1:latest "."
-# docker run -it --network=host --rm --gpus all --mount type=bind,source=C:\Users\dhruv\OneDrive\Documents\GitHub\centerpose_ws1,target=/CenterPose_ws centerpose
-
-## Run the Bash script inside the container
-# ./script.sh
