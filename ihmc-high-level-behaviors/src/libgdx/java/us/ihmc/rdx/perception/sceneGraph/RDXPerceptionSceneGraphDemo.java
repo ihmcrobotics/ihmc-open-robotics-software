@@ -10,6 +10,8 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
@@ -78,8 +80,12 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerDetection.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetection.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
 
-            operatorSceneGraph = SceneGraph.defaultObjects();
-            onRobotSceneGraph = SceneGraph.defaultObjects();
+            operatorSceneGraph = new SceneGraph();
+            DoorSceneNodeDefinitions.addDefaultObjects(operatorSceneGraph);
+            RigidBodySceneObjectDefinitions.addDefaultObjects(operatorSceneGraph);
+            onRobotSceneGraph = new SceneGraph();
+            DoorSceneNodeDefinitions.addDefaultObjects(onRobotSceneGraph);
+            RigidBodySceneObjectDefinitions.addDefaultObjects(onRobotSceneGraph);
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
                                                                                                                  ros2Helper,

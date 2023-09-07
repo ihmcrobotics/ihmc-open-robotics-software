@@ -182,4 +182,22 @@ public class DoorSceneNodeDefinitions
                                      DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                      PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
+
+   public static void addDefaultObjects(SceneGraph sceneGraph)
+   {
+      ArUcoDetectableNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel();
+      ArUcoDetectableNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
+      ArUcoDetectableNode pushDoorLeverHandle = DoorSceneNodeDefinitions.createPushDoorLeverHandle();
+      ArUcoDetectableNode pullDoorLeverHandle = DoorSceneNodeDefinitions.createPullDoorLeverHandle();
+      sceneGraph.registerArUcoDetectableSceneNode(pushDoorPanel);
+      sceneGraph.registerArUcoDetectableSceneNode(pullDoorPanel);
+      sceneGraph.registerArUcoDetectableSceneNode(pushDoorLeverHandle);
+      sceneGraph.registerArUcoDetectableSceneNode(pullDoorLeverHandle);
+
+      // The frames stay in place after being seen
+      StaticRelativeSceneNode pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame(pushDoorPanel);
+      StaticRelativeSceneNode pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame(pullDoorPanel);
+      sceneGraph.registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
+      sceneGraph.registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
+   }
 }
