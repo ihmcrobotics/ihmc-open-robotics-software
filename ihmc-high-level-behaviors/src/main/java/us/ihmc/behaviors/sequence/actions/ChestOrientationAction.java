@@ -37,9 +37,9 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    @Override
    public void triggerActionExecution()
    {
-      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(getReferenceFrame());
       frameChestYawPitchRoll.set(getYawPitchRoll());
+      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
       frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
