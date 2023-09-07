@@ -13,17 +13,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import java.util.*;
 
 /**
- * Use to specify which scene nodes a robot is looking for.
+ * A scene graph implementation that is really a scene tree. There
+ * are no loops. This data structure is also a CRDT. It is synced between
+ * the robot and operator UIs.
  *
- * We can put more specific stuff in here for now, like door specific
- * and even dynamic nodes.
- *
- * This is a super high level class, it includes ROS 2 topics,
- * heuristic stuff for certain nodes, stuff like that.
- *
- * This class exists so we can support multiple robots detecting the same
- * nodes, but also to serve the need we have to define things
- * by hand and construct custom heuristics.
+ * The scene graph can be used to represent things a robot is looking for.
  */
 public class SceneGraph
 {
