@@ -179,6 +179,7 @@ public class RDXBehaviorActionSequenceEditor
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
+               action.getExecutionWithNextAction().set(false);
             }
             else
             {
@@ -550,6 +551,8 @@ public class RDXBehaviorActionSequenceEditor
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
             ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));
+            ImGui.sameLine();
+            action.getExecutionWithNextAction().renderImGuiWidget();
          }
 
          action.renderImGuiWidgets();
