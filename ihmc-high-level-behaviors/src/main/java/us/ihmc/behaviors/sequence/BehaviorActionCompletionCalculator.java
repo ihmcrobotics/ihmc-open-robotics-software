@@ -13,34 +13,29 @@ public class BehaviorActionCompletionCalculator
    private double translationError;
    private double rotationError;
 
-   public enum Component
-   {
-      TRANSLATION, ORIENTATION
-   }
-
    public boolean isComplete(FramePose3DReadOnly desired,
                              FramePose3DReadOnly actual,
                              double translationTolerance,
                              double rotationTolerance,
                              double actionNominalDuration,
                              Timer executionTimer,
-                             Component... components)
+                             BehaviorActionCompletionComponent... components)
    {
       boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
       boolean desiredPoseAchieved = timeIsUp;
-      for (Component component : components)
+      for (BehaviorActionCompletionComponent component : components)
       {
          switch (component)
          {
             case TRANSLATION ->
             {
                translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
-               desiredPoseAchieved = desiredPoseAchieved && (translationError <= translationTolerance);
+               desiredPoseAchieved &= (translationError <= translationTolerance);
             }
             case ORIENTATION ->
             {
                rotationError = actual.getRotation().distance(desired.getRotation(), true);
-               desiredPoseAchieved = desiredPoseAchieved && (rotationError <= rotationTolerance);
+               desiredPoseAchieved &= (rotationError <= rotationTolerance);
             }
             default -> throw new IllegalStateException("Unexpected value: " + component);
          }
