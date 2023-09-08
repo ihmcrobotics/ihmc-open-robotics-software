@@ -4,12 +4,17 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarLiftOffAndTouchDownTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasLiftOffAndTouchDownTest
@@ -31,6 +36,17 @@ public class AtlasLiftOffAndTouchDownTest
                public double nominalHeightAboveAnkle()
                {
                   return 0.849;
+               }
+
+               @Override
+               public FootSwitchFactory getFootSwitchFactory()
+               {
+                  WrenchBasedFootSwitchFactory footSwitchFactory = new WrenchBasedFootSwitchFactory();
+
+                  footSwitchFactory.setDefaultContactThresholdForce(5.0);
+                  footSwitchFactory.setDefaultCoPThresholdFraction(Double.NaN);
+                  footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(180.0);
+                  return footSwitchFactory;
                }
             };
          }

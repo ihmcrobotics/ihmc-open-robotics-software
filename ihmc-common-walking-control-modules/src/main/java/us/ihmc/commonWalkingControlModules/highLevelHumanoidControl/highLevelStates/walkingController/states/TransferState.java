@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -33,7 +32,6 @@ public abstract class TransferState extends WalkingState
 
    protected final CenterOfMassHeightManager comHeightManager;
    protected final BalanceManager balanceManager;
-   protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -68,7 +66,6 @@ public abstract class TransferState extends WalkingState
       walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
       if (unloadFraction != null)
@@ -244,9 +241,6 @@ public abstract class TransferState extends WalkingState
       {
          failureDetectionControlModule.setNextFootstep(null);
       }
-
-      double transferTime = walkingMessageHandler.getNextTransferTime();
-      pelvisOrientationManager.setTrajectoryTime(transferTime);
    }
 
    public boolean isInitialTransfer()

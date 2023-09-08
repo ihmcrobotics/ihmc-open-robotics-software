@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
@@ -34,7 +33,6 @@ public class TransferToStandingState extends WalkingState
 
    private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
-   private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
    private final Point3D midFootPosition = new Point3D();
@@ -56,7 +54,6 @@ public class TransferToStandingState extends WalkingState
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
       doFootExplorationInTransferToStanding.set(false);
@@ -193,7 +190,6 @@ public class TransferToStandingState extends WalkingState
       midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
 
       // Just standing in double support, do nothing
-      pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
 
@@ -205,6 +201,8 @@ public class TransferToStandingState extends WalkingState
       WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.initializeDoubleSupport();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                                                    feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    @Override
