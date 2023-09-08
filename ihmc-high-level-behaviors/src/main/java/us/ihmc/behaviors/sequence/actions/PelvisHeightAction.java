@@ -61,6 +61,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
 
+
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
@@ -78,9 +79,9 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
 
       isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
-                                                     syncedPelvisPose, POSITION_TOLERANCE,
+                                                     syncedPelvisPose, POSITION_TOLERANCE, Double.NaN,
                                                      getTrajectoryDuration(),
-                                                     executionTimer);
+                                                     executionTimer, BehaviorActionCompletionCalculator.Component.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
