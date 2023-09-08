@@ -121,7 +121,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       // Left hand broke on Nadia and not in the robot model?
       isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
-                                                     syncedHandControlPose, POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
+                                                     syncedHandControlPose,
+                                                     POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
                                                      BehaviorActionCompletionCalculator.Component.TRANSLATION,
