@@ -7,7 +7,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -86,32 +85,11 @@ public class RDXFootstepChecker
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-      if (indexOfFootBeingChecked == 0)
-      {
-         FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
-         FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
-                                                                                            indexOfFootBeingChecked,
-                                                                                            candidateStepSide.getOppositeSide());
-
-         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
-      }
-      else if (indexOfFootBeingChecked == 1)
-      {
-         FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
-         FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
-                                                                                            indexOfFootBeingChecked,
-                                                                                            candidateStepSide.getOppositeSide());
-         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
-      }
-      else
-      {
-         FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
-                                                                                            indexOfFootBeingChecked,
-                                                                                            candidateStepSide.getOppositeSide());
-         FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
-
-         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
-      }
+      FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
+      FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
+                                                                                         indexOfFootBeingChecked,
+                                                                                         candidateStepSide.getOppositeSide());
+      reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
 
       reasons.add(reason);
    }
@@ -138,7 +116,7 @@ public class RDXFootstepChecker
       }
       else
       {
-         previousFootstepPose.set(getPreviousFootstepOnOppositeSide(controllerStatusTracker.getQueuedFootsteps(), candidateFootstepSide));
+         previousFootstepPose.set(getFootstepFromControllerQueue(controllerStatusTracker.getQueuedFootsteps(), candidateFootstepSide));
       }
 
       return previousFootstepPose;
@@ -147,7 +125,7 @@ public class RDXFootstepChecker
    /**
     * Sets the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot foot
     */
-   private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(List<QueuedFootstepStatusMessage> stepList, RobotSide candidateFootstepSide)
+   private FramePose3DReadOnly getFootstepFromControllerQueue(List<QueuedFootstepStatusMessage> stepList, RobotSide candidateFootstepSide)
    {
       FramePose3D previousFootstepPose = new FramePose3D();
 
