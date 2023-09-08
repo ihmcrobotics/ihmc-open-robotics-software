@@ -10,7 +10,6 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -51,7 +50,6 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    public void triggerActionExecution()
    {
       FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
-      frameChestQuaternion.set(getRotation());
       frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
@@ -68,7 +66,6 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 
       desiredChestPose.setFromReferenceFrame(getReferenceFrame());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-      desiredChestPose.getRotation().set(syncedChestPose.getRotation());
       startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
    }
 
@@ -77,13 +74,12 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    {
       desiredChestPose.setFromReferenceFrame(getReferenceFrame());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredChestPose.getRotation().set(syncedChestPose.getRotation());
 
       isExecuting = !completionCalculator.isComplete(desiredChestPose,
                                                      syncedChestPose, Double.NaN, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
-                                                     BehaviorActionCompletionCalculator.Component.ROTATION);
+                                                     BehaviorActionCompletionCalculator.Component.ORIENTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
