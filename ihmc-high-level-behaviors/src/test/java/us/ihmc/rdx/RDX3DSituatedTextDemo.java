@@ -4,9 +4,9 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-public class RDX3DTextRenderingDemo
+public class RDX3DSituatedTextDemo
 {
-   public RDX3DTextRenderingDemo()
+   public RDX3DSituatedTextDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -56,6 +56,6 @@ public class RDX3DTextRenderingDemo
 
    public static void main(String[] args)
    {
-      new RDX3DTextRenderingDemo();
+      new RDX3DSituatedTextDemo();
    }
 }
