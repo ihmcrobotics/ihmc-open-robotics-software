@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0ee2c191291ab8f338147dc1153067ec32bd853da7d89f1dff891a6da049dc3f";
+   		return "f2527b38190e6c108dec40b1217533829f293cdd3ef65768a9277dd543496757";
    }
    
    @Override
@@ -52,20 +52,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -80,25 +69,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+      current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getCdrSerializedSize(data.getSceneNode(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
-
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getArucoMarkerTransformToWorld(), current_alignment);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -107,38 +80,15 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getName().length() <= 255)
-      cdr.write_type_d(data.getName());else
-          throw new RuntimeException("name field exceeds the maximum length");
-
+      perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
       cdr.write_type_7(data.getCurrentlyDetected());
-
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getArucoMarkerTransformToWorld(), cdr);
-      cdr.write_type_7(data.getTrackDetectedPose());
-
-      cdr.write_type_5(data.getBreakFrequency());
-
-      cdr.write_type_5(data.getDistanceToDisableTracking());
-
-      cdr.write_type_5(data.getCurrentDistanceToRobot());
 
    }
 
    public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_d(data.getName());	
+      perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
       data.setCurrentlyDetected(cdr.read_type_7());
-      	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getArucoMarkerTransformToWorld(), cdr);	
-      data.setTrackDetectedPose(cdr.read_type_7());
-      	
-      data.setBreakFrequency(cdr.read_type_5());
-      	
-      data.setDistanceToDisableTracking(cdr.read_type_5());
-      	
-      data.setCurrentDistanceToRobot(cdr.read_type_5());
       	
 
    }
@@ -146,31 +96,17 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("name", data.getName());
+      ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
+
       ser.write_type_7("currently_detected", data.getCurrentlyDetected());
-      ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
-
-      ser.write_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
-
-      ser.write_type_7("track_detected_pose", data.getTrackDetectedPose());
-      ser.write_type_5("break_frequency", data.getBreakFrequency());
-      ser.write_type_5("distance_to_disable_tracking", data.getDistanceToDisableTracking());
-      ser.write_type_5("current_distance_to_robot", data.getCurrentDistanceToRobot());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectableSceneNodeMessage data)
    {
-      ser.read_type_d("name", data.getName());
+      ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
+
       data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
-      ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
-
-      ser.read_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
-
-      data.setTrackDetectedPose(ser.read_type_7("track_detected_pose"));
-      data.setBreakFrequency(ser.read_type_5("break_frequency"));
-      data.setDistanceToDisableTracking(ser.read_type_5("distance_to_disable_tracking"));
-      data.setCurrentDistanceToRobot(ser.read_type_5("current_distance_to_robot"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
