@@ -14,16 +14,24 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Settable<SceneGraphMessage>, EpsilonComparable<SceneGraphMessage>
 {
+   public static final byte SCENE_NODE_TYPE = (byte) 0;
+   public static final byte DETECTABLE_SCENE_NODE_TYPE = (byte) 1;
+   public static final byte ARUCO_MARKER_NODE_TYPE = (byte) 2;
+   public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 3;
    /**
             * The ID to assign to the next instantiated node
             */
    public long next_id_;
    /**
-            * A depth first ordered list of node indexes.
-            * The indexes are the index of that node in it's
-            * respective list for it's type.
+            * A depth first ordered list of types.
             */
-   public us.ihmc.idl.IDLSequence.Long  scene_tree_;
+   public us.ihmc.idl.IDLSequence.Byte  scene_tree_types_;
+   /**
+            * A depth first ordered list of node indexes.
+            * The index is of that node in it's respective list for
+            * it's type.
+            */
+   public us.ihmc.idl.IDLSequence.Long  scene_tree_indices_;
    /**
             * Basic scene nodes
             */
@@ -43,7 +51,9 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
    public SceneGraphMessage()
    {
-      scene_tree_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
+      scene_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
+
+      scene_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
 
       scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.SceneNodeMessage> (200, new perception_msgs.msg.dds.SceneNodeMessagePubSubType());
       detectable_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DetectableSceneNodeMessage> (200, new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType());
@@ -62,7 +72,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    {
       next_id_ = other.next_id_;
 
-      scene_tree_.set(other.scene_tree_);
+      scene_tree_types_.set(other.scene_tree_types_);
+      scene_tree_indices_.set(other.scene_tree_indices_);
       scene_nodes_.set(other.scene_nodes_);
       detectable_scene_nodes_.set(other.detectable_scene_nodes_);
       aruco_marker_scene_nodes_.set(other.aruco_marker_scene_nodes_);
@@ -86,13 +97,22 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
 
    /**
-            * A depth first ordered list of node indexes.
-            * The indexes are the index of that node in it's
-            * respective list for it's type.
+            * A depth first ordered list of types.
             */
-   public us.ihmc.idl.IDLSequence.Long  getSceneTree()
+   public us.ihmc.idl.IDLSequence.Byte  getSceneTreeTypes()
    {
-      return scene_tree_;
+      return scene_tree_types_;
+   }
+
+
+   /**
+            * A depth first ordered list of node indexes.
+            * The index is of that node in it's respective list for
+            * it's type.
+            */
+   public us.ihmc.idl.IDLSequence.Long  getSceneTreeIndices()
+   {
+      return scene_tree_indices_;
    }
 
 
@@ -151,7 +171,9 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.scene_tree_, other.scene_tree_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.scene_tree_types_, other.scene_tree_types_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.scene_tree_indices_, other.scene_tree_indices_, epsilon)) return false;
 
       if (this.scene_nodes_.size() != other.scene_nodes_.size()) { return false; }
       else
@@ -196,7 +218,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
-      if (!this.scene_tree_.equals(otherMyClass.scene_tree_)) return false;
+      if (!this.scene_tree_types_.equals(otherMyClass.scene_tree_types_)) return false;
+      if (!this.scene_tree_indices_.equals(otherMyClass.scene_tree_indices_)) return false;
       if (!this.scene_nodes_.equals(otherMyClass.scene_nodes_)) return false;
       if (!this.detectable_scene_nodes_.equals(otherMyClass.detectable_scene_nodes_)) return false;
       if (!this.aruco_marker_scene_nodes_.equals(otherMyClass.aruco_marker_scene_nodes_)) return false;
@@ -213,8 +236,10 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       builder.append("SceneGraphMessage {");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
-      builder.append("scene_tree=");
-      builder.append(this.scene_tree_);      builder.append(", ");
+      builder.append("scene_tree_types=");
+      builder.append(this.scene_tree_types_);      builder.append(", ");
+      builder.append("scene_tree_indices=");
+      builder.append(this.scene_tree_indices_);      builder.append(", ");
       builder.append("scene_nodes=");
       builder.append(this.scene_nodes_);      builder.append(", ");
       builder.append("detectable_scene_nodes=");

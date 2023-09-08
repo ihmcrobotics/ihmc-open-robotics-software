@@ -21,9 +21,7 @@ public class ROS2SceneGraphPublisher
 {
    private final SceneGraphMessage sceneGraphMessage = new SceneGraphMessage();
    private final FramePose3D sceneNodePose = new FramePose3D();
-   private final FramePose3D arUcoMarkerPose = new FramePose3D();
    private final RigidBodyTransform sceneNodeToWorldTransform = new RigidBodyTransform();
-   private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
 
    /**
     * @param ioQualifier Depending whether on the robot or in some other process.
@@ -34,6 +32,8 @@ public class ROS2SceneGraphPublisher
                        ROS2IOTopicQualifier ioQualifier)
    {
       sceneGraphMessage.setNextId(SceneGraph.NEXT_ID.intValue());
+      sceneGraphMessage.getSceneTreeTypes().clear();
+      sceneGraphMessage.getSceneTreeIndices().clear();
       sceneGraphMessage.getSceneNodes().clear();
       sceneGraphMessage.getDetectableSceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
@@ -51,7 +51,8 @@ public class ROS2SceneGraphPublisher
 
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         sceneGraphMessage.getSceneTree().add(sceneGraphMessage.getStaticRelativeSceneNodes().size());
+         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE);
+         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getStaticRelativeSceneNodes().size());
          StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().add();
          staticRelativeSceneNodeMessage.setDistanceToDisableTracking((float) staticRelativeSceneNode.getDistanceToDisableTracking());
          staticRelativeSceneNodeMessage.setCurrentDistanceToRobot((float) staticRelativeSceneNode.getCurrentDistance());
@@ -60,7 +61,8 @@ public class ROS2SceneGraphPublisher
 
       if (sceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
-         sceneGraphMessage.getSceneTree().add(sceneGraphMessage.getArucoMarkerSceneNodes().size());
+         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.ARUCO_MARKER_NODE_TYPE);
+         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getArucoMarkerSceneNodes().size());
          ArUcoMarkerNodeMessage arUcoMarkerNodeMessage = sceneGraphMessage.getArucoMarkerSceneNodes().add();
          arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
          detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
@@ -70,7 +72,8 @@ public class ROS2SceneGraphPublisher
       {
          if (detectableSceneNodeMessage == null)
          {
-            sceneGraphMessage.getSceneTree().add(sceneGraphMessage.getDetectableSceneNodes().size());
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
             detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().add();
          }
 
@@ -80,7 +83,8 @@ public class ROS2SceneGraphPublisher
 
       if (sceneNodeMessage == null)
       {
-         sceneGraphMessage.getSceneTree().add(sceneGraphMessage.getSceneNodes().size());
+         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.SCENE_NODE_TYPE);
+         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getSceneNodes().size());
          sceneNodeMessage = sceneGraphMessage.getSceneNodes().add();
       }
 

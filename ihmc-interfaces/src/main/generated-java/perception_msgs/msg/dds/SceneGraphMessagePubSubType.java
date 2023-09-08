@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "82f05e1e6666d421f21af303a6b06c9e876d7aef0c116b01b906bad0e98cef28";
+   		return "d14b56725d0a0f99007cd1ba8f05b5657e10fddc8a3a270a740623e8d4e5790d";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
@@ -85,7 +87,11 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getSceneTree().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getSceneTreeTypes().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getSceneTreeIndices().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -116,9 +122,13 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       cdr.write_type_4(data.getNextId());
 
-      if(data.getSceneTree().size() <= 1000)
-      cdr.write_type_e(data.getSceneTree());else
-          throw new RuntimeException("scene_tree field exceeds the maximum length");
+      if(data.getSceneTreeTypes().size() <= 1000)
+      cdr.write_type_e(data.getSceneTreeTypes());else
+          throw new RuntimeException("scene_tree_types field exceeds the maximum length");
+
+      if(data.getSceneTreeIndices().size() <= 1000)
+      cdr.write_type_e(data.getSceneTreeIndices());else
+          throw new RuntimeException("scene_tree_indices field exceeds the maximum length");
 
       if(data.getSceneNodes().size() <= 200)
       cdr.write_type_e(data.getSceneNodes());else
@@ -142,7 +152,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       data.setNextId(cdr.read_type_4());
       	
-      cdr.read_type_e(data.getSceneTree());	
+      cdr.read_type_e(data.getSceneTreeTypes());	
+      cdr.read_type_e(data.getSceneTreeIndices());	
       cdr.read_type_e(data.getSceneNodes());	
       cdr.read_type_e(data.getDetectableSceneNodes());	
       cdr.read_type_e(data.getArucoMarkerSceneNodes());	
@@ -154,7 +165,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final void serialize(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("next_id", data.getNextId());
-      ser.write_type_e("scene_tree", data.getSceneTree());
+      ser.write_type_e("scene_tree_types", data.getSceneTreeTypes());
+      ser.write_type_e("scene_tree_indices", data.getSceneTreeIndices());
       ser.write_type_e("scene_nodes", data.getSceneNodes());
       ser.write_type_e("detectable_scene_nodes", data.getDetectableSceneNodes());
       ser.write_type_e("aruco_marker_scene_nodes", data.getArucoMarkerSceneNodes());
@@ -165,7 +177,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SceneGraphMessage data)
    {
       data.setNextId(ser.read_type_4("next_id"));
-      ser.read_type_e("scene_tree", data.getSceneTree());
+      ser.read_type_e("scene_tree_types", data.getSceneTreeTypes());
+      ser.read_type_e("scene_tree_indices", data.getSceneTreeIndices());
       ser.read_type_e("scene_nodes", data.getSceneNodes());
       ser.read_type_e("detectable_scene_nodes", data.getDetectableSceneNodes());
       ser.read_type_e("aruco_marker_scene_nodes", data.getArucoMarkerSceneNodes());
