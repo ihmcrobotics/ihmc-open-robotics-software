@@ -7,8 +7,8 @@
 uint32 next_id
 
 # A depth first ordered list of node indexes.
-# The indexes are of the rest of the arrays in this message
-# as if one continuous array ordered top to bottom
+# The indexes are the index of that node in it's
+# respective list for it's type.
 uint32[<=1000] scene_tree
 
 # Basic scene nodes

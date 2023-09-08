@@ -20,8 +20,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public long next_id_;
    /**
             * A depth first ordered list of node indexes.
-            * The indexes are of the rest of the arrays in this message
-            * as if one continuous array ordered top to bottom
+            * The indexes are the index of that node in it's
+            * respective list for it's type.
             */
    public us.ihmc.idl.IDLSequence.Long  scene_tree_;
    /**
@@ -87,8 +87,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
    /**
             * A depth first ordered list of node indexes.
-            * The indexes are of the rest of the arrays in this message
-            * as if one continuous array ordered top to bottom
+            * The indexes are the index of that node in it's
+            * respective list for it's type.
             */
    public us.ihmc.idl.IDLSequence.Long  getSceneTree()
    {
