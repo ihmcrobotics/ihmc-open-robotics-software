@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
+import us.ihmc.perception.sceneGraph.ROS2SceneGraphSubscription;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
@@ -22,7 +22,7 @@ public class BehaviorActionSequenceModule
    private volatile boolean running = true;
    private final ROS2Node ros2Node;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
+   private final ROS2SceneGraphSubscription sceneGraphSubscription;
    private final Throttler throttler = new Throttler();
    private final double PERIOD = Conversions.hertzToSeconds(30.0);
    private final BehaviorActionSequence sequence;
@@ -33,8 +33,7 @@ public class BehaviorActionSequenceModule
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_action_sequence");
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(sceneGraph.getDetectableSceneNodes(), ros2ControllerHelper,
-                                                                                  ROS2IOTopicQualifier.STATUS);
+      sceneGraphSubscription = new ROS2SceneGraphSubscription(sceneGraph, ros2ControllerHelper, ROS2IOTopicQualifier.STATUS);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(sceneGraph.getReferenceFrameSuppliers());
@@ -51,12 +50,12 @@ public class BehaviorActionSequenceModule
       {
          throttler.waitAndRun(PERIOD);
 
-         detectableSceneNodesSubscription.update();
+         sceneGraphSubscription.update();
          sequence.update();
       }
 
       sequence.destroy();
-      detectableSceneNodesSubscription.destroy();
+      sceneGraphSubscription.destroy();
       ros2Node.destroy();
       stopped.set();
    }

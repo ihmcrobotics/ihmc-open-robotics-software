@@ -28,8 +28,8 @@ import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
+import us.ihmc.perception.sceneGraph.ROS2SceneGraphPublisher;
+import us.ihmc.perception.sceneGraph.ROS2SceneGraphSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -74,8 +74,8 @@ public class DualBlackflyCamera
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
-   private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
-   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
+   private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
+   private final ROS2SceneGraphSubscription sceneGraphSubscription;
 
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
@@ -157,9 +157,7 @@ public class DualBlackflyCamera
                                                                            PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(side),
                                                                            cameraTransformToParent);
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(sceneGraph.getDetectableSceneNodes(),
-                                                                                  ros2Helper,
-                                                                                  ROS2IOTopicQualifier.COMMAND);
+      sceneGraphSubscription = new ROS2SceneGraphSubscription(sceneGraph, ros2Helper, ROS2IOTopicQualifier.COMMAND);
 
       // Camera read thread
       cameraReadThread = new Thread(() ->
@@ -536,13 +534,13 @@ public class DualBlackflyCamera
 //          arUcoMarkerDetection.drawRejectedPoints(undistortedBytedecoImage.getBytedecoOpenCVMat());
          arUcoMarkerPublisher.update();
 
-         detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
+         sceneGraphSubscription.update(); // Receive overridden poses from operator
          ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, sceneGraph);
          synchronized (blackflyFrameForSceneNodeUpdate)
          {
             sceneGraph.update(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
          }
-         detectableSceneObjectsPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+         sceneGraphPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
       }
       // TODO: left behavior?
    }

@@ -27,8 +27,8 @@ public class RDXPerceptionSceneGraphUI
 {
    private final SceneGraph sceneGraph;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
-   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
-   private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
+   private final ROS2SceneGraphSubscription sceneGraphSubscription;
+   private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
@@ -42,9 +42,7 @@ public class RDXPerceptionSceneGraphUI
       this.sceneGraph = sceneGraph;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(sceneGraph.getDetectableSceneNodes(),
-                                                                                  ros2PublishSubscribeAPI,
-                                                                                  ROS2IOTopicQualifier.STATUS);
+      sceneGraphSubscription = new ROS2SceneGraphSubscription(sceneGraph, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.STATUS);
 
       for (DetectableSceneNode detectableSceneNode : sceneGraph.getDetectableSceneNodes())
       {
@@ -57,7 +55,7 @@ public class RDXPerceptionSceneGraphUI
 
    public void update()
    {
-      detectableSceneNodesSubscription.update();
+      sceneGraphSubscription.update();
 
       for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
       {
@@ -65,12 +63,12 @@ public class RDXPerceptionSceneGraphUI
       }
 
       if (publishThrottler.run())
-         detectableSceneObjectsPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+         sceneGraphPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Detectable scene nodes received: " + detectableSceneNodesSubscription.getNumberOfMessagesReceived());
+      ImGui.text("Detectable scene nodes received: " + sceneGraphSubscription.getNumberOfMessagesReceived());
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
       ImGui.text("Detections:");
       ImGui.separator();

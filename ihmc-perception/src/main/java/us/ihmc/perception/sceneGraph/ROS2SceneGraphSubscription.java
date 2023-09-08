@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.DetectableSceneNodesMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -15,15 +15,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
-import java.util.List;
-
 /**
- * Subscribes to, synchronizing, a list of detectable nodes in the robot's perception scene graph.
+ * Subscribes to, synchronizing, the robot's perception scene graph.
  */
-public class ROS2DetectableSceneNodesSubscription
+public class ROS2SceneGraphSubscription
 {
-   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneNodesSubscription;
-   private final List<DetectableSceneNode> detectableSceneNodes;
+   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
+   private final SceneGraph sceneGraph;
    private final FramePose3D nodePose = new FramePose3D();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
@@ -33,13 +31,13 @@ public class ROS2DetectableSceneNodesSubscription
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
     */
-   public ROS2DetectableSceneNodesSubscription(List<DetectableSceneNode> detectableSceneNodes,
-                                               ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                               ROS2IOTopicQualifier ioQualifier)
+   public ROS2SceneGraphSubscription(SceneGraph sceneGraph,
+                                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+                                     ROS2IOTopicQualifier ioQualifier)
    {
-      this.detectableSceneNodes = detectableSceneNodes;
+      this.sceneGraph = sceneGraph;
 
-      detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
+      sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
    }
 
    /**
@@ -49,12 +47,12 @@ public class ROS2DetectableSceneNodesSubscription
     */
    public boolean update()
    {
-      boolean newMessageAvailable = detectableSceneNodesSubscription.getMessageNotification().poll();
+      boolean newMessageAvailable = sceneGraphSubscription.getMessageNotification().poll();
       if (newMessageAvailable)
       {
          ++numberOfMessagesReceived;
-         DetectableSceneNodesMessage detectableSceneNodesMessage = detectableSceneNodesSubscription.getMessageNotification().read();
-         IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = detectableSceneNodesMessage.getDetectableSceneNodes();
+         SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
+         IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = sceneGraphMessage.getDetectableSceneNodes();
 
          // We group this because with a tree structure, modification propagate.
          // Maybe we should build that in at some point instead of freezing the whole tree,
@@ -69,7 +67,7 @@ public class ROS2DetectableSceneNodesSubscription
          // We could improve on this design later.
          for (int i = 0; i < detectableSceneNodeMessages.size(); i++)
          {
-            DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().get(i);
+            DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(i);
             DetectableSceneNode detectableSceneNode = detectableSceneNodes.get(i);
 
             if (detectableSceneNodeMessage.getNameAsString().equals(detectableSceneNode.getName()))
@@ -127,7 +125,7 @@ public class ROS2DetectableSceneNodesSubscription
 
    public void destroy()
    {
-      detectableSceneNodesSubscription.destroy();
+      sceneGraphSubscription.destroy();
    }
 
    public long getNumberOfMessagesReceived()
