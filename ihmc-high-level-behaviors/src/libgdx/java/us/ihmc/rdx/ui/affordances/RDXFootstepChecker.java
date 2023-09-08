@@ -95,8 +95,10 @@ public class RDXFootstepChecker
    }
 
    /**
-    * Returns the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot
-    * foot
+    * Returns the previous footstep on the opposite side of the new footstep side if it exists, otherwise set it to the current robot foot
+    * First check against footsteps that have been placed but are not sent to the controller
+    * Second check against footsteps that are in the controller
+    * Lastly if those don't have footsteps, default to comparing against the synced robot feet
     */
    private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList,
                                                                  int currentIndex,
