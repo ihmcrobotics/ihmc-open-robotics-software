@@ -6,6 +6,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
@@ -61,8 +62,8 @@ public class RDXPerceptionDevelopmentUI
    private RDXFootstepPlanGraphic footstepPlanGraphic;
 
 
-   private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230903_222303_PlanarRegionsListLogger.prllog").toString());
-   private PlanarRegionsList logLoadedPlanarRegions;
+   private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230908_144224_PlanarRegionsListLogger.prllog").toString());
+   private PlanarRegionsList logLoadedPlanarRegions = new PlanarRegionsList();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final HumanoidPerceptionModule perceptionModule = new HumanoidPerceptionModule(openCLManager);
@@ -101,13 +102,15 @@ public class RDXPerceptionDevelopmentUI
             humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Color", PerceptionAPI.D435_COLOR_IMAGE, globalVisualizersUI);
             humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Depth", PerceptionAPI.D435_DEPTH_IMAGE, globalVisualizersUI);
 
-            logLoadedPlanarRegions = PlanarRegionFileTools.loadRegionsFromLog(logFile);
-            PerceptionFilterTools.applyConcaveHullReduction(logLoadedPlanarRegions, new PolygonizerParameters("ForGPURegions"));
             PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(10.0f,
                                                                                                  new Point3D(),
                                                                                                  new Quaternion());
-            initialSupportSquareRegion.setRegionId(0);
+            initialSupportSquareRegion.setRegionId(100);
             logLoadedPlanarRegions.addPlanarRegion(initialSupportSquareRegion);
+
+            logLoadedPlanarRegions.addPlanarRegionsList(PlanarRegionFileTools.loadRegionsFromLog(logFile));
+            logLoadedPlanarRegions.applyTransform(new RigidBodyTransform(new Quaternion(), new Point3D(0.25, 2.0, -0.25)));
+            PerceptionFilterTools.applyConcaveHullReduction(logLoadedPlanarRegions, new PolygonizerParameters("ForGPURegions"));
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
@@ -222,7 +225,7 @@ public class RDXPerceptionDevelopmentUI
             Pose3D rightStartPose = new Pose3D();
             Pose3D leftGoalPose = new Pose3D();
             Pose3D rightGoalPose = new Pose3D();
-            leftStartPose.getPosition().set(-0.5, -0.5, 0.0);
+            leftStartPose.getPosition().set(0.0, 0., 0.0);
             leftGoalPose.getPosition().set(2.5, 4.5, 0.0);
 
             float yaw = (float) Math.atan2(leftGoalPose.getY() - leftStartPose.getY(), leftGoalPose.getX() - leftStartPose.getX());

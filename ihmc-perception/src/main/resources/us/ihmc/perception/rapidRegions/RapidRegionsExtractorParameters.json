@@ -1,12 +1,12 @@
 {
   "title" : "Rapid region extractor parameters",
   "Normal pack range" : {
-    "value" : 7,
+    "value" : 5,
     "lowerBound" : 1,
     "upperBound" : 10
   },
   "Centroid pack range" : {
-    "value" : 1,
+    "value" : 3,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -16,7 +16,7 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.014,
+    "value" : 0.010309,
     "lowerBound" : 0.0,
     "upperBound" : 1.5
   },
@@ -26,7 +26,7 @@
     "upperBound" : 1.0
   },
   "Merge angular threshold" : {
-    "value" : 0.886731,
+    "value" : 0.89644,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -75,12 +75,12 @@
     "upperBound" : 15000
   },
   "Region min patches" : {
-    "value" : 72,
+    "value" : 19,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 50,
+    "value" : 10,
     "lowerBound" : 1,
     "upperBound" : 1000
   },

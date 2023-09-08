@@ -44,7 +44,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_191411_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_204753_PerceptionLog.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
