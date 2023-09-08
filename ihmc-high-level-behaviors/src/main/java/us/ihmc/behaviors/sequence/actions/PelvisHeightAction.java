@@ -79,9 +79,11 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
 
       isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
-                                                     syncedPelvisPose, POSITION_TOLERANCE, Double.NaN,
+                                                     syncedPelvisPose,
+                                                     POSITION_TOLERANCE, Double.NaN,
                                                      getTrajectoryDuration(),
-                                                     executionTimer, BehaviorActionCompletionCalculator.Component.TRANSLATION);
+                                                     executionTimer,
+                                                     BehaviorActionCompletionCalculator.Component.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
@@ -89,7 +91,6 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
       executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
