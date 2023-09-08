@@ -1,12 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.PelvisHeightActionMessage;
+import behavior_msgs.msg.dds.BodyPartPoseActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -52,7 +51,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       pelvisInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
-   public void toMessage(PelvisHeightActionMessage message)
+   public void toMessage(BodyPartPoseActionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -60,7 +59,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       message.setTrajectoryDuration(trajectoryDuration);
    }
 
-   public void fromMessage(PelvisHeightActionMessage message)
+   public void fromMessage(BodyPartPoseActionMessage message)
    {
       pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));

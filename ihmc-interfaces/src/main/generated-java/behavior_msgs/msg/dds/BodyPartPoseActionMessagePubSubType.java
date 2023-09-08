@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "ChestOrientationActionMessage" defined in "ChestOrientationActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "BodyPartPoseActionMessage" defined in "BodyPartPoseActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from ChestOrientationActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ChestOrientationActionMessage_.idl instead.
+* This file was automatically generated from BodyPartPoseActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit BodyPartPoseActionMessage_.idl instead.
 *
 */
-public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ChestOrientationActionMessage>
+public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.BodyPartPoseActionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::ChestOrientationActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::BodyPartPoseActionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1bc27f10b3671b91ce869e339069463ca942ebf0c9019094c70cbbef2067bf2d";
+   		return "40226a681e6368d09ac889fd9f3f7c6caa5c4d0b9e7a9e939d380f2b58337e5b";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.ChestOrientationActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.BodyPartPoseActionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -66,12 +66,12 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ChestOrientationActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.BodyPartPoseActionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ChestOrientationActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -91,7 +91,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       if(data.getParentFrame().size() <= 1000)
@@ -103,7 +103,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
 
    }
 
-   public static void read(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       cdr.read_type_e(data.getParentFrame());	
@@ -114,7 +114,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -125,7 +125,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ChestOrientationActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BodyPartPoseActionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -135,15 +135,15 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.ChestOrientationActionMessage src, behavior_msgs.msg.dds.ChestOrientationActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.BodyPartPoseActionMessage src, behavior_msgs.msg.dds.BodyPartPoseActionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.ChestOrientationActionMessage createData()
+   public behavior_msgs.msg.dds.BodyPartPoseActionMessage createData()
    {
-      return new behavior_msgs.msg.dds.ChestOrientationActionMessage();
+      return new behavior_msgs.msg.dds.BodyPartPoseActionMessage();
    }
    @Override
    public int getTypeSize()
@@ -157,24 +157,24 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.ChestOrientationActionMessage src, behavior_msgs.msg.dds.ChestOrientationActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.BodyPartPoseActionMessage src, behavior_msgs.msg.dds.BodyPartPoseActionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public ChestOrientationActionMessagePubSubType newInstance()
+   public BodyPartPoseActionMessagePubSubType newInstance()
    {
-      return new ChestOrientationActionMessagePubSubType();
+      return new BodyPartPoseActionMessagePubSubType();
    }
 }

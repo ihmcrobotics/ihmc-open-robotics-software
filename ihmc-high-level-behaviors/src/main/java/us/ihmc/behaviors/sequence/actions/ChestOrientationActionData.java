@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ChestOrientationActionMessage;
+import behavior_msgs.msg.dds.BodyPartPoseActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -52,7 +52,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       chestInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
-   public void toMessage(ChestOrientationActionMessage message)
+   public void toMessage(BodyPartPoseActionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -60,7 +60,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       message.setTrajectoryDuration(trajectoryDuration);
    }
 
-   public void fromMessage(ChestOrientationActionMessage message)
+   public void fromMessage(BodyPartPoseActionMessage message)
    {
       chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));

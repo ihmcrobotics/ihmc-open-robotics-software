@@ -13,24 +13,24 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
             */
    public int sequence_size_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionMessage>  arm_joint_angles_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionMessage>  chest_orientation_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionMessage>  chest_orientation_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionMessage>  footstep_plan_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandConfigurationActionMessage>  hand_configuration_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionMessage>  hand_pose_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage>  hand_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionMessage>  hand_wrench_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightActionMessage>  pelvis_height_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionMessage>  pelvis_height_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionMessage>  wait_duration_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionMessage>  walk_actions_;
 
    public ActionSequenceUpdateMessage()
    {
       arm_joint_angles_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionMessage> (200, new behavior_msgs.msg.dds.ArmJointAnglesActionMessagePubSubType());
-      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionMessage> (200, new behavior_msgs.msg.dds.ChestOrientationActionMessagePubSubType());
+      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionMessagePubSubType());
       footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionMessagePubSubType());
       hand_configuration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandConfigurationActionMessage> (200, new behavior_msgs.msg.dds.HandConfigurationActionMessagePubSubType());
-      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionMessage> (200, new behavior_msgs.msg.dds.HandPoseActionMessagePubSubType());
+      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage> (200, new behavior_msgs.msg.dds.SidedBodyPartPoseActionMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionMessagePubSubType());
-      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightActionMessage> (200, new behavior_msgs.msg.dds.PelvisHeightActionMessagePubSubType());
+      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionMessagePubSubType());
       wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionMessagePubSubType());
       walk_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionMessage> (200, new behavior_msgs.msg.dds.WalkActionMessagePubSubType());
 
@@ -79,7 +79,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionMessage>  getChestOrientationActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionMessage>  getChestOrientationActions()
    {
       return chest_orientation_actions_;
    }
@@ -97,7 +97,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionMessage>  getHandPoseActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage>  getHandPoseActions()
    {
       return hand_pose_actions_;
    }
@@ -109,7 +109,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightActionMessage>  getPelvisHeightActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionMessage>  getPelvisHeightActions()
    {
       return pelvis_height_actions_;
    }
