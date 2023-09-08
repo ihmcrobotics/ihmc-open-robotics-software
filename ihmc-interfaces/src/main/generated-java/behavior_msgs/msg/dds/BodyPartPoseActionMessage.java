@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage> implements Settable<PelvisHeightActionMessage>, EpsilonComparable<PelvisHeightActionMessage>
+public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage> implements Settable<BodyPartPoseActionMessage>, EpsilonComparable<BodyPartPoseActionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -25,20 +25,20 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
             */
    public double trajectory_duration_;
 
-   public PelvisHeightActionMessage()
+   public BodyPartPoseActionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public PelvisHeightActionMessage(PelvisHeightActionMessage other)
+   public BodyPartPoseActionMessage(BodyPartPoseActionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(PelvisHeightActionMessage other)
+   public void set(BodyPartPoseActionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       parent_frame_.set(other.parent_frame_);
@@ -90,19 +90,19 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
    }
 
 
-   public static Supplier<PelvisHeightActionMessagePubSubType> getPubSubType()
+   public static Supplier<BodyPartPoseActionMessagePubSubType> getPubSubType()
    {
-      return PelvisHeightActionMessagePubSubType::new;
+      return BodyPartPoseActionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PelvisHeightActionMessagePubSubType::new;
+      return BodyPartPoseActionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(PelvisHeightActionMessage other, double epsilon)
+   public boolean epsilonEquals(BodyPartPoseActionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -122,9 +122,9 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof PelvisHeightActionMessage)) return false;
+      if(!(other instanceof BodyPartPoseActionMessage)) return false;
 
-      PelvisHeightActionMessage otherMyClass = (PelvisHeightActionMessage) other;
+      BodyPartPoseActionMessage otherMyClass = (BodyPartPoseActionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
@@ -140,7 +140,7 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("PelvisHeightActionMessage {");
+      builder.append("BodyPartPoseActionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("parent_frame=");
