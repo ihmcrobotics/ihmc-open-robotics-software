@@ -362,7 +362,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
 
-      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, footSwitches, controlDT, gravity, registry);
+      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, footSwitches, controlDT, new FrameVector3D( ReferenceFrame.getWorldFrame(), 0.0, 0.0, -gravity), registry);
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
