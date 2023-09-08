@@ -3,7 +3,7 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -19,7 +19,6 @@ public class RigidBodySceneObjectDefinitions
    public static final double LARGE_MARKER_WIDTH = 0.1982;
 
    public static final int BOX_MARKER_ID = 2;
-   public static final double BOX_MARKER_WIDTH = LARGE_MARKER_WIDTH;
    // The box is a cube
    public static final double BOX_SIZE = 0.35;
    public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.047298;
@@ -35,7 +34,6 @@ public class RigidBodySceneObjectDefinitions
 
    // TODO: Get soup can model from Arghya
    public static final int CAN_OF_SOUP_MARKER_ID = 3;
-   public static final double CAN_OF_SOUP_MARKER_SIZE = LARGE_MARKER_WIDTH;
    public static final double CAN_OF_SOUP_RADIUS = 0.0329375;
    public static final double CAN_OF_SOUP_HEIGHT = 0.082388;
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/canOfSoup/CanOfSoup.g3dj";
@@ -52,27 +50,30 @@ public class RigidBodySceneObjectDefinitions
       MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
    }
 
-   public static ArUcoMarkerNode createBox()
+   public static void createBox(SceneNode parentNode)
    {
-      return new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                              "Box",
-                                              BOX_VISUAL_MODEL_FILE_PATH,
-                                              BOX_TRANSFORM_TO_MARKER,
-                                              BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                                                           "Box",
+                                                                           BOX_VISUAL_MODEL_FILE_PATH,
+                                                                           BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      node.getNodeToParentFrameTransform().setAndInvert(BOX_TRANSFORM_TO_MARKER);
+      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
+      node.setOriginalParentFrame(parentNode::getNodeFrame);
+      parentNode.getChildren().add(node);
    }
 
    /**
-    * Represents a can of soup detected by a statically nearby placed ArUco
-    * marker,
+    * Represents a can of soup detected by a statically nearby placed ArUco marker.
     */
-   public static ArUcoMarkerNode createCanOfSoup()
+   public static void createCanOfSoup(SceneNode parentNode)
    {
-      return new ArUcoMarkerNode(SceneGraph.NEXT_ID.getAndIncrement(),
-                                 "CanOfSoup",
-                                 CAN_OF_SOUP_MARKER_ID,
-                                 CAN_OF_SOUP_MARKER_SIZE,
-                                 MARKER_TO_CAN_OF_SOUP_TRANSFORM,
-                                 CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
-                                 CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+                                                                           "CanOfSoup",
+                                                                           CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
+                                                                           CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      node.getNodeToParentFrameTransform().setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
+      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
+      node.setOriginalParentFrame(parentNode::getNodeFrame);
+      parentNode.getChildren().add(node);
    }
 }
