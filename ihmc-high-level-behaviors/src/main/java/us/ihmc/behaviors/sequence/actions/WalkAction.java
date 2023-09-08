@@ -188,7 +188,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                        nominalExecutionDuration,
                                                        executionTimer,
                                                        BehaviorActionCompletionCalculator.Component.TRANSLATION,
-                                                       BehaviorActionCompletionCalculator.Component.ROTATION);
+                                                       BehaviorActionCompletionCalculator.Component.ORIENTATION);
       }
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;
