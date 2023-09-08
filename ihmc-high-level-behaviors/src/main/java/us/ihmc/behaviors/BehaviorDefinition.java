@@ -5,6 +5,12 @@ import java.util.List;
 
 public class BehaviorDefinition
 {
+   /**
+    * Constant for not having a behavior selected.
+    * Will probably change to No-Op node at some point.
+    */
+   public static final String NONE = "None";
+
    private final String name;
    private final BehaviorSupplier behaviorSupplier;
    private final List<BehaviorDefinition> subBehaviors;

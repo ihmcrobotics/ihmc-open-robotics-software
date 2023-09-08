@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -25,7 +26,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.UUID;
 
@@ -46,7 +46,6 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
-   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
@@ -72,11 +71,13 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      update();
+
       this.actionIndex = actionIndex;
 
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToParentTransforms().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getGoalFrame(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
@@ -187,7 +188,8 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                        syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
                                                        executionTimer,
-                                                       warningThrottler);
+                                                       BehaviorActionCompletionComponent.TRANSLATION,
+                                                       BehaviorActionCompletionComponent.ORIENTATION);
       }
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;

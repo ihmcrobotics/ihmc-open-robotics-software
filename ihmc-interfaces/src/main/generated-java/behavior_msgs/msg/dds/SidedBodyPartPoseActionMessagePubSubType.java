@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "HandPoseActionMessage" defined in "HandPoseActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "SidedBodyPartPoseActionMessage" defined in "SidedBodyPartPoseActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from HandPoseActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit HandPoseActionMessage_.idl instead.
+* This file was automatically generated from SidedBodyPartPoseActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SidedBodyPartPoseActionMessage_.idl instead.
 *
 */
-public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandPoseActionMessage>
+public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::HandPoseActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::SidedBodyPartPoseActionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4d82e26c7dbbf825ead7d39d8b29cde338ced593754ca0e38789ddb227b5dbf0";
+   		return "9cb56cd44430e39a3efc523a275696e058d6e37d7304ffd04c1decd570cf4181";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.HandPoseActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -68,12 +68,12 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandPoseActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandPoseActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -96,7 +96,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
@@ -110,7 +110,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    }
 
-   public static void read(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
@@ -123,7 +123,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -135,7 +135,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandPoseActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -146,15 +146,15 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.HandPoseActionMessage src, behavior_msgs.msg.dds.HandPoseActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage src, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.HandPoseActionMessage createData()
+   public behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage createData()
    {
-      return new behavior_msgs.msg.dds.HandPoseActionMessage();
+      return new behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage();
    }
    @Override
    public int getTypeSize()
@@ -168,24 +168,24 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.HandPoseActionMessage src, behavior_msgs.msg.dds.HandPoseActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage src, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public HandPoseActionMessagePubSubType newInstance()
+   public SidedBodyPartPoseActionMessagePubSubType newInstance()
    {
-      return new HandPoseActionMessagePubSubType();
+      return new SidedBodyPartPoseActionMessagePubSubType();
    }
 }
