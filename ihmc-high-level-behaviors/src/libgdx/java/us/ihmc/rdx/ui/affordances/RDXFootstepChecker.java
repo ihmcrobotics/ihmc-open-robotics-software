@@ -1,6 +1,8 @@
 package us.ihmc.rdx.ui.affordances;
 
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tells the operator if a manually placed footstep is reasonable in realtime.
@@ -28,12 +31,12 @@ import java.util.ArrayList;
 public class RDXFootstepChecker
 {
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ControllerStatusTracker controllerStatusTracker;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
    private final RDX3DPanelTooltip tooltip;
-   private final SideDependentList<RigidBodyTransformReadOnly> syncedSolePoses = new SideDependentList<>();
 
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private String text = null;
@@ -41,10 +44,12 @@ public class RDXFootstepChecker
 
    public RDXFootstepChecker(RDXBaseUI baseUI,
                              ROS2SyncedRobotModel syncedRobot,
+                             ControllerStatusTracker controllerStatusTracker,
                              SideDependentList<ConvexPolygon2D> footPolygons,
                              FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
+      this.controllerStatusTracker = controllerStatusTracker;
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
@@ -69,12 +74,7 @@ public class RDXFootstepChecker
    {
       reasons.clear();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         syncedSolePoses.put(side, syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToRoot());
-      }
-
-      // Iterate through the footstep list and check validity for all footsteps.
+      // Iterate through the footstep list and check the validity for all footsteps.
       for (int i = 0; i < stepList.size(); ++i)
       {
          checkValidSingleStep(stepList, stepList.get(i).getFootPose(), stepList.get(i).getFootstepSide(), i);
@@ -86,29 +86,31 @@ public class RDXFootstepChecker
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
-      if (indexOfFootBeingChecked == 0) // No footsteps have been placed, check against robot feet
-      {
-         reason = stepChecker.checkValidity(candidateStepSide,
-                                            candidateFootstepPose,
-                                            syncedSolePoses.get(candidateStepSide.getOppositeSide()),
-                                            syncedSolePoses.get(candidateStepSide));
-      }
-      else if (indexOfFootBeingChecked == 1) // One footstep has been placed, check against the opposite robot foot
+      if (indexOfFootBeingChecked == 0)
       {
          FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
-         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, syncedSolePoses.get(candidateStepSide));
+         FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
+                                                                                            indexOfFootBeingChecked,
+                                                                                            candidateStepSide.getOppositeSide());
+
+         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
       }
-      else // Multiple footsteps have been placed, compare to previous footstep on the other side
+      else if (indexOfFootBeingChecked == 1)
+      {
+         FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
+         FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
+                                                                                            indexOfFootBeingChecked,
+                                                                                            candidateStepSide.getOppositeSide());
+         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
+      }
+      else
       {
          FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
                                                                                             indexOfFootBeingChecked,
                                                                                             candidateStepSide.getOppositeSide());
          FramePose3DReadOnly previousFootstepOnOtherSide = getPreviousFootstepOnOppositeSide(stepList, indexOfFootBeingChecked, candidateStepSide);
 
-         reason = stepChecker.checkValidity(candidateStepSide,
-                                            candidateFootstepPose,
-                                            previousFootstepOnOtherSide,
-                                            previousFootstepOnSameSide);
+         reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
       }
 
       reasons.add(reason);
@@ -133,6 +135,32 @@ public class RDXFootstepChecker
       if (i >= 0)
       {
          previousFootstepPose.setIncludingFrame(stepList.get(i).getFootPose());
+      }
+      else
+      {
+         previousFootstepPose.set(getPreviousFootstepOnOppositeSide(controllerStatusTracker.getQueuedFootsteps(), candidateFootstepSide));
+      }
+
+      return previousFootstepPose;
+   }
+
+   /**
+    * Sets the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot foot
+    */
+   private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(List<QueuedFootstepStatusMessage> stepList, RobotSide candidateFootstepSide)
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      int i;
+      if (!stepList.isEmpty())
+      {
+         i = stepList.size() - 1;
+         // Moved the index of the list to the last step on the other side
+         while (i >= 1 && stepList.get(i).getRobotSide() == candidateFootstepSide.toByte())
+            --i;
+
+         previousFootstepPose.getPosition().set(stepList.get(i).getLocation());
+         previousFootstepPose.getRotation().setToYawOrientation(stepList.get(i).getOrientation().getYaw());
       }
       else
       {
