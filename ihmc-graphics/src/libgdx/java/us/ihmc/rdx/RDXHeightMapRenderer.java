@@ -23,6 +23,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
 {
    private Renderable renderable;
 
+   private boolean active = true;
+
    public static final int FLOATS_PER_CELL = 8;
    public static final int BYTES_PER_VERTEX = FLOATS_PER_CELL * Float.BYTES;
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
@@ -50,8 +52,9 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
    private int totalCells;
 
-   public void create(int numberOfCells)
+   public void create(int numberOfCells, boolean active)
    {
+      this.active = active;
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
 
       renderable = new Renderable();
@@ -80,6 +83,9 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
    public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer,int centerIndex, float cellSizeXYInMeters)
    {
+      if (!active)
+         return;
+
       zUpFrameToWorld.getTranslation().setZ(0);
 
       int cellsPerAxis = 2 * centerIndex + 1;
@@ -144,7 +150,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (renderable != null)
+      if (renderable != null && active)
          renderables.add(renderable);
    }
 

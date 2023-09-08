@@ -259,6 +259,7 @@ public class RDXBuildingConstructor extends RDXPanel
 
          if (ImGui.button("Create Stairs"))
          {
+            LogTools.info("Adding stairs to building: Floors: {}, Sides: {}, Steps: {}", 3, 4, 10);
             constructStairwell(3, 4, 10, 3.0f, 3.0f, 12.0f);
          }
 
@@ -316,7 +317,7 @@ public class RDXBuildingConstructor extends RDXPanel
    public void constructStairwell(int floors, int sides, int numberOfStepsPerSide, float length, float width, float height)
    {
       if (building == null)
-         return;
+         building = new RDXBuildingObject();
 
       float[] xOffsets = {-width / 2.0f, length / 1.4f, width / 2.0f, -length / 1.4f};
       float[] yOffsets = {width / 1.4f, length / 2.0f, -width / 1.4f, -length / 2.0f};

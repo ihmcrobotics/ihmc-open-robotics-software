@@ -38,11 +38,11 @@ public class RDXHumanoidPerceptionUI
       this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
    }
 
-   public void initializeHeightMapRenderer(HumanoidPerceptionModule humanoidPerception)
+   public void initializeHeightMapRenderer(HumanoidPerceptionModule humanoidPerception, boolean enabled)
    {
       this.heightMapRenderer = new RDXHeightMapRenderer();
-      this.heightMapRenderer.create(
-            humanoidPerception.getRapidHeightMapExtractor().getGlobalCellsPerAxis() * humanoidPerception.getRapidHeightMapExtractor().getGlobalCellsPerAxis());
+      int numberOfCells = humanoidPerception.getRapidHeightMapExtractor().getGlobalCellsPerAxis() * humanoidPerception.getRapidHeightMapExtractor().getGlobalCellsPerAxis();
+      this.heightMapRenderer.create(numberOfCells, enabled);
    }
 
    public void initializeRapidRegionsUI()
@@ -72,9 +72,9 @@ public class RDXHumanoidPerceptionUI
             humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
             humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
 
-      PerceptionDebugTools.displayHeightMap("Output Height Map",
-                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
-                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
+//      PerceptionDebugTools.displayHeightMap("Output Height Map",
+//                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
+//                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
       rapidRegionsUI.render();
    }
 
