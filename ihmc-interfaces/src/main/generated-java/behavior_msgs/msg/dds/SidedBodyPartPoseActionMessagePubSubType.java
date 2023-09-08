@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "PelvisHeightActionMessage" defined in "PelvisHeightActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "SidedBodyPartPoseActionMessage" defined in "SidedBodyPartPoseActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from PelvisHeightActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit PelvisHeightActionMessage_.idl instead.
+* This file was automatically generated from SidedBodyPartPoseActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SidedBodyPartPoseActionMessage_.idl instead.
 *
 */
-public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.PelvisHeightActionMessage>
+public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::PelvisHeightActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::SidedBodyPartPoseActionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3b85bc4adb21a6311f889f3606e9ed42cb6674183412e8645b77974a7ca055c";
+   		return "9cb56cd44430e39a3efc523a275696e058d6e37d7304ffd04c1decd570cf4181";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.PelvisHeightActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -54,6 +54,8 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -66,16 +68,19 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.PelvisHeightActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.PelvisHeightActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
       current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
@@ -91,9 +96,11 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
+      cdr.write_type_9(data.getRobotSide());
+
       if(data.getParentFrame().size() <= 1000)
       cdr.write_type_e(data.getParentFrame());else
           throw new RuntimeException("parent_frame field exceeds the maximum length");
@@ -103,9 +110,11 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    }
 
-   public static void read(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
+      data.setRobotSide(cdr.read_type_9());
+      	
       cdr.read_type_e(data.getParentFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
@@ -114,10 +123,11 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
+      ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_e("parent_frame", data.getParentFrame());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
@@ -125,25 +135,26 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PelvisHeightActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
+      data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_e("parent_frame", data.getParentFrame());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.PelvisHeightActionMessage src, behavior_msgs.msg.dds.PelvisHeightActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage src, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.PelvisHeightActionMessage createData()
+   public behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage createData()
    {
-      return new behavior_msgs.msg.dds.PelvisHeightActionMessage();
+      return new behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage();
    }
    @Override
    public int getTypeSize()
@@ -157,24 +168,24 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.PelvisHeightActionMessage src, behavior_msgs.msg.dds.PelvisHeightActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage src, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public PelvisHeightActionMessagePubSubType newInstance()
+   public SidedBodyPartPoseActionMessagePubSubType newInstance()
    {
-      return new PelvisHeightActionMessagePubSubType();
+      return new SidedBodyPartPoseActionMessagePubSubType();
    }
 }
