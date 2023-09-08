@@ -37,9 +37,9 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
 {
    private final PelvisHeightActionData actionData = new PelvisHeightActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper heightInWorldWidget = new ImDoubleWrapper(actionData::getHeight,
-                                                                           actionData::setHeight,
-                                                                           imDouble -> ImGui.inputDouble(labels.get("Height"), imDouble));
+   private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionData::getHeight,
+                                                                    actionData::setHeight,
+                                                                    imDouble -> ImGui.inputDouble(labels.get("Height"), imDouble));
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
@@ -138,7 +138,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
          update();
       }
       ImGui.pushItemWidth(80.0f);
-      heightInWorldWidget.renderImGuiWidget();
+      heightWidget.renderImGuiWidget();
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
    }
