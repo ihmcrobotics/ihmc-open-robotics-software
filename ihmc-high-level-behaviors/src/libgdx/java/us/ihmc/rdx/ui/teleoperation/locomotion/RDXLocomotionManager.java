@@ -77,7 +77,7 @@ public class RDXLocomotionManager
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
-   private final RDXInteractableFootstepPlan interactableFootstepPlan;// = new RDXInteractableFootstepPlan();
+   private final RDXInteractableFootstepPlan interactableFootstepPlan;
    private final RDXFootstepPlanning footstepPlanning;
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
    private final RDXWalkPathControlRing walkPathControlRing = new RDXWalkPathControlRing();
