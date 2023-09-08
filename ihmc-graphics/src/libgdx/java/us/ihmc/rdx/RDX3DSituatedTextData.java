@@ -14,10 +14,7 @@ public class RDX3DSituatedTextData
    private final Model model;
    private final ModelInstance modelInstance;
 
-   public RDX3DSituatedTextData(Pixmap pixmap,
-                                BytePointer rgba8888BytePointer,
-                                Texture texture, Model model,
-                                ModelInstance modelInstance)
+   public RDX3DSituatedTextData(Pixmap pixmap, BytePointer rgba8888BytePointer, Texture texture, Model model, ModelInstance modelInstance)
    {
       this.pixmap = pixmap;
       this.rgba8888BytePointer = rgba8888BytePointer;
