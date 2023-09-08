@@ -10,10 +10,7 @@ import us.ihmc.behaviors.sequence.actions.PelvisHeightActionData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImDoubleWrapper;
-import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -39,10 +36,10 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionData::getHeight,
                                                                     actionData::setHeight,
-                                                                    imDouble -> ImGui.inputDouble(labels.get("Height"), imDouble));
+                                                                    imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
-                                                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+                                                                                imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
