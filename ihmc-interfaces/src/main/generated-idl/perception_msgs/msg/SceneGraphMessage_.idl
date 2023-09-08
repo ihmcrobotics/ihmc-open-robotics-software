@@ -11,6 +11,18 @@ module perception_msgs
   {
     module dds
     {
+      const octet SCENE_NODE_TYPE =
+      0;
+
+      const octet DETECTABLE_SCENE_NODE_TYPE =
+      1;
+
+      const octet ARUCO_MARKER_NODE_TYPE =
+      2;
+
+      const octet STATIC_RELATIVE_NODE_TYPE =
+      3;
+
 
       /**
        * Gives the current state of the complete collection of detectable scene nodes.
@@ -26,11 +38,15 @@ module perception_msgs
          */
         unsigned long next_id;
         /**
-         * A depth first ordered list of node indexes.
-         * The indexes are the index of that node in it's
-         * respective list for it's type.
+         * A depth first ordered list of types.
          */
-        sequence<unsigned long, 1000> scene_tree;
+        sequence<octet, 1000> scene_tree_types;
+        /**
+         * A depth first ordered list of node indexes.
+         * The index is of that node in it's respective list for
+         * it's type.
+         */
+        sequence<unsigned long, 1000> scene_tree_indices;
         /**
          * Basic scene nodes
          */
