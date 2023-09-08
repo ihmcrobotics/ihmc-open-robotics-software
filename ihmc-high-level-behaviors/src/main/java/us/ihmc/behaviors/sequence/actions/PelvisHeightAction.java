@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -67,7 +68,8 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
 
       desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
+      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslation());
+      desiredPelvisPose.getTranslation().setZ(desiredPelvisPose.getTranslationZ());
       startPositionDistanceToGoal = syncedPelvisPose.getTranslation().differenceNorm(desiredPelvisPose.getTranslation());
    }
 
@@ -76,14 +78,15 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    {
       desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
+      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslation());
+      desiredPelvisPose.getTranslation().setZ(desiredPelvisPose.getTranslationZ());
 
       isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
                                                      syncedPelvisPose,
                                                      POSITION_TOLERANCE, Double.NaN,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
-                                                     BehaviorActionCompletionCalculator.Component.TRANSLATION);
+                                                     BehaviorActionCompletionComponent.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());

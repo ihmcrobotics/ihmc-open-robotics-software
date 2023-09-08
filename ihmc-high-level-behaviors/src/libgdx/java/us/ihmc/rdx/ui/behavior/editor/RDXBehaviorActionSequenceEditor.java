@@ -672,7 +672,7 @@ public class RDXBehaviorActionSequenceEditor
          if (nextPreviousPelvisHeightAction != null)
          {
             pelvisHeightAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
-                                             nextPreviousPelvisHeightAction.getReferenceFrame().getTransformToParent());
+                                                 nextPreviousPelvisHeightAction.getReferenceFrame().getTransformToParent());
          }
          else // set to current robot's pelvis pose
          {
