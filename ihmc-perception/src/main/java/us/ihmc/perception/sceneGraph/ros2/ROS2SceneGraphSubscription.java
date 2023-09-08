@@ -1,7 +1,9 @@
-package us.ihmc.perception.sceneGraph;
+package us.ihmc.perception.sceneGraph.ros2;
 
+import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -12,6 +14,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
@@ -53,6 +58,15 @@ public class ROS2SceneGraphSubscription
          ++numberOfMessagesReceived;
          SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
          IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = sceneGraphMessage.getDetectableSceneNodes();
+
+         ROS2SceneGraphSubscriptionTree subscriptionNodeTree = new ROS2SceneGraphSubscriptionTree();
+         buildSubscriptionTree(0, sceneGraphMessage, subscriptionNodeTree);
+
+
+         invalidate(sceneGraph.getRootNode());
+
+
+
 
          // We group this because with a tree structure, modification propagate.
          // Maybe we should build that in at some point instead of freezing the whole tree,
@@ -121,6 +135,51 @@ public class ROS2SceneGraphSubscription
          }
       }
       return newMessageAvailable;
+   }
+
+   private void synchronize(SceneNode sceneNode)
+   {
+
+   }
+
+   private void buildSubscriptionTree(int index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionTree subscriptionTreeNode)
+   {
+      byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index);
+      int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(index);
+      switch (sceneNodeType)
+      {
+         case SceneGraphMessage.SCENE_NODE_TYPE ->
+               subscriptionTreeNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
+         case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE ->
+         {
+            DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(indexInTypesList);
+            subscriptionTreeNode.setDetectableSceneNodeMessage(detectableSceneNodeMessage);
+            subscriptionTreeNode.setSceneNodeMessage(detectableSceneNodeMessage.getSceneNode());
+         }
+         case SceneGraphMessage.ARUCO_MARKER_NODE_TYPE ->
+         {
+            ArUcoMarkerNodeMessage arUcoMarkerNodeMessage = sceneGraphMessage.getArucoMarkerSceneNodes().get(indexInTypesList);
+            subscriptionTreeNode.setArUcoMarkerNodeMessage(arUcoMarkerNodeMessage);
+            subscriptionTreeNode.setDetectableSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode());
+            subscriptionTreeNode.setSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
+         {
+            StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().get(indexInTypesList);
+            subscriptionTreeNode.setStaticRelativeSceneNodeMessageeMessage(staticRelativeSceneNodeMessage);
+            subscriptionTreeNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getSceneNode());
+         }
+      }
+   }
+
+   private void invalidate(SceneNode sceneNode)
+   {
+      sceneNode.setIsValid(false);
+
+      for (SceneNode child : sceneNode.getChildren())
+      {
+         invalidate(child);
+      }
    }
 
    public void destroy()

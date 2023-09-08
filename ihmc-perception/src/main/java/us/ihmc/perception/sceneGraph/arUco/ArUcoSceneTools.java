@@ -5,7 +5,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters;

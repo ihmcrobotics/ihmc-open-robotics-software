@@ -1,7 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;

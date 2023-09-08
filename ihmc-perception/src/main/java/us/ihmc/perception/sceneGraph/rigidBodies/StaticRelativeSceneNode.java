@@ -1,7 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
