@@ -85,11 +85,11 @@ public class ArUcoSceneTools
          }
          case RigidBodySceneObjectDefinitions.BOX_MARKER_ID:
          {
-
+            RigidBodySceneObjectDefinitions.createBox(arUcoMarkerNode);
          }
          case RigidBodySceneObjectDefinitions.CAN_OF_SOUP_MARKER_ID:
          {
-
+            RigidBodySceneObjectDefinitions.createCanOfSoup(arUcoMarkerNode);
          }
       }
 
