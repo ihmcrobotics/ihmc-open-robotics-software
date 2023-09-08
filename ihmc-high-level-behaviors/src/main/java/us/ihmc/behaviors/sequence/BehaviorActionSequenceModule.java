@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.ROS2SceneGraphSubscription;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
