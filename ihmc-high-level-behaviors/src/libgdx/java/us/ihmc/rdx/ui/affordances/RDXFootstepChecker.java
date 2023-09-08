@@ -95,9 +95,12 @@ public class RDXFootstepChecker
    }
 
    /**
-    * Sets the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot foot
+    * Returns the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot
+    * foot
     */
-   private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList, int currentIndex, RobotSide candidateFootstepSide)
+   private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList,
+                                                                 int currentIndex,
+                                                                 RobotSide candidateFootstepSide)
    {
       FramePose3D previousFootstepPose = new FramePose3D();
 
@@ -122,9 +125,6 @@ public class RDXFootstepChecker
       return previousFootstepPose;
    }
 
-   /**
-    * Sets the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot foot
-    */
    private FramePose3DReadOnly getFootstepFromControllerQueue(List<QueuedFootstepStatusMessage> stepList, RobotSide candidateFootstepSide)
    {
       FramePose3D previousFootstepPose = new FramePose3D();
