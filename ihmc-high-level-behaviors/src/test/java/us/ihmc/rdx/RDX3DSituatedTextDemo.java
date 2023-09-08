@@ -40,7 +40,7 @@ public class RDX3DSituatedTextDemo
                previousTextData.dispose();
 
             previousTextData = rapidlyChangingText.setTextWithoutCache("Time: " + stopwatch.totalElapsed());
-            rapidlyChangingText.getModelTransform().rotate(0.0f, 1.0f, 0.0f, 1.0f);
+            rapidlyChangingText.getModelTransform().rotate(1.0f, 0.0f, 0.0f, 200.0f * (float) stopwatch.totalElapsed());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
