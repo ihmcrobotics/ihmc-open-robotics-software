@@ -6,30 +6,23 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * A single footstep
+       */
 public class FootstepActionMessage extends Packet<FootstepActionMessage> implements Settable<FootstepActionMessage>, EpsilonComparable<FootstepActionMessage>
 {
    /**
-            * Used for syncing action sequences
-            */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
-   /**
-            * Specifies the side of the robot that this message refers to.
+            * Side, left or right foot
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * Name of the frame the this action is expressed in
+            * The footstep's sole pose
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
-   /**
-            * Transform that expresses the footstep pose in the parent frame
-            */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
+   public us.ihmc.euclid.geometry.Pose3D sole_pose_;
 
    public FootstepActionMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
-      parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
-      transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      sole_pose_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
    public FootstepActionMessage(FootstepActionMessage other)
@@ -40,31 +33,20 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
 
    public void set(FootstepActionMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
 
-      parent_frame_.set(other.parent_frame_);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
-   }
-
-
-   /**
-            * Used for syncing action sequences
-            */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
-   {
-      return action_information_;
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.sole_pose_, sole_pose_);
    }
 
    /**
-            * Specifies the side of the robot that this message refers to.
+            * Side, left or right foot
             */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Specifies the side of the robot that this message refers to.
+            * Side, left or right foot
             */
    public byte getRobotSide()
    {
@@ -73,20 +55,11 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
 
 
    /**
-            * Name of the frame the this action is expressed in
+            * The footstep's sole pose
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getParentFrame()
+   public us.ihmc.euclid.geometry.Pose3D getSolePose()
    {
-      return parent_frame_;
-   }
-
-
-   /**
-            * Transform that expresses the footstep pose in the parent frame
-            */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToParent()
-   {
-      return transform_to_parent_;
+      return sole_pose_;
    }
 
 
@@ -107,12 +80,9 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
-
-      if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
+      if (!this.sole_pose_.epsilonEquals(other.sole_pose_, epsilon)) return false;
 
       return true;
    }
@@ -126,11 +96,9 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
 
       FootstepActionMessage otherMyClass = (FootstepActionMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
-      if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
+      if (!this.sole_pose_.equals(otherMyClass.sole_pose_)) return false;
 
       return true;
    }
@@ -141,14 +109,10 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepActionMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("parent_frame=");
-      builder.append(this.parent_frame_);      builder.append(", ");
-      builder.append("transform_to_parent=");
-      builder.append(this.transform_to_parent_);
+      builder.append("sole_pose=");
+      builder.append(this.sole_pose_);
       builder.append("}");
       return builder.toString();
    }
