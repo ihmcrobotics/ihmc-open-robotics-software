@@ -73,10 +73,11 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    public void updateCurrentlyExecuting()
    {
       desiredChestPose.setFromReferenceFrame(getReferenceFrame());
-      syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+      syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
       isExecuting = !completionCalculator.isComplete(desiredChestPose,
-                                                     syncedChestPose, Double.NaN, ORIENTATION_TOLERANCE,
+                                                     syncedChestPose,
+                                                     Double.NaN, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
                                                      BehaviorActionCompletionCalculator.Component.ORIENTATION);
@@ -87,7 +88,6 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
