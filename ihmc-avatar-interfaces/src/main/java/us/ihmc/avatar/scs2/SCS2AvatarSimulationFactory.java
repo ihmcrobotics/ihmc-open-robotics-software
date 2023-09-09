@@ -421,7 +421,7 @@ public class SCS2AvatarSimulationFactory
          componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
          if (parameters != null)
             componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
-         if (heightMapForFootstepZ.hasValue())
+         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
             componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
 
          steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;

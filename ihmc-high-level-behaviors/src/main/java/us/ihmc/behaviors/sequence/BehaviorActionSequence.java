@@ -89,7 +89,6 @@ public class BehaviorActionSequence
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
       addCommonFrames(referenceFrameLibrary, syncedRobot);
-      referenceFrameLibrary.build();
 
       updateSubscription = ros2.subscribe(SEQUENCE_COMMAND_TOPIC);
       manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
@@ -124,9 +123,9 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (ChestOrientationActionMessage message : latestUpdateMessage.getChestOrientationActions())
+         for (BodyPartPoseActionMessage message : latestUpdateMessage.getChestOrientationActions())
          {
-            ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot);
+            ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -142,7 +141,7 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandPoseActionMessage message : latestUpdateMessage.getHandPoseActions())
+         for (SidedBodyPartPoseActionMessage message : latestUpdateMessage.getHandPoseActions())
          {
             HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
             action.fromMessage(message);
@@ -154,9 +153,9 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (PelvisHeightActionMessage message : latestUpdateMessage.getPelvisHeightActions())
+         for (BodyPartPoseActionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
-            PelvisHeightAction action = new PelvisHeightAction(ros2);
+            PelvisHeightAction action = new PelvisHeightAction(ros2, referenceFrameLibrary, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }

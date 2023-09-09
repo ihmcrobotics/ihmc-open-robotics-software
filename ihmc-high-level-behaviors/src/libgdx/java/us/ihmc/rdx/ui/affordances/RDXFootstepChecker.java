@@ -12,7 +12,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,15 +27,14 @@ import java.util.ArrayList;
  */
 public class RDXFootstepChecker
 {
-   private final RDX3DPanel primary3DPanel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
    private final RDX3DPanelTooltip tooltip;
-
    private final SideDependentList<RigidBodyTransformReadOnly> syncedSolePoses = new SideDependentList<>();
+
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private String text = null;
    private boolean renderTooltip = false;
@@ -47,21 +45,11 @@ public class RDXFootstepChecker
                              FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
-      primary3DPanel = baseUI.getPrimary3DPanel();
-      tooltip = new RDX3DPanelTooltip(primary3DPanel);
-      primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
       snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
       stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);
-      setInitialFeet();
-   }
-
-   public void setInitialFeet()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         syncedSolePoses.put(side, syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToRoot());
-      }
    }
 
    public void getInput(ImGui3DViewInput input)
@@ -77,20 +65,22 @@ public class RDXFootstepChecker
       }
    }
 
-   // TODO: This should update candidate, stance, and swing in the ImGuiGDXManualFootstepPlacement,
-   //  updates RejectionReason, and generate warning message in the UI screen.
    public void checkValidStepList(RecyclingArrayList<RDXInteractableFootstep> stepList)
    {
       reasons.clear();
-      setInitialFeet();
-      // iterate through the list ( + current initial stance and swing) and check validity for all.
+
+      for (RobotSide side : RobotSide.values)
+      {
+         syncedSolePoses.put(side, syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToRoot());
+      }
+
+      // Iterate through the footstep list and check validity for all footsteps.
       for (int i = 0; i < stepList.size(); ++i)
       {
          checkValidSingleStep(stepList, stepList.get(i).getFootPose(), stepList.get(i).getFootstepSide(), i);
       }
    }
 
-   // Check the validity of a single step
    public void checkValidSingleStep(RecyclingArrayList<RDXInteractableFootstep> stepList,
                                     FramePose3DReadOnly candidateFootstepPose,
                                     RobotSide candidateStepSide,
@@ -127,7 +117,7 @@ public class RDXFootstepChecker
    /**
     * Sets the previousFootstepPose to the footstep on the opposite side of the candidateFootstepSide if it exists, otherwise set it to the current robot foot
     */
-   public FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList, int currentIndex, RobotSide candidateFootstepSide)
+   private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList, int currentIndex, RobotSide candidateFootstepSide)
    {
       FramePose3D previousFootstepPose = new FramePose3D();
 
@@ -182,11 +172,6 @@ public class RDXFootstepChecker
    public void setRenderTooltip(boolean renderTooltip)
    {
       this.renderTooltip = renderTooltip;
-   }
-
-   public RDX3DPanel getPrimary3DPanel()
-   {
-      return primary3DPanel;
    }
 
    public void update(RecyclingArrayList<RDXInteractableFootstep> footstepArrayList)
