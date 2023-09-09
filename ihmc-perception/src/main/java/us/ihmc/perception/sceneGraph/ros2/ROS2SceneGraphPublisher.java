@@ -49,6 +49,9 @@ public class ROS2SceneGraphPublisher
 
    private void packSceneTreeToMessage(SceneNode sceneNode, SceneGraphMessage sceneGraphMessage)
    {
+      // We handle packing the most specific types and then the more basic ones
+      // We keep track of the more basic ones so we can share the
+      // packing logic below.
       SceneNodeMessage sceneNodeMessage = null;
       DetectableSceneNodeMessage detectableSceneNodeMessage = null;
 
@@ -73,7 +76,7 @@ public class ROS2SceneGraphPublisher
 
       if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
       {
-         if (detectableSceneNodeMessage == null)
+         if (detectableSceneNodeMessage == null) // Just a detectable node
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
@@ -84,7 +87,7 @@ public class ROS2SceneGraphPublisher
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }
 
-      if (sceneNodeMessage == null)
+      if (sceneNodeMessage == null) // In this case the node is just the most basic type
       {
          sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.SCENE_NODE_TYPE);
          sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getSceneNodes().size());
