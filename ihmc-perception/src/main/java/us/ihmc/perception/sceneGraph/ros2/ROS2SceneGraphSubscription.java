@@ -67,8 +67,8 @@ public class ROS2SceneGraphSubscription
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
-         // TODO
          localTreeFrozen = false;
+         checkTreeModified(sceneGraph.getRootNode());
 
          mapLocalTree(sceneGraph.getRootNode());
          updateLocalTreeFromSubscription(subscriptionRootNode);
@@ -125,6 +125,16 @@ public class ROS2SceneGraphSubscription
       }
 
       return localNode;
+   }
+
+   private void checkTreeModified(SceneNode localNode)
+   {
+      localTreeFrozen |= localNode.operatorHasntModifiedThisRecently();
+
+      for (SceneNode child : localNode.getChildren())
+      {
+         checkTreeModified(child);
+      }
    }
 
    private void mapLocalTree(SceneNode localNode)
