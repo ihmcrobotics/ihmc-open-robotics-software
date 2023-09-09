@@ -15,7 +15,7 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "57406b04838c48a4dee8630199aa5dfe1a0b2b8edd228497716e1aa85605cb28";
+   		return "153774f9aaaf0e33c2ea09c4bf47cdc07826e228422833fb73d1f85457ecd461";
    }
    
    @Override

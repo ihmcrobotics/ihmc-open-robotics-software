@@ -24,6 +24,10 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
             * Transform of the node's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
+   /**
+            * Number of child nodes; used for serialization
+            */
+   public int number_of_children_;
 
    public SceneNodeMessage()
    {
@@ -45,6 +49,8 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       name_.append(other.name_);
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      number_of_children_ = other.number_of_children_;
+
    }
 
    /**
@@ -95,6 +101,21 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       return transform_to_world_;
    }
 
+   /**
+            * Number of child nodes; used for serialization
+            */
+   public void setNumberOfChildren(int number_of_children)
+   {
+      number_of_children_ = number_of_children;
+   }
+   /**
+            * Number of child nodes; used for serialization
+            */
+   public int getNumberOfChildren()
+   {
+      return number_of_children_;
+   }
+
 
    public static Supplier<SceneNodeMessagePubSubType> getPubSubType()
    {
@@ -118,6 +139,8 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
+
 
       return true;
    }
@@ -136,6 +159,8 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
+
 
       return true;
    }
@@ -151,7 +176,9 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
       builder.append("transform_to_world=");
-      builder.append(this.transform_to_world_);
+      builder.append(this.transform_to_world_);      builder.append(", ");
+      builder.append("number_of_children=");
+      builder.append(this.number_of_children_);
       builder.append("}");
       return builder.toString();
    }
