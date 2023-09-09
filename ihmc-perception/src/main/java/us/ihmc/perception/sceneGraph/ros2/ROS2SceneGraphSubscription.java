@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -32,6 +34,7 @@ public class ROS2SceneGraphSubscription
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
+   private final TLongObjectMap<SceneNode> disassembledTreeMap = new TLongObjectHashMap<>();
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
@@ -59,14 +62,12 @@ public class ROS2SceneGraphSubscription
          SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
          IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = sceneGraphMessage.getDetectableSceneNodes();
 
-         ROS2SceneGraphSubscriptionTree subscriptionNodeTree = new ROS2SceneGraphSubscriptionTree();
+         ROS2SceneGraphSubscriptionNode subscriptionNodeTree = new ROS2SceneGraphSubscriptionNode();
          buildSubscriptionTree(0, sceneGraphMessage, subscriptionNodeTree);
 
+         disassembleLocalTree(sceneGraph.getRootNode());
 
-         invalidate(sceneGraph.getRootNode());
-
-
-
+         updateLocalTreeFromSubscription(subscriptionNodeTree, sceneGraph.getRootNode());
 
          // We group this because with a tree structure, modification propagate.
          // Maybe we should build that in at some point instead of freezing the whole tree,
@@ -137,48 +138,72 @@ public class ROS2SceneGraphSubscription
       return newMessageAvailable;
    }
 
-   private void synchronize(SceneNode sceneNode)
+   private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode, SceneNode localNode)
    {
+      for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
+      {
+         SceneNode localChildNode = disassembledTreeMap.get(subscriptionChildNode.getSceneNodeMessage().getId());
 
+         if (localChildNode == null) // New node that wasn't in the local tree
+         {
+            localChildNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionChildNode);
+         }
+
+
+
+
+
+         localNode.getChildren().add(localChildNode);
+         updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode);
+      }
    }
 
-   private void buildSubscriptionTree(int index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionTree subscriptionTreeNode)
+   private void disassembleLocalTree(SceneNode localNode)
+   {
+      disassembledTreeMap.put(localNode.getID(), localNode);
+
+      for (SceneNode child : localNode.getChildren())
+      {
+         disassembleLocalTree(child);
+      }
+
+      localNode.getChildren().clear();
+   }
+
+   private void buildSubscriptionTree(int index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
       byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index);
       int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(index);
       switch (sceneNodeType)
       {
          case SceneGraphMessage.SCENE_NODE_TYPE ->
-               subscriptionTreeNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
+               subscriptionNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
          case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE ->
          {
             DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(indexInTypesList);
-            subscriptionTreeNode.setDetectableSceneNodeMessage(detectableSceneNodeMessage);
-            subscriptionTreeNode.setSceneNodeMessage(detectableSceneNodeMessage.getSceneNode());
+            subscriptionNode.setDetectableSceneNodeMessage(detectableSceneNodeMessage);
+            subscriptionNode.setSceneNodeMessage(detectableSceneNodeMessage.getSceneNode());
          }
          case SceneGraphMessage.ARUCO_MARKER_NODE_TYPE ->
          {
             ArUcoMarkerNodeMessage arUcoMarkerNodeMessage = sceneGraphMessage.getArucoMarkerSceneNodes().get(indexInTypesList);
-            subscriptionTreeNode.setArUcoMarkerNodeMessage(arUcoMarkerNodeMessage);
-            subscriptionTreeNode.setDetectableSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode());
-            subscriptionTreeNode.setSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode().getSceneNode());
+            subscriptionNode.setArUcoMarkerNodeMessage(arUcoMarkerNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
          {
             StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().get(indexInTypesList);
-            subscriptionTreeNode.setStaticRelativeSceneNodeMessageeMessage(staticRelativeSceneNodeMessage);
-            subscriptionTreeNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getSceneNode());
+            subscriptionNode.setStaticRelativeSceneNodeMessageeMessage(staticRelativeSceneNodeMessage);
+            subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getSceneNode());
          }
       }
-   }
 
-   private void invalidate(SceneNode sceneNode)
-   {
-      sceneNode.setIsValid(false);
-
-      for (SceneNode child : sceneNode.getChildren())
+      for (int i = 0; i < subscriptionNode.getSceneNodeMessage().getNumberOfChildren(); i++)
       {
-         invalidate(child);
+         ROS2SceneGraphSubscriptionNode subscriptionTreeChildNode = new ROS2SceneGraphSubscriptionNode();
+         buildSubscriptionTree(index++, sceneGraphMessage, subscriptionTreeChildNode);
+         subscriptionNode.getChildren().add(subscriptionTreeChildNode);
       }
    }
 
