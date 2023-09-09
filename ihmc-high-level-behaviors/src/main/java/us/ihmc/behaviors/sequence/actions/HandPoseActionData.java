@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.HandPoseActionMessage;
+import behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -55,7 +55,7 @@ public class HandPoseActionData implements BehaviorActionData
       palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
-   public void toMessage(HandPoseActionMessage message)
+   public void toMessage(SidedBodyPartPoseActionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -64,7 +64,7 @@ public class HandPoseActionData implements BehaviorActionData
       message.setTrajectoryDuration(trajectoryDuration);
    }
 
-   public void fromMessage(HandPoseActionMessage message)
+   public void fromMessage(SidedBodyPartPoseActionMessage message)
    {
       palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       palmFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
