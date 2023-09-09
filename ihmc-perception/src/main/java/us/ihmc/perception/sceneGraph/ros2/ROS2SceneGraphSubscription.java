@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -34,7 +33,8 @@ public class ROS2SceneGraphSubscription
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
-   private final TLongObjectMap<SceneNode> disassembledTreeMap = new TLongObjectHashMap<>();
+   private boolean localTreeFrozen = false;
+   private final TLongObjectMap<SceneNode> idToLocalNodeMap = new TLongObjectHashMap<>();
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
@@ -62,112 +62,82 @@ public class ROS2SceneGraphSubscription
          SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
          IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = sceneGraphMessage.getDetectableSceneNodes();
 
-         ROS2SceneGraphSubscriptionNode subscriptionNodeTree = new ROS2SceneGraphSubscriptionNode();
-         buildSubscriptionTree(0, sceneGraphMessage, subscriptionNodeTree);
+         ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
+         buildSubscriptionTree(0, sceneGraphMessage, subscriptionRootNode);
 
-         disassembleLocalTree(sceneGraph.getRootNode());
+         // If the tree was recently modified by the operator, we do not accept
+         // updates the structure of the tree.
+         // TODO
+         localTreeFrozen = false;
 
-         updateLocalTreeFromSubscription(subscriptionNodeTree, sceneGraph.getRootNode());
-
-         // We group this because with a tree structure, modification propagate.
-         // Maybe we should build that in at some point instead of freezing the whole tree,
-         // but it's good enough for now.
-         boolean operatorHasntModifiedAnythingRecently = true;
-         for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
-         {
-            operatorHasntModifiedAnythingRecently &= detectableSceneNode.operatorHasntModifiedThisRecently();
-         }
-
-         // We assume the nodes are in the same order on both sides. This is to avoid O(n^2) complexity.
-         // We could improve on this design later.
-         for (int i = 0; i < detectableSceneNodeMessages.size(); i++)
-         {
-            DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(i);
-            DetectableSceneNode detectableSceneNode = detectableSceneNodes.get(i);
-
-            if (detectableSceneNodeMessage.getNameAsString().equals(detectableSceneNode.getName()))
-            {
-               detectableSceneNode.setCurrentlyDetected(detectableSceneNodeMessage.getCurrentlyDetected());
-
-               // We must synchronize the ArUco marker frames so we can reset overriden node
-               // poses back to ArUco relative ones.
-               // The ArUco frame is the parent so we should update it first.
-               if (detectableSceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
-               {
-                  MessageTools.toEuclid(detectableSceneNodeMessage.getArucoMarkerTransformToWorld(), arUcoMarkerToWorldTransform);
-                  arUcoMarkerPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), arUcoMarkerToWorldTransform);
-                  arUcoMarkerPose.changeFrame(arUcoMarkerNode.getNodeFrame().getParent());
-                  arUcoMarkerPose.get(arUcoMarkerNode.getNodeToParentFrameTransform());
-                  arUcoMarkerNode.getNodeFrame().update();
-               }
-               if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
-               {
-                  staticRelativeNode.setCurrentDistance(detectableSceneNodeMessage.getCurrentDistanceToRobot());
-               }
-
-               // If the node was recently modified by the operator, the node does not accept
-               // updates of the "track detected pose" setting. This is to allow the operator's changes to propagate
-               // and so it doesn't get overriden immediately by an out of date message coming from the robot.
-               // On the robot side, this will always get updated because there is no operator.
-               if (operatorHasntModifiedAnythingRecently)
-               {
-                  detectableSceneNode.setTrackDetectedPose(detectableSceneNodeMessage.getTrackDetectedPose());
-                  if (detectableSceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
-                  {
-                     arUcoMarkerNode.setBreakFrequency(detectableSceneNodeMessage.getBreakFrequency());
-                  }
-                  if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
-                  {
-                     staticRelativeNode.setDistanceToDisableTracking(detectableSceneNodeMessage.getDistanceToDisableTracking());
-                  }
-
-                  MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
-                  nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-                  nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
-                  nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
-                  detectableSceneNode.getNodeFrame().update();
-               }
-            }
-            else
-            {
-               LogTools.warn("Scene graph nodes are out of sync. %s != %s".formatted(detectableSceneNodeMessage.getNameAsString(),
-                                                                                     detectableSceneNode.getName()));
-            }
-         }
+         mapLocalTree(sceneGraph.getRootNode());
+         updateLocalTreeFromSubscription(subscriptionRootNode);
       }
       return newMessageAvailable;
    }
 
-   private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode, SceneNode localNode)
+   private SceneNode updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
-      for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
-      {
-         SceneNode localChildNode = disassembledTreeMap.get(subscriptionChildNode.getSceneNodeMessage().getId());
+      SceneNode localNode = idToLocalNodeMap.get(subscriptionNode.getSceneNodeMessage().getId());
 
-         if (localChildNode == null) // New node that wasn't in the local tree
+      if (!localTreeFrozen && localNode == null) // New node that wasn't in the local tree
+      {
+         localNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode);
+      }
+
+      if (localNode instanceof DetectableSceneNode detectableSceneNode)
+      {
+         detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
+      }
+      if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+      {
+         staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getCurrentDistanceToRobot());
+      }
+
+      // If the node was recently modified by the operator, the node does not accept
+      // updates of these values. This is to allow the operator's changes to propagate
+      // and so it doesn't get overriden immediately by an out of date message coming from the robot.
+      // On the robot side, this will always get updated because there is no operator.
+      if (!localTreeFrozen)
+      {
+         if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
          {
-            localChildNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionChildNode);
+            arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
+         }
+         if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+         {
+            staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getDistanceToDisableTracking());
          }
 
-
-
-
-
-         localNode.getChildren().add(localChildNode);
-         updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode);
+         MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
+         nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
+         nodePose.changeFrame(localNode.getNodeFrame().getParent());
+         nodePose.get(localNode.getNodeToParentFrameTransform());
+         localNode.getNodeFrame().update();
       }
+
+      for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
+      {
+         SceneNode localChildNode = updateLocalTreeFromSubscription(subscriptionChildNode);
+
+         if (!localTreeFrozen)
+            localNode.getChildren().add(localChildNode);
+      }
+
+      return localNode;
    }
 
-   private void disassembleLocalTree(SceneNode localNode)
+   private void mapLocalTree(SceneNode localNode)
    {
-      disassembledTreeMap.put(localNode.getID(), localNode);
+      idToLocalNodeMap.put(localNode.getID(), localNode);
 
       for (SceneNode child : localNode.getChildren())
       {
-         disassembleLocalTree(child);
+         mapLocalTree(child);
       }
 
-      localNode.getChildren().clear();
+      if (!localTreeFrozen)
+         localNode.getChildren().clear();
    }
 
    private void buildSubscriptionTree(int index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
