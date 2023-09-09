@@ -34,8 +34,6 @@ public class SceneNode
     * This is to allow the changes to propagate elsewhere.
     */
    private final Timer modifiedTimer = new Timer();
-   /** Used for updating the tree with incoming copies. */
-   private boolean isValid = true;
 
    public SceneNode(long id, String name)
    {
@@ -111,15 +109,5 @@ public class SceneNode
    public boolean operatorHasntModifiedThisRecently()
    {
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
-   }
-
-   public void setIsValid(boolean isValid)
-   {
-      this.isValid = isValid;
-   }
-
-   public boolean getIsValid()
-   {
-      return isValid;
    }
 }

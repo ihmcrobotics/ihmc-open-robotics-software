@@ -8,7 +8,7 @@ import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ROS2SceneGraphSubscriptionTree
+public class ROS2SceneGraphSubscriptionNode
 {
    private byte type;
    private SceneNodeMessage sceneNodeMessage;
@@ -16,7 +16,7 @@ public class ROS2SceneGraphSubscriptionTree
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessageeMessage;
 
-   private final List<ROS2SceneGraphSubscriptionTree> children = new ArrayList<>();
+   private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
    public byte getType()
    {
@@ -68,7 +68,7 @@ public class ROS2SceneGraphSubscriptionTree
       this.staticRelativeSceneNodeMessageeMessage = staticRelativeSceneNodeMessageeMessage;
    }
 
-   public List<ROS2SceneGraphSubscriptionTree> getChildren()
+   public List<ROS2SceneGraphSubscriptionNode> getChildren()
    {
       return children;
    }
