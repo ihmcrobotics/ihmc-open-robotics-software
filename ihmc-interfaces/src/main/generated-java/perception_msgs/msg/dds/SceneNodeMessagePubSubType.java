@@ -15,7 +15,7 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f474739d66d2b417fcc861c451fbba1e03c59db097a41462c50ea85f386428d4";
+   		return "4cdf4fa3092b10060f7d9bfe5af9389312d0b6cf96be32565169526081a73f92";
    }
    
    @Override
@@ -57,6 +57,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +79,9 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +95,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
           throw new RuntimeException("name field exceeds the maximum length");
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
+      cdr.write_type_3(data.getNumberOfChildren());
+
    }
 
    public static void read(perception_msgs.msg.dds.SceneNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -98,6 +105,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       cdr.read_type_d(data.getName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
+      data.setNumberOfChildren(cdr.read_type_3());
+      	
 
    }
 
@@ -108,6 +117,7 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_d("name", data.getName());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      ser.write_type_3("number_of_children", data.getNumberOfChildren());
    }
 
    @Override
@@ -117,6 +127,7 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.read_type_d("name", data.getName());
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      data.setNumberOfChildren(ser.read_type_3("number_of_children"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SceneNodeMessage src, perception_msgs.msg.dds.SceneNodeMessage dest)
