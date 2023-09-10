@@ -6,9 +6,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  * This node stays in the same spot relative to where a parent scene node
  * at the time it is seen up close.
  *
- * Once it has been seen up close, the pose of this node is set as known
- * and does not move until {@link #setTrackDetectedPose} is called.
- *
  * The whole point of this is so we don't have to put markers on everything,
  * especially things that don't move.
  */

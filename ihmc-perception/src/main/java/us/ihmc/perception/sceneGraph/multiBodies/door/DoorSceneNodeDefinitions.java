@@ -125,6 +125,7 @@ public class DoorSceneNodeDefinitions
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
@@ -138,6 +139,7 @@ public class DoorSceneNodeDefinitions
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
@@ -152,6 +154,7 @@ public class DoorSceneNodeDefinitions
                                                                  PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                  DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
       node.getNodeToParentFrameTransform().set(PULL_DOOR_FRAME_TO_PANEL_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
@@ -165,6 +168,7 @@ public class DoorSceneNodeDefinitions
                                                                  PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                  DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
       node.getNodeToParentFrameTransform().set(PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
@@ -177,6 +181,7 @@ public class DoorSceneNodeDefinitions
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
@@ -189,6 +194,7 @@ public class DoorSceneNodeDefinitions
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);

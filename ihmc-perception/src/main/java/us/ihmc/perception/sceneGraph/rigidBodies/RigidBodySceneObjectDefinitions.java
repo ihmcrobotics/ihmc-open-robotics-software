@@ -56,6 +56,7 @@ public class RigidBodySceneObjectDefinitions
                                                                            BOX_VISUAL_MODEL_FILE_PATH,
                                                                            BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(BOX_TRANSFORM_TO_MARKER);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
@@ -71,6 +72,7 @@ public class RigidBodySceneObjectDefinitions
                                                                            CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                                                            CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
+      node.setOriginalParentID(parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
