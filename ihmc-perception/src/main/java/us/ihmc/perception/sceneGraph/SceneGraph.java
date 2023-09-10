@@ -17,8 +17,8 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
  */
 public class SceneGraph
 {
-   public static final MutableInt NEXT_ID = new MutableInt();
-   private final SceneNode rootNode = new SceneNode(NEXT_ID.getAndIncrement(), "SceneGraphRoot");
+   private final MutableInt nextID = new MutableInt();
+   private final SceneNode rootNode = new SceneNode(nextID.getAndIncrement(), "SceneGraphRoot");
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -77,6 +77,11 @@ public class SceneGraph
    public SceneNode getRootNode()
    {
       return rootNode;
+   }
+
+   public MutableInt getNextID()
+   {
+      return nextID;
    }
 
    public TLongObjectMap<SceneNode> getIDToNodeMap()

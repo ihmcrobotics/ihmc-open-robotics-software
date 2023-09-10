@@ -118,85 +118,79 @@ public class DoorSceneNodeDefinitions
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
    }
 
-   public static PredefinedRigidBodySceneNode createPullDoorPanel(SceneNode parentNode)
+   public static PredefinedRigidBodySceneNode createPullDoorPanel(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PullDoorPanel",
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
       return node;
    }
 
-   public static PredefinedRigidBodySceneNode createPushDoorPanel(SceneNode parentNode)
+   public static PredefinedRigidBodySceneNode createPushDoorPanel(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PushDoorPanel",
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
       return node;
    }
 
-   public static void createPullDoorFrame(SceneNode parentNode)
+   public static void createPullDoorFrame(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      StaticRelativeSceneNode node = new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                  "PullDoorFrame",
                                                                  DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                                  PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                  DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
       node.getNodeToParentFrameTransform().set(PULL_DOOR_FRAME_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
    }
 
-   public static void createPushDoorFrame(SceneNode parentNode)
+   public static void createPushDoorFrame(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      StaticRelativeSceneNode node = new StaticRelativeSceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                  "PushDoorFrame",
                                                                  DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                                  PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                  DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
       node.getNodeToParentFrameTransform().set(PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
    }
 
-   public static void createPushDoorLeverHandle(SceneNode parentNode)
+   public static void createPushDoorLeverHandle(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PushDoorLeverHandle",
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
    }
 
-   public static void createPullDoorLeverHandle(SceneNode parentNode)
+   public static void createPullDoorLeverHandle(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PullDoorLeverHandle",
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
    }
 }
