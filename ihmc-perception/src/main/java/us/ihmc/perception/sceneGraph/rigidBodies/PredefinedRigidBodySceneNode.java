@@ -2,8 +2,10 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
+
+import java.util.function.Supplier;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is
@@ -24,7 +26,8 @@ public class PredefinedRigidBodySceneNode extends SceneNode
    private final RigidBodyTransform visualModelToNodeFrameTransform;
    /** ID of parent node when tracking. */
    private long originalParentID;
-   private ReferenceFrameSupplier originalParentFrameSupplier;
+   private Supplier<SceneNode> originalParentNodeSupplier;
+   private Supplier<SceneNode> rootNodeSupplier;
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
 
@@ -45,24 +48,11 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       return visualModelToNodeFrameTransform;
    }
 
-   public void setOriginalParentID(long originalParentID)
+   public void setOriginalParentID(SceneGraph sceneGraph, long originalParentID)
    {
       this.originalParentID = originalParentID;
-   }
-
-   public long getOriginalParentID()
-   {
-      return originalParentID;
-   }
-
-   public void setOriginalParentFrame(ReferenceFrameSupplier parentFrameSupplier)
-   {
-      this.originalParentFrameSupplier = parentFrameSupplier;
-   }
-
-   public ReferenceFrameSupplier getOriginalParentFrame()
-   {
-      return originalParentFrameSupplier;
+      originalParentNodeSupplier = () -> sceneGraph.getIDToNodeMap().get(originalParentID);
+      rootNodeSupplier = sceneGraph::getRootNode;
    }
 
    public void setOriginalTransformToParent(RigidBodyTransform originalTransformToParent)
@@ -76,22 +66,17 @@ public class PredefinedRigidBodySceneNode extends SceneNode
     */
    public void clearOffset()
    {
-      if (originalParentFrameSupplier.get() != getNodeFrame().getParent())
+      if (getNodeFrame().getParent() != rootNodeSupplier.get().getNodeFrame())
       {
-         originalPose.setToZero(originalParentFrameSupplier.get());
-         originalPose.set(getOriginalTransformToParent());
+         SceneNode originalParentNode = originalParentNodeSupplier.get();
+         originalPose.setIncludingFrame(originalParentNode.getNodeFrame(), originalTransformToParent);
          originalPose.changeFrame(getNodeFrame().getParent());
          originalPose.get(getNodeToParentFrameTransform());
       }
       else
       {
-         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
+         getNodeToParentFrameTransform().set(originalTransformToParent);
       }
       getNodeFrame().update();
-   }
-
-   public RigidBodyTransform getOriginalTransformToParent()
-   {
-      return originalTransformToParent;
    }
 }

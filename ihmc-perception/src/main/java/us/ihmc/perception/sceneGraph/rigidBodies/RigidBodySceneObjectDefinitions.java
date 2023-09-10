@@ -49,32 +49,30 @@ public class RigidBodySceneObjectDefinitions
       MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
    }
 
-   public static void createBox(SceneNode parentNode)
+   public static void createBox(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "Box",
                                                                            BOX_VISUAL_MODEL_FILE_PATH,
                                                                            BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(BOX_TRANSFORM_TO_MARKER);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
    }
 
    /**
     * Represents a can of soup detected by a statically nearby placed ArUco marker.
     */
-   public static void createCanOfSoup(SceneNode parentNode)
+   public static void createCanOfSoup(SceneGraph sceneGraph, SceneNode parentNode)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(SceneGraph.NEXT_ID.getAndIncrement(),
+      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "CanOfSoup",
                                                                            CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                                                            CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       node.getNodeToParentFrameTransform().setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
-      node.setOriginalParentID(parentNode.getID());
+      node.setOriginalParentID(sceneGraph, parentNode.getID());
       node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
-      node.setOriginalParentFrame(parentNode::getNodeFrame);
       parentNode.getChildren().add(node);
    }
 }
