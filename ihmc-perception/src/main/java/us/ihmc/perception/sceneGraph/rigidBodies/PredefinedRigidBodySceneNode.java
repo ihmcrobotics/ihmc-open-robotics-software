@@ -22,6 +22,8 @@ public class PredefinedRigidBodySceneNode extends SceneNode
 {
    private final String visualModelFilePath;
    private final RigidBodyTransform visualModelToNodeFrameTransform;
+   /** ID of parent node when tracking. */
+   private long originalParentID;
    private ReferenceFrameSupplier originalParentFrameSupplier;
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
@@ -41,6 +43,16 @@ public class PredefinedRigidBodySceneNode extends SceneNode
    public RigidBodyTransform getVisualModelToNodeFrameTransform()
    {
       return visualModelToNodeFrameTransform;
+   }
+
+   public void setOriginalParentID(long originalParentID)
+   {
+      this.originalParentID = originalParentID;
+   }
+
+   public long getOriginalParentID()
+   {
+      return originalParentID;
    }
 
    public void setOriginalParentFrame(ReferenceFrameSupplier parentFrameSupplier)

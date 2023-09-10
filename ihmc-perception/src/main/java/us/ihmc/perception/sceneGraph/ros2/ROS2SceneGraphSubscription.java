@@ -1,7 +1,5 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -34,7 +32,6 @@ public class ROS2SceneGraphSubscription
    private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
-   private final TLongObjectMap<SceneNode> idToLocalNodeMap = new TLongObjectHashMap<>();
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
@@ -70,7 +67,9 @@ public class ROS2SceneGraphSubscription
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
 
-         mapLocalTree(sceneGraph.getRootNode());
+         sceneGraph.updateIDMap();
+         if (!localTreeFrozen)
+            clearChildren(sceneGraph.getRootNode());
          updateLocalTreeFromSubscription(subscriptionRootNode);
       }
       return newMessageAvailable;
@@ -78,7 +77,7 @@ public class ROS2SceneGraphSubscription
 
    private SceneNode updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
-      SceneNode localNode = idToLocalNodeMap.get(subscriptionNode.getSceneNodeMessage().getId());
+      SceneNode localNode = sceneGraph.getIDToNodeMap().get(subscriptionNode.getSceneNodeMessage().getId());
 
       if (!localTreeFrozen && localNode == null) // New node that wasn't in the local tree
       {
@@ -137,17 +136,14 @@ public class ROS2SceneGraphSubscription
       }
    }
 
-   private void mapLocalTree(SceneNode localNode)
+   private void clearChildren(SceneNode localNode)
    {
-      idToLocalNodeMap.put(localNode.getID(), localNode);
-
       for (SceneNode child : localNode.getChildren())
       {
-         mapLocalTree(child);
+         clearChildren(child);
       }
 
-      if (!localTreeFrozen)
-         localNode.getChildren().clear();
+      localNode.getChildren().clear();
    }
 
    private void buildSubscriptionTree(int index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)

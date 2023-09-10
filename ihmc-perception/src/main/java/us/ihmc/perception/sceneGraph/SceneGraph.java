@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,9 +18,13 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 public class SceneGraph
 {
    public static final MutableInt NEXT_ID = new MutableInt();
-
    private final SceneNode rootNode = new SceneNode(NEXT_ID.getAndIncrement(), "SceneGraphRoot");
-
+   /**
+    * Useful for accessing nodes by ID instead of searching.
+    * Also, sometimes, the tree will be disassembled and this is used in putting it
+    * back together.
+    */
+   private final TLongObjectMap<SceneNode> idToNodeMap = new TLongObjectHashMap<>();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
 
    public SceneGraph()
@@ -52,8 +58,29 @@ public class SceneGraph
       });
    }
 
+   public void updateIDMap()
+   {
+      idToNodeMap.clear();
+      updateIDMap(rootNode);
+   }
+
+   private void updateIDMap(SceneNode node)
+   {
+      idToNodeMap.put(node.getID(), node);
+
+      for (SceneNode child : node.getChildren())
+      {
+         updateIDMap(child);
+      }
+   }
+
    public SceneNode getRootNode()
    {
       return rootNode;
+   }
+
+   public TLongObjectMap<SceneNode> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 }
