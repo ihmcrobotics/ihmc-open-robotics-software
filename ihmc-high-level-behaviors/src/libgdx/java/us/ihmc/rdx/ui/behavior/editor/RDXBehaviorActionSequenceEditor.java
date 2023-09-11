@@ -24,6 +24,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -177,6 +178,7 @@ public class RDXBehaviorActionSequenceEditor
                action.updateAfterLoading();
                action.update();
                actionSequence.add(action);
+               action.getExecutionWithNextAction().set(false);
                action.getSelected().set(false);
                action.getExpanded().set(false);
                action.getExecutionWithNextAction().set(false);
@@ -254,7 +256,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXBehaviorAction action = actionSequence.get(i);
          action.setActionIndex(i);
-         action.setActionNextExcecutionIndex(executionNextIndexStatus);
+         action.setActionNextExecutionIndex(executionNextIndexStatus);
          action.update();
       }
    }

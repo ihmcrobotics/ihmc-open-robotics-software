@@ -21,18 +21,18 @@ public abstract class RDXBehaviorAction
 {
    private final MutableBoolean selected = new MutableBoolean();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   protected final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
+   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
                                                                            selected::setValue,
                                                                            imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   protected final MutableBoolean executeWithNextAction = new MutableBoolean(false);
-   protected final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(executeWithNextAction::booleanValue,
+   private final MutableBoolean executeWithNextAction = new MutableBoolean();
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(executeWithNextAction::booleanValue,
                                                                                       executeWithNextAction::setValue,
                                                                                       imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"),
                                                                                                                   imBoolean));
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
    private int actionIndex = -1;
-   private int actionNextExcecutionIndex = -1;
+   private int actionNextExecutionIndex = -1;
 
    public RDXBehaviorAction()
    {
@@ -121,13 +121,13 @@ public abstract class RDXBehaviorAction
       this.actionIndex = actionIndex;
    }
 
-   public int getActionNextExcecutionIndex()
+   public int getActionNextExecutionIndex()
    {
-      return actionNextExcecutionIndex;
+      return actionNextExecutionIndex;
    }
 
-   public void setActionNextExcecutionIndex(int actionNextExcecutionIndex)
+   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
    {
-      this.actionNextExcecutionIndex = actionNextExcecutionIndex;
+      this.actionNextExecutionIndex = actionNextExecutionIndex;
    }
 }

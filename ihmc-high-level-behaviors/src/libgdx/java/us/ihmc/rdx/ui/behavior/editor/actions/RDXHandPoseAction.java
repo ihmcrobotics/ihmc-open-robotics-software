@@ -1,14 +1,12 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
-import boofcv.alg.sfm.DepthSparse3D;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
@@ -208,7 +206,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
-      displayIKSolution = getActionIndex() == getActionNextExcecutionIndex();
+      displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
       if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
       {
          HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
