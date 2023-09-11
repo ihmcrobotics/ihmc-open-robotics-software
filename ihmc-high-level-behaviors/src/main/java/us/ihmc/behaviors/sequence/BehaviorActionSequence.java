@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
+import gnu.trove.list.array.TByteArrayList;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
@@ -17,12 +18,15 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Manages running a sequence of actions on the robot with shared autonomy.
@@ -42,8 +46,6 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Empty> MANUALLY_EXECUTE_NEXT_ACTION_TOPIC = COMMAND_TOPIC.withType(Empty.class).withSuffix("manually_execute_next_action");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
-   public static final ROS2Topic<SimultaneousActionsExecutionMessage> SIMULTANEOUS_ACTIONS_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(SimultaneousActionsExecutionMessage.class).withSuffix("simultaneous_actions_execution");
-   public static final ROS2Topic<SimultaneousActionsExecutionMessage> SIMULTANEOUS_ACTIONS_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(SimultaneousActionsExecutionMessage.class).withSuffix("simultaneous_actions_execution");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> HAND_POSE_JOINT_ANGLES_STATUS
