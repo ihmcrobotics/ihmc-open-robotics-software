@@ -157,9 +157,14 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
          ImGui.endTabBar();
       }
 
-      if (ImGui.button("Capture"))
+      if (ImGui.button("Log Map Regions"))
       {
          mappingManager.logMapRegions();
+      }
+
+      if (ImGui.button("Log Aggregate Regions"))
+      {
+         mappingManager.logAggregateRegions();
       }
 
       ImGui.checkbox("Show Parameter Tuners", mappingParametersTuner.getIsShowing());

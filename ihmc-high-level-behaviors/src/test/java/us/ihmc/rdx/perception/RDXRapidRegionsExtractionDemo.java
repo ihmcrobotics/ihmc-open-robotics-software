@@ -44,7 +44,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_204753_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("TUM_Dataset_01.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
@@ -99,7 +99,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createForPerspective(720, 1280, false); // Real D455
+            createForPerspective(480, 640, false); // TUM RGB-D
+            //createForPerspective(720, 1280, false); // Real D455
             //createForPerspective(768, 1024, false); // Real L515
             //createForPerspective(768, 1280, true); // Simulated L515
 
@@ -165,16 +166,17 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 //            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
 //            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
+            // TUM Intrinsics: 525.0,525.0,319.5,239.5
+            // D455 Intrinsics: 654.29,654.29,651.14,361.89
+
             String version = simulation ? "Simulation" : "";
             rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
                                                                           openCLProgram,
                                                                           depthHeight,
                                                                           depthWidth,
-                                                                          654.29,
-                                                                          654.29,
-                                                                          651.14,
-                                                                          361.89,
+                                                                          525.0,525.0,319.5,239.5,
                                                                           version);
+            rapidPlanarRegionsExtractor.setDepthScalar(5000.0f);
             rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
 
             pointCloudRenderer.create(depthHeight * depthWidth);

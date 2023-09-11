@@ -88,6 +88,7 @@ public class PlanarRegionMappingHandler
    private FramePlanarRegionsList previousRegions;
    private FramePlanarRegionsList currentRegions;
 
+   private PlanarRegionsList aggregateRegions = new PlanarRegionsList();
    private PlanarRegionMap planarRegionMap;
    private PlanarRegionsListLogger planarRegionsListLogger;
 
@@ -212,6 +213,16 @@ public class PlanarRegionMappingHandler
       planarRegionsListLogger.update(System.currentTimeMillis(), planarRegionMap.getMapRegions());
    }
 
+   public void logAggregateRegions()
+   {
+      if (planarRegionsListLogger == null)
+      {
+         planarRegionsListLogger = new PlanarRegionsListLogger("planar-region-logger", 1);
+         planarRegionsListLogger.start();
+      }
+      planarRegionsListLogger.update(System.currentTimeMillis(), aggregateRegions);
+   }
+
    private void launchMapper()
    {
       updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -282,12 +293,16 @@ public class PlanarRegionMappingHandler
          if (framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
          {
             planarRegionMap.setModified(true);
-            boolean wasKeyframe = updateMapWithNewRegions(framePlanarRegionsList);
+            RigidBodyTransform keyframePose = updateMapWithNewRegions(framePlanarRegionsList);
 
-            planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
-
-            if (wasKeyframe)
-               LogTools.info("[{}] Statistics: {}", perceptionLogIndex, planarRegionMap.getStatistics());
+            if (keyframePose != null)
+            {
+               planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
+               PlanarRegionsList regionsToAggregate = framePlanarRegionsList.getPlanarRegionsList().copy();
+               regionsToAggregate.applyTransform(keyframePose);
+               aggregateRegions.addPlanarRegionsList(regionsToAggregate);
+               LogTools.info("[{}] Statistics: {}, Aggregate: {}", perceptionLogIndex, planarRegionMap.getStatistics(), aggregateRegions.getNumberOfPlanarRegions());
+            }
          }
 
          perceptionLogIndex += 1;
@@ -330,7 +345,7 @@ public class PlanarRegionMappingHandler
       return modified;
    }
 
-   public boolean updateMapWithNewRegions(FramePlanarRegionsList regions)
+   public RigidBodyTransform updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
       planarRegionMap.setModified(true);
 
@@ -341,7 +356,6 @@ public class PlanarRegionMappingHandler
       if (keyframePose != null)
       {
          latestKeyframePoseForRendering.set(keyframePose);
-         return true;
       }
 
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
@@ -349,7 +363,7 @@ public class PlanarRegionMappingHandler
 
       LogTools.debug("Total Regions in Map: {}", planarRegionMap.getMapRegions().getNumberOfPlanarRegions());
 
-      return false;
+      return keyframePose;
    }
 
    public void resetMap()

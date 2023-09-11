@@ -71,7 +71,7 @@ def get_point_cloud(data, i):
     depth_metric = np.array(depth * 0.001, dtype=np.float32)
     depth_map = torch.tensor(depth_metric, dtype=torch.float32)
     points = fast_convert_depth_to_cloud(depth_map, K)
-    points = filter_by_distance(points, 0.5, 2.0)
+    points = filter_by_distance(points, 0.5, 1.5)
     return points, depth
 
 def convert_depth_to_cloud(depth, params):
@@ -118,8 +118,8 @@ if __name__ == "__main__":
     pcd_target.points = o3d.utility.Vector3dVector(points_target)
     pcd_target.colors = o3d.utility.Vector3dVector(np.array([[i / len(points_target), 0, 0] for i in range(len(points_target))]))
     
-    display_image(data, source, "l515/depth", 0, "Depth Source")
-    display_image(data, target, "l515/depth", 0, "Depth Target")
+    # display_image(data, source, "l515/depth", 0, "Depth Source")
+    # display_image(data, target, "l515/depth", 0, "Depth Target")
 
     o3d.visualization.draw_geometries([pcd_source, pcd_target])
     

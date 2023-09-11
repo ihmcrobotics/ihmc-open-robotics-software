@@ -219,7 +219,7 @@ def analyzer_main():
     
 #     plotter_main(data, output_file)
 
-def kitti_main():
+def create_from_KITTI():
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
 
@@ -229,16 +229,44 @@ def kitti_main():
     dataset_paths = ['/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/']
     group_names = ['/kitti/left/']
 
-    # data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
+    data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
 
-    # data = insert_image_datasets(data, dataset_paths, group_names)
-    # data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
-    # data = insert_poses(data, poses_path, '/kitti/time/')
+    data = insert_image_datasets(data, dataset_paths, group_names)
+    data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
+    data = insert_poses(data, poses_path, '/kitti/time/')
 
-    # data.close()
+    data.close()
 
     data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'r')
     print_file_info(data, 'KITTI_Dataset_00.hdf5')
+
+def create_from_TUM(path):
+
+    depth_info = '/home/quantum/Workspace/Storage/Other/Temp/TUM/rgbd_dataset_freiburg1_xyz/depth.txt'
+    gt_info = '/home/quantum/Workspace/Storage/Other/Temp/TUM/rgbd_dataset_freiburg1_xyz/groundtruth.txt'
+
+    depth_path = '/home/quantum/Workspace/Storage/Other/Temp/TUM/rgbd_dataset_freiburg1_xyz/depth/'
+
+    data = h5py.File(path + 'TUM_Dataset_01.hdf5', 'w')
+
+    insert_compressed_depth_maps(data, depth_path, '/l515/depth/', True)
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    insert_timestamps(data, depth_info, '/l515/time/')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    insert_poses_quaternion(data, gt_info, '/l515/gt/')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    resample_poses_quaternion(data, '/l515/gt/', '/l515/sensor/', '/l515/time/')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    data.close()
+
+    data = h5py.File(path + 'TUM_Dataset_01.hdf5', 'r')
+    print_file_info(data, 'TUM_Dataset_01.hdf5')
+
+    
 
 if __name__ == '__main__':
 
@@ -254,6 +282,7 @@ if __name__ == '__main__':
     parser.add_argument("--dst", help="destination file name", type=str)
     parser.add_argument("--rename", help="rename file to include sensors used", type=str)
     parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
+    parser.add_argument("--createTUM", help="renames ALL files in the logs/perception directory", action="store_true")
 
     args = parser.parse_args()
     home = os.path.expanduser('~')
@@ -289,3 +318,7 @@ if __name__ == '__main__':
     if args.renameAll:
         files = sorted(os.listdir(path))
         rename_all_files(path, files)
+
+    if args.createTUM:
+        create_from_TUM(path + '/')
+

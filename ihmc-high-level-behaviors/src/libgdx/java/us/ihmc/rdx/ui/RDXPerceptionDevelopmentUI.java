@@ -62,8 +62,8 @@ public class RDXPerceptionDevelopmentUI
    private RDXFootstepPlanGraphic footstepPlanGraphic;
 
 
-   private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230908_144224_PlanarRegionsListLogger.prllog").toString());
-   private PlanarRegionsList logLoadedPlanarRegions = new PlanarRegionsList();
+   private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230909_190359_PlanarRegionsListLogger.prllog").toString());
+   private PlanarRegionsList logLoadedPlanarRegions;
 
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final HumanoidPerceptionModule perceptionModule = new HumanoidPerceptionModule(openCLManager);
