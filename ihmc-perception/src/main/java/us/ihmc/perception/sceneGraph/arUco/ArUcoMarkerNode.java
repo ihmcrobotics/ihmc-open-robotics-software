@@ -12,10 +12,10 @@ import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
  */
 public class ArUcoMarkerNode extends DetectableSceneNode
 {
-   private final int markerID;
-   private final double markerSize;
    private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
+   private int markerID;
+   private double markerSize;
    private double breakFrequency = 1.0;
 
    /**
@@ -36,9 +36,19 @@ public class ArUcoMarkerNode extends DetectableSceneNode
       getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
    }
 
+   public void setMarkerID(int markerID)
+   {
+      this.markerID = markerID;
+   }
+
    public int getMarkerID()
    {
       return markerID;
+   }
+
+   public void setMarkerSize(double markerSize)
+   {
+      this.markerSize = markerSize;
    }
 
    public double getMarkerSize()

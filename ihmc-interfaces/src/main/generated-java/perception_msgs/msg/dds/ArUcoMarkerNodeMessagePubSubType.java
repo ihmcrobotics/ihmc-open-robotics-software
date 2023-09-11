@@ -15,7 +15,7 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "153774f9aaaf0e33c2ea09c4bf47cdc07826e228422833fb73d1f85457ecd461";
+   		return "c0b2469abeb04aeb6645380435dc60af8f62c80b28115c5fb248278000d38e46";
    }
    
    @Override
@@ -54,6 +54,10 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -71,6 +75,12 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getCdrSerializedSize(data.getDetectableSceneNode(), current_alignment);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -81,6 +91,10 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public static void write(perception_msgs.msg.dds.ArUcoMarkerNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
+      cdr.write_type_3(data.getMarkerId());
+
+      cdr.write_type_5(data.getMarkerSize());
+
       cdr.write_type_5(data.getBreakFrequency());
 
    }
@@ -88,6 +102,10 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public static void read(perception_msgs.msg.dds.ArUcoMarkerNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
+      data.setMarkerId(cdr.read_type_3());
+      	
+      data.setMarkerSize(cdr.read_type_5());
+      	
       data.setBreakFrequency(cdr.read_type_5());
       	
 
@@ -98,6 +116,8 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.write_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
+      ser.write_type_3("marker_id", data.getMarkerId());
+      ser.write_type_5("marker_size", data.getMarkerSize());
       ser.write_type_5("break_frequency", data.getBreakFrequency());
    }
 
@@ -106,6 +126,8 @@ public class ArUcoMarkerNodeMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.read_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
+      data.setMarkerId(ser.read_type_3("marker_id"));
+      data.setMarkerSize(ser.read_type_5("marker_size"));
       data.setBreakFrequency(ser.read_type_5("break_frequency"));
    }
 
