@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.affordances;
 
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -20,7 +19,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Tells the operator if a manually placed footstep is reasonable in realtime.
@@ -119,28 +117,9 @@ public class RDXFootstepChecker
       {
          previousFootstepPose.setIncludingFrame(stepList.get(i).getFootPose());
       }
-      else
+      else if (!controllerStatusTracker.getFootstepTracker().getQueuedFootsteps().isEmpty())
       {
-         previousFootstepPose.set(getFootstepFromControllerQueue(controllerStatusTracker.getQueuedFootsteps(), candidateFootstepSide));
-      }
-
-      return previousFootstepPose;
-   }
-
-   private FramePose3DReadOnly getFootstepFromControllerQueue(List<QueuedFootstepStatusMessage> stepList, RobotSide candidateFootstepSide)
-   {
-      FramePose3D previousFootstepPose = new FramePose3D();
-
-      int i;
-      if (!stepList.isEmpty())
-      {
-         i = stepList.size() - 1;
-         // Moved the index of the list to the last step on the other side
-         while (i >= 1 && stepList.get(i).getRobotSide() == candidateFootstepSide.toByte())
-            --i;
-
-         previousFootstepPose.getPosition().set(stepList.get(i).getLocation());
-         previousFootstepPose.getRotation().setToYawOrientation(stepList.get(i).getOrientation().getYaw());
+         previousFootstepPose.set(controllerStatusTracker.getFootstepTracker().getLastFootstepQueuedOnSameSideOrNull(candidateFootstepSide));
       }
       else
       {
