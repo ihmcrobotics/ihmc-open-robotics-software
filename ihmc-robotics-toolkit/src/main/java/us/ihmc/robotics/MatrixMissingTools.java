@@ -12,7 +12,6 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixMissingTools
@@ -364,5 +363,13 @@ public class MatrixMissingTools
    public static void negate(DMatrixRMaj matrix)
    {
       CommonOps_DDRM.scale(-1.0, matrix);
+   }
+
+   /**
+    * Slide the bottom numberOfRows up to the top of the matrix, making room for src.numRows - numberOfRows rows at the bottom of the matrix.
+    */
+   public static void slideBottomNRowsToTop(DMatrixRMaj src, int numberOfRows)
+   {
+      setMatrixBlock(src, 0, 0, src, src.numRows - numberOfRows, 0, numberOfRows, src.numCols, 1.0);
    }
 }
