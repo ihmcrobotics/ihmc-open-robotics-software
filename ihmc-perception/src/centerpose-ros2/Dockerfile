@@ -29,7 +29,7 @@ RUN git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /o
 RUN mkdir src
 RUN cp -r /opt/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces /root/ihmc_ros2_ws/src/ihmc_interfaces
 RUN rm -rf /opt/ihmc-open-robotics-software
-RUN bash /opt/ros/galactic/setup.sh && colcon build
+RUN . /opt/ros/galactic/setup.sh && colcon build
 
 # Install CenterPose
 ENV CenterPose_ROOT=/root/centerpose-install
