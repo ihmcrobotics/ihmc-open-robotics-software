@@ -67,8 +67,6 @@ public class RDXAffordanceTemplateEditorUI
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
    {
       SceneGraph sceneGraph = new SceneGraph();
-      DoorSceneNodeDefinitions.addDefaultObjects(sceneGraph);
-      RigidBodySceneObjectDefinitions.addDefaultObjects(sceneGraph);
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
       baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
 

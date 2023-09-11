@@ -67,7 +67,7 @@ public class ROS2SceneGraphSubscription
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
 
-         sceneGraph.updateIDMap();
+         sceneGraph.updateCaches();
          if (!localTreeFrozen)
             clearChildren(sceneGraph.getRootNode());
          updateLocalTreeFromSubscription(subscriptionRootNode);

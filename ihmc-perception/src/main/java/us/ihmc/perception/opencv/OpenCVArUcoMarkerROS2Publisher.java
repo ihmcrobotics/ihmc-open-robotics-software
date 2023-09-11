@@ -1,6 +1,6 @@
 package us.ihmc.perception.opencv;
 
-import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.TIntDoubleMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import us.ihmc.communication.PerceptionAPI;
@@ -23,11 +23,11 @@ public class OpenCVArUcoMarkerROS2Publisher
    private final OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final ROS2PublishSubscribeAPI ros2;
-   private final TIntDoubleHashMap markerIDsToSizesMap;
+   private final TIntDoubleMap markerIDsToSizesMap;
 
    public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
                                          ROS2PublishSubscribeAPI ros2,
-                                         TIntDoubleHashMap markerIDsToSizesMap)
+                                         TIntDoubleMap markerIDsToSizesMap)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
       this.ros2 = ros2;
