@@ -35,7 +35,7 @@ public class RDXPerceptionSceneGraphUI
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ArrayList<RDXSceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
+   private RDXSceneNode rootNode;
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
    public RDXPerceptionSceneGraphUI(SceneGraph sceneGraph,
