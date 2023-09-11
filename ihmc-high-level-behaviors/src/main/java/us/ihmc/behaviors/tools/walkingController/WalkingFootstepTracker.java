@@ -120,11 +120,6 @@ public class WalkingFootstepTracker
                            ids));
    }
 
-   public List<QueuedFootstepStatusMessage> getQueuedFootsteps()
-   {
-      return queuedFootsteps;
-   }
-
    public FramePose3DReadOnly getLastFootstepQueuedOnSameSideOrNull(RobotSide candidateFootstepSide)
    {
       FramePose3D previousFootstepPose = new FramePose3D();
