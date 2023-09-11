@@ -117,7 +117,7 @@ public class RDXFootstepChecker
       {
          previousFootstepPose.setIncludingFrame(stepList.get(i).getFootPose());
       }
-      else if (!controllerStatusTracker.getFootstepTracker().getQueuedFootsteps().isEmpty())
+      else if (controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
       {
          previousFootstepPose.set(controllerStatusTracker.getFootstepTracker().getLastFootstepQueuedOnSameSideOrNull(candidateFootstepSide));
       }
