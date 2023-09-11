@@ -2,9 +2,12 @@
 
 echo "Setting up workspace..."
 
-# Change this for your specific setup
-export ROS_DOMAIN_ID=80
-echo "Setting ROS_DOMAIN_ID to $ROS_DOMAIN_ID"
+if [ -z "${ROS_DOMAIN_ID}" ]; then
+  echo "ROS_DOMAIN_ID is not defined"
+  exit 1
+fi
+
+echo "ROS_DOMAIN_ID: $ROS_DOMAIN_ID"
 
 cp /root/centerpose-ros2/zed2/zed2_centerpose_node.py /root/centerpose-install/src/
 cd /root/centerpose-install
