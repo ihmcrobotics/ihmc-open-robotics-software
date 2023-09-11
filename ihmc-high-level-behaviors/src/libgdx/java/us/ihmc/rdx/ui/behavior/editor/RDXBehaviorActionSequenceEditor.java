@@ -178,7 +178,6 @@ public class RDXBehaviorActionSequenceEditor
                action.updateAfterLoading();
                action.update();
                actionSequence.add(action);
-               action.getExecutionWithNextAction().set(false);
                action.getSelected().set(false);
                action.getExpanded().set(false);
                action.getExecutionWithNextAction().set(false);

@@ -34,6 +34,10 @@ module behavior_msgs
          * The trajectory duration
          */
         double trajectory_duration;
+        /**
+         * Whether the next action can be executed at the same time of this one
+         */
+        boolean execute_with_next_action;
       };
     };
   };
