@@ -35,7 +35,7 @@ public class RDXPerceptionSceneGraphUI
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ArrayList<RDXPredefinedRigidBodySceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
+   private final ArrayList<RDXSceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
    public RDXPerceptionSceneGraphUI(SceneGraph sceneGraph,
@@ -51,7 +51,7 @@ public class RDXPerceptionSceneGraphUI
       {
          if (detectableSceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
          {
-            predefinedRigidBodySceneNodes.add(new RDXPredefinedRigidBodySceneNode(predefinedRigidBodySceneNode, panel3D));
+            predefinedRigidBodySceneNodes.add(new RDXSceneNode(predefinedRigidBodySceneNode, panel3D));
          }
       }
    }
@@ -60,7 +60,7 @@ public class RDXPerceptionSceneGraphUI
    {
       sceneGraphSubscription.update();
 
-      for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
+      for (RDXSceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
       {
          predefinedRigidBodySceneNode.update();
       }
@@ -85,7 +85,7 @@ public class RDXPerceptionSceneGraphUI
    {
       if (showGraphics.get())
       {
-         for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
+         for (RDXSceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
          {
             predefinedRigidBodySceneNode.getRenderables(renderables, pool, sceneLevels);
          }

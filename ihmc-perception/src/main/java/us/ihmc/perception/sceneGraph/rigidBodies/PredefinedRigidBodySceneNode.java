@@ -50,7 +50,7 @@ public class PredefinedRigidBodySceneNode extends SceneNode
 
    public void setTrackInitialParent(boolean trackInitialParent)
    {
-      boolean previousTrackingInitialParent = getNodeFrame().getParent() == initialParentNodeSupplier.get().getNodeFrame();
+      boolean previousTrackingInitialParent = getTrackingInitialParent();
       if (previousTrackingInitialParent != trackInitialParent)
       {
          if (trackInitialParent)
@@ -65,6 +65,11 @@ public class PredefinedRigidBodySceneNode extends SceneNode
          }
          update(); // Update this and children because parent frame has changed
       }
+   }
+
+   public boolean getTrackingInitialParent()
+   {
+      return getNodeFrame().getParent() == initialParentNodeSupplier.get().getNodeFrame();
    }
 
    /**
