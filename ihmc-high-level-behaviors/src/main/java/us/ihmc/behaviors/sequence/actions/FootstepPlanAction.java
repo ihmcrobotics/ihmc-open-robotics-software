@@ -145,6 +145,12 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;

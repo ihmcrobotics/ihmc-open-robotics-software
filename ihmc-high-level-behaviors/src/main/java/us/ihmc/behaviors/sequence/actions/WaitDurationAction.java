@@ -45,6 +45,12 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;

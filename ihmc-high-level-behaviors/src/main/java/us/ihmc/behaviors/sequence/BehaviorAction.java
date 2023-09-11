@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
@@ -21,6 +23,12 @@ public interface BehaviorAction extends BehaviorActionData
    default void updateCurrentlyExecuting()
    {
 
+   }
+
+   /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
+   default ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return new ActionExecutionStatusMessage();
    }
 
    /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */

@@ -22,7 +22,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Manages running a sequence of actions on the robot with shared autonomy.
@@ -64,8 +66,9 @@ public class BehaviorActionSequence
    private final IHMCROS2Input<Bool> automaticExecutionSubscription;
    private final IHMCROS2Input<Int32> executionNextIndexSubscription;
    private boolean automaticExecution = false;
-   private int excecutionNextIndex = 0;
-   private BehaviorAction currentlyExecutingAction = null;
+   private int executionNextIndex = 0;
+   private final List<BehaviorAction> currentlyExecutingActions = new ArrayList<>();
+   private BehaviorAction lastCurrentlyExecutingAction = null;
 
    private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
    public final Int32 executionNextIndexStatusMessage = new Int32();
@@ -184,10 +187,10 @@ public class BehaviorActionSequence
             actionSequence.add(action);
          }
 
-         if (excecutionNextIndex > latestUpdateMessage.getSequenceSize())
-            excecutionNextIndex = latestUpdateMessage.getSequenceSize();
+         if (executionNextIndex > latestUpdateMessage.getSequenceSize())
+            executionNextIndex = latestUpdateMessage.getSequenceSize();
 
-         LogTools.info("Updated action sequence recieved with {} actions. Execution next index: {}", actionSequence.size(), excecutionNextIndex);
+         LogTools.info("Updated action sequence received with {} actions. Execution next index: {}", actionSequence.size(), executionNextIndex);
       }
 
       syncedRobot.update();
@@ -199,18 +202,25 @@ public class BehaviorActionSequence
       }
       if (executionNextIndexSubscription.getMessageNotification().poll())
       {
-         excecutionNextIndex = executionNextIndexSubscription.getMessageNotification().read().getData();
-         currentlyExecutingAction = null; // Set to null so we don't wait for that action to complete
+         executionNextIndex = executionNextIndexSubscription.getMessageNotification().read().getData();
+         lastCurrentlyExecutingAction = null; // Set to null so we don't wait for that action to complete
+         currentlyExecutingActions.clear();
       }
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         actionSequence.get(i).update(i, excecutionNextIndex);
+         actionSequence.get(i).update(i, executionNextIndex);
       }
 
-      if (currentlyExecutingAction != null)
+      if (lastCurrentlyExecutingAction != null)
       {
-         currentlyExecutingAction.updateCurrentlyExecuting();
+         List<ActionExecutionStatusMessage> actionExecutionStatusMessages = new ArrayList<>();
+         for (BehaviorAction currentlyExecutingAction : currentlyExecutingActions)
+         {
+            currentlyExecutingAction.updateCurrentlyExecuting();
+            actionExecutionStatusMessages.add(currentlyExecutingAction.getExecutionStatusMessage());
+         }
+         ros2.publish(ACTIONS_EXECUTION_STATUS, actionExecutionStatusMessages);
       }
       else
       {
@@ -222,49 +232,63 @@ public class BehaviorActionSequence
 
       if (automaticExecution)
       {
-         boolean endOfSequence = excecutionNextIndex >= actionSequence.size();
+         boolean endOfSequence = executionNextIndex >= actionSequence.size();
          if (endOfSequence)
          {
             automaticExecution = false;
          }
-         else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting())
+         else if (lastCurrentlyExecutingAction == null || noCurrentActionIsExecuting())
          {
-            LogTools.info("Automatically executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
+            LogTools.info("Automatically executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
             executeNextAction();
-            while (currentlyExecutingAction != null && currentlyExecutingAction.getExecuteWithNextAction())
+            while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction())
             {
+               LogTools.info("Automatically executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
                executeNextAction();
             }
          }
       }
       else if (manuallyExecuteSubscription.getMessageNotification().poll())
       {
-         LogTools.info("Manually executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
+         LogTools.info("Manually executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
          executeNextAction();
-         while (currentlyExecutingAction != null && currentlyExecutingAction.getExecuteWithNextAction())
+         while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction())
          {
+            LogTools.info("Manually executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
             executeNextAction();
          }
       }
 
-      if (currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting())
+      if (lastCurrentlyExecutingAction != null && noCurrentActionIsExecuting())
       {
-         currentlyExecutingAction = null;
+         lastCurrentlyExecutingAction = null;
+         currentlyExecutingActions.clear();
       }
    }
 
    private void executeNextAction()
    {
-      currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
-      currentlyExecutingAction.update(excecutionNextIndex, excecutionNextIndex + 1);
-      currentlyExecutingAction.triggerActionExecution();
-      currentlyExecutingAction.updateCurrentlyExecuting();
-      excecutionNextIndex++;
+      lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
+      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1);
+      lastCurrentlyExecutingAction.triggerActionExecution();
+      lastCurrentlyExecutingAction.updateCurrentlyExecuting();
+      currentlyExecutingActions.add(lastCurrentlyExecutingAction);
+      executionNextIndex++;
+   }
+
+   private boolean noCurrentActionIsExecuting()
+   {
+      boolean noCurrentActionIsExecuting = true;
+      for (BehaviorAction currentlyExecutingAction : currentlyExecutingActions)
+      {
+         noCurrentActionIsExecuting &= !currentlyExecutingAction.isExecuting();
+      }
+      return noCurrentActionIsExecuting;
    }
 
    private void sendStatus()
    {
-      executionNextIndexStatusMessage.setData(excecutionNextIndex);
+      executionNextIndexStatusMessage.setData(executionNextIndex);
       ros2.publish(EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
       automaticExecutionStatusMessage.setData(automaticExecution);
       ros2.publish(AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);

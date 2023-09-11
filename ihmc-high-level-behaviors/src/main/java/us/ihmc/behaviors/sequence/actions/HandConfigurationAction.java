@@ -57,6 +57,12 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;

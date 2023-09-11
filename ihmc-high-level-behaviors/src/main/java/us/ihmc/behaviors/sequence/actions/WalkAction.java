@@ -211,6 +211,12 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;
