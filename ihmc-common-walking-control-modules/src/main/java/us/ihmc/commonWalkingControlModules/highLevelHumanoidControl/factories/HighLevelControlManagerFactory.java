@@ -373,7 +373,9 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          return null;
 
       HumanoidRobotNaturalPosture naturalPostureMeasurement = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
-      naturalPostureMeasurement.addNaturalPostureParametersToSCS(registry, controllerToolbox.getYoGraphicsListRegistry());
+      if (naturalPostureMeasurement.getRegistry() != null)
+         registry.addChild(naturalPostureMeasurement.getRegistry());
+      naturalPostureMeasurement.createVisuals(controllerToolbox.getYoGraphicsListRegistry());
 
       naturalPostureManager = new NaturalPostureManager(naturalPostureMeasurement,
                                                         walkingControllerParameters.getNaturalPostureParameters(),
