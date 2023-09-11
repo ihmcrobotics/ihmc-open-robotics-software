@@ -121,6 +121,9 @@ public class WalkingFootstepTracker
                            ids));
    }
 
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
    public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSide(RobotSide candidateFootstepSide)
    {
       previousFootstepPose = new FramePose3D();
