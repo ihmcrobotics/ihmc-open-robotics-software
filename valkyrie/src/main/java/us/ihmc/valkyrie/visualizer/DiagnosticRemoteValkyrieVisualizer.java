@@ -15,10 +15,6 @@ public class DiagnosticRemoteValkyrieVisualizer implements SCSVisualizerStateLis
    
    public DiagnosticRemoteValkyrieVisualizer()
    {
-
-      String host = NetworkParameters.getHost(NetworkParameterKeys.logger);
-      System.out.println("Connecting to host " + host);
-
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(false);
