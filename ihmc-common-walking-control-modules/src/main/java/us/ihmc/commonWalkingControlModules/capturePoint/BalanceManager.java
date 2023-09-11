@@ -569,8 +569,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
                        boolean keepCoPInsideSupportPolygon,
                        boolean controlHeightWithMomentum)
    {
-      updateTimeInState();
-
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
 
@@ -611,6 +609,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
+
+      // This guy relies on the desired ICP being updated.
+      updateTimeInState();
 
       if (computeAngularMomentumOffset.getValue())
          angularMomentumHandler.computeCoPPosition(yoPerfectCMP, yoPerfectCoP);
