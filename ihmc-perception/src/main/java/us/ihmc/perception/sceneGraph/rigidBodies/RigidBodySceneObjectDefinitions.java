@@ -57,6 +57,7 @@ public class RigidBodySceneObjectDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "Box",
+                                                                           sceneGraph::getRootNode,
                                                                            () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
                                                                            BOX_TO_MARKER_TRANSFORM,
                                                                            BOX_VISUAL_MODEL_FILE_PATH,
@@ -71,6 +72,7 @@ public class RigidBodySceneObjectDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "CanOfSoup",
+                                                                           sceneGraph::getRootNode,
                                                                            () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
                                                                            CAN_OF_SOUP_TO_MARKER_TRANSFORM,
                                                                            CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,

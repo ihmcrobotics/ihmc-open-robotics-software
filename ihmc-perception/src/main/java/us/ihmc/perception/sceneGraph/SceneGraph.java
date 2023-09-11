@@ -6,7 +6,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -24,8 +23,8 @@ public class SceneGraph
     * Also, sometimes, the tree will be disassembled and this is used in putting it
     * back together.
     */
-   private final TLongObjectMap<SceneNode> idToNodeMap = new TLongObjectHashMap<>();
-   private final FramePose3D arUcoMarkerPose = new FramePose3D();
+   private transient final TLongObjectMap<SceneNode> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final FramePose3D detectedSceneNodePose = new FramePose3D();
 
    public SceneGraph()
    {
@@ -36,21 +35,22 @@ public class SceneGraph
    {
       rootNode.update(sceneNode ->
       {
-         if (sceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+         if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
          {
-            // We assume that the parent node is always an ArUco node, which is a weak assummption,
-            // but the whole static relative thing is also weak.
-            if (staticRelativeNode.getParentNode() instanceof ArUcoMarkerNode parentArUcoNode)
+            if (detectableSceneNode.getCurrentlyDetected())
             {
-               if (parentArUcoNode.getCurrentlyDetected())
+               for (SceneNode child : detectableSceneNode.getChildren())
                {
-                  arUcoMarkerPose.setToZero(parentArUcoNode.getNodeFrame());
-                  arUcoMarkerPose.setFromReferenceFrame(sensorFrame);
-                  double currentDistance = arUcoMarkerPose.getPosition().distanceFromOrigin();
-                  staticRelativeNode.setCurrentDistance(currentDistance);
-                  if (currentDistance <= staticRelativeNode.getDistanceToDisableTracking())
+                  if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
                   {
-                     staticRelativeNode.setTrackDetectedPose(false);
+                     detectedSceneNodePose.setToZero(detectableSceneNode.getNodeFrame());
+                     detectedSceneNodePose.setFromReferenceFrame(sensorFrame);
+                     double currentDistance = detectedSceneNodePose.getPosition().distanceFromOrigin();
+                     staticRelativeSceneNode.setCurrentDistance(currentDistance);
+                     if (currentDistance <= staticRelativeSceneNode.getDistanceToDisableTracking())
+                     {
+                        staticRelativeSceneNode.setTrackInitialParent(false);
+                     }
                   }
                }
             }
