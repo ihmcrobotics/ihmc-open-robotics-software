@@ -17,6 +17,14 @@ public class ArUcoMarkerNodeMessage extends Packet<ArUcoMarkerNodeMessage> imple
             */
    public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
    /**
+            * ArUco marker ID
+            */
+   public int marker_id_;
+   /**
+            * ArUco marker size
+            */
+   public float marker_size_;
+   /**
             * Break frequency filter value for nodes that are alpha filtered
             */
    public float break_frequency_;
@@ -35,6 +43,10 @@ public class ArUcoMarkerNodeMessage extends Packet<ArUcoMarkerNodeMessage> imple
    public void set(ArUcoMarkerNodeMessage other)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
+      marker_id_ = other.marker_id_;
+
+      marker_size_ = other.marker_size_;
+
       break_frequency_ = other.break_frequency_;
 
    }
@@ -46,6 +58,36 @@ public class ArUcoMarkerNodeMessage extends Packet<ArUcoMarkerNodeMessage> imple
    public perception_msgs.msg.dds.DetectableSceneNodeMessage getDetectableSceneNode()
    {
       return detectable_scene_node_;
+   }
+
+   /**
+            * ArUco marker ID
+            */
+   public void setMarkerId(int marker_id)
+   {
+      marker_id_ = marker_id;
+   }
+   /**
+            * ArUco marker ID
+            */
+   public int getMarkerId()
+   {
+      return marker_id_;
+   }
+
+   /**
+            * ArUco marker size
+            */
+   public void setMarkerSize(float marker_size)
+   {
+      marker_size_ = marker_size;
+   }
+   /**
+            * ArUco marker size
+            */
+   public float getMarkerSize()
+   {
+      return marker_size_;
    }
 
    /**
@@ -82,6 +124,10 @@ public class ArUcoMarkerNodeMessage extends Packet<ArUcoMarkerNodeMessage> imple
       if(other == this) return true;
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.marker_id_, other.marker_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.marker_size_, other.marker_size_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
 
 
@@ -98,6 +144,10 @@ public class ArUcoMarkerNodeMessage extends Packet<ArUcoMarkerNodeMessage> imple
       ArUcoMarkerNodeMessage otherMyClass = (ArUcoMarkerNodeMessage) other;
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
+      if(this.marker_id_ != otherMyClass.marker_id_) return false;
+
+      if(this.marker_size_ != otherMyClass.marker_size_) return false;
+
       if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
 
 
@@ -112,6 +162,10 @@ public class ArUcoMarkerNodeMessage extends Packet<ArUcoMarkerNodeMessage> imple
       builder.append("ArUcoMarkerNodeMessage {");
       builder.append("detectable_scene_node=");
       builder.append(this.detectable_scene_node_);      builder.append(", ");
+      builder.append("marker_id=");
+      builder.append(this.marker_id_);      builder.append(", ");
+      builder.append("marker_size=");
+      builder.append(this.marker_size_);      builder.append(", ");
       builder.append("break_frequency=");
       builder.append(this.break_frequency_);
       builder.append("}");

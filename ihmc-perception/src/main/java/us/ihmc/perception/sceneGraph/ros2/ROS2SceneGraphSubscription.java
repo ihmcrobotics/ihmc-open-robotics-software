@@ -101,6 +101,8 @@ public class ROS2SceneGraphSubscription
       {
          if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
          {
+            arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
+            arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
             arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)

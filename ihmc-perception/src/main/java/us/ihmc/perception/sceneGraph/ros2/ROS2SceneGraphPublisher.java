@@ -70,6 +70,8 @@ public class ROS2SceneGraphPublisher
          sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.ARUCO_MARKER_NODE_TYPE);
          sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getArucoMarkerSceneNodes().size());
          ArUcoMarkerNodeMessage arUcoMarkerNodeMessage = sceneGraphMessage.getArucoMarkerSceneNodes().add();
+         arUcoMarkerNodeMessage.setMarkerId(arUcoMarkerNode.getMarkerID());
+         arUcoMarkerNodeMessage.setMarkerSize((float) arUcoMarkerNode.getMarkerSize());
          arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
          detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
       }

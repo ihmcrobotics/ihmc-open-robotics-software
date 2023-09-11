@@ -21,6 +21,14 @@ module perception_msgs
          */
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
         /**
+         * ArUco marker ID
+         */
+        unsigned short marker_id;
+        /**
+         * ArUco marker size
+         */
+        float marker_size;
+        /**
          * Break frequency filter value for nodes that are alpha filtered
          */
         float break_frequency;
