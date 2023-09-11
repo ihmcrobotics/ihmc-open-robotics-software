@@ -46,6 +46,8 @@ public class SceneGraph
 
    public void update(ReferenceFrame sensorFrame)
    {
+      updateCaches();
+
       rootNode.update(sceneNode ->
       {
          if (sceneNode instanceof DetectableSceneNode detectableSceneNode)

@@ -57,7 +57,6 @@ public class ROS2SceneGraphSubscription
       {
          ++numberOfMessagesReceived;
          SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
-         IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = sceneGraphMessage.getDetectableSceneNodes();
 
          ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
          buildSubscriptionTree(0, sceneGraphMessage, subscriptionRootNode);
@@ -67,10 +66,11 @@ public class ROS2SceneGraphSubscription
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
 
-         sceneGraph.updateCaches();
          if (!localTreeFrozen)
             clearChildren(sceneGraph.getRootNode());
          updateLocalTreeFromSubscription(subscriptionRootNode);
+
+         sceneGraph.updateCaches();
       }
       return newMessageAvailable;
    }
@@ -84,45 +84,51 @@ public class ROS2SceneGraphSubscription
          localNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode);
       }
 
-      if (localNode instanceof DetectableSceneNode detectableSceneNode)
+      // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
+      // This'll happen if a node is deleted locally. We want that change to propagate and not add
+      // it right back.
+      if (localNode != null)
       {
-         detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
-      }
-      if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-      {
-         staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getCurrentDistanceToRobot());
-      }
-
-      // If the node was recently modified by the operator, the node does not accept
-      // updates of these values. This is to allow the operator's changes to propagate
-      // and so it doesn't get overriden immediately by an out of date message coming from the robot.
-      // On the robot side, this will always get updated because there is no operator.
-      if (!localTreeFrozen)
-      {
-         if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
+         if (localNode instanceof DetectableSceneNode detectableSceneNode)
          {
-            arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
-            arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
-            arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
+            detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
-            staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getDistanceToDisableTracking());
+            staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getCurrentDistanceToRobot());
          }
 
-         MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
-         nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-         nodePose.changeFrame(localNode.getNodeFrame().getParent());
-         nodePose.get(localNode.getNodeToParentFrameTransform());
-         localNode.getNodeFrame().update();
-      }
-
-      for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
-      {
-         SceneNode localChildNode = updateLocalTreeFromSubscription(subscriptionChildNode);
-
+         // If the node was recently modified by the operator, the node does not accept
+         // updates of these values. This is to allow the operator's changes to propagate
+         // and so it doesn't get overriden immediately by an out of date message coming from the robot.
+         // On the robot side, this will always get updated because there is no operator.
          if (!localTreeFrozen)
-            localNode.getChildren().add(localChildNode);
+         {
+            if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
+            {
+               arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
+               arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
+               arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
+            }
+            if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+            {
+               staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getDistanceToDisableTracking());
+            }
+
+            MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
+            nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
+            nodePose.changeFrame(localNode.getNodeFrame().getParent());
+            nodePose.get(localNode.getNodeToParentFrameTransform());
+            localNode.getNodeFrame().update();
+         }
+
+         for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
+         {
+            SceneNode localChildNode = updateLocalTreeFromSubscription(subscriptionChildNode);
+
+            if (!localTreeFrozen)
+               localNode.getChildren().add(localChildNode);
+         }
       }
 
       return localNode;
@@ -130,7 +136,7 @@ public class ROS2SceneGraphSubscription
 
    private void checkTreeModified(SceneNode localNode)
    {
-      localTreeFrozen |= localNode.operatorHasntModifiedThisRecently();
+      localTreeFrozen |= localNode.operatorModifiedThisRecently();
 
       for (SceneNode child : localNode.getChildren())
       {
