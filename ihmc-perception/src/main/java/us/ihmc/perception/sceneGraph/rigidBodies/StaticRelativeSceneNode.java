@@ -24,13 +24,14 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 
    public StaticRelativeSceneNode(long id,
                                   String name,
+                                  Supplier<SceneNode> rootNodeSupplier,
                                   Supplier<SceneNode> initialParentNodeSupplier,
                                   RigidBodyTransformReadOnly initialTransformToParent,
                                   String visualModelFilePath,
                                   RigidBodyTransform visualModelToNodeFrameTransform,
                                   double distanceToDisableTracking)
    {
-      super(id, name, initialParentNodeSupplier, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
+      super(id, name, initialParentNodeSupplier, rootNodeSupplier, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
 
       this.distanceToDisableTracking = distanceToDisableTracking;
    }

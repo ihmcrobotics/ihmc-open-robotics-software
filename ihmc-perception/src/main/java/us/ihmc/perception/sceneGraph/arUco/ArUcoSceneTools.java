@@ -18,8 +18,7 @@ import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions
  */
 public class ArUcoSceneTools
 {
-   public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
-                                                             SceneGraph sceneGraph)
+   public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection, SceneGraph sceneGraph)
    {
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
@@ -39,7 +38,7 @@ public class ArUcoSceneTools
          {
             int missingMarkerID = iterator.next();
             LogTools.info("Adding detected ArUco marker to scene graph: {}", missingMarkerID);
-            ArUcoMarkerNode arUcoMarkerNode = new ArUcoMarkerNode(SceneGraph.NEXT_ID.getAndIncrement(),
+            ArUcoMarkerNode arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
                                                                   "ArUcoMarker%d".formatted(missingMarkerID),
                                                                   missingMarkerID,
                                                                   RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
@@ -50,7 +49,7 @@ public class ArUcoSceneTools
          {
             if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               addPredfinedChildrenIfMissing(arUcoMarkerNode);
+               addPredfinedChildrenIfMissing(sceneGraph, arUcoMarkerNode);
 
                boolean isDetected = arUcoMarkerDetection.isDetected(arUcoMarkerNode.getMarkerID());
                arUcoMarkerNode.setCurrentlyDetected(isDetected);
@@ -67,29 +66,29 @@ public class ArUcoSceneTools
       }
    }
 
-   public static void addPredfinedChildrenIfMissing(ArUcoMarkerNode arUcoMarkerNode)
+   public static void addPredfinedChildrenIfMissing(SceneGraph sceneGraph, ArUcoMarkerNode arUcoMarkerNode)
    {
       switch (arUcoMarkerNode.getMarkerID())
       {
          case DoorModelParameters.PULL_DOOR_MARKER_ID:
          {
-            DoorSceneNodeDefinitions.createPullDoorLeverHandle(arUcoMarkerNode);
-            PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel(arUcoMarkerNode);
-            DoorSceneNodeDefinitions.createPullDoorFrame(pullDoorPanel);
+            DoorSceneNodeDefinitions.createPullDoorLeverHandle(sceneGraph, arUcoMarkerNode);
+            PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel(sceneGraph, arUcoMarkerNode);
+            DoorSceneNodeDefinitions.createPullDoorFrame(sceneGraph, pullDoorPanel);
          }
          case DoorModelParameters.PUSH_DOOR_MARKER_ID:
          {
-            DoorSceneNodeDefinitions.createPushDoorLeverHandle(arUcoMarkerNode);
-            PredefinedRigidBodySceneNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel(arUcoMarkerNode);
-            DoorSceneNodeDefinitions.createPushDoorFrame(pushDoorPanel);
+            DoorSceneNodeDefinitions.createPushDoorLeverHandle(sceneGraph, arUcoMarkerNode);
+            PredefinedRigidBodySceneNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel(sceneGraph, arUcoMarkerNode);
+            DoorSceneNodeDefinitions.createPushDoorFrame(sceneGraph, pushDoorPanel);
          }
          case RigidBodySceneObjectDefinitions.BOX_MARKER_ID:
          {
-            RigidBodySceneObjectDefinitions.createBox(arUcoMarkerNode);
+            RigidBodySceneObjectDefinitions.createBox(sceneGraph, arUcoMarkerNode);
          }
          case RigidBodySceneObjectDefinitions.CAN_OF_SOUP_MARKER_ID:
          {
-            RigidBodySceneObjectDefinitions.createCanOfSoup(arUcoMarkerNode);
+            RigidBodySceneObjectDefinitions.createCanOfSoup(sceneGraph, arUcoMarkerNode);
          }
       }
 

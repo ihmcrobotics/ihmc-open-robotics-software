@@ -22,6 +22,7 @@ import java.util.function.Supplier;
  */
 public class PredefinedRigidBodySceneNode extends SceneNode
 {
+   private final Supplier<SceneNode> rootNodeSupplier;
    private final Supplier<SceneNode> initialParentNodeSupplier;
    private final RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D initialPose = new FramePose3D();
@@ -30,12 +31,14 @@ public class PredefinedRigidBodySceneNode extends SceneNode
 
    public PredefinedRigidBodySceneNode(long id,
                                        String name,
+                                       Supplier<SceneNode> rootNodeSupplier,
                                        Supplier<SceneNode> initialParentNodeSupplier,
                                        RigidBodyTransformReadOnly initialTransformToParent,
                                        String visualModelFilePath,
                                        RigidBodyTransform visualModelToNodeFrameTransform)
    {
       super(id, name);
+      this.rootNodeSupplier = rootNodeSupplier;
       this.initialParentNodeSupplier = initialParentNodeSupplier;
       this.initialTransformToParent.set(initialTransformToParent);
       this.visualModelFilePath = visualModelFilePath;
@@ -45,14 +48,23 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       getNodeFrame().update();
    }
 
-   public String getVisualModelFilePath()
+   public void setTrackInitialParent(boolean trackInitialParent)
    {
-      return visualModelFilePath;
-   }
-
-   public RigidBodyTransform getVisualModelToNodeFrameTransform()
-   {
-      return visualModelToNodeFrameTransform;
+      boolean previousTrackingInitialParent = getNodeFrame().getParent() == initialParentNodeSupplier.get().getNodeFrame();
+      if (previousTrackingInitialParent != trackInitialParent)
+      {
+         if (trackInitialParent)
+         {
+            rootNodeSupplier.get().getChildren().remove(this);
+            initialParentNodeSupplier.get().getChildren().add(this);
+         }
+         else
+         {
+            initialParentNodeSupplier.get().getChildren().remove(this);
+            rootNodeSupplier.get().getChildren().add(this);
+         }
+         update(); // Update this and children because parent frame has changed
+      }
    }
 
    /**
@@ -73,5 +85,15 @@ public class PredefinedRigidBodySceneNode extends SceneNode
          getNodeToParentFrameTransform().set(initialTransformToParent);
       }
       getNodeFrame().update();
+   }
+
+   public String getVisualModelFilePath()
+   {
+      return visualModelFilePath;
+   }
+
+   public RigidBodyTransform getVisualModelToNodeFrameTransform()
+   {
+      return visualModelToNodeFrameTransform;
    }
 }

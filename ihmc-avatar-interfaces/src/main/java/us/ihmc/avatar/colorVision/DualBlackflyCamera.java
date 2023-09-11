@@ -540,7 +540,7 @@ public class DualBlackflyCamera
          {
             sceneGraph.update(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
          }
-         sceneGraphPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+         sceneGraphPublisher.publish(sceneGraph, ros2Helper, ROS2IOTopicQualifier.STATUS);
       }
       // TODO: left behavior?
    }
