@@ -1,8 +1,8 @@
-# NVLabs centerpose_ros2 version 0.0.1
+# NVLabs centerpose-ros2 version 0.0.1
 # Do not upload to dockerhub
 
 FROM nvcr.io/nvidia/cuda:11.6.2-devel-ubuntu20.04
-LABEL Name=centerpose_ros2 Version=0.0.1
+LABEL Name=centerpose-ros2 Version=0.0.1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -45,6 +45,10 @@ RUN git clone -b replace_linear_assignment https://github.com/ihmcrobotics/Cente
 RUN rm -r $CenterPose_ROOT/src/lib/models/networks/DCNv2
 RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CenterPose_ROOT/src/lib/models/networks/DCNv2 && \
     rm -rf $CenterPose_ROOT/src/lib/models/networks/DCNv2/.git
+
+# Build DCV_v2 and installing CenterPose
+WORKDIR $CenterPose_ROOT/src/lib/models/networks/DCNv2
+RUN python3 setup.py build develop
 
 # Cleanup to reduce image size
 RUN apt-get remove curl git -y && \
