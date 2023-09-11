@@ -38,9 +38,6 @@ RUN git clone -b replace_linear_assignment https://github.com/ihmcrobotics/Cente
 RUN rm -r $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2
 RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2 && \
     rm -rf $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2/.git
-# Build DCV_v2 and installing CenterPose
-# WORKDIR $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2
-# RUN python3 setup.py build develop
 
 # Cleanup to reduce image size
 RUN apt-get remove curl git -y && \
