@@ -11,7 +11,6 @@ public enum NetworkParameterKeys
    leftHand("Hostname/IP of the left hand.", "", true),
    rightHand("Hostname/IP of the right hand.", "", true),
 
-   loggedCameras("Cameras to be recorded by the logger. Should be a comma seperated list", "", false),
    RTPSDomainID("RTPS Domain ID used for rtps publishers and subscribers", "-1", false),
    RTPSSubnet("RTPS subnet restriction, expected format: \"192.168.1.0/24\". "
               + "When provided RTPS only communicate through the indicated sub-network. "
@@ -21,7 +20,7 @@ public enum NetworkParameterKeys
    private final String defaultValue;
    private final boolean isIPAddress;
 
-   private NetworkParameterKeys(String description, String defaultValue, boolean isIPAddress)
+   NetworkParameterKeys(String description, String defaultValue, boolean isIPAddress)
    {
       this.description = description;
       this.defaultValue = defaultValue;
