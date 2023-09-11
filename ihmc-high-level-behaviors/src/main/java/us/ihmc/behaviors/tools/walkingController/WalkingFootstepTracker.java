@@ -120,7 +120,7 @@ public class WalkingFootstepTracker
                            ids));
    }
 
-   public FramePose3DReadOnly getLastFootstepQueuedOnSameSideOrNull(RobotSide candidateFootstepSide)
+   public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSideOrNull(RobotSide candidateFootstepSide)
    {
       FramePose3D previousFootstepPose = new FramePose3D();
 
