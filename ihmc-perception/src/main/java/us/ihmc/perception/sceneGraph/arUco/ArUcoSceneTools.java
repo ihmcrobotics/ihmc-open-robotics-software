@@ -68,30 +68,34 @@ public class ArUcoSceneTools
 
    public static void addPredfinedChildrenIfMissing(SceneGraph sceneGraph, ArUcoMarkerNode arUcoMarkerNode)
    {
-      switch (arUcoMarkerNode.getMarkerID())
+      // Either they'll all be there or none of them
+      if (arUcoMarkerNode.getChildren().isEmpty())
       {
-         case DoorModelParameters.PULL_DOOR_MARKER_ID:
+         switch (arUcoMarkerNode.getMarkerID())
          {
-            DoorSceneNodeDefinitions.createPullDoorLeverHandle(sceneGraph, arUcoMarkerNode);
-            PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel(sceneGraph, arUcoMarkerNode);
-            DoorSceneNodeDefinitions.createPullDoorFrame(sceneGraph, pullDoorPanel);
+            case DoorModelParameters.PULL_DOOR_MARKER_ID ->
+            {
+               DoorSceneNodeDefinitions.createPullDoorLeverHandle(sceneGraph, arUcoMarkerNode);
+               PredefinedRigidBodySceneNode pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel(sceneGraph, arUcoMarkerNode);
+               DoorSceneNodeDefinitions.createPullDoorFrame(sceneGraph, pullDoorPanel);
+            }
+            case DoorModelParameters.PUSH_DOOR_MARKER_ID ->
+            {
+               DoorSceneNodeDefinitions.createPushDoorLeverHandle(sceneGraph, arUcoMarkerNode);
+               PredefinedRigidBodySceneNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel(sceneGraph, arUcoMarkerNode);
+               DoorSceneNodeDefinitions.createPushDoorFrame(sceneGraph, pushDoorPanel);
+            }
+            case RigidBodySceneObjectDefinitions.BOX_MARKER_ID ->
+            {
+               RigidBodySceneObjectDefinitions.createBox(sceneGraph, arUcoMarkerNode);
+            }
+            case RigidBodySceneObjectDefinitions.CAN_OF_SOUP_MARKER_ID ->
+            {
+               RigidBodySceneObjectDefinitions.createCanOfSoup(sceneGraph, arUcoMarkerNode);
+            }
          }
-         case DoorModelParameters.PUSH_DOOR_MARKER_ID:
-         {
-            DoorSceneNodeDefinitions.createPushDoorLeverHandle(sceneGraph, arUcoMarkerNode);
-            PredefinedRigidBodySceneNode pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel(sceneGraph, arUcoMarkerNode);
-            DoorSceneNodeDefinitions.createPushDoorFrame(sceneGraph, pushDoorPanel);
-         }
-         case RigidBodySceneObjectDefinitions.BOX_MARKER_ID:
-         {
-            RigidBodySceneObjectDefinitions.createBox(sceneGraph, arUcoMarkerNode);
-         }
-         case RigidBodySceneObjectDefinitions.CAN_OF_SOUP_MARKER_ID:
-         {
-            RigidBodySceneObjectDefinitions.createCanOfSoup(sceneGraph, arUcoMarkerNode);
-         }
-      }
 
-      arUcoMarkerNode.update();
+         arUcoMarkerNode.update();
+      }
    }
 }

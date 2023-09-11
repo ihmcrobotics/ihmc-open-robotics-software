@@ -106,8 +106,8 @@ public class SceneNode
       modifiedTimer.reset();
    }
 
-   public boolean operatorHasntModifiedThisRecently()
+   public boolean operatorModifiedThisRecently()
    {
-      return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
+      return modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }
 }
