@@ -17,7 +17,7 @@ import time
 
 class Image2CenterPose_node(Node):
     def __init__(self):
-        super().__init__('Image2CenterPose_node')
+        super().__init__('zed2_centerpose_node')
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
