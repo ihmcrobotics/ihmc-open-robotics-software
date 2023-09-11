@@ -42,6 +42,8 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Empty> MANUALLY_EXECUTE_NEXT_ACTION_TOPIC = COMMAND_TOPIC.withType(Empty.class).withSuffix("manually_execute_next_action");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
+   public static final ROS2Topic<SimultaneousActionsExecutionMessage> SIMULTANEOUS_ACTIONS_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(SimultaneousActionsExecutionMessage.class).withSuffix("simultaneous_actions_execution");
+   public static final ROS2Topic<SimultaneousActionsExecutionMessage> SIMULTANEOUS_ACTIONS_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(SimultaneousActionsExecutionMessage.class).withSuffix("simultaneous_actions_execution");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> HAND_POSE_JOINT_ANGLES_STATUS
