@@ -32,14 +32,14 @@ RUN rm -rf /opt/ihmc-open-robotics-software
 RUN . /opt/ros/galactic/setup.sh && colcon build
 
 # Install CenterPose
-ENV CenterPose_ROOT=/root/centerpose-install
-RUN git clone -b replace_linear_assignment https://github.com/ihmcrobotics/CenterPose.git $CenterPose_ROOT && \
-    rm -rf $CenterPose_ROOT/.git
-RUN rm -r $CenterPose_ROOT/src/lib/models/networks/DCNv2
-RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CenterPose_ROOT/src/lib/models/networks/DCNv2 && \
-    rm -rf $CenterPose_ROOT/src/lib/models/networks/DCNv2/.git
+ENV CENTERPOSE_INSTALL_DIR=/root/centerpose-install
+RUN git clone -b replace_linear_assignment https://github.com/ihmcrobotics/CenterPose.git $CENTERPOSE_INSTALL_DIR && \
+    rm -rf $CENTERPOSE_INSTALL_DIR/.git
+RUN rm -r $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2
+RUN git clone https://github.com/ihmcrobotics/DCNv2_latest.git $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2 && \
+    rm -rf $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2/.git
 # Build DCV_v2 and installing CenterPose
-WORKDIR $CenterPose_ROOT/src/lib/models/networks/DCNv2
+WORKDIR $CENTERPOSE_INSTALL_DIR/src/lib/models/networks/DCNv2
 RUN python3 setup.py build develop
 
 # Cleanup to reduce image size
