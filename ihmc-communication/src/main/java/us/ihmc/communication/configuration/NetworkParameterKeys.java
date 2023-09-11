@@ -3,7 +3,6 @@ package us.ihmc.communication.configuration;
 public enum NetworkParameterKeys
 {
    robotController("Hostname/IP of the robot controller.", "127.0.0.1", true),
-   logger("Hostname/IP of the logger or visualizer network.", "127.0.0.1", true),
    networkManager("Hostname/IP of the network manager, as seen from the communication shaper.", "127.0.0.1", true),
 
    rosURI("Fully qualified ROS master URI.", "http://127.0.0.1:11311", false),
