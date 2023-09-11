@@ -421,6 +421,7 @@ public class ControllerNaturalPostureManager
    
    ///////////////////// methods for generating data for paper
 
+   //TODO pull this out into its own class
    private void computeDataForPaper() {
 	   // We would like to compare the relative angular velocity to the angular velocity of the ACOM frame
 	   // We also want to compare the CAM to the one approximated by ACOM
@@ -507,6 +508,7 @@ public class ControllerNaturalPostureManager
       DMatrixRMaj jointVelocity = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
       MultiBodySystemTools.extractJointsState(jointList, JointStateType.VELOCITY, jointVelocity);
 
+      //TODO we can get this from the HLHControllerToolbox via the contained internal objects.
       DMatrixRMaj momentumMatrix = computeMomentumMatrix(fullRobotModel);
       DMatrixRMaj comMomentum = MatrixTools.mult(momentumMatrix, jointVelocityWithFloatingBase);
 
