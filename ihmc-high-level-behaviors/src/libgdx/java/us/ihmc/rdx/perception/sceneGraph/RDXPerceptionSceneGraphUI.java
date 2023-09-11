@@ -66,12 +66,12 @@ public class RDXPerceptionSceneGraphUI
       }
 
       if (publishThrottler.run())
-         sceneGraphPublisher.publish(sceneGraph.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+         sceneGraphPublisher.publish(sceneGraph, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Detectable scene nodes received: " + sceneGraphSubscription.getNumberOfMessagesReceived());
+      ImGui.text("Scene graph updates received: " + sceneGraphSubscription.getNumberOfMessagesReceived());
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
       ImGui.text("Detections:");
       ImGui.separator();
