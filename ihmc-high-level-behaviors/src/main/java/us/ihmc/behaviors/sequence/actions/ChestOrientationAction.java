@@ -89,7 +89,6 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
    @Override

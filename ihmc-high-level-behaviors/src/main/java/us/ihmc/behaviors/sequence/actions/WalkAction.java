@@ -207,7 +207,6 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                                  + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
    @Override

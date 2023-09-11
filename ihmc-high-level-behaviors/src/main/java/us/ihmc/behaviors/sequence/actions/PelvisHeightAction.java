@@ -94,7 +94,6 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
       executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
    @Override

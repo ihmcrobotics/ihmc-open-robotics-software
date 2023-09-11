@@ -139,7 +139,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(getSide(), true));
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
    @Override
