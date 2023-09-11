@@ -64,6 +64,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.nadia.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -149,6 +150,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    private boolean firstTick = true;
+
+   private final InertialParameterEstimator inertialParameterEstimator;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -278,6 +281,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
+
+      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, feetManager, controllerToolbox.getFootSwitches(), controllerToolbox.getGravityZ(), registry);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -682,6 +687,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
+
+      inertialParameterEstimator.update();
 
       firstTick = false;
    }

@@ -163,8 +163,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingMessageHandler walkingMessageHandler;
    private WalkingTrajectoryPath walkingTrajectoryPath;
 
-   private InertialParameterEstimator inertialParameterEstimator;
-
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel,
@@ -361,8 +359,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
-
-      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, footSwitches, new FrameVector3D( ReferenceFrame.getWorldFrame(), 0.0, 0.0, -gravity), registry);
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
@@ -417,8 +413,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
-
-      inertialParameterEstimator.update();
    }
 
    private final FramePoint2D tempFootCop2d = new FramePoint2D();
