@@ -20,12 +20,15 @@ public class DoorSceneNodeDefinitions
    // PUSH DOOR
 
    public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM  = new RigidBodyTransform();
+   public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
    static
    {
       PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setZ(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
       PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setY(-DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
+      PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM.setAndInvert(PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
    }
    public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
    {
       RigidBodyTransform leverToPanelTransform = new RigidBodyTransform();
@@ -40,6 +43,7 @@ public class DoorSceneNodeDefinitions
       FramePose3D markerPose = new FramePose3D(markerFrame);
       markerPose.changeFrame(panelFrame);
       markerPose.get(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM.setAndInvert(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
    }
    public static final RigidBodyTransform PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM = new RigidBodyTransform();
    static
@@ -59,12 +63,15 @@ public class DoorSceneNodeDefinitions
    // PULL DOOR
 
    public static final RigidBodyTransform PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM  = new RigidBodyTransform();
+   public static final RigidBodyTransform PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
    static
    {
       PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setZ(DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
       PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setY(-DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
+      PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM.setAndInvert(PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
    }
    public static final RigidBodyTransform PULL_DOOR_MARKER_TO_PANEL_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PULL_DOOR_PANEL_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
    {
       RigidBodyTransform leverToPanelTransform = new RigidBodyTransform();
@@ -80,6 +87,7 @@ public class DoorSceneNodeDefinitions
       FramePose3D markerPose = new FramePose3D(markerFrame);
       markerPose.changeFrame(panelFrame);
       markerPose.get(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      PULL_DOOR_PANEL_TO_MARKER_TRANSFORM.setAndInvert(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
    }
    public static final RigidBodyTransform PULL_DOOR_FRAME_TO_PANEL_TRANSFORM = new RigidBodyTransform();
    static
@@ -122,11 +130,10 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PullDoorPanel",
+                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           PULL_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
       return node;
    }
@@ -135,11 +142,10 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PushDoorPanel",
+                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
       return node;
    }
@@ -148,12 +154,11 @@ public class DoorSceneNodeDefinitions
    {
       StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                  "PullDoorFrame",
+                                                                 () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                 PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                                  DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                                  PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                  DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
-      node.getNodeToParentFrameTransform().set(PULL_DOOR_FRAME_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
    }
 
@@ -161,12 +166,11 @@ public class DoorSceneNodeDefinitions
    {
       StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                  "PushDoorFrame",
+                                                                 () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                 PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                                  DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                                  PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                  DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
-      node.getNodeToParentFrameTransform().set(PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
    }
 
@@ -174,11 +178,10 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PushDoorLeverHandle",
+                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      node.getNodeToParentFrameTransform().setAndInvert(PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
    }
 
@@ -186,11 +189,10 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PullDoorLeverHandle",
+                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      node.getNodeToParentFrameTransform().setAndInvert(PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
    }
 }
