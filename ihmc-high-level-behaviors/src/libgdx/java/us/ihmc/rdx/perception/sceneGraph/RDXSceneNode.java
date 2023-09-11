@@ -9,6 +9,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
@@ -31,7 +32,7 @@ import java.util.Set;
  * TODO: Add pose "override", via right click context menu, and gizmo.
  *   Possibly do this in a higher level class or class that extends this.
  */
-public class RDXPredefinedRigidBodySceneNode
+public class RDXSceneNode
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
    private final PredefinedRigidBodySceneNode sceneNode;
@@ -48,7 +49,7 @@ public class RDXPredefinedRigidBodySceneNode
    private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
    private ImGuiInputDoubleWrapper distanceToDisableTrackingInput;
 
-   public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
+   public RDXSceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
       this.sceneNode = predefinedRigidBodySceneNode;
 
@@ -59,7 +60,7 @@ public class RDXPredefinedRigidBodySceneNode
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(sceneNode.getNodeFrame(),
                                                      sceneNode.getNodeToParentFrameTransform());
       offsetPoseGizmo.createAndSetupDefault(panel3D);
-      trackDetectedPoseWrapper = new ImBooleanWrapper(sceneNode::getTrackDetectedPose,
+      trackDetectedPoseWrapper = new ImBooleanWrapper(sceneNode::getTrackingInitialParent,
                                                       trackDetectedPoseChanged::set,
                                                       imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
 
@@ -86,12 +87,12 @@ public class RDXPredefinedRigidBodySceneNode
       if (trackDetectedPoseChanged.poll())
       {
          boolean trackDetectedPose = trackDetectedPoseChanged.read();
-         sceneNode.setTrackDetectedPose(trackDetectedPose);
+         sceneNode.setTrackInitialParent(trackDetectedPose);
          ensureGizmoFrameIsSceneNodeFrame();
          sceneNode.markModifiedByOperator();
       }
 
-      showing = sceneNode.getCurrentlyDetected() || !sceneNode.getTrackDetectedPose();
+      showing = sceneNode.getCurrentlyDetected() || !sceneNode.getTrackingInitialParent();
 
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
       ensureGizmoFrameIsSceneNodeFrame();
@@ -112,9 +113,12 @@ public class RDXPredefinedRigidBodySceneNode
 
    public void renderImGuiWidgets()
    {
-      boolean currentlyDetected = sceneNode.getCurrentlyDetected();
-      currentlyDetectedPlot.setWidgetTextColor(currentlyDetected ? ImGuiTools.GREEN : ImGuiTools.RED);
-      currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");
+      if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
+      {
+         boolean currentlyDetected = detectableSceneNode.getCurrentlyDetected();
+         currentlyDetectedPlot.setWidgetTextColor(currentlyDetected ? ImGuiTools.GREEN : ImGuiTools.RED);
+         currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");
+      }
 
       trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();
