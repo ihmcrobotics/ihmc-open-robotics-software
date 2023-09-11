@@ -36,7 +36,7 @@ public class BehaviorActionSequenceModule
       sceneGraphSubscription = new ROS2SceneGraphSubscription(sceneGraph, ros2ControllerHelper, ROS2IOTopicQualifier.STATUS);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
-      referenceFrameLibrary.addAll(sceneGraph.getReferenceFrameSuppliers());
+      referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       sequence = new BehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
 

@@ -1,11 +1,21 @@
 package us.ihmc.perception.sceneGraph;
 
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -24,6 +34,9 @@ public class SceneGraph
     * back together.
     */
    private transient final TLongObjectMap<SceneNode> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final List<String> nodeNameList = new ArrayList<>();
+   private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
+   private transient final TIntDoubleMap arUcoMarkerIDsToSizesMap = new TIntDoubleHashMap();
    private transient final FramePose3D detectedSceneNodePose = new FramePose3D();
 
    public SceneGraph()
@@ -58,19 +71,29 @@ public class SceneGraph
       });
    }
 
-   public void updateIDMap()
+   public void updateCaches()
    {
       idToNodeMap.clear();
-      updateIDMap(rootNode);
+      nodeNameList.clear();
+      namesToNodesMap.clear();
+      arUcoMarkerIDsToSizesMap.clear();
+      updateCaches(rootNode);
    }
 
-   private void updateIDMap(SceneNode node)
+   private void updateCaches(SceneNode node)
    {
       idToNodeMap.put(node.getID(), node);
+      nodeNameList.add(node.getName());
+      namesToNodesMap.put(node.getName(), node);
+
+      if (node instanceof ArUcoMarkerNode arUcoMarkerNode)
+      {
+         arUcoMarkerIDsToSizesMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode.getMarkerSize());
+      }
 
       for (SceneNode child : node.getChildren())
       {
-         updateIDMap(child);
+         updateCaches(child);
       }
    }
 
@@ -87,5 +110,26 @@ public class SceneGraph
    public TLongObjectMap<SceneNode> getIDToNodeMap()
    {
       return idToNodeMap;
+   }
+
+   public List<String> getNodeNameList()
+   {
+      return nodeNameList;
+   }
+
+   public Map<String, SceneNode> getNamesToNodesMap()
+   {
+      return namesToNodesMap;
+   }
+
+   public TIntDoubleMap getArUcoMarkerIDsToSizesMap()
+   {
+      return arUcoMarkerIDsToSizesMap;
+   }
+
+   public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
+   {
+      Function<String, ReferenceFrame> frameLookup = nodeName -> namesToNodesMap.get(nodeName).getNodeFrame();
+      return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 }
