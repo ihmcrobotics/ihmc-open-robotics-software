@@ -31,10 +31,10 @@ RUN apt-get update && \
 
 # Setup ros2 ws --------------------------------------------------------------------
 WORKDIR /home/ros2ws
-RUN git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /ihmc-openihmc-open-robotics-software
+RUN git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /opt/ihmc-open-robotics-software
 RUN mkdir src
-RUN cp -r /ihmc-openihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces /home/ros2ws/src/ihmc_interfaces
-RUN rm -rf /ihmc-openihmc-open-robotics-software
+RUN cp -r /opt/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces /home/ros2ws/src/ihmc_interfaces
+RUN rm -rf /opt/ihmc-open-robotics-software
 RUN . /opt/ros/galactic/setup.sh && \
     colcon build
 
