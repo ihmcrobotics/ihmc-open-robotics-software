@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.sequence.actions.HandConfigurationActionData;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
@@ -18,6 +19,9 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
                                                                                 imInt -> ImGui.combo(labels.get("Grip"),
                                                                                                      imInt,
                                                                                                      handConfigurationNames));
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
+                                                                                      actionData::setExecuteWithNextAction,
+                                                                                      imBoolean -> imgui.ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
 
    public RDXHandConfigurationAction()
    {
@@ -35,6 +39,12 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
       sideWidget.renderImGuiWidget();
       handConfigurationIndex.renderImGuiWidget();
       ImGui.popItemWidth();
+   }
+
+   @Override
+   public ImBooleanWrapper getExecutionWithNextAction()
+   {
+      return executeWithNextActionWrapper;
    }
 
    @Override

@@ -127,6 +127,7 @@ public class HandPoseActionData implements BehaviorActionData
       this.trajectoryDuration = trajectoryDuration;
    }
 
+   @Override
    public boolean getExecuteWithNextAction()
    {
       return executeWitNextAction;

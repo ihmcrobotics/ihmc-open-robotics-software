@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
-import gnu.trove.list.array.TByteArrayList;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
@@ -18,15 +17,12 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Manages running a sequence of actions on the robot with shared autonomy.
@@ -235,12 +231,20 @@ public class BehaviorActionSequence
          {
             LogTools.info("Automatically executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
             executeNextAction();
+            while (currentlyExecutingAction != null && currentlyExecutingAction.getExecuteWithNextAction())
+            {
+               executeNextAction();
+            }
          }
       }
       else if (manuallyExecuteSubscription.getMessageNotification().poll())
       {
          LogTools.info("Manually executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
          executeNextAction();
+         while (currentlyExecutingAction != null && currentlyExecutingAction.getExecuteWithNextAction())
+         {
+            executeNextAction();
+         }
       }
 
       if (currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting())
