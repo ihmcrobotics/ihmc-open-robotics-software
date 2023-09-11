@@ -48,8 +48,8 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("hand_pose_joint_angles");
-   public static final ROS2Topic<ActionExecutionStatusMessage> ACTION_EXECUTION_STATUS
-         = STATUS_TOPIC.withType(ActionExecutionStatusMessage.class).withSuffix("execution_status");
+   public static final ROS2Topic<ActionsExecutionStatusMessage> ACTIONS_EXECUTION_STATUS
+         = STATUS_TOPIC.withType(ActionsExecutionStatusMessage.class).withSuffix("execution_status");
 
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2;
@@ -77,6 +77,7 @@ public class BehaviorActionSequence
    private final Throttler oneHertzThrottler = new Throttler();
    private final ActionSequenceUpdateMessage actionSequenceStatusMessage = new ActionSequenceUpdateMessage();
    private final ActionExecutionStatusMessage nothingExecutingStatusMessage = new ActionExecutionStatusMessage();
+   private final ActionsExecutionStatusMessage actionsExecutionStatusMessage = new ActionsExecutionStatusMessage();
 
    public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -212,20 +213,21 @@ public class BehaviorActionSequence
          actionSequence.get(i).update(i, executionNextIndex);
       }
 
+      actionsExecutionStatusMessage.getActionStatusList().clear();
       if (lastCurrentlyExecutingAction != null)
       {
-         List<ActionExecutionStatusMessage> actionExecutionStatusMessages = new ArrayList<>();
          for (BehaviorAction currentlyExecutingAction : currentlyExecutingActions)
          {
             currentlyExecutingAction.updateCurrentlyExecuting();
-            actionExecutionStatusMessages.add(currentlyExecutingAction.getExecutionStatusMessage());
+            actionsExecutionStatusMessage.getActionStatusList().add(currentlyExecutingAction.getExecutionStatusMessage());
          }
-         ros2.publish(ACTIONS_EXECUTION_STATUS, actionExecutionStatusMessages);
+         ros2.publish(ACTIONS_EXECUTION_STATUS, actionsExecutionStatusMessage);
       }
       else
       {
          nothingExecutingStatusMessage.setActionIndex(-1);
-         ros2.publish(ACTION_EXECUTION_STATUS, nothingExecutingStatusMessage);
+         actionsExecutionStatusMessage.getActionStatusList().add(nothingExecutingStatusMessage);
+         ros2.publish(ACTIONS_EXECUTION_STATUS, actionsExecutionStatusMessage);
       }
 
       sendStatus();
