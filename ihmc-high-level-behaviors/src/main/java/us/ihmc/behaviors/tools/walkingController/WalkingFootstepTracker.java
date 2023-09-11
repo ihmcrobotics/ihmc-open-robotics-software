@@ -24,12 +24,13 @@ import static us.ihmc.tools.string.StringTools.format;
  */
 public class WalkingFootstepTracker
 {
-   private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private final IHMCROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
    private final IHMCROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
    private final IHMCROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
 
+   private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private List<QueuedFootstepStatusMessage> queuedFootsteps = new ArrayList<>();
+   private transient FramePose3D previousFootstepPose;
    private volatile int completedIndex = 0;
    private volatile int totalStepsCompleted = 0;
    private volatile int totalIncompleteFootsteps = 0;
@@ -120,25 +121,17 @@ public class WalkingFootstepTracker
                            ids));
    }
 
-   public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSideOrNull(RobotSide candidateFootstepSide)
+   public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSide(RobotSide candidateFootstepSide)
    {
-      FramePose3D previousFootstepPose = new FramePose3D();
+      previousFootstepPose = new FramePose3D();
 
-      int i;
-      if (!queuedFootsteps.isEmpty())
-      {
-         i = queuedFootsteps.size() - 1;
-         // Moved the index of the list to the last step on the other side
-         while (i >= 1 && queuedFootsteps.get(i).getRobotSide() == candidateFootstepSide.toByte())
-            --i;
+      int i = queuedFootsteps.size() - 1;
+      // Moved the index of the list to the last step on the other side
+      while (i >= 1 && queuedFootsteps.get(i).getRobotSide() == candidateFootstepSide.toByte())
+         --i;
 
-         previousFootstepPose.getPosition().set(queuedFootsteps.get(i).getLocation());
-         previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
-      }
-      else
-      {
-         previousFootstepPose.setFromReferenceFrame(null);
-      }
+      previousFootstepPose.getPosition().set(queuedFootsteps.get(i).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
 
       return previousFootstepPose;
    }
