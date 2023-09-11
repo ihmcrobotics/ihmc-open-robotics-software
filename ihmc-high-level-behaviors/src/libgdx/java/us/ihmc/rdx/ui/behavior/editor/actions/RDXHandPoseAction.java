@@ -330,6 +330,12 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
+   public ImBooleanWrapper getExecutionWithNextAction()
+   {
+      return executeWithNextActionWrapper;
+   }
+
+   @Override
    public HandPoseActionData getActionData()
    {
       return actionData;

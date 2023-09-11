@@ -21,6 +21,7 @@ public class ChestOrientationActionData implements BehaviorActionData
    private double trajectoryDuration = 4.0;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private boolean executeWitNextAction = false;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -41,6 +42,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       jsonNode.put("parentFrame", chestInteractableReferenceFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, chestInteractableReferenceFrame.getTransformToParent());
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
    @Override
@@ -50,6 +52,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       chestInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
    public void toMessage(BodyPartPoseActionMessage message)
@@ -58,6 +61,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       message.getParentFrame().add(getParentFrame().getName());
       MessageTools.toMessage(chestInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
+      message.setExecuteWithNextAction(executeWitNextAction);
    }
 
    public void fromMessage(BodyPartPoseActionMessage message)
@@ -65,6 +69,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
+      executeWitNextAction = message.getExecuteWithNextAction();
    }
 
    public void setYaw(double yaw)
@@ -98,6 +103,16 @@ public class ChestOrientationActionData implements BehaviorActionData
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
    }
 
    public ReferenceFrame getParentFrame()

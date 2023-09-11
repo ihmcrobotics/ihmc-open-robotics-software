@@ -22,8 +22,8 @@ public abstract class RDXBehaviorAction
    private final MutableBoolean selected = new MutableBoolean();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
-                                                                           selected::setValue,
-                                                                           imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+                                                                         selected::setValue,
+                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final MutableBoolean executeWithNextAction = new MutableBoolean();
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(executeWithNextAction::booleanValue,
                                                                                       executeWithNextAction::setValue,

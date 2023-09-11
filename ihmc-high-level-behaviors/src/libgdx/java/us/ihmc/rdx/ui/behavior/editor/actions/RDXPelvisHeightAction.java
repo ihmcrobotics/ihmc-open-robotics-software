@@ -45,6 +45,9 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
+                                                                                      actionData::setExecuteWithNextAction,
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;
@@ -193,6 +196,12 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    public ImBooleanWrapper getSelected()
    {
       return selectedWrapper;
+   }
+
+   @Override
+   public ImBooleanWrapper getExecutionWithNextAction()
+   {
+      return executeWithNextActionWrapper;
    }
 
    public ReferenceFrame getReferenceFrame()

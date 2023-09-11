@@ -20,6 +20,7 @@ public class PelvisHeightActionData implements BehaviorActionData
    private double trajectoryDuration = 4.0;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private boolean executeWitNextAction = false;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -40,6 +41,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       jsonNode.put("parentFrame", pelvisInteractableReferenceFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, pelvisInteractableReferenceFrame.getTransformToParent());
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
    @Override
@@ -49,6 +51,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       pelvisInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
    public void toMessage(BodyPartPoseActionMessage message)
@@ -57,6 +60,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       message.getParentFrame().add(getParentFrame().getName());
       MessageTools.toMessage(pelvisInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
+      message.setExecuteWithNextAction(executeWitNextAction);
    }
 
    public void fromMessage(BodyPartPoseActionMessage message)
@@ -64,6 +68,7 @@ public class PelvisHeightActionData implements BehaviorActionData
       pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
+      executeWitNextAction = message.getExecuteWithNextAction();
    }
 
    public double getHeight()
@@ -84,6 +89,16 @@ public class PelvisHeightActionData implements BehaviorActionData
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
    }
 
    public ReferenceFrame getParentFrame()
