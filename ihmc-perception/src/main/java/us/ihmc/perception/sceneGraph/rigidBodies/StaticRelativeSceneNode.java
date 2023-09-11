@@ -1,6 +1,10 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.perception.sceneGraph.SceneNode;
+
+import java.util.function.Supplier;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -20,11 +24,13 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 
    public StaticRelativeSceneNode(long id,
                                   String name,
+                                  Supplier<SceneNode> initialParentNodeSupplier,
+                                  RigidBodyTransformReadOnly initialTransformToParent,
                                   String visualModelFilePath,
                                   RigidBodyTransform visualModelToNodeFrameTransform,
                                   double distanceToDisableTracking)
    {
-      super(id, name, visualModelFilePath, visualModelToNodeFrameTransform);
+      super(id, name, initialParentNodeSupplier, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
 
       this.distanceToDisableTracking = distanceToDisableTracking;
    }

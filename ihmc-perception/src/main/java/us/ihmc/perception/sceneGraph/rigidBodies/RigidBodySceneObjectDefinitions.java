@@ -22,11 +22,13 @@ public class RigidBodySceneObjectDefinitions
    public static final double BOX_SIZE = 0.35;
    public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.047298;
    public static final double BOX_MARKER_FROM_RIGHT_Y = 0.047298;
-   public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   public static final RigidBodyTransform MARKER_TO_BOX_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform BOX_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(BOX_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 0.0);
-      BOX_TRANSFORM_TO_MARKER.getTranslation().set(0.0, BOX_MARKER_FROM_RIGHT_Y, BOX_MARKER_FROM_BOTTOM_Z);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(MARKER_TO_BOX_TRANSFORM.getRotation(), 180.0, 0.0, 0.0);
+      MARKER_TO_BOX_TRANSFORM.getTranslation().set(0.0, BOX_MARKER_FROM_RIGHT_Y, BOX_MARKER_FROM_BOTTOM_Z);
+      BOX_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_BOX_TRANSFORM);
    }
    public static final String BOX_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/box.g3dj";
    public static final RigidBodyTransform BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
@@ -43,21 +45,22 @@ public class RigidBodySceneObjectDefinitions
    }
    public static final double MARKER_TO_CAN_OF_SOUP_X = 0.5;
    public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform CAN_OF_SOUP_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(MARKER_TO_CAN_OF_SOUP_TRANSFORM.getRotation(), 0.0, -90.0, 0.0);
       MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
+      CAN_OF_SOUP_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
    }
 
    public static void createBox(SceneGraph sceneGraph, SceneNode parentNode)
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "Box",
+                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           BOX_TO_MARKER_TRANSFORM,
                                                                            BOX_VISUAL_MODEL_FILE_PATH,
                                                                            BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      node.getNodeToParentFrameTransform().setAndInvert(BOX_TRANSFORM_TO_MARKER);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
    }
 
@@ -68,11 +71,10 @@ public class RigidBodySceneObjectDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "CanOfSoup",
+                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           CAN_OF_SOUP_TO_MARKER_TRANSFORM,
                                                                            CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                                                            CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      node.getNodeToParentFrameTransform().setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
-      node.setOriginalParentID(sceneGraph, parentNode.getID());
-      node.setOriginalTransformToParent(node.getNodeToParentFrameTransform());
       parentNode.getChildren().add(node);
    }
 }
