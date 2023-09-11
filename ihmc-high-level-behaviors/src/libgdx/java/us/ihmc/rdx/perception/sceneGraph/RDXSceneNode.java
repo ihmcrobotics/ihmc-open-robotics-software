@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
@@ -35,7 +36,7 @@ import java.util.Set;
 public class RDXSceneNode
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
-   private final PredefinedRigidBodySceneNode sceneNode;
+   private final SceneNode sceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
@@ -49,9 +50,9 @@ public class RDXSceneNode
    private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
    private ImGuiInputDoubleWrapper distanceToDisableTrackingInput;
 
-   public RDXSceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
+   public RDXSceneNode(SceneNode sceneNode, RDX3DPanel panel3D)
    {
-      this.sceneNode = predefinedRigidBodySceneNode;
+      this.sceneNode = sceneNode;
 
       modelInstance = new RDXModelInstance(RDXModelLoader.load(sceneNode.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
