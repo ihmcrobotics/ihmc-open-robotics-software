@@ -28,7 +28,7 @@ class Image2CenterPose_node(Node):
         self.opt = opts().parser.parse_args()
 
         self.opt.arch = 'dlav1_34'
-        self.opt.load_model = f"/home/CenterPose_ws/models/chair_v1_140.pth"
+        self.opt.load_model = f"/root/centerpose-ros2/models/chair_v1_140.pth"
         self.opt.debug = 5
 
         # Default setting
