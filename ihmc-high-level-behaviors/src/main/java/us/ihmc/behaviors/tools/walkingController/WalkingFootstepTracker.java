@@ -3,12 +3,15 @@ package us.ihmc.behaviors.tools.walkingController;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
@@ -25,6 +28,8 @@ public class WalkingFootstepTracker
    private final IHMCROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
    private final IHMCROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
    private final IHMCROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
+
+   private List<QueuedFootstepStatusMessage> queuedFootsteps = new ArrayList<>();
    private volatile int completedIndex = 0;
    private volatile int totalStepsCompleted = 0;
    private volatile int totalIncompleteFootsteps = 0;
@@ -45,6 +50,7 @@ public class WalkingFootstepTracker
    private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
       totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();
+      queuedFootsteps = footstepQueueStatusMessage.getQueuedFootstepList();
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
@@ -112,6 +118,34 @@ public class WalkingFootstepTracker
                            completedIndex,
                            footsteps.size(),
                            ids));
+   }
+
+   public List<QueuedFootstepStatusMessage> getQueuedFootsteps()
+   {
+      return queuedFootsteps;
+   }
+
+   public FramePose3DReadOnly getLastFootstepQueuedOnSameSideOrNull(RobotSide candidateFootstepSide)
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      int i;
+      if (!queuedFootsteps.isEmpty())
+      {
+         i = queuedFootsteps.size() - 1;
+         // Moved the index of the list to the last step on the other side
+         while (i >= 1 && queuedFootsteps.get(i).getRobotSide() == candidateFootstepSide.toByte())
+            --i;
+
+         previousFootstepPose.getPosition().set(queuedFootsteps.get(i).getLocation());
+         previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
+      }
+      else
+      {
+         previousFootstepPose.setFromReferenceFrame(null);
+      }
+
+      return previousFootstepPose;
    }
 
    public int getNumberOfIncompleteFootsteps()

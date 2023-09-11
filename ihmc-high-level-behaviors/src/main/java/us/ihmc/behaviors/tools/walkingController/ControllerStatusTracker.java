@@ -31,7 +31,6 @@ public class ControllerStatusTracker
    private static final double CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME = 0.25;
 
    private final WalkingFootstepTracker footstepTracker;
-   private List<QueuedFootstepStatusMessage> queuedFootsteps = new ArrayList<>();
    private final LogToolsWriteOnly statusLogger;
    private volatile HighLevelControllerName latestKnownState;
    private final Vector3D lastPlanOffset = new Vector3D();
@@ -59,7 +58,6 @@ public class ControllerStatusTracker
       new IHMCROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
       new IHMCROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
-      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepQueueStatusMessage.class, robotName), this::acceptFootstepQueueStatusMessage);
    }
 
    public void registerAbortedListener(Notification abortedListener)
@@ -162,16 +160,6 @@ public class ControllerStatusTracker
       }
 
       this.isWalking = isWalking;
-   }
-
-   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage message)
-   {
-      queuedFootsteps = message.getQueuedFootstepList();
-   }
-
-   public List<QueuedFootstepStatusMessage> getQueuedFootsteps()
-   {
-      return queuedFootsteps;
    }
 
    public boolean isWalking()
