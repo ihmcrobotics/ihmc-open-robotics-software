@@ -65,6 +65,12 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionData implements Be
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;

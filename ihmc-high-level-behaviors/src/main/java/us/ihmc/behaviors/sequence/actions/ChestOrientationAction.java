@@ -93,6 +93,12 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;

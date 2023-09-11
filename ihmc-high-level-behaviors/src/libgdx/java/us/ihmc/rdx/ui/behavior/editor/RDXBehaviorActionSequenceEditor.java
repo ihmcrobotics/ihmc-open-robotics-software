@@ -44,6 +44,7 @@ import us.ihmc.tools.io.*;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -92,6 +93,7 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
    private IHMCROS2Input<ActionExecutionStatusMessage> executionStatusSubscription;
    private final ActionExecutionStatusMessage executionStatusMessageToDisplay = new ActionExecutionStatusMessage();
+   private final List<RDXBehaviorAction> currentlyExecutingActions = new ArrayList<>();
    private RDXBehaviorAction currentlyExecutingAction;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
@@ -411,7 +413,11 @@ public class RDXBehaviorActionSequenceEditor
          {
             executionStatusMessageToDisplay.set(latestExecutionStatus);
             currentlyExecutingAction = actionSequence.get(executionStatusMessageToDisplay.getActionIndex());
-            ImGui.text("Executing: %s (%s)".formatted(currentlyExecutingAction.getDescription(), currentlyExecutingAction.getActionTypeTitle()));
+            currentlyExecutingActions.add(currentlyExecutingAction);
+            ImGui.text("Executing: ");
+            ImGui.sameLine();
+            for (RDXBehaviorAction action : currentlyExecutingActions)
+               ImGui.text("%s (%s)".formatted(action.getDescription(), action.getActionTypeTitle()));
          }
       }
 

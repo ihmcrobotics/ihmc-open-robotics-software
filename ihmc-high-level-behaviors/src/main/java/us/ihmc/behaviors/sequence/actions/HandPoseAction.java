@@ -143,6 +143,12 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
+   }
+
+   @Override
    public boolean isExecuting()
    {
       return isExecuting;
