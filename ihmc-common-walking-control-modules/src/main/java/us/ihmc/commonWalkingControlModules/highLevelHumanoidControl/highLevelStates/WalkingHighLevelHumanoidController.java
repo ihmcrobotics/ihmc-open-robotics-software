@@ -301,7 +301,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
-
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -541,6 +540,20 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFlamingoCommands();
 
+      privilegedConfigurationCommand.clear();
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+         for (int i = 0; i < armJointNames.length; i++)
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+
+         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+      }
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());

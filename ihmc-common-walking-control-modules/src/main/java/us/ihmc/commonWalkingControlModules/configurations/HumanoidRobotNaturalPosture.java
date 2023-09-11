@@ -33,5 +33,10 @@ public interface HumanoidRobotNaturalPosture
    // For testing
    public DMatrixRMaj getNaturalPostureJacobianRtBaseEwrtBase();
 
-   public void addNaturalPostureParametersToSCS(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry);
+   default YoRegistry getRegistry()
+   {
+      return null;
+   }
+
+   public void createVisuals(YoGraphicsListRegistry yoGraphicsListRegistry);
 }
