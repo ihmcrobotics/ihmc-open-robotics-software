@@ -15,7 +15,7 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9cb56cd44430e39a3efc523a275696e058d6e37d7304ffd04c1decd570cf4181";
+   		return "83b93d96725aa815530e9da8505c1caa5911eefa057217c1ff17a647912c7d66";
    }
    
    @Override
@@ -64,6 +64,8 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +94,9 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,6 +113,8 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
+      cdr.write_type_7(data.getExecuteWithNextAction());
+
    }
 
    public static void read(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
@@ -118,6 +125,8 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       cdr.read_type_e(data.getParentFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
+      	
+      data.setExecuteWithNextAction(cdr.read_type_7());
       	
 
    }
@@ -132,6 +141,7 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
+      ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
    }
 
    @Override
@@ -144,6 +154,7 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
+      data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage src, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage dest)

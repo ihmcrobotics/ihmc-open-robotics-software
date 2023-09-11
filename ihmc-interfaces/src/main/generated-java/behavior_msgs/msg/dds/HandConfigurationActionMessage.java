@@ -20,6 +20,10 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
             * The grip type
             */
    public long grip_;
+   /**
+            * Whether the next action can be executed at the same time of this one
+            */
+   public boolean execute_with_next_action_;
 
    public HandConfigurationActionMessage()
    {
@@ -38,6 +42,8 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
       robot_side_ = other.robot_side_;
 
       grip_ = other.grip_;
+
+      execute_with_next_action_ = other.execute_with_next_action_;
 
    }
 
@@ -80,6 +86,21 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
       return grip_;
    }
 
+   /**
+            * Whether the next action can be executed at the same time of this one
+            */
+   public void setExecuteWithNextAction(boolean execute_with_next_action)
+   {
+      execute_with_next_action_ = execute_with_next_action;
+   }
+   /**
+            * Whether the next action can be executed at the same time of this one
+            */
+   public boolean getExecuteWithNextAction()
+   {
+      return execute_with_next_action_;
+   }
+
 
    public static Supplier<HandConfigurationActionMessagePubSubType> getPubSubType()
    {
@@ -103,6 +124,8 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grip_, other.grip_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
+
 
       return true;
    }
@@ -121,6 +144,8 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
 
       if(this.grip_ != otherMyClass.grip_) return false;
 
+      if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
+
 
       return true;
    }
@@ -136,7 +161,9 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("grip=");
-      builder.append(this.grip_);
+      builder.append(this.grip_);      builder.append(", ");
+      builder.append("execute_with_next_action=");
+      builder.append(this.execute_with_next_action_);
       builder.append("}");
       return builder.toString();
    }

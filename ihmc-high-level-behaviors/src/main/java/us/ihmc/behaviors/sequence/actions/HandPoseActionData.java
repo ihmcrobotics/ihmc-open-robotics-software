@@ -22,6 +22,7 @@ public class HandPoseActionData implements BehaviorActionData
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame palmFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private double trajectoryDuration = 4.0;
+   private boolean executeWitNextAction = false;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -43,6 +44,7 @@ public class HandPoseActionData implements BehaviorActionData
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
    @Override
@@ -53,6 +55,7 @@ public class HandPoseActionData implements BehaviorActionData
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
    public void toMessage(SidedBodyPartPoseActionMessage message)
@@ -62,6 +65,7 @@ public class HandPoseActionData implements BehaviorActionData
       MessageTools.toMessage(palmFrame.getTransformToParent(), message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
+      message.setExecuteWithNextAction(executeWitNextAction);
    }
 
    public void fromMessage(SidedBodyPartPoseActionMessage message)
@@ -70,6 +74,7 @@ public class HandPoseActionData implements BehaviorActionData
       palmFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
+      executeWitNextAction = message.getExecuteWithNextAction();
    }
 
    public ReferenceFrame getParentFrame()
@@ -120,6 +125,16 @@ public class HandPoseActionData implements BehaviorActionData
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
    }
 
    @Override
