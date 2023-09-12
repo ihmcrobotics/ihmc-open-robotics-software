@@ -31,6 +31,31 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
+    * When {@code true}, the waypoints of the swing trajectory will be positioned z-wise with respect
+    * to the height of the toe instead of the center of the sole.
+    * <p>
+    * This essentially renders the height of the waypoints independent from the foot toeing off.
+    * </p>
+    */
+   public boolean useInitialToeHeight()
+   {
+      return false;
+   }
+
+   /**
+    * When {@code true}, the waypoints of the swing trajectory will be positioned z-wise with respect
+    * to the height of the heel instead of the center of the sole.
+    * <p>
+    * This essentially renders the height of the waypoints independent from the foot pitch at
+    * touchdown.
+    * </p>
+    */
+   public boolean useFinalHeelHeight()
+   {
+      return false;
+   }
+
+   /**
     * Custom waypoint positions are precomputed externally. During execution the initial foot pose
     * might be different than expected, and the preplanned trajectory might have the foot go backward
     * before moving forward, for example. This provides a threshold for the maximum angle from forward
