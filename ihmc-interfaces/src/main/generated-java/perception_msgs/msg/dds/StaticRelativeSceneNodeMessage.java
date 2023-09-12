@@ -13,9 +13,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNodeMessage> implements Settable<StaticRelativeSceneNodeMessage>, EpsilonComparable<StaticRelativeSceneNodeMessage>
 {
    /**
-            * The base scene node information
+            * The predefined rigid body information that this extends
             */
-   public perception_msgs.msg.dds.SceneNodeMessage scene_node_;
+   public perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage predefined_rigid_body_scene_node_;
    /**
             * Distance to robot to disable tracking.
             * Used for automatically disabling tracking for static relative objects.
@@ -29,7 +29,7 @@ public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNo
 
    public StaticRelativeSceneNodeMessage()
    {
-      scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
+      predefined_rigid_body_scene_node_ = new perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage();
    }
 
    public StaticRelativeSceneNodeMessage(StaticRelativeSceneNodeMessage other)
@@ -40,7 +40,7 @@ public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNo
 
    public void set(StaticRelativeSceneNodeMessage other)
    {
-      perception_msgs.msg.dds.SceneNodeMessagePubSubType.staticCopy(other.scene_node_, scene_node_);
+      perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType.staticCopy(other.predefined_rigid_body_scene_node_, predefined_rigid_body_scene_node_);
       distance_to_disable_tracking_ = other.distance_to_disable_tracking_;
 
       current_distance_to_robot_ = other.current_distance_to_robot_;
@@ -49,11 +49,11 @@ public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNo
 
 
    /**
-            * The base scene node information
+            * The predefined rigid body information that this extends
             */
-   public perception_msgs.msg.dds.SceneNodeMessage getSceneNode()
+   public perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage getPredefinedRigidBodySceneNode()
    {
-      return scene_node_;
+      return predefined_rigid_body_scene_node_;
    }
 
    /**
@@ -108,7 +108,7 @@ public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNo
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.scene_node_.epsilonEquals(other.scene_node_, epsilon)) return false;
+      if (!this.predefined_rigid_body_scene_node_.epsilonEquals(other.predefined_rigid_body_scene_node_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_disable_tracking_, other.distance_to_disable_tracking_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_distance_to_robot_, other.current_distance_to_robot_, epsilon)) return false;
@@ -126,7 +126,7 @@ public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNo
 
       StaticRelativeSceneNodeMessage otherMyClass = (StaticRelativeSceneNodeMessage) other;
 
-      if (!this.scene_node_.equals(otherMyClass.scene_node_)) return false;
+      if (!this.predefined_rigid_body_scene_node_.equals(otherMyClass.predefined_rigid_body_scene_node_)) return false;
       if(this.distance_to_disable_tracking_ != otherMyClass.distance_to_disable_tracking_) return false;
 
       if(this.current_distance_to_robot_ != otherMyClass.current_distance_to_robot_) return false;
@@ -141,8 +141,8 @@ public class StaticRelativeSceneNodeMessage extends Packet<StaticRelativeSceneNo
       StringBuilder builder = new StringBuilder();
 
       builder.append("StaticRelativeSceneNodeMessage {");
-      builder.append("scene_node=");
-      builder.append(this.scene_node_);      builder.append(", ");
+      builder.append("predefined_rigid_body_scene_node=");
+      builder.append(this.predefined_rigid_body_scene_node_);      builder.append(", ");
       builder.append("distance_to_disable_tracking=");
       builder.append(this.distance_to_disable_tracking_);      builder.append(", ");
       builder.append("current_distance_to_robot=");

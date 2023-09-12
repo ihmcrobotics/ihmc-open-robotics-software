@@ -1,9 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.SceneGraphMessage;
-import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -80,7 +77,7 @@ public class ROS2SceneGraphSubscription
 
       if (!localTreeFrozen && localNode == null) // New node that wasn't in the local tree
       {
-         localNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode);
+         localNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
       }
 
       // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
@@ -160,12 +157,21 @@ public class ROS2SceneGraphSubscription
       switch (sceneNodeType)
       {
          case SceneGraphMessage.SCENE_NODE_TYPE ->
-               subscriptionNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
+         {
+            subscriptionNode.setSceneNodeMessage(sceneGraphMessage.getSceneNodes().get(indexInTypesList));
+         }
          case SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE ->
          {
             DetectableSceneNodeMessage detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().get(indexInTypesList);
             subscriptionNode.setDetectableSceneNodeMessage(detectableSceneNodeMessage);
             subscriptionNode.setSceneNodeMessage(detectableSceneNodeMessage.getSceneNode());
+         }
+         case SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE ->
+         {
+            PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage
+                  = sceneGraphMessage.getPredefinedRigidBodySceneNodes().get(indexInTypesList);
+            subscriptionNode.setPredefinedRigidBodySceneNodeMessage(predefinedRigidBodySceneNodeMessage);
+            subscriptionNode.setSceneNodeMessage(predefinedRigidBodySceneNodeMessage.getSceneNode());
          }
          case SceneGraphMessage.ARUCO_MARKER_NODE_TYPE ->
          {
@@ -178,7 +184,8 @@ public class ROS2SceneGraphSubscription
          {
             StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().get(indexInTypesList);
             subscriptionNode.setStaticRelativeSceneNodeMessage(staticRelativeSceneNodeMessage);
-            subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getSceneNode());
+            subscriptionNode.setPredefinedRigidBodySceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode());
+            subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode().getSceneNode());
          }
       }
 

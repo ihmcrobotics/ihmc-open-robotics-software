@@ -7,9 +7,11 @@ int8 SCENE_NODE_TYPE=0
 
 int8 DETECTABLE_SCENE_NODE_TYPE=1
 
-int8 ARUCO_MARKER_NODE_TYPE=2
+int8 PREDEFINED_RIGID_BODY_NODE_TYPE=2
 
-int8 STATIC_RELATIVE_NODE_TYPE=3
+int8 ARUCO_MARKER_NODE_TYPE=3
+
+int8 STATIC_RELATIVE_NODE_TYPE=4
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -27,6 +29,9 @@ perception_msgs/SceneNodeMessage[] scene_nodes
 
 # Detectable scene nodes
 perception_msgs/DetectableSceneNodeMessage[] detectable_scene_nodes
+
+# Predefined rigid body scene nodes
+perception_msgs/PredefinedRigidBodySceneNodeMessage[] predefined_rigid_body_scene_nodes
 
 # ArUco marker scene nodes
 perception_msgs/ArUcoMarkerNodeMessage[] aruco_marker_scene_nodes

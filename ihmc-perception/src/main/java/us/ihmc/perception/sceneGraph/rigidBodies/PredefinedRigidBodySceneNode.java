@@ -1,11 +1,11 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
+import gnu.trove.map.TLongObjectMap;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-
-import java.util.function.Supplier;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is
@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class PredefinedRigidBodySceneNode extends SceneNode
 {
-   private final Supplier<SceneNode> rootNodeSupplier;
-   private final Supplier<SceneNode> initialParentNodeSupplier;
+   private final TLongObjectMap<SceneNode> sceneGraphIDToNodeMap;
+   private final long initialParentNodeID;
    private final RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D initialPose = new FramePose3D();
    private final String visualModelFilePath;
@@ -31,15 +31,15 @@ public class PredefinedRigidBodySceneNode extends SceneNode
 
    public PredefinedRigidBodySceneNode(long id,
                                        String name,
-                                       Supplier<SceneNode> rootNodeSupplier,
-                                       Supplier<SceneNode> initialParentNodeSupplier,
+                                       TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
+                                       long initialParentNodeID,
                                        RigidBodyTransformReadOnly initialTransformToParent,
                                        String visualModelFilePath,
                                        RigidBodyTransform visualModelToNodeFrameTransform)
    {
       super(id, name);
-      this.rootNodeSupplier = rootNodeSupplier;
-      this.initialParentNodeSupplier = initialParentNodeSupplier;
+      this.sceneGraphIDToNodeMap = sceneGraphIDToNodeMap;
+      this.initialParentNodeID = initialParentNodeID;
       this.initialTransformToParent.set(initialTransformToParent);
       this.visualModelFilePath = visualModelFilePath;
       this.visualModelToNodeFrameTransform = visualModelToNodeFrameTransform;
@@ -53,15 +53,17 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       boolean previousTrackingInitialParent = getTrackingInitialParent();
       if (previousTrackingInitialParent != trackInitialParent)
       {
+         SceneNode rootNode = sceneGraphIDToNodeMap.get(SceneGraph.ROOT_NODE_ID);
+         SceneNode initialParentNode = sceneGraphIDToNodeMap.get(initialParentNodeID);
          if (trackInitialParent)
          {
-            rootNodeSupplier.get().getChildren().remove(this);
-            initialParentNodeSupplier.get().getChildren().add(this);
+            rootNode.getChildren().remove(this);
+            initialParentNode.getChildren().add(this);
          }
          else
          {
-            initialParentNodeSupplier.get().getChildren().remove(this);
-            rootNodeSupplier.get().getChildren().add(this);
+            initialParentNode.getChildren().remove(this);
+            rootNode.getChildren().add(this);
          }
          update(); // Update this and children because parent frame has changed
       }
@@ -69,7 +71,7 @@ public class PredefinedRigidBodySceneNode extends SceneNode
 
    public boolean getTrackingInitialParent()
    {
-      return getNodeFrame().getParent() == initialParentNodeSupplier.get().getNodeFrame();
+      return getNodeFrame().getParent() == sceneGraphIDToNodeMap.get(initialParentNodeID).getNodeFrame();
    }
 
    /**
@@ -78,9 +80,10 @@ public class PredefinedRigidBodySceneNode extends SceneNode
     */
    public void clearOffset()
    {
-      if (getNodeFrame().getParent() != initialParentNodeSupplier.get().getNodeFrame())
+      SceneNode initialParentNode = sceneGraphIDToNodeMap.get(initialParentNodeID);
+      if (getNodeFrame().getParent() != initialParentNode.getNodeFrame())
       {
-         SceneNode originalParentNode = initialParentNodeSupplier.get();
+         SceneNode originalParentNode = initialParentNode;
          initialPose.setIncludingFrame(originalParentNode.getNodeFrame(), initialTransformToParent);
          initialPose.changeFrame(getNodeFrame().getParent());
          initialPose.get(getNodeToParentFrameTransform());
@@ -90,6 +93,16 @@ public class PredefinedRigidBodySceneNode extends SceneNode
          getNodeToParentFrameTransform().set(initialTransformToParent);
       }
       getNodeFrame().update();
+   }
+
+   public long getInitialParentNodeID()
+   {
+      return initialParentNodeID;
+   }
+
+   public RigidBodyTransform getInitialTransformToParent()
+   {
+      return initialTransformToParent;
    }
 
    public String getVisualModelFilePath()
