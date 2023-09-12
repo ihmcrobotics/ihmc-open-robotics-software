@@ -306,14 +306,19 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    }
 
    /**
-    * Gets the transform either from the footstep list, or from the synced robot.
+    * Gets the transform of the last footstep, first checking the current interactable footstep list, then checking the queued controller footsteps,
+    * and if there are no footsteps in either of those. Use the feet of the synced robot to get the transform
     * Never gets the transform from the footstep currently being placed.
     */
    public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
    {
-      if (footsteps.size() > 0)
+      if (!footsteps.isEmpty())
       {
          return getLastFootstep().getFootPose();
+      }
+      else if (controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
+      {
+         return controllerStatusTracker.getFootstepTracker().getLastFootstepQueuedOnOppositeSide(robotSide.getOppositeSide());
       }
       else
       {
