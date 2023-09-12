@@ -51,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class DRCKinematicsBasedStateEstimator implements StateEstimatorController
 {
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
-   public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
+   public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = true;
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
 
    private enum MomentumEstimatorMode
@@ -263,7 +263,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
-         jointTorqueFromForceSensorVisualizer = new JointTorqueFromForceSensorVisualizer(footSwitches, registry);
+         jointTorqueFromForceSensorVisualizer = new JointTorqueFromForceSensorVisualizer(rootJoint.getSuccessor(), feet, footSwitches, registry);
       else
          jointTorqueFromForceSensorVisualizer = null;
 
