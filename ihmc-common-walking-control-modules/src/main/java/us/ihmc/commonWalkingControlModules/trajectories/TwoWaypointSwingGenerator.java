@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -56,6 +57,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble maxSwingHeight;
    private final YoDouble defaultSwingHeight;
    private final YoDouble customWaypointAngleThreshold;
+   private final YoDouble stepUpFirstWaypointHeightFactor;
+   private final YoDouble stepDownSecondWaypointHeightFactor;
 
    private final double[] waypointProportions = new double[2];
 
@@ -188,8 +191,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
       this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
 
-      this.customWaypointAngleThreshold = new YoDouble(namePrefix + "customWaypointAngleThreshold", registry);
+      this.customWaypointAngleThreshold = new YoDouble(namePrefix + "CustomWaypointAngleThreshold", registry);
       this.customWaypointAngleThreshold.set(customWaypointAngleThreshold);
+
+      stepUpFirstWaypointHeightFactor = new YoDouble(namePrefix + "StepUpFirstWaypointHeightFactor", registry);
+      stepUpFirstWaypointHeightFactor.set(1.0);
+      stepDownSecondWaypointHeightFactor = new YoDouble(namePrefix + "StepDownSecondWaypointHeightFactor", registry);
+      stepDownSecondWaypointHeightFactor.set(1.0);
 
       for (int i = 0; i < defaultNumberOfWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
@@ -324,12 +332,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    @Override
    public void setSwingHeight(double swingHeight)
    {
-      boolean useDefaultSwing = Double.isNaN(swingHeight) || swingHeight <= 0.0;
-
-      if (useDefaultSwing)
+      if (!isSwingHeightValid(swingHeight))
          this.swingHeight.set(defaultSwingHeight.getDoubleValue());
       else
          this.swingHeight.set(MathTools.clamp(swingHeight, minSwingHeight.getDoubleValue(), maxSwingHeight.getDoubleValue()));
+   }
+
+   public boolean isSwingHeightValid(double swingHeight)
+   {
+      return Double.isFinite(swingHeight) && swingHeight > 0.0;
    }
 
    @Override
@@ -355,6 +366,12 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.waypointProportions[1] = waypointProportions1;
    }
 
+   public void setObstacleClearanceWaypointHeightFactors(double stepUpFirstWaypointHeightFactor, double stepDownSecondWaypointHeightFactor)
+   {
+      this.stepUpFirstWaypointHeightFactor.set(stepUpFirstWaypointHeightFactor);
+      this.stepDownSecondWaypointHeightFactor.set(stepDownSecondWaypointHeightFactor);
+   }
+
    @Override
    public void initialize()
    {
@@ -368,50 +385,73 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       needToAdjustedSwingForSelfCollision.set(computeSwingAdjustment(initialPosition, finalPosition, stanceFootPosition, swingOffset));
 
       double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
+
       switch (trajectoryType)
       {
          case OBSTACLE_CLEARANCE:
+         {
             waypointPositions.clear();
+
             for (int i = 0; i < defaultNumberOfWaypoints; i++)
             {
                waypointPositions.add();
                waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-               waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
 
                if (needToAdjustedSwingForSelfCollision.getBooleanValue())
                {
                   waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
                }
             }
+
+            if (initialPosition.getZ() < finalPosition.getZ())
+            { // Stepping up
+               double alpha = stepUpFirstWaypointHeightFactor.getValue();
+               waypointPositions.get(0).setZ(swingHeight.getValue() + EuclidCoreTools.interpolate(initialPosition.getZ(), finalPosition.getZ(), alpha));
+               waypointPositions.get(1).setZ(swingHeight.getValue() + finalPosition.getZ());
+            }
+            else
+            { // Stepping down
+               waypointPositions.get(0).setZ(swingHeight.getValue() + initialPosition.getZ());
+               double alpha = stepDownSecondWaypointHeightFactor.getValue();
+               waypointPositions.get(1).setZ(swingHeight.getValue() + EuclidCoreTools.interpolate(finalPosition.getZ(), initialPosition.getZ(), alpha));
+            }
+
             break;
+         }
          case DEFAULT:
+         {
             waypointPositions.clear();
             for (int i = 0; i < defaultNumberOfWaypoints; i++)
             {
                waypointPositions.add();
                waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
                waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
+
                if (needToAdjustedSwingForSelfCollision.getBooleanValue())
                {
                   waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
                }
             }
             break;
+         }
          case CUSTOM:
             break;
          default:
             throw new RuntimeException("Trajectory type not implemented");
       }
 
-      double maxWaypointZ;
-      if (stanceFootPosition.containsNaN())
-         maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
-      else
-         maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
-
-      for (int i = 0; i < waypointPositions.size(); i++)
+      if (trajectoryType != TrajectoryType.OBSTACLE_CLEARANCE)
       {
-         waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
+         double maxWaypointZ;
+         if (stanceFootPosition.containsNaN())
+            maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
+         else
+            maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+         
+         for (int i = 0; i < waypointPositions.size(); i++)
+         {
+            waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
+         }
       }
 
       initialVelocityNoTimeDimension.setIncludingFrame(initialVelocity);
