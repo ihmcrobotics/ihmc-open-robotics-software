@@ -57,10 +57,17 @@ def insert_timestamps(data, timestamps_path, group):
     timestamps = []
     for line in timestamps_file:
         if line.split(' ')[0] != '#':
-            timestamps.append(float(line.split(' ')[0]))
-    timestamps = np.array(timestamps, dtype=np.float32)
+            words = line.split(' ')
+            print("Time Found: ", float(words[0]))
+            timestamps.append(float(words[0]))
+
+    timestamps = np.array(timestamps, dtype=np.float64)
 
     data.create_dataset(group + 'time', shape=timestamps.shape, data=timestamps)
+
+    np.set_printoptions(suppress=True)
+    print("Times: ", timestamps.tolist())
+    np.set_printoptions(suppress=False)
 
     timestamps_file.close()
 
@@ -73,7 +80,7 @@ def insert_poses(data, poses_path, group):
     poses = []
     for line in poses_file:
         poses.append([float(x) for x in line.split()])
-    poses = np.array(poses, dtype=np.float32)
+    poses = np.array(poses, dtype=np.float64)
 
     print(poses.shape)
 
@@ -97,9 +104,9 @@ def insert_poses_quaternion(data, poses_path, group):
             tvecs.append([float(x) for x in words[1:4]])
             qvecs.append([float(x) for x in words[4:8]])
     
-    times = np.array(times, dtype=np.float32)
-    poses_tvec = np.array(tvecs, dtype=np.float32)
-    poses_qvec = np.array(qvecs, dtype=np.float32)
+    times = np.array(times, dtype=np.float64)
+    poses_tvec = np.array(tvecs, dtype=np.float64)
+    poses_qvec = np.array(qvecs, dtype=np.float64)
 
     print(poses_tvec.shape, poses_qvec.shape)
 
@@ -127,11 +134,14 @@ def resample_poses_quaternion(data, src_grp, dst_grp, time_group, block_size=10)
 
     for time in times:
         index = np.argmin(np.abs(data[src_grp + 'time'][:] - time))
+        gt_time = data[src_grp + 'time'][index]
         poses_tvec_resampled.append(poses_tvec[index])
         poses_qvec_resampled.append(poses_qvec[index])
 
-    poses_tvec_resampled = np.array(poses_tvec_resampled, dtype=np.float32)
-    poses_qvec_resampled = np.array(poses_qvec_resampled, dtype=np.float32)
+        print("Index Closest: ", index, "Time: ", time, "GT Time: ", gt_time)
+
+    poses_tvec_resampled = np.array(poses_tvec_resampled, dtype=np.float64)
+    poses_qvec_resampled = np.array(poses_qvec_resampled, dtype=np.float64)
 
     # create datasets of size block_size each
     for i in range(0, len(times), block_size):

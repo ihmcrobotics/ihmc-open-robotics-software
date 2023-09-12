@@ -153,6 +153,13 @@ def plotter_main(data, output_file):
 
     # plot_position(150, 640, [mocap_euler, final_rotations, sensor_orientation], ['-b', '-r', '-y'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
+def plot_data(data):
+    position = get_data(data, 'l515/sensor/position/')
+
+    print(position)
+
+    plot_position(0, -1, [position], ['-b'], "Position", "Position")
+
 
 def extract_trajectory_from_output(file):
     
@@ -242,10 +249,10 @@ def create_from_KITTI():
 
 def create_from_TUM(path):
 
-    depth_info = '/home/quantum/Workspace/Storage/Other/Temp/TUM/rgbd_dataset_freiburg1_xyz/depth.txt'
-    gt_info = '/home/quantum/Workspace/Storage/Other/Temp/TUM/rgbd_dataset_freiburg1_xyz/groundtruth.txt'
+    depth_info = path + 'depth.txt'
+    gt_info = path + 'groundtruth.txt'
 
-    depth_path = '/home/quantum/Workspace/Storage/Other/Temp/TUM/rgbd_dataset_freiburg1_xyz/depth/'
+    depth_path = path + 'depth/'
 
     data = h5py.File(path + 'TUM_Dataset_01.hdf5', 'w')
 
@@ -298,7 +305,7 @@ if __name__ == '__main__':
 
     if args.plot:
         data = h5py.File(path + args.plot, 'r')
-        plotter_main(data)
+        plot_data(data)
 
     if args.play:
         data = h5py.File(path + args.play, 'r')
