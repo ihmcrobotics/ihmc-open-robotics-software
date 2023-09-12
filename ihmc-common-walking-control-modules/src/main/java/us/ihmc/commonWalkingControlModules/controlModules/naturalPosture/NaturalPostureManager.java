@@ -13,17 +13,21 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class NaturalPostureManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ControllerNaturalPostureManager walkingManager;
-
    private final HumanoidRobotNaturalPosture robotNaturalPosture;
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
-
    private final ExecutionTimer naturalPostureTimer;
+
+   private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
+   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
+   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
+   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
 
    public NaturalPostureManager(HumanoidRobotNaturalPosture naturalPostureMeasurement,
                                 NaturalPostureParameters naturalPostureParameters,
@@ -31,6 +35,11 @@ public class NaturalPostureManager
                                 YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
+
+      useNaturalPostureCommand.set(false); //this must be true to use Natural Posture
+      usePelvisPrivilegedPoseCommand.set(false);
+      useBodyManagerCommands.set(true);
+      usePelvisOrientationCommand.set(true);
 
       robotNaturalPosture = naturalPostureMeasurement;
 
@@ -40,8 +49,8 @@ public class NaturalPostureManager
       OneDoFJointBasics[] allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
       String[] jointNamesRestrictiveLimits = naturalPostureParameters.getJointsWithRestrictiveLimits();
       OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
-                                                                                                                        jointNamesRestrictiveLimits),
-                                                                                         OneDoFJointBasics.class);
+                                                                                                                         jointNamesRestrictiveLimits),
+                                                                                          OneDoFJointBasics.class);
       for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
       {
          JointLimitParameters limitParameters = naturalPostureParameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
@@ -71,6 +80,31 @@ public class NaturalPostureManager
       naturalPostureTimer.startMeasurement();
       walkingManager.compute();
       naturalPostureTimer.stopMeasurement();
+   }
+
+   //   private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
+   //   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
+   //   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
+   //   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
+
+   public YoBoolean getUseNaturalPostureCommand()
+   {
+      return useNaturalPostureCommand;
+   }
+
+   public YoBoolean getUseBodyManagerCommands()
+   {
+      return useBodyManagerCommands;
+   }
+
+   public YoBoolean getUsePelvisPrivilegedPoseCommand()
+   {
+      return usePelvisPrivilegedPoseCommand;
+   }
+
+   public YoBoolean getUsePelvisOrientationCommand()
+   {
+      return usePelvisOrientationCommand;
    }
 
    public void initialize()
