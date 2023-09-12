@@ -5,7 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class AlphaFilteredElementwiseYoMatrix
+public class AlphaFilteredElementwiseMatrix
 {
    private final DMatrixRMaj previous;
 
@@ -15,7 +15,7 @@ public class AlphaFilteredElementwiseYoMatrix
 
    private final YoDouble alpha;
 
-   public AlphaFilteredElementwiseYoMatrix(String name, int numberOfRows, int numberOfColumns, double alpha, YoRegistry registry)
+   public AlphaFilteredElementwiseMatrix(String name, int numberOfRows, int numberOfColumns, double alpha, YoRegistry registry)
    {
       this.alpha = new YoDouble(name + "_alpha", registry);
       this.alpha.set(alpha);
@@ -25,7 +25,7 @@ public class AlphaFilteredElementwiseYoMatrix
       filtered = new DMatrixRMaj(numberOfRows, numberOfColumns);
    }
 
-   public AlphaFilteredElementwiseYoMatrix(String name, int numberOfRows, int numberOfColumns, YoRegistry registry)
+   public AlphaFilteredElementwiseMatrix(String name, int numberOfRows, int numberOfColumns, YoRegistry registry)
    {
       this(name, numberOfRows, numberOfColumns, 0.0, registry);  // Default to no filtering if alpha is not supplied
    }
