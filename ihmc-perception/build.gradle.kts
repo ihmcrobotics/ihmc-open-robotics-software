@@ -81,7 +81,7 @@ mainDependencies {
    api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
    api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
    api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
-   val zedVersion = "4.0.5-1.5.9"
+   val zedVersion = "4.0.6-1.5.9"
    api("us.ihmc:zed:$zedVersion") {
       exclude(group = "us.ihmc", module = "javacpp")
    }
