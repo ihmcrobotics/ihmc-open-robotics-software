@@ -68,8 +68,8 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
 
       desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslation());
-      desiredPelvisPose.getTranslation().setZ(desiredPelvisPose.getTranslationZ());
+      desiredPelvisPose.getTranslation().setX(syncedPelvisPose.getTranslationX());
+      desiredPelvisPose.getTranslation().setY(syncedPelvisPose.getTranslationY());
       startPositionDistanceToGoal = syncedPelvisPose.getTranslation().differenceNorm(desiredPelvisPose.getTranslation());
    }
 
@@ -78,8 +78,8 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    {
       desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslation());
-      desiredPelvisPose.getTranslation().setZ(desiredPelvisPose.getTranslationZ());
+      desiredPelvisPose.getTranslation().setX(syncedPelvisPose.getTranslationX());
+      desiredPelvisPose.getTranslation().setY(syncedPelvisPose.getTranslationY());
 
       isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
                                                      syncedPelvisPose,
