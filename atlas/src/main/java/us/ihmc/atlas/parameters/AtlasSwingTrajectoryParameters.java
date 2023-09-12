@@ -18,19 +18,19 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    }
 
    @Override
-   public double getMinSwingHeightFromStanceFoot()
+   public double getMinSwingHeight()
    {
       return 0.10 * modelScale;
    }
 
    @Override
-   public double getDefaultSwingHeightFromStanceFoot()
+   public double getDefaultSwingHeight()
    {
-      return getMinSwingHeightFromStanceFoot();
+      return getMinSwingHeight();
    }
    
    @Override
-   public double getMaxSwingHeightFromStanceFoot()
+   public double getMaxSwingHeight()
    {
       return 0.40 * modelScale;
    }

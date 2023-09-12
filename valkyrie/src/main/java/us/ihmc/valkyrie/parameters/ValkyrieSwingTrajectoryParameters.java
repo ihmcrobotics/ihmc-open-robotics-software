@@ -15,13 +15,13 @@ public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
    }
 
    @Override
-   public double getMaxSwingHeightFromStanceFoot()
+   public double getMaxSwingHeight()
    {
       return 0.3 * physicalProperties.getModelSizeScale();
    }
 
    @Override
-   public double getDefaultSwingHeightFromStanceFoot()
+   public double getDefaultSwingHeight()
    {
       if (target == RobotTarget.REAL_ROBOT)
          return 0.05 * physicalProperties.getModelSizeScale(); //changed from 0.025 to 0.05 in 11/2018 to help with foot getting caught on pallet
@@ -30,7 +30,7 @@ public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
    }
 
    @Override
-   public double getMinSwingHeightFromStanceFoot()
+   public double getMinSwingHeight()
    {
       return 0.025 * physicalProperties.getModelSizeScale();
    }

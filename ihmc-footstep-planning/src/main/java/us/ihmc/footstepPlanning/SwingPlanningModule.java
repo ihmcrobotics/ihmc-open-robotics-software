@@ -191,7 +191,7 @@ public class SwingPlanningModule
 
    private void computeNominalSwingTrajectoryLength()
    {
-      double nominalSwingHeight = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeightFromStanceFoot();
+      double nominalSwingHeight = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
       double nominalSwingProportion = TwoWaypointSwingGenerator.getDefaultWaypointProportions()[0];
       double nominalSwingLength = 2.0 * footstepPlannerParameters.getIdealFootstepLength();
 

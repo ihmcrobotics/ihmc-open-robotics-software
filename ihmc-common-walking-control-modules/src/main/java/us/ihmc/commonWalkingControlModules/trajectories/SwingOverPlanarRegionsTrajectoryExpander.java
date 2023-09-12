@@ -148,14 +148,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
-                                                                swingTrajectoryParameters.getMinSwingHeightFromStanceFoot(),
-                                                                swingTrajectoryParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                swingTrajectoryParameters.getDefaultSwingHeightFromStanceFoot(),
+                                                                swingTrajectoryParameters.getMinSwingHeight(),
+                                                                swingTrajectoryParameters.getMaxSwingHeight(),
+                                                                swingTrajectoryParameters.getDefaultSwingHeight(),
                                                                 swingTrajectoryParameters.getCustomWaypointAngleThreshold(),
                                                                 this.registry,
                                                                 graphicsListRegistry);
-      minimumSwingHeight = swingTrajectoryParameters.getMinSwingHeightFromStanceFoot();
-      maximumSwingHeight = swingTrajectoryParameters.getMaxSwingHeightFromStanceFoot();
+      minimumSwingHeight = swingTrajectoryParameters.getMinSwingHeight();
+      maximumSwingHeight = swingTrajectoryParameters.getMaxSwingHeight();
       toeLength = steppingParameters.getFootForwardOffset();
       heelLength = steppingParameters.getFootBackwardOffset();
       footLengthOffset = 0.5 * (heelLength - toeLength);

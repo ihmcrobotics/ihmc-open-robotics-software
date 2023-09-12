@@ -171,19 +171,19 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    private static class ProxyAtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    {
       @Override
-      public double getMinSwingHeightFromStanceFoot()
+      public double getMinSwingHeight()
       {
          return 0.10;
       }
 
       @Override
-      public double getDefaultSwingHeightFromStanceFoot()
+      public double getDefaultSwingHeight()
       {
-         return getMinSwingHeightFromStanceFoot();
+         return getMinSwingHeight();
       }
 
       @Override
-      public double getMaxSwingHeightFromStanceFoot()
+      public double getMaxSwingHeight()
       {
          return 0.30;
       }

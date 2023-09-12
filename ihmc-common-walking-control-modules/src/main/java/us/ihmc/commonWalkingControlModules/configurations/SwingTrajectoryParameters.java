@@ -5,12 +5,18 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public abstract class SwingTrajectoryParameters
 {
-   public abstract double getMaxSwingHeightFromStanceFoot();
+   /**
+    * Returns the maximum swing height from the stance foot for this robot
+    */
+   public double getMaxSwingHeight()
+   {
+      return 0.3;
+   }
 
    /**
     * Returns the minimum swing height from the stance foot for this robot
     */
-   public double getMinSwingHeightFromStanceFoot()
+   public double getMinSwingHeight()
    {
       return 0.1;
    }
@@ -19,9 +25,9 @@ public abstract class SwingTrajectoryParameters
     * Default swing height used by the controller. If a swing height is not specified or lies outside
     * of the allowable range, this value is used.
     */
-   public double getDefaultSwingHeightFromStanceFoot()
+   public double getDefaultSwingHeight()
    {
-      return getMinSwingHeightFromStanceFoot();
+      return getMinSwingHeight();
    }
 
    /**

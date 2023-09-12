@@ -529,9 +529,9 @@ public class SwingOverHeightMapTest
    {
       SwingTrajectoryParameters swingTrajectoryParameters = getWalkingControllerParameters().getSwingTrajectoryParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
-                                                                                          swingTrajectoryParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          swingTrajectoryParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                                          swingTrajectoryParameters.getMinSwingHeightFromStanceFoot(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeight(),
+                                                                                          swingTrajectoryParameters.getMaxSwingHeight(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeight(),
                                                                                           swingTrajectoryParameters.getCustomWaypointAngleThreshold(),
                                                                                           new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
@@ -983,19 +983,19 @@ public class SwingOverHeightMapTest
       return new SwingTrajectoryParameters()
       {
          @Override
-         public double getMinSwingHeightFromStanceFoot()
+         public double getMinSwingHeight()
          {
             return 0.10;
          }
 
          @Override
-         public double getDefaultSwingHeightFromStanceFoot()
+         public double getDefaultSwingHeight()
          {
-            return getMinSwingHeightFromStanceFoot();
+            return getMinSwingHeight();
          }
 
          @Override
-         public double getMaxSwingHeightFromStanceFoot()
+         public double getMaxSwingHeight()
          {
             return 0.30;
          }
