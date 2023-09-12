@@ -338,20 +338,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean isFootstepBeingPlacedReachable()
    {
       FramePose3D previousFootstepPose = new FramePose3D();
-      // Find the previous footstep of the opposite side of the footstep being placed
-      int i = footstepPlan.getNumberOfFootsteps() - 1;
-      while (i >= 0 && footstepPlan.getFootsteps().get(i).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
-      {
-         --i;
-      }
-      if (i >= 0)
-      {
-         previousFootstepPose.setIncludingFrame(footstepPlan.getFootsteps().get(i).getFootPose());
-      }
-      else
-      {
-         previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
-      }
+
+      previousFootstepPose.set(stepChecker.getPreviousFootstepOnOppositeSide(footstepPlan.getFootsteps(),
+                                                                             footstepPlan.getNumberOfFootsteps(),
+                                                                             footstepBeingPlaced.getFootstepSide()));
 
       boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaximumStepReach();
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
