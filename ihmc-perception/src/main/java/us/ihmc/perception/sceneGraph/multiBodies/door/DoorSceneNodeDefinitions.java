@@ -130,8 +130,8 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PullDoorPanel",
-                                                                           sceneGraph::getRootNode,
-                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           sceneGraph.getIDToNodeMap(),
+                                                                           parentNode.getID(),
                                                                            PULL_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
@@ -143,8 +143,8 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PushDoorPanel",
-                                                                           sceneGraph::getRootNode,
-                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           sceneGraph.getIDToNodeMap(),
+                                                                           parentNode.getID(),
                                                                            PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
@@ -156,8 +156,8 @@ public class DoorSceneNodeDefinitions
    {
       StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                  "PullDoorFrame",
-                                                                 sceneGraph::getRootNode,
-                                                                 () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                 sceneGraph.getIDToNodeMap(),
+                                                                 parentNode.getID(),
                                                                  PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                                  DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                                  PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
@@ -169,8 +169,8 @@ public class DoorSceneNodeDefinitions
    {
       StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                  "PushDoorFrame",
-                                                                 sceneGraph::getRootNode,
-                                                                 () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                 sceneGraph.getIDToNodeMap(),
+                                                                 parentNode.getID(),
                                                                  PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                                  DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                                  PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
@@ -182,8 +182,8 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PushDoorLeverHandle",
-                                                                           sceneGraph::getRootNode,
-                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           sceneGraph.getIDToNodeMap(),
+                                                                           parentNode.getID(),
                                                                            PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
@@ -194,8 +194,8 @@ public class DoorSceneNodeDefinitions
    {
       PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                            "PullDoorLeverHandle",
-                                                                           sceneGraph::getRootNode,
-                                                                           () -> sceneGraph.getIDToNodeMap().get(parentNode.getID()),
+                                                                           sceneGraph.getIDToNodeMap(),
+                                                                           parentNode.getID(),
                                                                            PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                            PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);

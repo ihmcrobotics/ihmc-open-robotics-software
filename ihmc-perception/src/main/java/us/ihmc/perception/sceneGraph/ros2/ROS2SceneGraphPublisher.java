@@ -12,6 +12,7 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 /**
@@ -52,33 +53,49 @@ public class ROS2SceneGraphPublisher
       // We handle packing the most specific types and then the more basic ones
       // We keep track of the more basic ones so we can share the
       // packing logic below.
-      SceneNodeMessage sceneNodeMessage = null;
-      DetectableSceneNodeMessage detectableSceneNodeMessage = null;
+      SceneNodeMessage sceneNodeMessage;
 
-      if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+      if (sceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
       {
-         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE);
-         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getStaticRelativeSceneNodes().size());
-         StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().add();
-         staticRelativeSceneNodeMessage.setDistanceToDisableTracking((float) staticRelativeSceneNode.getDistanceToDisableTracking());
-         staticRelativeSceneNodeMessage.setCurrentDistanceToRobot((float) staticRelativeSceneNode.getCurrentDistance());
-         sceneNodeMessage = staticRelativeSceneNodeMessage.getSceneNode();
+         PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
+         if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getStaticRelativeSceneNodes().size());
+            StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().add();
+            staticRelativeSceneNodeMessage.setDistanceToDisableTracking((float) staticRelativeSceneNode.getDistanceToDisableTracking());
+            staticRelativeSceneNodeMessage.setCurrentDistanceToRobot((float) staticRelativeSceneNode.getCurrentDistance());
+            predefinedRigidBodySceneNodeMessage = staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode();
+         }
+         else
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getPredefinedRigidBodySceneNodes().size());
+            predefinedRigidBodySceneNodeMessage = sceneGraphMessage.getPredefinedRigidBodySceneNodes().add();
+         }
+
+         predefinedRigidBodySceneNodeMessage.setInitialParentId(predefinedRigidBodySceneNode.getInitialParentNodeID());
+         MessageTools.toMessage(predefinedRigidBodySceneNode.getInitialTransformToParent(),
+                                predefinedRigidBodySceneNodeMessage.getInitialTransformToParent());
+         predefinedRigidBodySceneNodeMessage.setVisualModelFilePath(predefinedRigidBodySceneNode.getVisualModelFilePath());
+         MessageTools.toMessage(predefinedRigidBodySceneNode.getVisualModelToNodeFrameTransform(),
+                                predefinedRigidBodySceneNodeMessage.getVisualTransformToParent());
+         sceneNodeMessage = predefinedRigidBodySceneNodeMessage.getSceneNode();
       }
-
-      if (sceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
+      else if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
       {
-         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.ARUCO_MARKER_NODE_TYPE);
-         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getArucoMarkerSceneNodes().size());
-         ArUcoMarkerNodeMessage arUcoMarkerNodeMessage = sceneGraphMessage.getArucoMarkerSceneNodes().add();
-         arUcoMarkerNodeMessage.setMarkerId(arUcoMarkerNode.getMarkerID());
-         arUcoMarkerNodeMessage.setMarkerSize((float) arUcoMarkerNode.getMarkerSize());
-         arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
-         detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
-      }
-
-      if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
-      {
-         if (detectableSceneNodeMessage == null) // Just a detectable node
+         DetectableSceneNodeMessage detectableSceneNodeMessage;
+         if (sceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.ARUCO_MARKER_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getArucoMarkerSceneNodes().size());
+            ArUcoMarkerNodeMessage arUcoMarkerNodeMessage = sceneGraphMessage.getArucoMarkerSceneNodes().add();
+            arUcoMarkerNodeMessage.setMarkerId(arUcoMarkerNode.getMarkerID());
+            arUcoMarkerNodeMessage.setMarkerSize((float) arUcoMarkerNode.getMarkerSize());
+            arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
+            detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
+         }
+         else
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
@@ -88,8 +105,7 @@ public class ROS2SceneGraphPublisher
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }
-
-      if (sceneNodeMessage == null) // In this case the node is just the most basic type
+      else // In this case the node is just the most basic type
       {
          sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.SCENE_NODE_TYPE);
          sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getSceneNodes().size());

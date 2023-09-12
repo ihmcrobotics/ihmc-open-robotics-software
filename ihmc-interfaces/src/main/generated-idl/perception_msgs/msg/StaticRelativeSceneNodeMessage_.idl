@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__StaticRelativeSceneNodeMessage__idl__
 #define __perception_msgs__msg__StaticRelativeSceneNodeMessage__idl__
 
-#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+#include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -17,9 +17,9 @@ module perception_msgs
       struct StaticRelativeSceneNodeMessage
       {
         /**
-         * The base scene node information
+         * The predefined rigid body information that this extends
          */
-        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        perception_msgs::msg::dds::PredefinedRigidBodySceneNodeMessage predefined_rigid_body_scene_node;
         /**
          * Distance to robot to disable tracking.
          * Used for automatically disabling tracking for static relative objects.

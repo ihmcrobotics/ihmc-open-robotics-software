@@ -4,7 +4,7 @@ import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -26,7 +26,10 @@ import java.util.function.Function;
  */
 public class SceneGraph
 {
-   private final MutableInt nextID = new MutableInt();
+   /** The root node is always ID 0 and all nodes in the tree are unique. */
+   public static long ROOT_NODE_ID = 0;
+
+   private final MutableLong nextID = new MutableLong();
    private final SceneNode rootNode = new SceneNode(nextID.getAndIncrement(), "SceneGraphRoot");
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -104,7 +107,7 @@ public class SceneGraph
       return rootNode;
    }
 
-   public MutableInt getNextID()
+   public MutableLong getNextID()
    {
       return nextID;
    }

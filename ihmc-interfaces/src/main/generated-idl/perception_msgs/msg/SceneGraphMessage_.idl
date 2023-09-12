@@ -3,6 +3,7 @@
 
 #include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+#include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 #include "perception_msgs/msg/./StaticRelativeSceneNodeMessage_.idl"
 module perception_msgs
@@ -17,11 +18,14 @@ module perception_msgs
       const octet DETECTABLE_SCENE_NODE_TYPE =
       1;
 
-      const octet ARUCO_MARKER_NODE_TYPE =
+      const octet PREDEFINED_RIGID_BODY_NODE_TYPE =
       2;
 
-      const octet STATIC_RELATIVE_NODE_TYPE =
+      const octet ARUCO_MARKER_NODE_TYPE =
       3;
+
+      const octet STATIC_RELATIVE_NODE_TYPE =
+      4;
 
 
       /**
@@ -55,6 +59,10 @@ module perception_msgs
          * Detectable scene nodes
          */
         sequence<perception_msgs::msg::dds::DetectableSceneNodeMessage, 200> detectable_scene_nodes;
+        /**
+         * Predefined rigid body scene nodes
+         */
+        sequence<perception_msgs::msg::dds::PredefinedRigidBodySceneNodeMessage, 200> predefined_rigid_body_scene_nodes;
         /**
          * ArUco marker scene nodes
          */

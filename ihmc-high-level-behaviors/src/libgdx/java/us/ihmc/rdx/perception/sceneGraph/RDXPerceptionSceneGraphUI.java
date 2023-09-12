@@ -62,7 +62,7 @@ public class RDXPerceptionSceneGraphUI
    {
       sceneGraphSubscription.update();
 
-      
+
 
 
 

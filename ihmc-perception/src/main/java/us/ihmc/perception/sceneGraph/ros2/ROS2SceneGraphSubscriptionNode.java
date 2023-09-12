@@ -1,9 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.SceneNodeMessage;
-import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +10,7 @@ public class ROS2SceneGraphSubscriptionNode
    private byte type;
    private SceneNodeMessage sceneNodeMessage;
    private DetectableSceneNodeMessage detectableSceneNodeMessage;
+   private PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
 
@@ -46,6 +44,16 @@ public class ROS2SceneGraphSubscriptionNode
    public void setDetectableSceneNodeMessage(DetectableSceneNodeMessage detectableSceneNodeMessage)
    {
       this.detectableSceneNodeMessage = detectableSceneNodeMessage;
+   }
+
+   public PredefinedRigidBodySceneNodeMessage getPredefinedRigidBodySceneNodeMessage()
+   {
+      return predefinedRigidBodySceneNodeMessage;
+   }
+
+   public void setPredefinedRigidBodySceneNodeMessage(PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage)
+   {
+      this.predefinedRigidBodySceneNodeMessage = predefinedRigidBodySceneNodeMessage;
    }
 
    public ArUcoMarkerNodeMessage getArUcoMarkerNodeMessage()

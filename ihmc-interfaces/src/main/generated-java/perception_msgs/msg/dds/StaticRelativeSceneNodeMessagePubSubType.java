@@ -15,7 +15,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dba97d1b922f0213a58e62b4a122944055dd321c6b06bf15107196798e5e213e";
+   		return "fbde76c9b5bb0fe4faa2d05f54db43915a654ef7f4af2622f5de5c1e77595b30";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -71,7 +71,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getCdrSerializedSize(data.getSceneNode(), current_alignment);
+      current_alignment += perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType.getCdrSerializedSize(data.getPredefinedRigidBodySceneNode(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -85,7 +85,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(perception_msgs.msg.dds.StaticRelativeSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
-      perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
+      perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType.write(data.getPredefinedRigidBodySceneNode(), cdr);
       cdr.write_type_5(data.getDistanceToDisableTracking());
 
       cdr.write_type_5(data.getCurrentDistanceToRobot());
@@ -94,7 +94,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
 
    public static void read(perception_msgs.msg.dds.StaticRelativeSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
-      perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
+      perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType.read(data.getPredefinedRigidBodySceneNode(), cdr);	
       data.setDistanceToDisableTracking(cdr.read_type_5());
       	
       data.setCurrentDistanceToRobot(cdr.read_type_5());
@@ -105,7 +105,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(perception_msgs.msg.dds.StaticRelativeSceneNodeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
+      ser.write_type_a("predefined_rigid_body_scene_node", new perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType(), data.getPredefinedRigidBodySceneNode());
 
       ser.write_type_5("distance_to_disable_tracking", data.getDistanceToDisableTracking());
       ser.write_type_5("current_distance_to_robot", data.getCurrentDistanceToRobot());
@@ -114,7 +114,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.StaticRelativeSceneNodeMessage data)
    {
-      ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
+      ser.read_type_a("predefined_rigid_body_scene_node", new perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType(), data.getPredefinedRigidBodySceneNode());
 
       data.setDistanceToDisableTracking(ser.read_type_5("distance_to_disable_tracking"));
       data.setCurrentDistanceToRobot(ser.read_type_5("current_distance_to_robot"));
