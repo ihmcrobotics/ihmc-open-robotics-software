@@ -5,6 +5,36 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public abstract class SwingTrajectoryParameters
 {
+   public abstract double getMaxSwingHeightFromStanceFoot();
+
+   /**
+    * Returns the minimum swing height from the stance foot for this robot
+    */
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.1;
+   }
+
+   /**
+    * Default swing height used by the controller. If a swing height is not specified or lies outside
+    * of the allowable range, this value is used.
+    */
+   public double getDefaultSwingHeightFromStanceFoot()
+   {
+      return getMinSwingHeightFromStanceFoot();
+   }
+
+   /**
+    * Custom waypoint positions are precomputed externally. During execution the initial foot pose
+    * might be different than expected, and the preplanned trajectory might have the foot go backward
+    * before moving forward, for example. This provides a threshold for the maximum angle from forward
+    * to use - lower is more restrictive, 90 deg max recommended.
+    */
+   public double getCustomWaypointAngleThreshold()
+   {
+      return Math.toRadians(50.0);
+   }
+
    /**
     * Useful to force the swing foot to end up with an height offset with respect to the given
     * footstep.
@@ -35,7 +65,7 @@ public abstract class SwingTrajectoryParameters
    {
       return 0.0;
    }
-   
+
    /**
     * Ratio used to modify the x and y components of the desired swing final acceleration by adding a
     * portion of the predicted center of mass acceleration at the end of swing.
@@ -55,7 +85,8 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
-    * When this value is 0.0, the initial foot velocity is 0.0. When it is 1.0, the initial swing foot velocity is the pelvis velocity.
+    * When this value is 0.0, the initial foot velocity is 0.0. When it is 1.0, the initial swing foot
+    * velocity is the pelvis velocity.
     */
    public double getPelvisVelocityInjectionRatio()
    {

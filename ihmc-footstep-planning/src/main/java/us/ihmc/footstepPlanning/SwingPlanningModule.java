@@ -1,19 +1,18 @@
 package us.ihmc.footstepPlanning;
 
-import org.bytedeco.opencl._cl_kernel;
-import perception_msgs.msg.dds.HeightMapMessage;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
@@ -21,22 +20,12 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
 
 public class SwingPlanningModule
 {
@@ -202,7 +191,7 @@ public class SwingPlanningModule
 
    private void computeNominalSwingTrajectoryLength()
    {
-      double nominalSwingHeight = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double nominalSwingHeight = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeightFromStanceFoot();
       double nominalSwingProportion = TwoWaypointSwingGenerator.getDefaultWaypointProportions()[0];
       double nominalSwingLength = 2.0 * footstepPlannerParameters.getIdealFootstepLength();
 
