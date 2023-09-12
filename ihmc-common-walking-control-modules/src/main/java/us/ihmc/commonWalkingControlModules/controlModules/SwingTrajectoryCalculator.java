@@ -28,6 +28,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -125,6 +126,30 @@ public class SwingTrajectoryCalculator
       swingTrajectoryOptimizer.setObstacleClearanceWaypointHeightFactors(firstWaypointHeightFactorForSteppingUp, secondWaypointHeightFactorForSteppingDown);
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
+
+      if (walkingControllerParameters.getSwingTrajectoryParameters().useInitialToeHeight())
+      {
+         YoPoint3D toePoint = new YoPoint3D(namePrefix + "InitialToePosition", registry);
+         swingTrajectoryOptimizer.setInitialGroundHeightProvider(() ->
+         {
+            toePoint.set(walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0, 0.0, 0.0);
+            initialOrientation.transform(toePoint);
+            toePoint.add(initialPosition);
+            return toePoint.getZ();
+         });
+      }
+
+      if (walkingControllerParameters.getSwingTrajectoryParameters().useFinalHeelHeight())
+      {
+         YoPoint3D heelPoint = new YoPoint3D(namePrefix + "FinalHeelPosition", registry);
+         swingTrajectoryOptimizer.setFinalGroundHeightProvider(() ->
+         {
+            heelPoint.set(-walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0, 0.0, 0.0);
+            finalOrientation.transform(heelPoint);
+            heelPoint.add(finalPosition);
+            return heelPoint.getZ();
+         });
+      }
 
       lastFootstepPosition.setToNaN();
       finalPosition.setToNaN();
