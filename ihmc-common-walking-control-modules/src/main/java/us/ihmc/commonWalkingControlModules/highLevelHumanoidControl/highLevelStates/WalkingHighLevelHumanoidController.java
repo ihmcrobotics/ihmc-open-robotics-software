@@ -696,6 +696,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void handleChangeInContactState()
    {
+      // TODO Quite hackish, clean me up!
+      if (stateMachine.getCurrentState().isSingleSupportState())
+         return;
+
       boolean haveContactStatesChanged = false;
       for (RobotSide robotSide : RobotSide.values)
       {

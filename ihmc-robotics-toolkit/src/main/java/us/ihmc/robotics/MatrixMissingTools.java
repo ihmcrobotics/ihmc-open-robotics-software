@@ -3,10 +3,11 @@ package us.ihmc.robotics;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
-import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
+import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
+
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -29,8 +30,15 @@ public class MatrixMissingTools
     * @param numberOfColumns Column size of the block
     * @param scale           Scale the block from otherMatrix by this value
     */
-   public static void setMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix src, int srcStartRow, int srcStartColumn,
-                                     int numberOfRows, int numberOfColumns, double scale)
+   public static void setMatrixBlock(DMatrix1Row dest,
+                                     int destStartRow,
+                                     int destStartColumn,
+                                     DMatrix src,
+                                     int srcStartRow,
+                                     int srcStartColumn,
+                                     int numberOfRows,
+                                     int numberOfColumns,
+                                     double scale)
    {
       if (numberOfRows == 0 || numberOfColumns == 0)
          return;
@@ -78,6 +86,7 @@ public class MatrixMissingTools
       inverseToPack.set(0, 1, -determinantInverse * matrix.get(0, 1));
       inverseToPack.set(1, 0, -determinantInverse * matrix.get(1, 0));
    }
+
    public static void setDiagonal(DMatrix3x3 mat, double diagonalValue)
    {
       for (int row = 0; row < 3; row++)
@@ -111,13 +120,11 @@ public class MatrixMissingTools
          return;
 
       if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
-         throw new IllegalArgumentException(
-               "dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: " + dest.getNumRows() + ", cols: "
-               + dest.getNumCols() + "]");
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
+                                            + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
       if (src.getNumRows() < numberOfRows + srcStartRow || src.getNumCols() < numberOfColumns + srcStartColumn)
-         throw new IllegalArgumentException(
-               "src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: " + (numberOfColumns + srcStartColumn) + "], was: [rows: "
-               + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: "
+                                            + (numberOfColumns + srcStartColumn) + "], was: [rows: " + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
 
       for (int i = 0; i < numberOfRows; i++)
       {
@@ -286,7 +293,6 @@ public class MatrixMissingTools
       skewSymmetricToPack.setM22(0.0);
    }
 
-
    public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src)
    {
       addMatrixBlock(dest, destStartRow, destStartColumn, src, 1.0);
@@ -352,7 +358,7 @@ public class MatrixMissingTools
 
    public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
    {
-      matrix.data[ row * matrix.numCols + col ] += value;
+      matrix.data[row * matrix.numCols + col] += value;
    }
 
    /**

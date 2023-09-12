@@ -6,6 +6,9 @@ import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextMatrix3D;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
+import java.lang.reflect.Field;
+import java.util.Random;
+
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.MathTools;
@@ -22,6 +25,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
@@ -37,10 +42,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-
-import java.lang.reflect.Field;
-import java.util.Random;
-
 public class EuclidCoreMissingTools
 {
    public static final String DEGREE_SYMBOL = "\u00B0";
@@ -1488,5 +1489,21 @@ public class EuclidCoreMissingTools
       {
          throw new RuntimeException(e);
       }
+   }
+
+   public static FrameVector3DReadOnly newLinkedFrameVector3DReadOnly(ReferenceFrameHolder referenceFrameHolder, DMatrixRMaj source)
+   {
+      return newLinkedFrameVector3DReadOnly(referenceFrameHolder, 0, source);
+   }
+
+   public static FrameVector3DReadOnly newLinkedFrameVector3DReadOnly(ReferenceFrameHolder referenceFrameHolder, int startIndex, DMatrixRMaj source)
+   {
+      int xIndex = startIndex;
+      int yIndex = startIndex + 1;
+      int zIndex = startIndex + 2;
+      return EuclidFrameFactories.newLinkedFrameVector3DReadOnly(referenceFrameHolder,
+                                                                 () -> source.get(xIndex, 0),
+                                                                 () -> source.get(yIndex, 0),
+                                                                 () -> source.get(zIndex, 0));
    }
 }

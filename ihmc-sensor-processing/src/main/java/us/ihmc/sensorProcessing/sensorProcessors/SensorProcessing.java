@@ -444,15 +444,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
          inputForces.get(forceSensorDefinition).setToZero();
          inputTorques.get(forceSensorDefinition).setToZero();
 
          resetProcessors(processedForces.get(forceSensorDefinition));
          resetProcessors(processedTorques.get(forceSensorDefinition));
 
-         tempWrench.setToZero();
-         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+         tempWrench.setToZero(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getSensorFrame());
+         outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
    }
 
@@ -515,7 +514,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
+         tempWrench.setIncludingFrame(inputForceSensors.getData(forceSensorDefinition).getWrench());
          tempForce.setIncludingFrame(tempWrench.getLinearPart());
          tempTorque.setIncludingFrame(tempWrench.getAngularPart());
          inputForces.get(forceSensorDefinition).set(tempForce);
@@ -527,7 +526,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          tempForce.setIncludingFrame(intermediateForces.get(forceSensorDefinition));
          tempTorque.setIncludingFrame(intermediateTorques.get(forceSensorDefinition));
          tempWrench.set(tempTorque, tempForce);
-         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+         outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
 
       for (int i = 0; i < diagnosticModules.size(); i++)
@@ -1094,8 +1093,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
-         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix
-               + suffix, stiffness, maximumDeflection, intermediateJointPosition, intermediateJointTau, registry);
+         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix + suffix,
+                                                                                                     stiffness,
+                                                                                                     maximumDeflection,
+                                                                                                     intermediateJointPosition,
+                                                                                                     intermediateJointTau,
+                                                                                                     registry);
          processors.add(filteredJointPosition);
 
          if (!forVizOnly)
@@ -1206,7 +1209,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, newProcessorID);
       YoDouble filteredJointPosition = new YoDouble(prefix + suffix, registry);
       ProcessingYoVariable jointProcessor = () -> filteredJointPosition.set(backupProcessorTrigger.test(defaultInput) ? backupInput.getValue()
-            : defaultInput.getValue());
+                                                                                                                      : defaultInput.getValue());
 
       jointProcessors.add(jointProcessor);
 
@@ -1278,8 +1281,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix
-               + suffix, stiffness, maximumDeflection, intermediateJointVelocity, intermediateJointTau, updateDT, registry);
+         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix + suffix,
+                                                                                                                     stiffness,
+                                                                                                                     maximumDeflection,
+                                                                                                                     intermediateJointVelocity,
+                                                                                                                     intermediateJointTau,
+                                                                                                                     updateDT,
+                                                                                                                     registry);
          processors.add(filteredJointVelocity);
 
          if (!forVizOnly)
@@ -1346,8 +1354,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointPosition, updateDT, registry);
+         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix + suffix,
+                                                                                   "",
+                                                                                   alphaFilter,
+                                                                                   intermediateJointPosition,
+                                                                                   updateDT,
+                                                                                   registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -1427,8 +1439,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
+         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix + suffix,
+                                                                                                                         "",
+                                                                                                                         alphaFilter,
+                                                                                                                         intermediateJointPosition,
+                                                                                                                         updateDT,
+                                                                                                                         slopTime,
+                                                                                                                         registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -1497,8 +1514,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix
-               + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
+         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix + suffix,
+                                                                                               "",
+                                                                                               intermediateJointVelocity,
+                                                                                               updateDT,
+                                                                                               slopTime,
+                                                                                               registry);
          processors.add(filteredJointVelocity);
 
          if (!forVizOnly)
@@ -1547,8 +1568,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
          String prefix = JOINT_ACCELERATION.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
+         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix + suffix,
+                                                                                       "",
+                                                                                       alphaFilter,
+                                                                                       intermediateJointVelocity,
+                                                                                       updateDT,
+                                                                                       registry);
          processors.add(jointAcceleration);
 
          if (!forVizOnly)
@@ -2324,7 +2349,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       if (value.getNumRows() != Wrench.SIZE || value.getNumCols() != 1)
          throw new RuntimeException("Unexpected size");
 
-      inputForceSensors.setForceSensorValue(forceSensorDefinition, value);
+      inputForceSensors.getData(forceSensorDefinition).setWrench(value);
    }
 
    public SensorOutputMapReadOnly getRawSensorOutputMap()

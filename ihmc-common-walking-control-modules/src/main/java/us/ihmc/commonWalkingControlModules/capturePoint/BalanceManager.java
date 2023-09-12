@@ -11,6 +11,7 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYo
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
@@ -29,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -39,12 +41,9 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajec
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -226,6 +225,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final ContactStateManager contactStateManager;
    private final DoubleProvider timeShiftProvider = this::computeTimeShiftToMinimizeTrackingError;
 
+   private final Predicate<RobotSide> contactStateBasedPredicate;
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
@@ -253,6 +253,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
+      contactStateBasedPredicate = robotSide -> controllerToolbox.getFootContactState(robotSide).inContact();
       contactStateManager = new ContactStateManager(yoTime, walkingControllerParameters, registry);
 
       angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
@@ -366,7 +367,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
          // TODO Don't merge to develop as is
          //         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-         //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
+         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
                                                                           yoDesiredCapturePoint,
@@ -511,12 +512,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       }
 
       // use 1.0 - feedback alpha, because 0.0 feedback alpha does nothing, while 1.0 should allow no feedback.
-      stepAdjustmentController.compute(yoTime.getDoubleValue(),
-                                       yoDesiredCapturePoint,
-                                       capturePoint2d,
-                                       omega0,
-                                       yoEquivalentRemainingCoP,
-                                       1.0 - feedbackAlpha);
+      stepAdjustmentController.compute(yoTime.getDoubleValue(), yoDesiredCapturePoint, capturePoint2d, omega0, yoEquivalentRemainingCoP, 1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       if (footstepWasAdjusted)
          footstep.setPose(stepAdjustmentController.getFootstepSolution());
@@ -569,8 +565,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
                        boolean keepCoPInsideSupportPolygon,
                        boolean controlHeightWithMomentum)
    {
-      updateTimeInState();
-
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
 
@@ -611,6 +605,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
+
+      // This guy relies on the desired ICP being updated.
+      updateTimeInState();
 
       if (computeAngularMomentumOffset.getValue())
          angularMomentumHandler.computeCoPPosition(yoPerfectCMP, yoPerfectCoP);
@@ -688,7 +685,12 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    public void computeICPPlan()
    {
-      computeICPPlanInternal(copTrajectory);
+      computeICPPlan(contactStateBasedPredicate);
+   }
+
+   public void computeICPPlan(Predicate<RobotSide> isFootInSupport)
+   {
+      computeICPPlanInternal(isFootInSupport, copTrajectory);
    }
 
    public void computeFlamingoStateICPPlan()
@@ -699,12 +701,17 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    private void computeICPPlanInternal(CoPTrajectoryGenerator copTrajectory)
    {
+      computeICPPlanInternal(contactStateBasedPredicate, copTrajectory);
+   }
+
+   private void computeICPPlanInternal(Predicate<RobotSide> isFootInSupport, CoPTrajectoryGenerator copTrajectory)
+   {
       plannerTimer.startMeasurement();
 
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (controllerToolbox.getFootContactState(robotSide).inContact())
+         if (isFootInSupport.test(robotSide))
             copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide), soleFrames.get(robotSide));
       }
 
@@ -1215,6 +1222,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                      DefaultPoint2DGraphic.CIRCLE_CROSS);
       perfectCoPViz.setVisible(false);
       group.addChild(perfectCoPViz);
+      group.addChild(copTrajectory.getSCS2YoGraphics());
 
       return group;
    }

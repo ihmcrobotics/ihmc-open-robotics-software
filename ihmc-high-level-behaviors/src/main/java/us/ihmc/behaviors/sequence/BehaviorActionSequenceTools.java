@@ -2,6 +2,9 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.List;
 
@@ -13,7 +16,7 @@ public class BehaviorActionSequenceTools
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
       actionSequenceUpdateMessage.getChestOrientationActions().clear();
-      actionSequenceUpdateMessage.getFootstepActions().clear();
+      actionSequenceUpdateMessage.getFootstepPlanActions().clear();
       actionSequenceUpdateMessage.getHandConfigurationActions().clear();
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
@@ -32,15 +35,15 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof ChestOrientationActionData chestOrientationActionData)
          {
-            ChestOrientationActionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
+            BodyPartPoseActionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
             chestOrientationActionMessage.getActionInformation().setActionIndex(i);
             chestOrientationActionData.toMessage(chestOrientationActionMessage);
          }
-         else if (action instanceof FootstepActionData footstepActionData)
+         else if (action instanceof FootstepPlanActionData footstepPlanActionData)
          {
-            FootstepActionMessage footstepActionMessage = actionSequenceUpdateMessage.getFootstepActions().add();
-            footstepActionMessage.getActionInformation().setActionIndex(i);
-            footstepActionData.toMessage(footstepActionMessage);
+            FootstepPlanActionMessage footstepPlanActionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
+            footstepPlanActionMessage.getActionInformation().setActionIndex(i);
+            footstepPlanActionData.toMessage(footstepPlanActionMessage);
          }
          else if (action instanceof HandConfigurationActionData handConfigurationActionData)
          {
@@ -50,7 +53,7 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof HandPoseActionData handPoseActionData)
          {
-            HandPoseActionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
+            SidedBodyPartPoseActionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
             handPoseActionMessage.getActionInformation().setActionIndex(i);
             handPoseActionData.toMessage(handPoseActionMessage);
          }
@@ -62,7 +65,7 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof PelvisHeightActionData pelvisHeightActionData)
          {
-            PelvisHeightActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
+            BodyPartPoseActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
             pelvisHeightActionData.toMessage(pelvisHeightActionMessage);
          }
@@ -78,6 +81,19 @@ public class BehaviorActionSequenceTools
             walkActionMessage.getActionInformation().setActionIndex(i);
             walkActionData.toMessage(walkActionMessage);
          }
+      }
+   }
+
+   /**
+    * ReferenceFrames don't have mutable parents, so they get recreated. This accomodates for that.
+    */
+   public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
+   {
+      ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
+      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByName(previousParentFrame.getName()).get();
+      if (previousParentFrame != nextParentFrame)
+      {
+         frameToUpdate.changeParentFrame(nextParentFrame);
       }
    }
 }

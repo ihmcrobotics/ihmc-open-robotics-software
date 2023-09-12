@@ -609,7 +609,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
-         wristForceSensor.getWrench(wristTempWrench);
+         wristTempWrench.setIncludingFrame(wristForceSensor.getWrench());
 
          tempWristForce.setIncludingFrame(wristTempWrench.getLinearPart());
          tempWristTorque.setIncludingFrame(wristTempWrench.getAngularPart());
