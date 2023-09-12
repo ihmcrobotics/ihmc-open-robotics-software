@@ -1,6 +1,7 @@
 #ifndef __perception_msgs__msg__DetectedObjectPacket__idl__
 #define __perception_msgs__msg__DetectedObjectPacket__idl__
 
+#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module perception_msgs
 {
@@ -21,6 +22,9 @@ module perception_msgs
         unsigned long sequence_id;
         geometry_msgs::msg::dds::Pose pose;
         long id;
+        double confidence;
+        string object_type;
+        geometry_msgs::msg::dds::Point bounding_box_vertices[8];
       };
     };
   };
