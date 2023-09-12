@@ -2,9 +2,11 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
@@ -15,10 +17,12 @@ public class RDXZed2DisplayDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Zed 2 Display Demo");
    private final RDXGlobalVisualizersPanel globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+   private final ROS2Helper ros2Helper;
 
    public RDXZed2DisplayDemo()
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "zed_2_demo_node");
+      ros2Helper = new ROS2Helper(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -54,6 +58,12 @@ public class RDXZed2DisplayDemo
             zed2ColoredPointCloudVisualizer.setSubscribed(true);
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
+
+            RDXROS2BoundingBoxVisualizer CenterPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
+                                                                                                            ros2Helper,
+                                                                                                            PerceptionAPI.CENTERPOSE_DETECTED_OBJECT);
+            CenterPoseBoundingBoxVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(CenterPoseBoundingBoxVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.create();

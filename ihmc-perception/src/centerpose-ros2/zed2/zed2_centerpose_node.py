@@ -1,19 +1,30 @@
-import os
+import os, timeit
 
 import numpy as np
 
 import rclpy
 from rclpy.node import Node
+from geometry_msgs.msg import Point
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+from perception_msgs.msg import DetectedObjectPacket
 
 from lib.opts import opts
 from lib.detectors.object_pose import ObjectPoseDetector
 
-from geometry_msgs.msg import PoseStamped
 from perception_msgs.msg import ImageMessage
 
 import cv2
 import time
+
+def cube_vertices(Xc,Yc,Zc,SL):
+    return [[Xc + SL/2, Yc + SL/2, Zc + SL/2],
+            [Xc + SL/2, Yc + SL/2, Zc - SL/2],
+            [Xc + SL/2, Yc - SL/2, Zc + SL/2],
+            [Xc + SL/2, Yc - SL/2, Zc - SL/2],
+            [Xc - SL/2, Yc + SL/2, Zc + SL/2],
+            [Xc - SL/2, Yc + SL/2, Zc - SL/2],
+            [Xc - SL/2, Yc - SL/2, Zc + SL/2],
+            [Xc - SL/2, Yc - SL/2, Zc - SL/2]]
 
 class Image2CenterPose_node(Node):
     def __init__(self):
@@ -97,10 +108,11 @@ class Image2CenterPose_node(Node):
         self.subscription
 
         # Create a publisher for the pose topic
-        self.pose_pub = self.create_publisher(PoseStamped, '/pose_topic', 10)
-        self.pose_msg = PoseStamped()
+        self.centerpose_publisher_ = self.create_publisher(DetectedObjectPacket, '/ihmc/centerpose', 1)
+        self.detected_object = DetectedObjectPacket()
 
         self.get_logger().info("Waiting for an Image...")
+        self.start_time = timeit.default_timer()
 
     def listener_callback(self, msg):
         # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU - it can't
@@ -114,17 +126,44 @@ class Image2CenterPose_node(Node):
         image = cv2.imdecode(image_np, cv2.COLOR_YUV2RGB)
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
 
-        if len(ret['results']) > 0:
+        if len(ret['results']) > 0  or True:
             # print(ret)
-            self.pose_msg.pose.position.x = ret['results'][0]['location'][0]
-            self.pose_msg.pose.position.y = ret['results'][0]['location'][1]
-            self.pose_msg.pose.position.z = ret['results'][0]['location'][2]
-            self.pose_msg.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
-            self.pose_msg.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
-            self.pose_msg.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
-            self.pose_msg.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
-            self.get_logger().info('Published: "%s"' % self.pose_msg.pose)
-            self.pose_pub.publish(self.pose_msg)
+            current_time = timeit.default_timer()
+
+            # self.detected_object.pose.position.x = ret['results'][0]['location'][0]
+            # self.detected_object.pose.position.y = ret['results'][0]['location'][1]
+            # self.detected_object.pose.position.z = ret['results'][0]['location'][2]
+            # self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
+            # self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
+            # self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
+            # self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
+
+            self.detected_object.pose.position.x = 0.5*np.sin(0.5*(self.start_time - current_time))
+            self.detected_object.pose.position.y = 0.5*np.cos(0.5*(self.start_time - current_time))
+            self.detected_object.pose.position.z = 0.0
+            self.detected_object.pose.orientation.x = 0.0
+            self.detected_object.pose.orientation.y = 0.0
+            self.detected_object.pose.orientation.z = 0.0
+            self.detected_object.pose.orientation.w = 1.0
+
+            point_verts = []
+            vertices = cube_vertices(0.5*np.sin(0.5*(self.start_time - current_time)),
+                                     0.5*np.cos(0.5*(self.start_time - current_time)),
+                                     0,
+                                     1*np.sin(0.5*(self.start_time - current_time)))
+            for vert in vertices:
+                point = Point()
+                point.x = vert[0]
+                point.y = vert[1]
+                point.z = vert[2]
+                point_verts.append(point)
+            self.detected_object.bounding_box_vertices = point_verts
+
+            self.detected_object.confidence = self.start_time - current_time
+            self.detected_object.object_type = "cup"
+            
+            self.get_logger().info('Published: "%s"' % self.detected_object.pose)
+            self.centerpose_publisher_.publish(self.detected_object)
 
 def main(args=None):
     # Check if models directory exists
