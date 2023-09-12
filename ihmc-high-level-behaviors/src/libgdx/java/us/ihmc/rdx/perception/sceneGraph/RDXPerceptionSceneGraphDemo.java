@@ -80,7 +80,7 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerDetection.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetection.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
 
-            operatorSceneGraph = new SceneGraph();
+            operatorSceneGraph = new SceneGraph(RDXSceneNode::new);
             onRobotSceneGraph = new SceneGraph();
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",

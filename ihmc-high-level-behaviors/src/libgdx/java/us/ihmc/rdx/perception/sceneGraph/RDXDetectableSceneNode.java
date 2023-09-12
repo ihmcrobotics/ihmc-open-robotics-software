@@ -1,34 +1,38 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.rdx.imgui.ImGuiEnumPlot;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
-public class RDXDetectableSceneNode extends RDXSceneNode
+import java.util.Set;
+
+public class RDXDetectableSceneNode extends DetectableSceneNode implements RDXSceneNodeInterface
 {
-   private final DetectableSceneNode detectableSceneNode;
-   private final ImGuiEnumPlot currentlyDetectedPlot;
+   private final RDXDetectableSceneNodeBasics detectableSceneNodeBasics;
 
-   public RDXDetectableSceneNode(DetectableSceneNode detectableSceneNode)
+   public RDXDetectableSceneNode(long id, String name)
    {
-      super(detectableSceneNode);
-      this.detectableSceneNode = detectableSceneNode;
-      currentlyDetectedPlot = new ImGuiEnumPlot(detectableSceneNode.getName());
+      super(id, name);
+      detectableSceneNodeBasics = new RDXDetectableSceneNodeBasics(this);
    }
 
    @Override
    public void update()
    {
-      super.update();
+      detectableSceneNodeBasics.update();
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
+      detectableSceneNodeBasics.renderImGuiWidgets();
+   }
 
-      boolean currentlyDetected = detectableSceneNode.getCurrentlyDetected();
-      currentlyDetectedPlot.setWidgetTextColor(currentlyDetected ? ImGuiTools.GREEN : ImGuiTools.RED);
-      currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      detectableSceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
    }
 }

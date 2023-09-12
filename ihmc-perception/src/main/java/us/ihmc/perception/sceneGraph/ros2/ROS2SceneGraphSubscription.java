@@ -15,6 +15,8 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
+import java.util.function.Function;
+
 /**
  * Subscribes to, synchronizing, the robot's perception scene graph.
  */
@@ -22,10 +24,9 @@ public class ROS2SceneGraphSubscription
 {
    private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
+   private final Function<ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final FramePose3D nodePose = new FramePose3D();
-   private final FramePose3D arUcoMarkerPose = new FramePose3D();
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
-   private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
 
@@ -36,7 +37,24 @@ public class ROS2SceneGraphSubscription
                                      ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                      ROS2IOTopicQualifier ioQualifier)
    {
+      this(sceneGraph,
+           ros2PublishSubscribeAPI,
+           ioQualifier,
+           ros2SceneGraphSubscriptionNode -> ROS2SceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, sceneGraph));
+   }
+
+   /**
+    * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
+    * @param newNodeSupplier So that new nodes can be externally extended, like for UI representations.
+    *                        Use {@link ROS2SceneGraphTools#createNodeFromMessage} as a base.
+    */
+   public ROS2SceneGraphSubscription(SceneGraph sceneGraph,
+                                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+                                     ROS2IOTopicQualifier ioQualifier,
+                                     Function<ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier)
+   {
       this.sceneGraph = sceneGraph;
+      this.newNodeSupplier = newNodeSupplier;
 
       sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
    }
@@ -77,7 +95,7 @@ public class ROS2SceneGraphSubscription
 
       if (!localTreeFrozen && localNode == null) // New node that wasn't in the local tree
       {
-         localNode = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
+         localNode = newNodeSupplier.apply(subscriptionNode);
       }
 
       // If tree is frozen and the ID isn't in the local tree, we don't have anything to update

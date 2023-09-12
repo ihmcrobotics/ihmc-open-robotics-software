@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -30,7 +31,7 @@ public class SceneGraph
    public static long ROOT_NODE_ID = 0;
 
    private final MutableLong nextID = new MutableLong();
-   private final SceneNode rootNode = new SceneNode(nextID.getAndIncrement(), "SceneGraphRoot");
+   private final SceneNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -44,7 +45,12 @@ public class SceneGraph
 
    public SceneGraph()
    {
-      // Here so that you can track the instantiations of this class with the IDE
+      this(SceneNode::new);
+   }
+
+   public SceneGraph(BiFunction<Long, String, SceneNode> newRootNodeSupplier)
+   {
+      rootNode = newRootNodeSupplier.apply(nextID.getAndIncrement(), "SceneGraphRoot");
    }
 
    public void update(ReferenceFrame sensorFrame)
