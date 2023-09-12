@@ -70,7 +70,7 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
    float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
    float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
 
-   float4 point = (float4) (X, Y, Z, 0);
+   float4 point = (float4) (Z, -X, -Y, 0);
    return point;
 }
 

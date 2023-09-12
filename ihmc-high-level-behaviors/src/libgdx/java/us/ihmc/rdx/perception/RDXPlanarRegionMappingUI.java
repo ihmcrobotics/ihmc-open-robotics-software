@@ -39,6 +39,9 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    private final ImBoolean liveModeEnabled = new ImBoolean(true);
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean renderBoundingBoxEnabled = new ImBoolean(false);
+   private final ImBoolean renderMatchLinesEnabled = new ImBoolean(false);
+   private final ImBoolean renderPreviousEnabled = new ImBoolean(false);
+   private final ImBoolean renderCurrentEnabled = new ImBoolean(false);
 
    private RDXLineGraphic lineMeshModel = new RDXLineGraphic(0.02f, Color.WHITE);
    private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -102,6 +105,9 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
                mappingManager.hardResetTheMap();
             }
 
+            ImGui.checkbox("Render Match Lines", renderMatchLinesEnabled);
+            ImGui.checkbox("Render Previous Regions", renderPreviousEnabled);
+            ImGui.checkbox("Render Current Regions", renderCurrentEnabled);
             ImGui.checkbox("Render Bounding Box", renderBoundingBoxEnabled);
 
             ImGui.endTabItem();
@@ -206,8 +212,13 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      previousRegionsGraphic.getRenderables(renderables, pool);
-      currentRegionsGraphic.getRenderables(renderables, pool);
-      lineMeshModel.getRenderables(renderables, pool);
+      if (renderPreviousEnabled.get())
+         previousRegionsGraphic.getRenderables(renderables, pool);
+
+      if (renderCurrentEnabled.get())
+         currentRegionsGraphic.getRenderables(renderables, pool);
+
+      if (renderMatchLinesEnabled.get())
+         lineMeshModel.getRenderables(renderables, pool);
    }
 }
