@@ -98,7 +98,7 @@ public class RDXFootstepChecker
     * Second check against footsteps that are in the controller
     * Lastly if those don't have footsteps, default to comparing against the synced robot feet
     */
-   private FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList,
+   public FramePose3DReadOnly getPreviousFootstepOnOppositeSide(RecyclingArrayList<RDXInteractableFootstep> stepList,
                                                                  int currentIndex,
                                                                  RobotSide candidateFootstepSide)
    {
