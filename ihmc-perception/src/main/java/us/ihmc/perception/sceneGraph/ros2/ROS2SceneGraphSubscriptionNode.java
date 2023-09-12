@@ -14,7 +14,7 @@ public class ROS2SceneGraphSubscriptionNode
    private SceneNodeMessage sceneNodeMessage;
    private DetectableSceneNodeMessage detectableSceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
-   private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessageeMessage;
+   private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
 
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
@@ -58,14 +58,14 @@ public class ROS2SceneGraphSubscriptionNode
       this.arUcoMarkerNodeMessage = arUcoMarkerNodeMessage;
    }
 
-   public StaticRelativeSceneNodeMessage getStaticRelativeSceneNodeMessageeMessage()
+   public StaticRelativeSceneNodeMessage getStaticRelativeSceneNodeMessage()
    {
-      return staticRelativeSceneNodeMessageeMessage;
+      return staticRelativeSceneNodeMessage;
    }
 
-   public void setStaticRelativeSceneNodeMessageeMessage(StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessageeMessage)
+   public void setStaticRelativeSceneNodeMessage(StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage)
    {
-      this.staticRelativeSceneNodeMessageeMessage = staticRelativeSceneNodeMessageeMessage;
+      this.staticRelativeSceneNodeMessage = staticRelativeSceneNodeMessage;
    }
 
    public List<ROS2SceneGraphSubscriptionNode> getChildren()
