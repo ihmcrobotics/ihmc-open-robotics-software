@@ -7,4 +7,10 @@ geometry_msgs/Pose pose
 
 int32 id
 
+float64 confidence
+
+string object_type
+
+geometry_msgs/Point[] bounding_box_vertices
+
 

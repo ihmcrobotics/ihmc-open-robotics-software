@@ -5,3 +5,9 @@ uint32 sequence_id
 
 geometry_msgs/Pose pose
 int32 id
+
+float64 confidence
+
+string object_type
+
+geometry_msgs/Point[8] bounding_box_vertices

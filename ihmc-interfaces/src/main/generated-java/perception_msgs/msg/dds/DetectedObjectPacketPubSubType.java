@@ -15,7 +15,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c577e6cf1f01bbba20c18381e50e31f9e2c92f93387c747f7ac7c443c3e2a381";
+   		return "31dcb6bf13a2cfaef6564b28b3da40d3680c037834791b42c2c4fed9eaa1f368";
    }
    
    @Override
@@ -58,6 +58,12 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      for(int i0 = 0; i0 < (8); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -79,6 +85,15 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectType().length() + 1;
+
+      for(int i0 = 0; i0 < data.getBoundingBoxVertices().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxVertices()[i0], current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +105,17 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
       cdr.write_type_2(data.getId());
 
+      cdr.write_type_6(data.getConfidence());
+
+      if(data.getObjectType().length() <= 255)
+      cdr.write_type_d(data.getObjectType());else
+          throw new RuntimeException("object_type field exceeds the maximum length");
+
+      for(int i0 = 0; i0 < data.getBoundingBoxVertices().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxVertices()[i0], cdr);		
+      }
+
    }
 
    public static void read(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
@@ -98,6 +124,14 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setId(cdr.read_type_2());
+      	
+      data.setConfidence(cdr.read_type_6());
+      	
+      cdr.read_type_d(data.getObjectType());	
+      for(int i0 = 0; i0 < data.getBoundingBoxVertices().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxVertices()[i0], cdr);	
+      }
       	
 
    }
@@ -109,6 +143,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       ser.write_type_2("id", data.getId());
+      ser.write_type_6("confidence", data.getConfidence());
+      ser.write_type_d("object_type", data.getObjectType());
+      ser.write_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
    }
 
    @Override
@@ -118,6 +155,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       data.setId(ser.read_type_2("id"));
+      data.setConfidence(ser.read_type_6("confidence"));
+      ser.read_type_d("object_type", data.getObjectType());
+      ser.read_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectedObjectPacket src, perception_msgs.msg.dds.DetectedObjectPacket dest)
