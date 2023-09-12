@@ -96,18 +96,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
-   private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
-   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
-   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
-   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
-
    private final YoDouble yoTime;
 
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final NaturalPosturePrivilegedManager naturalPosturePrivilegedManager;
-   private final NaturalPostureManager naturalPostureManager;
+   private NaturalPosturePrivilegedManager naturalPosturePrivilegedManager;
+   private NaturalPostureManager naturalPostureManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
@@ -170,11 +165,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      useNaturalPostureCommand.set(false);
-      usePelvisPrivilegedPoseCommand.set(false);
-      useBodyManagerCommands.set(true);
-      usePelvisOrientationCommand.set(true);
-
       this.managerFactory = managerFactory;
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
@@ -187,8 +177,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
-      this.naturalPosturePrivilegedManager = managerFactory.getOrCreateNaturalPosturePrivilegedManager();
+
+      YoBoolean enableNaturalPostureManager = new YoBoolean("enableNaturalPostureManager", registry);
+      enableNaturalPostureManager.set(false);
+      if (enableNaturalPostureManager.getBooleanValue())
+      {
+         this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
+         this.naturalPosturePrivilegedManager = managerFactory.getOrCreateNaturalPosturePrivilegedManager();
+      }
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
@@ -553,7 +549,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
       }
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
@@ -587,7 +583,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.initialize();
-      if (useNaturalPostureCommand.getValue())
+      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          naturalPosturePrivilegedManager.initialize();
          naturalPostureManager.initialize();
@@ -813,7 +809,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.compute();
-      if (useNaturalPostureCommand.getValue())
+      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          naturalPostureManager.compute();
          naturalPosturePrivilegedManager.compute();
@@ -930,27 +926,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void submitControllerCoreCommands()
    {
-      // useNaturalPostureCommand.set(!stateMachine.getCurrentState().isDoubleSupportState());
-      if (useNaturalPostureCommand.getValue())
-      {
-         useNaturalPostureCommand.set(true);
-         useBodyManagerCommands.set(false);
-         usePelvisPrivilegedPoseCommand.set(false);
-         usePelvisOrientationCommand.set(true);
-
-         useBodyManagerCommands.set(false);
-      }
-      else
-      {
-         usePelvisPrivilegedPoseCommand.set(false);
-         usePelvisOrientationCommand.set(true);
-
-         useBodyManagerCommands.set(true);
-      }
-
       planeContactStateCommandPool.clear();
 
-      if (useNaturalPostureCommand.getValue())
+      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPosturePrivilegedManager.getInverseDynamicsCommand());
          controllerCoreCommand.addFeedbackControlCommand(naturalPosturePrivilegedManager.getFeedbackControlCommand());
@@ -984,7 +962,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Body managers:
-      if (useBodyManagerCommands.getValue())
+      if ((naturalPostureManager == null) || naturalPostureManager.getUseBodyManagerCommands().getValue())
       {
          for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
          {
@@ -1003,7 +981,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Natural posture:
-      if ((naturalPostureManager != null) && (useNaturalPostureCommand.getValue()))
+      if ((naturalPostureManager != null) && (naturalPostureManager.getUseNaturalPostureCommand().getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getJointLimitEnforcementCommand());
@@ -1011,13 +989,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Privileged pelvis control:
-      if ((naturalPostureManager != null) && (usePelvisPrivilegedPoseCommand.getValue()))
+      if ((naturalPostureManager != null) && (naturalPostureManager.getUsePelvisPrivilegedPoseCommand().getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPelvisPrivilegedPoseCommand());
       }
 
       // Higher-level pelvis control:
-      if (usePelvisOrientationCommand.getValue())
+      if (naturalPostureManager == null || naturalPostureManager.getUsePelvisOrientationCommand().getValue())
       {
          controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
          // controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
