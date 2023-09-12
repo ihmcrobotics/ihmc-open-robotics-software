@@ -12,7 +12,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -95,7 +94,7 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
-            staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getCurrentDistanceToRobot());
+            staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessage().getCurrentDistanceToRobot());
          }
 
          // If the node was recently modified by the operator, the node does not accept
@@ -112,7 +111,7 @@ public class ROS2SceneGraphSubscription
             }
             if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
             {
-               staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessageeMessage().getDistanceToDisableTracking());
+               staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
             }
 
             MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
@@ -178,7 +177,7 @@ public class ROS2SceneGraphSubscription
          case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
          {
             StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().get(indexInTypesList);
-            subscriptionNode.setStaticRelativeSceneNodeMessageeMessage(staticRelativeSceneNodeMessage);
+            subscriptionNode.setStaticRelativeSceneNodeMessage(staticRelativeSceneNodeMessage);
             subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getSceneNode());
          }
       }
