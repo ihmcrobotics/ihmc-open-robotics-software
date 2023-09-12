@@ -127,12 +127,69 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
-    * Returns the percent of the step length which will be used to determine the swing waypoints when
-    * taking a step of the type obstacle clearance
+    * Default swing height used by the controller used when stepping up.
     */
-   public double[] getObstacleClearanceProportions()
+   public double getDefaultSwingStepUpHeight()
    {
-      return new double[] {0.15, 0.85};
+      return getDefaultSwingHeight();
+   }
+
+   /**
+    * Default swing height used by the controller used when stepping down.
+    */
+   public double getDefaultSwingStepDownHeight()
+   {
+      return getDefaultSwingHeight();
+   }
+
+   /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when
+    * taking a step up
+    */
+   public double[] getSwingStepUpWaypointProportions()
+   {
+      return getSwingWaypointProportions();
+   }
+
+   /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when
+    * taking a step up
+    */
+   public double[] getSwingStepDownWaypointProportions()
+   {
+      return getSwingWaypointProportions();
+   }
+
+   /**
+    * Returns a factor in [0, 1] for controlling the first waypoint's z coordinate when performing a
+    * step up.
+    * <ul>
+    * <li>a value of 0 sets the waypoint to be at the initial stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value of 1 sets the waypoint to be at the final stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value in ]0, 1[ linearly interpolates between the two previous examples.
+    * </ul>
+    */
+   public double getFirstWaypointHeightFactorForSteppingUp()
+   {
+      return 1.0;
+   }
+
+   /**
+    * Returns a factor in [0, 1] for controlling the first waypoint's z coordinate when performing a
+    * step down.
+    * <ul>
+    * <li>a value of 0 sets the waypoint to be at the final stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value of 1 sets the waypoint to be at the initial stance foot height plus
+    * {@link #getDefaultSwingStepUpHeight()}.
+    * <li>a value in ]0, 1[ linearly interpolates between the two previous examples.
+    * </ul>
+    */
+   public double getSecondWaypointHeightFactorForSteppingDown()
+   {
+      return 1.0;
    }
 
    /**

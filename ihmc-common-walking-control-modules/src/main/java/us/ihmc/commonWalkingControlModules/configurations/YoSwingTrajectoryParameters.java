@@ -17,6 +17,8 @@ import java.util.List;
 
 public class YoSwingTrajectoryParameters
 {
+   private final DoubleParameter defaultSwingStepUpHeight;
+   private final DoubleParameter defaultSwingStepDownHeight;
    private final BooleanParameter addOrientationMidpointForClearance;
    private final DoubleParameter midpointOrientationInterpolationForClearance;
 
@@ -24,7 +26,8 @@ public class YoSwingTrajectoryParameters
    private final DoubleParameter finalSwingHeightOffset;
 
    private final List<DoubleProvider> defaultWaypointProportions = new ArrayList<>();
-   private final List<DoubleProvider> defaultObstacleClearanceWaypointProportions = new ArrayList<>();
+   private final List<DoubleProvider> defaultStepUpWaypointProportions = new ArrayList<>();
+   private final List<DoubleProvider> defaultStepDownWaypointProportions = new ArrayList<>();
 
    private final DoubleProvider minLiftOffVerticalVelocity;
    private final ParameterVector3D touchdownVelocityWeight;
@@ -49,9 +52,13 @@ public class YoSwingTrajectoryParameters
       this(namePrefix, walkingControllerParameters, walkingControllerParameters.getSwingTrajectoryParameters(), registry);
    }
 
-   public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, SwingTrajectoryParameters parameters,
+   public YoSwingTrajectoryParameters(String namePrefix,
+                                      WalkingControllerParameters walkingControllerParameters,
+                                      SwingTrajectoryParameters parameters,
                                       YoRegistry registry)
    {
+      defaultSwingStepUpHeight = new DoubleParameter(namePrefix + "DefaultSwingStepUpHeight", registry, parameters.getDefaultSwingStepUpHeight());
+      defaultSwingStepDownHeight = new DoubleParameter(namePrefix + "DefaultSwingStepDownHeight", registry, parameters.getDefaultSwingStepDownHeight());
       addOrientationMidpointForClearance = new BooleanParameter(namePrefix + "AddOrientationMidpointForClearance",
                                                                 registry,
                                                                 parameters.addOrientationMidpointForObstacleClearance());
@@ -65,16 +72,21 @@ public class YoSwingTrajectoryParameters
 
       int numberWaypoints = 2;
       double[] defaultWaypointProportions = parameters.getSwingWaypointProportions();
-      double[] defaultObstacleClearanceWaypointProportions = parameters.getObstacleClearanceProportions();
+      double[] defaultStepUpWaypointProportions = parameters.getSwingStepUpWaypointProportions();
+      double[] defaultStepDownWaypointProportions = parameters.getSwingStepDownWaypointProportions();
 
       for (int i = 0; i < numberWaypoints; i++)
       {
          DoubleParameter waypointProportion = new DoubleParameter(namePrefix + "WaypointProportion" + i, registry, defaultWaypointProportions[i]);
-         DoubleParameter obstacleClearanceWaypointProportion = new DoubleParameter(namePrefix + "ObstacleClearanceWaypointProportion" + i,
-                                                                                   registry,
-                                                                                   defaultObstacleClearanceWaypointProportions[i]);
+         DoubleParameter stepUpWaypointProportion = new DoubleParameter(namePrefix + "StepUpWaypointProportion" + i,
+                                                                        registry,
+                                                                        defaultStepUpWaypointProportions[i]);
+         DoubleParameter stepDownWaypointProportion = new DoubleParameter(namePrefix + "StepDownWaypointProportion" + i,
+                                                                          registry,
+                                                                          defaultStepDownWaypointProportions[i]);
          this.defaultWaypointProportions.add(waypointProportion);
-         this.defaultObstacleClearanceWaypointProportions.add(obstacleClearanceWaypointProportion);
+         this.defaultStepUpWaypointProportions.add(stepUpWaypointProportion);
+         this.defaultStepDownWaypointProportions.add(stepDownWaypointProportion);
       }
 
       this.touchdownVelocityWeight = new ParameterVector3D(namePrefix + "TouchdownVelocityWeight", parameters.getTouchdownVelocityWeight(), registry);
@@ -115,6 +127,16 @@ public class YoSwingTrajectoryParameters
       pelvisVelocityInjectionRatio = new DoubleParameter(namePrefix + "PelvisVelocityInjectionRatio", registry, parameters.getPelvisVelocityInjectionRatio());
    }
 
+   public double getDefaultSwingStepUpHeight()
+   {
+      return defaultSwingStepUpHeight.getValue();
+   }
+
+   public double getDefaultSwingStepDownHeight()
+   {
+      return defaultSwingStepDownHeight.getValue();
+   }
+
    public boolean addOrientationMidpointForObstacleClearance()
    {
       return addOrientationMidpointForClearance.getValue();
@@ -135,9 +157,14 @@ public class YoSwingTrajectoryParameters
       return defaultWaypointProportions;
    }
 
-   public List<DoubleProvider> getObstacleClearanceProportions()
+   public List<DoubleProvider> getSwingStepUpWaypointProportions()
    {
-      return defaultObstacleClearanceWaypointProportions;
+      return defaultStepUpWaypointProportions;
+   }
+
+   public List<DoubleProvider> getSwingStepDownWaypointProportions()
+   {
+      return defaultStepDownWaypointProportions;
    }
 
    public Tuple3DReadOnly getTouchdownVelocityWeight()
