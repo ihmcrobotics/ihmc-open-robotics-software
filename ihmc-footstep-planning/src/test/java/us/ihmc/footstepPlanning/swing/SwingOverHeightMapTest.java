@@ -527,12 +527,12 @@ public class SwingOverHeightMapTest
 
    private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
    {
-      SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
+      SwingTrajectoryParameters swingTrajectoryParameters = getWalkingControllerParameters().getSwingTrajectoryParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
-                                                                                          steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getCustomWaypointAngleThreshold(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeightFromStanceFoot(),
+                                                                                          swingTrajectoryParameters.getMaxSwingHeightFromStanceFoot(),
+                                                                                          swingTrajectoryParameters.getMinSwingHeightFromStanceFoot(),
+                                                                                          swingTrajectoryParameters.getCustomWaypointAngleThreshold(),
                                                                                           new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
 
@@ -871,24 +871,6 @@ public class SwingOverHeightMapTest
       return new SteppingParameters()
       {
          @Override
-         public double getMinSwingHeightFromStanceFoot()
-         {
-            return 0.10;
-         }
-
-         @Override
-         public double getDefaultSwingHeightFromStanceFoot()
-         {
-            return getMinSwingHeightFromStanceFoot();
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0.30;
-         }
-
-         @Override
          public double getFootForwardOffset()
          {
             return getFootLength() - getFootBackwardOffset();
@@ -1000,6 +982,24 @@ public class SwingOverHeightMapTest
    {
       return new SwingTrajectoryParameters()
       {
+         @Override
+         public double getMinSwingHeightFromStanceFoot()
+         {
+            return 0.10;
+         }
+
+         @Override
+         public double getDefaultSwingHeightFromStanceFoot()
+         {
+            return getMinSwingHeightFromStanceFoot();
+         }
+
+         @Override
+         public double getMaxSwingHeightFromStanceFoot()
+         {
+            return 0.30;
+         }
+
          @Override
          public double getDesiredTouchdownHeightOffset()
          {

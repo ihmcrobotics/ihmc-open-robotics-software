@@ -55,7 +55,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      setSwingHeight(steppingParameters.getDefaultSwingHeightFromStanceFoot());
+      setSwingHeight(walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeightFromStanceFoot());
       setMaxStepLength(steppingParameters.getMaxStepLength());
       setDefaultStepWidth(steppingParameters.getInPlaceWidth());
       setMinStepWidth(steppingParameters.getMinStepWidth());

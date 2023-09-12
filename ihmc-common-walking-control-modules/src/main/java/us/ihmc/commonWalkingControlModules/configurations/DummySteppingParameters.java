@@ -90,12 +90,6 @@ public class DummySteppingParameters implements SteppingParameters
    }
 
    @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.3;
-   }
-
-   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI / 4.0;
@@ -117,11 +111,5 @@ public class DummySteppingParameters implements SteppingParameters
    public double getMaxStepWidth()
    {
       return 0.6; //0.4;
-   }
-
-   @Override
-   public double getMinSwingHeightFromStanceFoot()
-   {
-      return 0.1;
    }
 }

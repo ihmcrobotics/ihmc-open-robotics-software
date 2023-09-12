@@ -92,10 +92,10 @@ public class SwingTrajectoryCalculator
    {
       this.namePrefix = namePrefix;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
-      double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
-      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
-      double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
+      double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getMaxSwingHeightFromStanceFoot();
+      double minSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getMinSwingHeightFromStanceFoot();
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeightFromStanceFoot();
+      double customWaypointAngleThreshold = walkingControllerParameters.getSwingTrajectoryParameters().getCustomWaypointAngleThreshold();
 
       pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
