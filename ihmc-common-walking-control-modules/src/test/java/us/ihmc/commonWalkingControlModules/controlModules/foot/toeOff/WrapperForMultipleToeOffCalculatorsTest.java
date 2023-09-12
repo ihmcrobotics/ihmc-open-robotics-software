@@ -348,7 +348,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
             return new SwingTrajectoryParameters()
             {
                @Override
-               public double getMaxSwingHeightFromStanceFoot()
+               public double getMaxSwingHeight()
                {
                   return 0;
                }

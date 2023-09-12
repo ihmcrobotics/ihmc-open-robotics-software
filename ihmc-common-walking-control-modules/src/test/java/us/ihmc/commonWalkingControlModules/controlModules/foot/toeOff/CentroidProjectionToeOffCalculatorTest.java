@@ -340,7 +340,7 @@ public class CentroidProjectionToeOffCalculatorTest
             return new SwingTrajectoryParameters()
             {
                @Override
-               public double getMaxSwingHeightFromStanceFoot()
+               public double getMaxSwingHeight()
                {
                   return 0;
                }

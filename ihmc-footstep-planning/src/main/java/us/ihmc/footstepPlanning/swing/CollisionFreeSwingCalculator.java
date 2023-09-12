@@ -284,7 +284,7 @@ public class CollisionFreeSwingCalculator
 
       // see TwoWaypointSwingGenerator.initialize() for trajectoryTypes DEFAULT and OBSTACLE_CLEARANCE
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
-      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeightFromStanceFoot();
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
 
       for (int i = 0; i < 2; i++)
       {

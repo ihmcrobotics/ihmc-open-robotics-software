@@ -56,7 +56,7 @@ public class AtlasKinematicSimulation
       }
 
       @Override
-      public double getMinSwingHeightFromStanceFoot()
+      public double getMinSwingHeight()
       {
          return 0.05 * modelScale;
       }

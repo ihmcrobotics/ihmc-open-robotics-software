@@ -92,9 +92,9 @@ public class SwingTrajectoryCalculator
    {
       this.namePrefix = namePrefix;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getMaxSwingHeightFromStanceFoot();
-      double minSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getMinSwingHeightFromStanceFoot();
-      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeightFromStanceFoot();
+      double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getMaxSwingHeight();
+      double minSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getMinSwingHeight();
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
       double customWaypointAngleThreshold = walkingControllerParameters.getSwingTrajectoryParameters().getCustomWaypointAngleThreshold();
 
       pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
