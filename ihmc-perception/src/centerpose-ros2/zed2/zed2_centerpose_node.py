@@ -135,7 +135,7 @@ def main(args=None):
 
     rclpy.init(args=args)
 
-    node = Image2CenterPose_node()
+    node = ZED2CenterPoseNode()
 
     rclpy.spin(node)
 
