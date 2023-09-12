@@ -8,7 +8,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -34,12 +33,12 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 
       selectedObject = new RDXInteractableObject(baseUI);
       //TODO change this to detectable when node library is updated
-      List<ArUcoMarkerNode> availableObjects = sceneGraph.getArUcoDetectableNodes();
-      for (var object : availableObjects)
-      {
-         nameModelMap.put(object.getName(), object.getVisualModelFilePath());
-         visualModelTransformMap.put(object.getName(), object.getVisualModelToNodeFrameTransform());
-      }
+//      List<ArUcoMarkerNode> availableObjects = sceneGraph.getArUcoDetectableNodes();
+//      for (var object : availableObjects)
+//      {
+//         nameModelMap.put(object.getName(), object.getVisualModelFilePath());
+//         visualModelTransformMap.put(object.getName(), object.getVisualModelToNodeFrameTransform());
+//      }
    }
 
    public void renderImGuiWidgets()
@@ -58,7 +57,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
             selectedObjectChanged.set(selectedObjectName);
 
             // check if object is currently detected, if so use the detected pose as initial pose
-            List<DetectableSceneNode> detectableSceneObjects = sceneGraph.getDetectableSceneNodes();
+            List<DetectableSceneNode> detectableSceneObjects = new ArrayList<>(); // TODO: Fix
             for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
             {
                if (detectableSceneObject.getName().equals(selectedObjectChanged.read()) && detectableSceneObject.getCurrentlyDetected())
