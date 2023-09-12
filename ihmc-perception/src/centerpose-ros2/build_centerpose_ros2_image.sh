@@ -8,3 +8,6 @@ docker run -it --name "centerpose-build-$random_id" --network=host --runtime=nvi
 
 # Commit
 docker commit "centerpose-build-$random_id" centerpose-ros2:0.0.1
+
+# Remove the intermediate build container
+docker rm "centerpose-build-$random_id"
