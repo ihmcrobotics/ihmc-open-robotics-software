@@ -416,15 +416,15 @@ public class RDXBehaviorActionSequenceEditor
                executionStatusMessagesToDisplay.add(latestActionsExecutionStatus.get(i));
                currentlyExecutingActions.add(actionSequence.get(executionStatusMessagesToDisplay.get(i).getActionIndex()));
             }
-            ImGui.text("Executing: ");
-            ImGui.sameLine();
-            for (RDXBehaviorAction action : currentlyExecutingActions)
-               ImGui.text("%s (%s)".formatted(action.getDescription(), action.getActionTypeTitle()));
          }
       }
 
       for (int i = 0; i < executionStatusMessagesToDisplay.size(); i++)
       {
+         ImGui.text("Executing: ");
+         ImGui.sameLine();
+         ImGui.text("%s (%s)".formatted(currentlyExecutingActions.get(i).getDescription(), currentlyExecutingActions.get(i).getActionTypeTitle()));
+
          widgetAligner.text("Expected time remaining:");
          double elapsedTime = executionStatusMessagesToDisplay.get(i).getElapsedExecutionTime();
          double nominalDuration = executionStatusMessagesToDisplay.get(i).getNominalExecutionDuration();

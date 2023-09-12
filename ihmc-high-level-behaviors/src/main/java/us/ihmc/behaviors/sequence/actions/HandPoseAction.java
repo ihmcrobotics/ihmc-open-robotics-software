@@ -3,6 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
@@ -13,6 +14,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -88,7 +90,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    public void triggerActionExecution()
    {
       ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-
       double solutionQuality = armIKSolver.getQuality();
       if (solutionQuality < 1.0)
       {
@@ -102,9 +103,26 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          jointAngles[i] = solutionOneDoFJoints[i].getQ();
       }
 
-      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
-      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-      ros2ControllerHelper.publishToController(armTrajectoryMessage);
+      FramePose3D frameHand = new FramePose3D(getPalmFrame());
+      frameHand.changeFrame(ReferenceFrame.getWorldFrame());
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(getSide(),
+                                                                                                     getTrajectoryDuration(),
+                                                                                                     frameHand.getPosition(),
+                                                                                                     frameHand.getOrientation(),
+                                                                                                     ReferenceFrame.getWorldFrame());
+      handTrajectoryMessage.setForceExecution(true);
+      // TODO. remove once tuned real robot wieghts and gains
+      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
+      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
+      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
+      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
+      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
+      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
+      ros2ControllerHelper.publishToController(handTrajectoryMessage);
+
+//      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
+//      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+//      ros2ControllerHelper.publishToController(armTrajectoryMessage);
 
       executionTimer.reset();
 
