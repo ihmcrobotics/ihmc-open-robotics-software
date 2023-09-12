@@ -3,7 +3,7 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    file = open('data/map_console_output_201455.txt', 'r')
+    file = open('data/map_console_output_tum_fr1_xyz.txt', 'r')
 
     lines = file.readlines()
 

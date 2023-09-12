@@ -1,7 +1,7 @@
 {
   "title" : "ConcaveHullFactoryParameters",
   "Edge length threshold" : {
-    "value" : 0.089231,
+    "value" : 0.08,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

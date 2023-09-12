@@ -15,8 +15,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
@@ -44,7 +46,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("TUM_Dataset_01.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("TUM_Dataset_02.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
@@ -161,8 +163,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                                                      frameIndex.get(),
                                                      depthBytePointer,
                                                      bytedecoDepthImage.getBytedecoOpenCVMat());
-            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
-            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);
 //            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
 //            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
@@ -258,17 +260,22 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             Point3D position = sensorPositionBuffer.get(frameIndex.get());
             Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
 
+            RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform(orientation, position);
+            //sensorTransformToWorld.invert();
+
             // sensorTransformToWorld.set(orientation, position);
-            cameraPose.set(position, orientation);
+            cameraPose.set(sensorTransformToWorld);
             cameraFrame.setPoseAndUpdate(cameraPose);
 
             cameraFrame.update();
 
             synchronized (bytedecoDepthImage.getBytedecoOpenCVMat())
             {
+               LogTools.debug("Sensor To World: {}", cameraFrame.getTransformToWorldFrame());
+
                frameRegions.getPlanarRegionsList().clear();
                rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, frameRegions);
-               frameRegions.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
+               //frameRegions.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
                planarRegionsListToRenderNotification.set(frameRegions.getPlanarRegionsList().copy());
             }
          }, getClass().getSimpleName() + "RapidRegions");

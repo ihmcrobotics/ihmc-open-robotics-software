@@ -76,6 +76,7 @@ public class PlaneRegistrationTools
 
          if (matches.size() < parameters.getICPMinMatches())
          {
+            LogTools.debug("Not enough matches, breaking out of IQA loop.");
             return false;
          }
 
@@ -93,6 +94,7 @@ public class PlaneRegistrationTools
 
          if ((Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
+            LogTools.debug("Terminating IQA loop. Error ratio: {}, Matches: {}", ratio, matches.size());
             break;
          }
 
@@ -102,6 +104,7 @@ public class PlaneRegistrationTools
 
       if (previousError > parameters.getICPErrorCutoff())
       {
+         LogTools.debug("Registration error too high, breaking out of IQA loop.");
          return false;
       }
 

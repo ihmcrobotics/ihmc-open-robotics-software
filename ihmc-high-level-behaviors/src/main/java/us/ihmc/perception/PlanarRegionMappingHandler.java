@@ -167,7 +167,8 @@ public class PlanarRegionMappingHandler
 //      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
-      createTerrain(720, 1280, false);
+      //createTerrain(720, 1280, false);
+      createTerrain(480, 640, false);
    }
 
    private void createTerrain(int depthHeight, int depthWidth, boolean simulation)
@@ -177,7 +178,10 @@ public class PlanarRegionMappingHandler
 
       String version = simulation ? "Simulation" : "";
 
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+      // TUM Intrinsics: 525.0,525.0,319.5,239.5
+      // D455 Intrinsics: 654.29,654.29,651.14,361.89
+
+      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, 525.0,525.0,319.5,239.5, version);
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -186,6 +190,8 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
+
+      rapidRegionsExtractor.setDepthScalar(5000.0f);
    }
 
    private void createOuster(int depthHeight, int depthWidth)
@@ -270,17 +276,17 @@ public class PlanarRegionMappingHandler
 
          loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
 
-         while (!dataAvailable.poll())
-         {
-            try
-            {
-               Thread.sleep(100);
-            }
-            catch (InterruptedException e)
-            {
-               e.printStackTrace();
-            }
-         }
+         //while (!dataAvailable.poll())
+         //{
+         //   try
+         //   {
+         //      Thread.sleep(100);
+         //   }
+         //   catch (InterruptedException e)
+         //   {
+         //      e.printStackTrace();
+         //   }
+         //}
 
          framePlanarRegionsList = new FramePlanarRegionsList();
          rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
@@ -298,10 +304,7 @@ public class PlanarRegionMappingHandler
             if (keyframePose != null)
             {
                planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
-               PlanarRegionsList regionsToAggregate = framePlanarRegionsList.getPlanarRegionsList().copy();
-               regionsToAggregate.applyTransform(keyframePose);
-               aggregateRegions.addPlanarRegionsList(regionsToAggregate);
-               LogTools.info("[{}] Statistics: {}, Aggregate: {}", perceptionLogIndex, planarRegionMap.getStatistics(), aggregateRegions.getNumberOfPlanarRegions());
+               LogTools.info("[{}] Statistics: {}, Aggregate: {}", perceptionLogIndex, planarRegionMap.getStatistics());
             }
          }
 

@@ -39,7 +39,7 @@ public class RDXPlanarRegionMappingDemo
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_191411_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("TUM_Dataset_01.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
@@ -108,6 +108,9 @@ public class RDXPlanarRegionMappingDemo
                   //                  keyframeTrajectoryGraphic.generateMeshes();
 
                   LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+
+                  if (poseModels.size() > 20)
+                     poseModels.remove(0);
                   poseModels.add(modelInstance);
                }
                framePreviousPose.set(framePose);

@@ -1,17 +1,17 @@
 {
   "title" : "PlanarRegionMappingParameters",
   "Update Alpha towards match" : {
-    "value" : 0.01,
+    "value" : 0.001,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
     "Similarity threshold between normals" : {
-        "value" : 0.92,
+        "value" : 0.90,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Orthogonal distance threshold" : {
-        "value" : 0.06,
+        "value" : 0.07,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -21,57 +21,57 @@
         "upperBound" : 1.0
     },
     "Minimum overlap threshold" : {
-        "value" : 0.7,
+        "value" : 0.6,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Minimum planar region area" : {
-        "value" : 0.04,
+        "value" : 0.02,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Minimum bounding box size" : {
-        "value" : 0.08,
+        "value" : 0.07,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Plane noise variance" : {
-        "value" : 0.04,
+        "value" : 0.0001,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Odometry noise variance" : {
-        "value" : 1.0E-4,
+        "value" : 0.001,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "State estimator noise variance" : {
-        "value" : 1.0E-7,
+        "value" : 0.00000001,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Best match angular threshold" : {
-        "value" : 0.75,
+        "value" : 0.9,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Best match distance threshold" : {
-        "value" : 0.08,
+        "value" : 0.07,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Best minimum overlap threshold" : {
-        "value" : 0.5,
+        "value" : 0.7,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Keyframe distance threshold" : {
-        "value" : 0.005,
+        "value" : 0.001,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Keyframe angular threshold" : {
-        "value" : 0.02,
+        "value" : 0.005,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -96,7 +96,7 @@
         "upperBound" : 1.0
     },
     "Minimum number of times matched" : {
-        "value" : 5,
+        "value" : 4,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     }
