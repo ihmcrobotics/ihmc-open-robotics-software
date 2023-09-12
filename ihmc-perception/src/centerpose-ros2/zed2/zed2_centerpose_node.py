@@ -15,7 +15,7 @@ from perception_msgs.msg import ImageMessage
 import cv2
 import time
 
-class ZED2CenterPoseNode(Node):
+class Image2CenterPose_node(Node):
     def __init__(self):
         super().__init__('zed2_centerpose_node')
         qos_profile = QoSProfile(
