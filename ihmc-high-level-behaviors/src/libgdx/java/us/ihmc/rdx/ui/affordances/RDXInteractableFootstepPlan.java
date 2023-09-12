@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RDXInteractableFootstepPlan implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ControllerStatusTracker controllerStatusTracker;
    private final RecyclingArrayList<RDXInteractableFootstep> footsteps = new RecyclingArrayList<>(this::newPlannedFootstep);
    private RDXInteractableFootstep selectedFootstep;
    private RDXBaseUI baseUI;
@@ -59,6 +61,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
 
+   public RDXInteractableFootstepPlan(ControllerStatusTracker controllerStatusTracker)
+   {
+      this.controllerStatusTracker = controllerStatusTracker;
+   }
+
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
@@ -73,7 +80,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       this.swingFootPlannerParameters = swingFootPlannerParameters;
 
       defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
-      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, defaultPolygons, footstepPlannerParameters);
+      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, controllerStatusTracker, defaultPolygons, footstepPlannerParameters);
       swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
                                                        footstepPlannerParameters,
                                                        communicationHelper.getRobotModel().getSwingPlannerParameters(),
@@ -299,14 +306,19 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    }
 
    /**
-    * Gets the transform either from the footstep list, or from the synced robot.
+    * Gets the transform of the last footstep, first checking the current interactable footstep list, then checking the queued controller footsteps,
+    * and if there are no footsteps in either of those. Use the feet of the synced robot to get the transform
     * Never gets the transform from the footstep currently being placed.
     */
    public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
    {
-      if (footsteps.size() > 0)
+      if (!footsteps.isEmpty())
       {
          return getLastFootstep().getFootPose();
+      }
+      else if (controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
+      {
+         return controllerStatusTracker.getFootstepTracker().getLastFootstepQueuedOnOppositeSide(robotSide.getOppositeSide());
       }
       else
       {
