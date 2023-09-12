@@ -21,6 +21,12 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import java.util.Set;
 
+/**
+ * A "ghost" colored model.
+ *
+ * TODO: Add pose "override", via right click context menu, and gizmo.
+ *   Possibly do this in a higher level class or class that extends this.
+ */
 public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
@@ -35,7 +41,7 @@ public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
 
    public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
-      super(predefinedRigidBodySceneNode, panel3D);
+      super(predefinedRigidBodySceneNode);
 
       this.predefinedRigidBodySceneNode = predefinedRigidBodySceneNode;
 
@@ -64,8 +70,6 @@ public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
       }
 
       ensureGizmoFrameIsSceneNodeFrame();
-      if (!isShowing())
-         offsetPoseGizmo.getSelected().set(false);
 
       if (offsetPoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
@@ -86,9 +90,7 @@ public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
 
       trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();
-      ImGui.beginDisabled(!isShowing());
       ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
-      ImGui.endDisabled();
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear Offset")))
       {
@@ -109,10 +111,7 @@ public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
-      if (isShowing())
-      {
-         if (sceneLevels.contains(RDXSceneLevel.MODEL))
-            modelInstance.getRenderables(renderables, pool);
-      }
+      if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         modelInstance.getRenderables(renderables, pool);
    }
 }

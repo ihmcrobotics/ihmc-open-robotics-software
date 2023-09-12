@@ -3,6 +3,8 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -17,7 +19,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -36,6 +37,7 @@ public class RDXPerceptionSceneGraphUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private RDXSceneNode rootNode;
+   private final TLongObjectMap<RDXSceneNode> idsToNodesMap = new TLongObjectHashMap<>();
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
    public RDXPerceptionSceneGraphUI(SceneGraph sceneGraph,
@@ -60,6 +62,10 @@ public class RDXPerceptionSceneGraphUI
    {
       sceneGraphSubscription.update();
 
+      
+
+
+
       for (RDXSceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
       {
          predefinedRigidBodySceneNode.update();
@@ -67,6 +73,16 @@ public class RDXPerceptionSceneGraphUI
 
       if (publishThrottler.run())
          sceneGraphPublisher.publish(sceneGraph, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+   }
+
+   private void clearTree(RDXSceneNode node)
+   {
+      for (RDXSceneNode child : node.getChildren())
+      {
+         clearTree(child);
+      }
+
+      node.getChildren().clear();
    }
 
    public void renderImGuiWidgets()
