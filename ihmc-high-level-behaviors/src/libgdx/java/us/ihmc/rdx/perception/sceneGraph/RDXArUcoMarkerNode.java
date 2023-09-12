@@ -1,29 +1,45 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
-public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
+import java.util.Set;
+
+public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeInterface
 {
-   private final ArUcoMarkerNode arUcoMarkerNode;
-   private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
+   private final RDXDetectableSceneNodeBasics detectableSceneNodeBasics;
+   private final ImGuiSliderDoubleWrapper alphaFilterValueSlider;
 
-   public RDXArUcoMarkerNode(ArUcoMarkerNode arUcoMarkerNode)
+   public RDXArUcoMarkerNode(long id, String name, int markerID, double markerSize)
    {
-      super(arUcoMarkerNode);
-      this.arUcoMarkerNode = arUcoMarkerNode;
+      super(id, name, markerID, markerSize);
+      detectableSceneNodeBasics = new RDXDetectableSceneNodeBasics(this);
       alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
-                                                            arUcoMarkerNode::getBreakFrequency,
-                                                            arUcoMarkerNode::setBreakFrequency,
-                                                            arUcoMarkerNode::markModifiedByOperator);
+                                                            this::getBreakFrequency,
+                                                            this::setBreakFrequency,
+                                                            this::markModifiedByOperator);
+   }
+
+   @Override
+   public void update()
+   {
+      detectableSceneNodeBasics.update();
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
+      detectableSceneNodeBasics.renderImGuiWidgets();
       alphaFilterValueSlider.render();
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      detectableSceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
    }
 }
