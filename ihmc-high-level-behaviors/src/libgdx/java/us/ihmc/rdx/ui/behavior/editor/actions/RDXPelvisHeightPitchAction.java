@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightActionData;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -30,13 +30,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXPelvisHeightAction extends RDXBehaviorAction
+public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 {
-   private final PelvisHeightActionData actionData = new PelvisHeightActionData();
+   private final PelvisHeightPitchActionData actionData = new PelvisHeightPitchActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionData::getHeight,
                                                                     actionData::setHeight,
                                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
+   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(actionData::getPitch,
+                                                                    actionData::setPitch,
+                                                                    imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
@@ -57,11 +60,11 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXPelvisHeightAction(RDX3DPanel panel3D,
-                                DRCRobotModel robotModel,
-                                FullHumanoidRobotModel syncedFullRobotModel,
-                                RobotCollisionModel selectionCollisionModel,
-                                ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXPelvisHeightPitchAction(RDX3DPanel panel3D,
+                                     DRCRobotModel robotModel,
+                                     FullHumanoidRobotModel syncedFullRobotModel,
+                                     RobotCollisionModel selectionCollisionModel,
+                                     ReferenceFrameLibrary referenceFrameLibrary)
    {
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
@@ -139,6 +142,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
       }
       ImGui.pushItemWidth(80.0f);
       heightWidget.renderImGuiWidget();
+      pitchWidget.renderImGuiWidget();
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
    }
@@ -210,7 +214,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    }
 
    @Override
-   public PelvisHeightActionData getActionData()
+   public PelvisHeightPitchActionData getActionData()
    {
       return actionData;
    }
@@ -218,6 +222,6 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    @Override
    public String getActionTypeTitle()
    {
-      return "Pelvis Height";
+      return "Pelvis Height and Pitch";
    }
 }
