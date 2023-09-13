@@ -691,10 +691,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
 
-      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
-      {
-         firstTick = false;
-      }
+      firstTick = false;
    }
 
    private void handleChangeInContactState()
