@@ -156,7 +156,7 @@ public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInter
          // @formatter:on
 
          RigidBodyTransform centerBasePose = new RigidBodyTransform(startPose);
-         centerBasePose.appendTranslation(0.8 * stackSizes.length * cinderBlockLength, 0.0, 0.0);
+         centerBasePose.appendTranslation(0.7 * stackSizes.length * cinderBlockLength, 0.0, -0.05);
          return grid2D(centerBasePose, stackSizes, types);
       }
 
