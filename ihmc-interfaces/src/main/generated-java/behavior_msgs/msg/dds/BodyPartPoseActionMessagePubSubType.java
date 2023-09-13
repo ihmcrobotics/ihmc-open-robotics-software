@@ -15,7 +15,7 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5719feffbef31de22946ab8fa9c9b63042bc7e542b3d65b37ec2152775858bd4";
+   		return "ae25ca574817ae16581083381c035cd885ee0e01cede06251280dfea68050350";
    }
    
    @Override
@@ -64,6 +64,8 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +94,9 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,6 +113,8 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getExecuteWithNextAction());
 
+      cdr.write_type_7(data.getHoldPoseInWorld());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
@@ -118,6 +125,8 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setTrajectoryDuration(cdr.read_type_6());
       	
       data.setExecuteWithNextAction(cdr.read_type_7());
+      	
+      data.setHoldPoseInWorld(cdr.read_type_7());
       	
 
    }
@@ -132,6 +141,7 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
+      ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
    }
 
    @Override
@@ -144,6 +154,7 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
+      data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BodyPartPoseActionMessage src, behavior_msgs.msg.dds.BodyPartPoseActionMessage dest)

@@ -38,6 +38,10 @@ module behavior_msgs
          * Whether the next action can be executed at the same time of this one
          */
         boolean execute_with_next_action;
+        /**
+         * Whether maintaining the rigid body controlled in world after the action is complete
+         */
+        boolean hold_pose_in_world;
       };
     };
   };

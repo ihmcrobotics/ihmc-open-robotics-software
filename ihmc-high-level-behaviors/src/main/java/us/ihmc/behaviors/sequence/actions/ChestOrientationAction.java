@@ -76,6 +76,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       desiredChestPose.setFromReferenceFrame(getReferenceFrame());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
+      boolean wasExecuting = isExecuting;
       isExecuting = !completionCalculator.isComplete(desiredChestPose,
                                                      syncedChestPose,
                                                      Double.NaN, ORIENTATION_TOLERANCE,
@@ -89,9 +90,14 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+
+      if (!isExecuting && wasExecuting && !getHoldPoseInWorldLater())
+      {
+         disengageHoldPoseInWorld();
+      }
    }
 
-   public void doa()
+   public void disengageHoldPoseInWorld()
    {
       FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
       frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());

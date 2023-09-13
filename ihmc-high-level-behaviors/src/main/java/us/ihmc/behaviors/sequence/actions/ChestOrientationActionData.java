@@ -44,7 +44,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, chestInteractableReferenceFrame.getTransformToParent());
       jsonNode.put("executeWithNextAction", executeWitNextAction);
-      jsonNode.put("holdPoseInTaskSpaceLater", holdPoseInWorldLater);
+      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
    }
 
    @Override
@@ -55,7 +55,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       chestInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
-      holdPoseInWorldLater = jsonNode.get("holdPoseInTaskSpaceLater").asBoolean();
+      holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
    }
 
    public void toMessage(BodyPartPoseActionMessage message)
@@ -65,7 +65,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       MessageTools.toMessage(chestInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
-      message.setExecuteWithNextAction(holdPoseInWorldLater);
+      message.setHoldPoseInWorld(holdPoseInWorldLater);
    }
 
    public void fromMessage(BodyPartPoseActionMessage message)
@@ -74,7 +74,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
-      holdPoseInWorldLater = message.getHoldPoseInWorldLater();
+      holdPoseInWorldLater = message.getHoldPoseInWorld();
    }
 
    public void setYaw(double yaw)

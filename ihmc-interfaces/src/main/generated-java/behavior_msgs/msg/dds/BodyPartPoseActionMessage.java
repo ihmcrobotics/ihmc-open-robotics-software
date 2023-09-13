@@ -28,6 +28,10 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
             * Whether the next action can be executed at the same time of this one
             */
    public boolean execute_with_next_action_;
+   /**
+            * Whether maintaining the rigid body controlled in world after the action is complete
+            */
+   public boolean hold_pose_in_world_;
 
    public BodyPartPoseActionMessage()
    {
@@ -50,6 +54,8 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
       trajectory_duration_ = other.trajectory_duration_;
 
       execute_with_next_action_ = other.execute_with_next_action_;
+
+      hold_pose_in_world_ = other.hold_pose_in_world_;
 
    }
 
@@ -110,6 +116,21 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
       return execute_with_next_action_;
    }
 
+   /**
+            * Whether maintaining the rigid body controlled in world after the action is complete
+            */
+   public void setHoldPoseInWorld(boolean hold_pose_in_world)
+   {
+      hold_pose_in_world_ = hold_pose_in_world;
+   }
+   /**
+            * Whether maintaining the rigid body controlled in world after the action is complete
+            */
+   public boolean getHoldPoseInWorld()
+   {
+      return hold_pose_in_world_;
+   }
+
 
    public static Supplier<BodyPartPoseActionMessagePubSubType> getPubSubType()
    {
@@ -136,6 +157,8 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
+
 
       return true;
    }
@@ -156,6 +179,8 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
 
       if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
 
+      if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
+
 
       return true;
    }
@@ -175,7 +200,9 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);      builder.append(", ");
       builder.append("execute_with_next_action=");
-      builder.append(this.execute_with_next_action_);
+      builder.append(this.execute_with_next_action_);      builder.append(", ");
+      builder.append("hold_pose_in_world=");
+      builder.append(this.hold_pose_in_world_);
       builder.append("}");
       return builder.toString();
    }

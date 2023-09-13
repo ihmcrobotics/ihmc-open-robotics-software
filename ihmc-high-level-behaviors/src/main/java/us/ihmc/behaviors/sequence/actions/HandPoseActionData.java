@@ -46,7 +46,7 @@ public class HandPoseActionData implements BehaviorActionData
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
       jsonNode.put("executeWithNextAction", executeWitNextAction);
-      jsonNode.put("holdPoseInTaskSpaceLater", holdPoseInWorldLater);
+      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
    }
 
    @Override
@@ -58,7 +58,7 @@ public class HandPoseActionData implements BehaviorActionData
       palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
-      holdPoseInWorldLater = jsonNode.get("holdPoseInTaskSpaceLater").asBoolean();
+      holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
    }
 
    public void toMessage(SidedBodyPartPoseActionMessage message)
@@ -69,7 +69,7 @@ public class HandPoseActionData implements BehaviorActionData
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
-      message.setExecuteWithNextAction(holdPoseInWorldLater);
+      message.setHoldPoseInWorld(holdPoseInWorldLater);
    }
 
    public void fromMessage(SidedBodyPartPoseActionMessage message)
@@ -79,7 +79,7 @@ public class HandPoseActionData implements BehaviorActionData
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
-      holdPoseInWorldLater = message.getHoldPoseInWorldLater();
+      holdPoseInWorldLater = message.getHoldPoseInWorld();
    }
 
    public ReferenceFrame getParentFrame()
