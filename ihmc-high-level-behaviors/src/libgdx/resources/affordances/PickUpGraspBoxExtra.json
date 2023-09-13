@@ -1,5 +1,5 @@
 {
-  "name" : "pickUpGraspBox",
+  "name" : "PickUpGraspBox",
   "object" : "Box",
   "x" : 0.0,
   "y" : 0.0,
@@ -44,15 +44,29 @@
     "yawInDegrees" : 0.0,
     "grip" : [ {
       "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
       "config" : "CRUSH"
     }, {
       "side" : "right",
       "config" : "CRUSH"
     } ]
   }, {
-    "x" : 0.0525,
+    "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.2015,
+    "z" : 0.228,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
@@ -64,9 +78,9 @@
       "config" : ""
     } ]
   }, {
-    "x" : 0.114,
+    "x" : 0.123,
     "y" : 0.0,
-    "z" : 0.544,
+    "z" : 0.4965,
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
@@ -79,6 +93,6 @@
     } ]
   } ],
   "activeSides" : 2,
-  "numberPreGraspFrames" : 2,
+  "numberPreGraspFrames" : 3,
   "numberPostGraspFrames" : 2
 }

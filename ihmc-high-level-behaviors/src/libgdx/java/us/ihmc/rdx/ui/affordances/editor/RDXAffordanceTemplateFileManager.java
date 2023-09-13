@@ -134,6 +134,7 @@ public class RDXAffordanceTemplateFileManager
                      else
                         executeWithNextAction = bothPosesAreSet;
                      actionNode.put("executeWithNextAction", executeWithNextAction);
+                     actionNode.put("holdPoseInWorldLater", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
@@ -184,6 +185,7 @@ public class RDXAffordanceTemplateFileManager
                   else
                      executeWithNextAction = bothPosesAreSet;
                   actionNode.put("executeWithNextAction", executeWithNextAction);
+                  actionNode.put("holdPoseInWorldLater", true);
 
                   double[] dataTrajectories = new double[16];
                   transformToParent.get(dataTrajectories);
@@ -241,6 +243,7 @@ public class RDXAffordanceTemplateFileManager
                      else
                         executeWithNextAction = bothPosesAreSet;
                      actionNode.put("executeWithNextAction", executeWithNextAction);
+                     actionNode.put("holdPoseInWorldLater", (i != numberOfPostGraspFrames - 1));
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
