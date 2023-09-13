@@ -122,6 +122,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
    private final ArrayList<RigidBodyReadOnly> rigidBodiesWithCoPCommands = new ArrayList<>();
 
+   private final WholeBodyControlCoreToolbox toolbox;
+
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this(toolbox, null, parentRegistry);
@@ -131,6 +133,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                                                    DynamicsMatrixCalculator dynamicsMatrixCalculator,
                                                    YoRegistry parentRegistry)
    {
+      this.toolbox = toolbox;
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -433,6 +436,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       DMatrixRMaj rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       DMatrixRMaj convectiveTerm = motionQPInputCalculator.getCentroidalMomentumConvectiveTerm();
       DMatrixRMaj additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      externalWrenchHandler.updateGravitationalWrench(toolbox.getGravityZ(), toolbox.getTotalRobotMass());
       DMatrixRMaj gravityWrench = externalWrenchHandler.getGravitationalWrench();
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
    }

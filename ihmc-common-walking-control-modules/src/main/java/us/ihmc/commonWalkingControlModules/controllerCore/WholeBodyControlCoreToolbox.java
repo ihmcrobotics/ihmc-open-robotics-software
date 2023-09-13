@@ -64,7 +64,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    private final JointIndexHandler jointIndexHandler;
    private final List<OneDoFJointBasics> inactiveOneDoFJoints = new ArrayList<>();
-   private final double totalRobotMass;
+   private double totalRobotMass;
    private CentroidalMomentumCalculator centroidalMomentumCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    // TODO The mass-matrix calculator (when created) should be used for computing the momentum stuff. Probably need some interface and API improvements.
@@ -468,6 +468,11 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       return contactWrenchMatrixCalculator;
    }
 
+   public CentroidalMomentumCalculator getCentroidalMomentumCalculator()
+   {
+      return centroidalMomentumCalculator;
+   }
+
    /**
     * <b>Important note</b>: the {@code CentroidalMomentumRateCalculator} is updated every control tick
     * in {@link MotionQPInputCalculator#initialize()}.
@@ -531,6 +536,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    public double getTotalRobotMass()
    {
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(getRootBody());
       return totalRobotMass;
    }
 

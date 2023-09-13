@@ -36,6 +36,8 @@ public class ExternalWrenchHandler
    private final SpatialForce tempWrench = new SpatialForce();
    private final ReferenceFrame centerOfMassFrame;
 
+   private final double robotTotalMass;
+
    public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, double robotTotalMass,
                                 List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
@@ -44,6 +46,7 @@ public class ExternalWrenchHandler
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
+      this.robotTotalMass = robotTotalMass;
       gravitationalWrench = new SpatialForce(centerOfMassFrame);
       gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
       totalWrenchAlreadyApplied = new SpatialForce(centerOfMassFrame);
@@ -162,5 +165,10 @@ public class ExternalWrenchHandler
    {
       gravitationalWrench.get(gravitationalWrenchMatrix);
       return gravitationalWrenchMatrix;
+   }
+
+   public void updateGravitationalWrench(double gravityZ, double robotTotalMass)
+   {
+      gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
    }
 }

@@ -34,6 +34,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.nadia.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -86,6 +87,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
    private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
    private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
+
+   private final InertialParameterEstimator inertialParameterEstimator;
 
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusMessageOutputManager,
@@ -140,6 +143,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
       pluginFactories.forEach(this::addControllerPluginFactory);
+
+      inertialParameterEstimator = new InertialParameterEstimator(controllerToolbox, controllerCoreFactory.getOrCreateWholeBodyControllerCoreToolbox(), registry);
    }
 
    /**
@@ -233,6 +238,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
       reportRobotDesiredConfigurationData();
+
+      inertialParameterEstimator.update();
    }
 
    @Override
