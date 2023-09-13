@@ -151,8 +151,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private boolean firstTick = true;
 
-   private final InertialParameterEstimator inertialParameterEstimator;
-
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory,
@@ -282,8 +280,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
 
-      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, feetManager, controllerToolbox.getFootSwitches(),
-                                                                  controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), registry);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
@@ -688,8 +684,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
-
-      inertialParameterEstimator.update();
 
       firstTick = false;
    }
