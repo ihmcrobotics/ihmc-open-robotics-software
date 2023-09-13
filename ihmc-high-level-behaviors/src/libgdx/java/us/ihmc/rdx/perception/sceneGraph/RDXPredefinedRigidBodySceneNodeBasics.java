@@ -87,6 +87,8 @@ public class RDXPredefinedRigidBodySceneNodeBasics
 
    public void renderImGuiWidgets()
    {
+      sceneNodeBasics.renderImGuiWidgets();
+
       trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());

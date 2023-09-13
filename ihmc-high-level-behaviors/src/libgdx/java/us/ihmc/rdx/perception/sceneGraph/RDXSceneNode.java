@@ -37,6 +37,12 @@ public class RDXSceneNode extends SceneNode implements RDXSceneNodeInterface
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      sceneNodeBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       sceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
