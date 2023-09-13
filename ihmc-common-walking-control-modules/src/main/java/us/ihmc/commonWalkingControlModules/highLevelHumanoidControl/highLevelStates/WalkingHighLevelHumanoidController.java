@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
-import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPosturePrivilegedManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -83,7 +82,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private NaturalPosturePrivilegedManager naturalPosturePrivilegedManager;
    private NaturalPostureManager naturalPostureManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
@@ -164,7 +162,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (enableNaturalPostureManager.getBooleanValue())
       {
          this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
-         this.naturalPosturePrivilegedManager = managerFactory.getOrCreateNaturalPosturePrivilegedManager();
       }
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
@@ -570,8 +567,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.initialize();
       if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
-         naturalPosturePrivilegedManager.initialize();
-         naturalPostureManager.getNaturalPostureController().getHumanoidRobotNaturalPosture().initialize();
+         naturalPostureManager.initialize();
       }
       // balanceManager.initialize(); // already initialized, so don't run it again or else the state machine gets reset.
       feetManager.initialize();
@@ -788,7 +784,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          naturalPostureManager.compute();
-         naturalPosturePrivilegedManager.compute();
       }
 
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
@@ -906,8 +901,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
-         controllerCoreCommand.addInverseDynamicsCommand(naturalPosturePrivilegedManager.getInverseDynamicsCommand());
-         controllerCoreCommand.addFeedbackControlCommand(naturalPosturePrivilegedManager.getFeedbackControlCommand());
+         //TODO could this be cleaner?
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getNaturalPosturePrivilegedConfigurationController()
+                                                                              .getInverseDynamicsCommand());
+         controllerCoreCommand.addFeedbackControlCommand(naturalPostureManager.getNaturalPosturePrivilegedConfigurationController()
+                                                                              .getFeedbackControlCommand());
       }
       else
       {

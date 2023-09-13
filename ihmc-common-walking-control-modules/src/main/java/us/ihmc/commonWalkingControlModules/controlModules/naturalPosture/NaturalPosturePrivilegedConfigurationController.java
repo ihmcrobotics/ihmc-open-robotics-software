@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -20,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
 
-public class NaturalPosturePrivilegedManager
+public class NaturalPosturePrivilegedConfigurationController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private boolean useSpinePrivilegedCommand;
@@ -51,7 +50,7 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
    private final YoDouble npPoseSpineRollPitchKp = new YoDouble("npPoseSpineRollPitchKp", registry);
-   
+
    private final YoDouble pPoseSpineRollPitchKp = new YoDouble("pPoseSpineRollPitchKp", registry);
    private final YoDouble pPoseSpineRollPitchKdFactor = new YoDouble("pPoseSpineRollPitchKdFactor", registry);
 
@@ -76,7 +75,7 @@ public class NaturalPosturePrivilegedManager
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public NaturalPosturePrivilegedManager(FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
+   public NaturalPosturePrivilegedConfigurationController(FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -102,7 +101,7 @@ public class NaturalPosturePrivilegedManager
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
          npPoseSpineRollPitchKp.set(100);
-         
+
          pPoseSpinePitchGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
          pPoseSpineRollGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
          pPoseSpinePitchGains.setZeta(0.7);
@@ -113,7 +112,7 @@ public class NaturalPosturePrivilegedManager
 
       pPoseSpineRollPitchKp.set(50.0);
       pPoseSpineRollPitchKdFactor.set(0.15);
-      
+
       pPoseSpineYawKp.set(300.0);
       pPoseSpineYawKdFactor.set(0.15);
 
@@ -320,5 +319,4 @@ public class NaturalPosturePrivilegedManager
 
       return jointParameters;
    }
-
 }

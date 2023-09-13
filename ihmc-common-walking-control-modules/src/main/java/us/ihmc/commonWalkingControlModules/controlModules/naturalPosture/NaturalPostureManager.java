@@ -20,6 +20,7 @@ public class NaturalPostureManager
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final NaturalPostureController naturalPostureController;
+   private final NaturalPosturePrivilegedConfigurationController naturalPosturePrivilegedConfigurationController;
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final ExecutionTimer naturalPostureTimer;
 
@@ -42,6 +43,7 @@ public class NaturalPostureManager
       NaturalPostureParameters naturalPostureParameters = walkingControllerParameters.getNaturalPostureParameters();
       HumanoidRobotNaturalPosture robotNaturalPosture = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
       naturalPostureController = new NaturalPostureController(robotNaturalPosture, controllerToolbox, registry);
+      naturalPosturePrivilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(controllerToolbox.getFullRobotModel(), registry);
 
       naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
 
@@ -74,8 +76,16 @@ public class NaturalPostureManager
       return jointLimitEnforcementMethodCommand;
    }
 
+   public void initialize()
+   {
+      naturalPostureController.getHumanoidRobotNaturalPosture().initialize();
+      naturalPosturePrivilegedConfigurationController.initialize();
+   }
+
    public void compute()
    {
+      naturalPosturePrivilegedConfigurationController.compute(); //this is intentionally outside the time measurement
+
       naturalPostureTimer.startMeasurement();
       naturalPostureController.compute();
       naturalPostureTimer.stopMeasurement();
@@ -84,6 +94,11 @@ public class NaturalPostureManager
    public NaturalPostureController getNaturalPostureController()
    {
       return naturalPostureController;
+   }
+
+   public NaturalPosturePrivilegedConfigurationController getNaturalPosturePrivilegedConfigurationController()
+   {
+      return naturalPosturePrivilegedConfigurationController;
    }
 
    public YoBoolean getUseNaturalPostureCommand()
