@@ -43,6 +43,7 @@ public class ArUcoSceneTools
                                                                   missingMarkerID,
                                                                   RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
             sceneGraph.getRootNode().getChildren().add(arUcoMarkerNode);
+            sceneGraph.getRootNode().markModifiedByOperator();
          }
 
          for (SceneNode child : sceneGraph.getRootNode().getChildren())
@@ -96,6 +97,7 @@ public class ArUcoSceneTools
          }
 
          arUcoMarkerNode.update();
+         arUcoMarkerNode.markModifiedByOperator();
       }
    }
 }
