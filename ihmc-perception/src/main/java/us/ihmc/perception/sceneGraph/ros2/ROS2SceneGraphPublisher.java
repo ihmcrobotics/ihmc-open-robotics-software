@@ -112,6 +112,7 @@ public class ROS2SceneGraphPublisher
          sceneNodeMessage = sceneGraphMessage.getSceneNodes().add();
       }
 
+      sceneNodeMessage.setId(sceneNode.getID());
       sceneNodeMessage.setName(sceneNode.getName());
       sceneNodePose.setToZero(sceneNode.getNodeFrame());
       sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
