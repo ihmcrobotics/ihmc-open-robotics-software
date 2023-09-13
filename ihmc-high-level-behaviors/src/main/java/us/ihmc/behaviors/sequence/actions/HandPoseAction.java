@@ -111,7 +111,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                                                                                                      frameHand.getOrientation(),
                                                                                                      ReferenceFrame.getWorldFrame());
       handTrajectoryMessage.setForceExecution(true);
-      // TODO. remove once tuned real robot wieghts and gains
+      // TODO. remove once tuned real robot weights and gains
       handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
       handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
       handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);

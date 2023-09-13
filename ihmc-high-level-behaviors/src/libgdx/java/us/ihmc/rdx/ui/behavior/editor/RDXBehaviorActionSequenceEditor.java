@@ -24,7 +24,6 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -180,7 +179,6 @@ public class RDXBehaviorActionSequenceEditor
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
-               action.getExecutionWithNextAction().set(false);
             }
             else
             {
@@ -675,15 +673,15 @@ public class RDXBehaviorActionSequenceEditor
          chestOrientationAction.getActionData().changeParentFrameWithoutMoving(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
          newAction = chestOrientationAction;
       }
-      if (ImGui.button(labels.get("Add Pelvis Height")))
+      if (ImGui.button(labels.get("Add Pelvis Height and Pitch")))
       {
-         RDXPelvisHeightAction pelvisHeightAction = new RDXPelvisHeightAction(panel3D,
-                                                                              robotModel,
-                                                                              syncedRobot.getFullRobotModel(),
-                                                                              selectionCollisionModel,
-                                                                              referenceFrameLibrary);
+         RDXPelvisHeightPitchAction pelvisHeightAction = new RDXPelvisHeightPitchAction(panel3D,
+                                                                                        robotModel,
+                                                                                        syncedRobot.getFullRobotModel(),
+                                                                                        selectionCollisionModel,
+                                                                                        referenceFrameLibrary);
          // Set the new action to where the last one was for faster authoring
-         RDXPelvisHeightAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightAction.class);
+         RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
          if (nextPreviousPelvisHeightAction != null)
          {
             pelvisHeightAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
