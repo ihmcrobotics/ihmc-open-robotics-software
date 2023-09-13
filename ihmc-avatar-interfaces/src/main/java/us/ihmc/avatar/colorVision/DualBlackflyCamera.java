@@ -538,7 +538,7 @@ public class DualBlackflyCamera
          ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, sceneGraph);
          synchronized (blackflyFrameForSceneNodeUpdate)
          {
-            sceneGraph.update(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
+            sceneGraph.updateOnRobot(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
          }
          sceneGraphPublisher.publish(sceneGraph, ros2Helper, ROS2IOTopicQualifier.STATUS);
       }

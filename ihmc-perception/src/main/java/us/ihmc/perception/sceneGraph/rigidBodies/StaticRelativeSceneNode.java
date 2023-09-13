@@ -1,6 +1,8 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import gnu.trove.map.TLongObjectMap;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -20,6 +22,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
     */
    private double distanceToDisableTracking;
    private double currentDistance = Double.NaN;
+   private transient final FramePose3D staticRelativeSceneNodePose = new FramePose3D();
 
    public StaticRelativeSceneNode(long id,
                                   String name,
@@ -33,6 +36,19 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
 
       this.distanceToDisableTracking = distanceToDisableTracking;
+   }
+
+   /** Should only happen on the robot, not the UI. */
+   public void updateTrackingState(ReferenceFrame sensorFrame)
+   {
+      staticRelativeSceneNodePose.setToZero(getNodeFrame());
+      staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);
+      double currentDistance = staticRelativeSceneNodePose.getPosition().distanceFromOrigin();
+      setCurrentDistance(currentDistance);
+      if (currentDistance <= getDistanceToDisableTracking())
+      {
+         setTrackInitialParent(false);
+      }
    }
 
    public void setDistanceToDisableTracking(double distanceToDisableTracking)

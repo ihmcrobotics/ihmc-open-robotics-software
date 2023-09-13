@@ -64,6 +64,8 @@ public class ArUcoSceneTools
                }
             }
          }
+
+         sceneGraph.ensureFramesMatchParentsRecursively();
       }
    }
 
@@ -96,7 +98,6 @@ public class ArUcoSceneTools
             }
          }
 
-         arUcoMarkerNode.update();
          arUcoMarkerNode.markModifiedByOperator();
       }
    }
