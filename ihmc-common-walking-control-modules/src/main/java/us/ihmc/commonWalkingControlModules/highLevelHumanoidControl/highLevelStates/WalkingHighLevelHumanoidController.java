@@ -179,7 +179,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
 
       YoBoolean enableNaturalPostureManager = new YoBoolean("enableNaturalPostureManager", registry);
-      enableNaturalPostureManager.set(false);
+      enableNaturalPostureManager.set(true);
       if (enableNaturalPostureManager.getBooleanValue())
       {
          this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
@@ -536,18 +536,21 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFlamingoCommands();
 
-      privilegedConfigurationCommand.clear();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-
-      for (RobotSide robotSide : RobotSide.values)
+      if (naturalPostureManager == null || !naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
-         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
-         for (int i = 0; i < armJointNames.length; i++)
-            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+         privilegedConfigurationCommand.clear();
+         privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
-         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+            for (int i = 0; i < armJointNames.length; i++)
+               privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
 
-         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+            OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+            privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+         }
       }
 
       for (RobotSide robotSide : RobotSide.values)
