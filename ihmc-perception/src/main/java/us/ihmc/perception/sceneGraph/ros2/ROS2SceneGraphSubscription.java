@@ -87,6 +87,7 @@ public class ROS2SceneGraphSubscription
             clearChildren(sceneGraph.getRootNode());
          updateLocalTreeFromSubscription(subscriptionRootNode);
 
+         sceneGraph.ensureFramesMatchParentsRecursively();
          sceneGraph.updateCaches();
       }
       return newMessageAvailable;

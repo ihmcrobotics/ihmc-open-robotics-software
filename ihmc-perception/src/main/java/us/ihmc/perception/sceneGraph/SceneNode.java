@@ -7,7 +7,6 @@ import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Represents a node on the Scene Knowledge Graph (to be defined).
@@ -16,8 +15,6 @@ import java.util.function.Consumer;
  */
 public class SceneNode
 {
-   public static final Consumer<SceneNode> NOOP = sceneNode -> { };
-
    /** A linearly increasing ID */
    private final long id;
    private final String name;
@@ -42,23 +39,26 @@ public class SceneNode
       this.nodeFrame = new ModifiableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public void update()
+   public void ensureParentFrameEquals(ReferenceFrame parentFrame)
    {
-      update(NOOP);
+      if (getNodeFrame().getParent() != parentFrame)
+      {
+         changeParentFrame(parentFrame);
+      }
    }
 
-   public void update(Consumer<SceneNode> updateHeuristic)
+   public void ensureFramesMatchParentsRecursively(ReferenceFrame parentFrame)
    {
+      ensureParentFrameEquals(parentFrame);
+
       for (SceneNode child : getChildren())
       {
-         if (child.getNodeFrame().getParent() != getNodeFrame())
-         {
-            child.changeParentFrame(getNodeFrame());
-         }
-
-         updateHeuristic.accept(child);
-         child.update(updateHeuristic);
+         child.ensureFramesMatchParentsRecursively(this.getNodeFrame());
       }
+//      for (int i = 0; i < getChildren().size(); i++)
+//      {
+//         getChildren().get(i).ensureFramesMatchParentsRecursively(this.getNodeFrame());
+//      }
    }
 
    public long getID()

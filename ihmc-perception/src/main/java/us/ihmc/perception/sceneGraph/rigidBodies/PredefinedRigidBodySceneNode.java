@@ -59,13 +59,14 @@ public class PredefinedRigidBodySceneNode extends SceneNode
          {
             rootNode.getChildren().remove(this);
             initialParentNode.getChildren().add(this);
+            ensureFramesMatchParentsRecursively(initialParentNode.getNodeFrame());
          }
          else
          {
             initialParentNode.getChildren().remove(this);
             rootNode.getChildren().add(this);
+            ensureFramesMatchParentsRecursively(rootNode.getNodeFrame());
          }
-         update(); // Update this and children because parent frame has changed
       }
    }
 

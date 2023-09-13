@@ -5,7 +5,6 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
@@ -41,7 +40,6 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntDoubleMap arUcoMarkerIDsToSizesMap = new TIntDoubleHashMap();
-   private transient final FramePose3D detectedSceneNodePose = new FramePose3D();
 
    public SceneGraph()
    {
@@ -53,33 +51,33 @@ public class SceneGraph
       rootNode = newRootNodeSupplier.apply(nextID.getAndIncrement(), "SceneGraphRoot");
    }
 
-   public void update(ReferenceFrame sensorFrame)
+   public void updateOnRobot(ReferenceFrame sensorFrame)
    {
       updateCaches();
 
-      rootNode.update(sceneNode ->
+      updateOnRobot(rootNode, sensorFrame);
+   }
+
+   private void updateOnRobot(SceneNode sceneNode, ReferenceFrame sensorFrame)
+   {
+      if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
-         {
-            if (detectableSceneNode.getCurrentlyDetected())
-            {
-               for (SceneNode child : detectableSceneNode.getChildren())
-               {
-                  if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-                  {
-                     detectedSceneNodePose.setToZero(detectableSceneNode.getNodeFrame());
-                     detectedSceneNodePose.setFromReferenceFrame(sensorFrame);
-                     double currentDistance = detectedSceneNodePose.getPosition().distanceFromOrigin();
-                     staticRelativeSceneNode.setCurrentDistance(currentDistance);
-                     if (currentDistance <= staticRelativeSceneNode.getDistanceToDisableTracking())
-                     {
-                        staticRelativeSceneNode.setTrackInitialParent(false);
-                     }
-                  }
-               }
-            }
-         }
-      });
+         staticRelativeSceneNode.updateTrackingState(sensorFrame);
+      }
+
+      for (SceneNode child : sceneNode.getChildren())
+      {
+         updateOnRobot(child, sensorFrame);
+      }
+//      for (int i = 0; i < sceneNode.getChildren().size(); i++)
+//      {
+//         updateOnRobot(sceneNode.getChildren().get(i), sensorFrame);
+//      }
+   }
+
+   public void ensureFramesMatchParentsRecursively()
+   {
+      rootNode.ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
    }
 
    public void updateCaches()

@@ -10,8 +10,6 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
@@ -117,7 +115,7 @@ public class RDXPerceptionSceneGraphDemo
 
             sceneGraphSubscription.update();
             ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotSceneGraph);
-            onRobotSceneGraph.update(sensorPoseGizmo.getGizmoFrame());
+            onRobotSceneGraph.updateOnRobot(sensorPoseGizmo.getGizmoFrame());
             sceneGraphPublisher.publish(onRobotSceneGraph, ros2Helper, ROS2IOTopicQualifier.STATUS);
 
             perceptionSceneGraphUI.update();
