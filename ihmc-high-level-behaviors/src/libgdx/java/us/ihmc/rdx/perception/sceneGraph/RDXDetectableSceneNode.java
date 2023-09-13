@@ -12,9 +12,10 @@ public class RDXDetectableSceneNode extends DetectableSceneNode implements RDXSc
 {
    private final RDXDetectableSceneNodeBasics detectableSceneNodeBasics;
 
-   public RDXDetectableSceneNode(long id, String name)
+   public RDXDetectableSceneNode(DetectableSceneNode nodeToCopy)
    {
-      super(id, name);
+      super(nodeToCopy.getID(), nodeToCopy.getName());
+
       detectableSceneNodeBasics = new RDXDetectableSceneNodeBasics(this);
    }
 

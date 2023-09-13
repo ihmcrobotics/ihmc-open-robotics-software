@@ -3,10 +3,6 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import gnu.trove.map.TLongObjectMap;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -17,16 +13,16 @@ public class RDXPredefinedRigidBodySceneNode extends PredefinedRigidBodySceneNod
 {
    private final RDXPredefinedRigidBodySceneNodeBasics predefinedRigidBodySceneNodeBasics;
 
-   public RDXPredefinedRigidBodySceneNode(long id,
-                                          String name,
-                                          TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
-                                          long initialParentNodeID,
-                                          RigidBodyTransformReadOnly initialTransformToParent,
-                                          String visualModelFilePath,
-                                          RigidBodyTransform visualModelToNodeFrameTransform,
-                                          RDX3DPanel panel3D)
+   public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode nodeToCopy, RDX3DPanel panel3D)
    {
-      super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
+      super(nodeToCopy.getID(),
+            nodeToCopy.getName(),
+            nodeToCopy.getSceneGraphIDToNodeMap(),
+            nodeToCopy.getInitialParentNodeID(),
+            nodeToCopy.getInitialTransformToParent(),
+            nodeToCopy.getVisualModelFilePath(),
+            nodeToCopy.getVisualModelToNodeFrameTransform());
+
       predefinedRigidBodySceneNodeBasics = new RDXPredefinedRigidBodySceneNodeBasics(this, panel3D);
    }
 

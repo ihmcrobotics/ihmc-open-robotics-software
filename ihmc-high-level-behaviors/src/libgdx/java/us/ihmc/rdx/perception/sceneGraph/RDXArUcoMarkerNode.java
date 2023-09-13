@@ -14,10 +14,15 @@ public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeI
    private final RDXDetectableSceneNodeBasics detectableSceneNodeBasics;
    private final ImGuiSliderDoubleWrapper alphaFilterValueSlider;
 
-   public RDXArUcoMarkerNode(long id, String name, int markerID, double markerSize)
+   public RDXArUcoMarkerNode(ArUcoMarkerNode nodeToCopy)
    {
-      super(id, name, markerID, markerSize);
+      super(nodeToCopy.getMarkerID(),
+            nodeToCopy.getName(),
+            nodeToCopy.getMarkerID(),
+            nodeToCopy.getMarkerSize());
+
       detectableSceneNodeBasics = new RDXDetectableSceneNodeBasics(this);
+
       alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
                                                             this::getBreakFrequency,
                                                             this::setBreakFrequency,
