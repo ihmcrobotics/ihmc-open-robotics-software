@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import perception_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
@@ -75,7 +76,7 @@ public class ROS2SceneGraphSubscription
          SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
 
          ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
-         buildSubscriptionTree(0, sceneGraphMessage, subscriptionRootNode);
+         buildSubscriptionTree(new MutableInt(), sceneGraphMessage, subscriptionRootNode);
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
@@ -170,10 +171,10 @@ public class ROS2SceneGraphSubscription
       localNode.getChildren().clear();
    }
 
-   private void buildSubscriptionTree(int index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
+   private void buildSubscriptionTree(MutableInt index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
-      byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index);
-      int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(index);
+      byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index.intValue());
+      int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(index.intValue());
       subscriptionNode.setType(sceneNodeType);
 
       switch (sceneNodeType)
@@ -214,7 +215,8 @@ public class ROS2SceneGraphSubscription
       for (int i = 0; i < subscriptionNode.getSceneNodeMessage().getNumberOfChildren(); i++)
       {
          ROS2SceneGraphSubscriptionNode subscriptionTreeChildNode = new ROS2SceneGraphSubscriptionNode();
-         buildSubscriptionTree(++index, sceneGraphMessage, subscriptionTreeChildNode);
+         index.increment();
+         buildSubscriptionTree(index, sceneGraphMessage, subscriptionTreeChildNode);
          subscriptionNode.getChildren().add(subscriptionTreeChildNode);
       }
    }
