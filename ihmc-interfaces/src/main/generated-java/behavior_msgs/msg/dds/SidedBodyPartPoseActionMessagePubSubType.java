@@ -15,7 +15,7 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "83b93d96725aa815530e9da8505c1caa5911eefa057217c1ff17a647912c7d66";
+   		return "87729da7cf051d01961ec331b12da5e5f533f5e73c595718ee9e38c7b86a2183";
    }
    
    @Override
@@ -66,6 +66,8 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -97,6 +99,9 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -115,6 +120,8 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_7(data.getExecuteWithNextAction());
 
+      cdr.write_type_7(data.getHoldPoseInWorld());
+
    }
 
    public static void read(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
@@ -127,6 +134,8 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
       data.setTrajectoryDuration(cdr.read_type_6());
       	
       data.setExecuteWithNextAction(cdr.read_type_7());
+      	
+      data.setHoldPoseInWorld(cdr.read_type_7());
       	
 
    }
@@ -142,6 +151,7 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
+      ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
    }
 
    @Override
@@ -155,6 +165,7 @@ public class SidedBodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
+      data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage src, behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage dest)
