@@ -1,5 +1,5 @@
 {
-  "name" : "PickUpGraspBox",
+  "name" : "pickUpGraspBox",
   "preGraspFrames" : [ {
     "side" : "left",
     "isPoseSet" : true,

@@ -1,8 +1,8 @@
 {
-  "name" : "PickUpGraspBox",
+  "name" : "pickUpGraspBox",
   "actions" : [ {
     "type" : "RDXHandPoseAction",
-    "description" : "Pre-grasp Left Hand Configuration",
+    "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
     "trajectoryDuration" : 1.0,
@@ -15,11 +15,13 @@
     "executeWithNextAction" : true
   }, {
     "type" : "RDXHandConfigurationAction",
+    "description" : "Pre-grasp Left Hand Configuration",
     "side" : "left",
-    "grip" : "HALF_CLOSE"
+    "grip" : "HALF_CLOSE",
+    "executeWithNextAction" : true
   }, {
     "type" : "RDXHandPoseAction",
-    "description" : "Pre-grasp Right Hand Configuration",
+    "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
     "trajectoryDuration" : 1.0,
@@ -29,11 +31,13 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : -75.38,
     "yawInDegrees" : 0.0,
-    "executeWithNextAction" : false
+    "executeWithNextAction" : true
   }, {
     "type" : "RDXHandConfigurationAction",
+    "description" : "Pre-grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "HALF_CLOSE"
+    "grip" : "HALF_CLOSE",
+    "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
     "description" : "Pre-grasp Left Hand Pose",
@@ -62,7 +66,7 @@
     "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
-    "description" : "Grasp Left Hand Configuration",
+    "description" : "Grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
     "trajectoryDuration" : 0.0,
@@ -75,11 +79,13 @@
     "executeWithNextAction" : true
   }, {
     "type" : "RDXHandConfigurationAction",
+    "description" : "Grasp Left Hand Configuration",
     "side" : "left",
-    "grip" : "CRUSH"
+    "grip" : "CRUSH",
+    "executeWithNextAction" : true
   }, {
     "type" : "RDXHandPoseAction",
-    "description" : "Grasp Right Hand Configuration",
+    "description" : "Grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
     "trajectoryDuration" : 0.0,
@@ -89,11 +95,13 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.32,
     "yawInDegrees" : 0.0,
-    "executeWithNextAction" : false
+    "executeWithNextAction" : true
   }, {
     "type" : "RDXHandConfigurationAction",
+    "description" : "Grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "CRUSH"
+    "grip" : "CRUSH",
+    "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
     "description" : "Post-grasp Left Hand Pose",
