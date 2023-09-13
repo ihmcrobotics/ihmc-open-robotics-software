@@ -61,7 +61,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
          {
             markerModelInstance.model.dispose();
          }
-         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices, 0.0005, BOX_EDGE_COLOR));
+         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices, 0.005, BOX_EDGE_COLOR));
          markerModelInstance = new RDXModelInstance(markerModel);
 
          markerPose.set(object_pose.getOrientation(), object_pose.getPosition());

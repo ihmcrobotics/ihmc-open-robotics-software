@@ -1,6 +1,7 @@
 import os, timeit
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 import rclpy
 from rclpy.node import Node
@@ -78,7 +79,8 @@ class Image2CenterPose_node(Node):
         self.meta = {}
         if self.opt.cam_intrinsic is None:
             self.meta['camera_matrix'] = np.array(
-                [[663.0287679036459, 0, 300.2775065104167], [0, 663.0287679036459, 395.00066121419275], [0, 0, 1]])
+                # [[663.0287679036459, 0, 300.2775065104167], [0, 663.0287679036459, 395.00066121419275], [0, 0, 1]])
+                [[261.0508728027344, 0, 316.148193359375], [0, 261.0508728027344, 181.02622985839844], [0, 0, 1]])
             self.opt.cam_intrinsic = self.meta['camera_matrix']
         else:
             self.meta['camera_matrix'] = np.array(self.opt.cam_intrinsic).reshape(3, 3)
@@ -106,11 +108,13 @@ class Image2CenterPose_node(Node):
             '/ihmc/zed2/left_color',
             self.listener_callback,
             qos_profile)
-        self.subscription
 
         # Create a publisher for the pose topic
         self.centerpose_publisher_ = self.create_publisher(DetectedObjectPacket, '/ihmc/centerpose', 1)
         self.detected_object = DetectedObjectPacket()
+
+        self.rot_mat = Rotation.from_euler('xyz', [np.deg2rad(90.0), 0.0, np.deg2rad(90.0)]).as_matrix()
+        print(self.rot_mat)
 
         self.get_logger().info("Waiting for an Image...")
         self.start_time = timeit.default_timer()
@@ -142,15 +146,11 @@ class Image2CenterPose_node(Node):
             #                          0,
             #                          1*np.sin(0.5*(self.start_time - current_time)))
             
-            self.detected_object.pose.position.x = ret['results'][0]['location'][0]
-            self.detected_object.pose.position.y = ret['results'][0]['location'][1]
-            self.detected_object.pose.position.z = ret['results'][0]['location'][2]
-            self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
-            self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
-            self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
-            self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
             nn_out_vertices = ret['results'][0]['kps_3d_cam'] # shape 9x3 (1st row is object centroid location)
-            
+            if(nn_out_vertices.any()==None):
+                print("Some vertices are not detected...")
+                pass
+
             point_verts = []
             for vertex in nn_out_vertices:
                 point = Point()
@@ -158,8 +158,18 @@ class Image2CenterPose_node(Node):
                 point.y = vertex[1]
                 point.z = vertex[2]
                 point_verts.append(point)
-            self.detected_object.bounding_box_vertices = point_verts
 
+            self.detected_object.pose.position.x = ret['results'][0]['location'][0]/10
+            self.detected_object.pose.position.y = ret['results'][0]['location'][1]/10
+            self.detected_object.pose.position.z = ret['results'][0]['location'][2]/10
+            self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
+            self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
+            self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
+            self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
+            
+            # print(len(point_verts))
+
+            self.detected_object.bounding_box_vertices = point_verts[-8:]
             self.detected_object.confidence = self.start_time - current_time
             self.detected_object.object_type = "cup"
             
