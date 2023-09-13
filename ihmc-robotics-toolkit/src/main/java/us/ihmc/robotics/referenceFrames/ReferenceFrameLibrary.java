@@ -20,6 +20,11 @@ public class ReferenceFrameLibrary
    private transient final SortedSet<String> referenceFrameNameSet = new TreeSet<>();
    private transient String[] referenceFrameNameArray = new String[0];
 
+   public ReferenceFrameLibrary()
+   {
+      // Here so it's easier to track instances in the IDE
+   }
+
    public void addAll(List<ReferenceFrameSupplier> referenceFrameSuppliers)
    {
       for (ReferenceFrameSupplier referenceFrame : referenceFrameSuppliers)
