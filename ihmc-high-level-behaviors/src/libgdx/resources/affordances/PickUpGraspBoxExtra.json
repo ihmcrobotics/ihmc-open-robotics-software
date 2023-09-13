@@ -1,5 +1,5 @@
 {
-  "name" : "PickUpGraspBox",
+  "name" : "pickUpGraspBox",
   "object" : "Box",
   "x" : 0.0,
   "y" : 0.0,
