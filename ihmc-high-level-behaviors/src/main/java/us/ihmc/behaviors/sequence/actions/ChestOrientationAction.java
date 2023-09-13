@@ -91,6 +91,23 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
    }
 
+   public void doa()
+   {
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
+      frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+
+      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+      message.getSo3Trajectory()
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
+                                                                  frameChestQuaternion,
+                                                                  EuclidCoreTools.zeroVector3D,
+                                                                  syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));
+      long frameId = MessageTools.toFrameId(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+      ros2ControllerHelper.publishToController(message);
+   }
+
    @Override
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {

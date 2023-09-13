@@ -23,7 +23,7 @@ public class HandPoseActionData implements BehaviorActionData
    private final ModifiableReferenceFrame palmFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private double trajectoryDuration = 4.0;
    private boolean executeWitNextAction = false;
-   private boolean holdPoseInTaskSpaceLater = false;
+   private boolean holdPoseInWorldLater = false;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -46,7 +46,7 @@ public class HandPoseActionData implements BehaviorActionData
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
       jsonNode.put("executeWithNextAction", executeWitNextAction);
-      jsonNode.put("holdPoseInTaskSpaceLater", holdPoseInTaskSpaceLater);
+      jsonNode.put("holdPoseInTaskSpaceLater", holdPoseInWorldLater);
    }
 
    @Override
@@ -58,7 +58,7 @@ public class HandPoseActionData implements BehaviorActionData
       palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
-      holdPoseInTaskSpaceLater = jsonNode.get("holdPoseInTaskSpaceLater").asBoolean();
+      holdPoseInWorldLater = jsonNode.get("holdPoseInTaskSpaceLater").asBoolean();
    }
 
    public void toMessage(SidedBodyPartPoseActionMessage message)
@@ -69,7 +69,7 @@ public class HandPoseActionData implements BehaviorActionData
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
-      message.setExecuteWithNextAction(holdPoseInTaskSpaceLater);
+      message.setExecuteWithNextAction(holdPoseInWorldLater);
    }
 
    public void fromMessage(SidedBodyPartPoseActionMessage message)
@@ -79,7 +79,7 @@ public class HandPoseActionData implements BehaviorActionData
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
-      holdPoseInTaskSpaceLater = message.getHoldPoseInTaskSpaceLater();
+      holdPoseInWorldLater = message.getHoldPoseInWorldLater();
    }
 
    public ReferenceFrame getParentFrame()
@@ -143,14 +143,14 @@ public class HandPoseActionData implements BehaviorActionData
       this.executeWitNextAction = executeWitNextAction;
    }
 
-   public boolean getHoldPoseInTaskSpaceLater()
+   public boolean getHoldPoseInWorldLater()
    {
-      return holdPoseInTaskSpaceLater;
+      return holdPoseInWorldLater;
    }
 
-   public void setHoldPoseInTaskSpaceLater(boolean holdPoseInTaskSpaceLater)
+   public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
    {
-      this.holdPoseInTaskSpaceLater = holdPoseInTaskSpaceLater;
+      this.holdPoseInWorldLater = holdPoseInWorldLater;
    }
 
 
