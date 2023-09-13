@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
-import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRBlock;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.block.linsol.qr.QrHouseHolderSolver_DDRB;
@@ -19,12 +18,10 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
@@ -34,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ControllerNaturalPostureManager
+public class NaturalPostureController
 {
    private static final boolean generateDataForPaper = false;
 
@@ -94,10 +91,8 @@ public class ControllerNaturalPostureManager
    private final YoFrameVector3D yoDirectProportionalFeedback = new YoFrameVector3D("npDirectProportionalFeedback", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D yoDirectDerivativeFeedback = new YoFrameVector3D("npDirectDerivativeFeedback", ReferenceFrame.getWorldFrame(), registry);
 
-
    private final FrameVector3D proportionalFeedback = new FrameVector3D();
    private final FrameVector3D derivativeFeedback = new FrameVector3D();
-
 
    private final OrientationFrame naturalPostureFrame = new OrientationFrame(yoCurrentNaturalPosture);
 
@@ -106,7 +101,7 @@ public class ControllerNaturalPostureManager
    private final YoDouble pelvisQPWeightX = new YoDouble("pelvisQPWeightX", registry);
    private final YoDouble pelvisQPWeightY = new YoDouble("pelvisQPWeightY", registry);
    private final YoDouble pelvisQPWeightZ = new YoDouble("pelvisQPWeightZ", registry);
-   
+
    private final YoDouble pPosePelvisYaw = new YoDouble("pPosePelvisYaw", registry);
    private final YoDouble pPosePelvisPitch = new YoDouble("pPosePelvisPitch", registry);
    private final YoDouble pPosePelvisRoll = new YoDouble("pPosePelvisRoll", registry);
@@ -147,26 +142,30 @@ public class ControllerNaturalPostureManager
    private final YoDouble centroidalAngularMomentumApproxByACOMX = new YoDouble("centroidalAngularMomentumApproxByACOMX", registry);
    private final YoDouble centroidalAngularMomentumApproxByACOMY = new YoDouble("centroidalAngularMomentumApproxByACOMY", registry);
    private final YoDouble centroidalAngularMomentumApproxByACOMZ = new YoDouble("centroidalAngularMomentumApproxByACOMZ", registry);
-   
-   public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
-                                          HighLevelHumanoidControllerToolbox controllerToolbox,
-                                          YoRegistry parentRegistry)
+
+   public NaturalPostureController(HumanoidRobotNaturalPosture robotNaturalPosture,
+                                   HighLevelHumanoidControllerToolbox controllerToolbox,
+                                   YoRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
+      this.robotNaturalPosture = robotNaturalPosture;
 
+      if (robotNaturalPosture.getRegistry() != null)
+         registry.addChild(robotNaturalPosture.getRegistry());
+      robotNaturalPosture.createVisuals(controllerToolbox.getYoGraphicsListRegistry());
 
-      npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(), controlDT), false));
-      npVelocityAlpha.addListener(v -> npVelocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(npVelocityAlpha.getDoubleValue(), controlDT), false));
+      npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(),
+                                                                                                                                    controlDT), false));
+      npVelocityAlpha.addListener(v -> npVelocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(npVelocityAlpha.getDoubleValue(),
+                                                                                                                            controlDT), false));
       npVelocityBreakFrequency.set(50.0);  //50
 
       npYawVelocity = new FilteredVelocityYoVariable("npYawVelocity", "", npVelocityAlpha, npYaw, controlDT, registry);
       npPitchVelocity = new FilteredVelocityYoVariable("npPitchVelocity", "", npVelocityAlpha, npPitch, controlDT, registry);
       npRollVelocity = new FilteredVelocityYoVariable("npRollVelocity", "", npVelocityAlpha, npRoll, controlDT, registry);
 
-      //      this.gains = gains;
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      this.robotNaturalPosture = robotNaturalPosture;
       npQPobjective.reshape(3, 1);
       npQPweightMatrix.reshape(3, 3);
       npQPselectionMatrix.reshape(3, 3);
@@ -192,7 +191,6 @@ public class ControllerNaturalPostureManager
       npKdPitch.set(5.0);
       npKdRoll.set(5.0);  // 3 // 6
 
-
       // Pelvis privileged pose
       double scale1 = 1;//100;
       double scale2 = 1;//0.1;
@@ -202,11 +200,11 @@ public class ControllerNaturalPostureManager
       pelvisQPweightMatrix.reshape(3, 3);
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
-      
+
       pelvisQPWeightX.set(scale1);
       pelvisQPWeightY.set(scale1);
       pelvisQPWeightZ.set(scale1);
-      
+
       pPosePelvisYaw.set(0.0);
       pPosePelvisPitch.set(0.02);
       pPosePelvisRoll.set(0.0);
@@ -263,9 +261,15 @@ public class ControllerNaturalPostureManager
       //   + the transformations for RPY & YPR are different, as the RPY Euler set is a different orientation representation
       //   + to avoid confusion, keep variable name & math consistent: keep the Y,P,R = 0,1,2 order when using YPR Euler sets
       //   + BUT the result: omega will be {x,y,z}
-      Dnp.set(0,0,-sbe);     Dnp.set(0,1,0.0);   Dnp.set(0,2,1.0);
-      Dnp.set(1,0, cbe*sal); Dnp.set(1,1, cal);  Dnp.set(1,2,0.0);
-      Dnp.set(2,0, cbe*cal); Dnp.set(2,1,-sal);  Dnp.set(2,2,0.0);
+      Dnp.set(0, 0, -sbe);
+      Dnp.set(0, 1, 0.0);
+      Dnp.set(0, 2, 1.0);
+      Dnp.set(1, 0, cbe * sal);
+      Dnp.set(1, 1, cal);
+      Dnp.set(1, 2, 0.0);
+      Dnp.set(2, 0, cbe * cal);
+      Dnp.set(2, 1, -sal);
+      Dnp.set(2, 2, 0.0);
 
       //      double[] kp = gains.getProportionalGains();
       //      double[] kp = new double[] {100.0, 0.0, 0.0};
@@ -281,7 +285,6 @@ public class ControllerNaturalPostureManager
       npPitchAcceleration.set(npKpPitch.getValue() * (npPitchDesired.getValue() - npPitch.getValue()) - npKdPitch.getValue() * npPitchVelocity.getValue());
       npRollAcceleration.set(npKpRoll.getValue() * (npRollDesired.getValue() - npRoll.getValue()) - npKdRoll.getValue() * npRollVelocity.getValue());
 
-
       computeProportionalNPFeedback(proportionalFeedback);
       computeDerivativeNPFeedback(derivativeFeedback);
 
@@ -291,9 +294,9 @@ public class ControllerNaturalPostureManager
       feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
 
       // TODO use these if you want to use the axis angle feedback controller
-//      yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
-//      yprDDot.set(1, 0, feedbackNPAcceleration.getY());
-//      yprDDot.set(2, 0, feedbackNPAcceleration.getX());
+      //      yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
+      //      yprDDot.set(1, 0, feedbackNPAcceleration.getY());
+      //      yprDDot.set(2, 0, feedbackNPAcceleration.getX());
 
       yprDDot.set(0, 0, npYawAcceleration.getValue());
       yprDDot.set(1, 0, npPitchAcceleration.getValue());
@@ -309,12 +312,12 @@ public class ControllerNaturalPostureManager
       naturalPostureControlCommand.getJacobian().set(robotNaturalPosture.getNaturalPostureJacobian());
       naturalPostureControlCommand.getSelectionMatrix().set(npQPselectionMatrix);
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
-      
+
       // For testing (data for paper)
       if (generateDataForPaper)
-    	  computeDataForPaper();
+         computeDataForPaper();
    }
-   
+
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private void computeProportionalNPFeedback(FrameVector3D feedbackTermToPack)
@@ -353,7 +356,6 @@ public class ControllerNaturalPostureManager
       return naturalPostureControlCommand;
    }
 
-
    // Implements a YPR servo on the pelvis, which is then used for the privileged
    // pose of the pelvis (via task null-space projection)
    private void pelvisPrivilegedPoseQPObjectiveCommand()
@@ -389,11 +391,11 @@ public class ControllerNaturalPostureManager
 
       // The pelvis equilibrium pose servo:
       pelvisYawAcceleration.set(pPosePelvisYawKp.getValue() * (pPosePelvisYaw.getValue() - pelvisYPR.getYaw())
-            - pPosePelvisYawKdFactor.getValue() * pPosePelvisYawKp.getValue() * pelvisYPRdot.get(0, 0));
+                                - pPosePelvisYawKdFactor.getValue() * pPosePelvisYawKp.getValue() * pelvisYPRdot.get(0, 0));
       pelvisPitchAcceleration.set(pPosePelvisPitchKp.getValue() * (pPosePelvisPitch.getValue() - pelvisYPR.getPitch())
-            - pPosePelvisPitchKdFactor.getValue() * pPosePelvisPitchKp.getValue() * pelvisYPRdot.get(1, 0));
+                                  - pPosePelvisPitchKdFactor.getValue() * pPosePelvisPitchKp.getValue() * pelvisYPRdot.get(1, 0));
       pelvisRollAcceleration.set(pPosePelvisRollKp.getValue() * (pPosePelvisRoll.getValue() - pelvisYPR.getRoll())
-            - pPosePelvisRollKdFactor.getValue() * pPosePelvisRollKp.getValue() * pelvisYPRdot.get(2, 0));
+                                 - pPosePelvisRollKdFactor.getValue() * pPosePelvisRollKp.getValue() * pelvisYPRdot.get(2, 0));
 
       yprDDot.set(0, 0, pelvisYawAcceleration.getValue());
       yprDDot.set(1, 0, pelvisPitchAcceleration.getValue());
@@ -418,76 +420,76 @@ public class ControllerNaturalPostureManager
    {
       return pelvisQPObjectiveCommand;
    }
-   
+
    ///////////////////// methods for generating data for paper
 
    //TODO pull this out into its own class
-   private void computeDataForPaper() {
-	   // We would like to compare the relative angular velocity to the angular velocity of the ACOM frame
-	   // We also want to compare the CAM to the one approximated by ACOM
+   private void computeDataForPaper()
+   {
+      // We would like to compare the relative angular velocity to the angular velocity of the ACOM frame
+      // We also want to compare the CAM to the one approximated by ACOM
 
-       fullRobotModel.getElevator().updateFramesRecursively();
-       MomentumData momentumData = computeMomentum(fullRobotModel);
+      fullRobotModel.getElevator().updateFramesRecursively();
+      MomentumData momentumData = computeMomentum(fullRobotModel);
 
-       DMatrixRMaj relativeVel = MatrixTools.mult(momentumData.connectionMatrix, momentumData.jointVelocity);
+      DMatrixRMaj relativeVel = MatrixTools.mult(momentumData.connectionMatrix, momentumData.jointVelocity);
 
-       relativeAngularVelX.set(relativeVel.get(0));
-       relativeAngularVelY.set(relativeVel.get(1));
-       relativeAngularVelZ.set(relativeVel.get(2));
-       
-       DMatrixRMaj b_omega_bc = MatrixTools.mult(robotNaturalPosture.getNaturalPostureJacobianRtBaseEwrtBase(), momentumData.jointVelocity);
-       omega_bc_X.set(b_omega_bc.get(0));
-       omega_bc_Y.set(b_omega_bc.get(1));
-       omega_bc_Z.set(b_omega_bc.get(2));       
+      relativeAngularVelX.set(relativeVel.get(0));
+      relativeAngularVelY.set(relativeVel.get(1));
+      relativeAngularVelZ.set(relativeVel.get(2));
 
-       DMatrixRMaj b_omega_wb = new DMatrixRMaj(3,1);
-       b_omega_wb.set(0, momentumData.jointVelocityWithFloatingBase.get(0));
-       b_omega_wb.set(1, momentumData.jointVelocityWithFloatingBase.get(1));
-       b_omega_wb.set(2, momentumData.jointVelocityWithFloatingBase.get(2));    		   
-       DMatrixRMaj b_omega_wc = new DMatrixRMaj(3,1);
-       b_omega_wc.set(0, b_omega_wb.get(0) + b_omega_bc.get(0));
-       b_omega_wc.set(1, b_omega_wb.get(1) + b_omega_bc.get(1));
-       b_omega_wc.set(2, b_omega_wb.get(2) + b_omega_bc.get(2));    	
-       
-       DMatrixRMaj centroidalMomentumApproxByACOM = new DMatrixRMaj(6,1);
-       DMatrixRMaj Mbase = new DMatrixRMaj(6, 3);
-       int[] srcColumnsBase = {0, 1, 2};
-       MatrixTools.extractColumns(momentumData.momentumMatrix, srcColumnsBase, Mbase, 0);
-       centroidalMomentumApproxByACOM = MatrixTools.mult(Mbase, b_omega_wc);
-       
-       centroidalAngularMomentumApproxByACOMX.set(centroidalMomentumApproxByACOM.get(0));
-       centroidalAngularMomentumApproxByACOMY.set(centroidalMomentumApproxByACOM.get(1));
-       centroidalAngularMomentumApproxByACOMZ.set(centroidalMomentumApproxByACOM.get(2));
+      DMatrixRMaj b_omega_bc = MatrixTools.mult(robotNaturalPosture.getNaturalPostureJacobianRtBaseEwrtBase(), momentumData.jointVelocity);
+      omega_bc_X.set(b_omega_bc.get(0));
+      omega_bc_Y.set(b_omega_bc.get(1));
+      omega_bc_Z.set(b_omega_bc.get(2));
+
+      DMatrixRMaj b_omega_wb = new DMatrixRMaj(3, 1);
+      b_omega_wb.set(0, momentumData.jointVelocityWithFloatingBase.get(0));
+      b_omega_wb.set(1, momentumData.jointVelocityWithFloatingBase.get(1));
+      b_omega_wb.set(2, momentumData.jointVelocityWithFloatingBase.get(2));
+      DMatrixRMaj b_omega_wc = new DMatrixRMaj(3, 1);
+      b_omega_wc.set(0, b_omega_wb.get(0) + b_omega_bc.get(0));
+      b_omega_wc.set(1, b_omega_wb.get(1) + b_omega_bc.get(1));
+      b_omega_wc.set(2, b_omega_wb.get(2) + b_omega_bc.get(2));
+
+      DMatrixRMaj centroidalMomentumApproxByACOM = new DMatrixRMaj(6, 1);
+      DMatrixRMaj Mbase = new DMatrixRMaj(6, 3);
+      int[] srcColumnsBase = {0, 1, 2};
+      MatrixTools.extractColumns(momentumData.momentumMatrix, srcColumnsBase, Mbase, 0);
+      centroidalMomentumApproxByACOM = MatrixTools.mult(Mbase, b_omega_wc);
+
+      centroidalAngularMomentumApproxByACOMX.set(centroidalMomentumApproxByACOM.get(0));
+      centroidalAngularMomentumApproxByACOMY.set(centroidalMomentumApproxByACOM.get(1));
+      centroidalAngularMomentumApproxByACOMZ.set(centroidalMomentumApproxByACOM.get(2));
    }
-   
-   
-	private static class MomentumData
-	{
-	   public DMatrixRMaj jointPositionWithFloatingBase;
-	   public DMatrixRMaj jointVelocityWithFloatingBase;
-	   public DMatrixRMaj jointPosition;
-	   public DMatrixRMaj jointVelocity;
-	   public DMatrixRMaj momentumMatrix;
-	   public DMatrixRMaj momentumVector;
-	   public DMatrixRMaj connectionMatrix;
-	
-	   public MomentumData(DMatrixRMaj jointPositionWithFloatingBase,
-	                       DMatrixRMaj jointVelocityWithFloatingBase,
-	                       DMatrixRMaj jointPosition,
-	                       DMatrixRMaj jointVelocity,
-	                       DMatrixRMaj momentumMatrix,
-	                       DMatrixRMaj momentumVector,
-	                       DMatrixRMaj connectionMatrix)
-	   {
-	      this.jointPositionWithFloatingBase = jointPositionWithFloatingBase;
-	      this.jointVelocityWithFloatingBase = jointVelocityWithFloatingBase;
-	      this.jointPosition = jointPosition;
-	      this.jointVelocity = jointVelocity;
-	      this.momentumMatrix = momentumMatrix;
-	      this.momentumVector = momentumVector;
-	      this.connectionMatrix = connectionMatrix;
-	   }
-	}
+
+   private static class MomentumData
+   {
+      public DMatrixRMaj jointPositionWithFloatingBase;
+      public DMatrixRMaj jointVelocityWithFloatingBase;
+      public DMatrixRMaj jointPosition;
+      public DMatrixRMaj jointVelocity;
+      public DMatrixRMaj momentumMatrix;
+      public DMatrixRMaj momentumVector;
+      public DMatrixRMaj connectionMatrix;
+
+      public MomentumData(DMatrixRMaj jointPositionWithFloatingBase,
+                          DMatrixRMaj jointVelocityWithFloatingBase,
+                          DMatrixRMaj jointPosition,
+                          DMatrixRMaj jointVelocity,
+                          DMatrixRMaj momentumMatrix,
+                          DMatrixRMaj momentumVector,
+                          DMatrixRMaj connectionMatrix)
+      {
+         this.jointPositionWithFloatingBase = jointPositionWithFloatingBase;
+         this.jointVelocityWithFloatingBase = jointVelocityWithFloatingBase;
+         this.jointPosition = jointPosition;
+         this.jointVelocity = jointVelocity;
+         this.momentumMatrix = momentumMatrix;
+         this.momentumVector = momentumVector;
+         this.connectionMatrix = connectionMatrix;
+      }
+   }
 
    private MomentumData computeMomentum(FullHumanoidRobotModel fullRobotModel)
    {
@@ -587,7 +589,6 @@ public class ControllerNaturalPostureManager
                               comMomentum,
                               Mconnection);
    }
-   
 
    private DMatrixRMaj computeMomentumMatrix(FullHumanoidRobotModel fullRobotModel)
    {
@@ -601,5 +602,9 @@ public class ControllerNaturalPostureManager
 
       return centroidalMomentumMatrix.getCentroidalMomentumMatrix();
    }
-   
+
+   public HumanoidRobotNaturalPosture getHumanoidRobotNaturalPosture()
+   {
+      return robotNaturalPosture;
+   }
 }

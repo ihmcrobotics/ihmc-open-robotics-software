@@ -571,7 +571,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          naturalPosturePrivilegedManager.initialize();
-         naturalPostureManager.getHumanoidRobotNaturalPosture().initialize();
+         naturalPostureManager.getNaturalPostureController().getHumanoidRobotNaturalPosture().initialize();
       }
       // balanceManager.initialize(); // already initialized, so don't run it again or else the state machine gets reset.
       feetManager.initialize();

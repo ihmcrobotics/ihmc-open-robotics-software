@@ -194,9 +194,6 @@ public class NaturalPosturePrivilegedManager
       //TODO: This is hardcoded here. It should be moved to a parameter setting instead. This is not the long term place for it.
       if (useSpinePrivilegedCommand)
       {
-         //         spineRollPrivilegedConfigurationParameters();
-         //         if (useSpinePitchPrivilegedCommand)
-         //            spinePitchPrivilegedConfigurationParameters();
          spineYawPrivilegedConfigurationParameters();
       }
 
@@ -231,26 +228,6 @@ public class NaturalPosturePrivilegedManager
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.WRIST_ROLL, 0.0);
          createAndAddJointPrivilegedConfigurationParameters(side, ArmJointName.FIRST_WRIST_PITCH, 0.0);
 
-         //         createAndAddJointPrivilegedConfigurationParameters(side,
-         //                                                            LegJointName.HIP_PITCH,
-         //                                                            -0.25,
-         //                                                            pPoseHipKp.getDoubleValue(),
-         //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         //         createAndAddJointPrivilegedConfigurationParameters(side,
-         //                                                            LegJointName.HIP_ROLL,
-         //                                                            0.0,
-         //                                                            pPoseHipKp.getDoubleValue(),
-         //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         //         createAndAddJointPrivilegedConfigurationParameters(side,
-         //                                                            LegJointName.HIP_YAW,
-         //                                                            0.0,
-         //                                                            pPoseHipKp.getDoubleValue(),
-         //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         //         createAndAddJointPrivilegedConfigurationParameters(side,
-         //                                                            LegJointName.KNEE_PITCH,
-         //                                                            0.5,
-         //                                                            pPoseKneeKp.getDoubleValue(),
-         //                                                            pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
          createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
       }

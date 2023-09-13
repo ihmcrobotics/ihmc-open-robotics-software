@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.configurations.NaturalPostureParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -18,8 +19,7 @@ public class NaturalPostureManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final ControllerNaturalPostureManager walkingManager;
-   private final HumanoidRobotNaturalPosture robotNaturalPosture;
+   private final NaturalPostureController naturalPostureController;
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final ExecutionTimer naturalPostureTimer;
 
@@ -28,8 +28,7 @@ public class NaturalPostureManager
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
    private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
 
-   public NaturalPostureManager(HumanoidRobotNaturalPosture naturalPostureMeasurement,
-                                NaturalPostureParameters naturalPostureParameters,
+   public NaturalPostureManager(WalkingControllerParameters walkingControllerParameters,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                 YoRegistry parentRegistry)
    {
@@ -40,9 +39,10 @@ public class NaturalPostureManager
       useBodyManagerCommands.set(false);
       usePelvisOrientationCommand.set(true);
 
-      robotNaturalPosture = naturalPostureMeasurement;
+      NaturalPostureParameters naturalPostureParameters = walkingControllerParameters.getNaturalPostureParameters();
+      HumanoidRobotNaturalPosture robotNaturalPosture = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
+      naturalPostureController = new NaturalPostureController(robotNaturalPosture, controllerToolbox, registry);
 
-      walkingManager = new ControllerNaturalPostureManager(robotNaturalPosture, controllerToolbox, registry);
       naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
 
       OneDoFJointBasics[] allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
@@ -61,12 +61,12 @@ public class NaturalPostureManager
 
    public InverseDynamicsCommand<?> getQPObjectiveCommand()
    {
-      return walkingManager.getInverseDynamicsCommand();
+      return naturalPostureController.getInverseDynamicsCommand();
    }
 
    public InverseDynamicsCommand<?> getPelvisPrivilegedPoseCommand()
    {
-      return walkingManager.getPelvisPrivilegedPoseCommand();
+      return naturalPostureController.getPelvisPrivilegedPoseCommand();
    }
 
    public JointLimitEnforcementMethodCommand getJointLimitEnforcementCommand()
@@ -77,8 +77,13 @@ public class NaturalPostureManager
    public void compute()
    {
       naturalPostureTimer.startMeasurement();
-      walkingManager.compute();
+      naturalPostureController.compute();
       naturalPostureTimer.stopMeasurement();
+   }
+
+   public NaturalPostureController getNaturalPostureController()
+   {
+      return naturalPostureController;
    }
 
    public YoBoolean getUseNaturalPostureCommand()
@@ -99,10 +104,5 @@ public class NaturalPostureManager
    public YoBoolean getUsePelvisOrientationCommand()
    {
       return usePelvisOrientationCommand;
-   }
-
-   public HumanoidRobotNaturalPosture getHumanoidRobotNaturalPosture()
-   {
-      return robotNaturalPosture;
    }
 }
