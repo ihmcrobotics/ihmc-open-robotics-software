@@ -25,6 +25,7 @@ public class ROS2SceneGraphSubscription
    private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
    private final Function<ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
+   private final ROS2IOTopicQualifier ioQualifier;
    private final FramePose3D nodePose = new FramePose3D();
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
@@ -55,6 +56,7 @@ public class ROS2SceneGraphSubscription
    {
       this.sceneGraph = sceneGraph;
       this.newNodeSupplier = newNodeSupplier;
+      this.ioQualifier = ioQualifier;
 
       sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
    }
@@ -210,7 +212,7 @@ public class ROS2SceneGraphSubscription
       for (int i = 0; i < subscriptionNode.getSceneNodeMessage().getNumberOfChildren(); i++)
       {
          ROS2SceneGraphSubscriptionNode subscriptionTreeChildNode = new ROS2SceneGraphSubscriptionNode();
-         buildSubscriptionTree(index++, sceneGraphMessage, subscriptionTreeChildNode);
+         buildSubscriptionTree(++index, sceneGraphMessage, subscriptionTreeChildNode);
          subscriptionNode.getChildren().add(subscriptionTreeChildNode);
       }
    }
