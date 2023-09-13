@@ -69,10 +69,6 @@ public class SceneGraph
       {
          updateOnRobot(child, sensorFrame);
       }
-//      for (int i = 0; i < sceneNode.getChildren().size(); i++)
-//      {
-//         updateOnRobot(sceneNode.getChildren().get(i), sensorFrame);
-//      }
    }
 
    public void ensureFramesMatchParentsRecursively()

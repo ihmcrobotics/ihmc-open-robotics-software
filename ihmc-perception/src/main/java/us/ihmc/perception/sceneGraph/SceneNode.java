@@ -55,10 +55,6 @@ public class SceneNode
       {
          child.ensureFramesMatchParentsRecursively(this.getNodeFrame());
       }
-//      for (int i = 0; i < getChildren().size(); i++)
-//      {
-//         getChildren().get(i).ensureFramesMatchParentsRecursively(this.getNodeFrame());
-//      }
    }
 
    public long getID()
