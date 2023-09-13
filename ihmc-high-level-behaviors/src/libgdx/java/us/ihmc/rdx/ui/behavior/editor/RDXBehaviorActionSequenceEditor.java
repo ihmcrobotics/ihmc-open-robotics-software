@@ -561,8 +561,6 @@ public class RDXBehaviorActionSequenceEditor
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
             ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));
-            ImGui.sameLine();
-            action.getExecutionWithNextAction().renderImGuiWidget();
          }
 
          action.renderImGuiWidgets();
