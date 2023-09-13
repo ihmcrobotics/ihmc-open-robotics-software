@@ -23,6 +23,7 @@ public class BehaviorActionSequenceModule
    private final ROS2Node ros2Node;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SceneGraphSubscription sceneGraphSubscription;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
    private final double PERIOD = Conversions.hertzToSeconds(30.0);
    private final BehaviorActionSequence sequence;
@@ -35,7 +36,7 @@ public class BehaviorActionSequenceModule
 
       sceneGraphSubscription = new ROS2SceneGraphSubscription(sceneGraph, ros2ControllerHelper, ROS2IOTopicQualifier.STATUS);
 
-      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
+      referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       sequence = new BehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
@@ -51,6 +52,7 @@ public class BehaviorActionSequenceModule
          throttler.waitAndRun(PERIOD);
 
          sceneGraphSubscription.update();
+         referenceFrameLibrary.update();
          sequence.update();
       }
 
