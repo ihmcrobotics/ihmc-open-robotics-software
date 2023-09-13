@@ -656,7 +656,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       walkingStateTimer.startMeasurement();
       // Do transitions will request ICP planner updates.
-      if (!firstTick) // this avoids doing two transitions in a single tick if the
+      if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
          stateMachine.doTransitions();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
