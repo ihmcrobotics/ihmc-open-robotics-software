@@ -174,6 +174,8 @@ public class ROS2SceneGraphSubscription
    {
       byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index);
       int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(index);
+      subscriptionNode.setType(sceneNodeType);
+
       switch (sceneNodeType)
       {
          case SceneGraphMessage.SCENE_NODE_TYPE ->
