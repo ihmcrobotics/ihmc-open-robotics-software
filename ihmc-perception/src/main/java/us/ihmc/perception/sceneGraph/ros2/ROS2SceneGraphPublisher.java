@@ -40,6 +40,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getSceneTreeIndices().clear();
       sceneGraphMessage.getSceneNodes().clear();
       sceneGraphMessage.getDetectableSceneNodes().clear();
+      sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
 
