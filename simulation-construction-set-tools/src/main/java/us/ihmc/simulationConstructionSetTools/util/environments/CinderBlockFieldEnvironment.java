@@ -126,11 +126,13 @@ public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInter
          // @formatter:off
          int[][] stackSizes = new int[][]
                {
+                     {0, 0, 0, 0, 0},
                      {2, 2, 1, 2, 1},
                      {1, 2, 2, 2, 2},
                      {1, 1, 1, 1, 0},
                      {0, 1, 2, 1, 0},
                      {0, 1, 2, 1, 0},
+                     {0, 0, 0, 0, 0}
                      };
          // @formatter:on
 
@@ -143,17 +145,18 @@ public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInter
          // @formatter:off
          CinderBlockType[][] types = new CinderBlockType[][]
                {
-                     {FLAT, FLAT, FLAT, FLAT, FLAT}, //1
-                     {FLAT, SLFW, FLAT, SLFW, FLAT}, //1
-                     {SLFW, FLAT, FLAT, FLAT, null}, //1
-                     {null, FLAT, FLAT, FLAT, null}, //1
-                     {null, FLAT, FLAT, FLAT, null}, //1
+                     {null, null, null, null, null},
+                     {FLAT, FLAT, FLAT, FLAT, FLAT},
+                     {FLAT, SLFW, FLAT, SLFW, FLAT},
+                     {SLFW, FLAT, FLAT, FLAT, null},
+                     {null, FLAT, FLAT, FLAT, null},
+                     {null, FLAT, FLAT, FLAT, null},
+                     {null, null, null, null, null}
                };
          // @formatter:on
 
          RigidBodyTransform centerBasePose = new RigidBodyTransform(startPose);
-         centerBasePose.appendTranslation(0.8 * stackSizes.length * cinderBlockLength, -0.2, 0.0);
-         centerBasePose.appendYawRotation(0.5 * Math.PI);
+         centerBasePose.appendTranslation(0.8 * stackSizes.length * cinderBlockLength, 0.0, 0.0);
          return grid2D(centerBasePose, stackSizes, types);
       }
 
