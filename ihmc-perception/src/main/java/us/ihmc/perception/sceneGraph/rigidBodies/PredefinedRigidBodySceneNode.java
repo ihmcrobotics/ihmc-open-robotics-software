@@ -5,7 +5,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
+
+import java.util.List;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is
@@ -48,7 +51,7 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       getNodeFrame().update();
    }
 
-   public void setTrackInitialParent(boolean trackInitialParent)
+   public void setTrackInitialParent(boolean trackInitialParent, List<SceneGraphNodeMove> sceneGraphNodeMoves)
    {
       boolean previousTrackingInitialParent = getTrackingInitialParent();
       if (previousTrackingInitialParent != trackInitialParent)
@@ -57,15 +60,11 @@ public class PredefinedRigidBodySceneNode extends SceneNode
          SceneNode initialParentNode = sceneGraphIDToNodeMap.get(initialParentNodeID);
          if (trackInitialParent)
          {
-            rootNode.getChildren().remove(this);
-            initialParentNode.getChildren().add(this);
-            ensureFramesMatchParentsRecursively(initialParentNode.getNodeFrame());
+            sceneGraphNodeMoves.add(new SceneGraphNodeMove(this, rootNode, initialParentNode));
          }
          else
          {
-            initialParentNode.getChildren().remove(this);
-            rootNode.getChildren().add(this);
-            ensureFramesMatchParentsRecursively(rootNode.getNodeFrame());
+            sceneGraphNodeMoves.add(new SceneGraphNodeMove(this, initialParentNode, rootNode));
          }
       }
    }

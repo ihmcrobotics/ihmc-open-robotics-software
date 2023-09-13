@@ -40,6 +40,7 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntDoubleMap arUcoMarkerIDsToSizesMap = new TIntDoubleHashMap();
+   private transient final List<SceneGraphNodeMove> sceneGraphNodeMoves = new ArrayList<>();
 
    public SceneGraph()
    {
@@ -54,15 +55,21 @@ public class SceneGraph
    public void updateOnRobot(ReferenceFrame sensorFrame)
    {
       updateCaches();
+      sceneGraphNodeMoves.clear();
 
       updateOnRobot(rootNode, sensorFrame);
+
+      for (SceneGraphNodeMove sceneGraphNodeMove : sceneGraphNodeMoves)
+      {
+         sceneGraphNodeMove.performMove();
+      }
    }
 
    private void updateOnRobot(SceneNode sceneNode, ReferenceFrame sensorFrame)
    {
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         staticRelativeSceneNode.updateTrackingState(sensorFrame);
+         staticRelativeSceneNode.updateTrackingState(sensorFrame, sceneGraphNodeMoves);
       }
 
       for (SceneNode child : sceneNode.getChildren())
@@ -130,6 +137,11 @@ public class SceneGraph
    public TIntDoubleMap getArUcoMarkerIDsToSizesMap()
    {
       return arUcoMarkerIDsToSizesMap;
+   }
+
+   public List<SceneGraphNodeMove> getSceneGraphNodeMoves()
+   {
+      return sceneGraphNodeMoves;
    }
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()

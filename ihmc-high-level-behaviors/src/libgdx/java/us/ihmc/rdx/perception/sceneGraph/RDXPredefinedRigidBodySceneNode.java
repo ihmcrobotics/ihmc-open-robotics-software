@@ -3,10 +3,12 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
+import java.util.List;
 import java.util.Set;
 
 public class RDXPredefinedRigidBodySceneNode extends PredefinedRigidBodySceneNode implements RDXSceneNodeInterface
@@ -27,9 +29,9 @@ public class RDXPredefinedRigidBodySceneNode extends PredefinedRigidBodySceneNod
    }
 
    @Override
-   public void update()
+   public void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
    {
-      predefinedRigidBodySceneNodeBasics.update();
+      predefinedRigidBodySceneNodeBasics.update(sceneGraphNodeMoves);
    }
 
    @Override

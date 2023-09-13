@@ -5,7 +5,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
+
+import java.util.List;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -39,7 +42,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    }
 
    /** Should only happen on the robot, not the UI. */
-   public void updateTrackingState(ReferenceFrame sensorFrame)
+   public void updateTrackingState(ReferenceFrame sensorFrame, List<SceneGraphNodeMove> sceneGraphNodeMoves)
    {
       staticRelativeSceneNodePose.setToZero(getNodeFrame());
       staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);
@@ -47,7 +50,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       setCurrentDistance(currentDistance);
       if (currentDistance <= getDistanceToDisableTracking())
       {
-         setTrackInitialParent(false);
+         setTrackInitialParent(false, sceneGraphNodeMoves);
       }
    }
 

@@ -8,6 +8,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -19,6 +20,7 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -57,14 +59,14 @@ public class RDXPredefinedRigidBodySceneNodeBasics
                                                       imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
    }
 
-   public void update()
+   public void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
    {
       sceneNodeBasics.update();
 
       if (trackDetectedPoseChanged.poll())
       {
          boolean trackDetectedPose = trackDetectedPoseChanged.read();
-         predefinedRigidBodySceneNode.setTrackInitialParent(trackDetectedPose);
+         predefinedRigidBodySceneNode.setTrackInitialParent(trackDetectedPose, sceneGraphNodeMoves);
          ensureGizmoFrameIsSceneNodeFrame();
          predefinedRigidBodySceneNode.markModifiedByOperator();
       }

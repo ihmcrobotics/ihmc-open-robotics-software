@@ -4,11 +4,13 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
+import java.util.List;
 import java.util.Set;
 
 public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implements RDXSceneNodeInterface
@@ -36,9 +38,9 @@ public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implemen
    }
 
    @Override
-   public void update()
+   public void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
    {
-      predefinedRigidBodySceneNodeBasics.update();
+      predefinedRigidBodySceneNodeBasics.update(sceneGraphNodeMoves);
    }
 
    @Override
