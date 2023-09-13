@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
+import java.util.List;
 import java.util.Set;
 
 public class RDXDetectableSceneNode extends DetectableSceneNode implements RDXSceneNodeInterface
@@ -20,7 +22,7 @@ public class RDXDetectableSceneNode extends DetectableSceneNode implements RDXSc
    }
 
    @Override
-   public void update()
+   public void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
    {
       detectableSceneNodeBasics.update();
    }

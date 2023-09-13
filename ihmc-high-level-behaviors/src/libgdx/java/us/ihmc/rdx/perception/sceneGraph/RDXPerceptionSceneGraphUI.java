@@ -16,6 +16,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -65,7 +66,15 @@ public class RDXPerceptionSceneGraphUI
    {
       sceneGraphSubscription.update();
 
+      // Nodes can be moved by the user clicking stuff
+      sceneGraph.getSceneGraphNodeMoves().clear();
+
       update(uiRootNode);
+
+      for (SceneGraphNodeMove sceneGraphNodeMove : sceneGraph.getSceneGraphNodeMoves())
+      {
+         sceneGraphNodeMove.performMove();
+      }
 
       if (publishThrottler.run())
          sceneGraphPublisher.publish(sceneGraph, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
@@ -73,7 +82,7 @@ public class RDXPerceptionSceneGraphUI
 
    private void update(RDXSceneNodeInterface uiSceneNode)
    {
-      uiSceneNode.update();
+      uiSceneNode.update(sceneGraph.getSceneGraphNodeMoves());
 
       if (uiSceneNode instanceof SceneNode sceneNode)
       {
