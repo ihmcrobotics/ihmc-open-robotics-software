@@ -36,9 +36,9 @@ public class NaturalPostureManager
    {
       parentRegistry.addChild(registry);
 
-      useNaturalPostureCommand.set(false); //this must be true to use Natural Posture
+      useNaturalPostureCommand.set(true); //this must be true to use Natural Posture
       usePelvisPrivilegedPoseCommand.set(false);
-      useBodyManagerCommands.set(true);
+      useBodyManagerCommands.set(false);
       usePelvisOrientationCommand.set(true);
 
       robotNaturalPosture = naturalPostureMeasurement;
