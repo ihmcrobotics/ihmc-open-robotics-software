@@ -1,10 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
@@ -13,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPosturePrivilegedManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -22,36 +17,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.SingleSupportToTransferToCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartFlamingoCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartWalkingCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopFlamingoCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopWalkingFromSingleSupportCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopWalkingFromTransferCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.FlamingoStanceState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.StandingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToFlamingoStanceState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToStandingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToWalkingSingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -61,7 +40,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -72,7 +50,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -88,6 +65,11 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider, SCS2YoGraphicHolder
 {
@@ -156,8 +138,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final ExecutionTimer managerUpdateTimer = new ExecutionTimer("managerUpdateTimer", registry);
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
-   // YMC: firstTick doesn't seem necessary?
-   // private boolean firstTick = true;
+   private boolean firstTick = true;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -282,9 +263,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
       {
-         // This guy can be used to add shearing forces to the feet while measuring the
-         // distance between them. Really useful to debug and identify elasticity in the
-         // legs.
+         /*
+          This guy can be used to add shearing forces to the feet while measuring the distance between them.
+          Really useful to debug and identify elasticity in the legs.
+         */
          legElasticityDebuggator = new LegElasticityDebuggator(controllerToolbox.getReferenceFrames(),
                                                                new SideDependentList<>(side -> feet.get(side).getRigidBody()),
                                                                yoTime,
@@ -491,8 +473,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       Set<WalkingStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING));
       factory.addTransition(allButStandingStates, WalkingStateEnum.TO_STANDING, new AbortCondition());
 
-      // Setup transition condition for push recovery, when recovering from double
-      // support.
+      // Setup transition condition for push recovery, when recovering from double support.
       Set<WalkingStateEnum> allDoubleSupportStates = Stream.of(WalkingStateEnum.values).filter(state -> state.isDoubleSupport()).collect(Collectors.toSet());
 
       // Update the previous state info for each state using state changed listeners.
@@ -523,8 +504,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (!shouldKeepInitialContacts.getAndSet(false))
       {
-         // Contact states need to be initialized before controllerToolbox initialize, as
-         // it updates the support polygons stuff.
+         // Contact states need to be initialized before controllerToolbox initialize, as it updates the support polygons stuff.
          initializeContacts();
       }
 
@@ -569,6 +549,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       initializeManagers();
 
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
+
+      firstTick = true;
    }
 
    private void initializeManagers()
@@ -589,10 +571,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          naturalPosturePrivilegedManager.initialize();
-         naturalPostureManager.initialize();
+         naturalPostureManager.getHumanoidRobotNaturalPosture().initialize();
       }
-      // balanceManager.initialize(); // already initialized, so don't run it again,
-      // or else the state machine gets reset.
+      // balanceManager.initialize(); // already initialized, so don't run it again or else the state machine gets reset.
       feetManager.initialize();
       comHeightManager.initialize();
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
@@ -675,11 +656,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       walkingStateTimer.startMeasurement();
       // Do transitions will request ICP planner updates.
-      // YMC: firstTick doesn't seem necessary?
-      // if (!firstTick) // this avoids doing two transitions in a single tick if the
-      // initialize reset the state machine.
-      // stateMachine.doTransitions();
-      stateMachine.doTransitions();
+      if (!firstTick) // this avoids doing two transitions in a single tick if the
+         stateMachine.doTransitions();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
       walkingStateTimer.stopMeasurement();
@@ -698,8 +676,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
-         // This happens on the first tick when the controller core has not yet run to
-         // update the center of pressure.
+         // This happens on the first tick when the controller core has not yet run to update the center of pressure.
          if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getSoleFrame())
          {
             footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
@@ -714,11 +691,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
 
-      // YMC: firstTick doesn't seem necessary?
-      // if (useNaturalPostureCommand.getValue())
-      // {
-      // firstTick = false;
-      // }
+      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
+      {
+         firstTick = false;
+      }
    }
 
    private void handleChangeInContactState()
@@ -1001,7 +977,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPostureManager == null || naturalPostureManager.getUsePelvisOrientationCommand().getValue())
       {
          controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
-         // controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
       }
 
       // CoM height control:
@@ -1011,9 +986,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
-
-      // System.out.println(controllerCoreCommand);
-      // System.out.println("");
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

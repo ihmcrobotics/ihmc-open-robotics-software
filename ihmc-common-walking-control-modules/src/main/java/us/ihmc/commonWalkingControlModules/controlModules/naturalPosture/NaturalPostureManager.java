@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -82,11 +81,6 @@ public class NaturalPostureManager
       naturalPostureTimer.stopMeasurement();
    }
 
-   //   private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
-   //   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
-   //   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
-   //   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
-
    public YoBoolean getUseNaturalPostureCommand()
    {
       return useNaturalPostureCommand;
@@ -107,8 +101,8 @@ public class NaturalPostureManager
       return usePelvisOrientationCommand;
    }
 
-   public void initialize()
+   public HumanoidRobotNaturalPosture getHumanoidRobotNaturalPosture()
    {
-      robotNaturalPosture.initialize();
+      return robotNaturalPosture;
    }
 }
