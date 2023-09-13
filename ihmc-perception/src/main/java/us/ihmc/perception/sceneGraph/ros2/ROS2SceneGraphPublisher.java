@@ -117,6 +117,7 @@ public class ROS2SceneGraphPublisher
       sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
       sceneNodePose.get(sceneNodeToWorldTransform);
       MessageTools.toMessage(sceneNodeToWorldTransform, sceneNodeMessage.getTransformToWorld());
+      sceneNodeMessage.setNumberOfChildren(sceneNode.getChildren().size());
 
       for (SceneNode child : sceneNode.getChildren())
       {
