@@ -51,14 +51,14 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    public void triggerActionExecution()
    {
       FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
-      frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
              .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
                                                                   frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
-                                                                  syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
+                                                                  ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 

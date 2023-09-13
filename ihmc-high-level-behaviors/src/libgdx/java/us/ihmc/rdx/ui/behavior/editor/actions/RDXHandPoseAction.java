@@ -209,42 +209,42 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
-      displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
-      if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
-      {
-         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
-         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
-         {
-            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
-            {
-               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
-            }
-            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
-            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
-         }
-
-         // We probably don't want to recolor the mesh every tick.
-         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
-         if (color != currentColor.get(getActionData().getSide()))
-         {
-            currentColor.put(getActionData().getSide(), color);
-            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
-            {
-               if (body instanceof RDXRigidBody rdxRigidBody)
-               {
-                  if (rdxRigidBody.getVisualGraphicsNode() != null)
-                  {
-                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
-                     {
-                        part.getModelInstance().setDiffuseColor(color);
-                     }
-                  }
-               }
-            }
-         }
-      }
+//      displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
+//      if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
+//      {
+//         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
+//         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
+//         {
+//            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
+//            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+//            for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
+//            {
+//               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
+//            }
+//            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
+//            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
+//         }
+//
+//         // We probably don't want to recolor the mesh every tick.
+//         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
+//         if (color != currentColor.get(getActionData().getSide()))
+//         {
+//            currentColor.put(getActionData().getSide(), color);
+//            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
+//            {
+//               if (body instanceof RDXRigidBody rdxRigidBody)
+//               {
+//                  if (rdxRigidBody.getVisualGraphicsNode() != null)
+//                  {
+//                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
+//                     {
+//                        part.getModelInstance().setDiffuseColor(color);
+//                     }
+//                  }
+//               }
+//            }
+//         }
+//      }
    }
 
    @Override
@@ -308,8 +308,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       highlightModels.get(actionData.getSide()).getRenderables(renderables, pool);
       poseGizmo.getVirtualRenderables(renderables, pool);
 
-      if (displayIKSolution)
-         armMultiBodyGraphics.get(getActionData().getSide()).getVisualRenderables(renderables, pool);
+//      if (displayIKSolution)
+//         armMultiBodyGraphics.get(getActionData().getSide()).getVisualRenderables(renderables, pool);
    }
 
    @Override

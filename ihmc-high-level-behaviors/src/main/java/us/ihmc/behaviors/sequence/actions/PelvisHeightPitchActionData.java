@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -14,9 +15,9 @@ import us.ihmc.tools.io.JSONTools;
 
 import java.util.function.Consumer;
 
-public class PelvisHeightActionData implements BehaviorActionData
+public class PelvisHeightPitchActionData implements BehaviorActionData
 {
-   private String description = "Pelvis height";
+   private String description = "Pelvis height and pitch";
    private double trajectoryDuration = 4.0;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
@@ -71,14 +72,25 @@ public class PelvisHeightActionData implements BehaviorActionData
       executeWitNextAction = message.getExecuteWithNextAction();
    }
 
+   public void setHeight(double height)
+   {
+      getTransformToParent().getTranslation().set(getTransformToParent().getTranslationX(), getTransformToParent().getTranslationY(), height);
+   }
+
+   public void setPitch(double pitch)
+   {
+      RotationMatrixBasics rotation = getTransformToParent().getRotation();
+      getTransformToParent().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+   }
+
    public double getHeight()
    {
       return getTransformToParent().getTranslationZ();
    }
 
-   public void setHeight(double height)
+   public double getPitch()
    {
-      getTransformToParent().getTranslation().set(getTransformToParent().getTranslationX(), getTransformToParent().getTranslationY(), height);
+      return getTransformToParent().getRotation().getPitch();
    }
 
    public double getTrajectoryDuration()
