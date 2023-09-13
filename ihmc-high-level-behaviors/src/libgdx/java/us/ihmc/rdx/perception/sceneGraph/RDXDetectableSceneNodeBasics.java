@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -20,7 +21,7 @@ public class RDXDetectableSceneNodeBasics
    {
       this.detectableSceneNode = detectableSceneNode;
       sceneNodeBasics = new RDXSceneNodeBasics(detectableSceneNode);
-      currentlyDetectedPlot = new ImGuiEnumPlot(detectableSceneNode.getName());
+      currentlyDetectedPlot = new ImGuiEnumPlot();
    }
 
    public void update()
@@ -30,6 +31,9 @@ public class RDXDetectableSceneNodeBasics
 
    public void renderImGuiWidgets()
    {
+      sceneNodeBasics.renderImGuiWidgets();
+      ImGui.sameLine();
+
       boolean currentlyDetected = detectableSceneNode.getCurrentlyDetected();
       currentlyDetectedPlot.setWidgetTextColor(currentlyDetected ? ImGuiTools.GREEN : ImGuiTools.RED);
       currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");

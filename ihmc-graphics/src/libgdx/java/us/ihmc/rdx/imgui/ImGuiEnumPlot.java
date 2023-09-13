@@ -61,7 +61,9 @@ public class ImGuiEnumPlot extends ImGuiFancyWidget
       else
          values[index] = ordinal;
 
+      ImGui.pushItemWidth(ImGui.getColumnWidth());
       ImGui.plotLines(label, values, bufferSize, 0, overlayText, Float.MAX_VALUE, Float.MAX_VALUE, 0, height);
+      ImGui.popItemWidth();
 
       ++index;
       if (index >= bufferSize - 1)

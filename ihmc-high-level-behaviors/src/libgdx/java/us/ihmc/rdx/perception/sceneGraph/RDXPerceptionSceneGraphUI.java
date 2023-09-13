@@ -108,6 +108,7 @@ public class RDXPerceptionSceneGraphUI
    private void renderImGuiWidgets(RDXSceneNodeInterface uiSceneNode)
    {
       uiSceneNode.renderImGuiWidgets();
+      ImGui.separator();
 
       if (uiSceneNode instanceof SceneNode sceneNode)
       {
