@@ -3,12 +3,10 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.rdx.imgui.ImBooleanCheckbox;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -19,16 +17,9 @@ import us.ihmc.rdx.vr.RDXVRContext;
  */
 public abstract class RDXBehaviorAction
 {
-   private final MutableBoolean selected = new MutableBoolean();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
-                                                                         selected::setValue,
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   private final MutableBoolean executeWithNextAction = new MutableBoolean();
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(executeWithNextAction::booleanValue,
-                                                                                      executeWithNextAction::setValue,
-                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"),
-                                                                                                                  imBoolean));
+   private final ImBooleanCheckbox selected = new ImBooleanCheckbox(labels.get("Selected"));
+   private final ImBooleanCheckbox executeWithNextAction = new ImBooleanCheckbox(labels.get("Execute With Next Action"));
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
    private int actionIndex = -1;
@@ -89,14 +80,14 @@ public abstract class RDXBehaviorAction
 
    public abstract BehaviorActionData getActionData();
 
-   public ImBooleanWrapper getSelected()
+   public ImBooleanCheckbox getSelected()
    {
-      return selectedWrapper;
+      return selected;
    }
 
-   public ImBooleanWrapper getExecutionWithNextAction()
+   public ImBooleanCheckbox getExecutionWithNextAction()
    {
-      return executeWithNextActionWrapper;
+      return executeWithNextAction;
    }
 
    public ImBoolean getExpanded()
