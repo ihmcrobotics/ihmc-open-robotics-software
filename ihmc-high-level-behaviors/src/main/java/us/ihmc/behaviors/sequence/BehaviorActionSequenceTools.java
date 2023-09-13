@@ -63,7 +63,7 @@ public class BehaviorActionSequenceTools
             handWrenchActionMessage.getActionInformation().setActionIndex(i);
             handWrenchActionData.toMessage(handWrenchActionMessage);
          }
-         else if (action instanceof PelvisHeightActionData pelvisHeightActionData)
+         else if (action instanceof PelvisHeightPitchActionData pelvisHeightActionData)
          {
             BodyPartPoseActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);

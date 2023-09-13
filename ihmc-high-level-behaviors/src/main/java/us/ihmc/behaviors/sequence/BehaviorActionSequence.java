@@ -159,7 +159,7 @@ public class BehaviorActionSequence
          }
          for (BodyPartPoseActionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
-            PelvisHeightAction action = new PelvisHeightAction(ros2, referenceFrameLibrary, syncedRobot);
+            PelvisHeightPitchAction action = new PelvisHeightPitchAction(ros2, referenceFrameLibrary, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -240,7 +240,7 @@ public class BehaviorActionSequence
          {
             automaticExecution = false;
          }
-         else if (lastCurrentlyExecutingAction == null || noCurrentActionIsExecuting())
+         else if (lastCurrentlyExecutingAction == null && noCurrentActionIsExecuting())
          {
             LogTools.info("Automatically executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
             executeNextAction();
@@ -253,13 +253,12 @@ public class BehaviorActionSequence
       }
       else if (manuallyExecuteSubscription.getMessageNotification().poll())
       {
-         LogTools.info("Manually executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
-         executeNextAction();
-         while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction())
+         do
          {
             LogTools.info("Manually executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
             executeNextAction();
          }
+         while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction());
       }
 
       if (lastCurrentlyExecutingAction != null && noCurrentActionIsExecuting())
