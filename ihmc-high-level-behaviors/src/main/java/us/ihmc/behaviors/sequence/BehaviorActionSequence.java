@@ -242,13 +242,12 @@ public class BehaviorActionSequence
          }
          else if (lastCurrentlyExecutingAction == null && noCurrentActionIsExecuting())
          {
-            LogTools.info("Automatically executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
-            executeNextAction();
-            while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction())
+            do
             {
                LogTools.info("Automatically executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
                executeNextAction();
             }
+            while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction());
          }
       }
       else if (manuallyExecuteSubscription.getMessageNotification().poll())
