@@ -23,6 +23,7 @@ import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
  */
 public class ROS2SceneGraphPublisher
 {
+   private ROS2IOTopicQualifier ioQualifier;
    private final SceneGraphMessage sceneGraphMessage = new SceneGraphMessage();
    private final FramePose3D sceneNodePose = new FramePose3D();
    private final RigidBodyTransform sceneNodeToWorldTransform = new RigidBodyTransform();
@@ -35,6 +36,8 @@ public class ROS2SceneGraphPublisher
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
+      this.ioQualifier = ioQualifier;
+
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
       sceneGraphMessage.getSceneTreeTypes().clear();
       sceneGraphMessage.getSceneTreeIndices().clear();
