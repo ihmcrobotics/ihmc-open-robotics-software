@@ -16,7 +16,7 @@ public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeI
 
    public RDXArUcoMarkerNode(ArUcoMarkerNode nodeToCopy)
    {
-      super(nodeToCopy.getMarkerID(),
+      super(nodeToCopy.getID(),
             nodeToCopy.getName(),
             nodeToCopy.getMarkerID(),
             nodeToCopy.getMarkerSize());
