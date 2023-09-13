@@ -19,11 +19,6 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.commons.time.Stopwatch;
-import com.badlogic.gdx.math.Vector3;
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 
 import java.util.Set;
 
@@ -37,15 +32,6 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final Color BOX_EDGE_COLOR = new Color(Color.WHITE);
    private RDX3DSituatedTextData previousTextData;
    private final Pose3D markerPose = new Pose3D();
-
-//   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
-//   private final Vector3 topLeftPosition = new Vector3();
-//   private final Vector3 bottomLeftPosition = new Vector3();
-//   private final Vector3 bottomRightPosition = new Vector3();
-//   private final Vector3 topRightPosition = new Vector3();
-//   private Stopwatch stopwatch = new Stopwatch().start();
-//   double panelWidth, panelHeight;
-//   float halfPanelHeight, halfPanelWidth;
 
    public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectPacket> topic)
    {
@@ -62,17 +48,6 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    public void update()
    {
       super.update();
-
-//      panelWidth = 1.0 * Math.sin(1.0 * (stopwatch.totalElapsed()));
-//      panelHeight = 1.0 * Math.sin(1.0 * (stopwatch.totalElapsed()));
-//      halfPanelHeight = (float) panelHeight / 2.0f;
-//      halfPanelWidth = (float) panelWidth / 2.0f;
-//      topLeftPosition.set(halfPanelHeight, halfPanelWidth, 0.0f);
-//      bottomLeftPosition.set(-halfPanelHeight, halfPanelWidth, 0.0f);
-//      bottomRightPosition.set(-halfPanelHeight, -halfPanelWidth, 0.0f);
-//      topRightPosition.set(halfPanelHeight, -halfPanelWidth, 0.0f);
-//      selectionCollisionBox.getSize().set(0.05, Math.abs(topRightPosition.y - topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
-//      FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
 
       if(subscription.getMessageNotification().poll())
       {

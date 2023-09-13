@@ -16,15 +16,15 @@ from perception_msgs.msg import ImageMessage
 import cv2
 import time
 
-def cube_vertices(Xc,Yc,Zc,SL):
-    return [[Xc + SL/2, Yc + SL/2, Zc + SL/2],
-            [Xc + SL/2, Yc + SL/2, Zc - SL/2],
-            [Xc + SL/2, Yc - SL/2, Zc + SL/2],
-            [Xc + SL/2, Yc - SL/2, Zc - SL/2],
-            [Xc - SL/2, Yc + SL/2, Zc + SL/2],
-            [Xc - SL/2, Yc + SL/2, Zc - SL/2],
-            [Xc - SL/2, Yc - SL/2, Zc + SL/2],
-            [Xc - SL/2, Yc - SL/2, Zc - SL/2]]
+# def cube_vertices(Xc,Yc,Zc,SL):
+#     return [[Xc + SL/2, Yc + SL/2, Zc + SL/2],
+#             [Xc + SL/2, Yc + SL/2, Zc - SL/2],
+#             [Xc + SL/2, Yc - SL/2, Zc + SL/2],
+#             [Xc + SL/2, Yc - SL/2, Zc - SL/2],
+#             [Xc - SL/2, Yc + SL/2, Zc + SL/2],
+#             [Xc - SL/2, Yc + SL/2, Zc - SL/2],
+#             [Xc - SL/2, Yc - SL/2, Zc + SL/2],
+#             [Xc - SL/2, Yc - SL/2, Zc - SL/2]]
 
 class Image2CenterPose_node(Node):
     def __init__(self):
@@ -39,13 +39,14 @@ class Image2CenterPose_node(Node):
         self.opt = opts().parser.parse_args()
 
         self.opt.arch = 'dlav1_34'
-        self.opt.load_model = f"/root/centerpose-ros2/models/chair_v1_140.pth"
+        # self.opt.load_model = f"/root/centerpose-ros2/models/chair_v1_140.pth"
+        self.opt.load_model = f"/root/centerpose-ros2/models/cup_mug_v1_140.pth"
         self.opt.debug = 5
 
         # Default setting
         self.opt.nms = True
         self.opt.obj_scale = True
-        self.image_process_frequency = 10
+        self.image_process_frequency = 5
         self.image_process_period_ns = int(1e9 / self.image_process_frequency)
         self.last_image_process_time_ns = 0
 
@@ -126,43 +127,43 @@ class Image2CenterPose_node(Node):
         image = cv2.imdecode(image_np, cv2.COLOR_YUV2RGB)
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
 
-        if len(ret['results']) > 0  or True:
-            # print(ret)
+        if len(ret['results']) > 0:
             current_time = timeit.default_timer()
 
-            # self.detected_object.pose.position.x = ret['results'][0]['location'][0]
-            # self.detected_object.pose.position.y = ret['results'][0]['location'][1]
-            # self.detected_object.pose.position.z = ret['results'][0]['location'][2]
-            # self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
-            # self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
-            # self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
-            # self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
-
-            self.detected_object.pose.position.x = 0.5*np.sin(0.5*(self.start_time - current_time))
-            self.detected_object.pose.position.y = 0.5*np.cos(0.5*(self.start_time - current_time))
-            self.detected_object.pose.position.z = 0.0
-            self.detected_object.pose.orientation.x = 0.0
-            self.detected_object.pose.orientation.y = 0.0
-            self.detected_object.pose.orientation.z = 0.0
-            self.detected_object.pose.orientation.w = 1.0
-
+            # self.detected_object.pose.position.x = 0.5*np.sin(0.5*(self.start_time - current_time))
+            # self.detected_object.pose.position.y = 0.5*np.cos(0.5*(self.start_time - current_time))
+            # self.detected_object.pose.position.z = 0.0
+            # self.detected_object.pose.orientation.x = 0.0
+            # self.detected_object.pose.orientation.y = 0.0
+            # self.detected_object.pose.orientation.z = 0.0
+            # self.detected_object.pose.orientation.w = 1.0
+            # nn_out_vertices = cube_vertices(0.5*np.sin(0.5*(self.start_time - current_time)),
+            #                          0.5*np.cos(0.5*(self.start_time - current_time)),
+            #                          0,
+            #                          1*np.sin(0.5*(self.start_time - current_time)))
+            
+            self.detected_object.pose.position.x = ret['results'][0]['location'][0]
+            self.detected_object.pose.position.y = ret['results'][0]['location'][1]
+            self.detected_object.pose.position.z = ret['results'][0]['location'][2]
+            self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
+            self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
+            self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
+            self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
+            nn_out_vertices = ret['results'][0]['kps_3d_cam'] # shape 9x3 (1st row is object centroid location)
+            
             point_verts = []
-            vertices = cube_vertices(0.5*np.sin(0.5*(self.start_time - current_time)),
-                                     0.5*np.cos(0.5*(self.start_time - current_time)),
-                                     0,
-                                     1*np.sin(0.5*(self.start_time - current_time)))
-            for vert in vertices:
+            for vertex in nn_out_vertices:
                 point = Point()
-                point.x = vert[0]
-                point.y = vert[1]
-                point.z = vert[2]
+                point.x = vertex[0]
+                point.y = vertex[1]
+                point.z = vertex[2]
                 point_verts.append(point)
             self.detected_object.bounding_box_vertices = point_verts
 
             self.detected_object.confidence = self.start_time - current_time
             self.detected_object.object_type = "cup"
             
-            self.get_logger().info('Published: "%s"' % self.detected_object.pose)
+            self.get_logger().info('Object Detected in the Image!')
             self.centerpose_publisher_.publish(self.detected_object)
 
 def main(args=None):
