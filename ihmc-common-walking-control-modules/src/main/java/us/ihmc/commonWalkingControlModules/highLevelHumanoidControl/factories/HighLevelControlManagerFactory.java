@@ -1,20 +1,14 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
-import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPosturePrivilegedManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -49,6 +43,10 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 {
    public static final String weightRegistryName = "MomentumOptimizationSettings";
@@ -69,7 +67,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private NaturalPostureManager naturalPostureManager;
-   private NaturalPosturePrivilegedManager naturalPosturePrivilegedManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -372,26 +369,9 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (!hasWalkingControllerParameters(NaturalPostureManager.class))
          return null;
 
-      naturalPostureManager = new NaturalPostureManager(walkingControllerParameters,
-                                                        controllerToolbox,
-                                                        registry);
+      naturalPostureManager = new NaturalPostureManager(walkingControllerParameters, controllerToolbox, registry);
 
       return naturalPostureManager;
-   }
-
-   public NaturalPosturePrivilegedManager getOrCreateNaturalPosturePrivilegedManager()
-   {
-      if (naturalPosturePrivilegedManager != null)
-         return naturalPosturePrivilegedManager;
-
-      if (!hasHighLevelHumanoidControllerToolbox(NaturalPosturePrivilegedManager.class))
-         return null;
-      if (!hasWalkingControllerParameters(NaturalPosturePrivilegedManager.class))
-         return null;
-
-      naturalPosturePrivilegedManager = new NaturalPosturePrivilegedManager(controllerToolbox.getFullRobotModel(), registry);
-
-      return naturalPosturePrivilegedManager;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
