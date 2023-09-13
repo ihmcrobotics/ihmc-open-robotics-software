@@ -15,7 +15,6 @@ import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -25,7 +24,6 @@ import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
-import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
@@ -84,8 +82,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
                                                                          imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
-   private final ImBooleanWrapper holdPoseInTaskSpaceLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInTaskSpaceLater,
-                                                                                         actionData::setHoldPoseInTaskSpaceLater,
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
+                                                                                     actionData::setHoldPoseInWorldLater,
                                                                                          imBoolean -> ImGui.checkbox(labels.get("Hold Pose In Task Space Later"), imBoolean));
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
@@ -255,7 +253,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
-      holdPoseInTaskSpaceLaterWrapper.renderImGuiWidget();
+      holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());

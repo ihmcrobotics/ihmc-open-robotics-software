@@ -52,9 +52,9 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
                                                                                       imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
-   private final ImBooleanWrapper holdPoseInTaskSpaceLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInTaskSpaceLater,
-                                                                                         actionData::setHoldPoseInTaskSpaceLater,
-                                                                                         imBoolean -> ImGui.checkbox(labels.get("Hold Pose In Task Space Later"), imBoolean));
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
+                                                                                         actionData::setHoldPoseInWorldLater,
+                                                                                         imBoolean -> ImGui.checkbox(labels.get("Hold Pose In World Later"), imBoolean));
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;
@@ -141,7 +141,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    {
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
-      holdPoseInTaskSpaceLaterWrapper.renderImGuiWidget();
+      holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
