@@ -95,6 +95,11 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       getNodeFrame().update();
    }
 
+   public TLongObjectMap<SceneNode> getSceneGraphIDToNodeMap()
+   {
+      return sceneGraphIDToNodeMap;
+   }
+
    public long getInitialParentNodeID()
    {
       return initialParentNodeID;
