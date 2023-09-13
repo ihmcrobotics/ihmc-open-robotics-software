@@ -36,7 +36,7 @@ public class RDXSceneGraphTools
       }
       else
       {
-         uiSceneNode = new RDXSceneNode(sceneNodeToCopy);
+         uiSceneNode = new RDXSceneNode(sceneNodeToCopy.getID(), sceneNodeToCopy.getName());
       }
       return uiSceneNode;
    }

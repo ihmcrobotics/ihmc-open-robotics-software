@@ -22,9 +22,9 @@ public class RDXSceneNode extends SceneNode implements RDXSceneNodeInterface
 {
    private final RDXSceneNodeBasics sceneNodeBasics;
 
-   public RDXSceneNode(SceneNode nodeToCopy)
+   public RDXSceneNode(long id, String name)
    {
-      super(nodeToCopy.getID(), nodeToCopy.getName());
+      super(id, name);
       sceneNodeBasics = new RDXSceneNodeBasics(this);
    }
 
