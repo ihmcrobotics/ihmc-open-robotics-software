@@ -35,16 +35,12 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      imgui.ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
       handConfigurationIndex.renderImGuiWidget();
       ImGui.popItemWidth();
-   }
-
-   @Override
-   public ImBooleanWrapper getExecutionWithNextAction()
-   {
-      return executeWithNextActionWrapper;
    }
 
    @Override

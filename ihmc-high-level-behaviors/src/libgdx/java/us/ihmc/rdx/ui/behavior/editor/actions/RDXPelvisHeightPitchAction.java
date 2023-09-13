@@ -135,6 +135,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
@@ -200,12 +202,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    public ImBooleanWrapper getSelected()
    {
       return selectedWrapper;
-   }
-
-   @Override
-   public ImBooleanWrapper getExecutionWithNextAction()
-   {
-      return executeWithNextActionWrapper;
    }
 
    public ReferenceFrame getReferenceFrame()
