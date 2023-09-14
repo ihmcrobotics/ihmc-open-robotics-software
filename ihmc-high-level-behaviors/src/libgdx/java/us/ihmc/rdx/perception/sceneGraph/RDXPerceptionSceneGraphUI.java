@@ -131,7 +131,7 @@ public class RDXPerceptionSceneGraphUI
 
       if (viewAsTree.get())
       {
-         renderSceneNodesAsTree(sceneGraph.getRootNode(), ImGui.getCursorPosX());
+         renderSceneNodesAsTree(sceneGraph.getRootNode());
       }
       else // Render IDs in order so they don't jump around
       {
@@ -147,30 +147,33 @@ public class RDXPerceptionSceneGraphUI
       }
    }
 
-   private void renderSceneNodesAsTree(SceneNode sceneNode, float cursorX)
+   private void renderSceneNodesAsTree(SceneNode sceneNode)
    {
       if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
       {
-         ImGui.setCursorPos(cursorX, ImGui.getCursorPosY());
+         float indentReduction = 10.0f; // Less indent to take less space
+         ImGui.unindent(indentReduction);
+
+         boolean expanded = false;
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         if (ImGui.treeNode(labels.get(sceneNode.getName())))
          {
-            boolean expanded = false;
-            ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-            if (ImGui.treeNode(labels.get(sceneNode.getName())))
+            expanded = true;
+            ImGui.popFont();
+
+
+            uiSceneNode.renderImGuiWidgets();
+            for (SceneNode child : sceneNode.getChildren())
             {
-               expanded = true;
-               ImGui.popFont();
-
-               uiSceneNode.renderImGuiWidgets();
-               for (SceneNode child : sceneNode.getChildren())
-               {
-                  renderSceneNodesAsTree(child, cursorX + 20.0f);
-               }
-               ImGui.treePop();
+               renderSceneNodesAsTree(child);
             }
-
-            if (!expanded)
-               ImGui.popFont();
+            ImGui.treePop();
          }
+
+         if (!expanded)
+            ImGui.popFont();
+
+         ImGui.indent(indentReduction);
       }
    }
 
