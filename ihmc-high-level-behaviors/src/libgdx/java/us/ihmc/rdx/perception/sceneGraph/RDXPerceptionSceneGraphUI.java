@@ -4,19 +4,25 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.*;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Manages perception scene graph nodes.
@@ -34,6 +40,7 @@ public class RDXPerceptionSceneGraphUI
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
+   private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
    private final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
@@ -102,19 +109,45 @@ public class RDXPerceptionSceneGraphUI
       }
    }
 
+   private void renderSceneNodeTree(SceneNode sceneNode, int level)
+   {
+      if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+      {
+         ImGui.setCursorPos(ImGui.getCursorPosX() + 20f + (level * 2), ImGui.getCursorPosY());
+         {
+            ImGui.pushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0f);
+            ImGui.beginGroup();
+            uiSceneNode.renderImGuiWidgets();
+            for (SceneNode child : sceneNode.getChildren())
+            {
+               renderSceneNodeTree(child, ++level);
+            }
+            ImGui.endGroup();
+            ImGui.popStyleVar();
+         }
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       ImGui.text("Scene graph updates received: " + sceneGraphSubscription.getNumberOfMessagesReceived());
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
-      ImGui.text("Detections:");
+      ImGui.checkbox(labels.get("View as tree"), viewAsTree);
       ImGui.separator();
 
-      for (SceneNode sceneNode : sceneNodesByID)
+      if (viewAsTree.get())
       {
-         if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+         renderSceneNodeTree(sceneGraph.getRootNode(), 0);
+      }
+      else
+      {
+         for (SceneNode sceneNode : sceneNodesByID)
          {
-            uiSceneNode.renderImGuiWidgets();
-            ImGui.separator();
+            if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+            {
+               uiSceneNode.renderImGuiWidgets();
+               ImGui.separator();
+            }
          }
       }
    }
