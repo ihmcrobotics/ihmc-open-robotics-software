@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -28,7 +29,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -58,8 +58,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
-   private final YoBoolean waitUntilICPPlannerDone = new YoBoolean("waitUntilICPPlannerDone", registry);
+   private final BooleanProvider finishWhenICPPlannerIsDone;
+   private final BooleanProvider waitUntilICPPlannerIsDone;
    private final YoBoolean hasSwingFootTouchedDown = new YoBoolean("hasSwingFootTouchedDown", registry);
    private final YoBoolean hasTriggeredTouchdown = new YoBoolean("hasTriggeredTouchdown", registry);
    private final YoBoolean resubmitStepsInSwingEveryTick = new YoBoolean("resubmitStepsInSwingEveryTick", registry);
@@ -94,11 +94,22 @@ public class WalkingSingleSupportState extends SingleSupportState
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
-      finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
-      waitUntilICPPlannerDone.set(true);
-      minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing",
-                                                                     registry,
-                                                                     walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
+      finishWhenICPPlannerIsDone = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
+                                                                          getClass().getSimpleName(),
+                                                                          "finishSingleSupportWhenICPPlannerIsDone",
+                                                                          registry,
+                                                                          walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
+      waitUntilICPPlannerIsDone = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
+                                                                         getClass().getSimpleName(),
+                                                                         "waitInSingleSupportUntilICPPlannerIsDone",
+                                                                         registry,
+                                                                         walkingControllerParameters.waitInSingleSupportUntilICPPlannerIsDone());
+
+      minimizeAngularMomentumRateZDuringSwing = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
+                                                                                       getClass().getSimpleName(),
+                                                                                       "minimizeAngularMomentumRateZDuringSwing",
+                                                                                       registry,
+                                                                                       walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
 
       timeOverrunToInitializeFreeFall = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
                                                                                getClass().getSimpleName(),
@@ -114,6 +125,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    int stepsToAdd;
+
    @Override
    public void doAction(double timeInState)
    {
@@ -197,7 +209,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (timeInState > swingTime + timeOverrunToInitializeFreeFall.getValue())
       {
-         // TODO Not sure if the transition duration should be fixed or a scale of the swing time. Need to be extracted. 
+         // TODO Not sure if the transition duration should be fixed or a scale of the swing time. Need to be extracted.
          comHeightManager.initializeTransitionToFall(swingTime / 6.0);
       }
 
@@ -222,7 +234,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (hasSwingFootTouchedDown.getValue())
       {
-         if (waitUntilICPPlannerDone.getValue())
+         if (waitUntilICPPlannerIsDone.getValue())
          {
             return balanceManager.isICPPlanDone();
          }
@@ -232,7 +244,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          }
       }
 
-      return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
+      return finishWhenICPPlannerIsDone.getValue() && balanceManager.isICPPlanDone();
    }
 
    @Override
@@ -425,6 +437,24 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.isSteppingUp())
          extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+   }
+
+   @Override
+   public void handleChangeInContactState()
+   {
+      boolean haveContactStatesChanged = false;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+         if (contactState.peekContactHasChangedNotification())
+            haveContactStatesChanged = true;
+      }
+
+      if (!haveContactStatesChanged)
+         return;
+
+      controllerToolbox.updateBipedSupportPolygons();
+      balanceManager.computeICPPlan(isFootInContact);
    }
 
    @Override
