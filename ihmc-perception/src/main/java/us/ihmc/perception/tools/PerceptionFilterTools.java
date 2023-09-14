@@ -158,4 +158,17 @@ public class PerceptionFilterTools
 
       region.set(filteredRegion);
    }
+
+   /**
+    * Filters regions by area. Uses parallel stream for efficient CPU usage.
+    *
+    * @param planarRegionsList
+    * @param minArea
+    */
+   public static void filterRegionsByArea(PlanarRegionsList planarRegionsList, double minArea)
+   {
+      List<PlanarRegion> filteredList = planarRegionsList.getPlanarRegionsAsList().parallelStream().filter(region -> region.getArea() > minArea).toList();
+      planarRegionsList.clear();
+      planarRegionsList.addPlanarRegions(filteredList);
+   }
 }

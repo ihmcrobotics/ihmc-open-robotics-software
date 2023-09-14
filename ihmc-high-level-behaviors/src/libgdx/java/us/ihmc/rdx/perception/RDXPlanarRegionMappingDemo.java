@@ -36,9 +36,6 @@ public class RDXPlanarRegionMappingDemo
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
-   private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
-   private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
-
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -86,9 +83,6 @@ public class RDXPlanarRegionMappingDemo
 
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
-
-            baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
          }
 
          public void renderPlanarRegions()
@@ -140,25 +134,17 @@ public class RDXPlanarRegionMappingDemo
                {
                   MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
 
-                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-                  mocapGraphic.update();
+                  // TODO: Call mapping ui render for mocap
                }
 
                if (!mappingManager.getSensorPositionBuffer().isEmpty())
                {
-                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-                  rootJointGraphic.update();
+                  // TODO: Call mapping ui render for sensor
                }
 
                graphicsInitialized = true;
 
                renderPlanarRegions();
-            }
-
-            if (!mappingManager.getSensorPositionBuffer().isEmpty())
-            {
-               rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-               rootJointGraphic.update();
             }
 
             graphicsInitialized = true;

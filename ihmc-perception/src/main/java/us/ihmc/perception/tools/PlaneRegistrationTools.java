@@ -55,13 +55,20 @@ public class PlaneRegistrationTools
 
       TIntIntMap matches = new TIntIntHashMap();
 
+      LogTools.debug("Outside");
       PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions,
                                                          previousRegions,
                                                          matches,
                                                          (float) parameters.getBestMinimumOverlapThreshold(),
                                                          (float) parameters.getBestMatchAngularThreshold(),
                                                          (float) parameters.getBestMatchDistanceThreshold(),
-                                                         0.3f);
+                                                         (float) parameters.getMinimumBoundingBoxSize());
+      if (matches.size() < parameters.getICPMinMatches())
+      {
+         LogTools.debug("Not enough matches, breaking out of IQA loop. Matches: {}", matches.size());
+         return false;
+      }
+
       double previousError = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
       for (int i = 0; i < parameters.getICPMaxIterations(); i++)
       {
@@ -72,19 +79,19 @@ public class PlaneRegistrationTools
                                                             (float) parameters.getBestMinimumOverlapThreshold(),
                                                             (float) parameters.getBestMatchAngularThreshold(),
                                                             (float) parameters.getBestMatchDistanceThreshold(),
-                                                            0.3f);
+                                                            (float) parameters.getMinimumBoundingBoxSize());
 
          if (matches.size() < parameters.getICPMinMatches())
          {
-            LogTools.debug("Not enough matches, breaking out of IQA loop.");
-            return false;
+            LogTools.debug("Not enough matches, breaking out of IQA loop. Matches: {}", matches.size());
+            break;
          }
 
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
 
          if (transform.containsNaN())
          {
-            LogTools.debug("Transform contains NaNs, breaking out of IQA loop.");
+            LogTools.debug("Transform contains NaNs, breaking out of IQA loop. Transform: {}", transform);
             break;
          }
 
@@ -92,20 +99,22 @@ public class PlaneRegistrationTools
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
          double ratio = (previousError - error) / previousError;
 
+         LogTools.debug("Iteration: {}, Error: {}, Ratio: {}", i, error, ratio);
+
          if ((Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
             LogTools.debug("Terminating IQA loop. Error ratio: {}, Matches: {}", ratio, matches.size());
             break;
          }
 
+         if (previousError > parameters.getICPErrorCutoff())
+         {
+            LogTools.debug("Registration error too high, breaking out of IQA loop. Error: {}", previousError);
+            break;
+         }
+
          finalTransform.multiply(transform);
          previousError = error + 1e-7;
-      }
-
-      if (previousError > parameters.getICPErrorCutoff())
-      {
-         LogTools.debug("Registration error too high, breaking out of IQA loop.");
-         return false;
       }
 
       transformToPack.set(finalTransform);
@@ -725,7 +734,7 @@ public class PlaneRegistrationTools
          }
       }
 
-      //LogTools.info("Match Metrics for [{}, {}]: " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f], Overlap: %.2f [%.2f]", normalSimilarity,
+      //LogTools.debug("Match Metrics for [{}, {}]: " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f], Overlap: %.2f [%.2f]", normalSimilarity,
       //                  normalThreshold, normalDistance, normalDistanceThreshold, overlapScore, overlapThreshold), regionA.getRegionId(), regionB.getRegionId());
 
       return wasMatched;

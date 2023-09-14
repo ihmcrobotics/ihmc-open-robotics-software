@@ -235,7 +235,7 @@ public class HumanoidPerceptionModule
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
    }
 
-   public void initializeLocalizationAndMappingThread(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
+   public void initializeLocalizationAndMappingThread(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, String version, boolean smoothing)
    {
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
       localizationAndMappingTask = new LocalizationAndMappingTask(robotName,
@@ -246,6 +246,7 @@ public class HumanoidPerceptionModule
                                                                   () ->
                                                                         {
                                                                         },
+                                                                  version,
                                                                   smoothing);
    }
 
