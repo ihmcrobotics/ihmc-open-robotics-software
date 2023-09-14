@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -115,7 +114,6 @@ public class RDXPerceptionSceneGraphUI
       {
          ImGui.setCursorPos(ImGui.getCursorPosX() + 20f + (level * 2), ImGui.getCursorPosY());
          {
-            ImGui.pushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0f);
             ImGui.beginGroup();
             uiSceneNode.renderImGuiWidgets();
             for (SceneNode child : sceneNode.getChildren())
@@ -123,7 +121,6 @@ public class RDXPerceptionSceneGraphUI
                renderSceneNodeTree(child, ++level);
             }
             ImGui.endGroup();
-            ImGui.popStyleVar();
          }
       }
    }
