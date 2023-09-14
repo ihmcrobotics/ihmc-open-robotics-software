@@ -12,16 +12,15 @@ import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.Comparator;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Manages perception scene graph nodes.
@@ -38,6 +37,7 @@ public class RDXPerceptionSceneGraphUI
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
@@ -66,6 +66,8 @@ public class RDXPerceptionSceneGraphUI
          ROS2IOTopicQualifier.STATUS,
          ros2SceneGraphSubscriptionNode -> RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph)
       );
+      sceneGraphSubscription.getSceneGraphSubscription().addCallback(message -> frequencyPlot.recordEvent());
+      frequencyPlot.getReceivedPlot().setWidth(100);
    }
 
    public void update()
@@ -127,7 +129,18 @@ public class RDXPerceptionSceneGraphUI
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Scene graph updates received: " + sceneGraphSubscription.getNumberOfMessagesReceived());
+      int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
+      int numberOfOnRobotNodes = sceneGraphSubscription.getLatestSceneGraphMessage().getSceneTreeIndices().size();
+      ImGui.text("UI nodes: %d   On robot nodes: %d   State: ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
+      ImGui.sameLine();
+      if (sceneGraphSubscription.getLocalTreeFrozen())
+         ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen");
+      else
+         ImGui.text("Normal");
+      ImGui.pushItemWidth(100.0f);
+      frequencyPlot.renderImGuiWidgets();
+      ImGui.popItemWidth();
+      ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
       ImGui.checkbox(labels.get("View as tree"), viewAsTree);
       ImGui.separator();
