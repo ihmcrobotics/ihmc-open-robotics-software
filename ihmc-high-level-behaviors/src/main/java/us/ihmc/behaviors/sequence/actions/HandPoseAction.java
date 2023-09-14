@@ -105,13 +105,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                                                                                                      frameHand.getOrientation(),
                                                                                                      ReferenceFrame.getWorldFrame());
       handTrajectoryMessage.setForceExecution(true);
-      // TODO. remove once tuned real robot weights and gains
-      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
-      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
-      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
-      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
-      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
-      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
       ros2ControllerHelper.publishToController(handTrajectoryMessage);
 
       executionTimer.reset();
@@ -164,13 +157,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                                                                                                      frameHand.getOrientation(),
                                                                                                      syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       message.setForceExecution(true);
-      // TODO. remove once tuned real robot weights and gains
-      message.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
-      message.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
-      message.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
-      message.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
-      message.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
-      message.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
       ros2ControllerHelper.publishToController(message);
    }
 
