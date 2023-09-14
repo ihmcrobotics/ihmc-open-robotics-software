@@ -22,6 +22,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.Throttler;
 
 public class RDXPerceptionSceneGraphDemo
 {
@@ -40,6 +41,8 @@ public class RDXPerceptionSceneGraphDemo
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
    private RDXPerceptionSceneGraphUI perceptionSceneGraphUI;
    private RDXOpenCVArUcoMarkerDetectionUI openCVArUcoMarkerDetectionUI;
+   /** Simulate an update rate more similar to what it would be on the robot. */
+   private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
 
    public RDXPerceptionSceneGraphDemo()
    {
@@ -106,17 +109,23 @@ public class RDXPerceptionSceneGraphDemo
          @Override
          public void render()
          {
+            boolean runPerception = perceptionThottler.run();
+
             environmentBuilder.update();
             simulatedCamera.render(baseUI.getPrimaryScene());
-            arUcoMarkerDetection.update();
+            if (runPerception)
+               arUcoMarkerDetection.update();
             openCVArUcoMarkerDetectionUI.update();
 
-            arUcoMarkerPublisher.update();
+            if (runPerception)
+            {
+               arUcoMarkerPublisher.update();
 
-            sceneGraphSubscription.update();
-            ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotSceneGraph);
-            onRobotSceneGraph.updateOnRobot(sensorPoseGizmo.getGizmoFrame());
-            sceneGraphPublisher.publish(onRobotSceneGraph, ros2Helper, ROS2IOTopicQualifier.STATUS);
+               sceneGraphSubscription.update();
+               ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotSceneGraph);
+               onRobotSceneGraph.updateOnRobot(sensorPoseGizmo.getGizmoFrame());
+               sceneGraphPublisher.publish(onRobotSceneGraph, ros2Helper, ROS2IOTopicQualifier.STATUS);
+            }
 
             perceptionSceneGraphUI.update();
 

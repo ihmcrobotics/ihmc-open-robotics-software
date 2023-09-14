@@ -35,6 +35,7 @@ public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implemen
                                                                    this::getDistanceToDisableTracking,
                                                                    this::setDistanceToDisableTracking,
                                                                    this::markModifiedByOperator);
+      distanceToDisableTrackingInput.setWidgetWidth(100.0f);
    }
 
    @Override
@@ -49,6 +50,7 @@ public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implemen
       predefinedRigidBodySceneNodeBasics.renderImGuiWidgets();
 
       ImGui.text("Current distance: %.2f".formatted(getCurrentDistance()));
+      ImGui.sameLine();
       distanceToDisableTrackingInput.render();
    }
 

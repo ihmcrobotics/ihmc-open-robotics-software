@@ -31,6 +31,7 @@ public class ROS2SceneGraphSubscription
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
+   private SceneGraphMessage latestSceneGraphMessage;
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
@@ -73,10 +74,10 @@ public class ROS2SceneGraphSubscription
       if (newMessageAvailable)
       {
          ++numberOfMessagesReceived;
-         SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
+         latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
 
          ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
-         buildSubscriptionTree(new MutableInt(), sceneGraphMessage, subscriptionRootNode);
+         buildSubscriptionTree(new MutableInt(), latestSceneGraphMessage, subscriptionRootNode);
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
@@ -227,8 +228,23 @@ public class ROS2SceneGraphSubscription
       sceneGraphSubscription.destroy();
    }
 
+   public IHMCROS2Input<SceneGraphMessage> getSceneGraphSubscription()
+   {
+      return sceneGraphSubscription;
+   }
+
    public long getNumberOfMessagesReceived()
    {
       return numberOfMessagesReceived;
+   }
+
+   public SceneGraphMessage getLatestSceneGraphMessage()
+   {
+      return latestSceneGraphMessage;
+   }
+
+   public boolean getLocalTreeFrozen()
+   {
+      return localTreeFrozen;
    }
 }
