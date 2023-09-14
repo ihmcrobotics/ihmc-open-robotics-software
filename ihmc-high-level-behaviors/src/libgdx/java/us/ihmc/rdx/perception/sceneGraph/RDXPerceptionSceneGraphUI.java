@@ -110,23 +110,6 @@ public class RDXPerceptionSceneGraphUI
       }
    }
 
-   private void renderSceneNodeTree(SceneNode sceneNode, int level)
-   {
-      if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
-      {
-         ImGui.setCursorPos(ImGui.getCursorPosX() + 20f + (level * 2), ImGui.getCursorPosY());
-         {
-            ImGui.beginGroup();
-            uiSceneNode.renderImGuiWidgets();
-            for (SceneNode child : sceneNode.getChildren())
-            {
-               renderSceneNodeTree(child, ++level);
-            }
-            ImGui.endGroup();
-         }
-      }
-   }
-
    public void renderImGuiWidgets()
    {
       int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
@@ -142,12 +125,13 @@ public class RDXPerceptionSceneGraphUI
       ImGui.popItemWidth();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
+      ImGui.sameLine();
       ImGui.checkbox(labels.get("View as tree"), viewAsTree);
       ImGui.separator();
 
       if (viewAsTree.get())
       {
-         renderSceneNodeTree(sceneGraph.getRootNode(), 0);
+         renderSceneNodeTree(sceneGraph.getRootNode(), ImGui.getCursorPosX());
       }
       else
       {
@@ -158,6 +142,23 @@ public class RDXPerceptionSceneGraphUI
                uiSceneNode.renderImGuiWidgets();
                ImGui.separator();
             }
+         }
+      }
+   }
+
+   private void renderSceneNodeTree(SceneNode sceneNode, float cursorX)
+   {
+      if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+      {
+         ImGui.setCursorPos(cursorX, ImGui.getCursorPosY());
+         {
+            ImGui.beginGroup();
+            uiSceneNode.renderImGuiWidgets();
+            for (SceneNode child : sceneNode.getChildren())
+            {
+               renderSceneNodeTree(child, cursorX + 20.0f);
+            }
+            ImGui.endGroup();
          }
       }
    }
