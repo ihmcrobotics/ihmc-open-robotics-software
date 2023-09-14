@@ -15,15 +15,13 @@ public class RDXSceneNodeBasics
 {
    private final SceneNode sceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
-   private final String sceneNodeTypeText;
-   private final String nameIDText;
+   private final String detailsText;
 
    public RDXSceneNodeBasics(SceneNode sceneNode)
    {
       this.sceneNode = sceneNode;
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
-      sceneNodeTypeText = sceneNode.getClass().getSimpleName();
-      nameIDText = "%s (ID: %d)".formatted(sceneNode.getName(), sceneNode.getID());
+      detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSuperclass().getSimpleName());
    }
 
    public void update()
@@ -33,8 +31,7 @@ public class RDXSceneNodeBasics
 
    public void renderImGuiWidgets()
    {
-      ImGui.text(sceneNodeTypeText);
-      ImGui.text(nameIDText);
+      ImGui.text(detailsText);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

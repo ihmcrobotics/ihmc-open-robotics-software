@@ -239,6 +239,13 @@ public class ImGuiTools
       ImGui.textColored(color.r, color.g, color.b, color.a, text);
    }
 
+   public static void textBold(String text)
+   {
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+      ImGui.text(text);
+      ImGui.popFont();
+   }
+
    public static void previousWidgetTooltip(String tooltipText)
    {
       if (ImGui.isItemHovered())
