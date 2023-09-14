@@ -37,6 +37,7 @@ public class RDXPredefinedRigidBodySceneNodeBasics
    private final RDXModelInstance modelInstance;
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private String initialParentName;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
    private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
    private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
@@ -54,9 +55,10 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(predefinedRigidBodySceneNode.getNodeFrame(),
                                                      predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
       offsetPoseGizmo.createAndSetupDefault(panel3D);
+      initialParentName = "Node " + predefinedRigidBodySceneNode.getInitialParentNodeID();
       trackDetectedPoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getTrackingInitialParent,
                                                       trackDetectedPoseChanged::set,
-                                                      imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
+                                                      imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName), imBoolean));
    }
 
    public void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
@@ -83,11 +85,17 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       nodePose.changeFrame(ReferenceFrame.getWorldFrame());
       nodePose.get(visualModelToWorldTransform);
       modelInstance.setTransformToWorldFrame(visualModelToWorldTransform);
+
+      if (predefinedRigidBodySceneNode.getTrackingInitialParent())
+         initialParentName = predefinedRigidBodySceneNode.getNodeFrame().getParent().getName();
    }
 
    public void renderImGuiWidgets()
    {
       sceneNodeBasics.renderImGuiWidgets();
+      ImGui.sameLine();
+      ImGui.text(" Parent: " + predefinedRigidBodySceneNode.getNodeFrame().getParent().getName());
+
 
       trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();

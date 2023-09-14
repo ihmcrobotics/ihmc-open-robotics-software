@@ -16,8 +16,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Manages perception scene graph nodes.
@@ -36,6 +35,7 @@ public class RDXPerceptionSceneGraphUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
+   private final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
    public RDXPerceptionSceneGraphUI(SceneGraph sceneGraph,
                                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
@@ -68,6 +68,7 @@ public class RDXPerceptionSceneGraphUI
 
       // Nodes can be moved by the user clicking stuff
       sceneGraph.getSceneGraphNodeMoves().clear();
+      sceneNodesByID.clear();
 
       update(uiRootNode);
 
@@ -83,6 +84,11 @@ public class RDXPerceptionSceneGraphUI
    private void update(RDXSceneNodeInterface uiSceneNode)
    {
       uiSceneNode.update(sceneGraph.getSceneGraphNodeMoves());
+
+      if (uiSceneNode instanceof SceneNode sceneNode)
+      {
+         sceneNodesByID.add(sceneNode);
+      }
 
       if (uiSceneNode instanceof SceneNode sceneNode)
       {
@@ -102,22 +108,13 @@ public class RDXPerceptionSceneGraphUI
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
       ImGui.text("Detections:");
       ImGui.separator();
-      renderImGuiWidgets(uiRootNode);
-   }
 
-   private void renderImGuiWidgets(RDXSceneNodeInterface uiSceneNode)
-   {
-      uiSceneNode.renderImGuiWidgets();
-      ImGui.separator();
-
-      if (uiSceneNode instanceof SceneNode sceneNode)
+      for (SceneNode sceneNode : sceneNodesByID)
       {
-         for (SceneNode child : sceneNode.getChildren())
+         if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
          {
-            if (child instanceof RDXSceneNodeInterface uiChildNode)
-            {
-               renderImGuiWidgets(uiChildNode);
-            }
+            uiSceneNode.renderImGuiWidgets();
+            ImGui.separator();
          }
       }
    }
