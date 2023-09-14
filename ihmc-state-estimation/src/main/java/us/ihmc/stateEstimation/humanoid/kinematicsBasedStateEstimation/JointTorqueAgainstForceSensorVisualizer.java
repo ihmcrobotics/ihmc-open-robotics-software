@@ -6,9 +6,8 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 
+import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -18,22 +17,25 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JointTorqueFromForceSensorVisualizer
+public class JointTorqueAgainstForceSensorVisualizer
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<JacobianBasedWrenchEstimator> estimators = new ArrayList<>();
 
-   public JointTorqueFromForceSensorVisualizer(RigidBodyBasics rootBody,
-                                               Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
-                                               Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-                                               YoRegistry parentRegistry)
+   public JointTorqueAgainstForceSensorVisualizer(RigidBodyBasics rootBody,
+                                                  Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
+                                                  Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
+                                                  YoRegistry parentRegistry)
    {
       for (RigidBodyBasics foot : footSwitches.keySet())
       {
@@ -66,7 +68,12 @@ public class JointTorqueFromForceSensorVisualizer
       private final YoFixedFrameWrench wrenchNoGravity;
       private final DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
       private final DMatrixRMaj torqueVector = new DMatrixRMaj(6, 1);
-      private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(6);
+
+      private final YoFramePoint2D cop2D;
+      private final YoFramePoint3D cop3D;
+      private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
+
+      private final DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(0, 0.005);
 
       public JacobianBasedWrenchEstimator(RigidBodyBasics foot,
                                           RigidBodyBasics rootBody,
@@ -78,16 +85,13 @@ public class JointTorqueFromForceSensorVisualizer
 
          joints = MultiBodySystemTools.createOneDoFJointPath(rootBody, foot);
 
-         if (joints.length != 6)
-            throw new RuntimeException("We can't yet use the Jacobian Based Wrench calculator, because the Jacobian isn't square. We need to implement this with a pseudo inverse.");
-
          jacobian = new GeometricJacobian(rootBody, foot, soleFrame);
          gravityTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(joints));
          gravityTorqueCalculator.setConsiderJointAccelerations(false);
          gravityTorqueCalculator.setGravitionalAcceleration(-9.81); // TODO Extract me
 
-         jointGravityTaus = new YoDouble[6];
-         jointTausFromFTSensor = new YoDouble[6];
+         jointGravityTaus = new YoDouble[joints.length];
+         jointTausFromFTSensor = new YoDouble[joints.length];
 
          for (int i = 0; i < jointGravityTaus.length; i++)
          {
@@ -102,6 +106,9 @@ public class JointTorqueFromForceSensorVisualizer
          wrenchNoGravity = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
                                                   new YoFrameVector3D(namePrefix + "EstimatedTorqueNoGravity", soleFrame, registry),
                                                   new YoFrameVector3D(namePrefix + "EstimatedForceNoGravity", soleFrame, registry));
+
+         cop2D = new YoFramePoint2D(namePrefix + "CoPInSole", "", soleFrame, registry);
+         cop3D = new YoFramePoint3D(namePrefix + "CoPInWorld", "", ReferenceFrame.getWorldFrame(), registry);
       }
 
       private final Wrench forceTorqueSensorWrench = new Wrench();
@@ -115,10 +122,10 @@ public class JointTorqueFromForceSensorVisualizer
          for (int i = 0; i < joints.length; i++)
             torqueVector.set(i, 0, joints[i].getTau());
 
-         solver.setA(jacobianTranspose);
+         pseudoInverseSolver.setA(jacobianTranspose);
          CommonOps_DDRM.scale(-1.0, torqueVector);
 
-         solver.solve(torqueVector, wrenchVector);
+         pseudoInverseSolver.solve(torqueVector, wrenchVector);
          wrench.set(wrenchVector);
 
          gravityTorqueCalculator.compute();
@@ -131,8 +138,11 @@ public class JointTorqueFromForceSensorVisualizer
 
          CommonOps_DDRM.scale(-1.0, torqueVector);
 
-         solver.solve(torqueVector, wrenchVector);
+         pseudoInverseSolver.solve(torqueVector, wrenchVector);
          wrenchNoGravity.set(wrenchVector);
+
+         centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop2D, wrenchNoGravity, cop2D.getReferenceFrame());
+         cop3D.setMatchingFrame(cop2D, 0.0);
 
          forceTorqueSensorWrench.setIncludingFrame(footSwitch.getMeasuredWrench());
          forceTorqueSensorWrench.changeFrame(jacobian.getJacobianFrame());
