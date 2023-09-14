@@ -7,12 +7,14 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.*;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -37,6 +39,7 @@ public class RDXPerceptionSceneGraphUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean showGraphics = new ImBoolean(true);
+   private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
    private final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
@@ -107,6 +110,23 @@ public class RDXPerceptionSceneGraphUI
       }
    }
 
+   private void renderSceneNodeTree(SceneNode sceneNode, int level)
+   {
+      if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+      {
+         ImGui.setCursorPos(ImGui.getCursorPosX() + 20f + (level * 2), ImGui.getCursorPosY());
+         {
+            ImGui.beginGroup();
+            uiSceneNode.renderImGuiWidgets();
+            for (SceneNode child : sceneNode.getChildren())
+            {
+               renderSceneNodeTree(child, ++level);
+            }
+            ImGui.endGroup();
+         }
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
@@ -122,14 +142,22 @@ public class RDXPerceptionSceneGraphUI
       ImGui.popItemWidth();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
+      ImGui.checkbox(labels.get("View as tree"), viewAsTree);
       ImGui.separator();
 
-      for (SceneNode sceneNode : sceneNodesByID)
+      if (viewAsTree.get())
       {
-         if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+         renderSceneNodeTree(sceneGraph.getRootNode(), 0);
+      }
+      else
+      {
+         for (SceneNode sceneNode : sceneNodesByID)
          {
-            uiSceneNode.renderImGuiWidgets();
-            ImGui.separator();
+            if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+            {
+               uiSceneNode.renderImGuiWidgets();
+               ImGui.separator();
+            }
          }
       }
    }
