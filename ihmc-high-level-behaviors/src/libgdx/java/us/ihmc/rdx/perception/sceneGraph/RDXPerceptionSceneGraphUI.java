@@ -131,14 +131,15 @@ public class RDXPerceptionSceneGraphUI
 
       if (viewAsTree.get())
       {
-         renderSceneNodeTree(sceneGraph.getRootNode(), ImGui.getCursorPosX());
+         renderSceneNodesAsTree(sceneGraph.getRootNode(), ImGui.getCursorPosX());
       }
-      else
+      else // Render IDs in order so they don't jump around
       {
          for (SceneNode sceneNode : sceneNodesByID)
          {
             if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
             {
+               ImGuiTools.textBold(sceneNode.getName());
                uiSceneNode.renderImGuiWidgets();
                ImGui.separator();
             }
@@ -146,19 +147,29 @@ public class RDXPerceptionSceneGraphUI
       }
    }
 
-   private void renderSceneNodeTree(SceneNode sceneNode, float cursorX)
+   private void renderSceneNodesAsTree(SceneNode sceneNode, float cursorX)
    {
       if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
       {
          ImGui.setCursorPos(cursorX, ImGui.getCursorPosY());
          {
-            ImGui.beginGroup();
-            uiSceneNode.renderImGuiWidgets();
-            for (SceneNode child : sceneNode.getChildren())
+            boolean expanded = false;
+            ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+            if (ImGui.treeNode(labels.get(sceneNode.getName())))
             {
-               renderSceneNodeTree(child, cursorX + 20.0f);
+               expanded = true;
+               ImGui.popFont();
+
+               uiSceneNode.renderImGuiWidgets();
+               for (SceneNode child : sceneNode.getChildren())
+               {
+                  renderSceneNodesAsTree(child, cursorX + 20.0f);
+               }
+               ImGui.treePop();
             }
-            ImGui.endGroup();
+
+            if (!expanded)
+               ImGui.popFont();
          }
       }
    }
