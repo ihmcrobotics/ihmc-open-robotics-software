@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -113,7 +114,8 @@ public class RDXPerceptionSceneGraphUI
    public void renderImGuiWidgets()
    {
       int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
-      int numberOfOnRobotNodes = sceneGraphSubscription.getLatestSceneGraphMessage().getSceneTreeIndices().size();
+      SceneGraphMessage latestSceneGraphMessage = sceneGraphSubscription.getLatestSceneGraphMessage();
+      int numberOfOnRobotNodes = latestSceneGraphMessage == null ? 0 : latestSceneGraphMessage.getSceneTreeIndices().size();
       ImGui.text("UI nodes: %d   On robot nodes: %d   State: ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
       ImGui.sameLine();
       if (sceneGraphSubscription.getLocalTreeFrozen())
