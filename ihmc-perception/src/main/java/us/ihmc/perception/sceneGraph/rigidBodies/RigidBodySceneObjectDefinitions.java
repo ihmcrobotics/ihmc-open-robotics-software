@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -53,30 +54,49 @@ public class RigidBodySceneObjectDefinitions
       CAN_OF_SOUP_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
    }
 
-   public static void createBox(SceneGraph sceneGraph, SceneNode parentNode)
+   public static boolean ensureNodesAdded(SceneGraph sceneGraph)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                           "Box",
-                                                                           sceneGraph.getIDToNodeMap(),
-                                                                           parentNode.getID(),
-                                                                           BOX_TO_MARKER_TRANSFORM,
-                                                                           BOX_VISUAL_MODEL_FILE_PATH,
-                                                                           BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      parentNode.getChildren().add(node);
-   }
+      boolean addedAnyNodes = false;
 
-   /**
-    * Represents a can of soup detected by a statically nearby placed ArUco marker.
-    */
-   public static void createCanOfSoup(SceneGraph sceneGraph, SceneNode parentNode)
-   {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                           "CanOfSoup",
-                                                                           sceneGraph.getIDToNodeMap(),
-                                                                           parentNode.getID(),
-                                                                           CAN_OF_SOUP_TO_MARKER_TRANSFORM,
-                                                                           CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
-                                                                           CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      parentNode.getChildren().add(node);
+      ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
+      if (boxArUcoMarker != null)
+      {
+         SceneNode box = sceneGraph.getNamesToNodesMap().get("Box");
+         if (box == null)
+         {
+            box = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                   "Box",
+                                                   sceneGraph.getIDToNodeMap(),
+                                                   boxArUcoMarker.getID(),
+                                                   BOX_TO_MARKER_TRANSFORM,
+                                                   BOX_VISUAL_MODEL_FILE_PATH,
+                                                   BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            boxArUcoMarker.getChildren().add(box);
+            boxArUcoMarker.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
+      }
+
+      ArUcoMarkerNode canOfSoupMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(CAN_OF_SOUP_MARKER_ID);
+      if (canOfSoupMarker != null)
+      {
+         SceneNode canOfSoup = sceneGraph.getNamesToNodesMap().get("CanOfSoup");
+         if (canOfSoup == null)
+         {
+            // Represents a can of soup detected by a statically nearby placed ArUco marker.
+            canOfSoup = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                         "CanOfSoup",
+                                                         sceneGraph.getIDToNodeMap(),
+                                                         canOfSoupMarker.getID(),
+                                                         CAN_OF_SOUP_TO_MARKER_TRANSFORM,
+                                                         CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
+                                                         CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            canOfSoupMarker.getChildren().add(canOfSoup);
+            canOfSoupMarker.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
+      }
+
+      return addedAnyNodes;
    }
 }

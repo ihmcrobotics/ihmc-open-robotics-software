@@ -1,8 +1,8 @@
 package us.ihmc.perception.sceneGraph;
 
-import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -39,7 +39,7 @@ public class SceneGraph
    private transient final TLongObjectMap<SceneNode> idToNodeMap = new TLongObjectHashMap<>();
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
-   private transient final TIntDoubleMap arUcoMarkerIDsToSizesMap = new TIntDoubleHashMap();
+   private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final List<SceneGraphNodeMove> sceneGraphNodeMoves = new ArrayList<>();
 
    public SceneGraph()
@@ -88,7 +88,7 @@ public class SceneGraph
       idToNodeMap.clear();
       nodeNameList.clear();
       namesToNodesMap.clear();
-      arUcoMarkerIDsToSizesMap.clear();
+      arUcoMarkerIDToNodeMap.clear();
       updateCaches(rootNode);
    }
 
@@ -100,7 +100,7 @@ public class SceneGraph
 
       if (node instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
-         arUcoMarkerIDsToSizesMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode.getMarkerSize());
+         arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
       }
 
       for (SceneNode child : node.getChildren())
@@ -134,9 +134,9 @@ public class SceneGraph
       return namesToNodesMap;
    }
 
-   public TIntDoubleMap getArUcoMarkerIDsToSizesMap()
+   public TIntObjectMap<ArUcoMarkerNode> getArUcoMarkerIDToNodeMap()
    {
-      return arUcoMarkerIDsToSizesMap;
+      return arUcoMarkerIDToNodeMap;
    }
 
    public List<SceneGraphNodeMove> getSceneGraphNodeMoves()
