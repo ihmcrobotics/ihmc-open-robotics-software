@@ -156,11 +156,10 @@ public class RDXPerceptionSceneGraphUI
 
          boolean expanded = false;
          ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-         if (ImGui.treeNode(labels.get(sceneNode.getName())))
+         if (ImGui.treeNode("##sceneNode-" + sceneNode.getID(), sceneNode.getName()))
          {
             expanded = true;
             ImGui.popFont();
-
 
             uiSceneNode.renderImGuiWidgets();
             for (SceneNode child : sceneNode.getChildren())
