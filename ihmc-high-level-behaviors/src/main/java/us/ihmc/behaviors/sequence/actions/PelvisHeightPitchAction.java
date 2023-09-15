@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -60,17 +61,27 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionData impleme
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
       syncedPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
-      message.getSe3Trajectory()
-             .set(HumanoidMessageTools.createSE3TrajectoryMessage(getTrajectoryDuration(),
-                                                                        framePose.getPosition(),
-                                                                        framePose.getOrientation(),
+//      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
+//      message.getSe3Trajectory()
+//             .set(HumanoidMessageTools.createSE3TrajectoryMessage(getTrajectoryDuration(),
+//                                                                        framePose.getPosition(),
+//                                                                        framePose.getOrientation(),
+//                                                                        ReferenceFrame.getWorldFrame()));
+//      long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+//      message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+//      message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
+//      message.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
+//      message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
+      message.getEuclideanTrajectory()
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(getTrajectoryDuration(),
+                                                                        new Point3D(0.0, 0.0, getHeight()),
                                                                         ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
+      message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
 
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
@@ -93,21 +104,20 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionData impleme
 
       isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
                                                      syncedPelvisPose,
-                                                     POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
+                                                     POSITION_TOLERANCE, Double.NaN,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
-                                                     BehaviorActionCompletionComponent.TRANSLATION,
-                                                     BehaviorActionCompletionComponent.ORIENTATION);
+                                                     BehaviorActionCompletionComponent.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+//      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+//      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
       executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+//      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
    }
 
    @Override
