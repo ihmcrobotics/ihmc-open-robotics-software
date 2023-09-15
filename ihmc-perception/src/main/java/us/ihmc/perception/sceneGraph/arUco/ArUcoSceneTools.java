@@ -4,6 +4,7 @@ import gnu.trove.iterator.TIntIterator;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 
@@ -23,7 +24,6 @@ public class ArUcoSceneTools
          {
             int detectedID = iterator.next();
             ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
-
             if (arUcoMarkerNode == null) // Add ArUco marker node if it is missing
             {
                LogTools.info("Adding detected ArUco marker to scene graph: {}", detectedID);
@@ -36,17 +36,24 @@ public class ArUcoSceneTools
                sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode);
                modifiedSceneGraph = true;
             }
+         }
 
-            boolean isDetected = arUcoMarkerDetection.isDetected(arUcoMarkerNode.getMarkerID());
-            arUcoMarkerNode.setCurrentlyDetected(isDetected);
-            if (isDetected)
+         // All ArUco markers are child of root
+         for (SceneNode child : sceneGraph.getRootNode().getChildren())
+         {
+            if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               arUcoMarkerDetection.getPose(arUcoMarkerNode.getMarkerID(),
-                                            arUcoMarkerNode.getMarkerSize(),
-                                            arUcoMarkerNode.getNodeFrame().getParent(),
-                                            arUcoMarkerNode.getNodeToParentFrameTransform());
-               arUcoMarkerNode.applyFilter();
-               arUcoMarkerNode.getNodeFrame().update();
+               boolean isDetected = arUcoMarkerDetection.isDetected(arUcoMarkerNode.getMarkerID());
+               arUcoMarkerNode.setCurrentlyDetected(isDetected);
+               if (isDetected)
+               {
+                  arUcoMarkerDetection.getPose(arUcoMarkerNode.getMarkerID(),
+                                               arUcoMarkerNode.getMarkerSize(),
+                                               arUcoMarkerNode.getNodeFrame().getParent(),
+                                               arUcoMarkerNode.getNodeToParentFrameTransform());
+                  arUcoMarkerNode.applyFilter();
+                  arUcoMarkerNode.getNodeFrame().update();
+               }
             }
          }
       }
