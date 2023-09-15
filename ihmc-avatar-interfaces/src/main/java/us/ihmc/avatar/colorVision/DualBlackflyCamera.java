@@ -370,7 +370,7 @@ public class DualBlackflyCamera
       arUcoMarkerDetection.create(rightBlackflyCameraFrame);
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
       newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDsToSizesMap());
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDToNodeMap());
 
       // Close pointers
       tempUndistortionMat2.close();

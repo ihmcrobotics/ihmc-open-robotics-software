@@ -92,7 +92,7 @@ public class RDXPerceptionSceneGraphDemo
 
             arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
                                                                       ros2Helper,
-                                                                      onRobotSceneGraph.getArUcoMarkerIDsToSizesMap());
+                                                                      onRobotSceneGraph.getArUcoMarkerIDToNodeMap());
 
             sceneGraphSubscription = new ROS2SceneGraphSubscription(onRobotSceneGraph, ros2Helper, ROS2IOTopicQualifier.COMMAND);
             perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(operatorSceneGraph, ros2Helper, baseUI.getPrimary3DPanel());
