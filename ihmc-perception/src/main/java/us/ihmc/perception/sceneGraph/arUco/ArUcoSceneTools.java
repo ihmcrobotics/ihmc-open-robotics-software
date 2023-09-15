@@ -65,6 +65,7 @@ public class ArUcoSceneTools
             }
          }
 
+         sceneGraph.updateCaches();
          sceneGraph.ensureFramesMatchParentsRecursively();
       }
    }

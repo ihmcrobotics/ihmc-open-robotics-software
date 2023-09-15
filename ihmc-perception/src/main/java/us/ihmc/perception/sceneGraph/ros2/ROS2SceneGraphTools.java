@@ -67,6 +67,8 @@ public class ROS2SceneGraphTools
          sceneNode = new SceneNode(nodeID, nodeName);
       }
 
+      sceneGraph.getIDToNodeMap().put(nodeID, sceneNode); // Make sure any new nodes are in the map
+
       return sceneNode;
    }
 }
