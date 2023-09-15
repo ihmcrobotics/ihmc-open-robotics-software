@@ -86,71 +86,69 @@ public class ROS2SceneGraphSubscription
 
          if (!localTreeFrozen)
             clearChildren(sceneGraph.getRootNode());
-         updateLocalTreeFromSubscription(subscriptionRootNode);
+         updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), ReferenceFrame.getWorldFrame());
 
-         sceneGraph.ensureFramesMatchParentsRecursively();
          sceneGraph.updateCaches();
       }
       return newMessageAvailable;
    }
 
-   private SceneNode updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode)
+   private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode, SceneNode localNode, ReferenceFrame parentFrame)
    {
-      SceneNode localNode = sceneGraph.getIDToNodeMap().get(subscriptionNode.getSceneNodeMessage().getId());
-
-      if (!localTreeFrozen && localNode == null) // New node that wasn't in the local tree
-      {
-         localNode = newNodeSupplier.apply(subscriptionNode);
-      }
-
       // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
       // This'll happen if a node is deleted locally. We want that change to propagate and not add
       // it right back.
-      if (localNode != null)
+      if (localNode instanceof DetectableSceneNode detectableSceneNode)
       {
-         if (localNode instanceof DetectableSceneNode detectableSceneNode)
+         detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
+      }
+      if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+      {
+         staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessage().getCurrentDistanceToRobot());
+      }
+
+      // If the node was recently modified by the operator, the node does not accept
+      // updates of these values. This is to allow the operator's changes to propagate
+      // and so it doesn't get overriden immediately by an out of date message coming from the robot.
+      // On the robot side, this will always get updated because there is no operator.
+      if (!localTreeFrozen)
+      {
+         if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
          {
-            detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
+            arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
+            arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
+            arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
-            staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessage().getCurrentDistanceToRobot());
+            staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
          }
 
-         // If the node was recently modified by the operator, the node does not accept
-         // updates of these values. This is to allow the operator's changes to propagate
-         // and so it doesn't get overriden immediately by an out of date message coming from the robot.
-         // On the robot side, this will always get updated because there is no operator.
-         if (!localTreeFrozen)
-         {
-            if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
-            {
-               arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
-               arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
-               arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
-            }
-            if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-            {
-               staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
-            }
+         localNode.ensureParentFrameEquals(parentFrame);
 
-            MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
-            nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-            nodePose.changeFrame(localNode.getNodeFrame().getParent());
-            nodePose.get(localNode.getNodeToParentFrameTransform());
-            localNode.getNodeFrame().update();
+         MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
+         nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
+         nodePose.changeFrame(localNode.getNodeFrame().getParent());
+         nodePose.get(localNode.getNodeToParentFrameTransform());
+         localNode.getNodeFrame().update();
+      }
+
+      for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
+      {
+         SceneNode localChildNode = sceneGraph.getIDToNodeMap().get(subscriptionChildNode.getSceneNodeMessage().getId());
+         if (localChildNode == null && !localTreeFrozen) // New node that wasn't in the local tree
+         {
+            localChildNode = newNodeSupplier.apply(subscriptionChildNode);
          }
 
-         for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
+         if (localChildNode != null)
          {
-            SceneNode localChildNode = updateLocalTreeFromSubscription(subscriptionChildNode);
+            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode.getNodeFrame());
 
             if (!localTreeFrozen)
                localNode.getChildren().add(localChildNode);
          }
       }
-
-      return localNode;
    }
 
    private void checkTreeModified(SceneNode localNode)
