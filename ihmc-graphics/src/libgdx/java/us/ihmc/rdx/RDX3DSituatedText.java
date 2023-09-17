@@ -45,8 +45,9 @@ public class RDX3DSituatedText implements RenderableProvider
    public static final float DEFAULT_HEIGHT = 0.1f;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
-   private final HashMap<String, ModelInstance> textModelInstances = new HashMap<>();
-   private ModelInstance modelInstance;
+   private final HashMap<String, RDX3DSituatedTextData> textDataMap = new HashMap<>();
+   private RDX3DSituatedTextData textData;
+   private String currentText;
    private final Font awtFont;
    private final Color awtColor;
    private final float textHeightMeters;
@@ -77,17 +78,20 @@ public class RDX3DSituatedText implements RenderableProvider
 
    public void setText(String text)
    {
-      modelInstance = textModelInstances.get(text);
+      this.currentText = text;
+      textData = textDataMap.get(text);
 
-      if (modelInstance == null)
+      if (textData == null)
       {
-         modelInstance = newText(text);
-         textModelInstances.put(text, modelInstance);
+         setTextWithoutCache(text);
+         textDataMap.put(text, textData);
       }
    }
 
-   private ModelInstance newText(String text)
+   public RDX3DSituatedTextData setTextWithoutCache(String text)
    {
+      this.currentText = text;
+
       // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
       // Create temporary image here in order to get Graphics2D instance
       BufferedImage onePixelImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
@@ -150,17 +154,25 @@ public class RDX3DSituatedText implements RenderableProvider
       float normalY = 0.0f;
       float normalZ = 1.0f;
       Model model = modelBuilder.createRect(x00, y00, z00, x10, y10, z10, x11, y11, z11, x01, y01, z01, normalX, normalY, normalZ, material, attributes);
-      return new ModelInstance(model);
+      ModelInstance modelInstance = new ModelInstance(model);
+      textData = new RDX3DSituatedTextData(pixmap, rgba8888BytePointer, libGDXTexture, model, modelInstance);
+
+      return textData;
    }
 
    public Matrix4 getModelTransform()
    {
-      return modelInstance.transform;
+      return textData.getModelInstance().transform;
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      modelInstance.getRenderables(renderables, pool);
+      textData.getModelInstance().getRenderables(renderables, pool);
+   }
+
+   public String getCurrentText()
+   {
+      return currentText;
    }
 }
