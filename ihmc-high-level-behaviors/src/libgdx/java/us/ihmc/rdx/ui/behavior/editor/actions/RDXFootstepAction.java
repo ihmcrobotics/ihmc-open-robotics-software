@@ -4,139 +4,118 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepActionData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
-import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXFootstepAction extends RDXBehaviorAction
+import java.util.function.BooleanSupplier;
+
+/**
+ * This class is a fully mutable and transitive interactable representation of FootstepActionData.
+ */
+public class RDXFootstepAction
 {
-   private final FootstepActionData actionData = new FootstepActionData();
-   private final RDXPose3DGizmo solePoseGizmo = new RDXPose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
-   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
-   private final SideDependentList<RigidBodyTransform> ankleToSoleFrameTransforms = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
-   private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
+   private final ReferenceFrameSupplier planFrameSupplier;
+   private final RDXBaseUI baseUI;
+   private final DRCRobotModel robotModel;
+   private final BooleanSupplier planSelected;
+   private FootstepActionData actionData;
+   private RDXInteractableFootstep interactableFootstep;
+   private RDXFootstepGraphic flatFootstepGraphic;
 
-   public RDXFootstepAction(RDX3DPanel panel3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXFootstepAction(ReferenceFrameSupplier planFrameSupplier,
+                            RDXBaseUI baseUI,
+                            DRCRobotModel robotModel,
+                            BooleanSupplier planSelected)
    {
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.planFrameSupplier = planFrameSupplier;
+      this.baseUI = baseUI;
+      this.robotModel = robotModel;
+      this.planSelected = planSelected;
+   }
 
-      for (RobotSide side : RobotSide.values)
+   public void update(FootstepActionData actionData, int stepIndex)
+   {
+      this.actionData = actionData;
+
+      if (interactableFootstep == null
+       || stepIndex != interactableFootstep.getIndex()
+       || actionData.getSide() != interactableFootstep.getFootstepSide())
       {
-         RigidBodyTransform ankleToSoleFrameTransform = new RigidBodyTransform(robotModel.getJointMap().getSoleToParentFrameTransform(side));
-         ankleToSoleFrameTransform.invert();
-         ankleToSoleFrameTransforms.put(side, ankleToSoleFrameTransform);
-         graphicFrame.update(transformToParent -> transformToParent.set(ankleToSoleFrameTransform));
-
-         String footBodyName = syncedRobot.getFullRobotModel().getFoot(side).getName();
-         String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
-         highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
+         recreateGraphics(actionData.getSide(), stepIndex);
       }
 
-      referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
-      solePoseGizmo.create(panel3D);
-   }
-
-   @Override
-   public void updateAfterLoading()
-   {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentReferenceFrame().getName());
-   }
-
-   public void setSide(RobotSide side)
-   {
-      actionData.setSide(side);
-   }
-
-   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
-   {
-      actionData.changeParentFrame(parentFrame);
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
-      update();
-   }
-
-   public void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
-      update();
-   }
-
-   @Override
-   public void update()
-   {
-      if (solePoseGizmo.getGizmoFrame() != actionData.getReferenceFrame())
+      ReferenceFrame updatedPlanFrame = planFrameSupplier.get();
+      if (updatedPlanFrame != getFootstepFrame().getParent())
       {
-         solePoseGizmo.setGizmoFrame(actionData.getReferenceFrame());
-         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
+         getGizmo().changeParentFrameWithoutMoving(updatedPlanFrame);
       }
 
-      solePoseGizmo.update();
-      highlightModels.get(actionData.getSide()).setPose(graphicFrame.getReferenceFrame());
+      getGizmo().update();
+
+      if (getGizmo().getGizmoModifiedByUser().poll())
+         actionData.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
+      else
+      {
+         getGizmo().getTransformToParent().set(actionData.getSolePose()); // Update gizmo in case action data changes
+         getGizmo().update();
+      }
+
+      interactableFootstep.update();
+
+      flatFootstepGraphic.setPose(getGizmo().getPose());
    }
 
-   @Override
+   /** The only reason we have to recreate these is because the side isn't mutable. */
+   private void recreateGraphics(RobotSide side, int stepIndex)
+   {
+      interactableFootstep = new RDXInteractableFootstep(baseUI, side, stepIndex, null);
+      flatFootstepGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(), side);
+      flatFootstepGraphic.create();
+   }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (getSelected().get())
+      if (planSelected.getAsBoolean())
       {
-         solePoseGizmo.calculate3DViewPick(input);
+         interactableFootstep.calculate3DViewPick(input);
       }
    }
 
-   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (getSelected().get())
+      if (planSelected.getAsBoolean())
       {
-         solePoseGizmo.process3DViewInput(input);
+         interactableFootstep.process3DViewInput(input, false);
       }
    }
 
-   @Override
-   public void renderImGuiSettingWidgets()
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (referenceFrameLibraryCombo.render())
-      {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
-         update();
-      }
+      if (planSelected.getAsBoolean())
+         interactableFootstep.getVirtualRenderables(renderables, pool);
+      else
+         flatFootstepGraphic.getRenderables(renderables, pool);
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      highlightModels.get(actionData.getSide()).getRenderables(renderables, pool);
-      if (getSelected().get())
-         solePoseGizmo.getRenderables(renderables, pool);
-   }
-
-   @Override
-   public String getActionTypeTitle()
-   {
-      return actionData.getSide().getPascalCaseName() + " Footstep";
-   }
-
-   public ReferenceFrame getReferenceFrame()
-   {
-      return solePoseGizmo.getGizmoFrame();
-   }
-
-   @Override
    public FootstepActionData getActionData()
    {
       return actionData;
+   }
+
+   public ReferenceFrame getFootstepFrame()
+   {
+      return getGizmo().getGizmoFrame();
+   }
+
+   public RDXPose3DGizmo getGizmo()
+   {
+      return interactableFootstep.getSelectablePose3DGizmo().getPoseGizmo();
    }
 }

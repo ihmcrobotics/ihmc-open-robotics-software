@@ -21,7 +21,7 @@ public class ImGuiReferenceFrameLibraryCombo
 
    public boolean render()
    {
-      return ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameLibrary.getReferenceFrameNames());
+      return ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameLibrary.getReferenceFrameNameArray());
    }
 
    public boolean setSelectedReferenceFrame(String referenceFrameName)
@@ -37,6 +37,6 @@ public class ImGuiReferenceFrameLibraryCombo
 
    public ReferenceFrameSupplier getSelectedReferenceFrame()
    {
-      return referenceFrameLibrary.getReferenceFrameSuppliers().get(referenceFrameIndex.get());
+      return referenceFrameLibrary.findFrameByIndex(referenceFrameIndex.get());
    }
 }

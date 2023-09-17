@@ -3,17 +3,16 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,10 +61,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
       ReferenceFrame syncedControlFrame = fullRobotModel.getHandControlFrame(side);
-      RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
-      RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
-      HandTransformTools.getHandLinkToControlFrameTransform(fullRobotModel, side, linkToControlFrameTransform);
-      HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
+
+      RigidBodyTransformReadOnly linkToControlFrameTransform = HandTransformTools.getHandLinkToControlFrameTransform(fullRobotModel, side);
+      RigidBodyTransformReadOnly graphicToControlFrameTransform = HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side);
+
       super.create(robotCollidable, syncedControlFrame, graphicToControlFrameTransform, linkToControlFrameTransform, modelFileName, baseUI.getPrimary3DPanel());
 
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
@@ -137,28 +136,17 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public void processVRInput(RDXVRContext vrContext)
    {
       super.processVRInput(vrContext);
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-            RDXVRDragData gripDragData = controller.getGripDragData();
-            if (isVRHovering() || gripDragData.getObjectBeingDragged() == this)
+            if (isVRPointing(side) || isVRHovering(side) || controller.getGripDragData().isBeingDragged(this))
             {
-               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
-               if (joystickButton.bChanged() && joystickButton.bState())
-               {
-                  Runnable radialMenuSelection = controller.getRadialMenuRunnable(openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
-                  if (radialMenuSelection != null)
-                     radialMenuSelection.run();
-               }
+               controller.getRadialMenu().run(controller,
+                                              "Open Hand", "Close Hand", "Door Avoidance", "Home Position",
+                                              openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
             }
-            else
-            {
-               controller.setRadialMenuSelection(null);
-            }
-            //TODO make radial menu disappear when joystick is active and move away from hovering
-            controller.setRadialMenuBoxPosition(isVRHovering());
          });
       }
    }

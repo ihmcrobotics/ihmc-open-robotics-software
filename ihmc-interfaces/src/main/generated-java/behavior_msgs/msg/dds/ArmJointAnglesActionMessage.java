@@ -17,6 +17,10 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
             */
    public byte robot_side_ = (byte) 255;
    /**
+            * Preset arm configuration
+            */
+   public int preset_;
+   /**
             * Joint angles
             */
    public double[] joint_angles_;
@@ -42,6 +46,8 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
+
+      preset_ = other.preset_;
 
       for(int i1 = 0; i1 < joint_angles_.length; ++i1)
       {
@@ -75,6 +81,21 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
    public byte getRobotSide()
    {
       return robot_side_;
+   }
+
+   /**
+            * Preset arm configuration
+            */
+   public void setPreset(int preset)
+   {
+      preset_ = preset;
+   }
+   /**
+            * Preset arm configuration
+            */
+   public int getPreset()
+   {
+      return preset_;
    }
 
 
@@ -122,6 +143,8 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
       if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preset_, other.preset_, epsilon)) return false;
+
       for(int i3 = 0; i3 < joint_angles_.length; ++i3)
       {
                 if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_angles_[i3], other.joint_angles_[i3], epsilon)) return false;
@@ -145,6 +168,8 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
+      if(this.preset_ != otherMyClass.preset_) return false;
+
       for(int i5 = 0; i5 < joint_angles_.length; ++i5)
       {
                 if(this.joint_angles_[i5] != otherMyClass.joint_angles_[i5]) return false;
@@ -166,6 +191,8 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("preset=");
+      builder.append(this.preset_);      builder.append(", ");
       builder.append("joint_angles=");
       builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
       builder.append("trajectory_duration=");

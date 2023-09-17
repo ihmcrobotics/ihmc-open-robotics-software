@@ -203,7 +203,7 @@ public class ICPController implements ICPControllerInterface
 
       copConstraintHandler = new ICPCoPConstraintHandler(icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, null);
+      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
 
@@ -460,7 +460,7 @@ public class ICPController implements ICPControllerInterface
                                                       desiredICP,
                                                       finalICP,
                                                       perfectCMP,
-                                                      unconstrainedFeedbackCMP,
+                                                      unconstrainedFeedbackCMPNoScaling,
                                                       copConstraintHandler.getCoPConstraint()));
       else
          feedForwardAlpha.set(0.0);
