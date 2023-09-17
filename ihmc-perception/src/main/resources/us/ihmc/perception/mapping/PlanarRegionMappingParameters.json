@@ -1,12 +1,12 @@
 {
   "title" : "PlanarRegionMappingParameters",
   "Update Alpha towards match" : {
-    "value" : 0.001,
+    "value" : 0.004,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
     "Similarity threshold between normals" : {
-        "value" : 0.90,
+        "value" : 0.85,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -36,7 +36,7 @@
         "upperBound" : 1.0
     },
     "Plane noise variance" : {
-        "value" : 0.0001,
+        "value" : 0.000001,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -46,7 +46,7 @@
         "upperBound" : 1.0
     },
     "State estimator noise variance" : {
-        "value" : 0.00000001,
+        "value" : 0.0000000001,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },

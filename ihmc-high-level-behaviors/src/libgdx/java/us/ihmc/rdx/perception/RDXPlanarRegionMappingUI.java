@@ -5,12 +5,14 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.mapping.PlanarRegionMapStatistics;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
@@ -18,6 +20,7 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarLandmarkList;
@@ -30,6 +33,7 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    private RDXStoredPropertySetTuner mappingParametersTuner;
    private PlanarRegionMappingHandler mappingManager;
    private RDXPanel panel;
+   private RDXFootstepPlanGraphic footstepPlanGraphic;
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
    private ImGuiPlot quaternionAveragingDurationPlot;
@@ -70,6 +74,8 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
       quaternionAveragingDurationPlot = new ImGuiPlot(labels.get("ICP duration"), 1000, 300, 50);
       factorGraphDurationPlot = new ImGuiPlot(labels.get("ICP registration duration"), 1000, 300, 50);
       regionMergingDurationPlot = new ImGuiPlot(labels.get("Region merging duration"), 1000, 300, 50);
+
+      footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    }
 
    public void renderImGuiWidgets()
@@ -86,7 +92,9 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
 
             ImGui.checkbox("Render live mode", renderEnabled);
             if (ImGui.button("Load Next Set"))
+            {
                mappingManager.nextButtonCallback();
+            }
             ImGui.sameLine();
             if (ImGui.button("Perform Map Clean-up"))
                mappingManager.performMapCleanUp();
@@ -108,6 +116,18 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
                mapRegionsGraphic.clear();
                mapRegionsGraphic.update();
                mappingManager.hardResetTheMap();
+            }
+            if (ImGui.button("Load and Evaluate"))
+            {
+               mappingManager.nextButtonCallback();
+
+               FootstepDataListMessage message = mappingManager.getFootstepsMessage();
+
+               if (message != null)
+               {
+                  footstepPlanGraphic.generateMeshesAsync(message, "Evaluation Footstep Plan");
+                  footstepPlanGraphic.update();
+               }
             }
 
             ImGui.checkbox("Render Bounding Box", renderBoundingBoxEnabled);
@@ -235,5 +255,7 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
 
       if (renderMatchLinesEnabled.get())
          matchLineMesh.getRenderables(renderables, pool);
+
+      footstepPlanGraphic.getRenderables(renderables, pool);
    }
 }

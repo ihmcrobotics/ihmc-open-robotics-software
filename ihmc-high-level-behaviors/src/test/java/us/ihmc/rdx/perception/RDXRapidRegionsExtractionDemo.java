@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
@@ -18,8 +19,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.PerceptionEvaluationTools;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -32,6 +35,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -46,7 +51,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_204753_PerceptionLog.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
@@ -63,6 +68,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ImInt frameIndex = new ImInt(0);
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Pose3D cameraPose = new Pose3D();
+
+   private FootstepPlanningModule footstepPlanningModule;
+   private FootstepDataListMessage footstepsMessage;
 
    private BytedecoImage bytedecoDepthImage;
    private RDXPanel navigationPanel;
@@ -87,6 +95,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    public RDXRapidRegionsExtractionDemo()
    {
       perceptionDataLoader = new PerceptionDataLoader();
+      footstepPlanningModule = new FootstepPlanningModule("perceptionUI");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -191,8 +200,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          @Override
          public void render()
          {
-
-            if (userChangedIndex.poll())
+            if (userChangedIndex.read())
             {
                loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
                {
@@ -201,7 +209,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                });
             }
 
-            updateRapidRegionsExtractor();
+            if (userChangedIndex.poll())
+            {
+               updateRapidRegionsExtractor();
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -275,8 +286,12 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
                frameRegions.getPlanarRegionsList().clear();
                rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, frameRegions);
+
+
                //frameRegions.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
                planarRegionsListToRenderNotification.set(frameRegions.getPlanarRegionsList().copy());
+
+               //planFootsteps(frameRegions.getPlanarRegionsList().copy(), cameraFrame);
             }
          }, getClass().getSimpleName() + "RapidRegions");
       }
@@ -288,10 +303,35 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       }
    }
 
+   public void planFootsteps(PlanarRegionsList planarRegions, ReferenceFrame sensorFrame)
+   {
+      planarRegions.applyTransform(sensorFrame.getTransformToWorldFrame());
+
+      Pose3D startPose = new Pose3D(sensorFrame.getTransformToWorldFrame());
+      startPose.getRotation().setToPitchOrientation(0.0);
+      startPose.getRotation().setToPitchOrientation(0.0);
+      startPose.getRotation().setToYawOrientation(sensorFrame.getTransformToWorldFrame().getRotation().getYaw());
+      startPose.getTranslation().setZ(0.0);
+
+      PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(0.5f,
+                                                                                           startPose.getTranslation(),
+                                                                                           startPose.getOrientation());
+      planarRegions.addPlanarRegion(initialSupportSquareRegion);
+
+      Pose3D goalPose = new Pose3D(startPose);
+      goalPose.appendTranslation(-0.5, 0.0, 0.0);
+
+      LogTools.info("Start: {}, Goal: {}", startPose, goalPose);
+
+      footstepsMessage = PerceptionEvaluationTools.planFootsteps(footstepPlanningModule, planarRegions, startPose, goalPose);
+   }
+
    public synchronized void generateMesh(PlanarRegionsList regionsList)
    {
       if (rapidPlanarRegionsExtractor.isModified())
       {
+         rapidRegionsUIPanel.renderFootstepGraphic(footstepsMessage);
+
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList(regionsList, cameraFrame.getTransformToWorldFrame());
          rapidRegionsUIPanel.render3DGraphics(framePlanarRegionsList);
          rapidRegionsUIPanel.render();

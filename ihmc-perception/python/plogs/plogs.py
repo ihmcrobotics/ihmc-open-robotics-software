@@ -190,7 +190,7 @@ def extract_trajectory_from_output(file):
     
 def analyzer_main():
     home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/perception/'
+    path = home + '/.ihmc/logs/perception/IROS_2023/'
     files = sorted(os.listdir(path))
     
     titles = [  'WalkForward_FallAtTheEnd', # 20230228_191411_PerceptionLog.hdf5
@@ -209,22 +209,22 @@ def analyzer_main():
 
     # INDEX TO LOAD ----------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    index_to_load = 4
+    index_to_load = 5
 
     # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     filename = files[index_to_load]
-    filename = '20230308_152625_PerceptionLog.hdf5'
+    print('Loading File ', index_to_load, ': ', filename, '\tTitle: ', titles[index_to_load])
 #     print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
 
     data = h5py.File(path + filename, 'r')
     print_file_info(data, filename)
 
-#     output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
+    output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
 
-    player_main(data)
+    # player_main(data)
     
-#     plotter_main(data, output_file)
+    plotter_main(data, output_file)
 
 def create_from_KITTI():
     home = os.path.expanduser('~')
@@ -277,55 +277,57 @@ def create_from_TUM(path):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
+    # parser = argparse.ArgumentParser()
 
-    parser.add_argument("--path", help="path to search for files", type=str)
-    parser.add_argument("--list", help="increase output verbosity", action="store_true")
-    parser.add_argument("--info", help="file name for which to print info", type=str)
-    parser.add_argument("--play", help="file name to play", type=str)
-    parser.add_argument("--plot", help="file name to plot", type=str)
-    parser.add_argument("--fix", help="file name to fix", type=str)
-    parser.add_argument("--fixAll", help="fixes all files that need fixing in the logs/perception directory", action="store_true")
-    parser.add_argument("--dst", help="destination file name", type=str)
-    parser.add_argument("--rename", help="rename file to include sensors used", type=str)
-    parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
-    parser.add_argument("--createTUM", help="renames ALL files in the logs/perception directory", action="store_true")
+    # parser.add_argument("--path", help="path to search for files", type=str)
+    # parser.add_argument("--list", help="increase output verbosity", action="store_true")
+    # parser.add_argument("--info", help="file name for which to print info", type=str)
+    # parser.add_argument("--play", help="file name to play", type=str)
+    # parser.add_argument("--plot", help="file name to plot", type=str)
+    # parser.add_argument("--fix", help="file name to fix", type=str)
+    # parser.add_argument("--fixAll", help="fixes all files that need fixing in the logs/perception directory", action="store_true")
+    # parser.add_argument("--dst", help="destination file name", type=str)
+    # parser.add_argument("--rename", help="rename file to include sensors used", type=str)
+    # parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
+    # parser.add_argument("--createTUM", help="renames ALL files in the logs/perception directory", action="store_true")
 
-    args = parser.parse_args()
-    home = os.path.expanduser('~')
-    path = args.path if args.path else home + '/.ihmc/logs/perception/'
+    # args = parser.parse_args()
+    # home = os.path.expanduser('~')
+    # path = args.path if args.path else home + '/.ihmc/logs/perception/'
 
-    if args.list:
-        files = sorted(os.listdir(path))
-        print_file_sizes(path, files)
+    # if args.list:
+    #     files = sorted(os.listdir(path))
+    #     print_file_sizes(path, files)
 
-    if args.info:
-        data = h5py.File(path + args.info, 'r')
-        print_file_info(data, args.info)
+    # if args.info:
+    #     data = h5py.File(path + args.info, 'r')
+    #     print_file_info(data, args.info)
 
-    if args.plot:
-        data = h5py.File(path + args.plot, 'r')
-        plot_data(data)
+    # if args.plot:
+    #     data = h5py.File(path + args.plot, 'r')
+    #     plot_data(data)
 
-    if args.play:
-        data = h5py.File(path + args.play, 'r')
-        player_main(data)
+    # if args.play:
+    #     data = h5py.File(path + args.play, 'r')
+    #     player_main(data)
 
-    if args.fix:
-        convert_main(path, args.fix, args.dst)
+    # if args.fix:
+    #     convert_main(path, args.fix, args.dst)
 
-    if args.fixAll:
-        files = sorted(os.listdir(path))
-        convert_all(path, files)
+    # if args.fixAll:
+    #     files = sorted(os.listdir(path))
+    #     convert_all(path, files)
     
-    if args.rename:
-        data = h5py.File(path + args.rename, 'r')
-        rename_file(path, data, args.rename)
+    # if args.rename:
+    #     data = h5py.File(path + args.rename, 'r')
+    #     rename_file(path, data, args.rename)
 
-    if args.renameAll:
-        files = sorted(os.listdir(path))
-        rename_all_files(path, files)
+    # if args.renameAll:
+    #     files = sorted(os.listdir(path))
+    #     rename_all_files(path, files)
 
-    if args.createTUM:
-        create_from_TUM(path + '/')
+    # if args.createTUM:
+    #     create_from_TUM(path + '/')
 
+
+    analyzer_main()

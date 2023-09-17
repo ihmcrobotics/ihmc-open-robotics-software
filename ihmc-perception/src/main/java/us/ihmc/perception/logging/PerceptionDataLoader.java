@@ -157,9 +157,6 @@ public class PerceptionDataLoader
    {
       Group group = hdf5Manager.openOrGetGroup(namespace);
       hdf5Tools.loadBytes(group, index, bytePointer);
-
-
-
       OpenCVTools.decompressDepthPNG(bytePointer, mat);
    }
 

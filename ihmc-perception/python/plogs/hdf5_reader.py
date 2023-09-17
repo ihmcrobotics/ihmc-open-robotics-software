@@ -247,6 +247,13 @@ def load_file(file_name):
     return data
 
 def plot_position(start_index, end_index, data_list, style_list, tag, type_string):
+
+    font = {'family' : 'normal',
+        'size'   : 20}
+
+    import matplotlib
+    matplotlib.rc('font', **font)
+
     # Compute RMSE between data_list[0] and data_list[1] with Eucledian distance between start index and end index
     fig3 = plt.figure(constrained_layout=True, figsize=(17,7))
     gs = fig3.add_gridspec(3, 7)
@@ -288,10 +295,10 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
 
 
     # Add a legend on the top-left corner with blue being Ground Truth and Red being the estimated position
-    xt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
-    yt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
-    zt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
-    xy_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
+    # xt_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
+    # yt_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
+    # zt_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
+    xy_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
 
 
     plt.show()

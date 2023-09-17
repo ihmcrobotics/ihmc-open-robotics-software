@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -14,17 +15,21 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.LocalizationAndMappingTask;
+import us.ihmc.perception.logging.PerceptionDataLoader;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -36,9 +41,12 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -57,6 +65,7 @@ public class HumanoidPerceptionModule
 
    private BytedecoImage realsenseDepthImage;
 
+   private final BytePointer depthBytePointer = new BytePointer(1000000);
    private final FramePose3D cameraPose = new FramePose3D();
 
    private OpenCLManager openCLManager;
@@ -71,14 +80,34 @@ public class HumanoidPerceptionModule
    private CollisionBoxProvider collisionBoxProvider;
    private FramePlanarRegionsList sensorFrameRegions;
 
-   private RobotConfigurationDataBuffer robotConfigurationDataBuffer;
-   private RobotConfigurationData robotConfigurationData;
+   private PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
 
+   private PerceptionDataLoader perceptionDataLoader;
+
+   private RobotConfigurationDataBuffer robotConfigurationDataBuffer;
+
+   private RobotConfigurationData robotConfigurationData;
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
+
+
+   private ArrayList<Point3D> sensorPositionBuffer;
+   private ArrayList<Quaternion> sensorOrientationBuffer;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
+   }
+
+   public void initializePerceptionLogLoader(String logFile)
+   {
+      perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader.openLogFile(logFile);
+
+      sensorPositionBuffer = new ArrayList<>();
+      sensorOrientationBuffer = new ArrayList<>();
+
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
+      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
    }
 
    public void initializeRealsenseDepthImage(int height, int width)
@@ -312,6 +341,28 @@ public class HumanoidPerceptionModule
       {
          PerceptionFilterTools.filterCollidingPlanarRegions(sensorFrameRegions, this.collidingScanRegionFilter);
       }
+   }
+
+   public void loadTerrainSensorData(int index)
+   {
+      perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME,
+                                               index,
+                                               depthBytePointer,
+                                               realsenseDepthImage.getBytedecoOpenCVMat());
+
+      Point3D position = sensorPositionBuffer.get(index);
+      Quaternion orientation = sensorOrientationBuffer.get(index);
+      RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform(orientation, position);
+
+      // sensorTransformToWorld.set(orientation, position);
+      cameraPose.set(sensorTransformToWorld);
+      cameraFrame.setPoseAndUpdate(cameraPose);
+      cameraFrame.update();
+   }
+
+   public ReferenceFrame getTerrainSensorFrame()
+   {
+      return cameraFrame;
    }
 
    public FramePlanarRegionsList getFramePlanarRegionsResult()

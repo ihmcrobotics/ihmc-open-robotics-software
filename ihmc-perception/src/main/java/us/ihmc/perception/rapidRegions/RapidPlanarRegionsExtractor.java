@@ -294,6 +294,15 @@ public class RapidPlanarRegionsExtractor
       }
    }
 
+   public void updateDebugger(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame)
+   {
+      debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(),
+                      currentFeatureGrid,
+                      patchGraph,
+                      cloudBuffer.getBackingDirectFloatBuffer(),
+                      cameraFrame.getTransformToWorldFrame());
+   }
+
    /**
     * Extracts features and generates patch graph from the input depth image on the GPU.
     */

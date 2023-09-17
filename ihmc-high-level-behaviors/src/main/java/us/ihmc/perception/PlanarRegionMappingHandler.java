@@ -1,11 +1,14 @@
 package us.ihmc.perception;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.perception.logging.PlanarRegionsListLogger;
 import us.ihmc.perception.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -88,6 +91,8 @@ public class PlanarRegionMappingHandler
    private FramePlanarRegionsList framePlanarRegionsList;
    private FramePlanarRegionsList previousRegions;
    private FramePlanarRegionsList currentRegions;
+   private FootstepPlanningModule footstepPlanningModule;
+   private FootstepDataListMessage footstepsMessage;
 
    private PlanarRegionsList aggregateRegions = new PlanarRegionsList();
    private PlanarRegionMap planarRegionMap;
@@ -163,6 +168,8 @@ public class PlanarRegionMappingHandler
 
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(logFile);
+
+      footstepPlanningModule = new FootstepPlanningModule("perceptionUI");
 
 //      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
 //      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
@@ -261,12 +268,12 @@ public class PlanarRegionMappingHandler
       if (source == DataSource.PLANAR_REGIONS_LOG && (planarRegionListIndex < planarRegionsListBuffer.getBufferLength()))
       {
          framePlanarRegionsList = (FramePlanarRegionsList) planarRegionsListBuffer.get(planarRegionListIndex);
-         LogTools.debug("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
+         //LogTools.debug("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
 
          updateMapWithNewRegions(framePlanarRegionsList);
 
          planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
-         LogTools.info("Statistics: {}", planarRegionMap.getStatistics());
+         //LogTools.info("Statistics: {}", planarRegionMap.getStatistics());
 
          planarRegionListIndex++;
       }
@@ -276,26 +283,10 @@ public class PlanarRegionMappingHandler
          LogTools.debug("Loading Perception Log: {}", perceptionLogIndex);
 
          loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
-
-         //while (!dataAvailable.poll())
-         //{
-         //   try
-         //   {
-         //      Thread.sleep(100);
-         //   }
-         //   catch (InterruptedException e)
-         //   {
-         //      e.printStackTrace();
-         //   }
-         //}
-
          framePlanarRegionsList = new FramePlanarRegionsList();
          rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
 
          LogTools.debug("Regions Found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
-
-         //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
-         //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
 
          if (framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
          {
@@ -306,6 +297,19 @@ public class PlanarRegionMappingHandler
             {
                planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
                LogTools.info("[{}] Statistics: {}, Aggregate: {}", perceptionLogIndex, planarRegionMap.getStatistics());
+
+               Pose3D startPose = new Pose3D(cameraFrame.getTransformToWorldFrame());
+               startPose.getRotation().setToPitchOrientation(0.0);
+               startPose.getRotation().setToPitchOrientation(0.0);
+               startPose.getRotation().setToYawOrientation(cameraFrame.getTransformToWorldFrame().getRotation().getYaw());
+               startPose.getTranslation().setZ(0.0);
+
+               Pose3D goalPose = new Pose3D(startPose);
+               goalPose.appendTranslation(-0.5, 0.0, 0.0);
+
+               //LogTools.info("Start: {}, Goal: {}", startPose, goalPose);
+
+               footstepsMessage = PerceptionEvaluationTools.planFootsteps(footstepPlanningModule, planarRegionMap.getMapRegions(), startPose, goalPose);
             }
          }
 
@@ -500,6 +504,11 @@ public class PlanarRegionMappingHandler
          updateMapFuture.cancel(true);
       executorService.shutdownNow();
       planarRegionMap.destroy();
+   }
+
+   public FootstepDataListMessage getFootstepsMessage()
+   {
+      return footstepsMessage;
    }
 
    public FramePlanarRegionsList getPreviousRegions()

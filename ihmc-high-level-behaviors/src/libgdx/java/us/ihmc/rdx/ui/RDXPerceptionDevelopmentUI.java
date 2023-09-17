@@ -2,10 +2,12 @@ package us.ihmc.rdx.ui;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
+import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -13,6 +15,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidPerceptionModule;
+import us.ihmc.perception.PerceptionEvaluationTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -32,15 +35,18 @@ import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 public class RDXPerceptionDevelopmentUI
 {
@@ -61,12 +67,15 @@ public class RDXPerceptionDevelopmentUI
    private FootstepPlanningModule footstepPlanningModule;
    private RDXFootstepPlanGraphic footstepPlanGraphic;
 
-
+   private static final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
    private static final File logFile = new File(IHMCCommonPaths.LOGS_DIRECTORY.resolve("20230911_171527_PlanarRegionsListLogger.prllog").toString());
+
    private PlanarRegionsList logLoadedPlanarRegions = new PlanarRegionsList();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
-   private final HumanoidPerceptionModule perceptionModule = new HumanoidPerceptionModule(openCLManager);
+   private final HumanoidPerceptionModule perceptionModule;
+
+   private int index = 0;
 
    public RDXPerceptionDevelopmentUI()
    {
@@ -76,6 +85,10 @@ public class RDXPerceptionDevelopmentUI
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       footstepPlanningModule = new FootstepPlanningModule("perceptionUI");
+
+      perceptionModule = new HumanoidPerceptionModule(openCLManager);
+      perceptionModule.initializePerceptionLogLoader(perceptionLogFile);
+      perceptionModule.initializeRealsenseDepthImage(720, 1280);
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
       baseUI = new RDXBaseUI("Perception UI");
@@ -102,16 +115,6 @@ public class RDXPerceptionDevelopmentUI
             humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Color", PerceptionAPI.D435_COLOR_IMAGE, globalVisualizersUI);
             humanoidPerceptionUI.initializeImageMessageVisualizer("D435 Depth", PerceptionAPI.D435_DEPTH_IMAGE, globalVisualizersUI);
 
-            PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(10.0f,
-                                                                                                 new Point3D(),
-                                                                                                 new Quaternion());
-            initialSupportSquareRegion.setRegionId(100);
-            logLoadedPlanarRegions.addPlanarRegion(initialSupportSquareRegion);
-
-            logLoadedPlanarRegions.addPlanarRegionsList(PlanarRegionFileTools.loadRegionsFromLog(logFile));
-            logLoadedPlanarRegions.applyTransform(new RigidBodyTransform(new Quaternion(), new Point3D(0.25, 2.0, -0.25)));
-            PerceptionFilterTools.applyConcaveHullReduction(logLoadedPlanarRegions, new PolygonizerParameters("ForGPURegions"));
-
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
                                                                                  PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS));
@@ -123,8 +126,6 @@ public class RDXPerceptionDevelopmentUI
             d455ColoredDepthVisualizer.setSubscribed(true);
             d455ColoredDepthVisualizer.setActive(true);
             globalVisualizersUI.addVisualizer(d455ColoredDepthVisualizer);
-
-
 
             RDXROS2ColoredPointCloudVisualizer ZEDColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
@@ -213,66 +214,28 @@ public class RDXPerceptionDevelopmentUI
 
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
+
             planarRegionsGraphic.generateMeshes(logLoadedPlanarRegions);
             planarRegionsGraphic.update();
 
             globalVisualizersUI.create();
          }
 
-         public void planFootsteps()
+         public void loadPlanarRegionLog()
          {
-            Pose3D leftStartPose = new Pose3D();
-            Pose3D rightStartPose = new Pose3D();
-            Pose3D leftGoalPose = new Pose3D();
-            Pose3D rightGoalPose = new Pose3D();
-            leftStartPose.getPosition().set(0.0, 0., 0.0);
-            leftGoalPose.getPosition().set(2.5, 4.5, 0.0);
+            PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(10.0f,
+                                                                                                 new Point3D(),
+                                                                                                 new Quaternion());
+            initialSupportSquareRegion.setRegionId(100);
+            logLoadedPlanarRegions.addPlanarRegion(initialSupportSquareRegion);
 
-            float yaw = (float) Math.atan2(leftGoalPose.getY() - leftStartPose.getY(), leftGoalPose.getX() - leftStartPose.getX());
-
-            leftStartPose.appendYawRotation(yaw);
-            leftGoalPose.appendYawRotation(yaw);
-
-            rightStartPose.set(leftStartPose);
-            rightStartPose.appendTranslation(0.0, -0.2, 0.0);
-
-            rightGoalPose.set(leftGoalPose);
-            rightGoalPose.appendTranslation(0.0, -0.2, 0.0);
-
-            FootstepPlannerRequest request = new FootstepPlannerRequest();
-            request.setStartFootPoses(leftStartPose, rightStartPose);
-            request.setGoalFootPoses(leftGoalPose, rightGoalPose);
-            request.setPlanarRegionsList(logLoadedPlanarRegions);
-
-            request.setPlanBodyPath(false);
-            request.setPerformAStarSearch(true);
-
-            FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
-
-            if (plannerOutput != null)
-            {
-               FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
-
-               LogTools.info("Result: {}" + String.format("\tPlan Iterations: %d, Plan Time: %.4f, Total Time: %.4f, Steps: %d",
-                              plannerOutput.getPlannerTimings().getStepPlanningIterations(),
-                              plannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
-                              plannerOutput.getPlannerTimings().getTotalElapsedSeconds(),
-                              plannerOutput.getFootstepPlan().getNumberOfSteps()),
-                              footstepPlanningResult);
-
-               FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 0.6, 0.3);
-
-               footstepPlanGraphic.generateMeshesAsync(message, "Evaluation Footstep Plan");
-               footstepPlanGraphic.update();
-            }
+            logLoadedPlanarRegions.addPlanarRegionsList(PlanarRegionFileTools.loadRegionsFromLog(logFile));
+            logLoadedPlanarRegions.applyTransform(new RigidBodyTransform(new Quaternion(), new Point3D(0.25, 2.0, -0.25)));
+            PerceptionFilterTools.applyConcaveHullReduction(logLoadedPlanarRegions, new PolygonizerParameters("ForGPURegions"));
          }
 
          public void renderImGuiWidgets()
          {
-            if (ImGui.button("Plan Footsteps"))
-            {
-               planFootsteps();
-            }
          }
 
          @Override
