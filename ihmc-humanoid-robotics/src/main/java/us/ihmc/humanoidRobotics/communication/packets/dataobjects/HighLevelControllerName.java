@@ -28,13 +28,13 @@ public enum HighLevelControllerName
    DIAGNOSTICS,
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
    CALIBRATION,
-   EXTERNAL_TRANSITION_STATE,
-   EXTERNAL,
    CUSTOM1,
    @RosEnumValueDocumentation(documentation = "State for recovering from a fall.")
    FALLING_STATE,
    @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC push recovery algorithms")
-   PUSH_RECOVERY;
+   PUSH_RECOVERY,
+   EXTERNAL_TRANSITION_STATE,
+   EXTERNAL;
 
 
    public static final HighLevelControllerName[] values = values();

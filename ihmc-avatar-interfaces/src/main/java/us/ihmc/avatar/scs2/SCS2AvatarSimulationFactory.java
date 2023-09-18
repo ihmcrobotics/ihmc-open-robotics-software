@@ -128,7 +128,7 @@ public class SCS2AvatarSimulationFactory
                                                                                                                                out) -> new SCS2OutputWriter(in,
                                                                                                                                                             out,
                                                                                                                                                             true));
-   protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", null);
+   protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
