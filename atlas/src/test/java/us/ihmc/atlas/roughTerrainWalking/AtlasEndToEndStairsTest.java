@@ -10,6 +10,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
 
+@Tag("humanoid-stairs-slow")
 public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
    private AtlasRobotVersion selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -21,7 +22,6 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlow(TestInfo testInfo) throws Exception
    {
       selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -29,7 +29,6 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
       selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -37,7 +36,6 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
       selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -45,7 +43,6 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
       selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -57,7 +54,6 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
     */
    @Disabled
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlowFBDemo(TestInfo testInfo) throws Exception
    {
       selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
