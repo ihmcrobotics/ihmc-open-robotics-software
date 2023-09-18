@@ -153,7 +153,6 @@ public class HandPoseActionData implements BehaviorActionData
       this.holdPoseInWorldLater = holdPoseInWorldLater;
    }
 
-
    @Override
    public void setDescription(String description)
    {
