@@ -109,6 +109,9 @@ public class JointTorqueAgainstForceSensorVisualizer
 
          cop2D = new YoFramePoint2D(namePrefix + "CoPInSole", "", soleFrame, registry);
          cop3D = new YoFramePoint3D(namePrefix + "CoPInWorld", "", ReferenceFrame.getWorldFrame(), registry);
+
+         jacobianTranspose.reshape(jacobian.getNumberOfColumns(), 6);
+         torqueVector.reshape(jacobian.getNumberOfColumns(), 1);
       }
 
       private final Wrench forceTorqueSensorWrench = new Wrench();
@@ -116,8 +119,8 @@ public class JointTorqueAgainstForceSensorVisualizer
       public void update()
       {
          jacobian.compute();
-         jacobianTranspose.reshape(jacobian.getNumberOfColumns(), 6);
          CommonOps_DDRM.transpose(jacobian.getJacobianMatrix(), jacobianTranspose);
+
 
          for (int i = 0; i < joints.length; i++)
             torqueVector.set(i, 0, joints[i].getTau());
