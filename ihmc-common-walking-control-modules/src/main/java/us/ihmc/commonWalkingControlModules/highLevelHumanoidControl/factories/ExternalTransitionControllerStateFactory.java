@@ -42,7 +42,8 @@ public class ExternalTransitionControllerStateFactory implements HighLevelContro
                                                                               standReadyControllerState,
                                                                               externalControllerState,
                                                                               controlledJoints,
-                                                                              controllerFactoryHelper.getHighLevelControllerParameters());
+                                                                              controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                              controllerFactoryHelper.getCommandInputManager());
       }
 
       return standTransitionControllerState;
