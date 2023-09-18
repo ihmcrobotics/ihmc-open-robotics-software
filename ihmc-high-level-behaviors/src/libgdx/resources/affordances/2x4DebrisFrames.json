@@ -1,0 +1,33 @@
+{
+  "name" : "2x4Debris",
+  "preGraspFrames" : [ {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : -0.0165,
+    "y" : -0.006,
+    "z" : 0.1985,
+    "rollInDegrees" : 1.78,
+    "pitchInDegrees" : -0.08,
+    "yawInDegrees" : 2.68
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : -0.0165,
+    "y" : -0.002,
+    "z" : 0.0685,
+    "rollInDegrees" : 1.78,
+    "pitchInDegrees" : -0.08,
+    "yawInDegrees" : 2.68
+  } ],
+  "graspFrames" : [ {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : -0.0165,
+    "y" : -0.002,
+    "z" : 0.0685,
+    "rollInDegrees" : 1.78,
+    "pitchInDegrees" : -0.08,
+    "yawInDegrees" : 2.68
+  } ],
+  "postGraspFrames" : [ ]
+}

@@ -1,0 +1,45 @@
+{
+  "name" : "2x4Debris",
+  "actions" : [ {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "2x4Debris",
+    "side" : "right",
+    "trajectoryDuration" : 1.0,
+    "x" : -0.0165,
+    "y" : -0.006,
+    "z" : 0.1985,
+    "rollInDegrees" : 1.78,
+    "pitchInDegrees" : -0.08,
+    "yawInDegrees" : 2.68
+  }, {
+    "type" : "RDXHandConfigurationAction",
+    "side" : "right",
+    "grip" : "HALF_CLOSE"
+  }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "2x4Debris",
+    "side" : "right",
+    "trajectoryDuration" : 1.2988512524098894,
+    "x" : -0.0165,
+    "y" : -0.002,
+    "z" : 0.0685,
+    "rollInDegrees" : 1.78,
+    "pitchInDegrees" : -0.08,
+    "yawInDegrees" : 2.68
+  }, {
+    "type" : "RDXHandPoseAction",
+    "parentFrame" : "2x4Debris",
+    "side" : "right",
+    "trajectoryDuration" : 1.1102230246251568E-16,
+    "x" : -0.0165,
+    "y" : -0.002,
+    "z" : 0.0685,
+    "rollInDegrees" : 1.78,
+    "pitchInDegrees" : -0.08,
+    "yawInDegrees" : 2.68
+  }, {
+    "type" : "RDXHandConfigurationAction",
+    "side" : "right",
+    "grip" : "CRUSH"
+  } ]
+}
