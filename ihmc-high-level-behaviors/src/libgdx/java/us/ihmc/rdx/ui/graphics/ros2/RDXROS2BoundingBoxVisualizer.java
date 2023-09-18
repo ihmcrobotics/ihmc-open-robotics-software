@@ -7,6 +7,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -32,6 +36,8 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final Color BOX_EDGE_COLOR = new Color(Color.WHITE);
    private RDX3DSituatedTextData previousTextData;
    private final Pose3D markerPose = new Pose3D();
+   private final Scalar RED = new Scalar(255, 1, 2, 255);
+   private final Point point = new Point();
 
    public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectPacket> topic)
    {
@@ -91,6 +97,17 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
             markerCoordinateFrameInstance.getRenderables(renderables, pool);
             markerModelInstance.getRenderables(renderables, pool);
          }
+      }
+   }
+
+   public void drawVertexOverlay(Mat rgba8Image)
+   {
+      Point3D[] boundingBox2dVertices = subscription.getLatest().getBoundingBox2dVertices();
+      for (Point3D boundingBox2dVertex : boundingBox2dVertices)
+      {
+         point.x((int) boundingBox2dVertex.getX());
+         point.y((int) boundingBox2dVertex.getY());
+         opencv_imgproc.circle(rgba8Image, point, 5, RED, -1, opencv_imgproc.LINE_8, 0);
       }
    }
 }
