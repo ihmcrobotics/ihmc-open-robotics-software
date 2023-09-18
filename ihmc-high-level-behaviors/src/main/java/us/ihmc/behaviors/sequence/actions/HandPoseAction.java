@@ -11,7 +11,7 @@ import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;

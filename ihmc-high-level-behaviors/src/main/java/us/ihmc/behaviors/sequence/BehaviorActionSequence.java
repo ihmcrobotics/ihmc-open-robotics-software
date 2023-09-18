@@ -9,7 +9,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Input;
@@ -54,7 +54,7 @@ public class BehaviorActionSequence
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
-   private final HandWrenchCalculator handWrenchCalculator;
+   private final ROS2HandWrenchCalculator handWrenchCalculator;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -83,7 +83,7 @@ public class BehaviorActionSequence
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       footstepTracker = new WalkingFootstepTracker(ros2.getROS2NodeInterface(), robotModel.getSimpleRobotName());
-      handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
+      handWrenchCalculator = new ROS2HandWrenchCalculator(syncedRobot);
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();

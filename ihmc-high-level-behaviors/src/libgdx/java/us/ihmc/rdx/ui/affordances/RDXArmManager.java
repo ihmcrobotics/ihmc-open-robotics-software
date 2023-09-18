@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
@@ -70,7 +70,7 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private final HandWrenchCalculator handWrenchCalculator;
+   private final ROS2HandWrenchCalculator handWrenchCalculator;
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
@@ -91,7 +91,7 @@ public class RDXArmManager
       this.interactableHands = interactableHands;
       armJointNames = robotModel.getJointMap().getArmJointNames();
 
-      handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
+      handWrenchCalculator = new ROS2HandWrenchCalculator(syncedRobot);
 
       for (RobotSide side : RobotSide.values)
       {
