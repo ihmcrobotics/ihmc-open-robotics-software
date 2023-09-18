@@ -19,17 +19,24 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    public int id_;
    public double confidence_;
    public java.lang.StringBuilder object_type_;
+   public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_2d_vertices_;
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_vertices_;
 
    public DetectedObjectPacket()
    {
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
       object_type_ = new java.lang.StringBuilder(255);
+      bounding_box_2d_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
+
+      for(int i1 = 0; i1 < bounding_box_2d_vertices_.length; ++i1)
+      {
+          bounding_box_2d_vertices_[i1] = new us.ihmc.euclid.tuple3D.Point3D();
+      }
       bounding_box_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
 
-      for(int i1 = 0; i1 < bounding_box_vertices_.length; ++i1)
+      for(int i3 = 0; i3 < bounding_box_vertices_.length; ++i3)
       {
-          bounding_box_vertices_[i1] = new us.ihmc.euclid.tuple3D.Point3D();
+          bounding_box_vertices_[i3] = new us.ihmc.euclid.tuple3D.Point3D();
       }
    }
 
@@ -51,9 +58,13 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       object_type_.setLength(0);
       object_type_.append(other.object_type_);
 
-      for(int i3 = 0; i3 < bounding_box_vertices_.length; ++i3)
+      for(int i5 = 0; i5 < bounding_box_2d_vertices_.length; ++i5)
       {
-            geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_vertices_[i3], bounding_box_vertices_[i3]);}
+            geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_2d_vertices_[i5], bounding_box_2d_vertices_[i5]);}
+
+      for(int i7 = 0; i7 < bounding_box_vertices_.length; ++i7)
+      {
+            geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_vertices_[i7], bounding_box_vertices_[i7]);}
 
    }
 
@@ -112,6 +123,12 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    }
 
 
+   public us.ihmc.euclid.tuple3D.Point3D[] getBoundingBox2dVertices()
+   {
+      return bounding_box_2d_vertices_;
+   }
+
+
    public us.ihmc.euclid.tuple3D.Point3D[] getBoundingBoxVertices()
    {
       return bounding_box_vertices_;
@@ -144,9 +161,14 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_type_, other.object_type_, epsilon)) return false;
 
-      for(int i5 = 0; i5 < bounding_box_vertices_.length; ++i5)
+      for(int i9 = 0; i9 < bounding_box_2d_vertices_.length; ++i9)
       {
-              if (!this.bounding_box_vertices_[i5].epsilonEquals(other.bounding_box_vertices_[i5], epsilon)) return false;
+              if (!this.bounding_box_2d_vertices_[i9].epsilonEquals(other.bounding_box_2d_vertices_[i9], epsilon)) return false;
+      }
+
+      for(int i11 = 0; i11 < bounding_box_vertices_.length; ++i11)
+      {
+              if (!this.bounding_box_vertices_[i11].epsilonEquals(other.bounding_box_vertices_[i11], epsilon)) return false;
       }
 
 
@@ -171,9 +193,13 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       if (!us.ihmc.idl.IDLTools.equals(this.object_type_, otherMyClass.object_type_)) return false;
 
-      for(int i7 = 0; i7 < bounding_box_vertices_.length; ++i7)
+      for(int i13 = 0; i13 < bounding_box_2d_vertices_.length; ++i13)
       {
-                if (!this.bounding_box_vertices_[i7].equals(otherMyClass.bounding_box_vertices_[i7])) return false;
+                if (!this.bounding_box_2d_vertices_[i13].equals(otherMyClass.bounding_box_2d_vertices_[i13])) return false;
+      }
+      for(int i15 = 0; i15 < bounding_box_vertices_.length; ++i15)
+      {
+                if (!this.bounding_box_vertices_[i15].equals(otherMyClass.bounding_box_vertices_[i15])) return false;
       }
 
       return true;
@@ -195,6 +221,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       builder.append(this.confidence_);      builder.append(", ");
       builder.append("object_type=");
       builder.append(this.object_type_);      builder.append(", ");
+      builder.append("bounding_box_2d_vertices=");
+      builder.append(java.util.Arrays.toString(this.bounding_box_2d_vertices_));      builder.append(", ");
       builder.append("bounding_box_vertices=");
       builder.append(java.util.Arrays.toString(this.bounding_box_vertices_));
       builder.append("}");

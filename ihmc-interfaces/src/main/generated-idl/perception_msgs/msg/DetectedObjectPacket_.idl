@@ -24,6 +24,7 @@ module perception_msgs
         long id;
         double confidence;
         string object_type;
+        geometry_msgs::msg::dds::Point bounding_box_2d_vertices[8];
         geometry_msgs::msg::dds::Point bounding_box_vertices[8];
       };
     };

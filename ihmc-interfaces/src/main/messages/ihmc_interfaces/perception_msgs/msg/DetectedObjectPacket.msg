@@ -10,4 +10,6 @@ float64 confidence
 
 string object_type
 
+geometry_msgs/Point[8] bounding_box_2d_vertices
+
 geometry_msgs/Point[8] bounding_box_vertices
