@@ -105,13 +105,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                                                                                                      frameHand.getOrientation(),
                                                                                                      ReferenceFrame.getWorldFrame());
       handTrajectoryMessage.setForceExecution(true);
-      // TODO. remove once tuned real robot weights and gains
-      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(10.0);
-      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(10.0);
-      handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(10.0);
-      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(20.0);
-      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(20.0);
-      handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(20.0);
       ros2ControllerHelper.publishToController(handTrajectoryMessage);
 
       executionTimer.reset();
@@ -159,18 +152,11 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       FramePose3D frameHand = new FramePose3D(getPalmFrame());
       frameHand.changeFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       HandTrajectoryMessage message = HumanoidMessageTools.createHandTrajectoryMessage(getSide(),
-                                                                                                     getTrajectoryDuration(),
-                                                                                                     frameHand.getPosition(),
-                                                                                                     frameHand.getOrientation(),
-                                                                                                     syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
+                                                                                       getTrajectoryDuration(),
+                                                                                       frameHand.getPosition(),
+                                                                                       frameHand.getOrientation(),
+                                                                                       syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       message.setForceExecution(true);
-      // TODO. remove once tuned real robot weights and gains
-      message.getSe3Trajectory().getAngularWeightMatrix().setXWeight(10.0);
-      message.getSe3Trajectory().getAngularWeightMatrix().setYWeight(10.0);
-      message.getSe3Trajectory().getAngularWeightMatrix().setZWeight(10.0);
-      message.getSe3Trajectory().getLinearWeightMatrix().setXWeight(20.0);
-      message.getSe3Trajectory().getLinearWeightMatrix().setYWeight(20.0);
-      message.getSe3Trajectory().getLinearWeightMatrix().setZWeight(20.0);
       ros2ControllerHelper.publishToController(message);
    }
 
