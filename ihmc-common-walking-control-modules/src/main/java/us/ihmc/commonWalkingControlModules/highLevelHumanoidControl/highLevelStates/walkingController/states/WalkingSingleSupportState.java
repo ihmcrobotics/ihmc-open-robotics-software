@@ -131,6 +131,10 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       if (hasSwingFootTouchedDown.getValue())
       {
+         /*
+          * This updates the foot contact state to load bearing and then updates the ICP planner so it uses
+          * the measured pose of the foot that just made contact instead of the desired footstep pose.
+          */
          if (!feetManager.getCurrentConstraintType(swingSide).isLoadBearing())
          {
             triggerTouchdown();
@@ -234,6 +238,10 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (hasSwingFootTouchedDown.getValue())
       {
+         /*
+          * When waitUntilICPPlannerIsDone is true, we indicate that the foot has touched down with
+          * hasSwingFootTouchedDown and keep returning false here until the ICP planner is done
+          */
          if (waitUntilICPPlannerIsDone.getValue())
          {
             return balanceManager.isICPPlanDone();
