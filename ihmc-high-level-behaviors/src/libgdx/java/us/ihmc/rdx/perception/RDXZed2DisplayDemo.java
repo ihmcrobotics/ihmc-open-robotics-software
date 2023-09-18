@@ -29,11 +29,17 @@ public class RDXZed2DisplayDemo
          @Override
          public void create()
          {
+            RDXROS2BoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
+                                                                                                            ros2Helper,
+                                                                                                            PerceptionAPI.CENTERPOSE_DETECTED_OBJECT);
+            centerPoseBoundingBoxVisualizer.setActive(true);
+
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                        PubSubImplementation.FAST_RTPS,
                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2LeftColorImageVisualizer.setSubscribed(true);
             zed2LeftColorImageVisualizer.setActive(true);
+            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
             globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
@@ -59,11 +65,7 @@ public class RDXZed2DisplayDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            RDXROS2BoundingBoxVisualizer CenterPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
-                                                                                                            ros2Helper,
-                                                                                                            PerceptionAPI.CENTERPOSE_DETECTED_OBJECT);
-            CenterPoseBoundingBoxVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(CenterPoseBoundingBoxVisualizer);
+            globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.create();
