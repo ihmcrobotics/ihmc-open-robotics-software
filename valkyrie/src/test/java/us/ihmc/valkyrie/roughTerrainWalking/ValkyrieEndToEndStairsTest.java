@@ -18,6 +18,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.simulation.ValkyrieFlatGroundQuickWalkingTest;
 
+@Tag("humanoid-stairs-slow")
 public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
    private static final String OSHA_DOWNSTAIRS_PARAMETERS_XML = "/us/ihmc/valkyrie/simulation/fast_walking_parameters.xml";
@@ -58,7 +59,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlow(TestInfo testInfo) throws Exception
    {
       Random random = new Random(53415);
@@ -66,7 +66,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
       Random random = new Random(53415);
@@ -74,14 +73,12 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
       testStairs(testInfo, false, true, 1.0, 0.25, 0.025);
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
       Random random = new Random(53415);
@@ -89,7 +86,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlowVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -98,7 +94,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlowVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -107,7 +102,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -115,7 +109,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -124,7 +117,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlowVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -156,7 +148,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlowVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -193,7 +184,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -224,7 +214,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
-   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
