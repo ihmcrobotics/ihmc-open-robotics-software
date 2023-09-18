@@ -80,7 +80,9 @@ class Image2CenterPose_node(Node):
         if self.opt.cam_intrinsic is None:
             self.meta['camera_matrix'] = np.array(
                 # [[663.0287679036459, 0, 300.2775065104167], [0, 663.0287679036459, 395.00066121419275], [0, 0, 1]])
-                [[261.0508728027344, 0, 316.148193359375], [0, 261.0508728027344, 181.02622985839844], [0, 0, 1]])
+                # [[261.0508728027344, 0, 316.148193359375], [0, 261.0508728027344, 181.02622985839844], [0, 0, 1]]) # zed
+                # [[261.0508728027344, 0, 316.148193359375], [0, 261.0508728027344, 181.02622985839844], [0, 0, 1]]) # iphone
+                [[1.62160860e+03, 0.00000000e+00, 6.40337225e+02], [0.00000000e+00, 1.64687719e+03, 9.68022092e+02], [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
             self.opt.cam_intrinsic = self.meta['camera_matrix']
         else:
             self.meta['camera_matrix'] = np.array(self.opt.cam_intrinsic).reshape(3, 3)
@@ -119,6 +121,8 @@ class Image2CenterPose_node(Node):
         self.get_logger().info("Waiting for an Image...")
         self.start_time = timeit.default_timer()
 
+        self.doOnce = True
+
     def listener_callback(self, msg):
         # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU - it can't
         # keep up at 30hz even on an i7 13700 -danderson
@@ -129,6 +133,9 @@ class Image2CenterPose_node(Node):
         self.get_logger().info("Processing ImageMessage #" + str(msg.sequence_number))
         image_np = np.frombuffer(b''.join(msg.data), dtype=np.uint8)
         image = cv2.imdecode(image_np, cv2.COLOR_YUV2RGB)
+        if(self.doOnce):
+            cv2.imwrite('image.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+            self.doOnce = False
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
 
         if len(ret['results']) > 0:
@@ -146,30 +153,39 @@ class Image2CenterPose_node(Node):
             #                          0,
             #                          1*np.sin(0.5*(self.start_time - current_time)))
             
-            nn_out_vertices = ret['results'][0]['kps_3d_cam'] # shape 9x3 (1st row is object centroid location)
-            if(nn_out_vertices.any()==None):
-                print("Some vertices are not detected...")
-                pass
+            # if 'kps_3d_cam' not in ret['results'][0]: 
+            #     print(ret)
+                
+            if 'kps_3d_cam' in ret['results'][0]: 
+                nn_out_vertices = ret['results'][0]['kps_3d_cam'] # shape 9x3 (1st row is object centroid location)
+                point_verts = []
+                for vertex in nn_out_vertices:
+                    point = Point()
+                    point.x = vertex[0]
+                    point.y = vertex[1]
+                    point.z = vertex[2]
+                    point_verts.append(point)
+                self.detected_object.bounding_box_vertices = point_verts[-8:]
 
-            point_verts = []
-            for vertex in nn_out_vertices:
-                point = Point()
-                point.x = vertex[0]
-                point.y = vertex[1]
-                point.z = vertex[2]
-                point_verts.append(point)
+            if 'projected_cuboid' in ret['results'][0]:
+                bbox = ret['results'][0]['projected_cuboid']
+                for vertex in bbox:
+                    point = Point()
+                    point.x = vertex[0]
+                    point.y = vertex[1]
+                    # point.z = vertex[2]
+                    point_verts.append(point)
+                self.detected_object.bounding_box_2d_vertices = point_verts[-8:]
 
-            self.detected_object.pose.position.x = ret['results'][0]['location'][0]/10
-            self.detected_object.pose.position.y = ret['results'][0]['location'][1]/10
-            self.detected_object.pose.position.z = ret['results'][0]['location'][2]/10
-            self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
-            self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
-            self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
-            self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
-            
-            # print(len(point_verts))
+            if 'location' in ret['results'][0]: 
+                self.detected_object.pose.position.x = ret['results'][0]['location'][0]/1000.0
+                self.detected_object.pose.position.y = ret['results'][0]['location'][1]/1000.0
+                self.detected_object.pose.position.z = ret['results'][0]['location'][2]/1000.0
+                self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
+                self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
+                self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
+                self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
 
-            self.detected_object.bounding_box_vertices = point_verts[-8:]
             self.detected_object.confidence = self.start_time - current_time
             self.detected_object.object_type = "cup"
             

@@ -11,6 +11,8 @@ float64 confidence
 
 string object_type
 
+geometry_msgs/Point[] bounding_box_2d_vertices
+
 geometry_msgs/Point[] bounding_box_vertices
 
 
