@@ -34,6 +34,7 @@ public class PredefinedSceneNodeLibrary
    private final StaticRelativeSceneNode pullDoorFrame;
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
+   private final ArUcoDetectableNode debris;
 
    private final List<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
    private final List<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
@@ -67,8 +68,10 @@ public class PredefinedSceneNodeLibrary
 
       box = RigidBodySceneObjectDefinitions.createBox();
       canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
+      debris = RigidBodySceneObjectDefinitions.createDebris();
       registerArUcoDetectableSceneNode(box);
       registerArUcoDetectableSceneNode(canOfSoup);
+      registerArUcoDetectableSceneNode(debris);
 
       // TODO: Add non-ArUco cup -- detected by neural net
 

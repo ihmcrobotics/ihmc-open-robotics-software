@@ -1,0 +1,47 @@
+{
+  "name" : "2x4Debris",
+  "object" : "2x4Debris",
+  "x" : 0.0,
+  "y" : 0.0,
+  "z" : 0.0,
+  "rollInDegrees" : -91.8,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : 90.0,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : -91.8,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 90.0,
+    "grip" : [ {
+      "side" : "right",
+      "config" : "HALF_CLOSE"
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : -91.8,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 90.0,
+    "grip" : [ {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : -91.8,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 90.0,
+    "grip" : [ {
+      "side" : "right",
+      "config" : "CRUSH"
+    } ]
+  } ],
+  "activeSides" : 1,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 0
+}
