@@ -1,0 +1,37 @@
+#ifndef __controller_msgs__msg__CrocoddylTimeIntervalMessage__idl__
+#define __controller_msgs__msg__CrocoddylTimeIntervalMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is a message that holds time interval details.
+       * 
+       * The time interval is defined by:
+       * * the time at the beginning of the interval, and
+       * * the duration of the interval.
+       * 
+       * The time interval information allow us to compute the beginning of
+       * the reference state and control.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::CrocoddylTimeIntervalMessage_")
+      struct CrocoddylTimeIntervalMessage
+      {
+        /**
+         * This represents the time at the beginning of the interval
+         */
+        double time;
+        /**
+         * This represents the duration of the interval
+         */
+        double duration;
+      };
+    };
+  };
+};
+
+#endif
