@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -115,6 +116,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final Wrench wristTempWrench = new Wrench();
    private final FrameVector3D tempWristForce = new FrameVector3D();
    private final FrameVector3D tempWristTorque = new FrameVector3D();
+   private final HandWrenchCalculator handWrenchCalculator;
 
    private final SideDependentList<YoDouble> handsMass;
 
@@ -291,6 +293,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = null;
          handCenterOfMassFrames = null;
          handsMass = null;
+         handWrenchCalculator = new HandWrenchCalculator(fullRobotModel, registry);
       }
       else
       {
@@ -301,6 +304,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = new SideDependentList<>();
          handCenterOfMassFrames = new SideDependentList<>();
          handsMass = new SideDependentList<>();
+         handWrenchCalculator = null;
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -409,6 +413,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       readWristSensorData();
 
       computeAngularAndLinearMomentum();
+      handWrenchCalculator.compute();
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
