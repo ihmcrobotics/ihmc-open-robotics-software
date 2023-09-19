@@ -48,7 +48,6 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final YoDouble currentHeightFromKneeControl = new YoDouble("currentHeightFromKneeControl", registry);
    private final DoubleParameter maximumHeightChangeFromKneeControl = new DoubleParameter("maximumHeightChangeFromKneeControl", registry, 0.02);
    private final YoDouble heightChangeFromKneeControl = new YoDouble("heightChangeFromKneeControl", registry);
-   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
    private final YoEnum<RobotSide> kneeSideToControl = new YoEnum<>("kneeSideToControl", registry, RobotSide.class);
    private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("kneeControlSupportLegSide", registry, RobotSide.class);
@@ -90,7 +89,6 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       kneeGains = new ParameterizedPDGains("kneeHeightControlGains", tempPDGains, registry);
       supportKneeWeight = new DoubleParameter("supportKneeHeightControlWeight", registry, 10.0);
       nonSupportKneeWeight = new DoubleParameter("nonSupportKneeHeightControlWeight", registry, 1.0);
-      controlHeightWithMomentum.set(false);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -246,13 +244,12 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    @Override
    public boolean getControlHeightWithMomentum()
    {
-      return controlHeightWithMomentum.getBooleanValue();
+      return false;
    }
    
    @Override
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
    {
-      this.controlHeightWithMomentum.set(controlHeightWithMomentum);
    }
 
    @Override
