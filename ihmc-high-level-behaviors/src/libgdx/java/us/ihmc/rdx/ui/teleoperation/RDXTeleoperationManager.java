@@ -658,4 +658,9 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       return locomotionManager.getLocomotionParameters();
    }
+
+   public RDXLocomotionManager getLocomotionManager()
+   {
+      return locomotionManager;
+   }
 }

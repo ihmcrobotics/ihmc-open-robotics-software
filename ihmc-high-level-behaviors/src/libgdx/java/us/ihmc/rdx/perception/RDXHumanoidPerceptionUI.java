@@ -39,14 +39,6 @@ public class RDXHumanoidPerceptionUI
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
    }
 
-   public void render(RigidBodyTransform zUpFrameToWorld)
-   {
-      if (rapidRegionsUI != null)
-      {
-         rapidRegionsUI.render();
-      }
-   }
-
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
    {
       rapidRegionsMapVisualizer = new RDXROS2PlanarRegionsVisualizer("SLAM Rapid Regions", ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);

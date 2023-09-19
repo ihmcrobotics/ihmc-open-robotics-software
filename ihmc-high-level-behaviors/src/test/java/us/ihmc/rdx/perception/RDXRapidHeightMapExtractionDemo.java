@@ -247,8 +247,6 @@ public class RDXRapidHeightMapExtractionDemo
          groundToWorldTransform.getRotation().setYawPitchRoll(sensorToWorldTransform.getRotation().getYaw(), 0, 0);
          groundToWorldTransform.getTranslation().setZ(0);
 
-         humanoidPerceptionUI.render(groundToWorldTransform);
-
          humanoidPerceptionUI.getHeightMapVisualizer().acceptHeightMapMessage(humanoidPerception.getGlobalHeightMapMessage());
          humanoidPerceptionUI.getHeightMapVisualizer().update();
 
