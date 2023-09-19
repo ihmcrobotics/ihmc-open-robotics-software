@@ -49,7 +49,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    public enum EvaluationEvent
    {
       STEP_IN_PLACE(5.0),
-      GO_TO_CRUISE_STRAIGHT(6.0), //(6.0),
+      GO_TO_CRUISE_STRAIGHT(6.0),
       TURN_180_CRUISE(8.0),
       SPEED_UP_TO_MAX_STRAIGHT(4.0),
       SLOW_DOWN_TO_ZERO(4.0),
