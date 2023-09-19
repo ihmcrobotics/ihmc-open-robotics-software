@@ -50,7 +50,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
-                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;

@@ -21,7 +21,7 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
                                                                                                      handConfigurationNames));
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
-                                                                                      imBoolean -> imgui.ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
+                                                                                      imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
    public RDXHandConfigurationAction()
    {

@@ -51,10 +51,10 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
-                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
                                                                                      actionData::setHoldPoseInWorldLater,
-                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold Pose In World Later"), imBoolean));
+                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;
