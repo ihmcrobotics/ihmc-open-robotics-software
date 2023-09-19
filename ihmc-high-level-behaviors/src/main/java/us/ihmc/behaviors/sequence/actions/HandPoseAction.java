@@ -13,11 +13,9 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,29 +60,40 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
    {
       update();
 
       this.actionIndex = actionIndex;
 
-      if (actionIndex == nextExecutionIndex)
+      if (concurrencyWithPreviousIndex)
       {
-         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-         armIKSolver.copyActualToWork();
-         armIKSolver.update(getPalmFrame());
-         armIKSolver.solve();
-
-         // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-         handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
-         handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
-         handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
-         for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-         {
-            handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
-         }
-         ros2ControllerHelper.publish(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+         if (actionIndex == nextExecutionIndex - 1)
+            computeAndPublishIKSolution();
       }
+      else
+      {
+         if (actionIndex == nextExecutionIndex)
+            computeAndPublishIKSolution();
+      }
+   }
+
+   private void computeAndPublishIKSolution()
+   {
+      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+      armIKSolver.copyActualToWork();
+      armIKSolver.update(getPalmFrame());
+      armIKSolver.solve();
+
+      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+      handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+      handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
+      handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
+      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+      {
+         handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+      }
+      ros2ControllerHelper.publish(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
    }
 
    @Override
@@ -93,12 +102,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       if (getJointSpaceControl())
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-
-         double solutionQuality = armIKSolver.getQuality();
-         if (solutionQuality < 1.0)
-         {
-            LogTools.error("Solution is low quality ({}). Not sending.", solutionQuality);
-         }
 
          OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
          double[] jointAngles = new double[solutionOneDoFJoints.length];

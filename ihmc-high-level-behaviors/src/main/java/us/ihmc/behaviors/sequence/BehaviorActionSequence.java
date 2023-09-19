@@ -210,7 +210,10 @@ public class BehaviorActionSequence
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         actionSequence.get(i).update(i, executionNextIndex);
+         boolean concurrencyWithPreviousAction = false;
+         if (i > 0)
+            concurrencyWithPreviousAction = actionSequence.get(i - 1).getExecuteWithNextAction();
+         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction);
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -269,8 +272,11 @@ public class BehaviorActionSequence
 
    private void executeNextAction()
    {
+      boolean concurrencyWithPreviousAction = false;
+      if (lastCurrentlyExecutingAction != null)
+         concurrencyWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
-      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1);
+      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrencyWithPreviousAction);
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);
