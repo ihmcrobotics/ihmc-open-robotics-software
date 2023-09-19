@@ -31,6 +31,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -47,6 +48,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final YoDouble currentHeightFromKneeControl = new YoDouble("currentHeightFromKneeControl", registry);
    private final DoubleParameter maximumHeightChangeFromKneeControl = new DoubleParameter("maximumHeightChangeFromKneeControl", registry, 0.02);
    private final YoDouble heightChangeFromKneeControl = new YoDouble("heightChangeFromKneeControl", registry);
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
    private final YoEnum<RobotSide> kneeSideToControl = new YoEnum<>("kneeSideToControl", registry, RobotSide.class);
    private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("kneeControlSupportLegSide", registry, RobotSide.class);
@@ -88,6 +90,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       kneeGains = new ParameterizedPDGains("kneeHeightControlGains", tempPDGains, registry);
       supportKneeWeight = new DoubleParameter("supportKneeHeightControlWeight", registry, 10.0);
       nonSupportKneeWeight = new DoubleParameter("nonSupportKneeHeightControlWeight", registry, 1.0);
+      controlHeightWithMomentum.set(false);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -243,13 +246,13 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    @Override
    public boolean getControlHeightWithMomentum()
    {
-      // FIXME this should be false?
-      return true;
+      return controlHeightWithMomentum.getBooleanValue();
    }
    
    @Override
-   public void setControlHeightWithMomentum(boolean flag)
+   public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
    {
+      this.controlHeightWithMomentum.set(controlHeightWithMomentum);
    }
 
    @Override
