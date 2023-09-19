@@ -33,7 +33,7 @@ public class AtlasFlatGroundWalkingTrackSCS2
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
-      int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      int recordFrequency = 1; // (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
       boolean useVelocityAndHeadingScript = true;
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();

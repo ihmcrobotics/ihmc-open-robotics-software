@@ -396,7 +396,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP,
                                                                        contactStateCommands,
                                                                        bipedSupportPolygons.getFootPolygonsInSoleFrame());
-      centerOfPressureCommand.set(centerOfPressureCommandCalculator.getCenterOfPressureCommand());
+//      centerOfPressureCommand.set(centerOfPressureCommandCalculator.getCenterOfPressureCommand());
 
       return success;
    }

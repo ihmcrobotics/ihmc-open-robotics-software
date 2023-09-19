@@ -19,6 +19,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -54,6 +55,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final Wrench footWrench;
 
    private final YoFramePoint2D centerOfPressure;
+   private final YoFramePoint3D centerOfPressureWorld;
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
    private final double footLength;
@@ -130,6 +132,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
 
       centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", soleFrame, registry);
+      centerOfPressureWorld = new YoFramePoint3D(namePrefix + "CenterOfPressureWorld", "", worldFrame, registry);
 
       footWrench = new Wrench(measurementFrame, (ReferenceFrame) null);
 
@@ -172,9 +175,15 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
       // Computing Center of Pressure
       if (fZPlus < MIN_FORCE_TO_COMPUTE_COP)
+      {
          centerOfPressure.setToNaN();
+         centerOfPressureWorld.setToNaN();
+      }
       else
+      {
          copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, footWrench, contactablePlaneBody.getSoleFrame());
+         centerOfPressureWorld.setMatchingFrame(centerOfPressure, 0.0);
+      }
 
       // Testing CoP threshold
       if (Double.isNaN(contactCoPThreshold.getValue()))
