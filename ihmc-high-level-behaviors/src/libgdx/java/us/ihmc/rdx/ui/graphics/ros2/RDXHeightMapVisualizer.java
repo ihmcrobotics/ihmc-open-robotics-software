@@ -44,6 +44,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean heightMapActive = new ImBoolean(false);
    private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
+   private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
 
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
    private HeightMapMessage latestHeightMapMessage = new HeightMapMessage();
@@ -117,7 +118,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          PerceptionMessageTools.convertToHeightMapImage(imageMessage, heightMapImage, incomingCompressedImageBuffer, incomingCompressedImageBytePointer, compressedBytesMat);
          zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
-         PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
+         if (displayGlobalHeightMapImage.get())
+            PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
+         else
+            PerceptionDebugTools.clearAllWindows();
+
 
          if (enableHeightMapVisualizer.get())
          {
@@ -157,6 +162,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       ImGui.checkbox("Render Ground Cells", renderGroundCells);
       ImGui.checkbox("Enable Height Map Visualizer", enableHeightMapVisualizer);
       ImGui.checkbox("Enable Height Map Renderer", enableHeightMapRenderer);
+      ImGui.checkbox("Display Global Height Map Image", displayGlobalHeightMapImage);
 
       setActive(heightMapActive.get());
 

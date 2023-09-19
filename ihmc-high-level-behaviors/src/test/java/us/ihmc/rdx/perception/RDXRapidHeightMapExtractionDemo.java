@@ -22,11 +22,9 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -96,7 +94,6 @@ public class RDXRapidHeightMapExtractionDemo
             createForPerspective(720, 1280);
 
             baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getRemotePerceptionUI().getPanel());
-            baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getHeightMapVisualizer().getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
             updateHeightMap();
@@ -252,7 +249,7 @@ public class RDXRapidHeightMapExtractionDemo
 
          humanoidPerceptionUI.render(groundToWorldTransform);
 
-         humanoidPerceptionUI.getHeightMapVisualizer().acceptHeightMapMessage(HeightMapMessageTools.toMessage(humanoidPerception.getRapidHeightMapExtractor().getLatestHeightMapData()));
+         humanoidPerceptionUI.getHeightMapVisualizer().acceptHeightMapMessage(humanoidPerception.getGlobalHeightMapMessage());
          humanoidPerceptionUI.getHeightMapVisualizer().update();
 
          humanoidPerception.getRapidHeightMapExtractor().setHeightMapDataAvailable(false);

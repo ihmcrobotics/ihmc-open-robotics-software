@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -24,13 +25,14 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.ActiveMappingTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.time.Instant;
 import java.util.List;
@@ -54,6 +56,7 @@ public class HumanoidPerceptionModule
    private PlanarRegionsList regionsInWorldFrame;
    private CollisionBoxProvider collisionBoxProvider;
    private FramePlanarRegionsList sensorFrameRegions;
+   private HeightMapData latestHeightMapData;
 
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final BytePointer compressedDepthPointer = new BytePointer();
@@ -307,5 +310,22 @@ public class HumanoidPerceptionModule
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
+   }
+
+   public HeightMapMessage getGlobalHeightMapMessage()
+   {
+      BytedecoImage heightMapImage = rapidHeightMapExtractor.getGlobalHeightMapImage();
+      Mat heightMapMat = heightMapImage.getBytedecoOpenCVMat().clone();
+      if (latestHeightMapData == null)
+      {
+         latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                 RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                 rapidHeightMapExtractor.getGridCenter().getX(),
+                                                 rapidHeightMapExtractor.getGridCenter().getY());
+      }
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat.ptr(0), latestHeightMapData,
+                                                    RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                    RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+      return HeightMapMessageTools.toMessage(latestHeightMapData);
    }
 }
