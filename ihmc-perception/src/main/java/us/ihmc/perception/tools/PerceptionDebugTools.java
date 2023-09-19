@@ -323,4 +323,9 @@ public class PerceptionDebugTools
 
       return proj;
    }
+
+   public static void clearAllWindows()
+   {
+      opencv_highgui.destroyAllWindows();
+   }
 }
