@@ -14,7 +14,7 @@ import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions
  */
 public class ArUcoSceneTools
 {
-   public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection, SceneGraph sceneGraph)
+   public static void updateSceneGraph(OpenCVArUcoMarkerDetection arUcoMarkerDetection, SceneGraph sceneGraph)
    {
       boolean modifiedSceneGraph = false;
 

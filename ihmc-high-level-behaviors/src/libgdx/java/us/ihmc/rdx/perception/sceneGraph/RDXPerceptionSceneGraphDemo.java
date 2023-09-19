@@ -123,7 +123,7 @@ public class RDXPerceptionSceneGraphDemo
                arUcoMarkerPublisher.update();
 
                sceneGraphSubscription.update();
-               ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotSceneGraph);
+               ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, onRobotSceneGraph);
                onRobotSceneGraph.updateOnRobot(sensorPoseGizmo.getGizmoFrame());
                sceneGraphPublisher.publish(onRobotSceneGraph, ros2Helper, ROS2IOTopicQualifier.STATUS);
             }
