@@ -17,6 +17,7 @@ import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.function.Supplier;
@@ -66,8 +67,8 @@ public class BytedecoRealsense
    private boolean colorEnabled = false;
    private int colorWidth;
    private int colorHeight;
-   private CameraPinholeBrown depthCameraIntrinsics;
-   private CameraPinholeBrown colorCameraIntrinsics;
+   private CameraIntrinsics depthCameraIntrinsics;
+   private CameraIntrinsics colorCameraIntrinsics;
 
    public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
    {
@@ -489,30 +490,32 @@ public class BytedecoRealsense
       return colorStreamIntrinsics.ppy();
    }
 
-   public CameraPinholeBrown getDepthCameraIntrinsics()
+   public CameraIntrinsics getDepthCameraIntrinsics()
    {
       if (depthCameraIntrinsics == null)
       {
-         depthCameraIntrinsics = new CameraPinholeBrown();
+         depthCameraIntrinsics = new CameraIntrinsics();
          depthCameraIntrinsics.setFx(getDepthFocalLengthPixelsX());
          depthCameraIntrinsics.setFy(getDepthFocalLengthPixelsY());
-         depthCameraIntrinsics.setSkew(0.0);
          depthCameraIntrinsics.setCx(getDepthPrincipalOffsetXPixels());
          depthCameraIntrinsics.setCy(getDepthPrincipalOffsetYPixels());
+         depthCameraIntrinsics.setHeight(depthHeight);
+         depthCameraIntrinsics.setWidth(depthWidth);
       }
       return depthCameraIntrinsics;
    }
 
-   public CameraPinholeBrown getColorCameraIntrinsics()
+   public CameraIntrinsics getColorCameraIntrinsics()
    {
       if (colorCameraIntrinsics == null)
       {
-         colorCameraIntrinsics = new CameraPinholeBrown();
+         colorCameraIntrinsics = new CameraIntrinsics();
          colorCameraIntrinsics.setFx(getColorFocalLengthPixelsX());
          colorCameraIntrinsics.setFy(getColorFocalLengthPixelsY());
-         colorCameraIntrinsics.setSkew(0.0);
          colorCameraIntrinsics.setCx(getColorPrincipalOffsetXPixels());
          colorCameraIntrinsics.setCy(getColorPrincipalOffsetYPixels());
+         colorCameraIntrinsics.setHeight(colorHeight);
+         colorCameraIntrinsics.setWidth(colorWidth);
       }
       return colorCameraIntrinsics;
    }

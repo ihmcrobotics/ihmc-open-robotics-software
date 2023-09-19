@@ -842,10 +842,11 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(SO3TrajectoryMessage so3Trajectory)
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                       Orientation3DReadOnly desiredOrientation)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.getSo3Trajectory().set(new SO3TrajectoryMessage(so3Trajectory));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, ReferenceFrame.getWorldFrame()));
       return message;
    }
 

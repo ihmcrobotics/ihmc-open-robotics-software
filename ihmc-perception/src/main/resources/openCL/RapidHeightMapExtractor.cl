@@ -11,6 +11,18 @@
 #define DEPTH_FY 10
 #define GLOBAL_CELL_SIZE 11
 #define GLOBAL_CENTER_INDEX 12
+#define ROBOT_COLLISION_RADIUS 13
+#define GRID_OFFSET_X 14
+#define HEIGHT_FILTER_ALPHA 15
+#define LOCAL_CELLS_PER_AXIS 16
+#define GLOBAL_CELLS_PER_AXIS 17
+#define HEIGHT_SCALING_FACTOR 18
+#define MIN_HEIGHT_REGISTRATION 19
+#define MAX_HEIGHT_REGISTRATION 20
+#define MIN_HEIGHT_DIFFERENCE 21
+#define MAX_HEIGHT_DIFFERENCE 22
+#define SEARCH_WINDOW_HEIGHT 23
+#define SEARCH_WINDOW_WIDTH 24
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -88,8 +100,8 @@ float get_height_on_plane(float x, float y, global float *plane)
 void kernel heightMapUpdateKernel(read_write image2d_t in,
                                   read_write image2d_t out,
                                   global float *params,
-                                  global float *sensorToWorldTf,
-                                  global float *worldToSensorTf)
+                                  global float *sensorToZUpFrameTf,
+                                  global float *zUpToSensorFrameTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -98,30 +110,27 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    float3 centroid;
 
    float averageHeightZ = 0;
-   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.0f);
-   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
+   cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[LOCAL_CELL_SIZE],
                                                params[LOCAL_CENTER_INDEX]);
 
 
-   cellCenterInWorld.x += 1.5f;
+   cellCenterInZUp.x += params[GRID_OFFSET_X];
 
-   int WINDOW_WIDTH = 140;
-   int WINDOW_HEIGHT = 250;
-
-   float halfCellWidth = params[LOCAL_CELL_SIZE] / 4.0f;
-   float minX = cellCenterInWorld.x - halfCellWidth;
-   float maxX = cellCenterInWorld.x + halfCellWidth;
-   float minY = cellCenterInWorld.y - halfCellWidth;
-   float maxY = cellCenterInWorld.y + halfCellWidth;
+   float halfCellWidth = params[LOCAL_CELL_SIZE] / 2.0f;
+   float minX = cellCenterInZUp.x - halfCellWidth;
+   float maxX = cellCenterInZUp.x + halfCellWidth;
+   float minY = cellCenterInZUp.y - halfCellWidth;
+   float maxY = cellCenterInZUp.y + halfCellWidth;
 
    float3 cellCenterInSensor = transformPoint3D32_2(
-      cellCenterInWorld,
-      (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
-      (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
-      (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
-      (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
+      cellCenterInZUp,
+      (float3)(zUpToSensorFrameTf[0], zUpToSensorFrameTf[1], zUpToSensorFrameTf[2]),
+      (float3)(zUpToSensorFrameTf[4], zUpToSensorFrameTf[5], zUpToSensorFrameTf[6]),
+      (float3)(zUpToSensorFrameTf[8], zUpToSensorFrameTf[9], zUpToSensorFrameTf[10]),
+      (float3)(zUpToSensorFrameTf[3], zUpToSensorFrameTf[7], zUpToSensorFrameTf[11]));
 
    int2 projectedPoint;
    if (params[MODE] == 0) // Spherical Projection
@@ -140,47 +149,47 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    }
 
    //printf("xIndex: %d, yIndex: %d\tcellCenterWorld: (%f, %f, %f)\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\n",
-   //       xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+   //       xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z,
    //       cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
 
    int count = 0;
 
-   for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset+=3)
+   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=3)
    {
-      for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset+=3)
+      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=3)
       {
          int yaw_count = projectedPoint.x + yaw_count_offset;
          int pitch_count = projectedPoint.y + pitch_count_offset;
 
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
-            float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
+            float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
 
             float3 queryPointInSensor;
             float3 queryPointInWorld;
             if (params[MODE] == 0) // Spherical
             {
-               queryPointInSensor = back_project_spherical(yaw_count,pitch_count,radius,params);
+               queryPointInSensor = back_project_spherical(yaw_count,pitch_count,depth,params);
             }
             else if (params[MODE] == 1) // Perspective
             {
-               queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
+               queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), depth, params);
             }
 
             queryPointInWorld = transformPoint3D32_2(
             queryPointInSensor,
-            (float3)(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2]),
-            (float3)(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
-            (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
-            (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
+            (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
+            (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
+            (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
+            (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
 
             //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
-            //   xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, projectedPoint.x, projectedPoint.y,
-            //   yaw_count, pitch_count, radius, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
+            //   xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z, projectedPoint.x, projectedPoint.y,
+            //   yaw_count, pitch_count, depth, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
 
 
             //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
-            //      cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+            //      cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z,
             //      cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z,
             //      projectedPoint.x, projectedPoint.y);
 
@@ -194,27 +203,27 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       }
    }
 
-   int cellsPerAxis = 2 * params[LOCAL_CENTER_INDEX] + 1;
+   int cellsPerAxis = (int)params[LOCAL_CELLS_PER_AXIS];
 
    if (count > 0)
    {
       averageHeightZ = averageHeightZ / (float)(count);
       averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
 
-      write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * 10000.0f), 0, 0, 0));
-
       //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
    else
    {
-      write_imageui(out, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
+      // this is slightly below the floor height of what we'll accept
+      averageHeightZ = params[MIN_HEIGHT_REGISTRATION] - 0.05F;
    }
+   write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
 void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                         read_write image2d_t globalMap,
                                         global float *params,
-                                        global float *worldToGroundTf)
+                                        global float *worldToZUpFrameTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -226,49 +235,55 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                                params[GLOBAL_CELL_SIZE],
                                                params[GLOBAL_CENTER_INDEX]);
 
-   // Transform the point to the ground frame
-   float3 cellCenterInGround = transformPoint3D32_2(
+   // Transform the point to the ZUp frame
+   float3 cellCenterInZUpFrame = transformPoint3D32_2(
       cellCenterInWorld,
-      (float3)(worldToGroundTf[0], worldToGroundTf[1], worldToGroundTf[2]),
-      (float3)(worldToGroundTf[4], worldToGroundTf[5], worldToGroundTf[6]),
-      (float3)(worldToGroundTf[8], worldToGroundTf[9], worldToGroundTf[10]),
-      (float3)(worldToGroundTf[3], worldToGroundTf[7], worldToGroundTf[11]));
+      (float3)(worldToZUpFrameTf[0], worldToZUpFrameTf[1], worldToZUpFrameTf[2]),
+      (float3)(worldToZUpFrameTf[4], worldToZUpFrameTf[5], worldToZUpFrameTf[6]),
+      (float3)(worldToZUpFrameTf[8], worldToZUpFrameTf[9], worldToZUpFrameTf[10]),
+      (float3)(worldToZUpFrameTf[3], worldToZUpFrameTf[7], worldToZUpFrameTf[11]));
 
-   bool isColliding = length(cellCenterInGround.xy) < 0.4f;
+   // Check if the point is within the robot's collision radius
+   bool isColliding = length(cellCenterInZUpFrame.xy) < params[ROBOT_COLLISION_RADIUS];
 
-   cellCenterInGround.x -= 1.5f;
+   cellCenterInZUpFrame.x -= params[GRID_OFFSET_X];
 
    // Compute the local cell index in the local map
    int2 localCellIndex = coordinate_to_indices(
-      (float2)(cellCenterInGround.x, cellCenterInGround.y),
+      (float2)(cellCenterInZUpFrame.x, cellCenterInZUpFrame.y),
       (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
       params[LOCAL_CELL_SIZE],
       params[LOCAL_CENTER_INDEX]);
 
-   int localCellsPerAxis = 2 * params[LOCAL_CENTER_INDEX] + 1;
+   int localCellsPerAxis = (int) params[LOCAL_CELLS_PER_AXIS];
 
    // Extract the height from the local map at the local cell index (if within bounds)
-   float height = 0.0f;
-   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / 10000.0f;
+   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR];
+   float height = params[MIN_HEIGHT_REGISTRATION] - 0.05f;
 
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
-      height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / 10000.0f;
+      height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / params[HEIGHT_SCALING_FACTOR];
    }
 
-   float alpha = 0.90f;
-   float finalHeight = 0.0f;
+   float finalHeight = previousHeight;
 
-   if (height > 0.05f && height < 0.7f && !isColliding)
+   // Filter the height value if it is within the registration height range and not colliding with the robot
+   if (!isColliding && height > params[MIN_HEIGHT_REGISTRATION] && height < params[MAX_HEIGHT_REGISTRATION])
    {
-//      finalHeight = height;
-       finalHeight = previousHeight * alpha + height * (1.0f - alpha);
-   }
-   else
-   {
-      finalHeight = previousHeight;
+      // Apply a poor man's mahalanobis filter on the data
+      float height_diff = height - previousHeight;
+      if (height_diff > params[MIN_HEIGHT_DIFFERENCE] && height_diff < params[MAX_HEIGHT_DIFFERENCE])
+      {
+         finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + height * (1.0f - params[HEIGHT_FILTER_ALPHA]);
+      }
+      else
+      {
+         // the difference between the incoming data and the old data was too much, reset it to the incoming data completely
+         finalHeight = height;
+      }
    }
 
    // Put the height value in the global map at the global cell index
-   write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * 10000.0f), 0, 0, 0));
+   write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }

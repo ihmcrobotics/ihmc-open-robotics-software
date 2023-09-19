@@ -24,6 +24,8 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
    public static final byte CUSTOM1 = (byte) 9;
    public static final byte FALLING_STATE = (byte) 10;
    public static final byte PUSH_RECOVERY = (byte) 11;
+   public static final byte EXTERNAL_TRANSITION_STATE = (byte) 12;
+   public static final byte EXTERNAL = (byte) 13;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */

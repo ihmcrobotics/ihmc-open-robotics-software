@@ -8,6 +8,9 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import us.ihmc.tools.Timer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An object that is currently detected or not currently detected,
  * as such with objects tracked via ArUco markers or YOLO.
@@ -32,6 +35,7 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    private boolean trackDetectedPose = true;
    private ReferenceFrameSupplier parentFrameSupplier;
+   private final List<DetectableSceneNode> children = new ArrayList<>();
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
 
@@ -85,24 +89,28 @@ public abstract class DetectableSceneNode extends SceneNode
    {
       this.trackDetectedPose = trackDetectedPose;
 
-      if (EuclidCoreMissingTools.hasBeenRemoved(getNodeFrame()))
+      update();
+      for (DetectableSceneNode child : children)
       {
-         LogTools.error("Frame has been removed: {}. Not sure why this would be removed at this point.", getNodeFrame().getName());
+         child.update();
+      }
+   }
+
+   private void update()
+   {
+      ReferenceFrame updatedParentFrame = trackDetectedPose ? parentFrameSupplier.get() : ReferenceFrame.getWorldFrame();
+
+      if (EuclidCoreMissingTools.hasBeenRemoved(updatedParentFrame))
+      {
+         LogTools.error("Parent frame has been removed! Parent name: %s This node: %s",
+                        EuclidCoreMissingTools.frameName(updatedParentFrame), getName());
       }
 
-      if (trackDetectedPose)
+      boolean thisFrameHasBeenRemoved = EuclidCoreMissingTools.hasBeenRemoved(getNodeFrame());
+
+      if (thisFrameHasBeenRemoved || updatedParentFrame != getNodeFrame().getParent())
       {
-         if (parentFrameSupplier.get() != getNodeFrame().getParent())
-         {
-            changeParentFrameWithoutMoving(parentFrameSupplier.get());
-         }
-      }
-      else
-      {
-         if (getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
-         {
-            changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-         }
+         changeParentFrameWithoutMoving(updatedParentFrame);
       }
    }
 
@@ -139,5 +147,10 @@ public abstract class DetectableSceneNode extends SceneNode
    public RigidBodyTransform getOriginalTransformToParent()
    {
       return originalTransformToParent;
+   }
+
+   public List<DetectableSceneNode> getChildren()
+   {
+      return children;
    }
 }

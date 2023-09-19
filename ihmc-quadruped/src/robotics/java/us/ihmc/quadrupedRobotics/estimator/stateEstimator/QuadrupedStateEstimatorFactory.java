@@ -62,10 +62,18 @@ public class QuadrupedStateEstimatorFactory
       String[] imuSensorsToUseInStateEstimator = sensorInformation.get().getImuNames();
       double gravityMagnitude = Math.abs(gravity.get());
 
-      StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
-                                                                                     sensorOutputMapReadOnly.get(), centerOfMassDataHolder.get(),
-                                                                                     imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-                                                                                     centerOfPressureDataHolder, robotMotionStatusFromController.get(), feetMap, yoGraphicsListRegistry.get());
+      StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure,
+                                                                                     stateEstimatorParameters.get(),
+                                                                                     sensorOutputMapReadOnly.get(),
+                                                                                     centerOfMassDataHolder.get(),
+                                                                                     imuSensorsToUseInStateEstimator,
+                                                                                     gravityMagnitude,
+                                                                                     footSwitchMap,
+                                                                                     centerOfPressureDataHolder,
+                                                                                     robotMotionStatusFromController.get(),
+                                                                                     feetMap,
+                                                                                     null,
+                                                                                     yoGraphicsListRegistry.get());
 
       FactoryTools.disposeFactory(this);
 

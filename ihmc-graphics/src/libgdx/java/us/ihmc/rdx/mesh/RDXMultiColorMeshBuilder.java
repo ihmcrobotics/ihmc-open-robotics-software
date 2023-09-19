@@ -28,6 +28,7 @@ public class RDXMultiColorMeshBuilder
 {
    private static final int DEFAULT_RES = 32;
    private static final float TwoPi = 2.0f * (float) Math.PI;
+   private static Texture paletteTexture;
 
    private int hueResolution = 256;
    private int saturationResolution = -1;
@@ -1063,7 +1064,9 @@ public class RDXMultiColorMeshBuilder
 
    public static Texture loadPaletteTexture()
    {
-      return new Texture(Gdx.files.classpath(getPalletImagePath()));
+      if (paletteTexture == null)
+         paletteTexture = new Texture(Gdx.files.classpath(getPalletImagePath()));
+      return paletteTexture;
    }
 
    public Mesh generateMesh()
