@@ -36,6 +36,10 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
    public boolean hold_pose_in_world_;
+   /**
+            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            */
+   public boolean joint_space_control_;
 
    public SidedBodyPartPoseActionMessage()
    {
@@ -62,6 +66,8 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
       execute_with_next_action_ = other.execute_with_next_action_;
 
       hold_pose_in_world_ = other.hold_pose_in_world_;
+
+      joint_space_control_ = other.joint_space_control_;
 
    }
 
@@ -152,6 +158,21 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
       return hold_pose_in_world_;
    }
 
+   /**
+            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            */
+   public void setJointSpaceControl(boolean joint_space_control)
+   {
+      joint_space_control_ = joint_space_control;
+   }
+   /**
+            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            */
+   public boolean getJointSpaceControl()
+   {
+      return joint_space_control_;
+   }
+
 
    public static Supplier<SidedBodyPartPoseActionMessagePubSubType> getPubSubType()
    {
@@ -182,6 +203,8 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_space_control_, other.joint_space_control_, epsilon)) return false;
+
 
       return true;
    }
@@ -206,6 +229,8 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
 
       if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
 
+      if(this.joint_space_control_ != otherMyClass.joint_space_control_) return false;
+
 
       return true;
    }
@@ -229,7 +254,9 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
       builder.append("execute_with_next_action=");
       builder.append(this.execute_with_next_action_);      builder.append(", ");
       builder.append("hold_pose_in_world=");
-      builder.append(this.hold_pose_in_world_);
+      builder.append(this.hold_pose_in_world_);      builder.append(", ");
+      builder.append("joint_space_control=");
+      builder.append(this.joint_space_control_);
       builder.append("}");
       return builder.toString();
    }

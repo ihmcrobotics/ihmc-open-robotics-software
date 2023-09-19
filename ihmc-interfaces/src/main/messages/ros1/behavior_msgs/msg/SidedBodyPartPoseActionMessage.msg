@@ -21,4 +21,7 @@ bool execute_with_next_action
 # Whether maintaining the rigid body controlled in world after the action is complete
 bool hold_pose_in_world
 
+# Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+bool joint_space_control
+
 
