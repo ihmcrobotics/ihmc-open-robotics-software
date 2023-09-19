@@ -96,6 +96,7 @@ public class RDXRapidHeightMapExtractionDemo
             createForPerspective(720, 1280);
 
             baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getRemotePerceptionUI().getPanel());
+            baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getHeightMapVisualizer().getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
             updateHeightMap();
@@ -196,8 +197,6 @@ public class RDXRapidHeightMapExtractionDemo
             {
                userChangedIndex.set();
             }
-
-            humanoidPerceptionUI.renderImGuiWidgets();
          }
 
          @Override
@@ -253,7 +252,6 @@ public class RDXRapidHeightMapExtractionDemo
 
          humanoidPerceptionUI.render(groundToWorldTransform);
 
-         humanoidPerceptionUI.getHeightMapVisualizer().setActive(humanoidPerceptionUI.getEnableHeightMapVisualizer());
          humanoidPerceptionUI.getHeightMapVisualizer().acceptHeightMapMessage(HeightMapMessageTools.toMessage(humanoidPerception.getRapidHeightMapExtractor().getLatestHeightMapData()));
          humanoidPerceptionUI.getHeightMapVisualizer().update();
 

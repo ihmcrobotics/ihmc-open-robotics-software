@@ -1,19 +1,14 @@
 package us.ihmc.rdx.perception;
 
-import imgui.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
-import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class RDXHumanoidPerceptionUI
 {
@@ -46,18 +41,6 @@ public class RDXHumanoidPerceptionUI
 
    public void render(RigidBodyTransform zUpFrameToWorld)
    {
-      if (heightMapVisualizer != null)
-      {
-         heightMapVisualizer.getHeightMapRenderer().update(zUpFrameToWorld,
-                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getPointerForAccessSpeed(),
-                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
-                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
-
-//         PerceptionDebugTools.displayHeightMap("Output Height Map",
-//                                               humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
-//                                               1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
-      }
-
       if (rapidRegionsUI != null)
       {
          rapidRegionsUI.render();

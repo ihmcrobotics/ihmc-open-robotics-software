@@ -23,32 +23,32 @@ public class RapidHeightMapExtractor
 {
    public int sequenceNumber = 0;
 
-   private float localWidthInMeters = 8.0f;
-   private float localCellSizeInMeters = 0.02f;
+   public static float LOCAL_WIDTH_IN_METERS = 3.0f; // localWidthInMeters
+   public static float LOCAL_CELL_SIZE_IN_METERS = 0.02f; // localCellSizeInMeters
 
-   private float globalWidthInMeters = 10.0f;
-   private float globalCellSizeInMeters = 0.02f;
+   public static float GLOBAL_WIDTH_IN_METERS = 4.0f; // globalWidthInMeters
+   public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
 
-   private int centerIndex;
-   private int localCellsPerAxis;
+   private static int centerIndex;
+   private static int localCellsPerAxis;
 
-   private int globalCenterIndex;
-   private int globalCellsPerAxis;
-   private float heightScalingFactor = 10000.0f;
+   private static int globalCenterIndex;
+   private static int globalCellsPerAxis;
+   private static float heightScalingFactor = 10000.0f;
 
-   private int searchWindowHeight = 250;
-   private int searchWindowWidth = 140;
+   private static int searchWindowHeight = 250;
+   private static int searchWindowWidth = 140;
 
-   private float minHeightRegistration = -0.1f;
-   private float maxHeightRegistration = 0.7f;
-   private float minHeightDifference = -0.05f;
-   private float maxHeightDifference = 0.1f;
+   private static float minHeightRegistration = -0.1f;
+   private static float maxHeightRegistration = 0.7f;
+   private static float minHeightDifference = -0.05f;
+   private static float maxHeightDifference = 0.1f;
 
-   private float robotCollisionCylinderRadius = 0.5f;
-   private float gridOffsetX = localWidthInMeters / 2.0f;
-   private float heightFilterAlpha = 0.65f;
+   private static float robotCollisionCylinderRadius = 0.5f;
+   private static float gridOffsetX = LOCAL_WIDTH_IN_METERS / 2.0f;
+   private static float heightFilterAlpha = 0.65f;
 
-   private int mode = 0; // 0 -> Ouster, 1 -> Realsense
+   private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -82,8 +82,6 @@ public class RapidHeightMapExtractor
    private boolean processing = false;
    private boolean heightMapDataAvailable = false;
 
-   private HeightMapData latestHeightMapData;
-
    public void create(OpenCLManager openCLManager,  BytedecoImage depthImage, int mode)
    {
       this.mode = mode;
@@ -91,10 +89,10 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
 
-      centerIndex = HeightMapTools.computeCenterIndex(localWidthInMeters, localCellSizeInMeters);
+      centerIndex = HeightMapTools.computeCenterIndex(LOCAL_WIDTH_IN_METERS, LOCAL_CELL_SIZE_IN_METERS);
       localCellsPerAxis = 2 * centerIndex + 1;
 
-      globalCenterIndex = HeightMapTools.computeCenterIndex(globalWidthInMeters, globalCellSizeInMeters);
+      globalCenterIndex = HeightMapTools.computeCenterIndex(GLOBAL_WIDTH_IN_METERS, GLOBAL_CELL_SIZE_IN_METERS);
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       parametersBuffer = new OpenCLFloatParameters();
@@ -180,20 +178,6 @@ public class RapidHeightMapExtractor
          localHeightMapImage.readOpenCLImage(openCLManager);
          globalHeightMapImage.readOpenCLImage(openCLManager);
 
-
-         if (latestHeightMapData == null)
-         {
-            latestHeightMapData = new HeightMapData(localCellSizeInMeters, localWidthInMeters, gridCenter.getX(), gridCenter.getY());
-         }
-
-         if (!heightMapDataAvailable)
-         {
-            PerceptionMessageTools.convertToHeightMapData(localHeightMapImage.getBytedecoByteBufferPointer(), latestHeightMapData, gridCenter,
-                                                          localCellSizeInMeters, localWidthInMeters, localCellsPerAxis, centerIndex);
-            heightMapDataAvailable = true;
-         }
-
-
          sequenceNumber++;
       }
    }
@@ -201,7 +185,7 @@ public class RapidHeightMapExtractor
    private void populateParameterBuffer(Tuple3DReadOnly gridCenter)
    {
       //// Fill parameters buffer
-      parametersBuffer.setParameter(localCellSizeInMeters);
+      parametersBuffer.setParameter(LOCAL_CELL_SIZE_IN_METERS);
       parametersBuffer.setParameter(centerIndex);
       parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
@@ -212,7 +196,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) cameraIntrinsics.getCy());
       parametersBuffer.setParameter((float) cameraIntrinsics.getFx());
       parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
-      parametersBuffer.setParameter(globalCellSizeInMeters);
+      parametersBuffer.setParameter(GLOBAL_CELL_SIZE_IN_METERS);
       parametersBuffer.setParameter((float) globalCenterIndex);
       parametersBuffer.setParameter(robotCollisionCylinderRadius);
       parametersBuffer.setParameter(gridOffsetX);
@@ -228,16 +212,6 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter(searchWindowWidth);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
-   }
-
-   public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
-   {
-      this.localWidthInMeters = widthInMeters;
-      this.localCellSizeInMeters = cellSizeXYInMeters;
-      this.gridOffsetX = localWidthInMeters / 2.0f;
-
-      centerIndex = HeightMapTools.computeCenterIndex(localWidthInMeters, cellSizeXYInMeters);
-      localCellsPerAxis = 2 * centerIndex + 1;
    }
 
    public void setDepthIntrinsics(double fx, double fy, double cx, double cy)
@@ -269,16 +243,6 @@ public class RapidHeightMapExtractor
       this.modified = modified;
    }
 
-   public float getLocalCellSizeInMeters()
-   {
-      return localCellSizeInMeters;
-   }
-
-   public float getGlobalCellSizeInMeters()
-   {
-      return globalCellSizeInMeters;
-   }
-
    public BytedecoImage getLocalHeightMapImage()
    {
       return localHeightMapImage;
@@ -307,11 +271,6 @@ public class RapidHeightMapExtractor
    public int getGlobalCenterIndex()
    {
       return globalCenterIndex;
-   }
-
-   public HeightMapData getLatestHeightMapData()
-   {
-      return latestHeightMapData;
    }
 
    public Point3D getGridCenter()

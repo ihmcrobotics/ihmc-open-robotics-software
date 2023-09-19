@@ -63,8 +63,6 @@ public class RDXHeightMapGraphic implements RenderableProvider
 
    public void generateMeshesAsync(HeightMapMessage heightMapMessage)
    {
-      LogTools.debug("Receiving height map with {} cells, ground plane at {}", heightMapMessage.getKeys().size(), heightMapMessage.getEstimatedGroundHeight());
-
       if (!isGeneratingMeshes.getAndSet(true))
       {
          executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
