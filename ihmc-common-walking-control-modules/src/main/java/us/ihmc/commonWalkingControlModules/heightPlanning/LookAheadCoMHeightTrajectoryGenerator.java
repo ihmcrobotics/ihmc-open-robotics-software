@@ -81,6 +81,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
+   private final YoDouble desiredCoMSlope = new YoDouble("desiredCoMSlope", registry);
    private final YoFramePoint3D queryPosition = new YoFramePoint3D("queryPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private final RecyclingArrayList<CoMHeightTrajectoryWaypoint> heightWaypoints;
@@ -216,6 +217,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       desiredCoMHeight.set(nominalLegLength.getDoubleValue());
       desiredCoMPosition.setMatchingFrame(tempFramePoint);
+      desiredCoMSlope.set(0.0);
 
       extraToeOffHeight.set(0.0);
 
@@ -238,6 +240,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    public void initializeToNominalHeight()
    {
       heightWaypoints.clear();
+      desiredCoMSlope.set(0.0);
 
       if (soleFrames.get(RobotSide.LEFT).getTransformToRoot().getTranslationZ() > soleFrames.get(RobotSide.RIGHT).getTransformToRoot().getTranslationZ())
          setSupportLeg(RobotSide.RIGHT);
@@ -277,7 +280,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
-      splinedHeightTrajectory.computeSpline();
+      splinedHeightTrajectory.computeSpline(desiredCoMSlope.getDoubleValue());
    }
 
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
@@ -344,7 +347,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
-      splinedHeightTrajectory.computeSpline();
+      splinedHeightTrajectory.computeSpline(desiredCoMSlope.getDoubleValue());
    }
 
    // FIXME this doesn't work well during transfer.
@@ -575,6 +578,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       this.splineQuery.set(point.getX());
       this.desiredCoMHeight.set(point.getY());
+      desiredCoMSlope.set(splinedHeightTrajectory.getPartialDzDs());
    }
 
    private void handleInitializeToCurrent(double normalDesiredHeight)
