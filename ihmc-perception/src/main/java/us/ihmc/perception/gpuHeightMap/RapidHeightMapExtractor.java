@@ -14,7 +14,9 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
@@ -78,6 +80,7 @@ public class RapidHeightMapExtractor
    private boolean patchSizeChanged = true;
    private boolean modified = true;
    private boolean processing = false;
+   private boolean heightMapDataAvailable = false;
 
    private HeightMapData latestHeightMapData;
 
@@ -177,7 +180,19 @@ public class RapidHeightMapExtractor
          localHeightMapImage.readOpenCLImage(openCLManager);
          globalHeightMapImage.readOpenCLImage(openCLManager);
 
-         latestHeightMapData = convertToHeightMapData(gridCenter);
+
+         if (latestHeightMapData == null)
+         {
+            latestHeightMapData = new HeightMapData(localCellSizeInMeters, localWidthInMeters, gridCenter.getX(), gridCenter.getY());
+         }
+
+         if (!heightMapDataAvailable)
+         {
+            PerceptionMessageTools.convertToHeightMapData(localHeightMapImage.getBytedecoByteBufferPointer(), latestHeightMapData, gridCenter,
+                                                          localCellSizeInMeters, localWidthInMeters, localCellsPerAxis, centerIndex);
+            heightMapDataAvailable = true;
+         }
+
 
          sequenceNumber++;
       }
@@ -213,33 +228,6 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter(searchWindowWidth);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
-   }
-
-   private HeightMapData convertToHeightMapData(Tuple3DReadOnly center)
-   {
-      HeightMapData heightMapData = new HeightMapData(localCellSizeInMeters, localWidthInMeters, center.getX(), center.getY());
-      BytePointer heightMapPointer = localHeightMapImage.getBytedecoByteBufferPointer();
-
-      float maxHeight = 0.7f;
-      float minHeight = 0.0f;
-
-
-      for (int xIndex = 0; xIndex < localCellsPerAxis; xIndex++)
-      {
-         for (int yIndex = 0; yIndex < localCellsPerAxis; yIndex++)
-         {
-            int heightIndex = xIndex * localCellsPerAxis + yIndex;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
-            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
-            if (cellHeight > maxHeight - 0.01f)
-               cellHeight = 0.0f;
-
-            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            heightMapData.setHeightAt(key, cellHeight);
-         }
-      }
-
-      return heightMapData;
    }
 
    public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
@@ -344,5 +332,15 @@ public class RapidHeightMapExtractor
    public RigidBodyTransform getSensorToWorldTransform()
    {
       return currentSensorToWorldTransform;
+   }
+
+   public void setHeightMapDataAvailable(boolean heightMapDataAvailable)
+   {
+      this.heightMapDataAvailable = heightMapDataAvailable;
+   }
+
+   public boolean isHeightMapDataAvailable()
+   {
+      return heightMapDataAvailable;
    }
 }

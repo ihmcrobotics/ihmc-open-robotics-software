@@ -10,12 +10,14 @@ import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -24,6 +26,8 @@ import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -73,14 +77,7 @@ public class PerceptionMessageTools
                                                   int width,
                                                   float depthToMetersRatio)
    {
-      packImageMessage(depthImageMessage,
-                       compressedDepthPointer,
-                       cameraPose,
-                       aquisitionTime,
-                       sequenceNumber,
-                       height,
-                       width,
-                       depthToMetersRatio);
+      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
 
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       helper.publish(topic, depthImageMessage);
@@ -97,14 +94,7 @@ public class PerceptionMessageTools
                                                      int width,
                                                      float depthToMetersRatio)
    {
-      packImageMessage(colorImageMessage,
-                       compressedColorPointer,
-                       cameraPose,
-                       aquisitionTime,
-                       sequenceNumber,
-                       height,
-                       width,
-                       depthToMetersRatio);
+      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
       helper.publish(topic, colorImageMessage);
    }
@@ -217,5 +207,32 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 1, (float) quaternion.getY());
       floatPointer.put(startIndex + 2, (float) quaternion.getZ());
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
+   }
+
+   public static void convertToHeightMapData(BytePointer heightMapPointer,
+                                             HeightMapData heightMapData,
+                                             Tuple3DReadOnly center,
+                                             float localCellSizeInMeters,
+                                             float localWidthInMeters,
+                                             int localCellsPerAxis,
+                                             int centerIndex)
+   {
+      float maxHeight = 0.7f;
+      float minHeight = 0.0f;
+
+      for (int xIndex = 0; xIndex < localCellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < localCellsPerAxis; yIndex++)
+         {
+            int heightIndex = xIndex * localCellsPerAxis + yIndex;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
+            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
+            if (cellHeight > maxHeight - 0.01f)
+               cellHeight = 0.0f;
+
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            heightMapData.setHeightAt(key, cellHeight);
+         }
+      }
    }
 }

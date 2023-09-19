@@ -95,7 +95,6 @@ public class RDXRapidHeightMapExtractionDemo
             //            createForSpherical(128, 2048);
             createForPerspective(720, 1280);
 
-            baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapRenderer(), RDXSceneLevel.MODEL);
             baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getRemotePerceptionUI().getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
@@ -126,7 +125,6 @@ public class RDXRapidHeightMapExtractionDemo
             cameraIntrinsics = new CameraIntrinsics(depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89);
             humanoidPerception.initializeRealsenseDepthImage(depthHeight, depthWidth);
             humanoidPerception.initializePerspectiveRapidHeightMapExtractor(cameraIntrinsics);
-            humanoidPerceptionUI.initializeHeightMapRenderer(humanoidPerception);
             humanoidPerceptionUI.initializeHeightMapVisualizer(null, null, true);
 
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
@@ -258,6 +256,8 @@ public class RDXRapidHeightMapExtractionDemo
          humanoidPerceptionUI.getHeightMapVisualizer().setActive(humanoidPerceptionUI.getEnableHeightMapVisualizer());
          humanoidPerceptionUI.getHeightMapVisualizer().acceptHeightMapMessage(HeightMapMessageTools.toMessage(humanoidPerception.getRapidHeightMapExtractor().getLatestHeightMapData()));
          humanoidPerceptionUI.getHeightMapVisualizer().update();
+
+         humanoidPerception.getRapidHeightMapExtractor().setHeightMapDataAvailable(false);
 
          humanoidPerception.getRapidHeightMapExtractor().setModified(false);
          humanoidPerception.getRapidHeightMapExtractor().setProcessing(false);
