@@ -181,7 +181,6 @@ public class HumanoidPerceptionModule
       rapidHeightMapExtractor = new RapidHeightMapExtractor();
 
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
-      rapidHeightMapExtractor.setHeightMapResolution(3.0f, 0.02f);
       rapidHeightMapExtractor.create(openCLManager, realsenseDepthImage, 1);
    }
 
