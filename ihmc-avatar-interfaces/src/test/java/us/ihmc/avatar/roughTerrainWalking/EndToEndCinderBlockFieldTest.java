@@ -53,7 +53,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
    public double getSwingHeight()
    {
-      return getRobotModel().getWalkingControllerParameters().getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      return -1.0;
    }
 
    @BeforeEach
