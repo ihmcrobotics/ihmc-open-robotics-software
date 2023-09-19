@@ -15,6 +15,7 @@ import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -24,6 +25,7 @@ import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
+import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
@@ -81,10 +83,17 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Execute With Next Action"), imBoolean));
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
                                                                                      actionData::setHoldPoseInWorldLater,
-                                                                                         imBoolean -> ImGui.checkbox(labels.get("Hold Pose In World Later"), imBoolean));
+                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+   private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(actionData::getJointSpaceControl,
+                                                                                  actionData::setJointSpaceControl,
+                                                                                  imBoolean -> {
+                                                                                     boolean newVal = ImGui.radioButton(labels.get("Joint space"), imBoolean.get());
+                                                                                     if (newVal)
+                                                                                        imBoolean.set(true);
+                                                                                  });
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
@@ -210,42 +219,42 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
-//      displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
-//      if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
-//      {
-//         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
-//         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
-//         {
-//            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-//            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-//            for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
-//            {
-//               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
-//            }
-//            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
-//            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
-//         }
-//
-//         // We probably don't want to recolor the mesh every tick.
-//         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
-//         if (color != currentColor.get(getActionData().getSide()))
-//         {
-//            currentColor.put(getActionData().getSide(), color);
-//            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
-//            {
-//               if (body instanceof RDXRigidBody rdxRigidBody)
-//               {
-//                  if (rdxRigidBody.getVisualGraphicsNode() != null)
-//                  {
-//                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
-//                     {
-//                        part.getModelInstance().setDiffuseColor(color);
-//                     }
-//                  }
-//               }
-//            }
-//         }
-//      }
+      displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
+      if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
+      {
+         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
+         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
+         {
+            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
+            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+            for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
+            {
+               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
+            }
+            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
+            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
+         }
+
+         // We probably don't want to recolor the mesh every tick.
+         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
+         if (color != currentColor.get(getActionData().getSide()))
+         {
+            currentColor.put(getActionData().getSide(), color);
+            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
+            {
+               if (body instanceof RDXRigidBody rdxRigidBody)
+               {
+                  if (rdxRigidBody.getVisualGraphicsNode() != null)
+                  {
+                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
+                     {
+                        part.getModelInstance().setDiffuseColor(color);
+                     }
+                  }
+               }
+            }
+         }
+      }
    }
 
    @Override
@@ -253,7 +262,16 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
-      holdPoseInWorldLaterWrapper.renderImGuiWidget();
+      jointSpaceControlWrapper.renderImGuiWidget();
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Task space"), !actionData.getJointSpaceControl()))
+      {
+         actionData.setJointSpaceControl(false);
+      }
+      if (!actionData.getJointSpaceControl())
+      {
+         holdPoseInWorldLaterWrapper.renderImGuiWidget();
+      }
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
@@ -312,8 +330,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       highlightModels.get(actionData.getSide()).getRenderables(renderables, pool);
       poseGizmo.getVirtualRenderables(renderables, pool);
 
-//      if (displayIKSolution)
-//         armMultiBodyGraphics.get(getActionData().getSide()).getVisualRenderables(renderables, pool);
+      if (displayIKSolution)
+         armMultiBodyGraphics.get(getActionData().getSide()).getVisualRenderables(renderables, pool);
    }
 
    @Override

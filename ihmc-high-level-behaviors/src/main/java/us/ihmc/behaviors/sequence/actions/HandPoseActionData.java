@@ -24,6 +24,7 @@ public class HandPoseActionData implements BehaviorActionData
    private double trajectoryDuration = 4.0;
    private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
+   private boolean jointSpaceControl = true;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -47,6 +48,7 @@ public class HandPoseActionData implements BehaviorActionData
       JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
       jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
+      jsonNode.put("jointSpaceControl", jointSpaceControl);
    }
 
    @Override
@@ -59,6 +61,7 @@ public class HandPoseActionData implements BehaviorActionData
       palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
+      jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
 
    public void toMessage(SidedBodyPartPoseActionMessage message)
@@ -70,6 +73,7 @@ public class HandPoseActionData implements BehaviorActionData
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
       message.setHoldPoseInWorld(holdPoseInWorldLater);
+      message.setJointSpaceControl(jointSpaceControl);
    }
 
    public void fromMessage(SidedBodyPartPoseActionMessage message)
@@ -80,6 +84,7 @@ public class HandPoseActionData implements BehaviorActionData
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
+//      jointSpaceControl = message.getJointSpaceControl();
    }
 
    public ReferenceFrame getParentFrame()
@@ -151,6 +156,16 @@ public class HandPoseActionData implements BehaviorActionData
    public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
    {
       this.holdPoseInWorldLater = holdPoseInWorldLater;
+   }
+
+   public boolean getJointSpaceControl()
+   {
+      return jointSpaceControl;
+   }
+
+   public void setJointSpaceControl(boolean jointSpaceControl)
+   {
+      this.jointSpaceControl = jointSpaceControl;
    }
 
    @Override
