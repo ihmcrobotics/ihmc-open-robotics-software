@@ -84,7 +84,7 @@ public class HandPoseActionData implements BehaviorActionData
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
-//      jointSpaceControl = message.getJointSpaceControl();
+      jointSpaceControl = message.getJointSpaceControl();
    }
 
    public ReferenceFrame getParentFrame()
