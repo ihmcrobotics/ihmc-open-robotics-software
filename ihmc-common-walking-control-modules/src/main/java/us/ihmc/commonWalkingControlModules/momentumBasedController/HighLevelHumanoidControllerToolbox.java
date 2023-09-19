@@ -413,7 +413,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       readWristSensorData();
 
       computeAngularAndLinearMomentum();
-      handWrenchCalculator.compute();
+      if (handWrenchCalculator != null)
+         handWrenchCalculator.compute();
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
