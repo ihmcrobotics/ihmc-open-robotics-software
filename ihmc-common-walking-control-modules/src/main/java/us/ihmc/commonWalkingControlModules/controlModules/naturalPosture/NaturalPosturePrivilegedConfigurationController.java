@@ -139,11 +139,8 @@ public class NaturalPosturePrivilegedConfigurationController
       spineRollCommand.setJoint(spineRoll);
 
       parentRegistry.addChild(registry);
-   }
 
-   public void initialize()
-   {
-
+      //initialize
       updatePrivilegedConfigurationCommand();
    }
 

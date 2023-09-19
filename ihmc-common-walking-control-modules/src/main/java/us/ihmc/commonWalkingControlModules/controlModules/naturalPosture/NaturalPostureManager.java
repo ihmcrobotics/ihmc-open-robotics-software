@@ -59,8 +59,6 @@ public class NaturalPostureManager
             throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
-
-      initialize();
    }
 
    public InverseDynamicsCommand<?> getQPObjectiveCommand()
@@ -76,12 +74,6 @@ public class NaturalPostureManager
    public JointLimitEnforcementMethodCommand getJointLimitEnforcementCommand()
    {
       return jointLimitEnforcementMethodCommand;
-   }
-
-   private void initialize()
-   {
-      naturalPostureController.getHumanoidRobotNaturalPosture().initialize();
-      naturalPosturePrivilegedConfigurationController.initialize();
    }
 
    public void compute()

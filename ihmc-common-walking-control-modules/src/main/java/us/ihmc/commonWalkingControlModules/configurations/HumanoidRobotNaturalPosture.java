@@ -11,8 +11,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public interface HumanoidRobotNaturalPosture
 {
   //TODO get rid of the top methods here (initialize, getNominalStandingPoseQoffset, setNaturalPostureOffset), they should be elsewhere
-   public void initialize();
-   
    public Quaternion getNominalStandingPoseQoffset();
    
    public void setNaturalPostureOffset(QuaternionReadOnly Qoffset);
