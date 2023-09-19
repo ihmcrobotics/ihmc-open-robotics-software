@@ -480,7 +480,7 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          clearInteractablesAndLocomotionGraphics();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      ImGuiTools.previousWidgetTooltip("Keybind: Shift + Escape");
       ImGui.sameLine();
       if (interactablesAvailable)
       {
