@@ -24,12 +24,8 @@ public class RDXHumanoidPerceptionUI
    private RDXROS2PlanarRegionsVisualizer rapidRegionsMapVisualizer;
    private RDXROS2FramePlanarRegionsVisualizer perspectiveRegionsVisualizer;
    private RDXROS2PlanarRegionsVisualizer sphericalRegionsVisualizer;
-   private RDXHeightMapRenderer heightMapRenderer;
    private RDXRemoteHeightMapPanel heightMapUI;
    private RDXHeightMapVisualizer heightMapVisualizer;
-
-   private ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
-   private ImBoolean enableHeightMapRenderer = new ImBoolean(false);
 
    public RDXHumanoidPerceptionUI(HumanoidPerceptionModule humanoidPerception, ROS2Helper ros2Helper)
    {
@@ -42,13 +38,6 @@ public class RDXHumanoidPerceptionUI
       }
    }
 
-   public void initializeHeightMapRenderer(HumanoidPerceptionModule humanoidPerception)
-   {
-      this.heightMapRenderer = new RDXHeightMapRenderer();
-      this.heightMapRenderer.create(
-            humanoidPerception.getRapidHeightMapExtractor().getGlobalCellsPerAxis() * humanoidPerception.getRapidHeightMapExtractor().getGlobalCellsPerAxis());
-   }
-
    public void initializeRapidRegionsUI()
    {
       this.rapidRegionsUI = new RDXRapidRegionsUI();
@@ -58,14 +47,11 @@ public class RDXHumanoidPerceptionUI
    public void render(RigidBodyTransform zUpFrameToWorld)
    {
       if (heightMapVisualizer != null)
-         heightMapVisualizer.setActive(enableHeightMapVisualizer.get());
-
-      if (heightMapRenderer != null)
       {
-         heightMapRenderer.update(zUpFrameToWorld,
+         heightMapVisualizer.getHeightMapRenderer().update(zUpFrameToWorld,
                                   humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getPointerForAccessSpeed(),
                                   humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
-                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters(), enableHeightMapRenderer.get());
+                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
 
 //         PerceptionDebugTools.displayHeightMap("Output Height Map",
 //                                               humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
@@ -123,9 +109,6 @@ public class RDXHumanoidPerceptionUI
       if (activeMappingUI != null)
          activeMappingUI.destroy();
 
-      if (heightMapRenderer != null)
-         heightMapRenderer.dispose();
-
       if (heightMapUI != null)
          heightMapUI.destroy();
 
@@ -144,12 +127,6 @@ public class RDXHumanoidPerceptionUI
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
    }
 
-   public void renderImGuiWidgets()
-   {
-      ImGui.checkbox("Enable Height Map Visualizer", enableHeightMapVisualizer);
-      ImGui.checkbox("Enable Height Map Renderer", enableHeightMapRenderer);
-   }
-
    public RDXRapidRegionsUI getRapidRegionsUI()
    {
       return rapidRegionsUI;
@@ -165,11 +142,6 @@ public class RDXHumanoidPerceptionUI
       return activeMappingUI;
    }
 
-   public RDXHeightMapRenderer getHeightMapRenderer()
-   {
-      return heightMapRenderer;
-   }
-
    public RDXHeightMapVisualizer getHeightMapVisualizer()
    {
       return heightMapVisualizer;
@@ -183,15 +155,5 @@ public class RDXHumanoidPerceptionUI
    public RDXRemoteHeightMapPanel getHeightMapUI()
    {
       return heightMapUI;
-   }
-
-   public boolean getEnableHeightMapVisualizer()
-   {
-      return enableHeightMapVisualizer.get();
-   }
-
-   public boolean getEnableHeightMapRenderer()
-   {
-      return enableHeightMapRenderer.get();
    }
 }

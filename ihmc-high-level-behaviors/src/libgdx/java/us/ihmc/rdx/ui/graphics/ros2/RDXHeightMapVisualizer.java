@@ -38,6 +38,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
    private final ImBoolean heightMapActive = new ImBoolean(false);
+   private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
 
    private Mat heightMapImage;
    private Mat compressedBytesMat;
@@ -92,7 +94,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void acceptImageMessage(ImageMessage imageMessage)
    {
       frequencyPlot.recordEvent();
-      if (isActive())
+      if (isActive() && enableHeightMapRenderer.get())
       {
          executorService.clearQueueAndExecute(() ->
          {
@@ -123,7 +125,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
             RigidBodyTransform transform = new RigidBodyTransform(imageMessage.getOrientation(), imageMessage.getPosition());
 
             // Update the height map renderer with the new image
-            heightMapRenderer.update(transform, heightMapImage.ptr(0), heightMapImage.rows() / 2, 0.02f, true);
+            heightMapRenderer.update(transform, heightMapImage.ptr(0), heightMapImage.rows() / 2, 0.02f);
 
             PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
          });
@@ -146,10 +148,13 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       super.renderImGuiWidgets();
 
       ImGui.checkbox("Height map active", heightMapActive);
-
       ImGui.checkbox("In Paint Height", inPaintHeight);
       ImGui.checkbox("Render Ground Plane", renderGroundPlane);
       ImGui.checkbox("Render Ground Cells", renderGroundCells);
+      ImGui.checkbox("Enable Height Map Visualizer", enableHeightMapVisualizer);
+      ImGui.checkbox("Enable Height Map Renderer", enableHeightMapRenderer);
+
+      setActive(heightMapActive.get());
 
       if (!isActive())
       {
@@ -180,8 +185,15 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       if (isActive() && sceneLevelCheck(sceneLevels))
       {
-         gridMapGraphic.getRenderables(renderables, pool);
-         heightMapRenderer.getRenderables(renderables, pool);
+         if (enableHeightMapVisualizer.get())
+         {
+            gridMapGraphic.getRenderables(renderables, pool);
+         }
+
+         if (enableHeightMapRenderer.get())
+         {
+            heightMapRenderer.getRenderables(renderables, pool);
+         }
       }
    }
 
@@ -190,5 +202,10 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       if (activeHeartbeat != null)
          activeHeartbeat.destroy();
       gridMapGraphic.destroy();
+   }
+
+   public RDXHeightMapRenderer getHeightMapRenderer()
+   {
+      return heightMapRenderer;
    }
 }

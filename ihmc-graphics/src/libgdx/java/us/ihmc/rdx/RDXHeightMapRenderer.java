@@ -22,7 +22,6 @@ import java.nio.FloatBuffer;
 
 public class RDXHeightMapRenderer implements RenderableProvider
 {
-   private boolean render = true;
    private Renderable renderable;
 
    public static final int FLOATS_PER_CELL = 8;
@@ -81,13 +80,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer,int centerIndex, float cellSizeXYInMeters, boolean render)
+   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer,int centerIndex, float cellSizeXYInMeters)
    {
-      this.render = render;
-
-      if (!render)
-         return;
-
       zUpFrameToWorld.getTranslation().setZ(0);
 
       int cellsPerAxis = 2 * centerIndex + 1;
@@ -216,8 +210,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (renderable != null && render)
-         renderables.add(renderable);
+      renderables.add(renderable);
    }
 
    public void dispose()
