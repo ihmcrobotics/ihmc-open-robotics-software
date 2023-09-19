@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetect
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
@@ -25,7 +24,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class WalkingControllerParameters
 {
@@ -531,6 +529,20 @@ public abstract class WalkingControllerParameters
     * switch to trigger the transition.
     */
    public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return false;
+   }
+
+   /**
+    * <ul>
+    * </li>When {@code true}, single support continues until the ICP planner is done even if the swing
+    * foot touches down, in which case the foot contact state is updated to be in contact. This kicks
+    * in when touchdown occurs early and allows to transition to transfer as planned by the ICP planner
+    * improving ICP plan continuity.
+    * <li>When {@code false}, single support ends as soon as the swing foot touches down.
+    * </ul>
+    */
+   public boolean waitInSingleSupportUntilICPPlannerIsDone()
    {
       return false;
    }

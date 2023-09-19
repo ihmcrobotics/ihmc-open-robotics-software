@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -26,12 +25,10 @@ public class StandingState extends WalkingState
 
    private final CommandInputManager commandInputManager;
    private final WalkingMessageHandler walkingMessageHandler;
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
    private final CenterOfMassHeightManager comHeightManager;
-   private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final RigidBodyControlManager chestManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
@@ -46,11 +43,10 @@ public class StandingState extends WalkingState
                         WalkingControllerParameters walkingControllerParameters,
                         YoRegistry parentRegistry)
    {
-      super(WalkingStateEnum.STANDING, parentRegistry);
+      super(WalkingStateEnum.STANDING, managerFactory, controllerToolbox, parentRegistry);
 
       this.commandInputManager = commandInputManager;
       this.walkingMessageHandler = walkingMessageHandler;
-      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
@@ -63,7 +59,6 @@ public class StandingState extends WalkingState
       }
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
 
       RigidBodyBasics chest = fullRobotModel.getChest();
