@@ -219,6 +219,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
+      // TODO. if there are concurrent actions, displayIKSolution will be true only for the first action of the concurrent ones
       displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
       if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
       {
