@@ -218,4 +218,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          activeHeartbeat.destroy();
       gridMapGraphic.destroy();
    }
+
+   public HeightMapMessage getLatestHeightMapMessage()
+   {
+      return latestHeightMapMessage;
+   }
 }

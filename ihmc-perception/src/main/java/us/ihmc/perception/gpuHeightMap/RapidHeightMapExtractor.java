@@ -27,7 +27,7 @@ public class RapidHeightMapExtractor
    public static float LOCAL_WIDTH_IN_METERS = 3.0f; // localWidthInMeters
    public static float LOCAL_CELL_SIZE_IN_METERS = 0.02f; // localCellSizeInMeters
 
-   public static float GLOBAL_WIDTH_IN_METERS = 4.0f; // globalWidthInMeters
+   public static float GLOBAL_WIDTH_IN_METERS = 6.0f; // globalWidthInMeters
    public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
 
    private static int centerIndex;

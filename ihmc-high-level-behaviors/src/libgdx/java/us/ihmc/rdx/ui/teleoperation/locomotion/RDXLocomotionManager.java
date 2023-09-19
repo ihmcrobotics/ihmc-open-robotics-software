@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -507,6 +508,12 @@ public class RDXLocomotionManager
          statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
          ImGui.popFont();
       }
+   }
+
+   public void submitHeightMapData(HeightMapMessage heightMapData)
+   {
+      footstepPlanning.setHeightMapData(heightMapData);
+      interactableFootstepPlan.setHeightMapMessage(heightMapData);
    }
 
    public RDXLocomotionParameters getLocomotionParameters()
