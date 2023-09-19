@@ -7,7 +7,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -21,7 +20,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 
-import java.awt.*;
 import java.util.UUID;
 
 public class FootstepPlanAction extends FootstepPlanActionData implements BehaviorAction
@@ -61,7 +59,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
    {
       update();
 

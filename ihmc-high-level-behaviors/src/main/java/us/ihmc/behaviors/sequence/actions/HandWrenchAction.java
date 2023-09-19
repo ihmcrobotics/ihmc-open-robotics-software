@@ -21,7 +21,7 @@ public class HandWrenchAction extends HandWrenchActionData implements BehaviorAc
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
    {
       update();
 

@@ -8,7 +8,7 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 public interface BehaviorAction extends BehaviorActionData
 {
    /** Called every tick. */
-   default void update(int actionIndex, int nextExecutionIndex)
+   default void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
    {
       update();
    }

@@ -7,7 +7,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -69,7 +68,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
    {
       update();
 
