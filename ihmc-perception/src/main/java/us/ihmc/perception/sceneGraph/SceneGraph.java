@@ -39,6 +39,7 @@ public class SceneGraph
 
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
+   private final SceneGraphNodeCandidateFiltration candidateFiltration = new SceneGraphNodeCandidateFiltration();
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2IOTopicQualifier subscriptionQualifier;
    private ROS2SceneGraphSubscription sceneGraphSubscription;
@@ -103,6 +104,7 @@ public class SceneGraph
    {
       updateCaches();
       sceneGraphNodeMoves.clear();
+      candidateFiltration.update();
 
       updateOnRobot(rootNode, sensorFrame);
 
@@ -176,6 +178,11 @@ public class SceneGraph
    public MutableLong getNextID()
    {
       return nextID;
+   }
+
+   public SceneGraphNodeCandidateFiltration getCandidateFiltration()
+   {
+      return candidateFiltration;
    }
 
    public TLongObjectMap<SceneNode> getIDToNodeMap()
