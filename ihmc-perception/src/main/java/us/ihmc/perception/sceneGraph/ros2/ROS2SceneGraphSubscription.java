@@ -158,6 +158,7 @@ public class ROS2SceneGraphSubscription
       localNode.getChildren().clear();
    }
 
+   /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
    private void buildSubscriptionTree(MutableInt index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
       byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index.intValue());
