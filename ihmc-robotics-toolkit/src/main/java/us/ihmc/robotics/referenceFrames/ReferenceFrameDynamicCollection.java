@@ -5,6 +5,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Needed to add a dynamically changing scene graph to a ReferenceFrameLibrary.
+ */
 public class ReferenceFrameDynamicCollection
 {
    private final List<String> frameNameList;
