@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
 
@@ -48,8 +49,9 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);
       double currentDistance = staticRelativeSceneNodePose.getPosition().distanceFromOrigin();
       setCurrentDistance(currentDistance);
-      if (currentDistance <= getDistanceToDisableTracking())
+      if (currentDistance <= getDistanceToDisableTracking() && getTrackingInitialParent())
       {
+         LogTools.warn("{}: Disabling tracking initial parent", getName());
          setTrackInitialParent(false, sceneGraphNodeMoves);
       }
    }
