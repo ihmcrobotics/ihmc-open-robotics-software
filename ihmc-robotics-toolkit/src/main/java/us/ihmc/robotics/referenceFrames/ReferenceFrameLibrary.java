@@ -69,15 +69,20 @@ public class ReferenceFrameLibrary
    public ReferenceFrame findFrameByName(String referenceFrameName)
    {
       // Check map first, then dynamic collections
-      ReferenceFrame referenceFrame = frameNameToSupplierMap.get(referenceFrameName).get();
-      boolean frameFound = referenceFrame != null;
+      ReferenceFrameSupplier referenceFrameSupplier = frameNameToSupplierMap.get(referenceFrameName);
+      boolean frameFound = referenceFrameSupplier != null;
 
-      if (!frameFound)
+      ReferenceFrame referenceFrame = null;
+      if (frameFound)
+      {
+         referenceFrame = referenceFrameSupplier.get();
+      }
+      else
       {
          for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
          {
             referenceFrame = dynamicCollection.getFrameLookup().apply(referenceFrameName);
-            frameFound |= referenceFrame != null;
+            frameFound = referenceFrame != null;
             if (frameFound)
                break;
          }
