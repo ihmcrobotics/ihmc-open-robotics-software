@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -186,7 +187,9 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                            .isComplete(commandedGoalFeetTransformToWorld.get(side),
                                                        syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
-                                                       executionTimer);
+                                                       executionTimer,
+                                                       BehaviorActionCompletionComponent.TRANSLATION,
+                                                       BehaviorActionCompletionComponent.ORIENTATION);
       }
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;
