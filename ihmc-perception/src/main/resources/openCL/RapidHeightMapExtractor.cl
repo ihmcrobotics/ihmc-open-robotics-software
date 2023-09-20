@@ -288,10 +288,12 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
-void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
+void kernel heightMapFeatureExtractionKernel(read_write image2d_t localMap,
                                        read_write image2d_t globalMap,
                                        global float *params,
                                        global float *worldToZUpFrameTf)
 {
+   // Extract surface normal at each cell
+
 
 }
