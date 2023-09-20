@@ -27,11 +27,11 @@ public class ArUcoSceneTools
             ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
             if (arUcoMarkerNode == null) // Add ArUco marker node if it is missing
             {
-               DetectionFilter candidateFilter = sceneGraph.getCandidateFiltration().getOrCreateFilter(detectedID);
+               DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
                candidateFilter.registerDetection();
                if (candidateFilter.isStableDetectionResult())
                {
-                  sceneGraph.getCandidateFiltration().removeFilter(detectedID);
+                  sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
                   String nodeName = "ArUcoMarker%d".formatted(detectedID);
                   arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
