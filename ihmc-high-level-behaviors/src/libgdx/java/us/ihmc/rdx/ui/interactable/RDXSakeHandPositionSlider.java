@@ -1,11 +1,13 @@
 package us.ihmc.rdx.ui.interactable;
 
 import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
+import controller_msgs.msg.dds.HandSakeStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,10 +37,12 @@ public class RDXSakeHandPositionSlider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
+   private final IHMCROS2Input<HandSakeStatusMessage> handStatusMessage;
    private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
    private double valueFromRobot = Double.NaN;
+   private double goalTorqueRatio = Double.NaN;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
@@ -50,13 +54,18 @@ public class RDXSakeHandPositionSlider
       sliderName = handSide.getPascalCaseName() + " angle";
 
       syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveRobotConfigurationData);
+
+      handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
+                                                                 .withTypeName(HandSakeStatusMessage.class),
+                                                        message -> message.getRobotSide() == handSide.toByte());
    }
 
    private void receiveRobotConfigurationData(RobotConfigurationData robotConfigurationData)
    {
-      if (updateThrottler.run(UPDATE_PERIOD) && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
+      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage() && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
       {
          valueFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
+         goalTorqueRatio = handStatusMessage.getLatest().getGoalTorqueRatio();
       }
    }
 
@@ -72,7 +81,7 @@ public class RDXSakeHandPositionSlider
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) 5); // GOTO command
             message.setPostionRatio(positionRatio);
-            message.setTorqueRatio(0.3);
+            message.setTorqueRatio(goalTorqueRatio);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
