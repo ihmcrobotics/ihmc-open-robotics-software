@@ -95,6 +95,10 @@ public class SceneGraph
          sceneGraphSubscription.update();
    }
 
+   /**
+    * This method updates the caches and the static relative nodes, whose
+    * tracking state should only be evaluated by the robot.
+    */
    public void updateOnRobot(ReferenceFrame sensorFrame)
    {
       updateCaches();
