@@ -111,8 +111,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          {
             heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
             compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-            incomingCompressedImageBuffer = NativeMemoryTools.allocate(numberOfBytes * 4);
+            incomingCompressedImageBuffer = NativeMemoryTools.allocate(numberOfBytes * 8);
             incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+            LogTools.warn("Creating Buffer of Size: {}", numberOfBytes * 8);
          }
 
          PerceptionMessageTools.convertToHeightMapImage(imageMessage, heightMapImage, incomingCompressedImageBuffer, incomingCompressedImageBytePointer, compressedBytesMat);
