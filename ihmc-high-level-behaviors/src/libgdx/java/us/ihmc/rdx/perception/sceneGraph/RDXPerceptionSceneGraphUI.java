@@ -22,10 +22,10 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.*;
 
 /**
- * Manages perception scene graph nodes.
+ * Manages the perception scene graph.
  * - It keeps them up to date with a subscription to the on robot perception process.
  * - It renders them in the 3D scene as semi-transparent models.
- * - TODO: It allows the operator to override the poses of nodes.
+ * - Allows the operator to override the poses of nodes.
  */
 public class RDXPerceptionSceneGraphUI
 {
