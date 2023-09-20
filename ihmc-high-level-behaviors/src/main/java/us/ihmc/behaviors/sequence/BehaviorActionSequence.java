@@ -213,7 +213,7 @@ public class BehaviorActionSequence
          boolean concurrencyWithPreviousAction = false;
          if (i > 0)
             concurrencyWithPreviousAction = actionSequence.get(i - 1).getExecuteWithNextAction();
-         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction);
+         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction));
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -270,13 +270,31 @@ public class BehaviorActionSequence
       }
    }
 
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction)
+   {
+      if (concurrencyWithPreviousAction)
+      {
+         boolean isLastConcurrency = true;
+         for (int j = 2; j <= actionIndex; j++)
+         {
+            isLastConcurrency = actionSequence.get(actionIndex - j).getExecuteWithNextAction();
+            if (!isLastConcurrency)
+            {
+               return (j - 1);
+            }
+         }
+      }
+      return 1;
+   }
+
    private void executeNextAction()
    {
       boolean concurrencyWithPreviousAction = false;
       if (lastCurrentlyExecutingAction != null)
          concurrencyWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
-      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrencyWithPreviousAction);
+      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrencyWithPreviousAction,
+                                          getIndexShiftFromConcurrentActionRoot(executionNextIndex, concurrencyWithPreviousAction));
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);

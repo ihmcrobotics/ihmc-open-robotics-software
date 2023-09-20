@@ -43,7 +43,7 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
       PresetArmConfiguration preset = actionData.getPreset();
       currentConfiguration.set(preset == null ? 0 : preset.ordinal() + 1);

@@ -101,18 +101,18 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    {
       actionData.changeParentFrame(parentFrame);
       actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
-      update();
+      update(false, -1);
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
       actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
       actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
-      update();
+      update(false, -1);
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
       actionData.update();
 
@@ -145,7 +145,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
-         update();
+         update(false, -1);
       }
       ImGui.pushItemWidth(80.0f);
       yawWidget.renderImGuiWidget();

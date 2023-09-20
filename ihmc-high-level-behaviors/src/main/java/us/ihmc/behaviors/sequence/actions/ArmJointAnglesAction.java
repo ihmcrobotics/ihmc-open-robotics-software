@@ -24,7 +24,7 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionData implements Be
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 

@@ -34,7 +34,7 @@ public abstract class RDXBehaviorAction
 
    }
 
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
 
    }

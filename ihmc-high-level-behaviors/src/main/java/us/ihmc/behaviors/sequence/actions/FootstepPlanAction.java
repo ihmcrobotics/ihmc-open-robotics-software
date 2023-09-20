@@ -59,7 +59,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 

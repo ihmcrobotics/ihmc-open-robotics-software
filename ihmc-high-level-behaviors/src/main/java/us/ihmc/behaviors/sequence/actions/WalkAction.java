@@ -68,7 +68,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 

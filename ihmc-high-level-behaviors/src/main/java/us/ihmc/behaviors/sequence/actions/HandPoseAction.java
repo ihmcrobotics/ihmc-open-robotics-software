@@ -16,6 +16,7 @@ import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -60,7 +61,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 
@@ -68,13 +69,14 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       if (concurrencyWithPreviousIndex)
       {
-         if (actionIndex == nextExecutionIndex - 1)
+         if (actionIndex == (nextExecutionIndex + indexShiftConcurrentAction))
+         {
             computeAndPublishIKSolution();
+         }
       }
-      else
+      if (actionIndex == nextExecutionIndex)
       {
-         if (actionIndex == nextExecutionIndex)
-            computeAndPublishIKSolution();
+         computeAndPublishIKSolution();
       }
    }
 
