@@ -1,11 +1,11 @@
-package us.ihmc.perception.sceneGraph;
+package us.ihmc.perception.filters;
 
 import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.linked.TFloatLinkedList;
 import us.ihmc.commons.thread.Notification;
 
-public class SceneGraphNodeCandidateFilter
+public class DetectionFilter
 {
    public final int HISTORY = 30; // 1 second at 30 HZ
    public final float ACCEPTANCE_THRESHOLD = 0.6f;

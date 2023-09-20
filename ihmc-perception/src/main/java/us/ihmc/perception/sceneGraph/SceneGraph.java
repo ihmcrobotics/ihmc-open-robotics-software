@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
@@ -39,7 +40,7 @@ public class SceneGraph
 
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
-   private final SceneGraphNodeCandidateFiltration candidateFiltration = new SceneGraphNodeCandidateFiltration();
+   private final DetectionFilterCollection candidateFiltration = new DetectionFilterCollection();
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2IOTopicQualifier subscriptionQualifier;
    private ROS2SceneGraphSubscription sceneGraphSubscription;
@@ -180,7 +181,7 @@ public class SceneGraph
       return nextID;
    }
 
-   public SceneGraphNodeCandidateFiltration getCandidateFiltration()
+   public DetectionFilterCollection getCandidateFiltration()
    {
       return candidateFiltration;
    }

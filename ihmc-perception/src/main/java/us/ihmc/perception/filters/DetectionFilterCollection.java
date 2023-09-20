@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph;
+package us.ihmc.perception.filters;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -8,17 +8,17 @@ import gnu.trove.map.hash.TIntObjectHashMap;
  * TODO: Make useful for different types of detections, not just ArUco
  *   marker detections.
  */
-public class SceneGraphNodeCandidateFiltration
+public class DetectionFilterCollection
 {
-   private final TIntObjectHashMap<SceneGraphNodeCandidateFilter> markerIDFilters = new TIntObjectHashMap<>();
+   private final TIntObjectHashMap<DetectionFilter> markerIDFilters = new TIntObjectHashMap<>();
 
-   public SceneGraphNodeCandidateFilter getOrCreateFilter(int markerID)
+   public DetectionFilter getOrCreateFilter(int markerID)
    {
-      SceneGraphNodeCandidateFilter filter = markerIDFilters.get(markerID);
+      DetectionFilter filter = markerIDFilters.get(markerID);
 
       if (filter == null)
       {
-         filter = new SceneGraphNodeCandidateFilter();
+         filter = new DetectionFilter();
          markerIDFilters.put(markerID, filter);
       }
 
