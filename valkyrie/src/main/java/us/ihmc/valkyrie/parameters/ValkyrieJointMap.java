@@ -41,6 +41,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    private final SpineJointName[] spineJoints = {SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL};
    private final NeckJointName[] neckJoints = {NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
    private final SideDependentList<String> handNames = new SideDependentList<>();
+   protected final SideDependentList<String> forearmNames = new SideDependentList<>();
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
 
@@ -273,6 +274,12 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
+   }
+
+   @Override
+   public String getForearmName(RobotSide robotSide)
+   {
+      return forearmNames.get(robotSide);
    }
 
    @Override

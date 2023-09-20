@@ -43,6 +43,12 @@ module controller_msgs
       const octet PUSH_RECOVERY =
       11;
 
+      const octet EXTERNAL_TRANSITION_STATE =
+      12;
+
+      const octet EXTERNAL =
+      13;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.

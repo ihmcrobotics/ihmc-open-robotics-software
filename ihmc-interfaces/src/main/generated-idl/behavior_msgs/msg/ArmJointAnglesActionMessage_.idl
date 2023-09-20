@@ -22,6 +22,10 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
+         * Preset arm configuration
+         */
+        long preset;
+        /**
          * Joint angles
          */
         double joint_angles[7];

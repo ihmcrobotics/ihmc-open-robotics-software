@@ -41,8 +41,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
@@ -129,6 +128,7 @@ public class SCS2AvatarSimulationFactory
                                                                                                                                out) -> new SCS2OutputWriter(in,
                                                                                                                                                             out,
                                                                                                                                                             true));
+   protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
@@ -397,8 +397,7 @@ public class SCS2AvatarSimulationFactory
                                                     contextDataFactory,
                                                     null,
                                                     ros2Node,
-                                                    gravity.get(),
-                                                    robotModel.get().getEstimatorDT());
+                                                    gravity.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -422,7 +421,7 @@ public class SCS2AvatarSimulationFactory
          componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
          if (parameters != null)
             componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
-         if (heightMapForFootstepZ.hasValue())
+         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
             componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
 
          steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
@@ -559,7 +558,7 @@ public class SCS2AvatarSimulationFactory
                                                                          builders,
                                                                          100000,
                                                                          robotModel.getEstimatorDT());
-         estimatorTask.addRunnableOnTaskThread(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
+         estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
       }
 
       // If running with server setup the server registries and their updates.
@@ -569,18 +568,18 @@ public class SCS2AvatarSimulationFactory
                                           estimatorThread.getFullRobotModel().getElevator(),
                                           enableSCS1YoGraphics.get() ? estimatorThread.getSCS1YoGraphicsListRegistry() : null,
                                           enableSCS2YoGraphics.get() ? estimatorThread.getSCS2YoGraphics() : null);
-         estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
+         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              estimatorThread.getYoRegistry()));
 
          yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(),
                                       enableSCS1YoGraphics.get() ? controllerThread.getSCS1YoGraphicsListRegistry() : null,
                                       enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null);
-         controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
          yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
                                       enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
-         stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
+         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                  stepGeneratorThread.getYoVariableRegistry()));
       }
 
@@ -741,7 +740,10 @@ public class SCS2AvatarSimulationFactory
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
 
-      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+      if (!initialState.hasValue())
+         controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+      else
+         controllerFactory.setInitialState(initialState.get());
 
       if (realtimeROS2Node.hasBeenSet())
       {
@@ -955,5 +957,28 @@ public class SCS2AvatarSimulationFactory
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
+   }
+
+   public void setInitialState(HighLevelControllerName initialState)
+   {
+      this.initialState.set(initialState);
+   }
+
+   public void setupDefaultExternalControllerFactory()
+   {
+      HighLevelHumanoidControllerFactory highLevelControllerFactory = highLevelHumanoidControllerFactory.get();
+      if (highLevelControllerFactory == null)
+         throw new RuntimeException("You must call this.setDefaultHighLevelHumanoidCointrollerFactory first!");
+
+      highLevelControllerFactory.addCustomControlState(new StandReadyControllerStateFactory());
+      highLevelControllerFactory.addCustomControlState(new ExternalControllerStateFactory());
+      highLevelControllerFactory.addCustomControlState(new ExternalTransitionControllerStateFactory());
+
+      highLevelControllerFactory.addRequestableTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.EXTERNAL_TRANSITION_STATE); // FIXME not necessary
+      highLevelControllerFactory.addRequestableTransition(HighLevelControllerName.EXTERNAL_TRANSITION_STATE, HighLevelControllerName.EXTERNAL); // FIXME not necessary
+      highLevelControllerFactory.addControllerFailureTransition(HighLevelControllerName.EXTERNAL_TRANSITION_STATE,
+                                                                robotModel.get().getHighLevelControllerParameters().getFallbackControllerState());
+      highLevelControllerFactory.addControllerFailureTransition(HighLevelControllerName.EXTERNAL,
+                                                                robotModel.get().getHighLevelControllerParameters().getFallbackControllerState());
    }
 }

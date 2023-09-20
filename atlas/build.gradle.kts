@@ -58,7 +58,6 @@ mainDependencies {
    api("us.ihmc:ihmc-parameter-tuner:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
    api("us.ihmc:ihmc-high-level-behaviors:source")
-   api("us.ihmc:ihmc-high-level-behaviors-javafx:source")
 }
 
 testDependencies {
