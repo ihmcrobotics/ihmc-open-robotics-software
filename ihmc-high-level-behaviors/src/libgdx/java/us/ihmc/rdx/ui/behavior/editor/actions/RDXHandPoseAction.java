@@ -185,18 +185,18 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       actionData.changeParentFrame(parentFrame);
       actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
-      update();
+      update(false, -1);
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
       actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
       actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
-      update();
+      update(false, -1);
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
       actionData.update();
 
@@ -219,8 +219,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
-      // TODO. if there are concurrent actions, displayIKSolution will be true only for the first action of the concurrent ones
-      displayIKSolution = getActionIndex() == getActionNextExecutionIndex();
+      displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
+                          (concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
       if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
       {
          HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
@@ -276,7 +276,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
-         update();
+         update(false, -1);
       }
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();

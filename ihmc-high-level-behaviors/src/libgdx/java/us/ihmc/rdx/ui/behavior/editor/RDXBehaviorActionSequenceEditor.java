@@ -175,7 +175,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                action.getActionData().loadFromFile(actionNode);
                action.updateAfterLoading();
-               action.update();
+               action.update(false, -1);
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
@@ -254,8 +254,28 @@ public class RDXBehaviorActionSequenceEditor
          RDXBehaviorAction action = actionSequence.get(i);
          action.setActionIndex(i);
          action.setActionNextExecutionIndex(executionNextIndexStatus);
-         action.update();
+         boolean concurrencyWithPreviousAction = false;
+         if (i > 0)
+            concurrencyWithPreviousAction = actionSequence.get(i - 1).getActionData().getExecuteWithNextAction();
+         action.update(concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction));
       }
+   }
+
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction)
+   {
+      if (concurrencyWithPreviousAction)
+      {
+         boolean isLastConcurrency = true;
+         for (int j = 2; j <= actionIndex; j++)
+         {
+            isLastConcurrency = actionSequence.get(actionIndex - j).getActionData().getExecuteWithNextAction();
+            if (!isLastConcurrency)
+            {
+               return (j - 1);
+            }
+         }
+      }
+      return 1;
    }
 
    public void renderFileMenu()
@@ -777,7 +797,7 @@ public class RDXBehaviorActionSequenceEditor
    private void insertNewAction(RDXBehaviorAction action)
    {
       action.updateAfterLoading();
-      action.update();
+      action.update(false, -1);
 
       int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
       actionSequence.add(insertionIndex, action);
