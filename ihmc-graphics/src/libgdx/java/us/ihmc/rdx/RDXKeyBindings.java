@@ -21,7 +21,7 @@ import java.util.TreeSet;
 public class RDXKeyBindings
 {
    private static final int WINDOW_WIDTH = 600;
-   private static final int WINDOW_HEIGHT = 400;
+   private static final int WINDOW_HEIGHT = 600;
 
    private final Map<String, KeyBindingsSection> sections = new HashMap<>();
 
