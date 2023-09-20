@@ -86,7 +86,7 @@ public class SceneGraph
       this.subscriptionQualifier = subscriptionQualifier;
 
       if (ros2PublishSubscribeAPI != null)
-         sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.STATUS, newNodeSupplier);
+         sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, subscriptionQualifier, newNodeSupplier);
    }
 
    public void updateSubscription()
