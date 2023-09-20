@@ -109,6 +109,7 @@ public class RDXBaseUI
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt foregroundFPSLimit = new ImInt(240);
+   private final ImBoolean recordScreenUI = new ImBoolean(false);
    private final ImBoolean plotFrameRate = new ImBoolean(false);
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
@@ -118,6 +119,7 @@ public class RDXBaseUI
    private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
+   private final RDXScreenRecorder screenRecorder = new RDXScreenRecorder();
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -505,6 +507,10 @@ public class RDXBaseUI
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
       }
 
+      if (ImGui.checkbox("Record UI", recordScreenUI))
+      {
+         screenRecorder.saveScreenshot(IHMCCommonPaths.LOGS_DIRECTORY.toString());
+      }
       frameRateDisplay.renderHz();
 
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
