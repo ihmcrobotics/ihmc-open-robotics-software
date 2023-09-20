@@ -11,14 +11,12 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.*;
@@ -34,46 +32,33 @@ public class RDXPerceptionSceneGraphUI
    private final SceneGraph sceneGraph;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final RDXSceneNode uiRootNode;
-   private final ROS2SceneGraphSubscription sceneGraphSubscription;
-   private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
    private final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
-   public RDXPerceptionSceneGraphUI(SceneGraph sceneGraph,
-                                    ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                    RDX3DPanel panel3D)
+   public RDXPerceptionSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
-      this.sceneGraph = sceneGraph;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
-      if (sceneGraph.getRootNode() instanceof RDXSceneNode rootNode)
-      {
-         uiRootNode = rootNode;
-      }
-      else
-      {
-         throw new RuntimeException("Scene graph must be created with RDXSceneGraph::new");
-      }
-
-      sceneGraphSubscription = new ROS2SceneGraphSubscription
+      uiRootNode = new RDXSceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME);
+      sceneGraph = new SceneGraph
       (
-         sceneGraph,
+         uiRootNode,
+         (sceneGraph, ros2SceneGraphSubscriptionNode) -> RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph),
          ros2PublishSubscribeAPI,
-         ROS2IOTopicQualifier.STATUS,
-         ros2SceneGraphSubscriptionNode -> RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph)
+         ROS2IOTopicQualifier.STATUS
       );
-      sceneGraphSubscription.getSceneGraphSubscription().addCallback(message -> frequencyPlot.recordEvent());
-      frequencyPlot.getReceivedPlot().setWidth(100);
+
+      sceneGraph.getSceneGraphSubscription().getSceneGraphSubscription().addCallback(message -> subscriptionFrequencyText.ping());
    }
 
    public void update()
    {
-      sceneGraphSubscription.update();
+      sceneGraph.updateSubscription();
 
       // Nodes can be moved by the user clicking stuff
       sceneGraph.getSceneGraphNodeMoves().clear();
@@ -86,8 +71,7 @@ public class RDXPerceptionSceneGraphUI
          sceneGraphNodeMove.performMove();
       }
 
-      if (publishThrottler.run())
-         sceneGraphPublisher.publish(sceneGraph, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+      sceneGraph.updatePublication();
    }
 
    private void update(RDXSceneNodeInterface uiSceneNode)
@@ -114,16 +98,16 @@ public class RDXPerceptionSceneGraphUI
    public void renderImGuiWidgets()
    {
       int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
-      SceneGraphMessage latestSceneGraphMessage = sceneGraphSubscription.getLatestSceneGraphMessage();
+      SceneGraphMessage latestSceneGraphMessage = sceneGraph.getSceneGraphSubscription().getLatestSceneGraphMessage();
       int numberOfOnRobotNodes = latestSceneGraphMessage == null ? 0 : latestSceneGraphMessage.getSceneTreeIndices().size();
       ImGui.text("UI nodes: %d   On robot nodes: %d   State: ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
       ImGui.sameLine();
-      if (sceneGraphSubscription.getLocalTreeFrozen())
+      if (sceneGraph.getSceneGraphSubscription().getLocalTreeFrozen())
          ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen");
       else
          ImGui.text("Normal");
       ImGui.pushItemWidth(100.0f);
-      frequencyPlot.renderImGuiWidgets();
+      subscriptionFrequencyText.render();
       ImGui.popItemWidth();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
@@ -206,5 +190,10 @@ public class RDXPerceptionSceneGraphUI
    public RDXPanel getPanel()
    {
       return panel;
+   }
+
+   public SceneGraph getSceneGraph()
+   {
+      return sceneGraph;
    }
 }
