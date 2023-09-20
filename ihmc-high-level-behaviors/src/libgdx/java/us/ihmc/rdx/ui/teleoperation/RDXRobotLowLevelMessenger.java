@@ -34,7 +34,7 @@ public class RDXRobotLowLevelMessenger
    {
       if (ImGui.button(labels.get("Freeze")))
       {
-         robotLowLevelMessenger.sendFreezeRequest();
+         sendFreezeRequest();
       }
 
       ImGui.sameLine();
@@ -95,6 +95,11 @@ public class RDXRobotLowLevelMessenger
    public void sendStandRequest()
    {
       robotLowLevelMessenger.sendStandRequest();
+   }
+
+   public void sendFreezeRequest()
+   {
+      robotLowLevelMessenger.sendFreezeRequest();
    }
 
    private void sendPSIRequest()
