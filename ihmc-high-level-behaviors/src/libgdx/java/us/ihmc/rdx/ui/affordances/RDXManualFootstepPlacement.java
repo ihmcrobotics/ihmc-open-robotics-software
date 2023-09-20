@@ -76,7 +76,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
       RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
-      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Delete");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete last interactable footstep", "Delete");
       RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
 
