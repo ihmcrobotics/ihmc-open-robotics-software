@@ -4,10 +4,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloTreeNode;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloWaypointNode;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ class MonteCarloPlanning2DSimulationDemo
       Mat gridColor = new Mat();
       Scalar zero = new Scalar(0, 0, 0, 0);
 
-      List<MonteCarloTreeNode> optimalPath = new ArrayList<>();
+      List<MonteCarloWaypointNode> optimalPath = new ArrayList<>();
 
       planner.setParameters(50, 10, 4);
 

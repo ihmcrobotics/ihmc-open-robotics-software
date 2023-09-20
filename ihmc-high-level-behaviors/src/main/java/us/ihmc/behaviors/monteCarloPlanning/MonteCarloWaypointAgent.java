@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * as well as for handling the virtual sensor data available on the agent for simulated
  * rollouts in the Monte Carlo Tree Search.
  */
-public class MonteCarloPlanningAgent
+public class MonteCarloWaypointAgent
 {
    /**
     * The current position of the agent.
@@ -35,7 +35,7 @@ public class MonteCarloPlanningAgent
     */
    private final ArrayList<Point2DReadOnly> scanPoints = new ArrayList<>();
 
-   public MonteCarloPlanningAgent(Point2DReadOnly position)
+   public MonteCarloWaypointAgent(Point2DReadOnly position)
    {
       this.position.set(position);
       this.previousPosition.set(position);
@@ -70,7 +70,7 @@ public class MonteCarloPlanningAgent
       scanPoints.addAll(measurements);
    }
 
-   public Point2DReadOnly getPosition()
+   public Point2DReadOnly getState()
    {
       return position;
    }

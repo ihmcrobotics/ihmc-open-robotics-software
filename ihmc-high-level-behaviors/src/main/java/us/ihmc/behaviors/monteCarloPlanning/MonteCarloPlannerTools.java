@@ -16,7 +16,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 public class MonteCarloPlannerTools
 {
-   public static int getTotalNodesInSubTree(MonteCarloTreeNode rootNode)
+   public static int getTotalNodesInSubTree(MonteCarloWaypointNode rootNode)
    {
       if (rootNode == null)
          return 0;
@@ -24,13 +24,13 @@ public class MonteCarloPlannerTools
       int total = 1;
       for (MonteCarloTreeNode child : rootNode.getChildren())
       {
-         total += getTotalNodesInSubTree(child);
+         total += getTotalNodesInSubTree((MonteCarloWaypointNode) child);
       }
 
       return total;
    }
 
-   public static void printTree(MonteCarloTreeNode node, int level)
+   public static void printTree(MonteCarloWaypointNode node, int level)
    {
       // TODO: Make this write to a string and then print the combined string with LogTools.info()
       LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
@@ -41,7 +41,7 @@ public class MonteCarloPlannerTools
 
       for (MonteCarloTreeNode child : node.getChildren())
       {
-         printTree(child, level + 1);
+         printTree((MonteCarloWaypointNode) child, level + 1);
       }
    }
 
@@ -64,14 +64,14 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void plotAgent(MonteCarloPlanningAgent agent, Mat gridColor)
+   public static void plotAgent(MonteCarloWaypointAgent agent, Mat gridColor)
    {
       // check bounds of agent
-      if (isWithinGridBoundaries(agent.getPosition(), gridColor.cols()))
+      if (isWithinGridBoundaries(agent.getState(), gridColor.cols()))
       {
          // Set the agent's position as 50
          gridColor.ptr((int) (agent.getPreviousPosition().getX32()), (int) (agent.getPreviousPosition().getY32())).put(new byte[] {0, 0, 0});
-         gridColor.ptr((int) (agent.getPosition().getX32()), (int) (agent.getPosition().getY32())).put(new byte[] {0, (byte) 255, (byte) 250});
+         gridColor.ptr((int) (agent.getState().getX32()), (int) (agent.getState().getY32())).put(new byte[] {0, (byte) 255, (byte) 250});
          gridColor.ptr((int) (agent.getAveragePosition().getX32()), (int) (agent.getAveragePosition().getY32())).put(new byte[] {100, 100, (byte) 255});
       }
    }
@@ -204,16 +204,16 @@ public class MonteCarloPlannerTools
       return position.getX() >= 0 && position.getX() < gridWidth && position.getY() >= 0 && position.getY() < gridWidth;
    }
 
-   public static void getOptimalPath(MonteCarloTreeNode root, List<MonteCarloTreeNode> path)
+   public static void getOptimalPath(MonteCarloWaypointNode root, List<MonteCarloWaypointNode> path)
    {
       float maxValue = Float.MIN_VALUE;
-      MonteCarloTreeNode maxNode = null;
+      MonteCarloWaypointNode maxNode = null;
       for (MonteCarloTreeNode node : root.getChildren())
       {
          if (node.getValue() > maxValue)
          {
             maxValue = node.getValue();
-            maxNode = node;
+            maxNode = (MonteCarloWaypointNode) node;
          }
       }
 
@@ -224,9 +224,9 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void plotPath(List<MonteCarloTreeNode> path, Mat gridColor)
+   public static void plotPath(List<MonteCarloWaypointNode> path, Mat gridColor)
    {
-      for (MonteCarloTreeNode node : path)
+      for (MonteCarloWaypointNode node : path)
       {
          Point2DReadOnly position = node.getPosition();
 
@@ -236,7 +236,7 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void getLayerCounts(MonteCarloTreeNode root, HashMap<Integer, Integer> layerCounts)
+   public static void getLayerCounts(MonteCarloWaypointNode root, HashMap<Integer, Integer> layerCounts)
    {
       if (layerCounts.get(root.getLevel()) == null)
          layerCounts.put(root.getLevel(), 1);
@@ -245,7 +245,7 @@ public class MonteCarloPlannerTools
 
       for (MonteCarloTreeNode child : root.getChildren())
       {
-         getLayerCounts(child, layerCounts);
+         getLayerCounts((MonteCarloWaypointNode) child, layerCounts);
       }
    }
 }
