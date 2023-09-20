@@ -10,7 +10,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface HumanoidRobotNaturalPosture
 {
-  //TODO get rid of the top methods here (initialize, getNominalStandingPoseQoffset, setNaturalPostureOffset), they should be elsewhere
    public double[] getJointPositionArray();
 
    default void compute(Orientation3DReadOnly Qbase)

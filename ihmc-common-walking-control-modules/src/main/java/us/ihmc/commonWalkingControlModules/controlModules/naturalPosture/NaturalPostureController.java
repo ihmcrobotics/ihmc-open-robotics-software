@@ -7,6 +7,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.ops.ConvertDMatrixStruct;
 
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
+import us.ihmc.commonWalkingControlModules.configurations.NaturalPostureParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -42,6 +43,8 @@ public class NaturalPostureController
    private final QPObjectiveCommand naturalPostureControlCommand = new QPObjectiveCommand();
 
    private final HumanoidRobotNaturalPosture robotNaturalPosture;
+   private final NaturalPostureParameters naturalPostureParameters;
+
    private final DMatrixRMaj npQPobjective = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPweightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPselectionMatrix = new DMatrixRMaj(1, 1);
@@ -65,9 +68,7 @@ public class NaturalPostureController
    private final YoDouble npKdPitch = new YoDouble("npKdPitch", registry);
    private final YoDouble npKdRoll = new YoDouble("npKdRoll", registry);
 
-   private final YoDouble npQPWeightX = new YoDouble("npQPWeightX", registry);
-   private final YoDouble npQPWeightY = new YoDouble("npQPWeightY", registry);
-   private final YoDouble npQPWeightZ = new YoDouble("npQPWeightZ", registry);
+   //TODO do we need to preserve the YoVariables which are used to tune, and if so, where?
 
    private final YoDouble npYawDesired = new YoDouble("npYawDesired", registry);
    private final YoDouble npPitchDesired = new YoDouble("npPitchDesired", registry);
@@ -144,11 +145,13 @@ public class NaturalPostureController
    private final YoDouble centroidalAngularMomentumApproxByACOMZ = new YoDouble("centroidalAngularMomentumApproxByACOMZ", registry);
 
    public NaturalPostureController(HumanoidRobotNaturalPosture robotNaturalPosture,
+                                   NaturalPostureParameters naturalPostureParameters,
                                    HighLevelHumanoidControllerToolbox controllerToolbox,
                                    YoRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.robotNaturalPosture = robotNaturalPosture;
+      this.naturalPostureParameters = naturalPostureParameters;
 
       if (robotNaturalPosture.getRegistry() != null)
          registry.addChild(robotNaturalPosture.getRegistry());
@@ -171,17 +174,13 @@ public class NaturalPostureController
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
 
-      // switches 
+      //TODO wasnt this already decided in NaturalPostureManager?
+      //switches
       doNullSpaceProjectionForNaturalPosture.set(true);
       doNullSpaceProjectionForPelvis.set(true);
 
       // Desired NP values (wrt world)
       npPitchDesired.set(-0.0);   // -0.03
-
-      double qpWeight = 5.0; //5.0;
-      npQPWeightZ.set(1);
-      npQPWeightY.set(.01); //1
-      npQPWeightX.set(.01); //1
 
       npKpYaw.set(10.0);   // 150 
       npKpPitch.set(10.0);
@@ -227,10 +226,9 @@ public class NaturalPostureController
       pelvisPrivilegedPoseQPObjectiveCommand();
 
       // POPULATE QP MATRICES HERE:
-
-      npQPweightMatrix.set(0, 0, npQPWeightX.getValue());
-      npQPweightMatrix.set(1, 1, npQPWeightY.getValue());
-      npQPweightMatrix.set(2, 2, npQPWeightZ.getValue());
+      npQPweightMatrix.set(0, 0, naturalPostureParameters.getQPWeights().getX());
+      npQPweightMatrix.set(1, 1, naturalPostureParameters.getQPWeights().getY());
+      npQPweightMatrix.set(2, 2, naturalPostureParameters.getQPWeights().getZ());
 
       // Get current NP:   GMN - we're assuming NP compute() is getting called somewhere else?
       yoCurrentNaturalPosture.set(robotNaturalPosture.getNaturalPostureQuaternion());
@@ -356,8 +354,9 @@ public class NaturalPostureController
       return naturalPostureControlCommand;
    }
 
-   // Implements a YPR servo on the pelvis, which is then used for the privileged
-   // pose of the pelvis (via task null-space projection)
+   //TODO should this and its getter live in NaturalPosturePrivilegedController?
+   //Implements a YPR servo on the pelvis, which is then used for the privileged
+   //pose of the pelvis (via task null-space projection)
    private void pelvisPrivilegedPoseQPObjectiveCommand()
    {
       pelvisQPweightMatrix.set(0, 0, pelvisQPWeightX.getValue());
@@ -606,5 +605,10 @@ public class NaturalPostureController
    public HumanoidRobotNaturalPosture getHumanoidRobotNaturalPosture()
    {
       return robotNaturalPosture;
+   }
+
+   public NaturalPostureParameters getNaturalPostureParameters()
+   {
+      return naturalPostureParameters;
    }
 }
