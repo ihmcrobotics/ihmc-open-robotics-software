@@ -82,6 +82,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
    private final YoDouble desiredCoMSlope = new YoDouble("desiredCoMSlope", registry);
+   private final YoDouble desiredCoMSlopeAtStart = new YoDouble("desiredCoMSlopeAtStart", registry);
    private final YoFramePoint3D queryPosition = new YoFramePoint3D("queryPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private final RecyclingArrayList<CoMHeightTrajectoryWaypoint> heightWaypoints;
@@ -272,15 +273,22 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       endWaypoint.setMinMax(nominalLegLength.getDoubleValue() - 0.05, nominalLegLength.getDoubleValue() + 0.05);
       endWaypoint.setXY(transferToPosition.getX(), midstanceY);
 
+      // set the x and y value to the current x and y, so that we get a continuous trajectory.
+      com.setFromReferenceFrame(centerOfMassFrame);
+      desiredCoMPosition.setX(com.getX());
+      desiredCoMPosition.setY(com.getY());
+
+      // store the desired value
       desiredCoMPositionAtStart.set(desiredCoMPosition);
       desiredCoMPositionAtStart.setZ(tempFramePoint.getZ());
+      desiredCoMSlopeAtStart.set(desiredCoMSlope.getDoubleValue());
 
       for (int i = 0; i < heightWaypoints.size(); i++)
          heightWaypoints.get(i).update();
 
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
-      splinedHeightTrajectory.computeSpline(desiredCoMSlope.getDoubleValue());
+      splinedHeightTrajectory.computeSpline(desiredCoMSlopeAtStart.getDoubleValue());
    }
 
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
@@ -297,7 +305,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       yoTransferFromPosition.setMatchingFrame(transferFromPosition);
       yoTransferToPosition.setMatchingFrame(transferToPosition);
 
+      // set the x and y value to the current x and y, so that we get a continuous trajectory.
+      com.setFromReferenceFrame(centerOfMassFrame);
+      desiredCoMPosition.setX(com.getX());
+      desiredCoMPosition.setY(com.getY());
+
+      // store the desired value
       desiredCoMPositionAtStart.set(desiredCoMPosition);
+      desiredCoMSlopeAtStart.set(desiredCoMSlope.getDoubleValue());
 
       startCoMPosition.setIncludingFrame(desiredCoMPosition);
       startCoMPosition.changeFrame(frameOfSupportLeg);
@@ -345,9 +360,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       for (int i = 0; i < heightWaypoints.size(); i++)
          heightWaypoints.get(i).update();
 
+      // TODO this s houldn't do anything.
+      heightWaypoints.get(0).setXY(startCoMPosition.getX(), startCoMPosition.getY());
+      heightWaypoints.get(0).setHeight(startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
+
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
-      splinedHeightTrajectory.computeSpline(desiredCoMSlope.getDoubleValue());
+      splinedHeightTrajectory.computeSpline(desiredCoMSlopeAtStart.getDoubleValue());
    }
 
    // FIXME this doesn't work well during transfer.
@@ -388,7 +407,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       double thirdMidpointY = InterpolationTools.linearInterpolate(startWaypointY, endWaypointY, thirdAlpha);
       double fourthMidpointY = InterpolationTools.linearInterpolate(startWaypointY, endWaypointY, fourthAlpha);
 
-      CoMHeightTrajectoryWaypoint startWaypoint = heightWaypoints.size() > 0 ? heightWaypoints.getLast() : getWaypointInFrame(frameOfSupportLeg);
+      CoMHeightTrajectoryWaypoint startWaypoint = !heightWaypoints.isEmpty() ? heightWaypoints.getLast() : getWaypointInFrame(frameOfSupportLeg);
       CoMHeightTrajectoryWaypoint firstMidpoint = getWaypointInFrame(frameOfSupportLeg);
       CoMHeightTrajectoryWaypoint secondMidpoint = getWaypointInFrame(frameOfSupportLeg);
       CoMHeightTrajectoryWaypoint thirdMidpoint = getWaypointInFrame(frameOfSupportLeg);
