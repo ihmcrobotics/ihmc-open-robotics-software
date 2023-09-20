@@ -4,6 +4,7 @@ import gnu.trove.iterator.TIntIterator;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeCandidateFilter;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
@@ -26,16 +27,23 @@ public class ArUcoSceneTools
             ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
             if (arUcoMarkerNode == null) // Add ArUco marker node if it is missing
             {
-               String nodeName = "ArUcoMarker%d".formatted(detectedID);
-               arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
-                                                     nodeName,
-                                                     detectedID,
-                                                     RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
-               LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
-               sceneGraph.getRootNode().getChildren().add(arUcoMarkerNode);
-               sceneGraph.getRootNode().markModifiedByOperator();
-               sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode);
-               modifiedSceneGraph = true;
+               SceneGraphNodeCandidateFilter candidateFilter = sceneGraph.getCandidateFiltration().getOrCreateFilter(detectedID);
+               candidateFilter.registerDetection();
+               if (candidateFilter.isStableDetectionResult())
+               {
+                  sceneGraph.getCandidateFiltration().removeFilter(detectedID);
+
+                  String nodeName = "ArUcoMarker%d".formatted(detectedID);
+                  arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        nodeName,
+                                                        detectedID,
+                                                        RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+                  LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
+                  sceneGraph.getRootNode().getChildren().add(arUcoMarkerNode);
+                  sceneGraph.getRootNode().markModifiedByOperator();
+                  sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode);
+                  modifiedSceneGraph = true;
+               }
             }
          }
 
