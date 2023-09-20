@@ -360,10 +360,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       for (int i = 0; i < heightWaypoints.size(); i++)
          heightWaypoints.get(i).update();
 
-      // TODO this s houldn't do anything.
-      heightWaypoints.get(0).setXY(startCoMPosition.getX(), startCoMPosition.getY());
-      heightWaypoints.get(0).setHeight(startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
-
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
       splinedHeightTrajectory.computeSpline(desiredCoMSlopeAtStart.getDoubleValue());
