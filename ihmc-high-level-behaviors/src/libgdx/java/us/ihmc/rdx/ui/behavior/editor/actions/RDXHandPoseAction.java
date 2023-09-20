@@ -98,7 +98,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
    private boolean displayIKSolution = false;
-   private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> handJointAnglesStatusSubscription;
+   private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
+   private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
@@ -166,7 +167,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
 
-      handJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS);
+      leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
+      rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
@@ -221,35 +223,44 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
                           (concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
-      if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
+      if (displayIKSolution)
       {
-         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
-         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
+         boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
+                                           (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
+         if (receivedDataForThisSide)
          {
-            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
+            HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage;
+            if (actionData.getSide() == RobotSide.LEFT)
+               handPoseJointAnglesStatusMessage = leftHandJointAnglesStatusSubscription.getLatest();
+            else
+               handPoseJointAnglesStatusMessage = rightHandJointAnglesStatusSubscription.getLatest();
+            if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
             {
-               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
-            }
-            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
-            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
-         }
-
-         // We probably don't want to recolor the mesh every tick.
-         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
-         if (color != currentColor.get(getActionData().getSide()))
-         {
-            currentColor.put(getActionData().getSide(), color);
-            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
-            {
-               if (body instanceof RDXRigidBody rdxRigidBody)
+               SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
+               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+               for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
                {
-                  if (rdxRigidBody.getVisualGraphicsNode() != null)
+                  armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
+               }
+               armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
+               armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
+            }
+
+            // We probably don't want to recolor the mesh every tick.
+            Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
+            if (color != currentColor.get(getActionData().getSide()))
+            {
+               currentColor.put(getActionData().getSide(), color);
+               for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
+               {
+                  if (body instanceof RDXRigidBody rdxRigidBody)
                   {
-                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
+                     if (rdxRigidBody.getVisualGraphicsNode() != null)
                      {
-                        part.getModelInstance().setDiffuseColor(color);
+                        for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
+                        {
+                           part.getModelInstance().setDiffuseColor(color);
+                        }
                      }
                   }
                }
