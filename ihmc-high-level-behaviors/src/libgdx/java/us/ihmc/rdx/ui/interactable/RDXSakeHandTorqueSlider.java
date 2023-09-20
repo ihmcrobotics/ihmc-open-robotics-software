@@ -119,7 +119,7 @@ public class RDXSakeHandTorqueSlider
       ImGui.popStyleColor();
    }
 
-   private int getGreenToRedGradiatedColor(double value, double ... colorSwitchValues)
+   private int getGreenToRedGradiatedColor(double value, double... colorSwitchValues)
    {
       float redValue = 0.0f;
       float greenValue = 1.0f;
