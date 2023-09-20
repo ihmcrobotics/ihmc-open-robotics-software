@@ -26,11 +26,12 @@ public class ArUcoSceneTools
             ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
             if (arUcoMarkerNode == null) // Add ArUco marker node if it is missing
             {
-               LogTools.info("Adding detected ArUco marker to scene graph: {}", detectedID);
+               String nodeName = "ArUcoMarker%d".formatted(detectedID);
                arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
-                                                     "ArUcoMarker%d".formatted(detectedID),
+                                                     nodeName,
                                                      detectedID,
                                                      RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+               LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
                sceneGraph.getRootNode().getChildren().add(arUcoMarkerNode);
                sceneGraph.getRootNode().markModifiedByOperator();
                sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode);

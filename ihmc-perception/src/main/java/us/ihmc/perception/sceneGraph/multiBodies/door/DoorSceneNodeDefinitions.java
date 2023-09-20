@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -145,6 +146,7 @@ public class DoorSceneNodeDefinitions
                                                              PULL_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                              DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                              PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PullDoorPanel to scene graph.");
             pullDoorArUcoMarker.getChildren().add(pullDoorPanel);
             pullDoorArUcoMarker.markModifiedByOperator();
             addedAnyNodes = true;
@@ -156,11 +158,12 @@ public class DoorSceneNodeDefinitions
             pullDoorFrame = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                         "PullDoorFrame",
                                                         sceneGraph.getIDToNodeMap(),
-                                                        pullDoorArUcoMarker.getID(),
+                                                        pullDoorPanel.getID(),
                                                         PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                         DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                         PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+            LogTools.info("Adding PullDoorFrame to scene graph.");
             pullDoorPanel.getChildren().add(pullDoorFrame);
             pullDoorPanel.markModifiedByOperator();
             addedAnyNodes = true;
@@ -176,6 +179,7 @@ public class DoorSceneNodeDefinitions
                                                                    PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
                                                                    DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                    PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PullDoorLeverHandle to scene graph.");
             pullDoorArUcoMarker.getChildren().add(pullDoorLeverHandle);
             pullDoorArUcoMarker.markModifiedByOperator();
             addedAnyNodes = true;
@@ -195,6 +199,7 @@ public class DoorSceneNodeDefinitions
                                                              PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                              DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                              PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PushDoorPanel to scene graph.");
             pushDoorArUcoMarker.getChildren().add(pushDoorPanel);
             pushDoorArUcoMarker.markModifiedByOperator();
             addedAnyNodes = true;
@@ -206,11 +211,12 @@ public class DoorSceneNodeDefinitions
             pushDoorFrame = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                         "PushDoorFrame",
                                                         sceneGraph.getIDToNodeMap(),
-                                                        pushDoorArUcoMarker.getID(),
+                                                        pushDoorPanel.getID(),
                                                         PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                         DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                         PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+            LogTools.info("Adding PushDoorFrame to scene graph.");
             pushDoorPanel.getChildren().add(pushDoorFrame);
             pushDoorPanel.markModifiedByOperator();
             addedAnyNodes = true;
@@ -226,6 +232,7 @@ public class DoorSceneNodeDefinitions
                                                                    PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
                                                                    DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                                                    PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PushDoorLeverHandle to scene graph.");
             pushDoorArUcoMarker.getChildren().add(pushDoorLeverHandle);
             pushDoorArUcoMarker.markModifiedByOperator();
             addedAnyNodes = true;

@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -71,6 +72,7 @@ public class RigidBodySceneObjectDefinitions
                                                    BOX_TO_MARKER_TRANSFORM,
                                                    BOX_VISUAL_MODEL_FILE_PATH,
                                                    BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding Box to scene graph.");
             boxArUcoMarker.getChildren().add(box);
             boxArUcoMarker.markModifiedByOperator();
             addedAnyNodes = true;
@@ -91,6 +93,7 @@ public class RigidBodySceneObjectDefinitions
                                                          CAN_OF_SOUP_TO_MARKER_TRANSFORM,
                                                          CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                                          CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding CanOfSoup to scene graph.");
             canOfSoupMarker.getChildren().add(canOfSoup);
             canOfSoupMarker.markModifiedByOperator();
             addedAnyNodes = true;
