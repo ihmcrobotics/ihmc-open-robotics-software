@@ -5,6 +5,10 @@ import perception_msgs.msg.dds.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An intermediate tree representation of the ROS 2 message to assist in synchronizing
+ * with the actual tree.
+ */
 public class ROS2SceneGraphSubscriptionNode
 {
    private byte type;
