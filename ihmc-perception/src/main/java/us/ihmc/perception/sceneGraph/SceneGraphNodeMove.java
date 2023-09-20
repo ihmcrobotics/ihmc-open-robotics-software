@@ -1,5 +1,9 @@
 package us.ihmc.perception.sceneGraph;
 
+/**
+ * Used to queue up desired node moves from one parent to another
+ * to avoid concurrent modifications of node children in the tree.
+ */
 public class SceneGraphNodeMove
 {
    private final SceneNode nodeToMove;
