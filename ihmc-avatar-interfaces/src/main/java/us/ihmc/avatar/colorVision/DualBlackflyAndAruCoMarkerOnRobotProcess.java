@@ -3,6 +3,7 @@ package us.ihmc.avatar.colorVision;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -36,18 +37,16 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private volatile boolean running = true;
 
-   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
-                                                   SceneGraph sceneGraph,
-                                                   BlackflyLensProperties blackflyLensProperties)
+   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, BlackflyLensProperties blackflyLensProperties)
    {
       this.robotModel = robotModel;
-      this.sceneGraph = sceneGraph;
       this.blackflyLensProperties = blackflyLensProperties;
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       // Helpful to view relative sensor transforms when robot controller is not running
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
+      sceneGraph = new SceneGraph(new ROS2Helper(ros2Node));
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
@@ -108,7 +107,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                                     syncedRobot::getReferenceFrames,
                                     ros2Node,
                                     spinnakerBlackfly,
-                                    blackflyLensProperties, sceneGraph);
+                                    blackflyLensProperties,
+                                    sceneGraph);
    }
 
    private void destroy()
