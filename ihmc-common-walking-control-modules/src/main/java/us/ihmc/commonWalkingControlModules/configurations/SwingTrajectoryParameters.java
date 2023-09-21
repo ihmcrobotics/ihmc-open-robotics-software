@@ -257,7 +257,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getFootPitchAngleToAvoidHeelStrike()
    {
-      return Math.toRadians(30.0);
+      return Math.toRadians(20.0);
    }
 
    /**
