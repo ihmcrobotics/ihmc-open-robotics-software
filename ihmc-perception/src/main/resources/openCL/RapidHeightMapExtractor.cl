@@ -169,7 +169,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
             float3 queryPointInWorld;
             if (params[MODE] == 0) // Spherical
             {
-               queryPointInSensor = back_project_spherical(yaw_count,pitch_count,depth,params);
+               queryPointInSensor = back_project_spherical(yaw_count, pitch_count, depth, params);
             }
             else if (params[MODE] == 1) // Perspective
             {
@@ -245,6 +245,10 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
 
    // Check if the point is within the robot's collision radius
    bool isColliding = length(cellCenterInZUpFrame.xy) < params[ROBOT_COLLISION_RADIUS];
+   if (isColliding)
+   {
+       return;
+   }
 
    cellCenterInZUpFrame.x -= params[GRID_OFFSET_X];
 

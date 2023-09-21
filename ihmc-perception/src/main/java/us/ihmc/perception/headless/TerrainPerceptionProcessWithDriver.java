@@ -2,14 +2,12 @@ package us.ihmc.perception.headless;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -27,11 +25,9 @@ import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -81,10 +77,11 @@ public class TerrainPerceptionProcessWithDriver
    private final RealSenseHardwareManager realSenseHardwareManager;
    private final RealsenseConfiguration realsenseConfiguration;
    private final BytedecoRealsense realsense;
+   private final BytedecoImage depthBytedecoImage;
+   private final Runnable syncedRobotUpdater;
 
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private HumanoidPerceptionModule humanoidPerception;
-   private BytedecoImage depthBytedecoImage;
    private RobotConfigurationData robotConfigurationData;
    private FullHumanoidRobotModel fullRobotModel;
    private CollisionBoxProvider collisionBoxProvider;
@@ -95,16 +92,15 @@ public class TerrainPerceptionProcessWithDriver
    private Mat yuvColorImage;
    private Mat sourceDepthImage;
    private Mat sourceColorImage;
-   private Runnable syncedRobotUpdater;
 
    private final double outputPeriod;
    private boolean initialized = false;
    private volatile boolean running = true;
 
-   private int depthWidth;
-   private int depthHeight;
-   private int colorWidth;
-   private int colorHeight;
+   private final int depthWidth;
+   private final int depthHeight;
+   private final int colorWidth;
+   private final int colorHeight;
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
@@ -244,7 +240,7 @@ public class TerrainPerceptionProcessWithDriver
          // Important not to store as a field, as update() needs to be called each frame
          syncedRobotUpdater.run();
          ReferenceFrame cameraFrame = referenceFrames.getSteppingCameraFrame();
-         ReferenceFrame cameraZUpFrame = referenceFrames.getSteppingCameraZUPFrame();
+         ReferenceFrame cameraZUpFrame = referenceFrames.getSteppingCameraZUpFrame();
 
          cameraPose.setToZero(cameraFrame);
          cameraPose.changeFrame(ReferenceFrame.getWorldFrame());

@@ -58,7 +58,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private SideDependentList<ReferenceFrame> situationalAwarenessCameraFrame = new SideDependentList<>();
    private ReferenceFrame experimentalCameraFrame;
    private ReferenceFrame ousterLidarFrame;
-   private ZUpFrame steppingCameraZUPFrame;
+   private ZUpFrame steppingCameraZUpFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
@@ -235,7 +235,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
-         steppingCameraZUPFrame = sensorInformation.getSteppingCameraZUpFrame(this);
+         steppingCameraZUpFrame = sensorInformation.getSteppingCameraZUpFrame(this);
       }
    }
 
@@ -399,8 +399,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          lidarSensorFrame.update();
       if (steppingCameraFrame != null)
          steppingCameraFrame.update();
-      if (steppingCameraZUPFrame != null)
-         steppingCameraZUPFrame.update();
+      if (steppingCameraZUpFrame != null)
+         steppingCameraZUpFrame.update();
       if (objectDetectionCameraFrame != null)
          objectDetectionCameraFrame.update();
       situationalAwarenessCameraFrame.forEach((side, frame) ->
@@ -477,9 +477,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return steppingCameraFrame;
    }
 
-   public ReferenceFrame getSteppingCameraZUPFrame()
+   public ReferenceFrame getSteppingCameraZUpFrame()
    {
-      return steppingCameraZUPFrame;
+      return steppingCameraZUpFrame;
    }
 
    public ReferenceFrame getObjectDetectionCameraFrame()

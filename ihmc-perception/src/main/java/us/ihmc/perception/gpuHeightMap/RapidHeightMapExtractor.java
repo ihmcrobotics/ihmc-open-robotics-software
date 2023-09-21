@@ -1,12 +1,9 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -15,9 +12,6 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
@@ -30,24 +24,25 @@ public class RapidHeightMapExtractor
    public static float GLOBAL_WIDTH_IN_METERS = 6.0f; // globalWidthInMeters
    public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
 
-   private static int centerIndex;
-   private static int localCellsPerAxis;
+   public static float HEIGHT_SCALE_FACTOR = 10000.0f;
 
-   private static int globalCenterIndex;
-   private static int globalCellsPerAxis;
-   private static float heightScalingFactor = 10000.0f;
+   private int centerIndex;
+   private int localCellsPerAxis;
 
-   private static int searchWindowHeight = 250;
-   private static int searchWindowWidth = 140;
+   private int globalCenterIndex;
+   private int globalCellsPerAxis;
 
-   private static float minHeightRegistration = -0.1f;
-   private static float maxHeightRegistration = 0.7f;
-   private static float minHeightDifference = -0.05f;
-   private static float maxHeightDifference = 0.1f;
+   private int searchWindowHeight = 250;
+   private int searchWindowWidth = 140;
 
-   private static float robotCollisionCylinderRadius = 0.5f;
-   private static float gridOffsetX = LOCAL_WIDTH_IN_METERS / 2.0f;
-   private static float heightFilterAlpha = 0.65f;
+   private float minHeightRegistration = -0.1f;
+   private float maxHeightRegistration = 0.7f;
+   private float minHeightDifference = -0.05f;
+   private float maxHeightDifference = 0.1f;
+
+   private float robotCollisionCylinderRadius = 0.5f;
+   private float gridOffsetX = LOCAL_WIDTH_IN_METERS / 2.0f;
+   private float heightFilterAlpha = 0.65f;
 
    private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
@@ -77,13 +72,11 @@ public class RapidHeightMapExtractor
 
    private CameraIntrinsics cameraIntrinsics;
 
-   private boolean firstRun = true;
-   private boolean patchSizeChanged = true;
    private boolean modified = true;
    private boolean processing = false;
    private boolean heightMapDataAvailable = false;
 
-   public void create(OpenCLManager openCLManager,  BytedecoImage depthImage, int mode)
+   public void create(OpenCLManager openCLManager, BytedecoImage depthImage, int mode)
    {
       this.mode = mode;
       this.inputDepthImage = depthImage;
@@ -204,7 +197,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter(heightFilterAlpha);
       parametersBuffer.setParameter(localCellsPerAxis);
       parametersBuffer.setParameter(globalCellsPerAxis);
-      parametersBuffer.setParameter(heightScalingFactor);
+      parametersBuffer.setParameter(HEIGHT_SCALE_FACTOR);
       parametersBuffer.setParameter(minHeightRegistration);
       parametersBuffer.setParameter(maxHeightRegistration);
       parametersBuffer.setParameter(minHeightDifference);

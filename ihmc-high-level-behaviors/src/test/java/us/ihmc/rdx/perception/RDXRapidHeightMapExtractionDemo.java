@@ -41,9 +41,8 @@ import java.util.ArrayList;
 public class RDXRapidHeightMapExtractionDemo
 {
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
-   private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
-                                                                                                                                         true,
-                                                                                                                                         1);
+   private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor
+                                             = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress", true, 1);
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
@@ -57,9 +56,9 @@ public class RDXRapidHeightMapExtractionDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Pose3D cameraPose = new Pose3D();
 
+   private final PerceptionDataLoader perceptionDataLoader;
    private RDXHumanoidPerceptionUI humanoidPerceptionUI;
    private HumanoidPerceptionModule humanoidPerception;
-   private PerceptionDataLoader perceptionDataLoader;
    private CameraIntrinsics cameraIntrinsics;
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;

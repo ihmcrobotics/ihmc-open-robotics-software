@@ -9,15 +9,12 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
-
-import java.util.List;
 
 public class HumanoidActivePerceptionModule
 {
@@ -26,11 +23,16 @@ public class HumanoidActivePerceptionModule
    private MonteCarloPlanningAgent agent;
 
    /* For displaying occupancy grid from the active mapping module. */
-   private Mat gridColor = new Mat();
+   private final Mat gridColor = new Mat();
 
    private ActiveMappingRemoteTask activeMappingRemoteThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
+
+   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters)
+   {
+      this.perceptionConfigurationParameters = perceptionConfigurationParameters;
+   }
 
    public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
    {
@@ -47,7 +49,7 @@ public class HumanoidActivePerceptionModule
                                                               true);
    }
 
-   public void update(List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight, boolean display)
+   public void update(ReferenceFrame sensorFrame, boolean display)
    {
       if (activeMappingRemoteThread == null)
       {
@@ -78,15 +80,15 @@ public class HumanoidActivePerceptionModule
       {
          LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
 
-         this.world = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
-         this.agent = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
+         world = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
+         agent = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
       }
       else
       {
          LogTools.warn("Initializing Occupancy Grid from Scratch");
 
-         this.world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
-         this.agent = new MonteCarloPlanningAgent(new Point2D());
+         world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
+         agent = new MonteCarloPlanningAgent(new Point2D());
       }
    }
 
