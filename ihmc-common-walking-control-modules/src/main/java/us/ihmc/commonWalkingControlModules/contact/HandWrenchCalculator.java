@@ -70,15 +70,6 @@ public class HandWrenchCalculator
       }
    }
 
-   private DMatrixRMaj leftPseudoInverse(DMatrixRMaj matrix)
-   {
-      DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(matrix.getNumRows(), 1e-6);
-      pseudoInverseSolver.setA(matrix);
-      DMatrixRMaj leftPseudoInverseOfMatrix = new DMatrixRMaj(matrix);
-      pseudoInverseSolver.invert(leftPseudoInverseOfMatrix);
-      return leftPseudoInverseOfMatrix;
-   }
-
    public void compute()
    {
       for (RobotSide side : RobotSide.values)
@@ -106,9 +97,13 @@ public class HandWrenchCalculator
       }
    }
 
-   public SideDependentList<double[]> getJointTorques()
+   private DMatrixRMaj leftPseudoInverse(DMatrixRMaj matrix)
    {
-      return jointTorques;
+      DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(matrix.getNumRows(), 1e-6);
+      pseudoInverseSolver.setA(matrix);
+      DMatrixRMaj leftPseudoInverseOfMatrix = new DMatrixRMaj(matrix);
+      pseudoInverseSolver.invert(leftPseudoInverseOfMatrix);
+      return leftPseudoInverseOfMatrix;
    }
 
    // Wrench expressed in world-aligned frame
@@ -149,11 +144,6 @@ public class HandWrenchCalculator
    public SideDependentList<AlphaFilteredYoSpatialVector> getFilteredWrench()
    {
       return alphaFilteredYoSpatialVectors;
-   }
-
-   public SideDependentList<List<OneDoFJointBasics>> getArmJoints()
-   {
-      return armJoints;
    }
 
    public double getLinearWrenchMagnitude(RobotSide side, boolean filtered)
