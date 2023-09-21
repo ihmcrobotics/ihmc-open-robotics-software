@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Needed to add a dynamically changing scene graph to a ReferenceFrameLibrary.
+ * A dynamically changing list of frames for being added to a ReferenceFrameLibrary.
+ * This is to support having access to Scene Graph frames which are being added and
+ * removed.
  */
 public class ReferenceFrameDynamicCollection
 {
