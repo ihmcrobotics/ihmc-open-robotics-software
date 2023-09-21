@@ -25,7 +25,7 @@ public class SceneGraphNodeMove
       newParent.getChildren().add(nodeToMove);
       nodeToMove.changeParentFrameWithoutMoving(newParent.getNodeFrame());
       nodeToMove.ensureFramesMatchParentsRecursively(newParent.getNodeFrame());
-      previousParent.markModifiedByOperator();
-      newParent.markModifiedByOperator();
+      previousParent.freezeFromModification();
+      newParent.freezeFromModification();
    }
 }

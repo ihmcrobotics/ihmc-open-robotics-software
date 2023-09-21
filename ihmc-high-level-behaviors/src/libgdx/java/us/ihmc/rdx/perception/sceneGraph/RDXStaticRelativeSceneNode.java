@@ -34,7 +34,7 @@ public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implemen
       distanceToDisableTrackingInput = new ImGuiInputDoubleWrapper("Distance to disable tracking", "%.2f", 0.1, 0.5,
                                                                    this::getDistanceToDisableTracking,
                                                                    this::setDistanceToDisableTracking,
-                                                                   this::markModifiedByOperator);
+                                                                   this::freezeFromModification);
       distanceToDisableTrackingInput.setWidgetWidth(100.0f);
    }
 

@@ -29,7 +29,7 @@ public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeI
       alphaFilterValueSlider = new ImGuiInputDoubleWrapper("Break frequency:", "%.2f", 0.2, 5.0,
                                                            this::getBreakFrequency,
                                                            this::setBreakFrequency,
-                                                           this::markModifiedByOperator);
+                                                           this::freezeFromModification);
       alphaFilterValueSlider.setWidgetWidth(100.0f);
    }
 

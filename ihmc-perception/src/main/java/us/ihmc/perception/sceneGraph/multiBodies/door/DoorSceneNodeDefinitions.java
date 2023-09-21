@@ -148,7 +148,7 @@ public class DoorSceneNodeDefinitions
                                                              PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding PullDoorPanel to scene graph.");
             pullDoorArUcoMarker.getChildren().add(pullDoorPanel);
-            pullDoorArUcoMarker.markModifiedByOperator();
+            pullDoorArUcoMarker.freezeFromModification();
             addedAnyNodes = true;
          }
 
@@ -165,7 +165,7 @@ public class DoorSceneNodeDefinitions
                                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
             LogTools.info("Adding PullDoorFrame to scene graph.");
             pullDoorPanel.getChildren().add(pullDoorFrame);
-            pullDoorPanel.markModifiedByOperator();
+            pullDoorPanel.freezeFromModification();
             addedAnyNodes = true;
          }
 
@@ -181,7 +181,7 @@ public class DoorSceneNodeDefinitions
                                                                    PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding PullDoorLeverHandle to scene graph.");
             pullDoorArUcoMarker.getChildren().add(pullDoorLeverHandle);
-            pullDoorArUcoMarker.markModifiedByOperator();
+            pullDoorArUcoMarker.freezeFromModification();
             addedAnyNodes = true;
          }
       }
@@ -201,7 +201,7 @@ public class DoorSceneNodeDefinitions
                                                              PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding PushDoorPanel to scene graph.");
             pushDoorArUcoMarker.getChildren().add(pushDoorPanel);
-            pushDoorArUcoMarker.markModifiedByOperator();
+            pushDoorArUcoMarker.freezeFromModification();
             addedAnyNodes = true;
          }
 
@@ -218,7 +218,7 @@ public class DoorSceneNodeDefinitions
                                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
             LogTools.info("Adding PushDoorFrame to scene graph.");
             pushDoorPanel.getChildren().add(pushDoorFrame);
-            pushDoorPanel.markModifiedByOperator();
+            pushDoorPanel.freezeFromModification();
             addedAnyNodes = true;
          }
 
@@ -234,7 +234,7 @@ public class DoorSceneNodeDefinitions
                                                                    PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding PushDoorLeverHandle to scene graph.");
             pushDoorArUcoMarker.getChildren().add(pushDoorLeverHandle);
-            pushDoorArUcoMarker.markModifiedByOperator();
+            pushDoorArUcoMarker.freezeFromModification();
             addedAnyNodes = true;
          }
       }

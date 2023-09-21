@@ -15,16 +15,18 @@ import java.util.List;
  */
 public class SceneNode
 {
-   /** A linearly increasing ID */
+   /** The node's unique ID. */
    private final long id;
    private final String name;
    private final ModifiableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
    /**
+    * Certain changes to this node will cause a freeze of that data
+    * from being modified from incoming messages.
     * Scene nodes are usually being synced at 30 Hz or faster, so 1 second
     * should allow plenty of time for changes to propagate.
     */
-   public static final double OPERATOR_FREEZE_TIME = 1.0;
+   public static final double FREEZE_DURATION_ON_MODIFICATION = 1.0;
    /**
     * This timer is used in the case that an operator can "mark modified" this node's
     * data so it won't accept updates from other sources for a short period of time.
@@ -97,13 +99,13 @@ public class SceneNode
       return children;
    }
 
-   public void markModifiedByOperator()
+   public void freezeFromModification()
    {
       modifiedTimer.reset();
    }
 
-   public boolean operatorModifiedThisRecently()
+   public boolean isFrozenFromModification()
    {
-      return modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
+      return modifiedTimer.isRunning(FREEZE_DURATION_ON_MODIFICATION);
    }
 }

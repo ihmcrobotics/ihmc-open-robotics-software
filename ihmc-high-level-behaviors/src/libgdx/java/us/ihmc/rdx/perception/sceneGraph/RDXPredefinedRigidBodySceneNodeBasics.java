@@ -70,14 +70,14 @@ public class RDXPredefinedRigidBodySceneNodeBasics
          boolean trackDetectedPose = trackDetectedPoseChanged.read();
          predefinedRigidBodySceneNode.setTrackInitialParent(trackDetectedPose, sceneGraphNodeMoves);
          ensureGizmoFrameIsSceneNodeFrame();
-         predefinedRigidBodySceneNode.markModifiedByOperator();
+         predefinedRigidBodySceneNode.freezeFromModification();
       }
 
       ensureGizmoFrameIsSceneNodeFrame();
 
       if (offsetPoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
-         predefinedRigidBodySceneNode.markModifiedByOperator();
+         predefinedRigidBodySceneNode.freezeFromModification();
       }
 
       nodePose.setToZero(predefinedRigidBodySceneNode.getNodeFrame());
@@ -105,7 +105,7 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       {
          predefinedRigidBodySceneNode.clearOffset();
          ensureGizmoFrameIsSceneNodeFrame();
-         predefinedRigidBodySceneNode.markModifiedByOperator();
+         predefinedRigidBodySceneNode.freezeFromModification();
       }
    }
 
