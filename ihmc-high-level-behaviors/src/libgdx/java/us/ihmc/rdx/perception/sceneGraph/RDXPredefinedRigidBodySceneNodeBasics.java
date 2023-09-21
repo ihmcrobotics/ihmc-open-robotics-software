@@ -53,7 +53,7 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       modelInstance.setColor(GHOST_COLOR);
 
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(predefinedRigidBodySceneNode.getNodeFrame(),
-                                                     predefinedRigidBodySceneNode.getModifiableNodeFrame().getTransformToParent());
+                                                     predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
       offsetPoseGizmo.createAndSetupDefault(panel3D);
       initialParentName = "Node " + predefinedRigidBodySceneNode.getInitialParentNodeID();
       trackDetectedPoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getTrackingInitialParent,
