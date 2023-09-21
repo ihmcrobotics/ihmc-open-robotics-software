@@ -2,7 +2,6 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
@@ -12,8 +11,9 @@ import us.ihmc.ros2.ROS2Node;
 
 public class RDXHumanoidPerceptionUI
 {
+   private final RDXRemotePerceptionUI remotePerceptionUI;
+
    private HumanoidPerceptionModule humanoidPerception;
-   private RDXRemotePerceptionUI remotePerceptionUI;
    private RDXRapidRegionsUI rapidRegionsUI;
    private RDXActiveMappingUI activeMappingUI;
    private RDXROS2PlanarRegionsVisualizer rapidRegionsMapVisualizer;

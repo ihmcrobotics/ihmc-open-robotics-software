@@ -1,7 +1,12 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -12,7 +17,6 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
@@ -80,7 +84,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer,int centerIndex, float cellSizeXYInMeters)
+   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer, int centerIndex, float cellSizeXYInMeters, float heightScalingFactor)
    {
       zUpFrameToWorld.getTranslation().setZ(0);
 
@@ -102,7 +106,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
+            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor);
             zPosition = (float) MathTools.clamp(zPosition, minHeight, maxHeight);
             if (zPosition > maxHeight - 0.01f)
                zPosition = 0.0f;
@@ -110,13 +114,12 @@ public class RDXHeightMapRenderer implements RenderableProvider
             spritePoint.set(xPosition, yPosition, zPosition);
             //spritePoint.applyTransform(zUpFrameToWorld);
 
-//            spritePoint.setZ(zPosition);
+            //            spritePoint.setZ(zPosition);
 
             // Position
             intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();
             intermediateVertexBuffer[vertexIndex + 1] = (float) spritePoint.getY();
             intermediateVertexBuffer[vertexIndex + 2] = (float) spritePoint.getZ();
-
 
             Color color = computeColorFromHeight(zPosition);
 
@@ -155,7 +158,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       if (alpha < 0)
          alpha = 1 + alpha;
       while (alpha > 5 * gradientSize)
-         alpha -=  5 * gradientSize;
+         alpha -= 5 * gradientSize;
 
       if (alpha <= gradientSize * 1)
       {

@@ -1,8 +1,9 @@
 package us.ihmc.perception.realsense;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.librealsense2.global.realsense2;
+import org.bytedeco.librealsense2.*;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,10 +14,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.MutableBytePointer;
-import org.bytedeco.librealsense2.*;
-import org.bytedeco.librealsense2.global.realsense2;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.tools.string.StringTools;
 

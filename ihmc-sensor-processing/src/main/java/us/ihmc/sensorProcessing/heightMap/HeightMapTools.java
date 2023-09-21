@@ -1,8 +1,5 @@
 package us.ihmc.sensorProcessing.heightMap;
 
-import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
  * - A discretization value

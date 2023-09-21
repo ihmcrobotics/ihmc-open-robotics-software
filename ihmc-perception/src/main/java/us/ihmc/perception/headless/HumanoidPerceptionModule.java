@@ -44,9 +44,11 @@ public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final FramePose3D cameraPose = new FramePose3D();
+   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final BytePointer compressedDepthPointer = new BytePointer();
+   private final OpenCLManager openCLManager;
 
-   private BytedecoImage realsenseDepthImage;
-   private OpenCLManager openCLManager;
+   private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private LocalizationAndMappingTask localizationAndMappingTask;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidHeightMapExtractor rapidHeightMapExtractor;
@@ -57,11 +59,7 @@ public class HumanoidPerceptionModule
    private CollisionBoxProvider collisionBoxProvider;
    private FramePlanarRegionsList sensorFrameRegions;
    private HeightMapData latestHeightMapData;
-
-   private final ImageMessage depthImageMessage = new ImageMessage();
-   private final BytePointer compressedDepthPointer = new BytePointer();
-
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private BytedecoImage realsenseDepthImage;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -88,7 +86,7 @@ public class HumanoidPerceptionModule
          }
          else
          {
-            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
+            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1.0, 0.0);
          }
       }
 
@@ -114,8 +112,6 @@ public class HumanoidPerceptionModule
       extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
                                     realsenseDepthImage,
                                     sensorFrameRegions,
-                                    regionsInWorldFrame,
-                                    regionsInSensorFrame,
                                     cameraFrame);
       filterFramePlanarRegionsList();
       PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
@@ -142,10 +138,10 @@ public class HumanoidPerceptionModule
                                                          acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
                                                          rapidHeightMapExtractor.getGlobalHeightMapImage().getImageHeight(),
                                                          rapidHeightMapExtractor.getGlobalHeightMapImage().getImageWidth(),
-                                                         10000.0f);
+                                                         RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
    }
 
-   public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight, boolean display)
+   public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
    {
       cameraPose.setToZero(sensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -203,25 +199,21 @@ public class HumanoidPerceptionModule
                                                                   PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
                                                                   ros2Node,
                                                                   referenceFrames,
-                                                                  () ->
-                                                                        {
-                                                                        },
+                                                                  () -> {},
                                                                   smoothing);
    }
 
    public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
                                              BytedecoImage depthImage,
                                              FramePlanarRegionsList sensorFrameRegions,
-                                             PlanarRegionsList worldRegions,
-                                             PlanarRegionsList sensorRegions,
                                              ReferenceFrame cameraFrame)
    {
       extractor.update(depthImage, cameraFrame, sensorFrameRegions);
       extractor.setProcessing(false);
 
-      sensorRegions = sensorFrameRegions.getPlanarRegionsList();
-      worldRegions = sensorRegions.copy();
-      worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
+      regionsInSensorFrame = sensorFrameRegions.getPlanarRegionsList();
+      regionsInWorldFrame = regionsInSensorFrame.copy();
+      regionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
    }
 
    public void extractOccupancyGrid(List<Point3D> pointCloud,
