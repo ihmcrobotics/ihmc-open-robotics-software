@@ -22,15 +22,22 @@ import java.util.List;
 
 public class HandWrenchCalculator
 {
+   public static final double BREAK_FREQUENCY = 20.0;
+
    private final YoRegistry registry;
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final List<JointReadOnly> jointsFromBaseToEndEffector;
    private final List<OneDoFJointBasics> armJoints;
-   private final SpatialVector rawWrench = new SpatialVector();
-   private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final double[] jointTorquesForGravity;
    private final double[] jointTorques;
-   private final AlphaFilteredYoSpatialVector alphaFilteredYoSpatialVector;
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final SpatialVector unfilteredWrench = new SpatialVector();
+   private final AlphaFilteredYoSpatialVector yoFilteredWrench;
+   private final DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj jointTorqueVector;
+   private final DMatrixRMaj armJacobianTranspose;
+   private final DMatrixRMaj armJacobianTransposeDagger;
+   private final DampedLeastSquaresSolver dampedPseudoInverseSolver;
 
    public HandWrenchCalculator(RobotSide side, FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry, double expectedComputeDT)
    {
@@ -41,24 +48,28 @@ public class HandWrenchCalculator
 
       jointsFromBaseToEndEffector = geometricJacobianCalculator.getJointsFromBaseToEndEffector();
       armJoints = MultiBodySystemTools.filterJoints(jointsFromBaseToEndEffector, OneDoFJointBasics.class);
-      jointTorques = new double[armJoints.size()];
       jointTorquesForGravity = new double[armJoints.size()];
+      jointTorques = new double[armJoints.size()];
+      jointTorqueVector = new DMatrixRMaj(jointTorques.length, 1);
+      jointTorqueVector.setData(jointTorques);
+
+      armJacobianTranspose = CommonOps_DDRM.transpose(geometricJacobianCalculator.getJacobianMatrix(), null);
+      armJacobianTransposeDagger = new DMatrixRMaj(armJacobianTranspose);
+      double dampingFactor = 1e-6;
+      dampedPseudoInverseSolver = new DampedLeastSquaresSolver(armJacobianTranspose.getNumRows(), dampingFactor);
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(armJoints));
       inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);
       inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
 
-      // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
-      double breakFrequency = 20;
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, expectedComputeDT);
-      SpatialVector spatialVectorForSetup = new SpatialVector();
-      alphaFilteredYoSpatialVector = new AlphaFilteredYoSpatialVector("filteredWrench",
-                                                                      side.toString(),
-                                                                      registry,
-                                                                      () -> alpha,
-                                                                      () -> alpha,
-                                                                      spatialVectorForSetup.getAngularPart(),
-                                                                      spatialVectorForSetup.getLinearPart());
+      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(BREAK_FREQUENCY, expectedComputeDT);
+      yoFilteredWrench = new AlphaFilteredYoSpatialVector("filteredWrench",
+                                                          side.toString(),
+                                                          registry,
+                                                          () -> alpha,
+                                                          () -> alpha,
+                                                          unfilteredWrench.getAngularPart(),
+                                                          unfilteredWrench.getLinearPart());
       parentRegistry.addChild(registry);
    }
 
@@ -84,40 +95,32 @@ public class HandWrenchCalculator
 
       // Need to call rest to update the joint configurations in the jacobian calculator.
       geometricJacobianCalculator.reset();
-      // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
-      DMatrixRMaj armJacobian = geometricJacobianCalculator.getJacobianMatrix();
-      DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
-      DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
-      DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques);
-      DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
-      CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
+      // getJacobianMatrix also updates the matrix
+      CommonOps_DDRM.transpose(geometricJacobianCalculator.getJacobianMatrix(), armJacobianTranspose);
 
-      rawWrench.setReferenceFrame(geometricJacobianCalculator.getJacobianFrame());
-      rawWrench.set(wrenchVector);
-      rawWrench.changeFrame(ReferenceFrame.getWorldFrame());
+      armJacobianTransposeDagger.set(armJacobianTranspose);
+      dampedPseudoInverseSolver.setA(armJacobianTranspose);
+      dampedPseudoInverseSolver.invert(armJacobianTransposeDagger);
+
+      CommonOps_DDRM.mult(armJacobianTransposeDagger, jointTorqueVector, wrenchVector);
+
+      unfilteredWrench.setReferenceFrame(geometricJacobianCalculator.getJacobianFrame());
+      unfilteredWrench.set(wrenchVector);
+      unfilteredWrench.changeFrame(ReferenceFrame.getWorldFrame());
       // Negate to express the wrench the hand experiences from the external world
-      rawWrench.negate();
+      unfilteredWrench.negate();
 
-      alphaFilteredYoSpatialVector.update(rawWrench.getAngularPart(), rawWrench.getLinearPart());
-   }
-
-   private DMatrixRMaj leftPseudoInverse(DMatrixRMaj matrix)
-   {
-      DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(matrix.getNumRows(), 1e-6);
-      pseudoInverseSolver.setA(matrix);
-      DMatrixRMaj leftPseudoInverseOfMatrix = new DMatrixRMaj(matrix);
-      pseudoInverseSolver.invert(leftPseudoInverseOfMatrix);
-      return leftPseudoInverseOfMatrix;
+      yoFilteredWrench.update();
    }
 
    public SpatialVector getUnfilteredWrench()
    {
-      return rawWrench;
+      return unfilteredWrench;
    }
 
    public AlphaFilteredYoSpatialVector getFilteredWrench()
    {
-      return alphaFilteredYoSpatialVector;
+      return yoFilteredWrench;
    }
 
    public double getLinearWrenchMagnitude(boolean filtered)
