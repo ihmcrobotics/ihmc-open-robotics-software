@@ -3,6 +3,8 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -21,6 +23,7 @@ public class DoorSceneNodeDefinitions
 
    public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM  = new RigidBodyTransform();
    public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
+
    static
    {
       PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setZ(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
@@ -126,79 +129,116 @@ public class DoorSceneNodeDefinitions
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
    }
 
-   public static PredefinedRigidBodySceneNode createPullDoorPanel(SceneGraph sceneGraph, SceneNode parentNode)
+   public static boolean ensureNodesAdded(SceneGraph sceneGraph)
    {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                           "PullDoorPanel",
-                                                                           sceneGraph.getIDToNodeMap(),
-                                                                           parentNode.getID(),
-                                                                           PULL_DOOR_PANEL_TO_MARKER_TRANSFORM,
-                                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                                           PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      parentNode.getChildren().add(node);
-      return node;
-   }
+      boolean addedAnyNodes = false;
 
-   public static PredefinedRigidBodySceneNode createPushDoorPanel(SceneGraph sceneGraph, SceneNode parentNode)
-   {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                           "PushDoorPanel",
-                                                                           sceneGraph.getIDToNodeMap(),
-                                                                           parentNode.getID(),
-                                                                           PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM,
-                                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                                           PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      parentNode.getChildren().add(node);
-      return node;
-   }
+      ArUcoMarkerNode pullDoorArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(DoorModelParameters.PULL_DOOR_MARKER_ID);
+      if (pullDoorArUcoMarker != null)
+      {
+         SceneNode pullDoorPanel = sceneGraph.getNamesToNodesMap().get("PullDoorPanel");
+         if (pullDoorPanel == null)
+         {
+            pullDoorPanel = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                             "PullDoorPanel",
+                                                             sceneGraph.getIDToNodeMap(),
+                                                             pullDoorArUcoMarker.getID(),
+                                                             PULL_DOOR_PANEL_TO_MARKER_TRANSFORM,
+                                                             DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                                             PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PullDoorPanel to scene graph.");
+            pullDoorArUcoMarker.getChildren().add(pullDoorPanel);
+            pullDoorArUcoMarker.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
 
-   public static void createPullDoorFrame(SceneGraph sceneGraph, SceneNode parentNode)
-   {
-      StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                 "PullDoorFrame",
-                                                                 sceneGraph.getIDToNodeMap(),
-                                                                 parentNode.getID(),
-                                                                 PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
-                                                                 DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
-                                                                 PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                                 DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
-      parentNode.getChildren().add(node);
-   }
+         SceneNode pullDoorFrame = sceneGraph.getNamesToNodesMap().get("PullDoorFrame");
+         if (pullDoorFrame == null)
+         {
+            pullDoorFrame = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        "PullDoorFrame",
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        pullDoorPanel.getID(),
+                                                        PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
+                                                        DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                                        PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                        DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+            LogTools.info("Adding PullDoorFrame to scene graph.");
+            pullDoorPanel.getChildren().add(pullDoorFrame);
+            pullDoorPanel.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
 
-   public static void createPushDoorFrame(SceneGraph sceneGraph, SceneNode parentNode)
-   {
-      StaticRelativeSceneNode node = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                 "PushDoorFrame",
-                                                                 sceneGraph.getIDToNodeMap(),
-                                                                 parentNode.getID(),
-                                                                 PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
-                                                                 DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
-                                                                 PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                                 DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
-      parentNode.getChildren().add(node);
-   }
+         SceneNode pullDoorLeverHandle = sceneGraph.getNamesToNodesMap().get("PullDoorLeverHandle");
+         if (pullDoorLeverHandle == null)
+         {
+            pullDoorLeverHandle = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                   "PullDoorLeverHandle",
+                                                                   sceneGraph.getIDToNodeMap(),
+                                                                   pullDoorArUcoMarker.getID(),
+                                                                   PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
+                                                                   DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                   PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PullDoorLeverHandle to scene graph.");
+            pullDoorArUcoMarker.getChildren().add(pullDoorLeverHandle);
+            pullDoorArUcoMarker.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
+      }
 
-   public static void createPushDoorLeverHandle(SceneGraph sceneGraph, SceneNode parentNode)
-   {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                           "PushDoorLeverHandle",
-                                                                           sceneGraph.getIDToNodeMap(),
-                                                                           parentNode.getID(),
-                                                                           PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
-                                                                           DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                           PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      parentNode.getChildren().add(node);
-   }
+      ArUcoMarkerNode pushDoorArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(DoorModelParameters.PUSH_DOOR_MARKER_ID);
+      if (pushDoorArUcoMarker != null)
+      {
+         SceneNode pushDoorPanel = sceneGraph.getNamesToNodesMap().get("PushDoorPanel");
+         if (pushDoorPanel == null)
+         {
+            pushDoorPanel = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                             "PushDoorPanel",
+                                                             sceneGraph.getIDToNodeMap(),
+                                                             pushDoorArUcoMarker.getID(),
+                                                             PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM,
+                                                             DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                                             PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PushDoorPanel to scene graph.");
+            pushDoorArUcoMarker.getChildren().add(pushDoorPanel);
+            pushDoorArUcoMarker.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
 
-   public static void createPullDoorLeverHandle(SceneGraph sceneGraph, SceneNode parentNode)
-   {
-      PredefinedRigidBodySceneNode node = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                           "PullDoorLeverHandle",
-                                                                           sceneGraph.getIDToNodeMap(),
-                                                                           parentNode.getID(),
-                                                                           PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
-                                                                           DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                           PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-      parentNode.getChildren().add(node);
+         SceneNode pushDoorFrame = sceneGraph.getNamesToNodesMap().get("PushDoorFrame");
+         if (pushDoorFrame == null)
+         {
+            pushDoorFrame = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                        "PushDoorFrame",
+                                                        sceneGraph.getIDToNodeMap(),
+                                                        pushDoorPanel.getID(),
+                                                        PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
+                                                        DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                                        PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                        DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+            LogTools.info("Adding PushDoorFrame to scene graph.");
+            pushDoorPanel.getChildren().add(pushDoorFrame);
+            pushDoorPanel.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
+
+         SceneNode pushDoorLeverHandle = sceneGraph.getNamesToNodesMap().get("PushDoorLeverHandle");
+         if (pushDoorLeverHandle == null)
+         {
+            pushDoorLeverHandle = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                   "PushDoorLeverHandle",
+                                                                   sceneGraph.getIDToNodeMap(),
+                                                                   pushDoorArUcoMarker.getID(),
+                                                                   PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
+                                                                   DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                   PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            LogTools.info("Adding PushDoorLeverHandle to scene graph.");
+            pushDoorArUcoMarker.getChildren().add(pushDoorLeverHandle);
+            pushDoorArUcoMarker.markModifiedByOperator();
+            addedAnyNodes = true;
+         }
+      }
+
+      return addedAnyNodes;
    }
 }
