@@ -1,12 +1,15 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
+import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -23,6 +26,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
+   private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final FramePose3D desiredChestPose = new FramePose3D();
@@ -44,6 +48,9 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       update();
 
       this.actionIndex = actionIndex;
+
+      chestPoseStatus.setCurrentAndConcurrent(concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction));
+      ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_ORIENTATION_STATUS, chestPoseStatus);
    }
 
    @Override
