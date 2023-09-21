@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.tools.Timer;
 
@@ -79,9 +79,15 @@ public class SceneNode
     * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getNodeFrame()}.
     * @return the transform to the parent frame
     */
-   public RigidBodyTransform getNodeToParentFrameTransform()
+   public RigidBodyTransformReadOnly getNodeToParentFrameTransform()
    {
       return nodeFrame.getTransformToParent();
+   }
+
+   /** Used to modify the node's frame's pose. */
+   public ModifiableReferenceFrame getModifiableNodeFrame()
+   {
+      return nodeFrame;
    }
 
    protected void changeParentFrame(ReferenceFrame newParentFrame)

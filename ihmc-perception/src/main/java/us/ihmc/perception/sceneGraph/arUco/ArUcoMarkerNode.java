@@ -32,8 +32,8 @@ public class ArUcoMarkerNode extends DetectableSceneNode
    public void applyFilter()
    {
       alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
-      alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
-      getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
+      alphaFilteredTransformToParent.update(getModifiableNodeFrame().getTransformToParent());
+      getModifiableNodeFrame().getTransformToParent().set(alphaFilteredTransformToParent);
    }
 
    public void setMarkerID(int markerID)
