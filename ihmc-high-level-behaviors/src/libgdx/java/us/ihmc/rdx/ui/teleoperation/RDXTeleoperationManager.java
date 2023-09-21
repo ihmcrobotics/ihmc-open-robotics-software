@@ -185,6 +185,12 @@ public class RDXTeleoperationManager extends RDXPanel
       this.baseUI = baseUI;
       desiredRobot.create();
 
+      // This button is created before locomotion manager to make the toolbar button ordering correct
+      RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
+      deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
+      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
+
       locomotionManager.create(baseUI);
 
       teleoperationParametersTuner.create(teleoperationParameters);
@@ -307,10 +313,15 @@ public class RDXTeleoperationManager extends RDXPanel
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
 
-      RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
-      deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
-      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
+      RDX3DPanelToolbarButton freezeButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      freezeButton.loadAndSetIcon("icons/freeze.png");
+      freezeButton.setTooltipText("Freeze");
+      freezeButton.setOnPressed(robotLowLevelMessenger::sendFreezeRequest);
+
+      RDX3DPanelToolbarButton abortToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      abortToolbarButton.loadAndSetIcon("icons/abort.png");
+      abortToolbarButton.setTooltipText("Abort");
+      abortToolbarButton.setOnPressed(locomotionManager::sendAbortWalkingMessage);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }

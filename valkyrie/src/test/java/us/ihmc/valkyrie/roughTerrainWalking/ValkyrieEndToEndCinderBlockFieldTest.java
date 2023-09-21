@@ -96,7 +96,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Disabled
    @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSlantedCinderBlockFieldA()
+   public void testSlantedCinderBlockFieldA() throws Exception
    {
       removeAnkleJointLimits = true;
       super.testSlantedCinderBlockField(false);
@@ -105,7 +105,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Disabled
    @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSlantedCinderBlockFieldB()
+   public void testSlantedCinderBlockFieldB() throws Exception
    {
       removeAnkleJointLimits = true;
       super.testSlantedCinderBlockField(true);
