@@ -116,7 +116,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final Wrench wristTempWrench = new Wrench();
    private final FrameVector3D tempWristForce = new FrameVector3D();
    private final FrameVector3D tempWristTorque = new FrameVector3D();
-   private final HandWrenchCalculator handWrenchCalculator;
+   private final SideDependentList<HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
 
    private final SideDependentList<YoDouble> handsMass;
 
@@ -293,7 +293,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = null;
          handCenterOfMassFrames = null;
          handsMass = null;
-         handWrenchCalculator = new HandWrenchCalculator(fullRobotModel, registry, controlDT);
+         for (RobotSide robotSide : RobotSide.values)
+            handWrenchCalculators.put(robotSide, new HandWrenchCalculator(robotSide, fullRobotModel, registry, controlDT));
       }
       else
       {
@@ -304,7 +305,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = new SideDependentList<>();
          handCenterOfMassFrames = new SideDependentList<>();
          handsMass = new SideDependentList<>();
-         handWrenchCalculator = null;
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -413,8 +413,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       readWristSensorData();
 
       computeAngularAndLinearMomentum();
-      if (handWrenchCalculator != null)
-         handWrenchCalculator.compute();
+      for (RobotSide robotSide : handWrenchCalculators.sides())
+         handWrenchCalculators.get(robotSide).compute();
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
