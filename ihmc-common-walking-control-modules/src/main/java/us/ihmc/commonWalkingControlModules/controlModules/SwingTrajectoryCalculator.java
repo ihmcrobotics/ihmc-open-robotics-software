@@ -481,14 +481,14 @@ public class SwingTrajectoryCalculator
       }
 
       boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
-      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrike() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE && isSteppingDown)
+      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingDown() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE && isSteppingDown)
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
-         if (initialOrientation.getPitch() < Math.toRadians(45.0))
+         if (initialOrientation.getPitch() < swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike())
          {
-            tmpOrientation.setYawPitchRoll(initialOrientation.getYaw(), Math.toRadians(45.0), initialOrientation.getRoll());
-            swingTrajectory.appendOrientationWaypoint(0.15 * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
+            tmpOrientation.setYawPitchRoll(initialOrientation.getYaw(), swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike(), initialOrientation.getRoll());
+            swingTrajectory.appendOrientationWaypoint(swingTrajectoryParameters.getFractionOfSwingToPitchFootDown() * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
          }
       }
       // make the foot orientation better for avoidance
