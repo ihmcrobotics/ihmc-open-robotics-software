@@ -25,11 +25,16 @@ public class ReferenceFrameLibrary
       }
    }
 
-   public void add(ReferenceFrameSupplier referenceFrame)
+   public void add(ReferenceFrameSupplier referenceFrameSupplier)
    {
-      if (!frameNameToSupplierMap.containsKey(referenceFrame.get().getName()))
+      ReferenceFrame referenceFrame = referenceFrameSupplier.get();
+
+      if (referenceFrame != null)
       {
-         frameNameToSupplierMap.put(referenceFrame.get().getName(), referenceFrame);
+         if (!frameNameToSupplierMap.containsKey(referenceFrame.getName()))
+         {
+            frameNameToSupplierMap.put(referenceFrame.getName(), referenceFrameSupplier);
+         }
       }
    }
 

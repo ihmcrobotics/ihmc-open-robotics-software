@@ -3,10 +3,11 @@ package us.ihmc.behaviors.sequence;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
 import javax.annotation.Nullable;
 
-public abstract class FrameBasedBehaviorActionData implements BehaviorActionData
+public abstract class FrameBasedBehaviorActionData implements BehaviorActionData, ReferenceFrameSupplier
 {
    @Nullable
    private transient ReferenceFrameLibrary referenceFrameLibrary;
@@ -26,6 +27,8 @@ public abstract class FrameBasedBehaviorActionData implements BehaviorActionData
    public void setReferenceFrameLibrary(@Nullable ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.referenceFrameLibrary = referenceFrameLibrary;
+      if (referenceFrameLibrary != null)
+         referenceFrameLibrary.add(this);
    }
 
    @Nullable
@@ -63,10 +66,18 @@ public abstract class FrameBasedBehaviorActionData implements BehaviorActionData
          // Create the frame
          if (parentFrame != null && referenceFrame == null)
          {
+            // TODO: changeme
+            referenceFrame = new ReferenceFrame("", parentFrame)
+            {
+               @Override
+               protected void updateTransformToParent(RigidBodyTransform transformToParent)
+               {
 
+               }
+            };
          }
 
-         // Remove the frame if the parent is't in the reference frame library
+         // Remove the frame if the parent isn't in the reference frame library
          if (parentFrame == null && referenceFrame != null)
          {
             // Let the GC remove the reference frame since it has no parent
@@ -76,8 +87,22 @@ public abstract class FrameBasedBehaviorActionData implements BehaviorActionData
          // Check if the frame exists but the parent changed
          else if (referenceFrame != null && !referenceFrame.getParent().equals(parentFrame))
          {
+            // TODO: changeme
+            referenceFrame = new ReferenceFrame("", parentFrame)
+            {
+               @Override
+               protected void updateTransformToParent(RigidBodyTransform transformToParent)
+               {
 
+               }
+            };
          }
       }
+   }
+
+   @Override
+   public ReferenceFrame get()
+   {
+      return referenceFrame;
    }
 }

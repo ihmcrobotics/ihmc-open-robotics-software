@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionData extends FrameBasedBehaviorActionData
@@ -61,7 +60,6 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
       jsonNode.put("parentFrame", getParentFrameName());
-      JSONTools.toJSON(jsonNode, getTransformToParent());
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (FootstepActionData footstep : footsteps)
       {
@@ -77,7 +75,6 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
       setParentFrameName(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, getTransformToParent());
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
@@ -88,7 +85,6 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrameName());
-      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
       message.getFootsteps().clear();
       for (FootstepActionData footstep : footsteps)
       {
@@ -100,10 +96,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
    {
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
-
       setParentFrameName(message.getParentFrame().getString(0));
-      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
-
       footsteps.clear();
       for (FootstepActionMessage footstep : message.getFootsteps())
       {
