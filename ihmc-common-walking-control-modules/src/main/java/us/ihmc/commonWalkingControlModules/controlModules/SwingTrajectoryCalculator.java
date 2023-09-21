@@ -495,7 +495,7 @@ public class SwingTrajectoryCalculator
             tmpVector.setY(0.0);
 
             tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.getFractionOfSwingToPitchFootDown());
-            tmpOrientation.prependPitchRotation(remainingPitch);
+            tmpOrientation.setYawPitchRoll(tmpOrientation.getYaw(), swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike(), tmpOrientation.getRoll());
 
             swingTrajectory.appendOrientationWaypoint(swingTrajectoryParameters.getFractionOfSwingToPitchFootDown() * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
          }
