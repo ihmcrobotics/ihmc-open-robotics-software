@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 public class ROS2HandWrenchCalculator extends HandWrenchCalculator
 {
@@ -11,7 +12,7 @@ public class ROS2HandWrenchCalculator extends HandWrenchCalculator
 
    public ROS2HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
-      super(syncedRobot.getFullRobotModel(), null);
+      super(syncedRobot.getFullRobotModel(), null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT);
       syncedRobot.addRobotConfigurationDataReceivedCallback(robotConfigurationSyncNotification::set);
    }
 

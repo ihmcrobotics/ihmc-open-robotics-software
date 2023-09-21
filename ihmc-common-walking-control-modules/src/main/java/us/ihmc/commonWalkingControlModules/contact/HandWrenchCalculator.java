@@ -33,7 +33,7 @@ public class HandWrenchCalculator
    private final SideDependentList<double[]> jointTorques = new SideDependentList<>();
    private final SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
 
-   public HandWrenchCalculator(FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
+   public HandWrenchCalculator(FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry, double expectedComputeDT)
    {
       for (RobotSide side : RobotSide.values) // Set up for each side
       {
@@ -54,8 +54,7 @@ public class HandWrenchCalculator
 
          SpatialVector spatialVectorForSetup = new SpatialVector();
          double breakFrequency = 20;
-         double dt = 1.0 / 120.0;
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt);
+         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, expectedComputeDT);
          alphaFilteredYoSpatialVectors.set(side,
                                            new AlphaFilteredYoSpatialVector("filteredWrench",
                                                                             side.toString(),
