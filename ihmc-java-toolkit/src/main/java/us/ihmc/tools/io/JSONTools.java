@@ -34,6 +34,10 @@ public class JSONTools
 
    public static void toEuclid(JsonNode jsonNode, RigidBodyTransformBasics rigidBodyTransform)
    {
+      if (jsonNode.get("x") == null)
+      {
+         System.out.println(jsonNode.toPrettyString());
+      }
       rigidBodyTransform.getTranslation().setX(jsonNode.get("x").asDouble());
       rigidBodyTransform.getTranslation().setY(jsonNode.get("y").asDouble());
       rigidBodyTransform.getTranslation().setZ(jsonNode.get("z").asDouble());
