@@ -66,7 +66,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       this.actionIndex = actionIndex;
 
-      // if this action has to be executed with the previous one, it meas it belongs to a group of concurrent actions
+      // if this action has to be executed with the previous one, it means it belongs to a group of concurrent actions
       if (concurrencyWithPreviousIndex)
       {
          // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
