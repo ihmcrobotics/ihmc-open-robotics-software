@@ -21,8 +21,8 @@ public class SceneNode
    private final ModifiableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
    /**
-    * Scene nodes are usually being synced at 20 Hz or faster, so 1/5 of a second
-    * should allow enough time for changes to propagate.
+    * Scene nodes are usually being synced at 30 Hz or faster, so 1 second
+    * should allow plenty of time for changes to propagate.
     */
    public static final double OPERATOR_FREEZE_TIME = 1.0;
    /**

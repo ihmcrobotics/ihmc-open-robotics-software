@@ -16,7 +16,7 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Subscribes to, synchronizing, the robot's perception scene graph.
@@ -25,7 +25,7 @@ public class ROS2SceneGraphSubscription
 {
    private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
-   private final Function<ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
+   private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final ROS2IOTopicQualifier ioQualifier;
    private final FramePose3D nodePose = new FramePose3D();
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
@@ -35,26 +35,13 @@ public class ROS2SceneGraphSubscription
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
-    */
-   public ROS2SceneGraphSubscription(SceneGraph sceneGraph,
-                                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                     ROS2IOTopicQualifier ioQualifier)
-   {
-      this(sceneGraph,
-           ros2PublishSubscribeAPI,
-           ioQualifier,
-           ros2SceneGraphSubscriptionNode -> ROS2SceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, sceneGraph));
-   }
-
-   /**
-    * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
     * @param newNodeSupplier So that new nodes can be externally extended, like for UI representations.
     *                        Use {@link ROS2SceneGraphTools#createNodeFromMessage} as a base.
     */
    public ROS2SceneGraphSubscription(SceneGraph sceneGraph,
                                      ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                      ROS2IOTopicQualifier ioQualifier,
-                                     Function<ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier)
+                                     BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier)
    {
       this.sceneGraph = sceneGraph;
       this.newNodeSupplier = newNodeSupplier;
@@ -138,7 +125,7 @@ public class ROS2SceneGraphSubscription
          SceneNode localChildNode = sceneGraph.getIDToNodeMap().get(subscriptionChildNode.getSceneNodeMessage().getId());
          if (localChildNode == null && !localTreeFrozen) // New node that wasn't in the local tree
          {
-            localChildNode = newNodeSupplier.apply(subscriptionChildNode);
+            localChildNode = newNodeSupplier.apply(sceneGraph, subscriptionChildNode);
          }
 
          if (localChildNode != null)
@@ -171,6 +158,7 @@ public class ROS2SceneGraphSubscription
       localNode.getChildren().clear();
    }
 
+   /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
    private void buildSubscriptionTree(MutableInt index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
       byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index.intValue());
