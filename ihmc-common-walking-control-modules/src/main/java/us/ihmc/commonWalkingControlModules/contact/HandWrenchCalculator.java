@@ -120,11 +120,6 @@ public class HandWrenchCalculator
       return spatialVector;
    }
 
-   public SideDependentList<SpatialVector> getUnfilteredWrench()
-   {
-      return rawWrenches;
-   }
-
    // TODO: Check if this looks good.
    //   Remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves...
    public double[] getGravityCompensationTorques(RobotSide side)
@@ -139,6 +134,11 @@ public class HandWrenchCalculator
          }
       }
       return jointTorquesForGravity.get(side);
+   }
+
+   public SideDependentList<SpatialVector> getUnfilteredWrench()
+   {
+      return rawWrenches;
    }
 
    public SideDependentList<AlphaFilteredYoSpatialVector> getFilteredWrench()
