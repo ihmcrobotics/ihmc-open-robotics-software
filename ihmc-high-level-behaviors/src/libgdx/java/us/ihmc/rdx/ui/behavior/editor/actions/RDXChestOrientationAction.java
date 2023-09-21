@@ -88,20 +88,20 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getReferenceFrame().getParent().getName());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.changeParentFrame(parentFrame);
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      actionData.setParentFrameName(parentFrame.getName());
+      actionData.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionData.setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionData.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
@@ -135,7 +135,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);

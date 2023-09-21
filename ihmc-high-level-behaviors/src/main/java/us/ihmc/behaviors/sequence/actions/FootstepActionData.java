@@ -12,6 +12,21 @@ public class FootstepActionData
    private RobotSide side = RobotSide.LEFT;
    private final Pose3D solePose = new Pose3D();
 
+   public RobotSide getSide()
+   {
+      return side;
+   }
+
+   public void setSide(RobotSide side)
+   {
+      this.side = side;
+   }
+
+   public Pose3D getSolePose()
+   {
+      return solePose;
+   }
+
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("side", side.getLowerCaseName());
@@ -34,20 +49,5 @@ public class FootstepActionData
    {
       side = RobotSide.fromByte(message.getRobotSide());
       solePose.set(message.getSolePose());
-   }
-
-   public RobotSide getSide()
-   {
-      return side;
-   }
-
-   public void setSide(RobotSide side)
-   {
-      this.side = side;
-   }
-
-   public Pose3D getSolePose()
-   {
-      return solePose;
    }
 }

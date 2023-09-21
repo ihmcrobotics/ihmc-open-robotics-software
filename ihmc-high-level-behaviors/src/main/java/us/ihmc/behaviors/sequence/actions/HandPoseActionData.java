@@ -3,103 +3,27 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-import java.util.function.Consumer;
-
-public class HandPoseActionData implements BehaviorActionData
+public class HandPoseActionData extends FrameBasedBehaviorActionData
 {
    private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
-   private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ModifiableReferenceFrame palmFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private double trajectoryDuration = 4.0;
 
    @Override
-   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   public String getDescription()
    {
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      return description;
    }
 
    @Override
-   public void update()
+   public void setDescription(String description)
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(palmFrame, referenceFrameLibrary);
-   }
-
-   @Override
-   public void saveToFile(ObjectNode jsonNode)
-   {
-      jsonNode.put("description", description);
-      jsonNode.put("parentFrame", palmFrame.getReferenceFrame().getParent().getName());
-      jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryDuration", trajectoryDuration);
-      JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      description = jsonNode.get("description").textValue();
-      side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
-      palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
-   }
-
-   public void toMessage(SidedBodyPartPoseActionMessage message)
-   {
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrame().getName());
-      MessageTools.toMessage(palmFrame.getTransformToParent(), message.getTransformToParent());
-      message.setRobotSide(side.toByte());
-      message.setTrajectoryDuration(trajectoryDuration);
-   }
-
-   public void fromMessage(SidedBodyPartPoseActionMessage message)
-   {
-      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
-      palmFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
-      side = RobotSide.fromByte(message.getRobotSide());
-      trajectoryDuration = message.getTrajectoryDuration();
-   }
-
-   public ReferenceFrame getParentFrame()
-   {
-      return palmFrame.getReferenceFrame().getParent();
-   }
-
-   public ReferenceFrame getPalmFrame()
-   {
-      return palmFrame.getReferenceFrame();
-   }
-
-   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
-   {
-      palmFrame.changeParentFrameWithoutMoving(parentFrame);
-   }
-
-   public void changeParentFrame(ReferenceFrame parentFrame)
-   {
-      palmFrame.changeParentFrame(parentFrame);
-   }
-
-   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
-   {
-      palmFrame.update(transformToParentConsumer);
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return palmFrame.getTransformToParent();
+      this.description = description;
    }
 
    public RobotSide getSide()
@@ -123,14 +47,39 @@ public class HandPoseActionData implements BehaviorActionData
    }
 
    @Override
-   public void setDescription(String description)
+   public void saveToFile(ObjectNode jsonNode)
    {
-      this.description = description;
+      jsonNode.put("description", description);
+      jsonNode.put("side", side.getLowerCaseName());
+      jsonNode.put("trajectoryDuration", trajectoryDuration);
+      jsonNode.put("parentFrame", getParentFrameName());
+      JSONTools.toJSON(jsonNode, getTransformToParent());
    }
 
    @Override
-   public String getDescription()
+   public void loadFromFile(JsonNode jsonNode)
    {
-      return description;
+      description = jsonNode.get("description").textValue();
+      side = RobotSide.getSideFromString(jsonNode.get("side").asText());
+      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
+      setParentFrameName(jsonNode.get("parentFrame").textValue());
+      JSONTools.toEuclid(jsonNode, getTransformToParent());
+   }
+
+   public void toMessage(SidedBodyPartPoseActionMessage message)
+   {
+      message.setRobotSide(side.toByte());
+      message.setTrajectoryDuration(trajectoryDuration);
+      message.getParentFrame().resetQuick();
+      message.getParentFrame().add(getParentFrameName());
+      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
+   }
+
+   public void fromMessage(SidedBodyPartPoseActionMessage message)
+   {
+      side = RobotSide.fromByte(message.getRobotSide());
+      trajectoryDuration = message.getTrajectoryDuration();
+      setParentFrameName(message.getParentFrame().getString(0));
+      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
    }
 }

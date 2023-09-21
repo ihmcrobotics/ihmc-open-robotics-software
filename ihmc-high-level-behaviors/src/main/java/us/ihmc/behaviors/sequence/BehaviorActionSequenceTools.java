@@ -2,9 +2,6 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.List;
 
@@ -81,19 +78,6 @@ public class BehaviorActionSequenceTools
             walkActionMessage.getActionInformation().setActionIndex(i);
             walkActionData.toMessage(walkActionMessage);
          }
-      }
-   }
-
-   /**
-    * ReferenceFrames don't have mutable parents, so they get recreated. This accomodates for that.
-    */
-   public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
-   {
-      ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
-      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByName(previousParentFrame.getName()).get();
-      if (previousParentFrame != nextParentFrame)
-      {
-         frameToUpdate.changeParentFrame(nextParentFrame);
       }
    }
 }
