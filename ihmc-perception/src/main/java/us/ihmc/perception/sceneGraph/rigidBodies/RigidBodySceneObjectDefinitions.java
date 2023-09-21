@@ -74,7 +74,7 @@ public class RigidBodySceneObjectDefinitions
                                                    BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding Box to scene graph.");
             boxArUcoMarker.getChildren().add(box);
-            boxArUcoMarker.markModifiedByOperator();
+            boxArUcoMarker.freezeFromModification();
             addedAnyNodes = true;
          }
       }
@@ -95,7 +95,7 @@ public class RigidBodySceneObjectDefinitions
                                                          CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding CanOfSoup to scene graph.");
             canOfSoupMarker.getChildren().add(canOfSoup);
-            canOfSoupMarker.markModifiedByOperator();
+            canOfSoupMarker.freezeFromModification();
             addedAnyNodes = true;
          }
       }

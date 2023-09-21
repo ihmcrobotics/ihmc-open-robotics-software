@@ -40,7 +40,7 @@ public class ArUcoSceneTools
                                                         RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
                   LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
                   sceneGraph.getRootNode().getChildren().add(arUcoMarkerNode);
-                  sceneGraph.getRootNode().markModifiedByOperator();
+                  sceneGraph.getRootNode().freezeFromModification();
                   sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode);
                   modifiedSceneGraph = true;
                }
