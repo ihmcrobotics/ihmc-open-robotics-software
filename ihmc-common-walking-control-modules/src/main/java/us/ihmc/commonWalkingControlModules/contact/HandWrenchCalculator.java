@@ -16,85 +16,89 @@ import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
 public class HandWrenchCalculator
 {
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final SideDependentList<GeometricJacobianCalculator> jacobianCalculators = new SideDependentList<>();
-   private final SideDependentList<List<JointReadOnly>> jointsFromBaseToEndEffector = new SideDependentList<>();
-   private final SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
-   private final SideDependentList<SpatialVector> rawWrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
-   private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators = new SideDependentList<>();
-   private final SideDependentList<double[]> jointTorquesForGravity = new SideDependentList<>();
-   private final SideDependentList<double[]> jointTorques = new SideDependentList<>();
-   private final SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
+   private final YoRegistry registry;
+   private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
+   private final List<JointReadOnly> jointsFromBaseToEndEffector;
+   private final List<OneDoFJointBasics> armJoints;
+   private final SpatialVector rawWrench = new SpatialVector();
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final double[] jointTorquesForGravity;
+   private final double[] jointTorques;
+   private final AlphaFilteredYoSpatialVector alphaFilteredYoSpatialVector;
 
-   public HandWrenchCalculator(FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry, double expectedComputeDT)
+   public HandWrenchCalculator(RobotSide side, FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry, double expectedComputeDT)
    {
-      for (RobotSide side : RobotSide.values) // Set up for each side
-      {
-         GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
-         geometricJacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
-         geometricJacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
-         // geometricJacobianCalculator.setJacobianFrame(ReferenceFrame.getWorldFrame());
-         jacobianCalculators.set(side, geometricJacobianCalculator);
-         jointsFromBaseToEndEffector.set(side, geometricJacobianCalculator.getJointsFromBaseToEndEffector());
-         List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(jointsFromBaseToEndEffector.get(side), OneDoFJointBasics.class);
-         armJoints.set(side, oneDoFJoints);
-         MultiBodySystemReadOnly system = MultiBodySystemReadOnly.toMultiBodySystemInput(armJoints.get(side));
-         InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-         inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);
-         inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
-         inverseDynamicsCalculators.set(side, inverseDynamicsCalculator);
-         jointTorquesForGravity.set(side, new double[armJoints.get(side).size()]);
+      registry = new YoRegistry(HandWrenchCalculator.class.getSimpleName() + side.getPascalCaseName());
 
-         SpatialVector spatialVectorForSetup = new SpatialVector();
-         double breakFrequency = 20;
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, expectedComputeDT);
-         alphaFilteredYoSpatialVectors.set(side,
-                                           new AlphaFilteredYoSpatialVector("filteredWrench",
-                                                                            side.toString(),
-                                                                            registry,
-                                                                            () -> alpha,
-                                                                            () -> alpha,
-                                                                            spatialVectorForSetup.getAngularPart(),
-                                                                            spatialVectorForSetup.getLinearPart()));
-         jointTorques.set(side, new double[armJoints.get(side).size()]);
+      geometricJacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
+      geometricJacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
 
-         if (parentRegistry != null)
-            parentRegistry.addChild(registry);
-      }
+      jointsFromBaseToEndEffector = geometricJacobianCalculator.getJointsFromBaseToEndEffector();
+      armJoints = MultiBodySystemTools.filterJoints(jointsFromBaseToEndEffector, OneDoFJointBasics.class);
+      jointTorques = new double[armJoints.size()];
+      jointTorquesForGravity = new double[armJoints.size()];
+
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(armJoints));
+      inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);
+      inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+
+      // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
+      double breakFrequency = 20;
+      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, expectedComputeDT);
+      SpatialVector spatialVectorForSetup = new SpatialVector();
+      alphaFilteredYoSpatialVector = new AlphaFilteredYoSpatialVector("filteredWrench",
+                                                                      side.toString(),
+                                                                      registry,
+                                                                      () -> alpha,
+                                                                      () -> alpha,
+                                                                      spatialVectorForSetup.getAngularPart(),
+                                                                      spatialVectorForSetup.getLinearPart());
+      parentRegistry.addChild(registry);
    }
 
    public void compute()
    {
-      for (RobotSide side : RobotSide.values)
+      // Compute gravity compensation torques
+      // TODO: Check if this looks good.
+      //   Remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves...
+      inverseDynamicsCalculator.compute();
+      for (int i = 0; i < armJoints.size(); ++i)
       {
-         double[] jointTorquesForGravity = getGravityCompensationTorques(side);
-         List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
-
-         for (int i = 0; i < oneSideArmJoints.size(); ++i)
+         DMatrixRMaj tau = inverseDynamicsCalculator.getComputedJointTau(armJoints.get(i));
+         if (tau != null)
          {
-            jointTorques.get(side)[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
+            jointTorquesForGravity[i] = tau.get(0, 0);
          }
-
-         // Need to call rest to update the joint configurations in the jacobian calculator.
-         jacobianCalculators.get(side).reset();
-         // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
-         DMatrixRMaj armJacobian = jacobianCalculators.get(side).getJacobianMatrix();
-         DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
-         DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
-         DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques.get(side));
-         DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
-         CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
-
-         rawWrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
-         alphaFilteredYoSpatialVectors.get(side).update(rawWrenches.get(side).getAngularPart(), rawWrenches.get(side).getLinearPart());
       }
+
+      for (int i = 0; i < armJoints.size(); ++i)
+      {
+         jointTorques[i] = armJoints.get(i).getTau() - jointTorquesForGravity[i];
+      }
+
+      // Need to call rest to update the joint configurations in the jacobian calculator.
+      geometricJacobianCalculator.reset();
+      // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
+      DMatrixRMaj armJacobian = geometricJacobianCalculator.getJacobianMatrix();
+      DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
+      DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
+      DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques);
+      DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
+
+      rawWrench.setReferenceFrame(geometricJacobianCalculator.getJacobianFrame());
+      rawWrench.set(wrenchVector);
+      rawWrench.changeFrame(ReferenceFrame.getWorldFrame());
+      // Negate to express the wrench the hand experiences from the external world
+      rawWrench.negate();
+
+      alphaFilteredYoSpatialVector.update(rawWrench.getAngularPart(), rawWrench.getLinearPart());
    }
 
    private DMatrixRMaj leftPseudoInverse(DMatrixRMaj matrix)
@@ -106,55 +110,25 @@ public class HandWrenchCalculator
       return leftPseudoInverseOfMatrix;
    }
 
-   // Wrench expressed in world-aligned frame
-   private static SpatialVector makeWrench(ReferenceFrame jacobianFrame, DMatrixRMaj wrenchVector)
+   public SpatialVector getUnfilteredWrench()
    {
-      // Linear and angular part into spatial vector
-      SpatialVector spatialVector = new SpatialVector();
-      spatialVector.setReferenceFrame(jacobianFrame);
-      spatialVector.set(wrenchVector);
-      spatialVector.changeFrame(ReferenceFrame.getWorldFrame());
-      // Negate to express the wrench the hand experiences from the external world
-      spatialVector.negate();
-
-      return spatialVector;
+      return rawWrench;
    }
 
-   // TODO: Check if this looks good.
-   //   Remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves...
-   public double[] getGravityCompensationTorques(RobotSide side)
+   public AlphaFilteredYoSpatialVector getFilteredWrench()
    {
-      inverseDynamicsCalculators.get(side).compute();
-      for (int i = 0; i < armJoints.get(side).size(); ++i)
-      {
-         DMatrixRMaj tau = inverseDynamicsCalculators.get(side).getComputedJointTau(armJoints.get(side).get(i));
-         if (tau != null)
-         {
-            jointTorquesForGravity.get(side)[i] = tau.get(0, 0);
-         }
-      }
-      return jointTorquesForGravity.get(side);
+      return alphaFilteredYoSpatialVector;
    }
 
-   public SideDependentList<SpatialVector> getUnfilteredWrench()
+   public double getLinearWrenchMagnitude(boolean filtered)
    {
-      return rawWrenches;
+      FixedFrameSpatialVectorBasics wrench = filtered ? getFilteredWrench() : getUnfilteredWrench();
+      return wrench.getLinearPart().norm();
    }
 
-   public SideDependentList<AlphaFilteredYoSpatialVector> getFilteredWrench()
+   public double getAngularWrenchMagnitude(boolean filtered)
    {
-      return alphaFilteredYoSpatialVectors;
-   }
-
-   public double getLinearWrenchMagnitude(RobotSide side, boolean filtered)
-   {
-      SideDependentList<? extends FixedFrameSpatialVectorBasics> wrench = filtered ? getFilteredWrench() : getUnfilteredWrench();
-      return wrench.get(side).getLinearPart().norm();
-   }
-
-   public double getAngularWrenchMagnitude(RobotSide side, boolean filtered)
-   {
-      SideDependentList<? extends FixedFrameSpatialVectorBasics> wrench = filtered ? getFilteredWrench() : getUnfilteredWrench();
-      return wrench.get(side).getAngularPart().norm();
+      FixedFrameSpatialVectorBasics wrench = filtered ? getFilteredWrench() : getUnfilteredWrench();
+      return wrench.getAngularPart().norm();
    }
 }

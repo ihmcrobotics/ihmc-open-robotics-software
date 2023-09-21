@@ -19,6 +19,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
@@ -54,7 +56,7 @@ public class BehaviorActionSequence
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
-   private final ROS2HandWrenchCalculator handWrenchCalculator;
+   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -83,7 +85,8 @@ public class BehaviorActionSequence
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       footstepTracker = new WalkingFootstepTracker(ros2.getROS2NodeInterface(), robotModel.getSimpleRobotName());
-      handWrenchCalculator = new ROS2HandWrenchCalculator(syncedRobot);
+      for (RobotSide side : RobotSide.values)
+         handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -143,7 +146,7 @@ public class BehaviorActionSequence
          }
          for (SidedBodyPartPoseActionMessage message : latestUpdateMessage.getHandPoseActions())
          {
-            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
+            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -191,7 +194,8 @@ public class BehaviorActionSequence
       }
 
       syncedRobot.update();
-      handWrenchCalculator.compute();
+      for (RobotSide side : handWrenchCalculators.sides())
+         handWrenchCalculators.get(side).compute();
 
       if (automaticExecutionSubscription.getMessageNotification().poll())
       {

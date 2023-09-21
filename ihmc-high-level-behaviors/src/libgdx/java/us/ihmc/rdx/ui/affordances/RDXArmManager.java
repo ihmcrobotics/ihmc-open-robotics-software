@@ -70,7 +70,7 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private final ROS2HandWrenchCalculator handWrenchCalculator;
+   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
@@ -91,10 +91,9 @@ public class RDXArmManager
       this.interactableHands = interactableHands;
       armJointNames = robotModel.getJointMap().getArmJointNames();
 
-      handWrenchCalculator = new ROS2HandWrenchCalculator(syncedRobot);
-
       for (RobotSide side : RobotSide.values)
       {
+         handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames()));
       }
@@ -117,18 +116,18 @@ public class RDXArmManager
    public void update()
    {
       handManager.update();
-      handWrenchCalculator.compute();
 
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
       {
+         handWrenchCalculators.get(side).compute();
          armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
 
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
          if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
             interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
+         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculators.get(side).getFilteredWrench());
 
          // Check if the desired hand pose changed and we need to run the solver again.
          // We only want to evaluate this when we are going to take action on it
@@ -141,8 +140,8 @@ public class RDXArmManager
          if (showWrench)
          {
             panelHandWrenchIndicator.update(side,
-                                            handWrenchCalculator.getLinearWrenchMagnitude(side, true),
-                                            handWrenchCalculator.getAngularWrenchMagnitude(side, true));
+                                            handWrenchCalculators.get(side).getLinearWrenchMagnitude(true),
+                                            handWrenchCalculators.get(side).getAngularWrenchMagnitude(true));
          }
       }
 
