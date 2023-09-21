@@ -293,7 +293,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wristTorquesHandWeightCancelled = null;
          handCenterOfMassFrames = null;
          handsMass = null;
-         handWrenchCalculator = new HandWrenchCalculator(fullRobotModel, registry);
+         handWrenchCalculator = new HandWrenchCalculator(fullRobotModel, registry, controlDT);
       }
       else
       {
