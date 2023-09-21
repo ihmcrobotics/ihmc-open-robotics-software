@@ -116,7 +116,8 @@ public class ROS2SceneGraphSubscription
          MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
          nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
          nodePose.changeFrame(localNode.getNodeFrame().getParent());
-         localNode.getModifiableNodeFrame().update(nodePose::get);
+         nodePose.get(localNode.getNodeToParentFrameTransform());
+         localNode.getNodeFrame().update();
       }
 
       for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())

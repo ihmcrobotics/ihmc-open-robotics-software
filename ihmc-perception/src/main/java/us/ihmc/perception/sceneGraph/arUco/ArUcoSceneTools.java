@@ -59,7 +59,7 @@ public class ArUcoSceneTools
                   arUcoMarkerDetection.getPose(arUcoMarkerNode.getMarkerID(),
                                                arUcoMarkerNode.getMarkerSize(),
                                                arUcoMarkerNode.getNodeFrame().getParent(),
-                                               arUcoMarkerNode.getModifiableNodeFrame().getTransformToParent());
+                                               arUcoMarkerNode.getNodeToParentFrameTransform());
                   arUcoMarkerNode.applyFilter();
                   arUcoMarkerNode.getNodeFrame().update();
                }
