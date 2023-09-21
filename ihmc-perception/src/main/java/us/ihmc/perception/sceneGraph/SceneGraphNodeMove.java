@@ -1,8 +1,10 @@
 package us.ihmc.perception.sceneGraph;
 
 /**
- * Used to queue up desired node moves from one parent to another
- * to avoid concurrent modifications of node children in the tree.
+ * A record describing a move of a node from one parent to the other.
+ *
+ * In the scene graph, when node moves are requested, they are queued up
+ * and performed later to avoid concurrent modifications of node children in the tree.
  */
 public class SceneGraphNodeMove
 {
