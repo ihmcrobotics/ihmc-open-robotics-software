@@ -225,6 +225,11 @@ public abstract class SwingTrajectoryParameters
       return false;
    }
 
+   public boolean addFootPitchToAvoidHeelStrike()
+   {
+      return true;
+   }
+
    /**
     * Amount of interpolation between the initial orientation and the final orientation during obstacle
     * clearance. Is not used unless {@link #addOrientationMidpointForObstacleClearance()} returns true.

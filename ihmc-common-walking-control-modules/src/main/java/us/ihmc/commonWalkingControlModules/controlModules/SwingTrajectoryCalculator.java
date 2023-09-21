@@ -480,8 +480,19 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
+      boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
+      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrike() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE && isSteppingDown)
+      {
+         tmpOrientation.setToZero(worldFrame);
+         tmpVector.setToZero(worldFrame);
+         if (initialOrientation.getPitch() < Math.toRadians(45.0))
+         {
+            tmpOrientation.setYawPitchRoll(initialOrientation.getYaw(), Math.toRadians(45.0), initialOrientation.getRoll());
+            swingTrajectory.appendOrientationWaypoint(0.15 * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
+         }
+      }
       // make the foot orientation better for avoidance
-      if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+      else if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
