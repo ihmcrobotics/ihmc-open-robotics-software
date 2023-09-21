@@ -63,13 +63,13 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final HandPoseActionData actionData = new HandPoseActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getPalmFrame(), actionData.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getPalmFrame());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getPalmFrame());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final RigidBodyBasics syncedChest;
    private final Color goodQualityColor;
    private final Color badQualityColor;
@@ -160,7 +160,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
    }
 
    public void setSide(RobotSide side)
@@ -170,15 +170,15 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.changeParentFrame(parentFrame);
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      actionData.setParentFrameName(parentFrame.getName());
+      actionData.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionData.setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionData.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
@@ -187,11 +187,11 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       actionData.update();
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getPalmFrame())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getPalmFrame());
-         graphicFrame.changeParentFrame(actionData.getPalmFrame());
-         collisionShapeFrame.changeParentFrame(actionData.getPalmFrame());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
+         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
+         collisionShapeFrame.changeParentFrame(actionData.getReferenceFrame());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -249,7 +249,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);

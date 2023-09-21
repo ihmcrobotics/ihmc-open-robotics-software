@@ -69,7 +69,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copyActualToWork();
-         armIKSolver.update(getPalmFrame());
+         armIKSolver.update(getReferenceFrame());
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
@@ -108,7 +108,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       executionTimer.reset();
 
-      desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
+      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
       startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
       startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
@@ -117,7 +117,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
+      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
       // Left hand broke on Nadia and not in the robot model?

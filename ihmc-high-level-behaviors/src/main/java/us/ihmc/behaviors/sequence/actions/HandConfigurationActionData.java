@@ -14,6 +14,38 @@ public class HandConfigurationActionData implements BehaviorActionData
    private int handConfigurationIndex = 6;
 
    @Override
+   public String getDescription()
+   {
+      return description;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   public RobotSide getSide()
+   {
+      return side;
+   }
+
+   public void setSide(RobotSide side)
+   {
+      this.side = side;
+   }
+
+   public int getHandConfigurationIndex()
+   {
+      return handConfigurationIndex;
+   }
+
+   public void setHandConfigurationIndex(int handConfigurationIndex)
+   {
+      this.handConfigurationIndex = handConfigurationIndex;
+   }
+
+   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
@@ -39,37 +71,5 @@ public class HandConfigurationActionData implements BehaviorActionData
    {
       side = RobotSide.fromByte(message.getRobotSide());
       handConfigurationIndex = (int) message.getGrip();
-   }
-
-   public RobotSide getSide()
-   {
-      return side;
-   }
-
-   public void setSide(RobotSide side)
-   {
-      this.side = side;
-   }
-
-   public int getHandConfigurationIndex()
-   {
-      return handConfigurationIndex;
-   }
-
-   public void setHandConfigurationIndex(int handConfigurationIndex)
-   {
-      this.handConfigurationIndex = handConfigurationIndex;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 }

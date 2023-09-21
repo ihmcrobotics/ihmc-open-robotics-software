@@ -122,48 +122,80 @@ public class BehaviorActionSequence
             ArmJointAnglesAction action = new ArmJointAnglesAction(robotModel, ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("ArmJointAnglesActionMessage could not execute");
+            }
          }
          for (BodyPartPoseActionMessage message : latestUpdateMessage.getChestOrientationActions())
          {
             ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("BodyPartPoseActionMessage could not execute");
+            }
          }
          for (FootstepPlanActionMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
             FootstepPlanAction action = new FootstepPlanAction(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("FootstepPlanActionMessage could not execute");
+            }
          }
          for (HandConfigurationActionMessage message : latestUpdateMessage.getHandConfigurationActions())
          {
             HandConfigurationAction action = new HandConfigurationAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("HandConfigurationActionMessage could not execute");
+            }
          }
          for (SidedBodyPartPoseActionMessage message : latestUpdateMessage.getHandPoseActions())
          {
             HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("SidedBodyPartPoseActionMessage could not execute");
+            }
          }
          for (HandWrenchActionMessage message : latestUpdateMessage.getHandWrenchActions())
          {
             HandWrenchAction action = new HandWrenchAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("HandWrenchActionMessage could not execute");
+            }
          }
          for (BodyPartPoseActionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
             PelvisHeightAction action = new PelvisHeightAction(ros2, referenceFrameLibrary, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("BodyPartPoseActionMessage could not execute");
+            }
          }
          for (WaitDurationActionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
             WaitDurationAction action = new WaitDurationAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("WaitDurationActionMessage could not execute");
+            }
          }
          for (WalkActionMessage message : latestUpdateMessage.getWalkActions())
          {
@@ -176,6 +208,10 @@ public class BehaviorActionSequence
                                                referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            if (!message.getActionInformation().getCanExecute())
+            {
+               System.out.println("WalkActionMessage could not execute");
+            }
          }
 
          actionSequence.clear();

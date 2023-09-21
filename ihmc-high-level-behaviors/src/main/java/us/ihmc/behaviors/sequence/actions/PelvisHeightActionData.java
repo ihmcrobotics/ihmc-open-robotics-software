@@ -3,67 +3,25 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.BodyPartPoseActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONTools;
 
-import java.util.function.Consumer;
-
-public class PelvisHeightActionData implements BehaviorActionData
+public class PelvisHeightActionData extends FrameBasedBehaviorActionData
 {
    private String description = "Pelvis height";
    private double trajectoryDuration = 4.0;
-   private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ModifiableReferenceFrame pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
 
    @Override
-   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   public String getDescription()
    {
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      return description;
    }
 
    @Override
-   public void update()
+   public void setDescription(String description)
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(pelvisInteractableReferenceFrame, referenceFrameLibrary);
-   }
-
-   @Override
-   public void saveToFile(ObjectNode jsonNode)
-   {
-      jsonNode.put("description", description);
-      jsonNode.put("parentFrame", pelvisInteractableReferenceFrame.getReferenceFrame().getParent().getName());
-      jsonNode.put("trajectoryDuration", trajectoryDuration);
-      JSONTools.toJSON(jsonNode, pelvisInteractableReferenceFrame.getTransformToParent());
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      description = jsonNode.get("description").textValue();
-      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
-      pelvisInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
-   }
-
-   public void toMessage(BodyPartPoseActionMessage message)
-   {
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrame().getName());
-      MessageTools.toMessage(pelvisInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
-      message.setTrajectoryDuration(trajectoryDuration);
-   }
-
-   public void fromMessage(BodyPartPoseActionMessage message)
-   {
-      pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
-      pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
-      trajectoryDuration = message.getTrajectoryDuration();
+      this.description = description;
    }
 
    public double getHeight()
@@ -86,45 +44,36 @@ public class PelvisHeightActionData implements BehaviorActionData
       this.trajectoryDuration = trajectoryDuration;
    }
 
-   public ReferenceFrame getParentFrame()
+   @Override
+   public void saveToFile(ObjectNode jsonNode)
    {
-      return pelvisInteractableReferenceFrame.getReferenceFrame().getParent();
-   }
-
-   public ReferenceFrame getReferenceFrame()
-   {
-      return pelvisInteractableReferenceFrame.getReferenceFrame();
-   }
-
-   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
-   {
-      pelvisInteractableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
-   }
-
-   public void changeParentFrame(ReferenceFrame parentFrame)
-   {
-      pelvisInteractableReferenceFrame.changeParentFrame(parentFrame);
-   }
-
-   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
-   {
-      pelvisInteractableReferenceFrame.update(transformToParentConsumer);
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return pelvisInteractableReferenceFrame.getTransformToParent();
+      jsonNode.put("description", description);
+      jsonNode.put("trajectoryDuration", trajectoryDuration);
+      jsonNode.put("parentFrame", getParentFrameName());
+      JSONTools.toJSON(jsonNode, getTransformToParent());
    }
 
    @Override
-   public void setDescription(String description)
+   public void loadFromFile(JsonNode jsonNode)
    {
-      this.description = description;
+      description = jsonNode.get("description").textValue();
+      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
+      setParentFrameName(jsonNode.get("parentFrame").textValue());
+      JSONTools.toEuclid(jsonNode, getTransformToParent());
    }
 
-   @Override
-   public String getDescription()
+   public void toMessage(BodyPartPoseActionMessage message)
    {
-      return description;
+      message.setTrajectoryDuration(trajectoryDuration);
+      message.getParentFrame().resetQuick();
+      message.getParentFrame().add(getParentFrameName());
+      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
+   }
+
+   public void fromMessage(BodyPartPoseActionMessage message)
+   {
+      trajectoryDuration = message.getTrajectoryDuration();
+      setParentFrameName(message.getParentFrame().getString(0));
+      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
    }
 }
