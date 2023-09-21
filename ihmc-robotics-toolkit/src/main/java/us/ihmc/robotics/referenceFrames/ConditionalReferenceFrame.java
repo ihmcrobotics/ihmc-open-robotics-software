@@ -3,12 +3,11 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
 {
-   private static final ReferenceFrame NULL_FRAME = ReferenceFrameTools.constructARootFrame("NullFrame");
+   public static final ReferenceFrame NULL_FRAME = ReferenceFrameTools.constructARootFrame("NullFrame");
 
    private final String frameName;
    private String parentFrameName;
@@ -38,8 +37,11 @@ public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
 
    public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      ReferenceFrame parentFrame = referenceFrameLibrary.findFrameByName(parentFrameName).get();
-      modifiableReferenceFrame.changeParentFrame(Objects.requireNonNullElse(parentFrame, NULL_FRAME));
+      ReferenceFrameSupplier parentFrameSupplier = referenceFrameLibrary.findFrameByName2(parentFrameName);
+      if (parentFrameSupplier != null)
+         modifiableReferenceFrame.changeParentFrame(parentFrameSupplier.get());
+      else
+         modifiableReferenceFrame.changeParentFrame(NULL_FRAME);
    }
 
    public boolean hasParentFrame()
