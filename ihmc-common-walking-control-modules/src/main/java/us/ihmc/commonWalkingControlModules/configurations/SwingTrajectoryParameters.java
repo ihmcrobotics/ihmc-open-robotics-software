@@ -225,11 +225,6 @@ public abstract class SwingTrajectoryParameters
       return false;
    }
 
-   public boolean addFootPitchToAvoidHeelStrike()
-   {
-      return true;
-   }
-
    /**
     * Amount of interpolation between the initial orientation and the final orientation during obstacle
     * clearance. Is not used unless {@link #addOrientationMidpointForObstacleClearance()} returns true.
@@ -237,6 +232,32 @@ public abstract class SwingTrajectoryParameters
    public double midpointOrientationInterpolationForObstacleClearance()
    {
       return 0.4;
+   }
+
+   /**
+    * Specifies whether or not to pitch the foot down to help avoid heel strike when stepping down.
+    */
+   public boolean addFootPitchToAvoidHeelStrikeWhenSteppingDown()
+   {
+      return true;
+   }
+
+   /**
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the fraction
+    * through swing to add the additional foot pitch waypoint
+    */
+   public double getFractionOfSwingToPitchFootDown()
+   {
+      return 0.25;
+  }
+
+   /**
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the amount
+    * of angle to pitch the foot down
+    */
+   public double getFootPitchAngleToAvoidHeelStrike()
+   {
+      return Math.toRadians(30.0);
    }
 
    /**

@@ -20,7 +20,9 @@ public class YoSwingTrajectoryParameters
    private final DoubleParameter defaultSwingStepUpHeight;
    private final DoubleParameter defaultSwingStepDownHeight;
    private final BooleanParameter addOrientationMidpointForClearance;
-   private final BooleanParameter addFootPitchToAvoidHeelStrike;
+   private final BooleanParameter addFootPitchToAvoidHeelStrikeWhenSteppingDown;
+   private final DoubleParameter fractionOfSwingToPitchFootDown;
+   private final DoubleParameter footPitchAngleToAvoidHeelStrike;
    private final DoubleParameter midpointOrientationInterpolationForClearance;
 
    private final DoubleParameter minHeightDifferenceForObstacleClearance;
@@ -63,10 +65,18 @@ public class YoSwingTrajectoryParameters
       addOrientationMidpointForClearance = new BooleanParameter(namePrefix + "AddOrientationMidpointForClearance",
                                                                 registry,
                                                                 parameters.addOrientationMidpointForObstacleClearance());
-      addFootPitchToAvoidHeelStrike = new BooleanParameter(namePrefix + "AddFootPitchToAvoidHeelStrike", registry, parameters.addFootPitchToAvoidHeelStrike());
       midpointOrientationInterpolationForClearance = new DoubleParameter(namePrefix + "MidpointOrientationInterpolationForClearance",
                                                                          registry,
                                                                          parameters.midpointOrientationInterpolationForObstacleClearance());
+      addFootPitchToAvoidHeelStrikeWhenSteppingDown = new BooleanParameter(namePrefix + "AddFootPitchToAvoidHeelStrikeWhenSteppingDown",
+                                                                           registry,
+                                                                           parameters.addFootPitchToAvoidHeelStrikeWhenSteppingDown());
+      fractionOfSwingToPitchFootDown = new DoubleParameter(namePrefix + "FractionOfSwingToPitchFootDown",
+                                                           registry,
+                                                           parameters.getFractionOfSwingToPitchFootDown());
+      footPitchAngleToAvoidHeelStrike = new DoubleParameter(namePrefix + "FootPitchAngleToAvoidHeelStrike",
+                                                            registry,
+                                                            parameters.getFootPitchAngleToAvoidHeelStrike());
 
       minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance",
                                                                     registry,
@@ -144,14 +154,24 @@ public class YoSwingTrajectoryParameters
       return addOrientationMidpointForClearance.getValue();
    }
 
-   public boolean addFootPitchToAvoidHeelStrike()
-   {
-      return addFootPitchToAvoidHeelStrike.getValue();
-   }
-
    public double getMidpointOrientationInterpolationForObstacleClearance()
    {
       return midpointOrientationInterpolationForClearance.getValue();
+   }
+
+   public boolean addFootPitchToAvoidHeelStrikeWhenSteppingDown()
+   {
+      return addFootPitchToAvoidHeelStrikeWhenSteppingDown.getValue();
+   }
+
+   public double getFractionOfSwingToPitchFootDown()
+   {
+      return fractionOfSwingToPitchFootDown.getValue();
+   }
+
+   public double getFootPitchAngleToAvoidHeelStrike()
+   {
+      return footPitchAngleToAvoidHeelStrike.getValue();
    }
 
    public double getMinHeightDifferenceForStepUpOrDown()
