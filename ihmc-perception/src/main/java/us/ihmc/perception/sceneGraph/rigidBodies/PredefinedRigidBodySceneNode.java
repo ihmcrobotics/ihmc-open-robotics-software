@@ -47,8 +47,7 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       this.visualModelFilePath = visualModelFilePath;
       this.visualModelToNodeFrameTransform = visualModelToNodeFrameTransform;
 
-      getNodeToParentFrameTransform().set(initialTransformToParent);
-      getNodeFrame().update();
+      getModifiableNodeFrame().update(nodeToParentTransform -> nodeToParentTransform.set(initialTransformToParent));
    }
 
    public void setTrackInitialParent(boolean trackInitialParent, List<SceneGraphNodeMove> sceneGraphNodeMoves)
@@ -86,11 +85,11 @@ public class PredefinedRigidBodySceneNode extends SceneNode
          SceneNode originalParentNode = initialParentNode;
          initialPose.setIncludingFrame(originalParentNode.getNodeFrame(), initialTransformToParent);
          initialPose.changeFrame(getNodeFrame().getParent());
-         initialPose.get(getNodeToParentFrameTransform());
+         getModifiableNodeFrame().update(initialPose::get);
       }
       else
       {
-         getNodeToParentFrameTransform().set(initialTransformToParent);
+         getModifiableNodeFrame().update(nodeToParentTransform -> nodeToParentTransform.set(initialTransformToParent));
       }
       getNodeFrame().update();
    }
