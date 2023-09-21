@@ -272,6 +272,11 @@ public class BehaviorActionSequence
       }
    }
 
+   /**
+    * @param actionIndex Index of the current action
+    * @param concurrencyWithPreviousAction Whether this action has to be executed at the same time of the previous one
+    * @return Index shift in the actionSequence array from the current action to the first action of the same group of concurrent actions
+    */
    private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction)
    {
       if (concurrencyWithPreviousAction)

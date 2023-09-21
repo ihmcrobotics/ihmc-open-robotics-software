@@ -16,7 +16,6 @@ import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -67,8 +66,10 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       this.actionIndex = actionIndex;
 
+      // if this action has to be executed with the previous one, it meas it belongs to a group of concurrent actions
       if (concurrencyWithPreviousIndex)
       {
+         // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
          if (actionIndex == (nextExecutionIndex + indexShiftConcurrentAction))
          {
             computeAndPublishIKSolution();
