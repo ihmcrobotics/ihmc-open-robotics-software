@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a node on the Scene Knowledge Graph (to be defined).
+ * Represents a node on the scene graph.
  *
  * We give each node a name and a reference frame.
  */
