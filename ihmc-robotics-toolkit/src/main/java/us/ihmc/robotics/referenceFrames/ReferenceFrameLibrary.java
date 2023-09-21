@@ -44,14 +44,14 @@ public class ReferenceFrameLibrary
    }
 
    @Nullable
-   public ReferenceFrameSupplier findFrameByName2(String referenceFrameName)
+   public ReferenceFrameSupplier findFrameByName(String referenceFrameName)
    {
       return frameNameToSupplierMap.get(referenceFrameName);
    }
 
    public ReferenceFrameSupplier findFrameByIndex(int referenceFrameIndex)
    {
-      return findFrameByName2(getReferenceFrameNameArray()[referenceFrameIndex]);
+      return findFrameByName(getReferenceFrameNameArray()[referenceFrameIndex]);
    }
 
    public int findFrameIndexByName(String referenceFrameName)
