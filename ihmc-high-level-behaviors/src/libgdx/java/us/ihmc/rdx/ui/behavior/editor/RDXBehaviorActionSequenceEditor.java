@@ -13,6 +13,7 @@ import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.opencv.ximgproc.SelectiveSearchSegmentation;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
@@ -257,25 +258,30 @@ public class RDXBehaviorActionSequenceEditor
          boolean concurrencyWithPreviousAction = false;
          if (i > 0)
             concurrencyWithPreviousAction = actionSequence.get(i - 1).getActionData().getExecuteWithNextAction();
-         action.update(concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction));
+         action.update(concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndexStatus));
       }
    }
 
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction)
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
    {
       if (concurrencyWithPreviousAction)
       {
-         boolean isLastConcurrency = true;
-         for (int j = 2; j <= actionIndex; j++)
+         boolean isNotRootOfConcurrency = true;
+         for (int j = 1; j <= actionIndex; j++)
          {
-            isLastConcurrency = actionSequence.get(actionIndex - j).getActionData().getExecuteWithNextAction();
-            if (!isLastConcurrency)
+            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getActionData().getExecuteWithNextAction();
+            isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
+            if (!isNotRootOfConcurrency)
             {
                return (j - 1);
             }
+            else if ((actionIndex - j) == 0 && thisPreviousActionIsConcurrent)
+            {
+               return j;
+            }
          }
       }
-      return 1;
+      return -1;
    }
 
    public void renderFileMenu()

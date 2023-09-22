@@ -160,6 +160,7 @@ public class ArmIKSolver
    public void setChestExternally(ModifiableReferenceFrame externalChestFrame)
    {
       this.externalChestFrame = externalChestFrame;
+      LogTools.info(externalChestFrame);
    }
 
    public void update(ReferenceFrame handControlDesiredFrame)
@@ -170,10 +171,10 @@ public class ArmIKSolver
       {
          // Get the hand desired pose, but put it in the world of the detached arm
          handControlDesiredPose.setToZero(handControlDesiredFrame);
-         if (externalChestFrame != null)
+//         if (externalChestFrame == null)
             handControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
-         else
-            handControlDesiredPose.changeFrame(externalChestFrame.getReferenceFrame());
+//         else
+//            handControlDesiredPose.changeFrame(externalChestFrame.getReferenceFrame());
          handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
 
          // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame

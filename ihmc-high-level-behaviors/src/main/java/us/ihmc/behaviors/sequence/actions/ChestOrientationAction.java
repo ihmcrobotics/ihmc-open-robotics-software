@@ -2,7 +2,6 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
-import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -49,8 +48,11 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 
       this.actionIndex = actionIndex;
 
-      chestPoseStatus.setCurrentAndConcurrent(concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction));
-      ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_ORIENTATION_STATUS, chestPoseStatus);
+      chestPoseStatus.getParentFrame().resetQuick();
+      chestPoseStatus.getParentFrame().add(getParentFrame().getName());
+      chestPoseStatus.setNextAndConcurrent(concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction));
+      MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
+      ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
    }
 
    @Override

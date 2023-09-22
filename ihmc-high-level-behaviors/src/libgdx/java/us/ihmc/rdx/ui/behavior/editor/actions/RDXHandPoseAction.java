@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -11,10 +12,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -100,6 +103,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
+   private ModifiableReferenceFrame chestReferenceFrame;
    private final RDX3DPanelTooltip tooltip;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
@@ -169,6 +174,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
+      chestPoseStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
@@ -221,8 +227,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
+      // IK solution visualization via ghost arms
       displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
-                          (concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
+                          (concurrencyWithPreviousAction && indexShiftConcurrentAction > 0 && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
       if (displayIKSolution)
       {
          boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
@@ -237,7 +244,23 @@ public class RDXHandPoseAction extends RDXBehaviorAction
             if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
             {
                SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+               if (chestPoseStatusSubscription.hasReceivedFirstMessage())
+               {
+                  BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
+                  if (chestPoseStatusMessage.getNextAndConcurrent())
+                  {
+                     chestReferenceFrame = new ModifiableReferenceFrame(actionData.getReferenceFrameLibrary()
+                                                                                  .findFrameByName(chestPoseStatusMessage.getParentFrame()
+                                                                                                                         .getString(0)).get());
+                     chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+                  }
+                  else
+                     chestReferenceFrame = null;
+               }
+               if (chestReferenceFrame == null)
+                  floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+               else
+                  floatingJoint.getJointPose().set(chestReferenceFrame.getReferenceFrame().getTransformToRoot());
                for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
                {
                   armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
