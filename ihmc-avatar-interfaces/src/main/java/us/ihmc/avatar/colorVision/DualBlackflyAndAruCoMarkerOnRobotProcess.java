@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
@@ -25,7 +25,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
 
    private final DRCRobotModel robotModel;
-   private final SceneGraph sceneGraph;
+   private final ROS2SceneGraph sceneGraph;
    private final BlackflyLensProperties blackflyLensProperties;
 
    private final ROS2Node ros2Node;
@@ -46,7 +46,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       // Helpful to view relative sensor transforms when robot controller is not running
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
-      sceneGraph = new SceneGraph(new ROS2Helper(ros2Node));
+      sceneGraph = new ROS2SceneGraph(new ROS2Helper(ros2Node));
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {

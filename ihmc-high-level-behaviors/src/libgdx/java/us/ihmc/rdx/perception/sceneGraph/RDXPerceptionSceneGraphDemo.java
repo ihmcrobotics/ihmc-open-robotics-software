@@ -5,7 +5,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -31,7 +31,7 @@ public class RDXPerceptionSceneGraphDemo
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private SceneGraph onRobotSceneGraph;
+   private ROS2SceneGraph onRobotSceneGraph;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private RDXPerceptionSceneGraphUI perceptionSceneGraphUI;
    private RDXOpenCVArUcoMarkerDetectionUI openCVArUcoMarkerDetectionUI;
@@ -76,7 +76,7 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerDetection.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetection.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
 
-            onRobotSceneGraph = new SceneGraph(ros2Helper);
+            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
                                                                                                                  ros2Helper,

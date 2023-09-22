@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -29,7 +30,7 @@ import java.util.*;
  */
 public class RDXPerceptionSceneGraphUI
 {
-   private final SceneGraph sceneGraph;
+   private final ROS2SceneGraph sceneGraph;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final RDXSceneNode uiRootNode;
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
@@ -45,7 +46,7 @@ public class RDXPerceptionSceneGraphUI
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
       uiRootNode = new RDXSceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME);
-      sceneGraph = new SceneGraph
+      sceneGraph = new ROS2SceneGraph
       (
          uiRootNode,
          (sceneGraph, ros2SceneGraphSubscriptionNode) -> RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph),
@@ -191,7 +192,7 @@ public class RDXPerceptionSceneGraphUI
       return panel;
    }
 
-   public SceneGraph getSceneGraph()
+   public ROS2SceneGraph getSceneGraph()
    {
       return sceneGraph;
    }

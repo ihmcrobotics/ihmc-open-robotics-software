@@ -2,7 +2,7 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -55,7 +55,7 @@ public class RigidBodySceneObjectDefinitions
       CAN_OF_SOUP_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
    }
 
-   public static boolean ensureNodesAdded(SceneGraph sceneGraph)
+   public static boolean ensureNodesAdded(ROS2SceneGraph sceneGraph)
    {
       boolean addedAnyNodes = false;
 

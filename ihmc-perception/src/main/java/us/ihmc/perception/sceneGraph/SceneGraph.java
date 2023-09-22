@@ -5,24 +5,16 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphPublisher;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscription;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -41,11 +33,6 @@ public class SceneGraph
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
-   private final ROS2IOTopicQualifier subscriptionQualifier;
-   private ROS2SceneGraphSubscription sceneGraphSubscription;
-   private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
-   private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -57,44 +44,18 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final List<SceneGraphNodeMove> sceneGraphNodeMoves = new ArrayList<>();
 
-   /** Constuctor if you don't want ROS 2 sync. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, null, null);
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
    }
 
    /**
-    * Constructor for on-robot.
+    * Support passing in the externally created root node so it can be extended
+    * by a superclass implementation like for UI nodes.
     */
-   public SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
-   {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME),
-           (sceneGraph, subscriptionNode) -> ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph),
-           ros2PublishSubscribeAPI,
-           ROS2IOTopicQualifier.COMMAND);
-   }
-
-   /**
-    * The complexity of this constructor is to support the UI having nodes that extend the base
-    * on-robot ones.
-    */
-   public SceneGraph(SceneNode rootNode,
-                     BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier,
-                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                     ROS2IOTopicQualifier subscriptionQualifier)
+   public SceneGraph(SceneNode rootNode)
    {
       this.rootNode = rootNode;
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
-      this.subscriptionQualifier = subscriptionQualifier;
-
-      if (ros2PublishSubscribeAPI != null)
-         sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, subscriptionQualifier, newNodeSupplier);
-   }
-
-   public void updateSubscription()
-   {
-      if (sceneGraphSubscription != null)
-         sceneGraphSubscription.update();
    }
 
    /**
@@ -128,17 +89,6 @@ public class SceneGraph
       }
    }
 
-   public void ensureFramesMatchParentsRecursively()
-   {
-      rootNode.ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
-   }
-
-   public void updatePublication()
-   {
-      if (ros2PublishSubscribeAPI != null && publishThrottler.run())
-         sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, subscriptionQualifier.getOpposite());
-   }
-
    public void updateCaches()
    {
       idToNodeMap.clear();
@@ -163,12 +113,6 @@ public class SceneGraph
       {
          updateCaches(child);
       }
-   }
-
-   public void destroy()
-   {
-      if (sceneGraphSubscription != null)
-         sceneGraphSubscription.destroy();
    }
 
    public SceneNode getRootNode()
@@ -215,10 +159,5 @@ public class SceneGraph
    {
       Function<String, ReferenceFrame> frameLookup = nodeName -> namesToNodesMap.get(nodeName).getNodeFrame();
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
-   }
-
-   public ROS2SceneGraphSubscription getSceneGraphSubscription()
-   {
-      return sceneGraphSubscription;
    }
 }
