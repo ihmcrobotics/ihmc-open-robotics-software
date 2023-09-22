@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -13,10 +14,14 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,6 +40,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -57,6 +63,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
+
+      chestPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
    }
 
    @Override
@@ -72,19 +80,42 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
          if (actionIndex == (nextExecutionIndex + indexShiftConcurrentAction))
          {
-            computeAndPublishIKSolution();
+//            // if chest is in the same group of concurrent actions, then update the IK according to that chest pose
+//            if (chestPoseStatusSubscription.hasReceivedFirstMessage())
+//            {
+//               BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
+//               if (chestPoseStatusMessage.getNextAndConcurrent())
+//               {
+//                  ModifiableReferenceFrame chestReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary()
+//                                                                                                    .findFrameByName(chestPoseStatusMessage.getParentFrame()
+//                                                                                                                                           .getString(0)).get());
+//                  chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+//
+//                  ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+//                  armIKSolver.copyActualToWork();
+//                  armIKSolver.setChestExternally(chestReferenceFrame);
+//                  computeAndPublishIKSolution(armIKSolver);
+//               }
+//            }
+//            else // compute the IK with the synced chest
+//            {
+               ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+               armIKSolver.copyActualToWork();
+               computeAndPublishIKSolution(armIKSolver);
+//            }
          }
       }
       if (actionIndex == nextExecutionIndex)
       {
-         computeAndPublishIKSolution();
+         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+         armIKSolver.copyActualToWork();
+         computeAndPublishIKSolution(armIKSolver);
+
       }
    }
 
-   private void computeAndPublishIKSolution()
+   private void computeAndPublishIKSolution(ArmIKSolver armIKSolver)
    {
-      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-      armIKSolver.copyActualToWork();
       armIKSolver.update(getPalmFrame());
       armIKSolver.solve();
 
@@ -119,6 +150,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
          armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
          ros2ControllerHelper.publishToController(armTrajectoryMessage);
+         LogTools.info("SENDING");
       }
       else
       {

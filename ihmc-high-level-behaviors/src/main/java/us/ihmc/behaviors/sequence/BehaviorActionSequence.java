@@ -50,7 +50,7 @@ public class BehaviorActionSequence
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("left_hand_pose_joint_angles");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> RIGHT_HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("right_hand_pose_joint_angles");
-   public static final ROS2Topic<BodyPartPoseStatusMessage> CHEST_ORIENTATION_STATUS
+   public static final ROS2Topic<BodyPartPoseStatusMessage> CHEST_POSE_STATUS
          = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("chest_orientation_status");
    public static final ROS2Topic<ActionsExecutionStatusMessage> ACTIONS_EXECUTION_STATUS
          = STATUS_TOPIC.withType(ActionsExecutionStatusMessage.class).withSuffix("execution_status");
@@ -217,7 +217,7 @@ public class BehaviorActionSequence
          boolean concurrencyWithPreviousAction = false;
          if (i > 0)
             concurrencyWithPreviousAction = actionSequence.get(i - 1).getExecuteWithNextAction();
-         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction));
+         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndex));
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -277,23 +277,30 @@ public class BehaviorActionSequence
    /**
     * @param actionIndex Index of the current action
     * @param concurrencyWithPreviousAction Whether this action has to be executed at the same time of the previous one
+    * @param executionNextIndex Index of the next action to be executed
     * @return Index shift in the actionSequence array from the current action to the first action of the same group of concurrent actions
+    * Note. the first action of the same group cannot be an action that happens before the executionNextIndex
     */
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction)
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
    {
       if (concurrencyWithPreviousAction)
       {
-         boolean isLastConcurrency = true;
-         for (int j = 2; j <= actionIndex; j++)
+         boolean isNotRootOfConcurrency = true;
+         for (int j = 1; j <= actionIndex; j++)
          {
-            isLastConcurrency = actionSequence.get(actionIndex - j).getExecuteWithNextAction();
-            if (!isLastConcurrency)
+            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getExecuteWithNextAction();
+            isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
+            if (!isNotRootOfConcurrency)
             {
                return (j - 1);
             }
+            else if ((actionIndex - j) == 0 && thisPreviousActionIsConcurrent)
+            {
+               return j;
+            }
          }
       }
-      return 1;
+      return -1;
    }
 
    private void executeNextAction()
@@ -303,7 +310,7 @@ public class BehaviorActionSequence
          concurrencyWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
       lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrencyWithPreviousAction,
-                                          getIndexShiftFromConcurrentActionRoot(executionNextIndex, concurrencyWithPreviousAction));
+                                          getIndexShiftFromConcurrentActionRoot(executionNextIndex, concurrencyWithPreviousAction, executionNextIndex));
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);

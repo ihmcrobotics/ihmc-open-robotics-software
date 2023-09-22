@@ -179,4 +179,9 @@ public class HandPoseActionData implements BehaviorActionData
    {
       return description;
    }
+
+   public ReferenceFrameLibrary getReferenceFrameLibrary()
+   {
+      return referenceFrameLibrary;
+   }
 }
