@@ -35,7 +35,7 @@ public class RDXSakeHandTorqueSlider
    private final float[] sliderValue = new float[1];
    private double loadValueFromRobot = Double.NaN;
    private double presentGoalTorque = Double.NaN;
-   private double handPositionFromRobot = Double.NaN;
+   private double presentGoalPosition = Double.NaN;
    private final RobotSide handSide;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
@@ -47,8 +47,6 @@ public class RDXSakeHandTorqueSlider
       this.handSide = handSide;
       sliderName = handSide.getPascalCaseName() + " torque";
 
-      syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveSakeHandData);
-
       handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
                                                                  .withTypeName(HandSakeStatusMessage.class),
                                                         message -> message.getRobotSide() == handSide.toByte());
@@ -56,11 +54,11 @@ public class RDXSakeHandTorqueSlider
 
    private void receiveSakeHandData()
    {
-      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage() && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
+      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
       {
          loadValueFromRobot = handStatusMessage.getLatest().getPresentTorqueRatio();
          presentGoalTorque = handStatusMessage.getLatest().getGoalTorqueRatio();
-         handPositionFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
+         presentGoalPosition = handStatusMessage.getLatest().getGoalPositionRatio();
       }
    }
 
@@ -73,12 +71,10 @@ public class RDXSakeHandTorqueSlider
             HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
 
             // This attempts to keep the hand's position identical when sending a new goal torque
-            // TODO: use goal position instead of current position (send over status message)
-            double currentHandPositionRatio = (Math.toDegrees(handPositionFromRobot) + 3.0) / MAX_ANGLE_LIMIT;
-
+            // TODO: ensure resending goal position does not interfere with command sent before
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) 5); // GOTO
-            message.setPostionRatio(currentHandPositionRatio);
+            message.setPostionRatio(presentGoalPosition);
             message.setTorqueRatio(sliderValue[0]);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
@@ -88,6 +84,8 @@ public class RDXSakeHandTorqueSlider
       {
          sliderValue[0] = (float) presentGoalTorque;
       }
+
+      receiveSakeHandData();
    }
 
    private final ImVec2 textSize = new ImVec2();
