@@ -26,6 +26,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionData actionData = new FootstepPlanActionData();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
@@ -46,22 +47,22 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionData::getReferenceFrame, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionData, baseUI, robotModel, getSelected()::get));
    }
 
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getParentFrameName());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
       actionData.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
@@ -69,7 +70,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      actionData.update();
+      actionData.update(referenceFrameLibrary);
 
       // Add a footstep to the action data only
       if (userAddedFootstep.poll())
@@ -97,7 +98,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          double aLittleInFront = 0.15;
          newFootstepPose.getPosition().addX(aLittleInFront);
 
-         newFootstepPose.changeFrame(actionData.getReferenceFrame());
+         newFootstepPose.changeFrame(actionData.getConditionalReferenceFrame().get());
          addedFootstep.getSolePose().set(newFootstepPose);
       }
 
@@ -137,7 +138,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
+         actionData.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
          update();
       }
 

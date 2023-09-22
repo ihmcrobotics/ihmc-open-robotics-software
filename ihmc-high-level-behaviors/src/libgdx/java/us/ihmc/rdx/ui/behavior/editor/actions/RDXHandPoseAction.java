@@ -60,16 +60,17 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final HandPoseActionData actionData = new HandPoseActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getConditionalReferenceFrame().get(), actionData.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getConditionalReferenceFrame().get());
    private final RigidBodyBasics syncedChest;
    private final Color goodQualityColor;
    private final Color badQualityColor;
@@ -95,7 +96,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                             ReferenceFrameLibrary referenceFrameLibrary,
                             ROS2ControllerPublishSubscribeAPI ros2)
    {
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       ColorDefinition goodQualityColorDefinition = ColorDefinitions.parse(GOOD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5);
       goodQualityColor = RDXVisualTools.toColor(goodQualityColorDefinition);
@@ -160,7 +161,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getParentFrameName());
    }
 
    public void setSide(RobotSide side)
@@ -170,14 +171,14 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.setParentFrameName(parentFrame.getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
       actionData.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
       actionData.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
@@ -185,13 +186,13 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      actionData.update();
+      actionData.update(referenceFrameLibrary);
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getConditionalReferenceFrame().get())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
-         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
-         collisionShapeFrame.changeParentFrame(actionData.getReferenceFrame());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getConditionalReferenceFrame().get());
+         graphicFrame.changeParentFrame(actionData.getConditionalReferenceFrame().get());
+         collisionShapeFrame.changeParentFrame(actionData.getConditionalReferenceFrame().get());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -249,7 +250,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
+         actionData.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);

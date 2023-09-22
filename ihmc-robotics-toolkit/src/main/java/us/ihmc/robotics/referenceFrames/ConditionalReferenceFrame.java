@@ -11,7 +11,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
  */
 public class ConditionalReferenceFrame implements ReferenceFrameSupplier
 {
-   public static final ReferenceFrame INVALID_FRAME = ReferenceFrameTools.constructARootFrame("InvalidFrame");
+//   public static final ReferenceFrame INVALID_FRAME = ReferenceFrameTools.constructARootFrame("InvalidFrame");
+   public static final ReferenceFrame INVALID_FRAME = new PoseReferenceFrame("InvalidFrame", ReferenceFrame.getWorldFrame());
 
    private String parentFrameName;
    private final ModifiableReferenceFrame modifiableReferenceFrame;
@@ -20,6 +21,17 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
    {
       this.parentFrameName = parentFrameName;
       modifiableReferenceFrame = new ModifiableReferenceFrame(frameName, INVALID_FRAME);
+   }
+
+   public ConditionalReferenceFrame(String parentFrameName)
+   {
+      this.parentFrameName = parentFrameName;
+      modifiableReferenceFrame = new ModifiableReferenceFrame(INVALID_FRAME);
+   }
+
+   public ConditionalReferenceFrame()
+   {
+      this(INVALID_FRAME.getName());
    }
 
    public String getParentFrameName()

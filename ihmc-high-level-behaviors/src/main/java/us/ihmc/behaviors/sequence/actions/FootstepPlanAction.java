@@ -31,6 +31,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final WalkingControllerParameters walkingControllerParameters;
    private int actionIndex;
    private final FramePose3D solePose = new FramePose3D();
@@ -53,14 +54,14 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
-      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
-      update();
+      update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -71,7 +72,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       footstepPlanToExecute.clear();
       for (FootstepActionData footstep : getFootsteps())
       {
-         solePose.setIncludingFrame(getReferenceFrame(), footstep.getSolePose());
+         solePose.setIncludingFrame(getConditionalReferenceFrame().get(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }
@@ -101,7 +102,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else
