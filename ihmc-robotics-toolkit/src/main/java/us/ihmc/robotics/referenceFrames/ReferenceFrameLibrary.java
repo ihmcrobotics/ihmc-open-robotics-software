@@ -3,6 +3,7 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -38,18 +39,24 @@ public class ReferenceFrameLibrary
       }
    }
 
-   public ReferenceFrameSupplier findFrameByIndex(int referenceFrameIndex)
-   {
-      return findFrameByName(getReferenceFrameNameArray()[referenceFrameIndex]);
-   }
-
-   public ReferenceFrameSupplier findFrameByName(String referenceFrameName)
+   public ReferenceFrameSupplier findFrameByNameOrWorld(String referenceFrameName)
    {
       ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
       boolean frameFound = frameSupplier != null;
       if (!frameFound)
          LogTools.error("Frame not found: {}. Using world frame.", referenceFrameName);
       return frameFound ? frameSupplier : ReferenceFrame::getWorldFrame;
+   }
+
+   @Nullable
+   public ReferenceFrameSupplier findFrameByName(String referenceFrameName)
+   {
+      return frameNameToSupplierMap.get(referenceFrameName);
+   }
+
+   public ReferenceFrameSupplier findFrameByIndex(int referenceFrameIndex)
+   {
+      return findFrameByName(getReferenceFrameNameArray()[referenceFrameIndex]);
    }
 
    public int findFrameIndexByName(String referenceFrameName)
