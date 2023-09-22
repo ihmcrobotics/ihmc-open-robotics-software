@@ -93,6 +93,8 @@ public class SceneGraph
 
    public void update()
    {
+      getRootNode().ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
+
       idToNodeMap.clear();
       nodeNameList.clear();
       namesToNodesMap.clear();
@@ -115,11 +117,6 @@ public class SceneGraph
       {
          updateCaches(child);
       }
-   }
-
-   public void ensureFramesMatchParentsRecursively()
-   {
-      getRootNode().ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
    }
 
    public SceneNode getRootNode()

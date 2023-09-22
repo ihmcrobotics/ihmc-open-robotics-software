@@ -76,7 +76,6 @@ public class ArUcoSceneTools
       if (modifiedSceneGraph)
       {
          sceneGraph.update();
-         sceneGraph.ensureFramesMatchParentsRecursively();
       }
    }
 }
