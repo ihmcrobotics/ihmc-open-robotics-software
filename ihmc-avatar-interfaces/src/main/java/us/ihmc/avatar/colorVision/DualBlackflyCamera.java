@@ -26,7 +26,7 @@ import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -58,7 +58,7 @@ public class DualBlackflyCamera
 
    private SpinnakerBlackfly spinnakerBlackfly;
    private final BlackflyLensProperties blackflyLensProperties;
-   private final SceneGraph sceneGraph;
+   private final ROS2SceneGraph sceneGraph;
 
    private final FrequencyCalculator readFrequencyCalculator = new FrequencyCalculator();
    private final Timer printCameraReadRateTimer = new Timer();
@@ -127,7 +127,7 @@ public class DualBlackflyCamera
                              ROS2Node ros2Node,
                              SpinnakerBlackfly spinnakerBlackfly,
                              BlackflyLensProperties blackflyLensProperties,
-                             SceneGraph sceneGraph)
+                             ROS2SceneGraph sceneGraph)
    {
       this.side = side;
       this.referenceFrameSupplier = referenceFramesSupplier;

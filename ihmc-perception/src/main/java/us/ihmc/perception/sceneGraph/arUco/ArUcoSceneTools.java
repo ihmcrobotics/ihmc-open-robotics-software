@@ -3,7 +3,7 @@ package us.ihmc.perception.sceneGraph.arUco;
 import gnu.trove.iterator.TIntIterator;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
@@ -15,7 +15,7 @@ import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions
  */
 public class ArUcoSceneTools
 {
-   public static void updateSceneGraph(OpenCVArUcoMarkerDetection arUcoMarkerDetection, SceneGraph sceneGraph)
+   public static void updateSceneGraph(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ROS2SceneGraph sceneGraph)
    {
       boolean modifiedSceneGraph = false;
 

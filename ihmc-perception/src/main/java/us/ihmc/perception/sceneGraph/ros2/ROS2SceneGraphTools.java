@@ -5,7 +5,6 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
@@ -13,7 +12,7 @@ import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 public class ROS2SceneGraphTools
 {
-   public static SceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, SceneGraph sceneGraph)
+   public static SceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, ROS2SceneGraph sceneGraph)
    {
       SceneNode sceneNode;
 

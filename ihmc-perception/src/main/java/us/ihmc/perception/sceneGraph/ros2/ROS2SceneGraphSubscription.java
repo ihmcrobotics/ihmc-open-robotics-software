@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
@@ -24,8 +23,8 @@ import java.util.function.BiFunction;
 public class ROS2SceneGraphSubscription
 {
    private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
-   private final SceneGraph sceneGraph;
-   private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
+   private final ROS2SceneGraph sceneGraph;
+   private final BiFunction<ROS2SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final ROS2IOTopicQualifier ioQualifier;
    private final FramePose3D nodePose = new FramePose3D();
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
@@ -38,10 +37,10 @@ public class ROS2SceneGraphSubscription
     * @param newNodeSupplier So that new nodes can be externally extended, like for UI representations.
     *                        Use {@link ROS2SceneGraphTools#createNodeFromMessage} as a base.
     */
-   public ROS2SceneGraphSubscription(SceneGraph sceneGraph,
+   public ROS2SceneGraphSubscription(ROS2SceneGraph sceneGraph,
                                      ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                      ROS2IOTopicQualifier ioQualifier,
-                                     BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier)
+                                     BiFunction<ROS2SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier)
    {
       this.sceneGraph = sceneGraph;
       this.newNodeSupplier = newNodeSupplier;

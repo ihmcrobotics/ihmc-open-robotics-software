@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
@@ -12,7 +12,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 
 public class RDXSceneGraphTools
 {
-   public static SceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, RDX3DPanel panel3D, SceneGraph sceneGraph)
+   public static SceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, RDX3DPanel panel3D, ROS2SceneGraph sceneGraph)
    {
       SceneNode uiSceneNode;
       // We create one using this and copy to save on code maintenance

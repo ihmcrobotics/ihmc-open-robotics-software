@@ -6,7 +6,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
@@ -20,7 +20,7 @@ public class BehaviorActionSequenceModule
    private volatile boolean running = true;
    private final ROS2Node ros2Node;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final SceneGraph sceneGraph;
+   private final ROS2SceneGraph sceneGraph;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
    private final double PERIOD = Conversions.hertzToSeconds(30.0);
@@ -32,7 +32,7 @@ public class BehaviorActionSequenceModule
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_action_sequence");
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      sceneGraph = new SceneGraph(ros2ControllerHelper);
+      sceneGraph = new ROS2SceneGraph(ros2ControllerHelper);
       referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
