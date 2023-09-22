@@ -1,7 +1,6 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 /**
  * Represents a ReferenceFrameSupplier which may not have a valid parent ReferenceFrame.
@@ -11,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
  */
 public class ConditionalReferenceFrame implements ReferenceFrameSupplier
 {
-//   public static final ReferenceFrame INVALID_FRAME = ReferenceFrameTools.constructARootFrame("InvalidFrame");
    public static final ReferenceFrame INVALID_FRAME = new PoseReferenceFrame("InvalidFrame", ReferenceFrame.getWorldFrame());
 
    private String parentFrameName;
@@ -97,6 +95,11 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
    public boolean hasParentFrame()
    {
       return !modifiableReferenceFrame.getReferenceFrame().getParent().equals(INVALID_FRAME);
+   }
+
+   public ModifiableReferenceFrame getModifiableReferenceFrame()
+   {
+      return modifiableReferenceFrame;
    }
 
    @Override
