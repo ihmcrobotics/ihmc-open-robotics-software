@@ -70,9 +70,9 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
     */
    public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      ReferenceFrameSupplier parentFrameSupplier = referenceFrameLibrary.findFrameByName(parentFrameName);
-      if (parentFrameSupplier != null)
-         modifiableReferenceFrame.changeParentFrame(parentFrameSupplier.get());
+      ReferenceFrame parentFrame = referenceFrameLibrary.findFrameByName(parentFrameName);
+      if (parentFrame != null)
+         modifiableReferenceFrame.changeParentFrame(parentFrame);
       else
          modifiableReferenceFrame.changeParentFrame(INVALID_FRAME);
    }
