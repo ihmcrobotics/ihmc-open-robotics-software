@@ -309,7 +309,7 @@ public class PlanarRegionMappingHandler
 
                //LogTools.info("Start: {}, Goal: {}", startPose, goalPose);
 
-               footstepsMessage = PerceptionEvaluationTools.planFootsteps(footstepPlanningModule, planarRegionMap.getMapRegions(), startPose, goalPose);
+               //footstepsMessage = PerceptionEvaluationTools.planFootsteps(footstepPlanningModule, planarRegionMap.getMapRegions(), startPose, goalPose);
             }
          }
 

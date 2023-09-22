@@ -6,12 +6,12 @@
     "upperBound" : 1.0
   },
     "Similarity threshold between normals" : {
-        "value" : 0.85,
+        "value" : 0.82,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Orthogonal distance threshold" : {
-        "value" : 0.07,
+        "value" : 0.05,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -21,7 +21,7 @@
         "upperBound" : 1.0
     },
     "Minimum overlap threshold" : {
-        "value" : 0.6,
+        "value" : 0.7,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -31,7 +31,7 @@
         "upperBound" : 1.0
     },
     "Minimum bounding box size" : {
-        "value" : 0.07,
+        "value" : 0.08,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
@@ -51,17 +51,17 @@
         "upperBound" : 1.0
     },
     "Best match angular threshold" : {
-        "value" : 0.80,
+        "value" : 0.85,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Best match distance threshold" : {
-        "value" : 0.07,
+        "value" : 0.05,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },
     "Best minimum overlap threshold" : {
-        "value" : 0.5,
+        "value" : 0.7,
         "lowerBound" : 0.0,
         "upperBound" : 1.0
     },

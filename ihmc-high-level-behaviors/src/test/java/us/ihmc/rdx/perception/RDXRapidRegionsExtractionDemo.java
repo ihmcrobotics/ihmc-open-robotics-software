@@ -40,18 +40,26 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                        getClass(),
+                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> updateMapFuture;
 
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_204753_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_202456_PerceptionLog.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
@@ -214,8 +222,24 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                updateRapidRegionsExtractor();
             }
 
+            if (planarRegionsListToRenderNotification.poll())
+            {
+               generateMesh(planarRegionsListToRenderNotification.read());
+               updatePointCloudRenderer();
+            }
+
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void nextButtonCallback()
+         {
+            perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
+            ThreadTools.sleep(100);
+            updateRapidRegionsExtractor();
+
+            if (frameIndex.get() < totalFrameCount - 10)
+               frameIndex.set(frameIndex.get() + 1);
          }
 
          private void renderNavigationPanel()
@@ -237,6 +261,16 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                changed = true;
             }
 
+            if (ImGui.button("Auto Increment"))
+            {
+               updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
+            }
+
+            if (ImGui.button("Pause"))
+            {
+               updateMapFuture.cancel(true);
+            }
+
             if (changed)
                userChangedIndex.set();
          }
@@ -247,6 +281,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             rapidPlanarRegionsExtractor.setProcessing(false);
             perceptionDataLoader.closeLogFile();
             rapidRegionsUIPanel.destroy();
+            executorService.shutdown();
             baseUI.dispose();
          }
       });
@@ -294,12 +329,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                //planFootsteps(frameRegions.getPlanarRegionsList().copy(), cameraFrame);
             }
          }, getClass().getSimpleName() + "RapidRegions");
-      }
-
-      if (planarRegionsListToRenderNotification.poll())
-      {
-         generateMesh(planarRegionsListToRenderNotification.read());
-         updatePointCloudRenderer();
       }
    }
 
