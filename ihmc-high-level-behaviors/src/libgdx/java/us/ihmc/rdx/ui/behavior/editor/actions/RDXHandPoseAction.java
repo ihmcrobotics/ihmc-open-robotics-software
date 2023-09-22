@@ -244,23 +244,23 @@ public class RDXHandPoseAction extends RDXBehaviorAction
             if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
             {
                SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-               if (chestPoseStatusSubscription.hasReceivedFirstMessage())
+               if (chestPoseStatusSubscription.getMessageNotification().poll())
                {
                   BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-                  if (chestPoseStatusMessage.getNextAndConcurrent())
-                  {
-                     chestReferenceFrame = new ModifiableReferenceFrame(actionData.getReferenceFrameLibrary()
-                                                                                  .findFrameByName(chestPoseStatusMessage.getParentFrame()
-                                                                                                                         .getString(0)).get());
-                     chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-                  }
-                  else
-                     chestReferenceFrame = null;
+                  chestReferenceFrame = new ModifiableReferenceFrame(actionData.getReferenceFrameLibrary()
+                                                                               .findFrameByName(chestPoseStatusMessage.getParentFrame()
+                                                                                                                      .getString(0)).get());
+                  chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+               }
+               else
+               {
+                  chestReferenceFrame = null;
                }
                if (chestReferenceFrame == null)
                   floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
                else
                   floatingJoint.getJointPose().set(chestReferenceFrame.getReferenceFrame().getTransformToRoot());
+
                for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
                {
                   armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
