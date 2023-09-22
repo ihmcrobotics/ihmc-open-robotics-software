@@ -5,6 +5,12 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 import java.util.function.Supplier;
 
+/**
+ * Represents a ReferenceFrameSupplier which may not have a valid parent ReferenceFrame.
+ * In the case that the parent ReferenceFrame is not valid, it will be set to the NULL_FRAME.
+ *
+ * You must call update() and pass a ReferenceFrameLibrary every tick, or when it makes sense.
+ */
 public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
 {
    public static final ReferenceFrame NULL_FRAME = ReferenceFrameTools.constructARootFrame("NullFrame");
