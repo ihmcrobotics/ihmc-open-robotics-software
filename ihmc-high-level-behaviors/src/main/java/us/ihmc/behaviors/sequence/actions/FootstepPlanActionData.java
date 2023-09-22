@@ -59,7 +59,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (FootstepActionData footstep : footsteps)
       {
@@ -74,7 +74,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       description = jsonNode.get("description").textValue();
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
-      setParentFrameName(jsonNode.get("parentFrame").textValue());
+      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
@@ -84,7 +84,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
       message.getFootsteps().clear();
       for (FootstepActionData footstep : footsteps)
       {
@@ -96,7 +96,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
    {
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
-      setParentFrameName(message.getParentFrame().getString(0));
+      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
       footsteps.clear();
       for (FootstepActionMessage footstep : message.getFootsteps())
       {

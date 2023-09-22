@@ -21,6 +21,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    public static final double POSITION_TOLERANCE = 0.15;
 
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
@@ -36,14 +37,14 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
                              ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
-      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
-      update();
+      update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -66,7 +67,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
+      desiredPelvisPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslation());
       desiredPelvisPose.getTranslation().setZ(desiredPelvisPose.getTranslationZ());
@@ -76,7 +77,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
+      desiredPelvisPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslation());
       desiredPelvisPose.getTranslation().setZ(desiredPelvisPose.getTranslationZ());

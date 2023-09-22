@@ -33,6 +33,7 @@ import java.util.List;
 public class RDXPelvisHeightAction extends RDXBehaviorAction
 {
    private final PelvisHeightActionData actionData = new PelvisHeightActionData();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionData::getHeight,
                                                                     actionData::setHeight,
@@ -41,12 +42,12 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getConditionalReferenceFrame().get(), actionData.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getConditionalReferenceFrame().get());
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -60,7 +61,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
                                 RobotCollisionModel selectionCollisionModel,
                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
@@ -84,19 +85,19 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getParentFrameName());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.setParentFrameName(parentFrame.getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
       actionData.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
       actionData.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
@@ -104,13 +105,13 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      actionData.update();
+      actionData.update(referenceFrameLibrary);
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getConditionalReferenceFrame().get())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
-         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
-         collisionShapeFrame.changeParentFrame(actionData.getReferenceFrame());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getConditionalReferenceFrame().get());
+         graphicFrame.changeParentFrame(actionData.getConditionalReferenceFrame().get());
+         collisionShapeFrame.changeParentFrame(actionData.getConditionalReferenceFrame().get());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -131,7 +132,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
+         actionData.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);

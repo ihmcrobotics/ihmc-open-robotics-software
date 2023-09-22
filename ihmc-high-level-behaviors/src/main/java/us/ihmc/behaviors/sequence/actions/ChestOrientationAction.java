@@ -23,6 +23,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
@@ -36,13 +37,13 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
-      update();
+      update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -50,7 +51,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    @Override
    public void triggerActionExecution()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getConditionalReferenceFrame().get());
       frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
@@ -65,7 +66,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredChestPose.setFromReferenceFrame(getReferenceFrame());
+      desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
    }
@@ -73,7 +74,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredChestPose.setFromReferenceFrame(getReferenceFrame());
+      desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
       isExecuting = !completionCalculator.isComplete(desiredChestPose,

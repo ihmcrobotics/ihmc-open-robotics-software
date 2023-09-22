@@ -30,11 +30,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXWalkAction extends RDXBehaviorAction
 {
+   private final ReferenceFrameLibrary referenceFrameLibrary;
+
    private final WalkActionData actionData = new WalkActionData();
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
-   private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(actionData.getReferenceFrame(),
+   private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(actionData.getConditionalReferenceFrame().get(),
                                                                                                                     actionData.getTransformToParent());
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(footstepPlannerGoalGizmo::getSelected,
@@ -54,7 +56,7 @@ public class RDXWalkAction extends RDXBehaviorAction
                         DRCRobotModel robotModel,
                         ReferenceFrameLibrary referenceFrameLibrary)
    {
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
@@ -68,7 +70,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       {
          goalFeetPosesSelected.put(side, new ImBoolean(false));
 
-         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(actionData.getGoalFootstepToParentTransforms().get(side), actionData.getReferenceFrame());
+         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(actionData.getGoalFootstepToParentTransforms().get(side), actionData.getConditionalReferenceFrame().get());
          footGizmo.create(panel3D);
          goalFeetGizmos.put(side, footGizmo);
 
@@ -78,7 +80,7 @@ public class RDXWalkAction extends RDXBehaviorAction
 
          // Set initial placement of goal feet poses
          FramePose3D goalFootPose = new FramePose3D();
-         goalFootPose.setToZero(actionData.getReferenceFrame());
+         goalFootPose.setToZero(actionData.getConditionalReferenceFrame().get());
          goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
          goalFootPose.get(footGizmo.getTransformToParent());
       }
@@ -87,24 +89,24 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
-      footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(actionData.getReferenceFrame());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getParentFrameName());
+      footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(actionData.getConditionalReferenceFrame().get());
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetGizmos.get(side).setParentFrame(actionData.getReferenceFrame());
+         goalFeetGizmos.get(side).setParentFrame(actionData.getConditionalReferenceFrame().get());
       }
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.setParentFrameName(parentFrame.getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
       actionData.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionData.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
       actionData.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
@@ -112,17 +114,17 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      actionData.update();
+      actionData.update(referenceFrameLibrary);
 
       if (!getSelected().get())
          goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
 
-      if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoFrame() != actionData.getReferenceFrame())
+      if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoFrame() != actionData.getConditionalReferenceFrame().get())
       {
-         footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(actionData.getReferenceFrame());
+         footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(actionData.getConditionalReferenceFrame().get());
          for (RobotSide side : RobotSide.values)
          {
-            goalFeetGizmos.get(side).setParentFrame(actionData.getReferenceFrame());
+            goalFeetGizmos.get(side).setParentFrame(actionData.getConditionalReferenceFrame().get());
          }
       }
 
@@ -185,7 +187,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
+         actionData.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().get().getName());
          update();
       }
       if (ImGui.button(labels.get("Plan")))

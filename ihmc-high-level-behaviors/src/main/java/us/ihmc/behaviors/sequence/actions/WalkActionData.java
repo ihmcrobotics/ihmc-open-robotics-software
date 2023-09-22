@@ -60,7 +60,7 @@ public class WalkActionData extends FrameBasedBehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
       JSONTools.toJSON(jsonNode, getTransformToParent());
       for (RobotSide side : RobotSide.values)
       {
@@ -75,7 +75,7 @@ public class WalkActionData extends FrameBasedBehaviorActionData
       description = jsonNode.get("description").textValue();
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
-      setParentFrameName(jsonNode.get("parentFrame").textValue());
+      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
       JSONTools.toEuclid(jsonNode, getTransformToParent());
       for (RobotSide side : RobotSide.values)
       {
@@ -89,7 +89,7 @@ public class WalkActionData extends FrameBasedBehaviorActionData
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
       MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
@@ -99,7 +99,7 @@ public class WalkActionData extends FrameBasedBehaviorActionData
    {
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
-      setParentFrameName(message.getParentFrame().getString(0));
+      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
       MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
       MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.LEFT));
       MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.RIGHT));

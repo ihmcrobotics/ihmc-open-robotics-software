@@ -49,7 +49,7 @@ public class PelvisHeightActionData extends FrameBasedBehaviorActionData
    {
       jsonNode.put("description", description);
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("parentFrame", getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
       JSONTools.toJSON(jsonNode, getTransformToParent());
    }
 
@@ -58,7 +58,7 @@ public class PelvisHeightActionData extends FrameBasedBehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      setParentFrameName(jsonNode.get("parentFrame").textValue());
+      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
       JSONTools.toEuclid(jsonNode, getTransformToParent());
    }
 
@@ -66,14 +66,14 @@ public class PelvisHeightActionData extends FrameBasedBehaviorActionData
    {
       message.setTrajectoryDuration(trajectoryDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
       MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
    }
 
    public void fromMessage(BodyPartPoseActionMessage message)
    {
       trajectoryDuration = message.getTrajectoryDuration();
-      setParentFrameName(message.getParentFrame().getString(0));
+      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
       MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
    }
 }
