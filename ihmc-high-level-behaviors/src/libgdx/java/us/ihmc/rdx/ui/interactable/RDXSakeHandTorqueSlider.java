@@ -73,7 +73,7 @@ public class RDXSakeHandTorqueSlider
             HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
 
             // This attempts to keep the hand's position identical when sending a new goal torque
-            // TODO: Test this extensively
+            // TODO: use goal position instead of current position (send over status message)
             double currentHandPositionRatio = (Math.toDegrees(handPositionFromRobot) + 3.0) / MAX_ANGLE_LIMIT;
 
             message.setRobotSide(handSide.toByte());
