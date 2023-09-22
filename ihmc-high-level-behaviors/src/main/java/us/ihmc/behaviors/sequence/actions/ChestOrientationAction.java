@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
@@ -48,11 +49,15 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 
       this.actionIndex = actionIndex;
 
-      chestPoseStatus.getParentFrame().resetQuick();
-      chestPoseStatus.getParentFrame().add(getParentFrame().getName());
-      chestPoseStatus.setNextAndConcurrent(concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction));
-      MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
-      ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+      if ((concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)) ||
+          (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
+      {
+         chestPoseStatus.getParentFrame().resetQuick();
+         chestPoseStatus.getParentFrame().add(getParentFrame().getName());
+         chestPoseStatus.setNextAndConcurrent(true);
+         MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
+         ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+      }
    }
 
    @Override
