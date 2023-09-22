@@ -2,10 +2,14 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+
+import java.util.function.Consumer;
 
 /**
  * Static methods to create boxes, cylinders, etc.
@@ -55,10 +59,8 @@ public class RigidBodySceneObjectDefinitions
       CAN_OF_SOUP_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
    }
 
-   public static boolean ensureNodesAdded(ROS2SceneGraph sceneGraph)
+   public static void ensureNodesAdded(ROS2SceneGraph sceneGraph, Consumer<SceneGraphTreeModification> modificationQueue)
    {
-      boolean addedAnyNodes = false;
-
       ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
       if (boxArUcoMarker != null)
       {
@@ -73,9 +75,7 @@ public class RigidBodySceneObjectDefinitions
                                                    BOX_VISUAL_MODEL_FILE_PATH,
                                                    BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding Box to scene graph.");
-            boxArUcoMarker.getChildren().add(box);
-            boxArUcoMarker.freezeFromModification();
-            addedAnyNodes = true;
+            modificationQueue.accept(new SceneGraphNodeAddition(box, boxArUcoMarker));
          }
       }
 
@@ -94,12 +94,8 @@ public class RigidBodySceneObjectDefinitions
                                                          CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                                          CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             LogTools.info("Adding CanOfSoup to scene graph.");
-            canOfSoupMarker.getChildren().add(canOfSoup);
-            canOfSoupMarker.freezeFromModification();
-            addedAnyNodes = true;
+            modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, canOfSoupMarker));
          }
       }
-
-      return addedAnyNodes;
    }
 }

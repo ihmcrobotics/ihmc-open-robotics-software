@@ -69,7 +69,7 @@ public class RDXPerceptionSceneGraphUI
 
       for (SceneGraphNodeMove sceneGraphNodeMove : sceneGraph.getSceneGraphNodeMoves())
       {
-         sceneGraphNodeMove.performMove();
+         sceneGraphNodeMove.performOperation();
       }
 
       sceneGraph.updatePublication();
