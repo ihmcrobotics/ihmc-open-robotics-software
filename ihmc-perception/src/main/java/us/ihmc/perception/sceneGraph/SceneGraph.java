@@ -64,9 +64,11 @@ public class SceneGraph
     */
    public void updateOnRobot(ReferenceFrame sensorFrame)
    {
-      updateCaches();
-      sceneGraphNodeMoves.clear();
+      // This must happen only once per on-robot tick
       detectionFilterCollection.update();
+
+      // TODO: Generalize pre and post tree modification logic
+      sceneGraphNodeMoves.clear();
 
       updateOnRobot(rootNode, sensorFrame);
 
@@ -89,7 +91,7 @@ public class SceneGraph
       }
    }
 
-   public void updateCaches()
+   public void update()
    {
       idToNodeMap.clear();
       nodeNameList.clear();
@@ -113,6 +115,11 @@ public class SceneGraph
       {
          updateCaches(child);
       }
+   }
+
+   public void ensureFramesMatchParentsRecursively()
+   {
+      getRootNode().ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
    }
 
    public SceneNode getRootNode()

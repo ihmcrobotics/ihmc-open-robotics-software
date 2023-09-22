@@ -17,6 +17,9 @@ public class ArUcoSceneTools
 {
    public static void updateSceneGraph(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ROS2SceneGraph sceneGraph)
    {
+      // TODO: Perhaps instead, also queue up node additions
+      //  could use the move class with previous parent null or move extends addition
+      //  modification interface
       boolean modifiedSceneGraph = false;
 
       synchronized (arUcoMarkerDetection.getSyncObject())
@@ -72,7 +75,7 @@ public class ArUcoSceneTools
 
       if (modifiedSceneGraph)
       {
-         sceneGraph.updateCaches();
+         sceneGraph.update();
          sceneGraph.ensureFramesMatchParentsRecursively();
       }
    }

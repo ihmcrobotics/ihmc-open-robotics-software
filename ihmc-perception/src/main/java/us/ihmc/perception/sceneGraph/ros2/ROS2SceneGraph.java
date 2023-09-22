@@ -54,11 +54,6 @@ public class ROS2SceneGraph extends SceneGraph
          sceneGraphSubscription.update();
    }
 
-   public void ensureFramesMatchParentsRecursively()
-   {
-      getRootNode().ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
-   }
-
    public void updatePublication()
    {
       if (ros2PublishSubscribeAPI != null && publishThrottler.run())
