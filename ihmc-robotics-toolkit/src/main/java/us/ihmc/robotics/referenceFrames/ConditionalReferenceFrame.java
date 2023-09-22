@@ -9,20 +9,13 @@ public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
 {
    public static final ReferenceFrame NULL_FRAME = ReferenceFrameTools.constructARootFrame("NullFrame");
 
-   private final String frameName;
    private String parentFrameName;
-   private ModifiableReferenceFrame modifiableReferenceFrame;
+   private final ModifiableReferenceFrame modifiableReferenceFrame;
 
    public ConditionalReferenceFrame(String frameName, String parentFrameName)
    {
-      this.frameName = frameName;
       this.parentFrameName = parentFrameName;
       modifiableReferenceFrame = new ModifiableReferenceFrame(frameName, NULL_FRAME);
-   }
-
-   public String getFrameName()
-   {
-      return frameName;
    }
 
    public String getParentFrameName()
