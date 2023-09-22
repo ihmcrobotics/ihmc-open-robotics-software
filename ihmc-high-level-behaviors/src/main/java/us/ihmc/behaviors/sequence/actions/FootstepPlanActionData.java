@@ -58,7 +58,7 @@ public class FootstepPlanActionData implements BehaviorActionData
    public void loadFromFile(JsonNode jsonNode)
    {
       description = jsonNode.get("description").textValue();
-      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()));
+      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
 
@@ -83,7 +83,7 @@ public class FootstepPlanActionData implements BehaviorActionData
 
    public void fromMessage(FootstepPlanActionMessage message)
    {
-      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)));
+      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       planFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();

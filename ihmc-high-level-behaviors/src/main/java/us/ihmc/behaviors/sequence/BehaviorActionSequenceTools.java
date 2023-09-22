@@ -90,7 +90,7 @@ public class BehaviorActionSequenceTools
    public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
    {
       ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
-      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByName(previousParentFrame.getName());
+      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByNameOrWorld(previousParentFrame.getName());
       if (previousParentFrame != nextParentFrame)
       {
          frameToUpdate.changeParentFrame(nextParentFrame);
