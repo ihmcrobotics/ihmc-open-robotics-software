@@ -11,10 +11,8 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -32,6 +30,7 @@ public class SceneGraph
 
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
+   private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -74,7 +73,7 @@ public class SceneGraph
 
       for (SceneGraphNodeMove sceneGraphNodeMove : sceneGraphNodeMoves)
       {
-         sceneGraphNodeMove.performMove();
+         sceneGraphNodeMove.performOperation();
       }
    }
 
@@ -91,9 +90,25 @@ public class SceneGraph
       }
    }
 
+   public void modifyTree(Consumer<Consumer<SceneGraphTreeModification>> modifier)
+   {
+      modifier.accept(queuedModifications::add);
+
+      boolean modified = !queuedModifications.isEmpty();
+
+      while (!queuedModifications.isEmpty())
+      {
+         SceneGraphTreeModification modification = queuedModifications.poll();
+         modification.performOperation();
+      }
+
+      if (modified)
+         update();
+   }
+
    public void update()
    {
-      getRootNode().ensureFramesMatchParentsRecursively(ReferenceFrame.getWorldFrame());
+      rootNode.ensureFramesMatchParentsRecursively(rootNode.getNodeFrame().getParent());
 
       idToNodeMap.clear();
       nodeNameList.clear();
