@@ -8,8 +8,10 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
 public abstract class FrameBasedBehaviorActionData implements BehaviorActionData, ReferenceFrameSupplier
 {
+   private static final RigidBodyTransform ZERO_TRANSFORM_TO_PARENT = new RigidBodyTransform();
+
    private final ConditionalReferenceFrame conditionalReferenceFrame = new ConditionalReferenceFrame();
-   private RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
 
    public ConditionalReferenceFrame getConditionalReferenceFrame()
    {
@@ -23,7 +25,7 @@ public abstract class FrameBasedBehaviorActionData implements BehaviorActionData
 
    public void setTransformToParent(RigidBodyTransform transformToParent)
    {
-      this.transformToParent = transformToParent;
+      this.transformToParent.set(transformToParent);
    }
 
    @Override
@@ -35,6 +37,10 @@ public abstract class FrameBasedBehaviorActionData implements BehaviorActionData
    public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
       conditionalReferenceFrame.update(referenceFrameLibrary);
+      if (conditionalReferenceFrame.hasParentFrame())
+         conditionalReferenceFrame.getModifiableReferenceFrame().update(transformToParent -> transformToParent.set(this.transformToParent));
+      else
+         conditionalReferenceFrame.getModifiableReferenceFrame().update(transformToParent -> transformToParent.set(ZERO_TRANSFORM_TO_PARENT));
       update();
    }
 }
