@@ -71,6 +71,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
+   private final FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
@@ -119,9 +120,10 @@ public class RDXLocomotionManager
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
+      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
       {
-         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(regions);
+         framePlanarRegionsList.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
+         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
          footstepPlanning.setPlanarRegionsList(planarRegionsList);
          interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
       });
