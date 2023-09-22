@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a node on the scene graph.
+ * Represents a node on the scene graph which is
+ * built as a CRDT, so part of this node are present
+ * only to address that.
  *
  * We give each node a name and a reference frame.
  */
