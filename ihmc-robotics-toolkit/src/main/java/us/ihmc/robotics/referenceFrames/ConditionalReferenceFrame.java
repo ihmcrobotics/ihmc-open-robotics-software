@@ -3,17 +3,15 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
-import java.util.function.Supplier;
-
 /**
  * Represents a ReferenceFrameSupplier which may not have a valid parent ReferenceFrame.
  * In the case that the parent ReferenceFrame is not valid, it will be set to the NULL_FRAME.
- *
- * You must call update() and pass a ReferenceFrameLibrary every tick, or when it makes sense.
+ * <p>
+ * You must call update() and optionally pass a ReferenceFrameLibrary every tick, or when it makes sense.
  */
-public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
+public class ConditionalReferenceFrame implements ReferenceFrameSupplier
 {
-   public static final ReferenceFrame NULL_FRAME = ReferenceFrameTools.constructARootFrame("NullFrame");
+   public static final ReferenceFrame INVALID_FRAME = ReferenceFrameTools.constructARootFrame("InvalidFrame");
 
    private String parentFrameName;
    private final ModifiableReferenceFrame modifiableReferenceFrame;
@@ -21,7 +19,7 @@ public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
    public ConditionalReferenceFrame(String frameName, String parentFrameName)
    {
       this.parentFrameName = parentFrameName;
-      modifiableReferenceFrame = new ModifiableReferenceFrame(frameName, NULL_FRAME);
+      modifiableReferenceFrame = new ModifiableReferenceFrame(frameName, INVALID_FRAME);
    }
 
    public String getParentFrameName()
@@ -34,18 +32,59 @@ public class ConditionalReferenceFrame implements Supplier<ReferenceFrame>
       this.parentFrameName = parentFrameName;
    }
 
+   private boolean update(ReferenceFrame referenceFrame)
+   {
+      if (referenceFrame.getName().equals(parentFrameName))
+      {
+         modifiableReferenceFrame.changeParentFrame(referenceFrame);
+         return true;
+      }
+      else
+      {
+         for (int i = 0; i < referenceFrame.getNumberOfChildren(); i++)
+         {
+            if (update(referenceFrame.getChild(i)))
+            {
+               return true;
+            }
+         }
+      }
+      return false;
+   }
+
+   /**
+    * Update to find the parent frame by name recursively using the root ReferenceFrame.
+    */
+   public void update()
+   {
+      ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
+      boolean found = update(rootFrame);
+      if (!found)
+         modifiableReferenceFrame.changeParentFrame(INVALID_FRAME);
+   }
+
+   /**
+    * Update to find the parent frame by name using a ReferenceFrameLibrary - most efficient method.
+    *
+    * @param referenceFrameLibrary the ReferenceFrameLibrary which may contain the parent frame
+    */
    public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
       ReferenceFrameSupplier parentFrameSupplier = referenceFrameLibrary.findFrameByName(parentFrameName);
       if (parentFrameSupplier != null)
          modifiableReferenceFrame.changeParentFrame(parentFrameSupplier.get());
       else
-         modifiableReferenceFrame.changeParentFrame(NULL_FRAME);
+         modifiableReferenceFrame.changeParentFrame(INVALID_FRAME);
    }
 
+   /**
+    * Check if there is a valid parent ReferenceFrame.
+    *
+    * @return true if there exists a valid parent ReferenceFrame
+    */
    public boolean hasParentFrame()
    {
-      return !modifiableReferenceFrame.getReferenceFrame().getParent().equals(NULL_FRAME);
+      return !modifiableReferenceFrame.getReferenceFrame().getParent().equals(INVALID_FRAME);
    }
 
    @Override
