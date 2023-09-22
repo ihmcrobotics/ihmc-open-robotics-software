@@ -2,7 +2,6 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.tools.thread.Throttler;
@@ -16,7 +15,7 @@ public class ROS2SceneGraph extends SceneGraph
 {
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2IOTopicQualifier subscriptionQualifier;
-   private ROS2SceneGraphSubscription sceneGraphSubscription;
+   private final ROS2SceneGraphSubscription sceneGraphSubscription;
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
@@ -44,26 +43,23 @@ public class ROS2SceneGraph extends SceneGraph
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.subscriptionQualifier = subscriptionQualifier;
 
-      if (ros2PublishSubscribeAPI != null)
-         sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, subscriptionQualifier, newNodeSupplier);
+      sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, subscriptionQualifier, newNodeSupplier);
    }
 
    public void updateSubscription()
    {
-      if (sceneGraphSubscription != null)
-         sceneGraphSubscription.update();
+      sceneGraphSubscription.update();
    }
 
    public void updatePublication()
    {
-      if (ros2PublishSubscribeAPI != null && publishThrottler.run())
+      if (publishThrottler.run())
          sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, subscriptionQualifier.getOpposite());
    }
 
    public void destroy()
    {
-      if (sceneGraphSubscription != null)
-         sceneGraphSubscription.destroy();
+      sceneGraphSubscription.destroy();
    }
 
    public ROS2SceneGraphSubscription getSceneGraphSubscription()
