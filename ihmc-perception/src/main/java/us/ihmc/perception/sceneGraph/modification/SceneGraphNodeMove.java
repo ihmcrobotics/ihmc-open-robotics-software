@@ -1,4 +1,6 @@
-package us.ihmc.perception.sceneGraph;
+package us.ihmc.perception.sceneGraph.modification;
+
+import us.ihmc.perception.sceneGraph.SceneNode;
 
 /**
  * An actionable move of a node from one parent to the other.
@@ -19,8 +21,11 @@ public class SceneGraphNodeMove extends SceneGraphNodeAddition implements SceneG
    @Override
    public void performOperation()
    {
-      previousParent.getChildren().remove(getNodeToAdd());
-      getNodeToAdd().changeParentFrameWithoutMoving(getParent().getNodeFrame());
+      SceneNode nodeToMove = getNodeToAdd();
+      SceneNode newParent = getParent();
+
+      previousParent.getChildren().remove(nodeToMove);
+      nodeToMove.changeParentFrameWithoutMoving(newParent.getNodeFrame());
       super.performOperation();
       previousParent.freezeFromModification();
    }

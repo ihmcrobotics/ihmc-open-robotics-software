@@ -1,4 +1,6 @@
-package us.ihmc.perception.sceneGraph;
+package us.ihmc.perception.sceneGraph.modification;
+
+import us.ihmc.perception.sceneGraph.SceneNode;
 
 /**
  * An actionable scene node addition to the tree.
@@ -21,7 +23,7 @@ public class SceneGraphNodeAddition implements SceneGraphTreeModification
    public void performOperation()
    {
       parent.getChildren().add(nodeToAdd);
-      nodeToAdd.changeParentFrame(parent.getNodeFrame());
+      nodeToAdd.ensureParentFrame(parent.getNodeFrame());
       nodeToAdd.ensureFramesMatchParentsRecursively(parent.getNodeFrame());
       parent.freezeFromModification();
    }
