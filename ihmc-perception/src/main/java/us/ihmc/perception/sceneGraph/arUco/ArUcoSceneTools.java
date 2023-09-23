@@ -3,7 +3,7 @@ package us.ihmc.perception.sceneGraph.arUco;
 import gnu.trove.iterator.TIntIterator;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.sceneGraph.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.SceneNode;

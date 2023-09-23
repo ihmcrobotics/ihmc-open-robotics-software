@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph;
+package us.ihmc.perception.sceneGraph.modification;
 
 /**
  * Describes and has everything needed to perform a modification of

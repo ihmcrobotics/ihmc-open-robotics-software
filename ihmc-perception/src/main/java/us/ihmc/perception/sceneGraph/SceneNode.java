@@ -47,7 +47,7 @@ public class SceneNode
    {
       if (getNodeFrame().getParent() != parentFrame)
       {
-         changeParentFrame(parentFrame);
+         ensureParentFrame(parentFrame);
       }
    }
 
@@ -86,12 +86,13 @@ public class SceneNode
       return nodeFrame.getTransformToParent();
    }
 
-   protected void changeParentFrame(ReferenceFrame newParentFrame)
+   public void ensureParentFrame(ReferenceFrame newParentFrame)
    {
-      nodeFrame.changeParentFrame(newParentFrame);
+      if (newParentFrame != nodeFrame.getReferenceFrame().getParent())
+         nodeFrame.changeParentFrame(newParentFrame);
    }
 
-   protected void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
+   public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
    {
       nodeFrame.changeParentFrameWithoutMoving(newParentFrame);
    }

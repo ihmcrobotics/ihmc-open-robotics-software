@@ -13,9 +13,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * Subscribes to, synchronizing, the robot's perception scene graph.
@@ -31,6 +35,9 @@ public class ROS2SceneGraphSubscription
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
    private SceneGraphMessage latestSceneGraphMessage;
+   private final ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
+   private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
+   private final Consumer<Consumer<SceneGraphTreeModification>> subscriptionTreeModification = this::subscriptionTreeModification;
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
@@ -62,24 +69,32 @@ public class ROS2SceneGraphSubscription
          ++numberOfMessagesReceived;
          latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
 
-         ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
-         buildSubscriptionTree(new MutableInt(), latestSceneGraphMessage, subscriptionRootNode);
+         subscriptionRootNode.clear();
+         subscriptionNodeDepthFirstIndex.setValue(0);
+         buildSubscriptionTree(latestSceneGraphMessage, subscriptionRootNode);
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
 
-         if (!localTreeFrozen)
-            clearChildren(sceneGraph.getRootNode());
-         updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), ReferenceFrame.getWorldFrame());
-
-         sceneGraph.update();
+         sceneGraph.modifyTree(subscriptionTreeModification);
       }
       return newMessageAvailable;
    }
 
-   private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode, SceneNode localNode, ReferenceFrame parentFrame)
+   private void subscriptionTreeModification(Consumer<SceneGraphTreeModification> modificationQueue)
+   {
+      if (!localTreeFrozen)
+         modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
+
+      updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), ReferenceFrame.getWorldFrame(), modificationQueue);
+   }
+
+   private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode,
+                                                SceneNode localNode,
+                                                ReferenceFrame parentFrame,
+                                                Consumer<SceneGraphTreeModification> modificationQueue)
    {
       // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
       // This'll happen if a node is deleted locally. We want that change to propagate and not add
@@ -129,10 +144,10 @@ public class ROS2SceneGraphSubscription
 
          if (localChildNode != null)
          {
-            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode.getNodeFrame());
-
             if (!localTreeFrozen)
-               localNode.getChildren().add(localChildNode);
+               modificationQueue.accept(new SceneGraphNodeReplacement(localChildNode, localNode));
+
+            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode.getNodeFrame(), modificationQueue);
          }
       }
    }
@@ -158,10 +173,10 @@ public class ROS2SceneGraphSubscription
    }
 
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
-   private void buildSubscriptionTree(MutableInt index, SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
+   private void buildSubscriptionTree(SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
-      byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(index.intValue());
-      int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(index.intValue());
+      byte sceneNodeType = sceneGraphMessage.getSceneTreeTypes().get(subscriptionNodeDepthFirstIndex.intValue());
+      int indexInTypesList = (int) sceneGraphMessage.getSceneTreeIndices().get(subscriptionNodeDepthFirstIndex.intValue());
       subscriptionNode.setType(sceneNodeType);
 
       switch (sceneNodeType)
@@ -202,8 +217,8 @@ public class ROS2SceneGraphSubscription
       for (int i = 0; i < subscriptionNode.getSceneNodeMessage().getNumberOfChildren(); i++)
       {
          ROS2SceneGraphSubscriptionNode subscriptionTreeChildNode = new ROS2SceneGraphSubscriptionNode();
-         index.increment();
-         buildSubscriptionTree(index, sceneGraphMessage, subscriptionTreeChildNode);
+         subscriptionNodeDepthFirstIndex.increment();
+         buildSubscriptionTree(sceneGraphMessage, subscriptionTreeChildNode);
          subscriptionNode.getChildren().add(subscriptionTreeChildNode);
       }
    }

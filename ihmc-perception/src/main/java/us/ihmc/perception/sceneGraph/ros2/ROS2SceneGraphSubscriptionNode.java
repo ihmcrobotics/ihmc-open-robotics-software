@@ -17,8 +17,18 @@ public class ROS2SceneGraphSubscriptionNode
    private PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
-
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
+
+   public void clear()
+   {
+      type = -1;
+      sceneNodeMessage = null;
+      detectableSceneNodeMessage = null;
+      predefinedRigidBodySceneNodeMessage = null;
+      arUcoMarkerNodeMessage = null;
+      staticRelativeSceneNodeMessage = null;
+      children.clear();
+   }
 
    public byte getType()
    {
