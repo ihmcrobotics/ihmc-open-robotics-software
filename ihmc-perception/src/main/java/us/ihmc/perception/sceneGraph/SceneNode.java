@@ -6,7 +6,7 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Represents a node on the scene graph which is
@@ -21,7 +21,7 @@ public class SceneNode
    private final long id;
    private final String name;
    private final ModifiableReferenceFrame nodeFrame;
-   private final List<SceneNode> children = new ArrayList<>();
+   private final Collection<SceneNode> children = new ArrayList<>();
    /**
     * Certain changes to this node will cause a freeze of that data
     * from being modified from incoming messages.
@@ -97,7 +97,14 @@ public class SceneNode
       nodeFrame.changeParentFrameWithoutMoving(newParentFrame);
    }
 
-   public List<SceneNode> getChildren()
+   /**
+    * @return The scene node's children.
+    *
+    * Warning! Only modify this collection via queued modifications using
+    * {@link SceneGraph#modifyTree}. Otherwise, inconsistency can occur
+    * which may cause bad behavior or crashes.
+    */
+   public Collection<SceneNode> getChildren()
    {
       return children;
    }
