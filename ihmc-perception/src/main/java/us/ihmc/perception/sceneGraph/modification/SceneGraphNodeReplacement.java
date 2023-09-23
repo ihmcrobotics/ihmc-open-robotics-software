@@ -27,7 +27,7 @@ public class SceneGraphNodeReplacement implements SceneGraphTreeModification
    public void performOperation()
    {
       parent.getChildren().add(nodeToAdd);
-      nodeToAdd.ensureParentFrame(parent.getNodeFrame());
+      nodeToAdd.ensureParentFrameIsConsistent(parent.getNodeFrame());
    }
 
    protected SceneNode getNodeToAdd()

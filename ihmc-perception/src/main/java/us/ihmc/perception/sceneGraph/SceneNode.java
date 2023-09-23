@@ -43,24 +43,6 @@ public class SceneNode
       this.nodeFrame = new ModifiableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public void ensureParentFrameEquals(ReferenceFrame parentFrame)
-   {
-      if (getNodeFrame().getParent() != parentFrame)
-      {
-         ensureParentFrame(parentFrame);
-      }
-   }
-
-   public void ensureFramesMatchParentsRecursively(ReferenceFrame parentFrame)
-   {
-      ensureParentFrameEquals(parentFrame);
-
-      for (SceneNode child : getChildren())
-      {
-         child.ensureFramesMatchParentsRecursively(this.getNodeFrame());
-      }
-   }
-
    public long getID()
    {
       return id;
@@ -86,10 +68,14 @@ public class SceneNode
       return nodeFrame.getTransformToParent();
    }
 
-   public void ensureParentFrame(ReferenceFrame newParentFrame)
+   /**
+    * This makes sure this node's ReferenceFrame's parent is the same instance
+    * as this node's parent node's ReferenceFrame.
+    */
+   public void ensureParentFrameIsConsistent(ReferenceFrame desiredParentFrame)
    {
-      if (newParentFrame != nodeFrame.getReferenceFrame().getParent())
-         nodeFrame.changeParentFrame(newParentFrame);
+      if (desiredParentFrame != nodeFrame.getReferenceFrame().getParent())
+         nodeFrame.changeParentFrame(desiredParentFrame);
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)

@@ -122,8 +122,6 @@ public class ROS2SceneGraphSubscription
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
          }
 
-         localNode.ensureParentFrameEquals(parentFrame);
-
          MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
          nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
          nodePose.changeFrame(localNode.getNodeFrame().getParent());
