@@ -159,16 +159,6 @@ public class ROS2SceneGraphSubscription
       }
    }
 
-   private void clearChildren(SceneNode localNode)
-   {
-      for (SceneNode child : localNode.getChildren())
-      {
-         clearChildren(child);
-      }
-
-      localNode.getChildren().clear();
-   }
-
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
    private void buildSubscriptionTree(SceneGraphMessage sceneGraphMessage, ROS2SceneGraphSubscriptionNode subscriptionNode)
    {
