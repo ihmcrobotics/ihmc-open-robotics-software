@@ -9,8 +9,8 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -21,6 +21,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Manages the perception scene graph.
@@ -39,7 +40,6 @@ public class RDXPerceptionSceneGraphUI
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
-   private final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
    public RDXPerceptionSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
@@ -60,29 +60,13 @@ public class RDXPerceptionSceneGraphUI
    public void update()
    {
       sceneGraph.updateSubscription();
-
-      // Nodes can be moved by the user clicking stuff
-      sceneGraph.getSceneGraphNodeMoves().clear();
-      sceneNodesByID.clear();
-
-      update(uiRootNode);
-
-      for (SceneGraphNodeMove sceneGraphNodeMove : sceneGraph.getSceneGraphNodeMoves())
-      {
-         sceneGraphNodeMove.performOperation();
-      }
-
+      sceneGraph.modifyTree(modificationQueue -> update(uiRootNode, modificationQueue));
       sceneGraph.updatePublication();
    }
 
-   private void update(RDXSceneNodeInterface uiSceneNode)
+   private void update(RDXSceneNodeInterface uiSceneNode, Consumer<SceneGraphTreeModification> modificationQueue)
    {
-      uiSceneNode.update(sceneGraph.getSceneGraphNodeMoves());
-
-      if (uiSceneNode instanceof SceneNode sceneNode)
-      {
-         sceneNodesByID.add(sceneNode);
-      }
+      uiSceneNode.update(modificationQueue);
 
       if (uiSceneNode instanceof SceneNode sceneNode)
       {
@@ -90,7 +74,7 @@ public class RDXPerceptionSceneGraphUI
          {
             if (child instanceof RDXSceneNodeInterface uiChildNode)
             {
-               update(uiChildNode);
+               update(uiChildNode, modificationQueue);
             }
          }
       }
@@ -122,7 +106,7 @@ public class RDXPerceptionSceneGraphUI
       }
       else // Render IDs in order so they don't jump around
       {
-         for (SceneNode sceneNode : sceneNodesByID)
+         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
          {
             if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
             {

@@ -3,15 +3,23 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
-import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public interface RDXSceneNodeInterface
 {
-   default void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
+   /**
+    * Updates the UI node.
+    * This is tricky. Modifications can't be done in here because
+    * that would be a concurrent modification of the tree while iterating
+    * over it, so the entire UI node
+    * tree update is wrapped in {@link SceneGraph#modifyTree}.
+    */
+   default void update(Consumer<SceneGraphTreeModification> modificationQueue)
    {
 
    }

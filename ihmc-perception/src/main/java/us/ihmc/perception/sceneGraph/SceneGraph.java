@@ -8,7 +8,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
@@ -43,7 +42,7 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
-   private transient final List<SceneGraphNodeMove> sceneGraphNodeMoves = new ArrayList<>();
+   private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
    public SceneGraph()
    {
@@ -68,27 +67,19 @@ public class SceneGraph
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      // TODO: Generalize pre and post tree modification logic
-      sceneGraphNodeMoves.clear();
-
-      updateOnRobot(rootNode, sensorFrame);
-
-      for (SceneGraphNodeMove sceneGraphNodeMove : sceneGraphNodeMoves)
-      {
-         sceneGraphNodeMove.performOperation();
-      }
+      modifyTree(modificationQueue -> updateOnRobot(rootNode, sensorFrame, modificationQueue));
    }
 
-   private void updateOnRobot(SceneNode sceneNode, ReferenceFrame sensorFrame)
+   private void updateOnRobot(SceneNode sceneNode, ReferenceFrame sensorFrame, Consumer<SceneGraphTreeModification> modificationQueue)
    {
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         staticRelativeSceneNode.updateTrackingState(sensorFrame, sceneGraphNodeMoves);
+         staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
       }
 
       for (SceneNode child : sceneNode.getChildren())
       {
-         updateOnRobot(child, sensorFrame);
+         updateOnRobot(child, sensorFrame, modificationQueue);
       }
    }
 
@@ -116,6 +107,7 @@ public class SceneGraph
       nodeNameList.clear();
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
+      sceneNodesByID.clear();
       updateCaches(rootNode);
    }
 
@@ -124,6 +116,7 @@ public class SceneGraph
       idToNodeMap.put(node.getID(), node);
       nodeNameList.add(node.getName());
       namesToNodesMap.put(node.getName(), node);
+      sceneNodesByID.add(node);
 
       if (node instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
@@ -171,9 +164,9 @@ public class SceneGraph
       return arUcoMarkerIDToNodeMap;
    }
 
-   public List<SceneGraphNodeMove> getSceneGraphNodeMoves()
+   public SortedSet<SceneNode> getSceneNodesByID()
    {
-      return sceneGraphNodeMoves;
+      return sceneNodesByID;
    }
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()

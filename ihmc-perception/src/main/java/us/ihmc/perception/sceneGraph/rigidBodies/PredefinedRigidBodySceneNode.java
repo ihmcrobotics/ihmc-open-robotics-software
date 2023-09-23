@@ -7,8 +7,10 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is
@@ -51,21 +53,17 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       getNodeFrame().update();
    }
 
-   public void setTrackInitialParent(boolean trackInitialParent, List<SceneGraphNodeMove> sceneGraphNodeMoves)
+   public void setTrackInitialParent(boolean trackInitialParent, Consumer<SceneGraphTreeModification> modificationQueue)
    {
       boolean previousTrackingInitialParent = getTrackingInitialParent();
       if (previousTrackingInitialParent != trackInitialParent)
       {
          SceneNode rootNode = sceneGraphIDToNodeMap.get(SceneGraph.ROOT_NODE_ID);
          SceneNode initialParentNode = sceneGraphIDToNodeMap.get(initialParentNodeID);
-         if (trackInitialParent)
-         {
-            sceneGraphNodeMoves.add(new SceneGraphNodeMove(this, rootNode, initialParentNode));
-         }
-         else
-         {
-            sceneGraphNodeMoves.add(new SceneGraphNodeMove(this, initialParentNode, rootNode));
-         }
+
+         SceneNode previousParent = trackInitialParent ? rootNode : initialParentNode;
+         SceneNode newParent = trackInitialParent ? initialParentNode : rootNode;
+         modificationQueue.accept(new SceneGraphNodeMove(this, previousParent, newParent));
       }
    }
 
