@@ -37,7 +37,6 @@ public class ROS2SceneGraphSubscription
    private SceneGraphMessage latestSceneGraphMessage;
    private final ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
-   private final Consumer<Consumer<SceneGraphTreeModification>> subscriptionTreeModification = this::subscriptionTreeModification;
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
@@ -78,17 +77,15 @@ public class ROS2SceneGraphSubscription
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
 
-         sceneGraph.modifyTree(subscriptionTreeModification);
+         sceneGraph.modifyTree(modificationQueue ->
+         {
+            if (!localTreeFrozen)
+               modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
+
+            updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), ReferenceFrame.getWorldFrame(), modificationQueue);
+         });
       }
       return newMessageAvailable;
-   }
-
-   private void subscriptionTreeModification(Consumer<SceneGraphTreeModification> modificationQueue)
-   {
-      if (!localTreeFrozen)
-         modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
-
-      updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), ReferenceFrame.getWorldFrame(), modificationQueue);
    }
 
    private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode,
