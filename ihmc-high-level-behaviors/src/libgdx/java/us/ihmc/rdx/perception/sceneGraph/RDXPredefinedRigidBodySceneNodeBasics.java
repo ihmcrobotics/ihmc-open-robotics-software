@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,8 +20,8 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
-import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A "ghost" colored model.
@@ -58,22 +58,29 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       initialParentName = "Node " + predefinedRigidBodySceneNode.getInitialParentNodeID();
       trackDetectedPoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getTrackingInitialParent,
                                                       trackDetectedPoseChanged::set,
-                                                      imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName), imBoolean));
+                                                      imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName),
+                                                                                  imBoolean));
    }
 
-   public void update(List<SceneGraphNodeMove> sceneGraphNodeMoves)
+   public void update(Consumer<SceneGraphTreeModification> modificationQueue)
    {
       sceneNodeBasics.update();
 
       if (trackDetectedPoseChanged.poll())
       {
-         boolean trackDetectedPose = trackDetectedPoseChanged.read();
-         predefinedRigidBodySceneNode.setTrackInitialParent(trackDetectedPose, sceneGraphNodeMoves);
-         ensureGizmoFrameIsSceneNodeFrame();
-         predefinedRigidBodySceneNode.freezeFromModification();
+         predefinedRigidBodySceneNode.setTrackInitialParent(trackDetectedPoseChanged.read(), modificationQueue);
+         // This modification is to get queued after a basic node one
+         // in order to subsequently update the UI node after the node
+         // has been moved.
+         // There can't be another modification added, so we pass null
+         // as the modification queue.
+         // That would cause an infinite loop.
+         modificationQueue.accept(() -> update(null));
       }
 
-      ensureGizmoFrameIsSceneNodeFrame();
+      // Ensure gizmo frame is up to date
+      if (offsetPoseGizmo.getPoseGizmo().getGizmoFrame() != predefinedRigidBodySceneNode.getNodeFrame())
+         offsetPoseGizmo.getPoseGizmo().setGizmoFrame(predefinedRigidBodySceneNode.getNodeFrame());
 
       if (offsetPoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
@@ -96,7 +103,6 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       ImGui.sameLine();
       ImGui.text(" Parent: " + predefinedRigidBodySceneNode.getNodeFrame().getParent().getName());
 
-
       trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
@@ -104,15 +110,8 @@ public class RDXPredefinedRigidBodySceneNodeBasics
       if (ImGui.button(labels.get("Clear Offset")))
       {
          predefinedRigidBodySceneNode.clearOffset();
-         ensureGizmoFrameIsSceneNodeFrame();
          predefinedRigidBodySceneNode.freezeFromModification();
       }
-   }
-
-   private void ensureGizmoFrameIsSceneNodeFrame()
-   {
-      if (offsetPoseGizmo.getPoseGizmo().getGizmoFrame() != predefinedRigidBodySceneNode.getNodeFrame())
-         offsetPoseGizmo.getPoseGizmo().setGizmoFrame(predefinedRigidBodySceneNode.getNodeFrame());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
