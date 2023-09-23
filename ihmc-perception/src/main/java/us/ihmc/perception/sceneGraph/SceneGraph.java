@@ -99,10 +99,8 @@ public class SceneGraph
          update();
    }
 
-   public void update()
+   private void update()
    {
-      rootNode.ensureFramesMatchParentsRecursively(rootNode.getNodeFrame().getParent());
-
       idToNodeMap.clear();
       nodeNameList.clear();
       namesToNodesMap.clear();

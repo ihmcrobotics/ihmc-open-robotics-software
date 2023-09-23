@@ -529,7 +529,6 @@ public class DualBlackflyCamera
 
          sceneGraph.updateSubscription(); // Receive overridden poses from operator
          ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
-         sceneGraph.update();
          synchronized (blackflyFrameForSceneNodeUpdate)
          {
             sceneGraph.updateOnRobot(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
