@@ -59,18 +59,22 @@ public class SceneGraph
    }
 
    /**
+    * This method should only be called on the robot's copy of the scene graph.
+    * It should be called exactly once per frame and after perceptual detections
+    * have been collected, like ArUco marker detections.
+    *
     * This method updates the caches and the static relative nodes, whose
     * tracking state should only be evaluated by the robot.
     */
-   public void updateOnRobot(ReferenceFrame sensorFrame)
+   public void updateOnRobotOnly(ReferenceFrame sensorFrame)
    {
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      modifyTree(modificationQueue -> updateOnRobot(rootNode, sensorFrame, modificationQueue));
+      modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, sensorFrame, modificationQueue));
    }
 
-   private void updateOnRobot(SceneNode sceneNode, ReferenceFrame sensorFrame, Consumer<SceneGraphTreeModification> modificationQueue)
+   private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, Consumer<SceneGraphTreeModification> modificationQueue)
    {
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
@@ -79,7 +83,7 @@ public class SceneGraph
 
       for (SceneNode child : sceneNode.getChildren())
       {
-         updateOnRobot(child, sensorFrame, modificationQueue);
+         updateOnRobotOnly(child, sensorFrame, modificationQueue);
       }
    }
 

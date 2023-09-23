@@ -116,7 +116,7 @@ public class RDXPerceptionSceneGraphDemo
 
                onRobotSceneGraph.updateSubscription();
                ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, onRobotSceneGraph);
-               onRobotSceneGraph.updateOnRobot(sensorPoseGizmo.getGizmoFrame());
+               onRobotSceneGraph.updateOnRobotOnly(sensorPoseGizmo.getGizmoFrame());
                onRobotSceneGraph.updatePublication();
             }
 
