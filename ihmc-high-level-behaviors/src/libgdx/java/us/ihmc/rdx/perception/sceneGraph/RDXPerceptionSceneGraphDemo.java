@@ -27,7 +27,7 @@ public class RDXPerceptionSceneGraphDemo
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private RDXEnvironmentBuilder environmentBuilder;
-   private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
+   private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
