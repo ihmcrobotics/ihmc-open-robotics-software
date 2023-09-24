@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
@@ -74,7 +75,7 @@ public class SceneGraph
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, sensorFrame, modificationQueue));
    }
 
-   private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, Consumer<SceneGraphTreeModification> modificationQueue)
+   private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
@@ -87,7 +88,7 @@ public class SceneGraph
       }
    }
 
-   public void modifyTree(Consumer<Consumer<SceneGraphTreeModification>> modifier)
+   public void modifyTree(Consumer<SceneGraphModificationQueue> modifier)
    {
       modifier.accept(queuedModifications::add);
 

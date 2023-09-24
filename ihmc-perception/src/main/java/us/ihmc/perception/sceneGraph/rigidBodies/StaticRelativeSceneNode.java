@@ -6,12 +6,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -45,7 +41,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    }
 
    /** Should only happen on the robot, not the UI. */
-   public void updateTrackingState(ReferenceFrame sensorFrame, Consumer<SceneGraphTreeModification> modificationQueue)
+   public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
       staticRelativeSceneNodePose.setToZero(getNodeFrame());
       staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);

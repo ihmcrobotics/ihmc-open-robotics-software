@@ -4,11 +4,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 public interface RDXSceneNodeInterface
 {
@@ -19,7 +18,7 @@ public interface RDXSceneNodeInterface
     * over it, so the entire UI node
     * tree update is wrapped in {@link SceneGraph#modifyTree}.
     */
-   default void update(Consumer<SceneGraphTreeModification> modificationQueue)
+   default void update(SceneGraphModificationQueue modificationQueue)
    {
 
    }
