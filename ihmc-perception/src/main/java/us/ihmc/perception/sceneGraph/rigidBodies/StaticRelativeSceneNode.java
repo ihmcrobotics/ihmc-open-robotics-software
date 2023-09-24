@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import gnu.trove.map.TLongObjectMap;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -43,14 +45,41 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    /** Should only happen on the robot, not the UI. */
    public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
-      staticRelativeSceneNodePose.setToZero(getNodeFrame());
-      staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);
-      double currentDistance = staticRelativeSceneNodePose.getPosition().distanceFromOrigin();
-      setCurrentDistance(currentDistance);
-      if (currentDistance <= getDistanceToDisableTracking() && getTrackingInitialParent())
+      if (!isFrozenFromModification())
       {
-         LogTools.warn("{}: Disabling tracking initial parent", getName());
-         setTrackInitialParent(false, modificationQueue);
+         staticRelativeSceneNodePose.setToZero(getNodeFrame());
+         staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);
+         double updatedCurrentDistance = staticRelativeSceneNodePose.getPosition().distanceFromOrigin();
+         if (!MathTools.epsilonEquals(currentDistance, updatedCurrentDistance, 0.1) && updatedCurrentDistance < currentDistance)
+         {
+
+            LogTools.info(("""
+                  Type: %s
+                  Old distance: %.2f
+                  New distance: %.2f
+                  node frame: %s
+                  node frame parent: %s
+                  sensor frame: %s,
+                  node to world:
+                  %s,
+                  sensor to world:
+                  %s
+                  """).formatted(getClass().getSimpleName(),
+                                 currentDistance,
+                                 updatedCurrentDistance,
+                                 getNodeFrame().getName(),
+                                 getNodeFrame().getParent().getName(),
+                                 sensorFrame.getName(),
+                                 getNodeFrame().getTransformToWorldFrame(),
+                                 sensorFrame.getTransformToWorldFrame()));
+         }
+
+         currentDistance = updatedCurrentDistance;
+         //      if (currentDistance <= getDistanceToDisableTracking() && getTrackingInitialParent())
+         //      {
+         //         LogTools.warn("{}: Disabling tracking initial parent", getName());
+         //         setTrackInitialParent(false, modificationQueue);
+         //      }
       }
    }
 
@@ -66,6 +95,17 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 
    public void setCurrentDistance(double currentDistance)
    {
+      if (!MathTools.epsilonEquals(currentDistance, this.currentDistance, 0.1))
+      {
+//         LogTools.info(("""
+//                           Type: %s
+//                           Old distance: %.2f
+//                           New distance: %.2f
+//                        """).formatted(getClass().getSimpleName(),
+//                                       this.currentDistance,
+//                                       currentDistance));
+      }
+
       this.currentDistance = currentDistance;
    }
 

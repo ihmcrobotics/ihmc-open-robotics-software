@@ -1,6 +1,8 @@
 package us.ihmc.perception.sceneGraph.modification;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 /**
  * An actionable move of a node from one parent to the other.
@@ -28,5 +30,11 @@ public class SceneGraphNodeMove extends SceneGraphNodeAddition implements SceneG
       nodeToMove.changeParentFrameWithoutMoving(newParent.getNodeFrame());
       super.performOperation();
       previousParent.freezeFromModification();
+
+      if (nodeToMove instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+      {
+         LogTools.info("Moved: {} to {} ({})", nodeToMove.getName(), newParent.getName(), nodeToMove.getClass().getSimpleName());
+         LogTools.info("To world:\n{}", nodeToMove.getNodeFrame().getTransformToWorldFrame());
+      }
    }
 }

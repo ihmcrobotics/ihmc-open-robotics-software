@@ -72,6 +72,8 @@ public class SceneGraph
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
+      rootNode.ensureSubtreeParentFramesAreConsistent(rootNode.getNodeFrame().getParent());
+
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, sensorFrame, modificationQueue));
    }
 
