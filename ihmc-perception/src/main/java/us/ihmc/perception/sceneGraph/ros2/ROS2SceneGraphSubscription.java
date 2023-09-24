@@ -125,17 +125,6 @@ public class ROS2SceneGraphSubscription
          }
       }
 
-      if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-      {
-         if (ioQualifier == ROS2IOTopicQualifier.COMMAND)
-         {
-            if (localNode.getName().equals("PushDoorFrame"))
-            {
-//               LogTools.info("To world:\n{}", localNode.getNodeFrame().getTransformToWorldFrame());
-            }
-         }
-      }
-
       for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
          SceneNode localChildNode = sceneGraph.getIDToNodeMap().get(subscriptionChildNode.getSceneNodeMessage().getId());

@@ -2,7 +2,6 @@ package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.tools.Timer;
 
@@ -77,17 +76,6 @@ public class SceneNode
    {
       if (desiredParentFrame != nodeFrame.getReferenceFrame().getParent())
          nodeFrame.changeParentFrame(desiredParentFrame);
-   }
-
-   public void ensureSubtreeParentFramesAreConsistent(ReferenceFrame parentFrame)
-   {
-      ensureParentFrameIsConsistent(parentFrame);
-      getNodeFrame().update();
-
-      for (SceneNode child : getChildren())
-      {
-         child.ensureSubtreeParentFramesAreConsistent(getNodeFrame());
-      }
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
