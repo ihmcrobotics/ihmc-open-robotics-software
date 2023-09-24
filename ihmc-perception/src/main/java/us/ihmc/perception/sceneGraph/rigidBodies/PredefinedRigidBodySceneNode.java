@@ -5,12 +5,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is
@@ -53,7 +50,7 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       getNodeFrame().update();
    }
 
-   public void setTrackInitialParent(boolean trackInitialParent, Consumer<SceneGraphTreeModification> modificationQueue)
+   public void setTrackInitialParent(boolean trackInitialParent, SceneGraphModificationQueue modificationQueue)
    {
       boolean previousTrackingInitialParent = getTrackingInitialParent();
       if (previousTrackingInitialParent != trackInitialParent)

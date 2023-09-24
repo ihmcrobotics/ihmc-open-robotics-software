@@ -9,7 +9,7 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -21,7 +21,6 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * Manages the perception scene graph.
@@ -64,7 +63,7 @@ public class RDXPerceptionSceneGraphUI
       sceneGraph.updatePublication();
    }
 
-   private void update(RDXSceneNodeInterface uiSceneNode, Consumer<SceneGraphTreeModification> modificationQueue)
+   private void update(RDXSceneNodeInterface uiSceneNode, SceneGraphModificationQueue modificationQueue)
    {
       uiSceneNode.update(modificationQueue);
 

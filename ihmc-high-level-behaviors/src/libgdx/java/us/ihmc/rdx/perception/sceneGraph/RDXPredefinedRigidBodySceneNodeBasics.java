@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -21,7 +21,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * A "ghost" colored model.
@@ -62,7 +61,7 @@ public class RDXPredefinedRigidBodySceneNodeBasics
                                                                                   imBoolean));
    }
 
-   public void update(Consumer<SceneGraphTreeModification> modificationQueue)
+   public void update(SceneGraphModificationQueue modificationQueue)
    {
       sceneNodeBasics.update();
 

@@ -4,16 +4,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-
-import java.util.function.Consumer;
 
 /**
  * We want to measure this stuff in the right order.
@@ -133,7 +131,7 @@ public class DoorSceneNodeDefinitions
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
    }
 
-   public static void ensureNodesAdded(ROS2SceneGraph sceneGraph, Consumer<SceneGraphTreeModification> modificationQueue)
+   public static void ensureNodesAdded(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       ArUcoMarkerNode pullDoorArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(DoorModelParameters.PULL_DOOR_MARKER_ID);
       if (pullDoorArUcoMarker != null)

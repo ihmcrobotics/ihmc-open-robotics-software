@@ -2,14 +2,12 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-
-import java.util.function.Consumer;
 
 /**
  * Static methods to create boxes, cylinders, etc.
@@ -59,7 +57,7 @@ public class RigidBodySceneObjectDefinitions
       CAN_OF_SOUP_TO_MARKER_TRANSFORM.setAndInvert(MARKER_TO_CAN_OF_SOUP_TRANSFORM);
    }
 
-   public static void ensureNodesAdded(ROS2SceneGraph sceneGraph, Consumer<SceneGraphTreeModification> modificationQueue)
+   public static void ensureNodesAdded(ROS2SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
       if (boxArUcoMarker != null)

@@ -14,12 +14,11 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 /**
  * Subscribes to, synchronizing, the robot's perception scene graph.
@@ -91,7 +90,7 @@ public class ROS2SceneGraphSubscription
    private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode,
                                                 SceneNode localNode,
                                                 ReferenceFrame parentFrame,
-                                                Consumer<SceneGraphTreeModification> modificationQueue)
+                                                SceneGraphModificationQueue modificationQueue)
    {
       // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
       // This'll happen if a node is deleted locally. We want that change to propagate and not add

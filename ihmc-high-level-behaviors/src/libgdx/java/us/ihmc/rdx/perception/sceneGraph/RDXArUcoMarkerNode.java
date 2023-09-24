@@ -5,12 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeInterface
 {
@@ -34,7 +33,7 @@ public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeI
    }
 
    @Override
-   public void update(Consumer<SceneGraphTreeModification> modificationQueue)
+   public void update(SceneGraphModificationQueue modificationQueue)
    {
       detectableSceneNodeBasics.update();
    }
