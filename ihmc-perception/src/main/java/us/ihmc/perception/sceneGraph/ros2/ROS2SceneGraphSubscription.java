@@ -7,8 +7,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -29,7 +27,6 @@ public class ROS2SceneGraphSubscription
    private final ROS2SceneGraph sceneGraph;
    private final BiFunction<ROS2SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final ROS2IOTopicQualifier ioQualifier;
-   private final FramePose3D nodePose = new FramePose3D();
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
@@ -81,7 +78,7 @@ public class ROS2SceneGraphSubscription
             if (!localTreeFrozen)
                modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
 
-            updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), ReferenceFrame.getWorldFrame(), modificationQueue);
+            updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
          });
       }
       return newMessageAvailable;
@@ -89,7 +86,7 @@ public class ROS2SceneGraphSubscription
 
    private void updateLocalTreeFromSubscription(ROS2SceneGraphSubscriptionNode subscriptionNode,
                                                 SceneNode localNode,
-                                                ReferenceFrame parentFrame,
+                                                SceneNode localParentNode,
                                                 SceneGraphModificationQueue modificationQueue)
    {
       // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
@@ -121,11 +118,22 @@ public class ROS2SceneGraphSubscription
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
          }
 
-         MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
-         nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-         nodePose.changeFrame(localNode.getNodeFrame().getParent());
-         nodePose.get(localNode.getNodeToParentFrameTransform());
-         localNode.getNodeFrame().update();
+         if (localParentNode != null) // Parent of root node is null
+         {
+            MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
+            modificationQueue.accept(new SceneGraphNodeReplacement(localNode, localParentNode, nodeToWorldTransform));
+         }
+      }
+
+      if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+      {
+         if (ioQualifier == ROS2IOTopicQualifier.COMMAND)
+         {
+            if (localNode.getName().equals("PushDoorFrame"))
+            {
+//               LogTools.info("To world:\n{}", localNode.getNodeFrame().getTransformToWorldFrame());
+            }
+         }
       }
 
       for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
@@ -138,10 +146,7 @@ public class ROS2SceneGraphSubscription
 
          if (localChildNode != null)
          {
-            if (!localTreeFrozen)
-               modificationQueue.accept(new SceneGraphNodeReplacement(localChildNode, localNode));
-
-            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode.getNodeFrame(), modificationQueue);
+            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
          }
       }
    }
