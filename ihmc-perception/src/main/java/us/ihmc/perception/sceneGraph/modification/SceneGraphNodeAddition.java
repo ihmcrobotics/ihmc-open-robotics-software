@@ -23,8 +23,23 @@ public class SceneGraphNodeAddition implements SceneGraphTreeModification
    public void performOperation()
    {
       parent.getChildren().add(nodeToAdd);
-      nodeToAdd.ensureParentFrameIsConsistent(parent.getNodeFrame());
+      ensureParentFramesAreConsistent(nodeToAdd, parent);
       parent.freezeFromModification();
+   }
+
+   /**
+    * This is necessary both to make sure added nodes have consistent frames
+    * and also that when nodes are moved in the tree, their children are
+    * updated accordingly, which is absolutely necessary.
+    */
+   private void ensureParentFramesAreConsistent(SceneNode node, SceneNode parent)
+   {
+      node.ensureParentFrameIsConsistent(parent.getNodeFrame());
+
+      for (SceneNode child : node.getChildren())
+      {
+         ensureParentFramesAreConsistent(child, node);
+      }
    }
 
    protected SceneNode getNodeToAdd()
