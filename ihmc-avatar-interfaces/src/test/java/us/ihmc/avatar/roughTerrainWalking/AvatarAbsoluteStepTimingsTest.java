@@ -397,7 +397,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       {
          SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
          double flatArea = steppingParameters.getDefaultStepLength() * 0.5;
-         double maxElevation = steppingParameters.getDefaultSwingHeightFromStanceFoot() * 0.25;
+         double maxElevation = getRobotModel().getWalkingControllerParameters().getSwingTrajectoryParameters().getDefaultSwingHeight() * 0.25;
 
          terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
          terrain.addBox(-0.5 - flatArea / 2.0, -1.0, flatArea / 2.0, 1.0, -0.01, 0.0);
