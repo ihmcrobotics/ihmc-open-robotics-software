@@ -8,6 +8,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
+import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+
 public class RDXSakeHandCommandAction extends RDXBehaviorAction
 {
    private final SakeHandCommandActionData actionData = new SakeHandCommandActionData();
@@ -27,17 +29,16 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
       sideWidget.renderImGuiWidget();
       ImGui.popItemWidth();
 
-      // TODO: Get rid of magical 210.0
-      ImGui.sliderAngle(labels.get("Angle Between Fingers"), positionValue, 0.0f, 210.0f);
+      ImGui.sliderAngle(labels.get("Angle Between Fingers"), positionValue, 0.0f, MAX_ANGLE_BETWEEN_FINGERS);
       ImGui.pushStyleColor(ImGuiCol.SliderGrab, ImGuiTools.greenToRedGradiatedColor(torqueValue[0], 0.5, 0.7, 0.9));
-      ImGui.sliderFloat(labels.get("Goal Torque"), torqueValue, 0.0f, 1.0f, String.format("%.1fN", (torqueValue[0] * 35.0f)));
+      ImGui.sliderFloat(labels.get("Goal Torque"), torqueValue, 0.0f, 1.0f, String.format("%.1f N", (torqueValue[0] * MAX_TORQUE_NEWTONS)));
       ImGui.popStyleColor();
    }
 
    @Override
    public SakeHandCommandActionData getActionData()
    {
-      actionData.setGoalPosition(positionValue[0] / Math.toRadians(210.0));
+      actionData.setGoalPosition(positionValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
       actionData.setGoalTorque(torqueValue[0]);
 
       return actionData;

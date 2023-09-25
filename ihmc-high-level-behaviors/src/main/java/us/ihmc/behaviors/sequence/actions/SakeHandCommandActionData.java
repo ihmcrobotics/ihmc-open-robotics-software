@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+
 public class SakeHandCommandActionData implements BehaviorActionData
 {
    private String description = "Hand configuration";
@@ -34,7 +36,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
    public void toMessage(SakeHandCommandActionMessage message)
    {
       message.setRobotSide(side.toByte());
-      message.setConfiguration((byte) 5); // GOTO command
+      message.setConfiguration(SAKE_COMMAND_GOTO);
       message.setPositionRatio(goalPosition);
       message.setTorqueRatio(goalTorque);
    }

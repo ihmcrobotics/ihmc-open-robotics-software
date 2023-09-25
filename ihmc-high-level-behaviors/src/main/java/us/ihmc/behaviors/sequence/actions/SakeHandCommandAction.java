@@ -1,13 +1,14 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import behavior_msgs.msg.dds.SakeHandCommandActionMessage;
 import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
+
+import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
 
 public class SakeHandCommandAction extends SakeHandCommandActionData implements BehaviorAction
 {
@@ -38,7 +39,7 @@ public class SakeHandCommandAction extends SakeHandCommandActionData implements 
    {
       HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
       message.setRobotSide(getSide().toByte());
-      message.setDesiredHandConfiguration((byte) 5); // GOTO
+      message.setDesiredHandConfiguration(SAKE_COMMAND_GOTO);
       message.setPostionRatio(getGoalPosition());
       message.setTorqueRatio(getGoalTorque());
 
