@@ -480,8 +480,28 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
+      boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
+      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingDown() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE && isSteppingDown)
+      {
+         tmpOrientation.setToZero(worldFrame);
+         tmpVector.setToZero(worldFrame);
+         double remainingPitch = swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike() - initialOrientation.getPitch();
+         if (remainingPitch > 0.0)
+         {
+            // compute the linear velocity to go from A to B, and then zero out the pitch velocity.
+            tmpOrientation.difference(initialOrientation, finalOrientation);
+            tmpOrientation.getRotationVector(tmpVector);
+            tmpVector.scale(1.0 / swingDuration.getDoubleValue());
+            tmpVector.setY(0.0);
+
+            tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.getFractionOfSwingToPitchFootDown());
+            tmpOrientation.setYawPitchRoll(tmpOrientation.getYaw(), swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike(), tmpOrientation.getRoll());
+
+            swingTrajectory.appendOrientationWaypoint(swingTrajectoryParameters.getFractionOfSwingToPitchFootDown() * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
+         }
+      }
       // make the foot orientation better for avoidance
-      if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+      else if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
