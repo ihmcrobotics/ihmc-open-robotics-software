@@ -14,8 +14,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
@@ -49,14 +49,16 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 
       this.actionIndex = actionIndex;
 
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
       if ((concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)) ||
           (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
+         LogTools.info("SENT CHEST");
+         // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
          chestPoseStatus.getParentFrame().resetQuick();
          chestPoseStatus.getParentFrame().add(getParentFrame().getName());
-         chestPoseStatus.setNextAndConcurrent(true);
          MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
-         ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+         ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_ORIENTATION_STATUS, chestPoseStatus);
       }
    }
 

@@ -77,7 +77,7 @@ public class ArmIKSolver
    private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
    private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
    private final RigidBodyBasics syncedChest;
-   private ModifiableReferenceFrame externalChestFrame;
+   private ReferenceFrame externalChestFrame;
    private double quality;
 
    public ArmIKSolver(RobotSide side, DRCRobotModel robotModel, FullHumanoidRobotModel syncedRobot)
@@ -157,7 +157,7 @@ public class ArmIKSolver
       MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(syncedOneDoFJoints, workingOneDoFJoints);
    }
 
-   public void setChestExternally(ModifiableReferenceFrame externalChestFrame)
+   public void setChestExternally(ReferenceFrame externalChestFrame)
    {
       this.externalChestFrame = externalChestFrame;
    }
@@ -173,7 +173,7 @@ public class ArmIKSolver
          if (externalChestFrame == null)
             handControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
          else
-            handControlDesiredPose.changeFrame(externalChestFrame.getReferenceFrame());
+            handControlDesiredPose.changeFrame(externalChestFrame);
          handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
 
          // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame

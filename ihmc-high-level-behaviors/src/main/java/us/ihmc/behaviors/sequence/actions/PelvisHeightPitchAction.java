@@ -1,12 +1,14 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,6 +24,7 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionData impleme
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
+   private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
@@ -46,6 +49,16 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionData impleme
       update();
 
       this.actionIndex = actionIndex;
+
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      if ((concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)) ||
+          (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
+      {
+         pelvisPoseStatus.getParentFrame().resetQuick();
+         pelvisPoseStatus.getParentFrame().add(getParentFrame().getName());
+         MessageTools.toMessage(getTransformToParent(), pelvisPoseStatus.getTransformToParent());
+         ros2ControllerHelper.publish(BehaviorActionSequence.PELVIS_POSITION_STATUS, pelvisPoseStatus);
+      }
    }
 
    @Override
