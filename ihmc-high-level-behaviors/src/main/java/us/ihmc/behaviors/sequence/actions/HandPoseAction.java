@@ -83,35 +83,12 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
           (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
-         // if chest is in the same group of concurrent actions, then update the IK according to that chest pose
-         if (chestOrientationStatusSubscription.getMessageNotification().poll())
-         {
-            BodyPartPoseStatusMessage chestPoseStatusMessage = chestOrientationStatusSubscription.getLatest();
-            ModifiableReferenceFrame chestReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame()
-                                                                                                                                                         .getString(
-                                                                                                                                                               0))
-                                                                                                                  .get());
-            chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-
-            ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-            armIKSolver.copyActualToWork();
-            armIKSolver.setChestExternally(chestReferenceFrame.getReferenceFrame());
-            computeAndPublishIKSolution(armIKSolver);
-         }
-         // compute the IK with the synced chest
-         else
-         {
-            ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-            armIKSolver.copyActualToWork();
-            armIKSolver.setChestExternally(null);
-            computeAndPublishIKSolution(armIKSolver);
-         }
+                  ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+                  armIKSolver.copyActualToWork();
+                  armIKSolver.setChestExternally(getChestFrameAtTheEndOfAction(syncedRobot.getFullRobotModel().getChest(), getReferenceFrameLibrary(),
+                                                                               chestOrientationStatusSubscription, pelvisPositionStatusSubscription));
+                  computeAndPublishIKSolution(armIKSolver);
       }
-//         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-//         armIKSolver.copyActualToWork();
-//         armIKSolver.setChestExternally(getChestFrameAtTheEndOfAction(syncedRobot.getFullRobotModel().getChest(), getReferenceFrameLibrary(),
-//                                                                      chestOrientationStatusSubscription, pelvisPositionStatusSubscription));
-//         computeAndPublishIKSolution(armIKSolver);
       else if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
