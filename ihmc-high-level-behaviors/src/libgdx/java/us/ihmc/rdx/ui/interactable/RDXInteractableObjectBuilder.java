@@ -4,9 +4,7 @@ import imgui.internal.ImGui;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -17,7 +15,6 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = "Object Panel";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final SceneGraph sceneGraph;
    private RDXInteractableObject selectedObject;
    private final SortedMap<String, PredefinedRigidBodySceneNode> nameToNodesMap = new TreeMap<>();
    private String selectedObjectName = "";
@@ -27,22 +24,13 @@ public class RDXInteractableObjectBuilder extends RDXPanel
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
-      this.sceneGraph = sceneGraph;
 
       selectedObject = new RDXInteractableObject(baseUI);
 
-      sceneGraph.modifyTree(modificationQueue ->
-      {
-         DoorSceneNodeDefinitions.ensurePushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-         DoorSceneNodeDefinitions.ensurePullDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-         RigidBodySceneObjectDefinitions.ensureBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-         RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-      });
-
-      registerNode(sceneGraph.getRootNode());
+      registerSceneSubtree(sceneGraph.getRootNode());
    }
 
-   private void registerNode(SceneNode sceneNode)
+   private void registerSceneSubtree(SceneNode sceneNode)
    {
       if (sceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
       {
@@ -51,7 +39,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 
       for (SceneNode child : sceneNode.getChildren())
       {
-         registerNode(child);
+         registerSceneSubtree(child);
       }
    }
 
