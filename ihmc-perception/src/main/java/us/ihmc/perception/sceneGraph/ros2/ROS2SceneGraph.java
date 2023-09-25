@@ -43,11 +43,25 @@ public class ROS2SceneGraph extends SceneGraph
       sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, subscriptionQualifier, newNodeSupplier);
    }
 
+   /**
+    * Call before performing operations on the scene graph once per tick of your thread.
+    * This gets the scene graph up-to-date with the latest information.
+    *
+    * This method is separate from the updatePublication because you want to publish after doing
+    * a local possible modification of the scene graph first. Additionally, some processes
+    * just need to have a read-only copy of the scene graph, such as autonomy processes that
+    * merely act in the environment.
+    */
    public void updateSubscription()
    {
       sceneGraphSubscription.update();
    }
 
+   /**
+    * Publishes the scene graph to the other side, whether that be the UI or the robot's
+    * scene graph instance. Call this closer to the end of your thread's tick, after
+    * performing possible local modifications.
+    */
    public void updatePublication()
    {
       if (publishThrottler.run())
