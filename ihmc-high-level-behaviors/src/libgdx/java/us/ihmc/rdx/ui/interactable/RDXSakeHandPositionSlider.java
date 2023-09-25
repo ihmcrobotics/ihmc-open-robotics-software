@@ -12,6 +12,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
+import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+
 /**
  * This slider allows the user to control the Sake hand's finger positions,
  * and reflects the position of the fingers on the robot.
@@ -27,9 +29,6 @@ public class RDXSakeHandPositionSlider
    private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(10.0);
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
    private static final double ROBOT_DATA_EXPIRATION_DURATION = 1.0;
-   private static final double ANGLE_AT_CLOSE = Math.toRadians(-3.0);
-   private static final double MAX_ANGLE_LIMIT = Math.toRadians(210.0);
-   private static final double MIN_ANGLE_LIMIT = Math.toRadians(0.0);
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -68,11 +67,11 @@ public class RDXSakeHandPositionSlider
       {
          if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION))
          {
-            double positionRatio = sliderValue[0] / MAX_ANGLE_LIMIT;
+            double positionRatio = sliderValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
 
             HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) 5); // GOTO command
+            message.setDesiredHandConfiguration(SAKE_COMMAND_GOTO);
             message.setPostionRatio(positionRatio);
             message.setTorqueRatio(0.3);
 
@@ -81,14 +80,14 @@ public class RDXSakeHandPositionSlider
       }
       else
       {
-         sliderValue[0] = (float) (2.0 * (valueFromRobot - ANGLE_AT_CLOSE));
+         sliderValue[0] = (float) (2.0 * (valueFromRobot - Math.toRadians(CLOSED_FINGER_ANGLE)));
       }
    }
 
    private boolean renderImGuiSliderAndReturnChanged()
    {
       float previousValue = sliderValue[0];
-      ImGui.sliderAngle(labels.get(sliderName), sliderValue, (float) Math.toDegrees(MIN_ANGLE_LIMIT), (float) Math.toDegrees(MAX_ANGLE_LIMIT));
+      ImGui.sliderAngle(labels.get(sliderName), sliderValue, 0.0f, (float) MAX_ANGLE_BETWEEN_FINGERS);
       float currentValue = sliderValue[0];
       return !Double.isNaN(sliderValue[0]) && !MathTools.epsilonEquals(currentValue, previousValue, EPSILON);
    }
