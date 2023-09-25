@@ -32,7 +32,7 @@ public class HandPoseActionData implements BehaviorActionData
    @Override
    public void update()
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(palmFrame, referenceFrameLibrary);
+      BehaviorActionSequenceTools.accommodateFrameReplacement(palmFrame, referenceFrameLibrary);
    }
 
    @Override

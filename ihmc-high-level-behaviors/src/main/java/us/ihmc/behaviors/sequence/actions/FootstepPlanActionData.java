@@ -35,7 +35,7 @@ public class FootstepPlanActionData implements BehaviorActionData
    @Override
    public void update()
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(planFrame, referenceFrameLibrary);
+      BehaviorActionSequenceTools.accommodateFrameReplacement(planFrame, referenceFrameLibrary);
    }
 
    @Override

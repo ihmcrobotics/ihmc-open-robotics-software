@@ -31,7 +31,7 @@ public class ChestOrientationActionData implements BehaviorActionData
    @Override
    public void update()
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(chestInteractableReferenceFrame, referenceFrameLibrary);
+      BehaviorActionSequenceTools.accommodateFrameReplacement(chestInteractableReferenceFrame, referenceFrameLibrary);
    }
 
    @Override

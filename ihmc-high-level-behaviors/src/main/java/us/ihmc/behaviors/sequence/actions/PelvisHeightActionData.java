@@ -30,7 +30,7 @@ public class PelvisHeightActionData implements BehaviorActionData
    @Override
    public void update()
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(pelvisInteractableReferenceFrame, referenceFrameLibrary);
+      BehaviorActionSequenceTools.accommodateFrameReplacement(pelvisInteractableReferenceFrame, referenceFrameLibrary);
    }
 
    @Override
