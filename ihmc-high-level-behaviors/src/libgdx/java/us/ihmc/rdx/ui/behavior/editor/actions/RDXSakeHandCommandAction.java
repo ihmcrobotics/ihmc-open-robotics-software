@@ -29,7 +29,7 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
 
       // TODO: Get rid of magical 210.0
       ImGui.sliderAngle(labels.get("Angle Between Fingers"), positionValue, 0.0f, 210.0f);
-      ImGui.pushStyleColor(ImGuiCol.SliderGrab, ImGuiTools.getGreenToRedGradiatedColor(torqueValue[0], 0.5, 0.7, 0.9));
+      ImGui.pushStyleColor(ImGuiCol.SliderGrab, ImGuiTools.greenToRedGradiatedColor(torqueValue[0], 0.5, 0.7, 0.9));
       ImGui.sliderFloat(labels.get("Goal Torque"), torqueValue, 0.0f, 1.0f, String.format("%.1fN", (torqueValue[0] * 35.0f)));
       ImGui.popStyleColor();
    }
