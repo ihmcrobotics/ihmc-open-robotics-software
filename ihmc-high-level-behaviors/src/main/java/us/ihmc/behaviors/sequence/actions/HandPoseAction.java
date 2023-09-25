@@ -79,16 +79,18 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       this.actionIndex = actionIndex;
 
-   // if this action has to be executed with the previous or next one, it means it belongs to a group of concurrent actions
-      if (concurrencyWithPreviousIndex || getExecuteWithNextAction())
+      // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
+      if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
+          (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
          // if chest is in the same group of concurrent actions, then update the IK according to that chest pose
          if (chestOrientationStatusSubscription.getMessageNotification().poll())
          {
             BodyPartPoseStatusMessage chestPoseStatusMessage = chestOrientationStatusSubscription.getLatest();
-            ModifiableReferenceFrame chestReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary()
-                                                                                              .findFrameByName(chestPoseStatusMessage.getParentFrame()
-                                                                                                                                     .getString(0)).get());
+            ModifiableReferenceFrame chestReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame()
+                                                                                                                                                         .getString(
+                                                                                                                                                               0))
+                                                                                                                  .get());
             chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
 
             ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
@@ -101,14 +103,15 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          {
             ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
             armIKSolver.copyActualToWork();
+            armIKSolver.setChestExternally(null);
             computeAndPublishIKSolution(armIKSolver);
          }
+      }
 //         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
 //         armIKSolver.copyActualToWork();
 //         armIKSolver.setChestExternally(getChestFrameAtTheEndOfAction(syncedRobot.getFullRobotModel().getChest(), getReferenceFrameLibrary(),
 //                                                                      chestOrientationStatusSubscription, pelvisPositionStatusSubscription));
 //         computeAndPublishIKSolution(armIKSolver);
-      }
       else if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
