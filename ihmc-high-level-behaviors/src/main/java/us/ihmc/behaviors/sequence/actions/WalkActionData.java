@@ -34,7 +34,7 @@ public class WalkActionData implements BehaviorActionData
    @Override
    public void update()
    {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(goalFrame, referenceFrameLibrary);
+      BehaviorActionSequenceTools.accommodateFrameReplacement(goalFrame, referenceFrameLibrary);
    }
 
    @Override
