@@ -37,7 +37,6 @@ public class RDXSakeHandPositionSlider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
-   private final IHMCROS2Input<HandSakeStatusMessage> handStatusMessage;
    private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
@@ -53,15 +52,11 @@ public class RDXSakeHandPositionSlider
       sliderName = handSide.getPascalCaseName() + " angle";
 
       syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveRobotConfigurationData);
-
-      handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
-                                                                 .withTypeName(HandSakeStatusMessage.class),
-                                                        message -> message.getRobotSide() == handSide.toByte());
    }
 
    private void receiveRobotConfigurationData(RobotConfigurationData robotConfigurationData)
    {
-      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage() && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
+      if (updateThrottler.run(UPDATE_PERIOD) && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
       {
          valueFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
       }
