@@ -37,6 +37,7 @@ public class JointOfflineManager
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public static final double dampingCoefficient = 5.0;
+   public static final double jointOfflineLatency = 0.0;
 
    public JointOfflineManager(HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry registry)
    {
