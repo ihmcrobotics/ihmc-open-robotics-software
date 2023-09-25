@@ -76,7 +76,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
       RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
-      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete last interactable footstep", "Delete");
       RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
 
@@ -86,6 +86,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          footstepBeingPlaced.update();
          footstepBeingPlaced.updateFootstepIndexText(footstepPlan.getNumberOfFootsteps());
+
+         // Deselect all footsteps since we are placing a new one
+         for (int i = 0; i < footstepPlan.getNumberOfFootsteps(); i++)
+            footstepPlan.getFootsteps().get(i).getSelectablePose3DGizmo().setSelected(false);
       }
    }
 
@@ -118,11 +122,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
+      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          footstepPlan.removeLastStep();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
+      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
