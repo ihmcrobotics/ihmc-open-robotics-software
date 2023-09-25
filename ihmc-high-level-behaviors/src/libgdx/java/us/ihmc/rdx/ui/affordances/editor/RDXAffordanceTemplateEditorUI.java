@@ -12,7 +12,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -66,6 +67,14 @@ public class RDXAffordanceTemplateEditorUI
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
    {
       SceneGraph sceneGraph = new SceneGraph();
+      sceneGraph.modifyTree(modificationQueue ->
+      {
+         DoorSceneNodeDefinitions.ensurePushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+         DoorSceneNodeDefinitions.ensurePullDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+         RigidBodySceneObjectDefinitions.ensureBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+         RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+      });
+
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
       baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
 
