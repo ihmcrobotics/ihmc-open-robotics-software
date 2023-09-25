@@ -47,7 +47,6 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof SakeHandCommandActionData sakeHandCommandActionData)
          {
-            // TODO: Delete HandConfigurationActionMessage
             SakeHandCommandActionMessage sakehandCommandMessage = actionSequenceUpdateMessage.getSakeHandCommandActions().add();
             sakehandCommandMessage.getActionInformation().setActionIndex(i);
             sakeHandCommandActionData.toMessage(sakehandCommandMessage);
