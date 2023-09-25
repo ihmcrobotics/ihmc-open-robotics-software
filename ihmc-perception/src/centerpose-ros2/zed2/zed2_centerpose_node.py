@@ -79,10 +79,7 @@ class Image2CenterPose_node(Node):
         self.meta = {}
         if self.opt.cam_intrinsic is None:
             self.meta['camera_matrix'] = np.array(
-                # [[663.0287679036459, 0, 300.2775065104167], [0, 663.0287679036459, 395.00066121419275], [0, 0, 1]])
-                # [[261.0508728027344, 0, 316.148193359375], [0, 261.0508728027344, 181.02622985839844], [0, 0, 1]]) # zed
-                # [[261.0508728027344, 0, 316.148193359375], [0, 261.0508728027344, 181.02622985839844], [0, 0, 1]]) # iphone
-                [[1.62160860e+03, 0.00000000e+00, 6.40337225e+02], [0.00000000e+00, 1.64687719e+03, 9.68022092e+02], [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+                [[521.6779174804688, 0, 630.867431640625], [0, 521.6779174804688, 364.546142578125], [0, 0, 1]]) # zed
             self.opt.cam_intrinsic = self.meta['camera_matrix']
         else:
             self.meta['camera_matrix'] = np.array(self.opt.cam_intrinsic).reshape(3, 3)
@@ -115,8 +112,9 @@ class Image2CenterPose_node(Node):
         self.centerpose_publisher_ = self.create_publisher(DetectedObjectPacket, '/ihmc/centerpose', 1)
         self.detected_object = DetectedObjectPacket()
 
-        self.rot_mat = Rotation.from_euler('xyz', [np.deg2rad(90.0), 0.0, np.deg2rad(90.0)]).as_matrix()
-        print(self.rot_mat)
+        self.extrinsic_rot_mat = np.eye(4)
+        self.extrinsic_rot_mat[:3,:3] = Rotation.from_euler('xyz', [np.deg2rad(-90.0), np.deg2rad(90.0), 0.0]).as_matrix()
+        # print(self.extrinsic_rot_mat)
 
         self.get_logger().info("Waiting for an Image...")
         self.start_time = timeit.default_timer()
@@ -132,34 +130,21 @@ class Image2CenterPose_node(Node):
 
         self.get_logger().info("Processing ImageMessage #" + str(msg.sequence_number))
         image_np = np.frombuffer(b''.join(msg.data), dtype=np.uint8)
-        image = cv2.imdecode(image_np, cv2.COLOR_YUV2RGB)
-        if(self.doOnce):
-            cv2.imwrite('image.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 50])
-            self.doOnce = False
+        image = cv2.imdecode(image_np, cv2.COLOR_BGR2RGB)
+        # if(self.doOnce):
+        #     cv2.imwrite('/root/centerpose-ros2/zed2/new.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+        #     self.doOnce = False
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
 
+        scale = 10.0
         if len(ret['results']) > 0:
             current_time = timeit.default_timer()
-
-            # self.detected_object.pose.position.x = 0.5*np.sin(0.5*(self.start_time - current_time))
-            # self.detected_object.pose.position.y = 0.5*np.cos(0.5*(self.start_time - current_time))
-            # self.detected_object.pose.position.z = 0.0
-            # self.detected_object.pose.orientation.x = 0.0
-            # self.detected_object.pose.orientation.y = 0.0
-            # self.detected_object.pose.orientation.z = 0.0
-            # self.detected_object.pose.orientation.w = 1.0
-            # nn_out_vertices = cube_vertices(0.5*np.sin(0.5*(self.start_time - current_time)),
-            #                          0.5*np.cos(0.5*(self.start_time - current_time)),
-            #                          0,
-            #                          1*np.sin(0.5*(self.start_time - current_time)))
-            
-            # if 'kps_3d_cam' not in ret['results'][0]: 
-            #     print(ret)
                 
             if 'kps_3d_cam' in ret['results'][0]: 
                 nn_out_vertices = ret['results'][0]['kps_3d_cam'] # shape 9x3 (1st row is object centroid location)
                 point_verts = []
                 for vertex in nn_out_vertices:
+                    vertex = vertex/scale
                     point = Point()
                     point.x = vertex[0]
                     point.y = vertex[1]
@@ -167,24 +152,40 @@ class Image2CenterPose_node(Node):
                     point_verts.append(point)
                 self.detected_object.bounding_box_vertices = point_verts[-8:]
 
-            if 'projected_cuboid' in ret['results'][0]:
-                bbox = ret['results'][0]['projected_cuboid']
+            projected_points = 'kps'
+            # projected_points = 'projected_cuboid'
+            if projected_points in ret['results'][0]:
+                point_3d_verts = []
+                bbox = np.array(ret['results'][0][projected_points]).reshape(-1, 2)
                 for vertex in bbox:
                     point = Point()
                     point.x = vertex[0]
                     point.y = vertex[1]
-                    # point.z = vertex[2]
-                    point_verts.append(point)
-                self.detected_object.bounding_box_2d_vertices = point_verts[-8:]
+                    point_3d_verts.append(point)
+                self.detected_object.bounding_box_2d_vertices = point_3d_verts[-8:]
 
-            if 'location' in ret['results'][0]: 
-                self.detected_object.pose.position.x = ret['results'][0]['location'][0]/1000.0
-                self.detected_object.pose.position.y = ret['results'][0]['location'][1]/1000.0
-                self.detected_object.pose.position.z = ret['results'][0]['location'][2]/1000.0
-                self.detected_object.pose.orientation.x = ret['results'][0]['quaternion_xyzw'][0]
-                self.detected_object.pose.orientation.y = ret['results'][0]['quaternion_xyzw'][1]
-                self.detected_object.pose.orientation.z = ret['results'][0]['quaternion_xyzw'][2]
-                self.detected_object.pose.orientation.w = ret['results'][0]['quaternion_xyzw'][3]
+            if 'location' in ret['results'][0]:
+                obj_tform = np.eye(4)
+                obj_tform[:3,:3] = Rotation.from_quat([ret['results'][0]['quaternion_xyzw'][0],
+                                                       ret['results'][0]['quaternion_xyzw'][1],
+                                                       ret['results'][0]['quaternion_xyzw'][2],
+                                                       ret['results'][0]['quaternion_xyzw'][3]]).as_matrix()
+                obj_tform[:3,3] = np.array([ret['results'][0]['location'][0],
+                                            ret['results'][0]['location'][1],
+                                            ret['results'][0]['location'][2]])/scale
+                # obj_tform = self.extrinsic_rot_mat@obj_tform
+            
+                new_obj_position = obj_tform[:3,3]
+                print(new_obj_position)
+                self.detected_object.pose.position.x = new_obj_position[0]
+                self.detected_object.pose.position.y = new_obj_position[1]
+                self.detected_object.pose.position.z = new_obj_position[2]
+                
+                new_obj_quaternion = Rotation.from_matrix(obj_tform[:3,:3]).as_quat()
+                self.detected_object.pose.orientation.x = new_obj_quaternion[0]
+                self.detected_object.pose.orientation.y = new_obj_quaternion[1]
+                self.detected_object.pose.orientation.z = new_obj_quaternion[2]
+                self.detected_object.pose.orientation.w = new_obj_quaternion[3]
 
             self.detected_object.confidence = self.start_time - current_time
             self.detected_object.object_type = "cup"

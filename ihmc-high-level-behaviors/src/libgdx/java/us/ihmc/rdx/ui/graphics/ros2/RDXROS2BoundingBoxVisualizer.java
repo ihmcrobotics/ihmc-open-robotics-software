@@ -12,9 +12,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.DetectedObjectPacket;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDX3DSituatedTextData;
@@ -24,6 +29,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
@@ -31,23 +37,26 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final ROS2Topic<DetectedObjectPacket> topic;
    private final IHMCROS2Input<DetectedObjectPacket> subscription;
    private ModelInstance markerModelInstance;
-   private final RDXModelInstance markerCoordinateFrameInstance;
    private final RDX3DSituatedText text;
    private final Color BOX_EDGE_COLOR = new Color(Color.WHITE);
    private RDX3DSituatedTextData previousTextData;
-   private final Pose3D markerPose = new Pose3D();
+   private final RDXModelInstance markerCoordinateFrameInstance;
+   private final FramePose3D markerPose = new FramePose3D();
+   private final FramePoint3D[] vertices3D = new FramePoint3D[8];
+   private final ReferenceFrame sensorFrame;
+   private final RDXModelInstance sensorCoordinateFrameInstance;
    private final Scalar RED = new Scalar(255, 1, 2, 255);
    private final Point point = new Point();
 
-   public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectPacket> topic)
+   public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ReferenceFrame sensorFrame, ROS2Topic<DetectedObjectPacket> topic)
    {
       super(title + " (ROS 2)");
+      this.sensorFrame = sensorFrame;
       this.topic = topic;
-
-      subscription = ros2.subscribe(topic);
-      text = new RDX3DSituatedText("test");
-
-      markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.3));
+      this.subscription = ros2.subscribe(topic);
+      this.text = new RDX3DSituatedText("test");
+      this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
+      this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));
    }
 
    @Override
@@ -59,7 +68,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
       {
          DetectedObjectPacket DetectedObjectMessage = subscription.getMessageNotification().read();
          Point3D[] vertices = DetectedObjectMessage.getBoundingBoxVertices();
-         Pose3D object_pose = DetectedObjectMessage.getPose();
+         Pose3D objectPoseSensorFrame = DetectedObjectMessage.getPose();
          double confidence = DetectedObjectMessage.getConfidence();
          String object_ype = DetectedObjectMessage.getObjectTypeAsString();
 
@@ -67,11 +76,26 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
          {
             markerModelInstance.model.dispose();
          }
-         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices, 0.005, BOX_EDGE_COLOR));
+
+         for (int i = 0; i < vertices.length; i++)
+         {
+            if (vertices3D[i] == null)
+               vertices3D[i] = new FramePoint3D();
+
+            vertices3D[i].setIncludingFrame(sensorFrame, vertices[i]);
+            vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
+         }
+
+         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, BOX_EDGE_COLOR));
          markerModelInstance = new RDXModelInstance(markerModel);
 
-         markerPose.set(object_pose.getOrientation(), object_pose.getPosition());
+//         System.out.println(objectPoseSensorFrame.getPosition());
+         markerPose.setIncludingFrame(sensorFrame, objectPoseSensorFrame);
+//         markerPose.getPosition().addY(0.06);
+         markerPose.changeFrame(ReferenceFrame.getWorldFrame());
          markerCoordinateFrameInstance.setPoseInWorldFrame(markerPose);
+
+         sensorCoordinateFrameInstance.setTransformToReferenceFrame(sensorFrame);
 
          if (previousTextData != null)
             previousTextData.dispose();
@@ -95,6 +119,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
          {
             text.getRenderables(renderables, pool);
             markerCoordinateFrameInstance.getRenderables(renderables, pool);
+            sensorCoordinateFrameInstance.getRenderables(renderables, pool);
             markerModelInstance.getRenderables(renderables, pool);
          }
       }
@@ -103,11 +128,12 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    public void drawVertexOverlay(Mat rgba8Image)
    {
       Point3D[] boundingBox2dVertices = subscription.getLatest().getBoundingBox2dVertices();
-      for (Point3D boundingBox2dVertex : boundingBox2dVertices)
+      for (int i = 0; i < boundingBox2dVertices.length; i++)
       {
+         Point3D boundingBox2dVertex = boundingBox2dVertices[i];
          point.x((int) boundingBox2dVertex.getX());
          point.y((int) boundingBox2dVertex.getY());
-         opencv_imgproc.circle(rgba8Image, point, 5, RED, -1, opencv_imgproc.LINE_8, 0);
+         opencv_imgproc.circle(rgba8Image, point, (int)(1.0f*i), RED, -1, opencv_imgproc.LINE_8, 0);
       }
    }
 }
