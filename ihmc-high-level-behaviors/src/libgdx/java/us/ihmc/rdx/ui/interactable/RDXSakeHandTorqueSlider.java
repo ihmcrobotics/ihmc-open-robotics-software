@@ -24,7 +24,6 @@ public class RDXSakeHandTorqueSlider
    private static final double ROBOT_DATA_EXPIRATION_DURATION = 1.0;
    private static final float MAX_TORQUE = 1f;
    private static final float MIN_TORQUE = 0f;
-   private static final double MAX_ANGLE_LIMIT = 105.0;
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -35,7 +34,6 @@ public class RDXSakeHandTorqueSlider
    private final float[] sliderValue = new float[1];
    private double loadValueFromRobot = Double.NaN;
    private double presentGoalTorque = Double.NaN;
-   private double presentGoalPosition = Double.NaN;
    private final RobotSide handSide;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
@@ -58,7 +56,6 @@ public class RDXSakeHandTorqueSlider
       {
          loadValueFromRobot = handStatusMessage.getLatest().getPresentTorqueRatio();
          presentGoalTorque = handStatusMessage.getLatest().getGoalTorqueRatio();
-         presentGoalPosition = handStatusMessage.getLatest().getGoalPositionRatio();
       }
    }
 
@@ -74,7 +71,7 @@ public class RDXSakeHandTorqueSlider
             // TODO: ensure resending goal position does not interfere with command sent before
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) 5); // GOTO
-            message.setPostionRatio(presentGoalPosition);
+            message.setPostionRatio(-1.0);
             message.setTorqueRatio(sliderValue[0]);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);

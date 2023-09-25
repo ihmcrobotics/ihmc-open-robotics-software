@@ -31,10 +31,6 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
             * 0.0 min, 1.0 max
             */
    public double goal_torque_ratio_;
-   /**
-            * 0.0 closed, 1.0 open
-            */
-   public double goal_position_ratio_;
    public boolean calibrated_;
    public boolean needs_reset_;
 
@@ -61,8 +57,6 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
       postion_ratio_ = other.postion_ratio_;
 
       goal_torque_ratio_ = other.goal_torque_ratio_;
-
-      goal_position_ratio_ = other.goal_position_ratio_;
 
       calibrated_ = other.calibrated_;
 
@@ -148,21 +142,6 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
       return goal_torque_ratio_;
    }
 
-   /**
-            * 0.0 closed, 1.0 open
-            */
-   public void setGoalPositionRatio(double goal_position_ratio)
-   {
-      goal_position_ratio_ = goal_position_ratio;
-   }
-   /**
-            * 0.0 closed, 1.0 open
-            */
-   public double getGoalPositionRatio()
-   {
-      return goal_position_ratio_;
-   }
-
    public void setCalibrated(boolean calibrated)
    {
       calibrated_ = calibrated;
@@ -211,8 +190,6 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_torque_ratio_, other.goal_torque_ratio_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_position_ratio_, other.goal_position_ratio_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calibrated_, other.calibrated_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon)) return false;
@@ -242,8 +219,6 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
 
       if(this.goal_torque_ratio_ != otherMyClass.goal_torque_ratio_) return false;
 
-      if(this.goal_position_ratio_ != otherMyClass.goal_position_ratio_) return false;
-
       if(this.calibrated_ != otherMyClass.calibrated_) return false;
 
       if(this.needs_reset_ != otherMyClass.needs_reset_) return false;
@@ -270,8 +245,6 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
       builder.append(this.postion_ratio_);      builder.append(", ");
       builder.append("goal_torque_ratio=");
       builder.append(this.goal_torque_ratio_);      builder.append(", ");
-      builder.append("goal_position_ratio=");
-      builder.append(this.goal_position_ratio_);      builder.append(", ");
       builder.append("calibrated=");
       builder.append(this.calibrated_);      builder.append(", ");
       builder.append("needs_reset=");

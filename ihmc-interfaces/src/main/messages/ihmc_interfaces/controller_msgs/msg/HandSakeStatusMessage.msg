@@ -14,8 +14,6 @@ float64 present_torque_ratio
 float64 postion_ratio
 # 0.0 min, 1.0 max
 float64 goal_torque_ratio
-# 0.0 closed, 1.0 open
-float64 goal_position_ratio
 
 bool calibrated
 bool needs_reset

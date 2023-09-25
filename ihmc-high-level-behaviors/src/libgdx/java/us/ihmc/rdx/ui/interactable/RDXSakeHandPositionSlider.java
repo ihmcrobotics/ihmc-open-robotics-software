@@ -42,7 +42,6 @@ public class RDXSakeHandPositionSlider
    private final String sliderName;
    private final float[] sliderValue = new float[1];
    private double valueFromRobot = Double.NaN;
-   private double goalTorqueRatio = Double.NaN;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
@@ -65,7 +64,6 @@ public class RDXSakeHandPositionSlider
       if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage() && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
       {
          valueFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
-         goalTorqueRatio = handStatusMessage.getLatest().getGoalTorqueRatio();
       }
    }
 
@@ -81,7 +79,7 @@ public class RDXSakeHandPositionSlider
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) 5); // GOTO command
             message.setPostionRatio(positionRatio);
-            message.setTorqueRatio(goalTorqueRatio);
+            message.setTorqueRatio(-1.0);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
