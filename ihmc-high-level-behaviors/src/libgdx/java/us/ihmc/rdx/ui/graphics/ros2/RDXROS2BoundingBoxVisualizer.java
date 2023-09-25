@@ -1,9 +1,11 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -12,8 +14,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,21 +21,27 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDX3DSituatedTextData;
+import us.ihmc.rdx.mesh.MeshDataBuilderMissingTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.ArrayList;
+import java.nio.FloatBuffer;
 import java.util.Set;
 
 public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
 {
    private final ROS2Topic<DetectedObjectPacket> topic;
    private final IHMCROS2Input<DetectedObjectPacket> subscription;
+   private final Model boxModel;
+   private final ModelInstance boxModelInstance;
    private ModelInstance markerModelInstance;
    private final RDX3DSituatedText text;
    private final Color BOX_EDGE_COLOR = new Color(Color.WHITE);
@@ -47,6 +53,10 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final RDXModelInstance sensorCoordinateFrameInstance;
    private final Scalar RED = new Scalar(255, 1, 2, 255);
    private final Point point = new Point();
+   private int numVertices;
+   private int numIndices;
+   private final MeshDataBuilder meshDataBuilder = new MeshDataBuilder();
+   private final float[] intermediateVertexBuffer;
 
    public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ReferenceFrame sensorFrame, ROS2Topic<DetectedObjectPacket> topic)
    {
@@ -57,6 +67,18 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
       this.text = new RDX3DSituatedText("test");
       this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
       this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));
+
+      for (int i = 0; i < vertices3D.length; i++)
+      {
+         vertices3D[i] = new FramePoint3D();
+      }
+      boxModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, BOX_EDGE_COLOR));
+      boxModelInstance = new ModelInstance(boxModel);
+      Mesh mesh = boxModelInstance.model.nodes.get(0).parts.get(0).meshPart.mesh;
+      numVertices = mesh.getNumVertices();
+      numIndices = mesh.getNumIndices();
+
+      intermediateVertexBuffer = new float[mesh.getNumVertices() * 3];
    }
 
    @Override
@@ -70,24 +92,25 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
          Point3D[] vertices = DetectedObjectMessage.getBoundingBoxVertices();
          Pose3D objectPoseSensorFrame = DetectedObjectMessage.getPose();
          double confidence = DetectedObjectMessage.getConfidence();
-         String object_ype = DetectedObjectMessage.getObjectTypeAsString();
+         String objectTypeString = DetectedObjectMessage.getObjectTypeAsString();
 
-         if (markerModelInstance != null)
+         Mesh mesh = boxModelInstance.model.nodes.get(0).parts.get(0).meshPart.mesh;
+         numVertices = mesh.getNumVertices();
+         numIndices = mesh.getNumIndices();
+
+         meshDataBuilder.clear();
+         MeshDataBuilderMissingTools.addMultiLineBox(vertices3D, 0.005, meshDataBuilder);
+         MeshDataHolder meshDataHolder = meshDataBuilder.generateMeshDataHolder();
+
+         int i = 0;
+         for (Point3D32 vertex : meshDataHolder.getVertices())
          {
-            markerModelInstance.model.dispose();
+            intermediateVertexBuffer[i++] = vertex.getX32();
+            intermediateVertexBuffer[i++] = vertex.getY32();
+            intermediateVertexBuffer[i++] = vertex.getZ32();
          }
 
-         for (int i = 0; i < vertices.length; i++)
-         {
-            if (vertices3D[i] == null)
-               vertices3D[i] = new FramePoint3D();
-
-            vertices3D[i].setIncludingFrame(sensorFrame, vertices[i]);
-            vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
-         }
-
-         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, BOX_EDGE_COLOR));
-         markerModelInstance = new RDXModelInstance(markerModel);
+         mesh.setVertices(intermediateVertexBuffer, 0, intermediateVertexBuffer.length);
 
 //         System.out.println(objectPoseSensorFrame.getPosition());
          markerPose.setIncludingFrame(sensorFrame, objectPoseSensorFrame);
@@ -120,7 +143,8 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
             text.getRenderables(renderables, pool);
             markerCoordinateFrameInstance.getRenderables(renderables, pool);
             sensorCoordinateFrameInstance.getRenderables(renderables, pool);
-            markerModelInstance.getRenderables(renderables, pool);
+//            markerModelInstance.getRenderables(renderables, pool);
+            boxModelInstance.getRenderables(renderables, pool);
          }
       }
    }
