@@ -34,7 +34,21 @@ public class SceneGraphTest
       Assertions.assertEquals(2, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(0, sceneGraph.getArUcoMarkerIDToNodeMap().size());
 
+      SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
+      sceneGraph.modifyTree(modificationQueue ->
+      {
+         modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));
+         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0"), child1));
+      });
 
+      Assertions.assertEquals(2, sceneGraph.getRootNode().getChildren().size());
+      Assertions.assertEquals(1, child1.getChildren().size());
 
+      Assertions.assertEquals(4, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(4, sceneGraph.getIDToNodeMap().size());
+      Assertions.assertEquals(4, sceneGraph.getNodeNameList().size());
+      Assertions.assertEquals(4, sceneGraph.getNamesToNodesMap().size());
+      Assertions.assertEquals(4, sceneGraph.getIDToNodeMap().size());
+      Assertions.assertEquals(0, sceneGraph.getArUcoMarkerIDToNodeMap().size());
    }
 }
