@@ -239,7 +239,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean addFootPitchToAvoidHeelStrikeWhenSteppingDown()
    {
-      return true;
+      return false;
    }
 
    /**
