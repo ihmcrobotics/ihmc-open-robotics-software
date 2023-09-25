@@ -173,7 +173,15 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 ros2ControllerHelper);
             if (action != null)
             {
-               action.getActionData().loadFromFile(actionNode);
+               try
+               {
+                  action.getActionData().loadFromFile(actionNode);
+               }
+               catch (Exception exception)
+               {
+                  exception.printStackTrace();
+                  LogTools.error("Unable to load action sequence file: {}", workspaceFile.getFilesystemFile().getFileName());
+               }
                action.updateAfterLoading();
                action.update();
                actionSequence.add(action);

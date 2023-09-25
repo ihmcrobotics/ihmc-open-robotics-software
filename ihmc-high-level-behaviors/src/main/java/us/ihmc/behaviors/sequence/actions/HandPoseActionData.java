@@ -52,7 +52,7 @@ public class HandPoseActionData extends FrameBasedBehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       JSONTools.toJSON(jsonNode, getTransformToParent());
    }
 
@@ -71,7 +71,7 @@ public class HandPoseActionData extends FrameBasedBehaviorActionData
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
    }
 

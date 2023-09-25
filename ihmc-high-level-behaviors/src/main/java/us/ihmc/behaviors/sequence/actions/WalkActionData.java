@@ -60,7 +60,7 @@ public class WalkActionData extends FrameBasedBehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       JSONTools.toJSON(jsonNode, getTransformToParent());
       for (RobotSide side : RobotSide.values)
       {
@@ -89,7 +89,7 @@ public class WalkActionData extends FrameBasedBehaviorActionData
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());

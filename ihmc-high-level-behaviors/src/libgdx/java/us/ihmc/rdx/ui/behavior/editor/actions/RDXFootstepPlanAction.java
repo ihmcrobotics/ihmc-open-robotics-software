@@ -57,7 +57,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getConditionallyValidParentFrameName());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
