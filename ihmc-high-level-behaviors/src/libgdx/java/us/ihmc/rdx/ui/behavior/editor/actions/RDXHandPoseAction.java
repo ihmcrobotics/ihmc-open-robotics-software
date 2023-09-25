@@ -106,7 +106,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
    private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
-   private FramePose3D previousPelvisPose;
    private ReferenceFrame chestReferenceFrame;
    private final RDX3DPanelTooltip tooltip;
    private double timeElapsedFromLastChestNotification = 0;
@@ -256,11 +255,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
             if ((System.currentTimeMillis() - timeElapsedFromLastChestNotification) > 50)
             {
-               chestReferenceFrame = getHandReferenceFrameAtTheEndOfAction(syncedChest,
-                                                                           actionData.getReferenceFrameLibrary(),
-                                                                           chestOrientationStatusSubscription,
-                                                                           pelvisPositionStatusSubscription,
-                                                                           previousPelvisPose);
+               chestReferenceFrame = getHandReferenceFrameAtTheEndOfAction(actionData.getReferenceFrameLibrary(), chestOrientationStatusSubscription);
                timeElapsedFromLastChestNotification = System.currentTimeMillis();
             }
 
