@@ -16,7 +16,7 @@ public interface BehaviorActionData
 
    void saveToFile(ObjectNode jsonNode);
 
-   void loadFromFile(JsonNode jsonNode);
+   void loadFromFile(JsonNode jsonNode) throws Exception;
 
    /**
     * A description of the action to help the operator in understanding

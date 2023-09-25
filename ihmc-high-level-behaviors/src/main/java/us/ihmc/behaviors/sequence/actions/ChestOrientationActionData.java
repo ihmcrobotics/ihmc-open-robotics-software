@@ -40,7 +40,7 @@ public class ChestOrientationActionData extends FrameBasedBehaviorActionData
    {
       jsonNode.put("description", description);
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       JSONTools.toJSON(jsonNode, getTransformToParent());
    }
 
@@ -57,7 +57,7 @@ public class ChestOrientationActionData extends FrameBasedBehaviorActionData
    {
       message.setTrajectoryDuration(trajectoryDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
    }
 

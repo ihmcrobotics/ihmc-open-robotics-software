@@ -59,7 +59,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getParentFrameName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (FootstepActionData footstep : footsteps)
       {
@@ -84,7 +84,7 @@ public class FootstepPlanActionData extends FrameBasedBehaviorActionData
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getParentFrameName());
+      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       message.getFootsteps().clear();
       for (FootstepActionData footstep : footsteps)
       {

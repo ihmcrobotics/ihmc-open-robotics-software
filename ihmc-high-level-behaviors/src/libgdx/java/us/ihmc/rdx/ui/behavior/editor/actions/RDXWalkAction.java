@@ -89,7 +89,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(actionData.getConditionalReferenceFrame().get());
       for (RobotSide side : RobotSide.values)
       {

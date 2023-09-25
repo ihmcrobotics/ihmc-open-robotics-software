@@ -32,9 +32,14 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
       this(INVALID_FRAME.getName());
    }
 
-   public String getParentFrameName()
+   public String getConditionallyValidParentFrameName()
    {
       return parentFrameName;
+   }
+
+   public String getActualParentFrameName()
+   {
+      return modifiableReferenceFrame.getReferenceFrame().getParent().getName();
    }
 
    public void setParentFrameName(String parentFrameName)
