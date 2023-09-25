@@ -79,13 +79,13 @@ public class TerrainPerceptionProcessWithDriver
    private final BytedecoRealsense realsense;
    private final BytedecoImage depthBytedecoImage;
    private final Runnable syncedRobotUpdater;
+   private final RobotConfigurationData robotConfigurationData;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final CollisionBoxProvider collisionBoxProvider;
+   private final HumanoidReferenceFrames referenceFrames;
 
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private HumanoidPerceptionModule humanoidPerception;
-   private RobotConfigurationData robotConfigurationData;
-   private FullHumanoidRobotModel fullRobotModel;
-   private CollisionBoxProvider collisionBoxProvider;
-   private HumanoidReferenceFrames referenceFrames;
 
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
@@ -222,7 +222,7 @@ public class TerrainPerceptionProcessWithDriver
             humanoidPerception.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
             humanoidPerception.initializeRealsenseDepthImage(realsense.getDepthHeight(), realsense.getDepthWidth());
             humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
-            humanoidPerception.initializePerspectiveRapidHeightMapExtractor(realsense.getDepthCameraIntrinsics());
+            humanoidPerception.initializeHeightMapExtractor(realsense.getDepthCameraIntrinsics());
             humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
@@ -313,17 +313,16 @@ public class TerrainPerceptionProcessWithDriver
             });
          }
 
-         if (parameters.getRapidRegionsEnabled())
-         {
-            humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
-                                             cameraZUpFrame, true, false, false, false);
-         }
+         // TODO: Add spherical region extraction toggling parameter.
+         // humanoidPerception.setSphericalRegionsEnabled(parameters.getRapidRegionsEnabled());
 
-         if (parameters.getHeightMapEnabled())
-         {
-            humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
-                                             cameraZUpFrame, false, false, true, false);
-         }
+         humanoidPerception.setRapidRegionsEnabled(parameters.getRapidRegionsEnabled());
+         humanoidPerception.setHeightMapEnabled(parameters.getHeightMapEnabled());
+         humanoidPerception.setMappingEnabled(parameters.getSLAMEnabled());
+
+         /* Call all "enabled" setters before this update call.*/
+         humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
+                                          cameraZUpFrame, true, false);
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
          {
