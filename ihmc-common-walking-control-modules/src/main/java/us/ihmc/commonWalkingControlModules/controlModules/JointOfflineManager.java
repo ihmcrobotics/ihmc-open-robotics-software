@@ -30,12 +30,13 @@ public class JointOfflineManager
    private final HashMap<OneDoFJointBasics, YoBoolean> offlineStatus = new HashMap<>();
    private final JointTorqueCommand jointTorqueCommand = new JointTorqueCommand();
 
-   private final SideDependentList<RecyclingArrayList<Point2D>> nominalContactPoints = new SideDependentList<>(side -> new RecyclingArrayList<>(4, Point2D.class));
+   private final SideDependentList<RecyclingArrayList<Point2D>> nominalContactPoints = new SideDependentList<>(side -> new RecyclingArrayList<>(4,
+                                                                                                                                                Point2D.class));
    private final SideDependentList<MutableBoolean> hasNewContactState = new SideDependentList<>(side -> new MutableBoolean(false));
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final FramePoint3D tempPoint = new FramePoint3D();
-   
-   private final double dampingCoefficient = 5.0;
+
+   public static final double dampingCoefficient = 5.0;
 
    public JointOfflineManager(HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry registry)
    {
@@ -75,7 +76,7 @@ public class JointOfflineManager
          }
 
          double desiredJointTorque = 0.0;
-         desiredJointTorque = -joint.getQd()*dampingCoefficient;
+         desiredJointTorque = -joint.getQd() * dampingCoefficient;
          jointTorqueCommand.addJoint(joint, desiredJointTorque);
          offlineStatus.get(joint).set(true);
       }
@@ -151,5 +152,4 @@ public class JointOfflineManager
       jointTorqueCommand.setWeight(jointOfflineWeight.getDoubleValue());
       return jointTorqueCommand;
    }
-
 }
