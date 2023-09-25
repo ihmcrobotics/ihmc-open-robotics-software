@@ -4,6 +4,8 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -24,7 +26,11 @@ public class RapidHeightMapExtractor
    public static float GLOBAL_WIDTH_IN_METERS = 4.0f; // globalWidthInMeters
    public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
 
+   private float internalGlobalWidthInMeters = 12.0f; // globalWidthInMeters
+   private float internalGlobalCellSizeInMeters = 0.02f; // globalCellSizeInMeters
+
    public static float HEIGHT_SCALE_FACTOR = 10000.0f;
+   public static int CROP_WINDOW_SIZE = 201;
 
    private int centerIndex;
    private int localCellsPerAxis;
@@ -34,6 +40,7 @@ public class RapidHeightMapExtractor
 
    private int searchWindowHeight = 250;
    private int searchWindowWidth = 140;
+
 
    private float minHeightRegistration = -0.1f;
    private float maxHeightRegistration = 0.7f;
@@ -60,7 +67,7 @@ public class RapidHeightMapExtractor
    private OpenCLFloatBuffer sensorToGroundTransformBuffer;
    private float[] sensorToGroundTransformArray = new float[16];
 
-   private final Point3D gridCenter = new Point3D();
+   private final Point3D sensorOrigin = new Point3D();
 
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
@@ -69,6 +76,10 @@ public class RapidHeightMapExtractor
    private BytedecoImage inputDepthImage;
    private BytedecoImage localHeightMapImage;
    private BytedecoImage globalHeightMapImage;
+
+   private Rect cropWindowRectangle = new Rect((globalCellsPerAxis - CROP_WINDOW_SIZE) / 2, (globalCellsPerAxis - CROP_WINDOW_SIZE) / 2,
+                                               CROP_WINDOW_SIZE,
+                                               CROP_WINDOW_SIZE);
 
    private CameraIntrinsics cameraIntrinsics;
 
@@ -86,7 +97,7 @@ public class RapidHeightMapExtractor
       centerIndex = HeightMapTools.computeCenterIndex(LOCAL_WIDTH_IN_METERS, LOCAL_CELL_SIZE_IN_METERS);
       localCellsPerAxis = 2 * centerIndex + 1;
 
-      globalCenterIndex = HeightMapTools.computeCenterIndex(GLOBAL_WIDTH_IN_METERS, GLOBAL_CELL_SIZE_IN_METERS);
+      globalCenterIndex = HeightMapTools.computeCenterIndex(internalGlobalWidthInMeters, internalGlobalCellSizeInMeters);
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       parametersBuffer = new OpenCLFloatParameters();
@@ -130,9 +141,9 @@ public class RapidHeightMapExtractor
          RigidBodyTransform worldToGroundTransform = new RigidBodyTransform(groundToWorldTransform);
          worldToGroundTransform.invert();
 
-         gridCenter.set(sensorToWorldTransform.getTranslation());
+         sensorOrigin.set(sensorToWorldTransform.getTranslation());
 
-         populateParameterBuffer(gridCenter);
+         populateParameterBuffer(sensorOrigin);
 
          // Fill world-to-sensor transform buffer
          groundToSensorTransform.get(groundToSensorTransformArray);
@@ -247,6 +258,14 @@ public class RapidHeightMapExtractor
       return globalHeightMapImage;
    }
 
+   public Mat getCroppedGlobalHeightMapImage()
+   {
+      int xIndex = HeightMapTools.coordinateToIndex(sensorOrigin.getX(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(sensorOrigin.getY(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
+      cropWindowRectangle = new Rect((yIndex - CROP_WINDOW_SIZE / 2), (xIndex - CROP_WINDOW_SIZE / 2), CROP_WINDOW_SIZE, CROP_WINDOW_SIZE);
+      return globalHeightMapImage.getBytedecoOpenCVMat().apply(cropWindowRectangle);
+   }
+
    public int getLocalCellsPerAxis()
    {
       return localCellsPerAxis;
@@ -267,9 +286,9 @@ public class RapidHeightMapExtractor
       return globalCenterIndex;
    }
 
-   public Point3D getGridCenter()
+   public Point3D getSensorOrigin()
    {
-      return gridCenter;
+      return sensorOrigin;
    }
 
    public int getSequenceNumber()
