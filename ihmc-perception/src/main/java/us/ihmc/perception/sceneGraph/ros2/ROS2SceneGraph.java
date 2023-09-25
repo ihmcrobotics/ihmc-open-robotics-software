@@ -35,7 +35,7 @@ public class ROS2SceneGraph extends SceneGraph
     * on-robot ones.
     */
    public ROS2SceneGraph(SceneNode rootNode,
-                         BiFunction<ROS2SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier,
+                         BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier,
                          ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                          ROS2IOTopicQualifier subscriptionQualifier)
    {

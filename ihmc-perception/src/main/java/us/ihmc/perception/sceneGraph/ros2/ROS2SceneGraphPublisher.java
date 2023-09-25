@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
@@ -31,7 +32,7 @@ public class ROS2SceneGraphPublisher
     * @param ioQualifier Depending whether on the robot or in some other process.
     *                    If in the on-robot perception process, STATUS, else COMMAND.
     */
-   public void publish(ROS2SceneGraph sceneGraph,
+   public void publish(SceneGraph sceneGraph,
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
