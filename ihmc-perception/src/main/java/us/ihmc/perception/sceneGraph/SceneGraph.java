@@ -57,6 +57,7 @@ public class SceneGraph
    public SceneGraph(SceneNode rootNode)
    {
       this.rootNode = rootNode;
+      updateCaches(rootNode);
    }
 
    /**
