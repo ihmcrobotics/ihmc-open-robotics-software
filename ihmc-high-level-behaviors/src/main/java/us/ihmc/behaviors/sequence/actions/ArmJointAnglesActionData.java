@@ -44,9 +44,9 @@ public class ArmJointAnglesActionData implements BehaviorActionData
       String presetName = jsonNode.get("preset").textValue();
       preset = presetName.equals(CUSTOM_ANGLES_NAME) ? null : PresetArmConfiguration.valueOf(presetName);
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       if (preset == null)
       {
+         trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
          for (int i = 0; i < NUMBER_OF_JOINTS; i++)
          {
             jointAngles[i] = jsonNode.get("j" + i).asDouble();
