@@ -633,9 +633,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void clearInteractablesAndLocomotionGraphics()
    {
-      if (controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
-         locomotionManager.sendAbortWalkingMessage();
-
       locomotionManager.deleteAll();
 
       for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
