@@ -135,9 +135,9 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandConfigurationActionMessage message : latestUpdateMessage.getHandConfigurationActions())
+         for (SakeHandCommandActionMessage message : latestUpdateMessage.getSakeHandCommandActions())
          {
-            HandConfigurationAction action = new HandConfigurationAction(ros2);
+            SakeHandCommandAction action = new SakeHandCommandAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
