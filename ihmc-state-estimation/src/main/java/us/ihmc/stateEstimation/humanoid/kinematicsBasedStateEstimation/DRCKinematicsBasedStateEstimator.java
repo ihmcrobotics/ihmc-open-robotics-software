@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
-import us.ihmc.commonWalkingControlModules.visualizer.ExternalWrenchJointTorqueBasedEstimatorVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -51,8 +50,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class DRCKinematicsBasedStateEstimator implements StateEstimatorController
 {
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
-   public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
-   private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
+   private static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = true;
 
    private enum MomentumEstimatorMode
    {
@@ -75,8 +73,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final ExternalWrenchJointTorqueBasedEstimatorVisualizer estimatedWrenchVisualizer;
-
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
    private final double estimatorDT;
@@ -90,7 +86,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final YoBoolean usePelvisCorrector;
    private final SensorOutputMapReadOnly sensorOutput;
 
-   private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
+   private final JointTorqueAgainstForceSensorVisualizer jointTorqueAgainstForceSensorVisualizer;
 
    private final List<FootSwitchInterface> footSwitchList;
 
@@ -263,9 +259,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
-         jointTorqueFromForceSensorVisualizer = new JointTorqueFromForceSensorVisualizer(footSwitches, registry);
+         jointTorqueAgainstForceSensorVisualizer = new JointTorqueAgainstForceSensorVisualizer(rootJoint.getSuccessor(), feet, footSwitches, registry);
       else
-         jointTorqueFromForceSensorVisualizer = null;
+         jointTorqueAgainstForceSensorVisualizer = null;
 
       visualizeMeasurementFrames = visualizeMeasurementFrames && yoGraphicsListRegistry != null;
 
@@ -279,27 +275,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          operatingMode.set(StateEstimatorMode.FROZEN);
       else
          operatingMode.set(StateEstimatorMode.NORMAL);
-
-      if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
-      {
-         List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
-         for (RigidBodyBasics rigidBody : feet.keySet())
-         {
-            ContactablePlaneBody contactableBody = feet.get(rigidBody);
-            contactablePlaneBodies.add(contactableBody);
-         }
-         estimatedWrenchVisualizer = ExternalWrenchJointTorqueBasedEstimatorVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
-                                                                                                                                   inverseDynamicsStructure.getRootJoint()
-                                                                                                                                                           .getSuccessor(),
-                                                                                                                                   contactablePlaneBodies,
-                                                                                                                                   1.0,
-                                                                                                                                   yoGraphicsListRegistry,
-                                                                                                                                   registry);
-      }
-      else
-      {
-         estimatedWrenchVisualizer = null;
-      }
 
       yoRootTwist = new YoFixedFrameTwist("RootTwist",
                                           rootJoint.getFrameAfterJoint(),
@@ -407,10 +382,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
-         jointTorqueFromForceSensorVisualizer.update();
-
-      if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
-         estimatedWrenchVisualizer.update();
+         jointTorqueAgainstForceSensorVisualizer.update();
    }
 
    @Override
