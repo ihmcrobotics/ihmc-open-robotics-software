@@ -58,6 +58,11 @@ public class SceneNode
       return nodeFrame.getReferenceFrame();
    }
 
+   public ModifiableReferenceFrame getModifiableNodeFrame()
+   {
+      return nodeFrame;
+   }
+
    /**
     * Used to get and set the transform to the parent frame.
     * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getNodeFrame()}.
