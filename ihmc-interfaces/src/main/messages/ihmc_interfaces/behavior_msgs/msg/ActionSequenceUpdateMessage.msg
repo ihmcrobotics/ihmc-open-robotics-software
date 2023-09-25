@@ -7,7 +7,7 @@ behavior_msgs/BodyPartPoseActionMessage[<=200] chest_orientation_actions
 
 behavior_msgs/FootstepPlanActionMessage[<=200] footstep_plan_actions
 
-behavior_msgs/HandConfigurationActionMessage[<=200] hand_configuration_actions
+behavior_msgs/SakeHandCommandActionMessage[<=200] sake_hand_command_actions
 
 behavior_msgs/SidedBodyPartPoseActionMessage[<=200] hand_pose_actions
 

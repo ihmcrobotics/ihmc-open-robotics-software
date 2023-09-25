@@ -17,7 +17,7 @@ public class BehaviorActionSequenceTools
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
       actionSequenceUpdateMessage.getChestOrientationActions().clear();
       actionSequenceUpdateMessage.getFootstepPlanActions().clear();
-      actionSequenceUpdateMessage.getHandConfigurationActions().clear();
+      actionSequenceUpdateMessage.getSakeHandCommandActions().clear();
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
       actionSequenceUpdateMessage.getPelvisHeightActions().clear();
@@ -45,11 +45,12 @@ public class BehaviorActionSequenceTools
             footstepPlanActionMessage.getActionInformation().setActionIndex(i);
             footstepPlanActionData.toMessage(footstepPlanActionMessage);
          }
-         else if (action instanceof HandConfigurationActionData handConfigurationActionData)
+         else if (action instanceof SakeHandCommandActionData sakeHandCommandActionData)
          {
-            HandConfigurationActionMessage handConfigurationActionMessage = actionSequenceUpdateMessage.getHandConfigurationActions().add();
-            handConfigurationActionMessage.getActionInformation().setActionIndex(i);
-            handConfigurationActionData.toMessage(handConfigurationActionMessage);
+            // TODO: Delete HandConfigurationActionMessage
+            SakeHandCommandActionMessage sakehandCommandMessage = actionSequenceUpdateMessage.getSakeHandCommandActions().add();
+            sakehandCommandMessage.getActionInformation().setActionIndex(i);
+            sakeHandCommandActionData.toMessage(sakehandCommandMessage);
          }
          else if (action instanceof HandPoseActionData handPoseActionData)
          {
@@ -87,7 +88,7 @@ public class BehaviorActionSequenceTools
    /**
     * ReferenceFrames don't have mutable parents, so they get recreated. This accomodates for that.
     */
-   public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
+   public static void accommodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
    {
       ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
       ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByNameOrWorld(previousParentFrame.getName()).get();
