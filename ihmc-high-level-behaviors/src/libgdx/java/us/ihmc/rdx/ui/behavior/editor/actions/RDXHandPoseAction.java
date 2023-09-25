@@ -12,12 +12,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -59,7 +58,7 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.behaviors.sequence.actions.HandPoseAction.getChestFrameAtTheEndOfAction;
+import static us.ihmc.behaviors.sequence.actions.HandPoseAction.getHandReferenceFrameAtTheEndOfAction;
 
 public class RDXHandPoseAction extends RDXBehaviorAction
 {
@@ -107,6 +106,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
    private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
+   private FramePose3D previousPelvisPose;
    private ReferenceFrame chestReferenceFrame;
    private final RDX3DPanelTooltip tooltip;
    private double timeElapsedFromLastChestNotification = 0;
@@ -241,6 +241,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    private void visualizeIK()
    {
+
       boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
                                         (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
       if (receivedDataForThisSide)
@@ -253,12 +254,13 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-            if ((System.currentTimeMillis() - timeElapsedFromLastChestNotification) > 30)
+            if ((System.currentTimeMillis() - timeElapsedFromLastChestNotification) > 50)
             {
-               chestReferenceFrame = getChestFrameAtTheEndOfAction(syncedChest,
-                                                                   actionData.getReferenceFrameLibrary(),
-                                                                   chestOrientationStatusSubscription,
-                                                                   pelvisPositionStatusSubscription);
+               chestReferenceFrame = getHandReferenceFrameAtTheEndOfAction(syncedChest,
+                                                                           actionData.getReferenceFrameLibrary(),
+                                                                           chestOrientationStatusSubscription,
+                                                                           pelvisPositionStatusSubscription,
+                                                                           previousPelvisPose);
                timeElapsedFromLastChestNotification = System.currentTimeMillis();
             }
 
