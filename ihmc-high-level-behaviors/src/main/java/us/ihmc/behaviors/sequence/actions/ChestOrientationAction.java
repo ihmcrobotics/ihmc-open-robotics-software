@@ -53,7 +53,6 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       if ((concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)) ||
           (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
-         LogTools.info("SENT CHEST");
          // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
          chestPoseStatus.getParentFrame().resetQuick();
          chestPoseStatus.getParentFrame().add(getParentFrame().getName());

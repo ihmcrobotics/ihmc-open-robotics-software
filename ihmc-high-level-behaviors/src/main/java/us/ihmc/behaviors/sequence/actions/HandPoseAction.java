@@ -24,7 +24,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -51,7 +50,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
-   private FramePose3D previousPelvisPose;
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -86,9 +84,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
                   ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
                   armIKSolver.copyActualToWork();
-                  armIKSolver.setChestExternally(getHandReferenceFrameAtTheEndOfAction(syncedRobot.getFullRobotModel().getChest(), getReferenceFrameLibrary(),
-                                                                                       chestOrientationStatusSubscription, pelvisPositionStatusSubscription,
-                                                                                       previousPelvisPose));
+                  armIKSolver.setChestExternally(getHandReferenceFrameAtTheEndOfAction(getReferenceFrameLibrary(),
+                                                                                       chestOrientationStatusSubscription));
                   computeAndPublishIKSolution(armIKSolver);
       }
       else if (actionIndex == nextExecutionIndex)
@@ -101,16 +98,12 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       }
    }
 
-   public static ReferenceFrame getHandReferenceFrameAtTheEndOfAction(RigidBodyBasics syncedChest,
-                                                                      ReferenceFrameLibrary frameLibrary,
-                                                                      IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription,
-                                                                      IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription,
-                                                                      FramePose3D previousPelvisPose)
+   public static ReferenceFrame getHandReferenceFrameAtTheEndOfAction(ReferenceFrameLibrary frameLibrary,
+                                                                      IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription)
    {
       ModifiableReferenceFrame chestInteractableReferenceFrame;
       if (chestOrientationStatusSubscription.getMessageNotification().poll())
       {
-         LogTools.info("HAND COMPUTED WITH CHEST");
          BodyPartPoseStatusMessage chestPoseStatusMessage = chestOrientationStatusSubscription.getLatest();
          chestInteractableReferenceFrame = new ModifiableReferenceFrame(frameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrame()
                                                                                                                                   .getString(0)).get());
@@ -122,60 +115,62 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 //      ModifiableReferenceFrame pelvisInteractableReferenceFrame;
 //      if (pelvisPositionStatusSubscription.getMessageNotification().poll())
 //      {
-//         LogTools.info("HAND COMPUTED WITH PELVIS");
 //         BodyPartPoseStatusMessage pelvisPoseStatusMessage = pelvisPositionStatusSubscription.getLatest();
 //         pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(frameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame()
 //                                                                                                                                    .getString(0)).get());
 //         pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent(), transformToParent));
-//         previousPelvisPose = new FramePose3D(pelvisInteractableReferenceFrame.getReferenceFrame(),
-//                                              pelvisInteractableReferenceFrame.getReferenceFrame().getTransformToParent());
+//         pelvisInteractableReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
 //      }
 //      else
 //      {
 //         pelvisInteractableReferenceFrame = null;
-//         previousPelvisPose = null;
 //      }
 
       ReferenceFrame chestFrame = null;
 //      if (pelvisInteractableReferenceFrame != null && chestInteractableReferenceFrame != null)
-      ////      {
-      ////         FramePose3D finalPreviousPelvisPose = previousPelvisPose;
-      ////         chestInteractableReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-      ////         chestInteractableReferenceFrame.update(transformToParent -> updateChestPoseFromPelvisPosition(pelvisInteractableReferenceFrame,
-      ////                                                                                                       finalPreviousPelvisPose,
-      ////                                                                                                       chestInteractableReferenceFrame.getReferenceFrame(),
-      ////                                                                                                       transformToParent));
-      ////         chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
-      ////      }
-      ////      else if (pelvisInteractableReferenceFrame != null)
-      ////      {
-      ////         chestFrame = syncedChest.getParentJoint().getFrameAfterJoint();
-      ////         previousPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      ////         chestFrame.getTransformToWorldFrame()
-      ////                   .getTranslation()
-      ////                   .setZ(pelvisInteractableReferenceFrame.getReferenceFrame().getTransformToWorldFrame().getTranslationZ() - previousPelvisPose.getTranslationZ());
-      ////         chestFrame.update();
-      ////      }
-      ////      else
-       if (chestInteractableReferenceFrame != null)
+//      {
+//         FramePose3D finalPreviousPelvisPose = previousPelvisPose;
+//         LogTools.info(previousPelvisPose);
+//         chestInteractableReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+//         chestInteractableReferenceFrame.update(transformToParent -> updateChestPoseFromPelvisPosition(pelvisInteractableReferenceFrame,
+//                                                                                                       finalPreviousPelvisPose,
+//                                                                                                       chestInteractableReferenceFrame.getReferenceFrame(),
+//                                                                                                       transformToParent));
+//         chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
+//      }
+//      else if (pelvisInteractableReferenceFrame != null)
+//      {
+//         chestFrame = syncedChest.getParentJoint().getFrameAfterJoint();
+//         chestFrame.getTransformToWorldFrame()
+//                   .getTranslation()
+//                   .setZ(pelvisInteractableReferenceFrame.getReferenceFrame().getTransformToWorldFrame().getTranslationZ() - previousPelvisPose.getTranslationZ());
+//         chestFrame.update();
+//      }
+//      else
+      if (chestInteractableReferenceFrame != null)
          chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
 
       return chestFrame;
    }
 
-   private static void updateChestPoseFromPelvisPosition(ModifiableReferenceFrame pelvisInteractableFrame,
-                                                         FramePose3D previousPelvisPose,
-                                                         ReferenceFrame parentFrame,
-                                                         RigidBodyTransform chestTransformToParent)
-   {
-      pelvisInteractableFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-      previousPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      RigidBodyTransform newChestTransformToParent = pelvisInteractableFrame.getTransformToParent();
-      // add chest origin and remove abs
-      newChestTransformToParent.getTranslation().setZ(Math.abs(pelvisInteractableFrame.getTransformToParent().getTranslationZ() - previousPelvisPose.getTranslationZ()));
-
-      chestTransformToParent.getTranslation().set(newChestTransformToParent.getTranslation());
-   }
+//   private static void updateChestPoseFromPelvisPosition(ModifiableReferenceFrame pelvisInteractableFrame,
+//                                                         FramePose3D previousPelvisPose,
+//                                                         ReferenceFrame parentFrame,
+//                                                         RigidBodyTransform chestTransformToParent)
+//   {
+//      RigidBodyTransform oldChestTransformToParent = parentFrame.getTransformToParent();
+//      RigidBodyTransform newChestTransformToParent = new RigidBodyTransform(oldChestTransformToParent);
+//
+//      LogTools.info("{} - {} : {}", pelvisInteractableFrame.getTransformToParent().getTranslationZ(), previousPelvisPose.getTranslationZ(),
+//                    pelvisInteractableFrame.getTransformToParent().getTranslationZ() - previousPelvisPose.getTranslationZ());
+//      newChestTransformToParent.getTranslation().setZ(oldChestTransformToParent.getTranslationZ() +
+//                                                      pelvisInteractableFrame.getTransformToParent().getTranslationZ() - previousPelvisPose.getTranslationZ());
+//      previousPelvisPose.set(new RigidBodyTransform(pelvisInteractableFrame.getTransformToParent()));
+//
+//      chestTransformToParent.getTranslation().set(newChestTransformToParent.getTranslation());
+//
+//      LogTools.info("B {}", previousPelvisPose);
+//   }
 
    private void computeAndPublishIKSolution(ArmIKSolver armIKSolver)
    {
