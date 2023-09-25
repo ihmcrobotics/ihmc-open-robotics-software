@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -26,6 +27,7 @@ public class RDXCenterPoseBBoxDemo
          {
             RDXROS2BoundingBoxVisualizer CenterPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
                                                                                                             ros2Helper,
+                                                                                                            ReferenceFrame.getWorldFrame(),
                                                                                                             PerceptionAPI.CENTERPOSE_DETECTED_OBJECT);
             CenterPoseBoundingBoxVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(CenterPoseBoundingBoxVisualizer);

@@ -3,9 +3,13 @@ package us.ihmc.rdx.perception;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
@@ -29,8 +33,18 @@ public class RDXZed2DisplayDemo
          @Override
          public void create()
          {
+            baseUI.create();
+
+            RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
+            sensorToWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
+            sensorToWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+            ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
+                                                                                                           ReferenceFrame.getWorldFrame(),
+                                                                                                           sensorToWorldTransform);
+
             RDXROS2BoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
                                                                                                             ros2Helper,
+                                                                                                            sensorFrame,
                                                                                                             PerceptionAPI.CENTERPOSE_DETECTED_OBJECT);
             centerPoseBoundingBoxVisualizer.setActive(true);
 
@@ -67,10 +81,9 @@ public class RDXZed2DisplayDemo
 
             globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
 
-            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
-            baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
             globalVisualizersPanel.create();
+            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
          }
 
          @Override
