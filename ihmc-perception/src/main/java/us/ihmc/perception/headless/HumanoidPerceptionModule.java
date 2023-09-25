@@ -143,15 +143,15 @@ public class HumanoidPerceptionModule
       Instant acquisitionTime = Instant.now();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
-      OpenCVTools.compressImagePNG(rapidHeightMapExtractor.getGlobalHeightMapImage().getBytedecoOpenCVMat(), compressedDepthPointer);
+      OpenCVTools.compressImagePNG(rapidHeightMapExtractor.getCroppedGlobalHeightMapImage(), compressedDepthPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                          PerceptionAPI.HEIGHT_MAP_GLOBAL,
                                                          depthImageMessage,
                                                          ros2Helper,
                                                          cameraPose,
                                                          acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
-                                                         rapidHeightMapExtractor.getGlobalHeightMapImage().getImageHeight(),
-                                                         rapidHeightMapExtractor.getGlobalHeightMapImage().getImageWidth(),
+                                                         rapidHeightMapExtractor.getCroppedGlobalHeightMapImage().rows(),
+                                                         rapidHeightMapExtractor.getCroppedGlobalHeightMapImage().cols(),
                                                          RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
    }
 
@@ -320,10 +320,11 @@ public class HumanoidPerceptionModule
       {
          latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
                                                  RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                 rapidHeightMapExtractor.getGridCenter().getX(),
-                                                 rapidHeightMapExtractor.getGridCenter().getY());
+                                                 rapidHeightMapExtractor.getSensorOrigin().getX(),
+                                                 rapidHeightMapExtractor.getSensorOrigin().getY());
       }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat.ptr(0), latestHeightMapData,
+                                                    rapidHeightMapExtractor.getSensorOrigin(),
                                                     RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
                                                     RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
       return HeightMapMessageTools.toMessage(latestHeightMapData);

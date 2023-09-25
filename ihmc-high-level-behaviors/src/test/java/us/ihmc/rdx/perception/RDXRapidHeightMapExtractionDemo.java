@@ -92,7 +92,7 @@ public class RDXRapidHeightMapExtractionDemo
             //            createForSpherical(128, 2048);
             createForPerspective(720, 1280);
 
-            baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI.getPanel());
+            baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI);
             baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
             updateHeightMap();
@@ -122,7 +122,7 @@ public class RDXRapidHeightMapExtractionDemo
             cameraIntrinsics = new CameraIntrinsics(depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89);
             humanoidPerception.initializeRealsenseDepthImage(depthHeight, depthWidth);
             humanoidPerception.initializeHeightMapExtractor(cameraIntrinsics);
-            humanoidPerceptionUI.initializeHeightMapVisualizer(null, null, true);
+            humanoidPerceptionUI.initializeHeightMapVisualizer(null);
 
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);
