@@ -65,7 +65,7 @@ public class PartialFootholdModuleParameters
 
       omegaThresholdForEstimation = 1.5;
       decayBreakFrequency = 1.0;
-      rotationAngleThreshold = 0.05;
+      rotationAngleThreshold = 0.018;
       velocityEdgeFilterBreakFrequency = 5.0;
 
       thresholdForCoPRegionOccupancy = 3;
