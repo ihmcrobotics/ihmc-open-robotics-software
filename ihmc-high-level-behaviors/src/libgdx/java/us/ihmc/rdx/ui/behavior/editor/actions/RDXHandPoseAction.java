@@ -103,9 +103,11 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
    private ModifiableReferenceFrame chestReferenceFrame;
    private final RDX3DPanelTooltip tooltip;
+   private double timeElapsedFromLastChestNotification = 0;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
@@ -174,7 +176,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
-      chestPoseStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
+      chestOrientationStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_ORIENTATION_STATUS);
+      pelvisPositionStatusSubscription = ros2.subscribe(BehaviorActionSequence.PELVIS_POSITION_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
@@ -231,64 +234,74 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
                           (concurrencyWithPreviousAction && indexShiftConcurrentAction > 0 && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
       if (displayIKSolution)
+         visualizeIK();
+   }
+
+   private void visualizeIK()
+   {
+      boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
+                                        (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
+      if (receivedDataForThisSide)
       {
-         boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
-                                           (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
-         if (receivedDataForThisSide)
+         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage;
+         if (actionData.getSide() == RobotSide.LEFT)
+            handPoseJointAnglesStatusMessage = leftHandJointAnglesStatusSubscription.getLatest();
+         else
+            handPoseJointAnglesStatusMessage = rightHandJointAnglesStatusSubscription.getLatest();
+         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
-            HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage;
-            if (actionData.getSide() == RobotSide.LEFT)
-               handPoseJointAnglesStatusMessage = leftHandJointAnglesStatusSubscription.getLatest();
+            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
+            updateChestFrame();
+            if (chestReferenceFrame == null)
+               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
             else
-               handPoseJointAnglesStatusMessage = rightHandJointAnglesStatusSubscription.getLatest();
-            if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
-            {
-               SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-               if (chestPoseStatusSubscription.getMessageNotification().poll())
-               {
-                  BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-                  chestReferenceFrame = new ModifiableReferenceFrame(actionData.getReferenceFrameLibrary()
-                                                                               .findFrameByName(chestPoseStatusMessage.getParentFrame()
-                                                                                                                      .getString(0)).get());
-                  chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-               }
-               else
-               {
-                  chestReferenceFrame = null;
-               }
-               if (chestReferenceFrame == null)
-                  floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-               else
-                  floatingJoint.getJointPose().set(chestReferenceFrame.getReferenceFrame().getTransformToRoot());
+               floatingJoint.getJointPose().set(chestReferenceFrame.getReferenceFrame().getTransformToRoot());
 
-               for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
-               {
-                  armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
-               }
-               armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
-               armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
+            for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
+            {
+               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
             }
+            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
+            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
+         }
 
-            // We probably don't want to recolor the mesh every tick.
-            Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
-            if (color != currentColor.get(getActionData().getSide()))
+         // We probably don't want to recolor the mesh every tick.
+         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
+         if (color != currentColor.get(getActionData().getSide()))
+         {
+            currentColor.put(getActionData().getSide(), color);
+            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
             {
-               currentColor.put(getActionData().getSide(), color);
-               for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
+               if (body instanceof RDXRigidBody rdxRigidBody)
                {
-                  if (body instanceof RDXRigidBody rdxRigidBody)
+                  if (rdxRigidBody.getVisualGraphicsNode() != null)
                   {
-                     if (rdxRigidBody.getVisualGraphicsNode() != null)
+                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
                      {
-                        for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
-                        {
-                           part.getModelInstance().setDiffuseColor(color);
-                        }
+                        part.getModelInstance().setDiffuseColor(color);
                      }
                   }
                }
             }
          }
+      }
+   }
+
+   private void updateChestFrame()
+   {
+      if (chestOrientationStatusSubscription.getMessageNotification().poll())
+      {
+         LogTools.info("GRAPHICS WITH CHEST");
+         BodyPartPoseStatusMessage chestPoseStatusMessage = chestOrientationStatusSubscription.getLatest();
+         chestReferenceFrame = new ModifiableReferenceFrame(actionData.getReferenceFrameLibrary()
+                                                                      .findFrameByName(chestPoseStatusMessage.getParentFrame()
+                                                                                                             .getString(0)).get());
+         chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+         timeElapsedFromLastChestNotification = System.currentTimeMillis();
+      }
+      else if ((System.currentTimeMillis() - timeElapsedFromLastChestNotification) > 60)
+      {
+         chestReferenceFrame = null;
       }
    }
 

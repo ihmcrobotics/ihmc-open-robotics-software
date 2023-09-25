@@ -18,9 +18,12 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,7 +43,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -64,7 +68,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
 
-      chestPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
+      chestOrientationStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_ORIENTATION_STATUS);
+      pelvisPositionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.PELVIS_POSITION_STATUS);
    }
 
    @Override
@@ -74,42 +79,104 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       this.actionIndex = actionIndex;
 
-      // if this action has to be executed with the previous one, it means it belongs to a group of concurrent actions
-      if (concurrencyWithPreviousIndex)
+   // if this action has to be executed with the previous or next one, it means it belongs to a group of concurrent actions
+      if (concurrencyWithPreviousIndex || getExecuteWithNextAction())
       {
-         // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
-         if (actionIndex == (nextExecutionIndex + indexShiftConcurrentAction))
+         // if chest is in the same group of concurrent actions, then update the IK according to that chest pose
+         if (chestOrientationStatusSubscription.getMessageNotification().poll())
          {
-            // if chest is in the same group of concurrent actions, then update the IK according to that chest pose
-            if (chestPoseStatusSubscription.getMessageNotification().poll())
-            {
-               BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-               ModifiableReferenceFrame chestReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary()
-                                                                                                 .findFrameByName(chestPoseStatusMessage.getParentFrame()
-                                                                                                                                        .getString(0)).get());
-               chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+            BodyPartPoseStatusMessage chestPoseStatusMessage = chestOrientationStatusSubscription.getLatest();
+            ModifiableReferenceFrame chestReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary()
+                                                                                              .findFrameByName(chestPoseStatusMessage.getParentFrame()
+                                                                                                                                     .getString(0)).get());
+            chestReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
 
-               ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-               armIKSolver.copyActualToWork();
-               armIKSolver.setChestExternally(chestReferenceFrame);
-               computeAndPublishIKSolution(armIKSolver);
-            }
-            // compute the IK with the synced chest
-            else
-            {
-               ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-               armIKSolver.copyActualToWork();
-               computeAndPublishIKSolution(armIKSolver);
-            }
+            ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+            armIKSolver.copyActualToWork();
+            armIKSolver.setChestExternally(chestReferenceFrame.getReferenceFrame());
+            computeAndPublishIKSolution(armIKSolver);
          }
+         // compute the IK with the synced chest
+         else
+         {
+            ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+            armIKSolver.copyActualToWork();
+            computeAndPublishIKSolution(armIKSolver);
+         }
+//         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+//         armIKSolver.copyActualToWork();
+//         armIKSolver.setChestExternally(getChestFrameAtTheEndOfAction(syncedRobot.getFullRobotModel().getChest(), getReferenceFrameLibrary(),
+//                                                                      chestOrientationStatusSubscription, pelvisPositionStatusSubscription));
+//         computeAndPublishIKSolution(armIKSolver);
       }
-      if (actionIndex == nextExecutionIndex)
+      else if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+         armIKSolver.setChestExternally(null);
          armIKSolver.copyActualToWork();
          computeAndPublishIKSolution(armIKSolver);
 
       }
+   }
+
+   public static ReferenceFrame getChestFrameAtTheEndOfAction(RigidBodyBasics syncedChest,
+                                                              ReferenceFrameLibrary frameLibrary,
+                                                              IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription,
+                                                              IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription)
+   {
+      ModifiableReferenceFrame chestInteractableReferenceFrame;
+      if (chestOrientationStatusSubscription.getMessageNotification().poll())
+      {
+         LogTools.info("HAND COMPUTED WITH CHEST");
+         BodyPartPoseStatusMessage chestPoseStatusMessage = chestOrientationStatusSubscription.getLatest();
+         chestInteractableReferenceFrame = new ModifiableReferenceFrame(frameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrame()
+                                                                                                                                  .getString(0)).get());
+         chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+      }
+      else
+         chestInteractableReferenceFrame = null;
+
+      ModifiableReferenceFrame pelvisInteractableReferenceFrame;
+      if (pelvisPositionStatusSubscription.getMessageNotification().poll())
+      {
+         LogTools.info("HAND COMPUTED WITH PELVIS");
+         BodyPartPoseStatusMessage pelvisPoseStatusMessage = pelvisPositionStatusSubscription.getLatest();
+         pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(frameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame()
+                                                                                                                                    .getString(0)).get());
+         pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent(), transformToParent));
+      }
+      else
+         pelvisInteractableReferenceFrame = null;
+
+      ReferenceFrame chestFrame = null;
+      if (pelvisInteractableReferenceFrame != null && chestInteractableReferenceFrame != null)
+      {
+         chestInteractableReferenceFrame.update(transformToParent -> updateChestPoseFromPelvisPosition(pelvisInteractableReferenceFrame,
+                                                                                                       chestInteractableReferenceFrame.getReferenceFrame(),
+                                                                                           transformToParent));
+         chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
+      }
+      else if (pelvisInteractableReferenceFrame != null)
+      {
+         chestFrame = syncedChest.getParentJoint().getFrameAfterJoint();
+         chestFrame.getTransformToWorldFrame()
+                   .getTranslation()
+                   .set(pelvisInteractableReferenceFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation());
+         chestFrame.update();
+      }
+      else if (chestInteractableReferenceFrame != null)
+         chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
+
+      return chestFrame;
+   }
+
+   private static void updateChestPoseFromPelvisPosition(ModifiableReferenceFrame pelvisFrame,
+                                                         ReferenceFrame parentFrame,
+                                                         RigidBodyTransform chestTransformToParent)
+   {
+      pelvisFrame.changeParentFrame(parentFrame);
+      RigidBodyTransform pelvisTranformToParent = pelvisFrame.getTransformToParent();
+      chestTransformToParent.getTranslation().set(pelvisTranformToParent.getTranslation());
    }
 
    private void computeAndPublishIKSolution(ArmIKSolver armIKSolver)
@@ -148,7 +215,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
          armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
          ros2ControllerHelper.publishToController(armTrajectoryMessage);
-         LogTools.info("SENDING");
       }
       else
       {
