@@ -16,10 +16,6 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
             * Transform that expresses the pelvis pose in the parent frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
-   /**
-            * Specifies whether the action is next and concurrent with other actions
-            */
-   public boolean next_and_concurrent_;
 
    public BodyPartPoseStatusMessage()
    {
@@ -37,8 +33,6 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
    {
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
-      next_and_concurrent_ = other.next_and_concurrent_;
-
    }
 
 
@@ -57,21 +51,6 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToParent()
    {
       return transform_to_parent_;
-   }
-
-   /**
-            * Specifies whether the action is next and concurrent with other actions
-            */
-   public void setNextAndConcurrent(boolean next_and_concurrent)
-   {
-      next_and_concurrent_ = next_and_concurrent;
-   }
-   /**
-            * Specifies whether the action is next and concurrent with other actions
-            */
-   public boolean getNextAndConcurrent()
-   {
-      return next_and_concurrent_;
    }
 
 
@@ -95,8 +74,6 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.next_and_concurrent_, other.next_and_concurrent_, epsilon)) return false;
-
 
       return true;
    }
@@ -112,8 +89,6 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
 
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
-      if(this.next_and_concurrent_ != otherMyClass.next_and_concurrent_) return false;
-
 
       return true;
    }
@@ -127,9 +102,7 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
       builder.append("transform_to_parent=");
-      builder.append(this.transform_to_parent_);      builder.append(", ");
-      builder.append("next_and_concurrent=");
-      builder.append(this.next_and_concurrent_);
+      builder.append(this.transform_to_parent_);
       builder.append("}");
       return builder.toString();
    }

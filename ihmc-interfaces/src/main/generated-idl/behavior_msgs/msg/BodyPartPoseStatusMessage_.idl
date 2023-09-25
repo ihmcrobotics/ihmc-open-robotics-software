@@ -20,10 +20,6 @@ module behavior_msgs
          * Transform that expresses the pelvis pose in the parent frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_parent;
-        /**
-         * Specifies whether the action is next and concurrent with other actions
-         */
-        boolean next_and_concurrent;
       };
     };
   };
