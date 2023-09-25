@@ -35,6 +35,11 @@ public class ROS2SceneGraphSubscription
    private final ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
+   public ROS2SceneGraphSubscription(SceneGraph sceneGraph, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, ROS2IOTopicQualifier ioQualifier)
+   {
+      this(sceneGraph, ros2PublishSubscribeAPI, ioQualifier, null);
+   }
+
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
     * @param newNodeSupplier So that new nodes can be externally extended, like for UI representations.
@@ -46,7 +51,10 @@ public class ROS2SceneGraphSubscription
                                      BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier)
    {
       this.sceneGraph = sceneGraph;
-      this.newNodeSupplier = newNodeSupplier;
+      if (newNodeSupplier != null)
+         this.newNodeSupplier = newNodeSupplier;
+      else
+         this.newNodeSupplier = (uneeded, subscriptionNode) -> ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
       this.ioQualifier = ioQualifier;
 
       sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
@@ -64,6 +72,8 @@ public class ROS2SceneGraphSubscription
       {
          ++numberOfMessagesReceived;
          latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
+
+         sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
 
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);

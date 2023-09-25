@@ -24,10 +24,7 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public ROS2SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME),
-           (sceneGraph, subscriptionNode) -> ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph),
-           ros2PublishSubscribeAPI,
-           ROS2IOTopicQualifier.COMMAND);
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
    }
 
    /**
