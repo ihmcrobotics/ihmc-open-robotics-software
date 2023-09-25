@@ -27,9 +27,9 @@ public class ArmJointAnglesActionData implements BehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("preset", preset == null ? CUSTOM_ANGLES_NAME : preset.name());
       jsonNode.put("side", side.getLowerCaseName());
+      jsonNode.put("trajectoryDuration", trajectoryDuration);
       if (preset == null)
       {
-         jsonNode.put("trajectoryDuration", trajectoryDuration);
          for (int i = 0; i < NUMBER_OF_JOINTS; i++)
          {
             jsonNode.put("j" + i, jointAngles[i]);

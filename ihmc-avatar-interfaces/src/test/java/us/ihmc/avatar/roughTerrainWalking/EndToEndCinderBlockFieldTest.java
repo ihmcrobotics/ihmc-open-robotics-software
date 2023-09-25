@@ -89,6 +89,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationFactory.setUsePerfectSensors(getUsePerfectSensors());
       simulationFactory.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationFactory.setUseImpulseBasedPhysicsEngine(useImpulseBasedPhysicsEngine);
+      simulationFactory.setup(simulationTestingParameters);
       simulationTestHelper = simulationFactory.createAvatarTestingSimulation();
    }
 
