@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;

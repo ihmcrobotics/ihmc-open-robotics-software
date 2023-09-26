@@ -54,6 +54,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble stepTime;
    private final YoDouble timeIntoStep;
    private final YoBoolean isDone;
+   private final YoBoolean isSteppingDown;
    private final YoDouble swingHeight;
    private final YoDouble minSwingHeight;
    private final YoDouble maxSwingHeight;
@@ -189,6 +190,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
+      isSteppingDown = new YoBoolean(namePrefix + "IsSteppingDown", registry);
       swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
       swingHeight.set(minSwingHeight);
 
@@ -419,6 +421,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       else
          finalGroundZ = finalPosition.getZ();
 
+      isSteppingDown.set(false);
       switch (trajectoryType)
       {
          case OBSTACLE_CLEARANCE:
@@ -447,6 +450,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                waypointPositions.get(0).setZ(swingHeight.getValue() + initialGroundZ);
                double alpha = stepDownSecondWaypointHeightFactor.getValue();
                waypointPositions.get(1).setZ(swingHeight.getValue() + EuclidCoreTools.interpolate(finalGroundZ, initialGroundZ, alpha));
+               isSteppingDown.set(true);
             }
 
             break;
@@ -821,6 +825,11 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    public EnumMap<Axis3D, ArrayList<YoPolynomial>> getSwingTrajectory()
    {
       return trajectory.getTrajectories();
+   }
+
+   public boolean isSteppingDown()
+   {
+      return isSteppingDown.getBooleanValue();
    }
 
    public YoGraphicDefinition getSCS2YoGraphics()

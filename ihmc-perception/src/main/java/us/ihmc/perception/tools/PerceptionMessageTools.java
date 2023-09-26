@@ -17,13 +17,11 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -214,6 +212,7 @@ public class PerceptionMessageTools
 
    public static void convertToHeightMapData(BytePointer heightMapPointer,
                                              HeightMapData heightMapData,
+                                             Point3D gridCenter,
                                              float widthInMeters,
                                              float cellSizeInMeters)
    {
@@ -223,12 +222,14 @@ public class PerceptionMessageTools
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
 
+      heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
+
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
             int heightIndex = xIndex * cellsPerAxis + yIndex;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR;
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;

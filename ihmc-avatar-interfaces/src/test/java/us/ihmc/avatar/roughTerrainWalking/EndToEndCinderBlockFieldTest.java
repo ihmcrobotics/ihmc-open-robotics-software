@@ -89,6 +89,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationFactory.setUsePerfectSensors(getUsePerfectSensors());
       simulationFactory.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationFactory.setUseImpulseBasedPhysicsEngine(useImpulseBasedPhysicsEngine);
+      simulationFactory.setup(simulationTestingParameters);
       simulationTestHelper = simulationFactory.createAvatarTestingSimulation();
    }
 
@@ -173,7 +174,45 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       walkOverSlantedCinderBlockField(cinderBlockFieldEnvironment, footsteps);
    }
 
-   public void testSlantedCinderBlockField(boolean varyHeight)
+   public void testEastHillMountain()
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
+
+      CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
+      cinderBlockFieldEnvironment.addFlatGround();
+      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addEastHillMountainCinderBlockField();
+
+      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses, getStepHeightOffset());
+      DRCRobotModel robotModel = getRobotModel();
+      useImpulseBasedPhysicsEngine = true;
+      setupSimulation(cinderBlockFieldEnvironment);
+      ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
+      contactParameters.setCoefficientOfFriction(0.80);
+      contactParameters.setCoulombMomentFrictionRatio(0.6);
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationConstructionSet().getPhysicsEngine();
+      physicsEngine.setGlobalContactParameters(contactParameters);
+      simulationTestHelper.start();
+
+      simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.9);
+      simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
+      simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
+
+      assertTrue(simulationTestHelper.simulateNow(0.5));
+      simulationTestHelper.setInPoint();
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
+      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+      {
+         footsteps.getFootstepDataList().get(i).setSwingHeight(0.15);
+      }
+      simulationTestHelper.publishToController(footsteps);
+      double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
+   }
+
+   public void testSlantedCinderBlockField(boolean varyHeight) throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
