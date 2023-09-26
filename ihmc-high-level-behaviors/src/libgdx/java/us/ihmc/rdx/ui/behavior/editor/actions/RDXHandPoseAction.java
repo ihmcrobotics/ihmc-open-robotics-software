@@ -13,7 +13,6 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -177,7 +176,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
-      chestOrientationStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_ORIENTATION_STATUS);
+      chestOrientationStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
       pelvisPositionStatusSubscription = ros2.subscribe(BehaviorActionSequence.PELVIS_POSITION_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }

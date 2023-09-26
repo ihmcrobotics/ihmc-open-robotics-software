@@ -18,11 +18,8 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,7 +40,6 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -67,8 +63,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
 
-      chestOrientationStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_ORIENTATION_STATUS);
-      pelvisPositionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.PELVIS_POSITION_STATUS);
+      chestOrientationStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
    }
 
    @Override
@@ -112,65 +107,12 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       else
          chestInteractableReferenceFrame = null;
 
-//      ModifiableReferenceFrame pelvisInteractableReferenceFrame;
-//      if (pelvisPositionStatusSubscription.getMessageNotification().poll())
-//      {
-//         BodyPartPoseStatusMessage pelvisPoseStatusMessage = pelvisPositionStatusSubscription.getLatest();
-//         pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(frameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame()
-//                                                                                                                                    .getString(0)).get());
-//         pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent(), transformToParent));
-//         pelvisInteractableReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-//      }
-//      else
-//      {
-//         pelvisInteractableReferenceFrame = null;
-//      }
-
       ReferenceFrame chestFrame = null;
-//      if (pelvisInteractableReferenceFrame != null && chestInteractableReferenceFrame != null)
-//      {
-//         FramePose3D finalPreviousPelvisPose = previousPelvisPose;
-//         LogTools.info(previousPelvisPose);
-//         chestInteractableReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-//         chestInteractableReferenceFrame.update(transformToParent -> updateChestPoseFromPelvisPosition(pelvisInteractableReferenceFrame,
-//                                                                                                       finalPreviousPelvisPose,
-//                                                                                                       chestInteractableReferenceFrame.getReferenceFrame(),
-//                                                                                                       transformToParent));
-//         chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
-//      }
-//      else if (pelvisInteractableReferenceFrame != null)
-//      {
-//         chestFrame = syncedChest.getParentJoint().getFrameAfterJoint();
-//         chestFrame.getTransformToWorldFrame()
-//                   .getTranslation()
-//                   .setZ(pelvisInteractableReferenceFrame.getReferenceFrame().getTransformToWorldFrame().getTranslationZ() - previousPelvisPose.getTranslationZ());
-//         chestFrame.update();
-//      }
-//      else
       if (chestInteractableReferenceFrame != null)
          chestFrame = chestInteractableReferenceFrame.getReferenceFrame();
 
       return chestFrame;
    }
-
-//   private static void updateChestPoseFromPelvisPosition(ModifiableReferenceFrame pelvisInteractableFrame,
-//                                                         FramePose3D previousPelvisPose,
-//                                                         ReferenceFrame parentFrame,
-//                                                         RigidBodyTransform chestTransformToParent)
-//   {
-//      RigidBodyTransform oldChestTransformToParent = parentFrame.getTransformToParent();
-//      RigidBodyTransform newChestTransformToParent = new RigidBodyTransform(oldChestTransformToParent);
-//
-//      LogTools.info("{} - {} : {}", pelvisInteractableFrame.getTransformToParent().getTranslationZ(), previousPelvisPose.getTranslationZ(),
-//                    pelvisInteractableFrame.getTransformToParent().getTranslationZ() - previousPelvisPose.getTranslationZ());
-//      newChestTransformToParent.getTranslation().setZ(oldChestTransformToParent.getTranslationZ() +
-//                                                      pelvisInteractableFrame.getTransformToParent().getTranslationZ() - previousPelvisPose.getTranslationZ());
-//      previousPelvisPose.set(new RigidBodyTransform(pelvisInteractableFrame.getTransformToParent()));
-//
-//      chestTransformToParent.getTranslation().set(newChestTransformToParent.getTranslation());
-//
-//      LogTools.info("B {}", previousPelvisPose);
-//   }
 
    private void computeAndPublishIKSolution(ArmIKSolver armIKSolver)
    {
