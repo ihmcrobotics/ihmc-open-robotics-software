@@ -9,12 +9,16 @@ import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
@@ -26,6 +30,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
    private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final FramePose3D desiredChestPose = new FramePose3D();
@@ -33,12 +38,16 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    private double startOrientationDistanceToGoal;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private double heightVariationInWorld = 0.0;
+   private double previousPelvisHeightInWorld = -1.0;
 
    public ChestOrientationAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       setReferenceFrameLibrary(referenceFrameLibrary);
+
+      pelvisPositionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.PELVIS_POSITION_STATUS);
    }
 
    @Override
@@ -52,10 +61,42 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       if ((concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)) ||
           (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
+         if (pelvisPositionStatusSubscription.getMessageNotification().poll())
+         {
+            BodyPartPoseStatusMessage pelvisPositionStatusMessage = pelvisPositionStatusSubscription.getLatest();
+            ModifiableReferenceFrame pelvisInteractableReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(pelvisPositionStatusMessage.getParentFrame()
+                                                                                                                              .getString(0)).get());
+            pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(pelvisPositionStatusMessage.getTransformToParent(), transformToParent));
+            pelvisInteractableReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+
+            if (previousPelvisHeightInWorld < 0.0)
+               heightVariationInWorld = 0.0;
+            else
+            {
+               heightVariationInWorld = pelvisInteractableReferenceFrame.getTransformToParent().getTranslationZ() - previousPelvisHeightInWorld;
+               LogTools.info("{} - {} = {}", pelvisInteractableReferenceFrame.getTransformToParent().getTranslationZ(), previousPelvisHeightInWorld, heightVariationInWorld);
+            }
+            previousPelvisHeightInWorld = pelvisInteractableReferenceFrame.getTransformToParent().getTranslationZ();
+            LogTools.info(previousPelvisHeightInWorld);
+         }
+
+         if (heightVariationInWorld > 0.0)
+         {
+            FramePose3D updatedChestFramePose = new FramePose3D(getParentFrame(), getTransformToParent());
+            updatedChestFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            updatedChestFramePose.getTranslation().setZ(updatedChestFramePose.getTranslationZ() + heightVariationInWorld);
+
+            chestPoseStatus.getParentFrame().add(ReferenceFrame.getWorldFrame().getName());
+            MessageTools.toMessage(new RigidBodyTransform(updatedChestFramePose.getOrientation(), updatedChestFramePose.getPosition()),
+                                   chestPoseStatus.getTransformToParent());
+         }
+         else
+         {
+            chestPoseStatus.getParentFrame().resetQuick();
+            chestPoseStatus.getParentFrame().add(getParentFrame().getName());
+            MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
+         }
          // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-         chestPoseStatus.getParentFrame().resetQuick();
-         chestPoseStatus.getParentFrame().add(getParentFrame().getName());
-         MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
          ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
       }
    }
