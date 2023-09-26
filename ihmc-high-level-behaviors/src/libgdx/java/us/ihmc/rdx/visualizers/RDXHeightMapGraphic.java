@@ -10,9 +10,9 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import perception_msgs.msg.dds.HeightMapMessage;
 import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -25,7 +25,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -63,8 +62,6 @@ public class RDXHeightMapGraphic implements RenderableProvider
 
    public void generateMeshesAsync(HeightMapMessage heightMapMessage)
    {
-      LogTools.debug("Receiving height map with {} cells, ground plane at {}", heightMapMessage.getKeys().size(), heightMapMessage.getEstimatedGroundHeight());
-
       if (!isGeneratingMeshes.getAndSet(true))
       {
          executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));

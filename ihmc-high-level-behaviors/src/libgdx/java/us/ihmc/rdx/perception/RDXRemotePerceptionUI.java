@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -11,14 +12,14 @@ import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 
 public class RDXRemotePerceptionUI
 {
-   private final RDXPanel panel = new RDXPanel("Perception Panel", this::renderImGuiWidgets);
+   private RDXPanel panel;
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
 
@@ -32,11 +33,15 @@ public class RDXRemotePerceptionUI
    private final ConcaveHullFactoryParameters sphericalConcaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
    private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters("Spherical");
 
-   private ImFloat thresholdHeight = new ImFloat(1.0f);
-
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
+
+   public RDXRemotePerceptionUI(ROS2Helper ros2Helper, RDXPanel panel)
+   {
+      this(ros2Helper);
+      this.panel = panel;
+   }
 
    public RDXRemotePerceptionUI(ROS2Helper ros2Helper)
    {
@@ -44,15 +49,15 @@ public class RDXRemotePerceptionUI
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
 
-      remotePropertySets.registerRemotePropertySet(rapidRegionsExtractorParameters, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(polygonizerParameters, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(concaveHullFactoryParameters, PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(regionMappingParameters, PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS);
-
-      remotePropertySets.registerRemotePropertySet(sphericalRegionExtractorParameters, PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(sphericalPolygonizerParameters, PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(sphericalConcaveHullFactoryParameters, PerceptionComms.SPHERICAL_CONVEX_HULL_FACTORY_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(sphericalRegionMappingParameters, PerceptionComms.SPHERICAL_PLANAR_REGION_MAPPING_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(rapidRegionsExtractorParameters, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(polygonizerParameters, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(concaveHullFactoryParameters, PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(regionMappingParameters, PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS);
+      //
+      //remotePropertySets.registerRemotePropertySet(sphericalRegionExtractorParameters, PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(sphericalPolygonizerParameters, PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(sphericalConcaveHullFactoryParameters, PerceptionComms.SPHERICAL_CONVEX_HULL_FACTORY_PARAMETERS);
+      //remotePropertySets.registerRemotePropertySet(sphericalRegionMappingParameters, PerceptionComms.SPHERICAL_PLANAR_REGION_MAPPING_PARAMETERS);
    }
 
    public void setBlackflyLensProperties(BlackflyLensProperties blackflyLensCombo)
@@ -63,13 +68,7 @@ public class RDXRemotePerceptionUI
 
    public void renderImGuiWidgets()
    {
-      ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
       remotePropertySets.renderImGuiWidgets();
-   }
-
-   public float getThresholdHeight()
-   {
-      return thresholdHeight.get();
    }
 
    public void destroy()
@@ -79,10 +78,5 @@ public class RDXRemotePerceptionUI
    public PerceptionConfigurationParameters getPerceptionConfigurationParameters()
    {
       return perceptionConfigurationParameters;
-   }
-
-   public RDXPanel getPanel()
-   {
-      return panel;
    }
 }

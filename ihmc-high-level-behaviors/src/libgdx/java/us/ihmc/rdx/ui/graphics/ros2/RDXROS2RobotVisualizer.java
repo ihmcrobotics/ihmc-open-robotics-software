@@ -129,7 +129,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       {
          teleportCameraToRobotPelvis();
       }
-      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\nKeybind: Ctrl + P");
+      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\n (Ctrl + P)");
       ImGui.sameLine();
 
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))

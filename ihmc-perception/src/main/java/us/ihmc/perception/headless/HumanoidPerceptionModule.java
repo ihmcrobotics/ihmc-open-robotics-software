@@ -1,163 +1,178 @@
-package us.ihmc.perception;
+package us.ihmc.perception.headless;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteTask;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
-import us.ihmc.perception.headless.LocalizationAndMappingTask;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.ActiveMappingTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
-
-   /* For displaying occupancy grid from the active mapping module. */
-   private Mat gridColor = new Mat();
-
-   /* For storing world and agent states when active mapping module is disabled */
-   private MonteCarloPlanningWorld world;
-   private MonteCarloPlanningAgent agent;
-
-   private BytedecoImage realsenseDepthImage;
-
    private final FramePose3D cameraPose = new FramePose3D();
+   private final ImageMessage heightMapImageMessage = new ImageMessage();
+   private final BytePointer compressedDepthPointer = new BytePointer();
+   private final OpenCLManager openCLManager;
 
-   private OpenCLManager openCLManager;
+   private RemoteHeightMapUpdater heightMap;
+   private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private LocalizationAndMappingTask localizationAndMappingTask;
-   private ActiveMappingRemoteTask activeMappingRemoteThread;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
+   private RapidHeightMapExtractor rapidHeightMapExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
    private PlanarRegionsList regionsInSensorFrame;
    private PlanarRegionsList regionsInWorldFrame;
    private CollisionBoxProvider collisionBoxProvider;
    private FramePlanarRegionsList sensorFrameRegions;
+   private HeightMapData latestHeightMapData;
+   private BytedecoImage realsenseDepthImage;
 
-   private RobotConfigurationDataBuffer robotConfigurationDataBuffer;
-   private RobotConfigurationData robotConfigurationData;
-
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private boolean rapidRegionsEnabled = false;
+   private boolean sphericalRegionsEnabled = false;
+   private boolean heightMapEnabled = false;
+   private boolean mappingEnabled = false;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
    }
 
-   public void subscribeToRobotData(String robotName, ROS2Node ros2Node)
+   public void initializeRealsenseDepthImage(int height, int width)
    {
-      this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      this.robotConfigurationData = new RobotConfigurationData();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic(robotName), s ->
-      {
-         s.takeNextData(robotConfigurationData, null);
-      });
+      this.realsenseDepthImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
+      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
+   public void initializeHeightMapUpdater(String robotName, Supplier<ReferenceFrame> frameSupplier, RealtimeROS2Node realtimeRos2Node)
+   {
+      heightMap = new RemoteHeightMapUpdater(robotName, frameSupplier, realtimeRos2Node);
+      heightMap.start();
+   }
+
+   public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
+                             boolean initialized, boolean metricDepth)
    {
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.setEnableLiveMode(mappingEnabled);
 
+      if (rapidRegionsEnabled || heightMapEnabled)
+      {
+         if (metricDepth)
+         {
+            OpenCVTools.convertFloatToShort(incomingDepth, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+         }
+         else
+         {
+            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1);
+         }
+      }
+
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
-           {
-              OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
-              extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
-                                            realsenseDepthImage,
-                                            sensorFrameRegions,
-                                            regionsInWorldFrame,
-                                            regionsInSensorFrame,
-                                            cameraFrame);
-              filterFramePlanarRegionsList();
-              PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
-                                                                   PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                   ros2Helper);
-           });
+         {
+            updatePlanarRegions(ros2Helper, cameraFrame);
+         });
+      }
+
+      if (heightMapEnabled)
+      {
+         executorService.submit(() ->
+         {
+            updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
+         });
       }
    }
 
-   public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
+   private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
+   {
+      extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
+                                    realsenseDepthImage,
+                                    sensorFrameRegions,
+                                    cameraFrame);
+      filterFramePlanarRegionsList();
+      PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
+                                                           PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                           ros2Helper);
+   }
+
+   private void updateRapidHeightMap(ROS2Helper ros2Helper, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   {
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+
+      Instant acquisitionTime = Instant.now();
+      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
+
+      Mat heightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+      OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
+      PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
+                                                         PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
+                                                         ros2Helper,
+                                                         cameraPose,
+                                                         acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
+                                                         heightMapImage.rows(),
+                                                         heightMapImage.cols(),
+                                                         RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
+   }
+
+   public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
    {
       cameraPose.setToZero(sensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
       extractOccupancyGrid(pointCloud,
-                           world.getGrid(),
+                           occupancy,
                            sensorFrame.getTransformToWorldFrame(),
                            thresholdHeight,
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
 
       // TODO: Publish the occupancy grid as ImageMessage using the ROS2Helper.
-
-      if (activeMappingRemoteThread == null)
-      {
-         int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
-                                                                perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                                70);
-         int gridY = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
-                                                                perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                                70);
-
-         agent.changeStateTo(gridX, gridY);
-         agent.measure(world);
-
-         if (display)
-         {
-            MonteCarloPlannerTools.plotWorld(world, gridColor);
-            MonteCarloPlannerTools.plotAgent(agent, gridColor);
-            MonteCarloPlannerTools.plotRangeScan(agent.getScanPoints(), gridColor);
-
-            PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
-         }
-      }
-
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Initializing Perspective Rapid Regions: {}", cameraIntrinsics);
-
       this.sensorFrameRegions = new FramePlanarRegionsList();
-      this.realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
                                                                          cameraIntrinsics.getHeight(),
                                                                          cameraIntrinsics.getWidth(),
@@ -165,26 +180,15 @@ public class HumanoidPerceptionModule
                                                                          cameraIntrinsics.getFy(),
                                                                          cameraIntrinsics.getCx(),
                                                                          cameraIntrinsics.getCy());
-
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
 
-   public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
+   public void initializeHeightMapExtractor(CameraIntrinsics cameraIntrinsics)
    {
-      if (activeMappingRemoteThread != null)
-      {
-         LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
-
-         this.world = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
-         this.agent = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
-      }
-      else
-      {
-         LogTools.warn("Initializing Occupancy Grid from Scratch");
-
-         this.world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
-         this.agent = new MonteCarloPlanningAgent(new Point2D());
-      }
+      LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor();
+      rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
+      rapidHeightMapExtractor.create(openCLManager, realsenseDepthImage, 1);
    }
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
@@ -195,49 +199,29 @@ public class HumanoidPerceptionModule
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
    }
 
-   public void initializeLocalizationAndMappingThread(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
+   public void initializeLocalizationAndMappingThread(HumanoidReferenceFrames referenceFrames, String robotName, ROS2Node ros2Node, boolean smoothing)
    {
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
       localizationAndMappingTask = new LocalizationAndMappingTask(robotName,
                                                                   PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                   PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
                                                                   ros2Node,
-                                                                  syncedRobot.getReferenceFrames(),
-                                                                  () ->
-                                                                        {
-                                                                        },
+                                                                  referenceFrames,
+                                                                  () -> {},
                                                                   smoothing);
-   }
-
-   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
-   {
-      LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteThread = new ActiveMappingRemoteTask(robotName,
-                                                              robotModel,
-                                                              syncedRobot,
-                                                              PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                              ros2Node,
-                                                              syncedRobot.getReferenceFrames(),
-                                                              () ->
-                                                                  {
-                                                                  },
-                                                              true);
    }
 
    public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
                                              BytedecoImage depthImage,
                                              FramePlanarRegionsList sensorFrameRegions,
-                                             PlanarRegionsList worldRegions,
-                                             PlanarRegionsList sensorRegions,
                                              ReferenceFrame cameraFrame)
    {
       extractor.update(depthImage, cameraFrame, sensorFrameRegions);
       extractor.setProcessing(false);
 
-      sensorRegions = sensorFrameRegions.getPlanarRegionsList();
-      worldRegions = sensorRegions.copy();
-      worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
+      regionsInSensorFrame = sensorFrameRegions.getPlanarRegionsList();
+      regionsInWorldFrame = regionsInSensorFrame.copy();
+      regionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
    }
 
    public void extractOccupancyGrid(List<Point3D> pointCloud,
@@ -316,13 +300,54 @@ public class HumanoidPerceptionModule
 
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.destroy();
+   }
 
-      if (activeMappingRemoteThread != null)
-         activeMappingRemoteThread.destroy();
+   public RapidHeightMapExtractor getRapidHeightMapExtractor()
+   {
+      return rapidHeightMapExtractor;
    }
 
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
    }
+
+   public HeightMapMessage getGlobalHeightMapMessage()
+   {
+      BytedecoImage heightMapImage = rapidHeightMapExtractor.getGlobalHeightMapImage();
+      Mat heightMapMat = heightMapImage.getBytedecoOpenCVMat().clone();
+      if (latestHeightMapData == null)
+      {
+         latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                 RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                 rapidHeightMapExtractor.getSensorOrigin().getX(),
+                                                 rapidHeightMapExtractor.getSensorOrigin().getY());
+      }
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat.ptr(0), latestHeightMapData,
+                                                    rapidHeightMapExtractor.getSensorOrigin(),
+                                                    RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                    RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+      return HeightMapMessageTools.toMessage(latestHeightMapData);
+   }
+
+   public void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
+   {
+      this.rapidRegionsEnabled = rapidRegionsEnabled;
+   }
+
+   public void setHeightMapEnabled(boolean heightMapEnabled)
+   {
+      this.heightMapEnabled = heightMapEnabled;
+   }
+
+   public void setMappingEnabled(boolean mappingEnabled)
+   {
+      this.mappingEnabled = mappingEnabled;
+   }
+
+   public void setSphericalRegionsEnabled(boolean sphericalRegionsEnabled)
+   {
+      this.sphericalRegionsEnabled = sphericalRegionsEnabled;
+   }
+
 }
