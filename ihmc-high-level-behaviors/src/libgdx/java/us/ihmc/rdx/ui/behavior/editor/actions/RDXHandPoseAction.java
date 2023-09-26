@@ -57,8 +57,6 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.behaviors.sequence.actions.HandPoseAction.getHandReferenceFrameAtTheEndOfAction;
-
 public class RDXHandPoseAction extends RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
@@ -103,10 +101,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
-   private ReferenceFrame chestReferenceFrame;
    private final RDX3DPanelTooltip tooltip;
-   private double timeElapsedFromLastChestNotification = 0;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
@@ -175,7 +170,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
-      chestOrientationStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
@@ -250,17 +244,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-            if ((System.currentTimeMillis() - timeElapsedFromLastChestNotification) > 50)
-            {
-               chestReferenceFrame = getHandReferenceFrameAtTheEndOfAction(actionData.getReferenceFrameLibrary(), chestOrientationStatusSubscription);
-               timeElapsedFromLastChestNotification = System.currentTimeMillis();
-            }
-
-            if (chestReferenceFrame == null)
-               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            else
-               floatingJoint.getJointPose().set(chestReferenceFrame.getTransformToRoot());
-
+            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
                armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
