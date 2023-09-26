@@ -14,7 +14,9 @@ import java.util.*;
  */
 public class ReferenceFrameLibrary
 {
-   /** Reference frames are have immutable parents, so we must use Suppliers. */
+   /**
+    * Reference frames are have immutable parents, so we must use Suppliers.
+    */
    private final HashMap<String, ReferenceFrameSupplier> frameNameToSupplierMap = new HashMap<>();
    private transient String[] referenceFrameNameArray;
 
@@ -32,11 +34,22 @@ public class ReferenceFrameLibrary
 
       if (referenceFrame != null)
       {
-         if (!frameNameToSupplierMap.containsKey(referenceFrame.getName()))
-         {
-            frameNameToSupplierMap.put(referenceFrame.getName(), referenceFrameSupplier);
-         }
+         frameNameToSupplierMap.put(referenceFrame.getName(), referenceFrameSupplier);
       }
+   }
+
+   public void addParent(ReferenceFrameSupplier referenceFrameSupplier)
+   {
+      if (referenceFrameSupplier instanceof ConditionalReferenceFrame conditionalReferenceFrame)
+      {
+         ReferenceFrame referenceFrame = conditionalReferenceFrame.getModifiableReferenceFrame().getReferenceFrame();
+         frameNameToSupplierMap.put(conditionalReferenceFrame.getConditionallyValidParentFrameName(), referenceFrame::getParent);
+      }
+   }
+
+   public Collection<ReferenceFrameSupplier> getAll()
+   {
+      return frameNameToSupplierMap.values();
    }
 
    public ReferenceFrameSupplier findFrameByNameOrWorld(String referenceFrameName)
@@ -79,7 +92,7 @@ public class ReferenceFrameLibrary
       {
          // Sort in alphabetical order
          SortedSet<String> referenceFrameNameSet = new TreeSet<>(frameNameToSupplierMap.keySet());
-         referenceFrameNameArray = referenceFrameNameSet.toArray(new String[referenceFrameNameSet.size()]);
+         referenceFrameNameArray = referenceFrameNameSet.toArray(new String[0]);
       }
 
       return referenceFrameNameArray;

@@ -21,6 +21,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -187,6 +188,11 @@ public class RDXBehaviorActionSequenceEditor
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
+
+               if (action.getActionData() instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+               {
+                  referenceFrameLibrary.addParent(frameBasedBehaviorActionData.getConditionalReferenceFrame());
+               }
             }
             else
             {
@@ -223,6 +229,7 @@ public class RDXBehaviorActionSequenceEditor
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", behaviorAction.getClass().getSimpleName());
                behaviorAction.getActionData().saveToFile(actionNode);
+               behaviorAction.updateAfterLoading();
             }
          });
       }

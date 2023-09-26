@@ -3,6 +3,7 @@ package us.ihmc.rdx.imgui;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.robotics.referenceFrames.ConditionalReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
@@ -13,7 +14,7 @@ public class ImGuiReferenceFrameLibraryCombo
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private String invalidReferenceFrameName;
+   private ConditionalReferenceFrame selectedReferenceFrame = new ConditionalReferenceFrame();
    private int selectedFrameIndex;
 
    public ImGuiReferenceFrameLibraryCombo(ReferenceFrameLibrary referenceFrameLibrary)
@@ -23,65 +24,42 @@ public class ImGuiReferenceFrameLibraryCombo
 
    public boolean render()
    {
-      String[] referenceFrameNameArray;
+      String[] referenceFrameNamesArray = referenceFrameLibrary.getReferenceFrameNameArray();
 
-      if (invalidReferenceFrameName != null)
+      if (ImGui.beginCombo(labels.get("Parent frame"), referenceFrameNamesArray[selectedFrameIndex]))
       {
-         String[] referenceFrameNameArrayWithInvalidReferenceFrameName = new String[referenceFrameLibrary.getReferenceFrameNameArray().length + 1];
-         referenceFrameNameArrayWithInvalidReferenceFrameName[0] =  invalidReferenceFrameName + " [invalid]";
-         for (int i = 1; i <= referenceFrameLibrary.getReferenceFrameNameArray().length; i++)
+         for (int i = 0; i < referenceFrameNamesArray.length; i++)
          {
-            referenceFrameNameArrayWithInvalidReferenceFrameName[i] = referenceFrameLibrary.getReferenceFrameNameArray()[i - 1];
-         }
-         referenceFrameNameArray = referenceFrameNameArrayWithInvalidReferenceFrameName;
-      }
-      else
-      {
-         referenceFrameNameArray = referenceFrameLibrary.getReferenceFrameNameArray();
-      }
+            ReferenceFrameSupplier referenceFrameSupplier = referenceFrameLibrary.findFrameByName(referenceFrameNamesArray[i]);
 
-      if (ImGui.beginCombo(labels.get("Reference frame"), referenceFrameNameArray[selectedFrameIndex]))
-      {
-         for (int i = 0; i < referenceFrameNameArray.length; i++)
-         {
-            if (referenceFrameNameArray[i].contains("invalid"))
+            if (referenceFrameSupplier != null)
             {
-               ImGui.pushStyleColor(ImGuiCol.Text, Color.RED.toIntBits());
-            }
-            boolean isSelected = selectedFrameIndex == i;
-            if (ImGui.selectable(referenceFrameNameArray[i], isSelected))
-            {
-               selectedFrameIndex = i;
-            }
-            if (referenceFrameNameArray[i].contains("invalid"))
-            {
-               ImGui.popStyleColor();
+               boolean frameHasNoParentFrame = referenceFrameSupplier.get().equals(ConditionalReferenceFrame.INVALID_FRAME);
+
+               if (frameHasNoParentFrame)
+                  ImGui.pushStyleColor(ImGuiCol.Text, Color.RED.toIntBits());
+
+               if (ImGui.selectable(referenceFrameNamesArray[i], selectedFrameIndex == i))
+                  selectedFrameIndex = i;
+
+               if (frameHasNoParentFrame)
+                  ImGui.popStyleColor();
             }
          }
+
          ImGui.endCombo();
       }
 
       return true;
    }
 
-   public boolean setSelectedReferenceFrame(String referenceFrameName)
+   public void setSelectedReferenceFrame(ConditionalReferenceFrame referenceFrame)
    {
-      int frameIndex = referenceFrameLibrary.findFrameIndexByName(referenceFrameName);
-      boolean frameFound = frameIndex >= 0;
-      if (frameFound)
-      {
-         invalidReferenceFrameName = null;
-         selectedFrameIndex = frameIndex;
-      }
-      else
-      {
-         invalidReferenceFrameName = referenceFrameName;
-      }
-      return frameFound;
+      this.selectedReferenceFrame = referenceFrame;
    }
 
    public ReferenceFrameSupplier getSelectedReferenceFrame()
    {
-      return referenceFrameLibrary.findFrameByIndex(selectedFrameIndex);
+      return selectedReferenceFrame;
    }
 }
