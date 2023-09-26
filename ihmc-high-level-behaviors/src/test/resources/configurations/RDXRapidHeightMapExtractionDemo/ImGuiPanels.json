@@ -5,6 +5,7 @@
     "Dataset Navigation Panel" : true,
     "Cropped Height Map" : true,
     "Depth Image" : true,
+    "Internal Height Map" : true,
     "Local Height Map" : true,
     "Perception Panel" : true,
     "VR Settings" : false,

@@ -147,7 +147,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          ImGui.indent();
          ImGui.checkbox("Enable Rapid Regions", enableRapidRegions);
-         visualizers.get("PerspectiveRegions").renderImGuiWidgets();
+         RDXVisualizer visualizer = visualizers.get("PerspectiveRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("PerspectiveRegions").renderImGuiWidgets();
+         }
          ImGui.unindent();
       }
 
@@ -155,7 +159,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          ImGui.indent();
          ImGui.checkbox("Enable Spherical Rapid Regions", enableSphericalRapidRegions);
-         visualizers.get("SphericalRegions").renderImGuiWidgets();
+         RDXVisualizer visualizer = visualizers.get("SphericalRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("SphericalRegions").renderImGuiWidgets();
+         }
          ImGui.unindent();
       }
 
@@ -163,12 +171,13 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          ImGui.indent();
          ImGui.checkbox("Enable GPU Height Map", enableGPUHeightMap);
-
          RDXHeightMapVisualizer heightMapVisualizer = (RDXHeightMapVisualizer) visualizers.get("HeightMap");
-         heightMapVisualizer.renderImGuiWidgets();
-         heightMapUI.renderImGuiWidgets();
-
-         ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
+         if (heightMapVisualizer != null)
+         {
+            heightMapVisualizer.renderImGuiWidgets();
+            heightMapUI.renderImGuiWidgets();
+            ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
+         }
          ImGui.unindent();
       }
 
@@ -176,7 +185,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          ImGui.indent();
          ImGui.checkbox("Enable Map Regions", enableMapRegions);
-         visualizers.get("MapRegions").renderImGuiWidgets();
+         RDXVisualizer visualizer = visualizers.get("MapRegions");
+         if (visualizer != null)
+         {
+            visualizers.get("MapRegions").renderImGuiWidgets();
+         }
          ImGui.unindent();
       }
 

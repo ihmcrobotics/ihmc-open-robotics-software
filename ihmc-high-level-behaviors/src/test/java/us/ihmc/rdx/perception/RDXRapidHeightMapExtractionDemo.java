@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -100,9 +101,6 @@ public class RDXRapidHeightMapExtractionDemo
             humanoidPerceptionUI.initializeHeightMapVisualizer(ros2Helper);
             humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
 
-            //internalHeightMapPanel = new RDXBytedecoImagePanel("Internal Height Map", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-            //debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-
             //            createForSpherical(128, 2048);
             createForPerspective(720, 1280);
 
@@ -111,6 +109,11 @@ public class RDXRapidHeightMapExtractionDemo
 
             updateHeightMap();
 
+
+            internalHeightMapPanel = new RDXBytedecoImagePanel("Internal Height Map",
+                                                               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageWidth(),
+                                                               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageHeight(),
+                                                               RDXImagePanel.FLIP_Y);
             depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
                                                         humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().cols(),
                                                          humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().rows(),
@@ -129,6 +132,7 @@ public class RDXRapidHeightMapExtractionDemo
             navigationPanel.addChild(localHeightMapPanel.getImagePanel());
             navigationPanel.addChild(croppedHeightMapPanel.getImagePanel());
             navigationPanel.addChild(depthImagePanel.getImagePanel());
+            navigationPanel.addChild(internalHeightMapPanel.getImagePanel());
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }

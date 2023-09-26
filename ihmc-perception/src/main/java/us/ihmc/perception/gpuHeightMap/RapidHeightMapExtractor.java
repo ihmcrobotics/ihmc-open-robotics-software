@@ -259,6 +259,11 @@ public class RapidHeightMapExtractor
       return globalHeightMapImage;
    }
 
+   public BytedecoImage getInternalGlobalHeightMapImage()
+   {
+      return globalHeightMapImage;
+   }
+
    public Mat getCroppedGlobalHeightMapImage()
    {
       int xIndex = HeightMapTools.coordinateToIndex(sensorOrigin.getX(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
