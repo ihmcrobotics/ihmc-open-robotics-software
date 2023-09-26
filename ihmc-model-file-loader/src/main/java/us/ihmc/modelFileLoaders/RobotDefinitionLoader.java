@@ -130,8 +130,14 @@ public class RobotDefinitionLoader
             GeometryDefinition geometryDefinition = visualDefinition.getGeometryDefinition();
             if (geometryDefinition instanceof ModelFileGeometryDefinition)
             {
+               try {
                if (!((ModelFileGeometryDefinition) geometryDefinition).getFileName().toLowerCase().endsWith(".stl"))
                   continue;
+               }
+               catch(Exception e){
+                  System.out.println("blah");
+                  
+               }
             }
             visualDefinition.setMaterialDefinition(defaultMaterial);
          }

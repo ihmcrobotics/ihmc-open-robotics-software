@@ -102,8 +102,12 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final ArrayList<OneDoFJointBasics> torqueConstrainedJoints = new ArrayList<>();
    private final ArrayList<OneDoFJointBasics> powerConstrainedJoints = new ArrayList<>();
    private final TObjectDoubleHashMap<OneDoFJointBasics> jointPowerLimits = new TObjectDoubleHashMap<OneDoFJointBasics>();
+
    private final JointTorqueCommand torqueConstraintMinimumCommand = new JointTorqueCommand();
    private final JointTorqueCommand torqueConstraintMaximumCommand = new JointTorqueCommand();
+   private final Map<OneDoFJointBasics, YoDouble> jointTorqueMinimum = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointTorqueMaximum = new HashMap<>();
+
    private final JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler();
 
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
@@ -210,6 +214,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          OneDoFJointBasics joint = oneDoFJoints[i];
          jointMaximumAccelerations.put(joint, new YoDouble("qdd_max_qp_" + joint.getName(), registry));
          jointMinimumAccelerations.put(joint, new YoDouble("qdd_min_qp_" + joint.getName(), registry));
+
+         jointTorqueMinimum.put(joint, new YoDouble("tau_min_qp_" + joint.getName(), registry));
+         jointTorqueMaximum.put(joint, new YoDouble("tau_max_qp_" + joint.getName(), registry));
       }
 
       rhoMin.set(optimizationSettings.getRhoMin());
@@ -544,6 +551,15 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
          torqueConstraintMinimumCommand.addJoint(joint, torqueLimitLower);
          torqueConstraintMaximumCommand.addJoint(joint, torqueLimitUpper);
+
+         for (int j = 0; j < torqueConstraintMinimumCommand.getNumberOfJoints(); j++)
+         {
+            jointTorqueMinimum.get(torqueConstraintMinimumCommand.getJoint(j)).set(torqueConstraintMinimumCommand.getDesiredTorque(j).get(0));
+         }
+         for (int j = 0; j < torqueConstraintMaximumCommand.getNumberOfJoints(); j++)
+         {
+            jointTorqueMaximum.get(torqueConstraintMaximumCommand.getJoint(j)).set(torqueConstraintMaximumCommand.getDesiredTorque(j).get(0));
+         }
       }
    }
 

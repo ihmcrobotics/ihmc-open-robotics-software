@@ -109,7 +109,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleParameter supportDistanceFromOutside;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
-   private final YoFrameConvexPolygon2D allowableAreaForCoP = new YoFrameConvexPolygon2D(yoNamePrefix + "AllowableAreaForCoP", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D allowableAreaForCoP = new YoFrameConvexPolygon2D(yoNamePrefix + "AllowableAreaForCoP", worldFrame, 8, registry);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -224,7 +224,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       {
          FixedFrameConvexPolygon2DBasics allowableAreaForCoP = new YoFrameConvexPolygon2D(robotSide.getCamelCaseName() + "AllowableAreaForCoP",
                                                                                           soleZUpFrames.get(robotSide),
-                                                                                          4,
+                                                                                          8,
                                                                                           registry);
          allowableAreaForCoP.set(bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide));
          allowableAreasForCoP.put(robotSide, allowableAreaForCoP);
