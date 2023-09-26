@@ -104,7 +104,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPositionStatusSubscription;
    private ReferenceFrame chestReferenceFrame;
    private final RDX3DPanelTooltip tooltip;
    private double timeElapsedFromLastChestNotification = 0;
@@ -177,7 +176,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
       chestOrientationStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
-      pelvisPositionStatusSubscription = ros2.subscribe(BehaviorActionSequence.PELVIS_POSITION_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
