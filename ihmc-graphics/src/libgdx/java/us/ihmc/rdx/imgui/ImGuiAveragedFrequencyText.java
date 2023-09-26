@@ -20,12 +20,7 @@ public class ImGuiAveragedFrequencyText
    {
       if (throttler.run())
       {
-         fpsString = String.valueOf((int) averagedFrequencyCalculator.getFrequency());
-         while (fpsString.length() < 3)
-         {
-            fpsString = " " + fpsString;
-         }
-         fpsString += " Hz";
+         fpsString = "%3d Hz".formatted((int) averagedFrequencyCalculator.getFrequency());
       }
       ImGui.text(fpsString);
    }
