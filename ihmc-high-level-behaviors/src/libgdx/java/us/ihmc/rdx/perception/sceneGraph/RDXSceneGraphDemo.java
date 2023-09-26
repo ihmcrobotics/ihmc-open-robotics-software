@@ -21,6 +21,9 @@ import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * A self contained demo and development environment for our scene graph functionality.
+ */
 public class RDXSceneGraphDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
