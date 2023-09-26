@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -7,6 +9,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -23,6 +26,7 @@ public class RigidBodySceneObjectDefinitions
 
    public static final String BOX_NAME = "Box";
    public static final int BOX_MARKER_ID = 2;
+   public static final double BOX_MARKER_SIZE = 0.150;
    // The box is a cube
    public static final double BOX_SIZE = 0.35;
    public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.154;
@@ -63,12 +67,23 @@ public class RigidBodySceneObjectDefinitions
    public static final String DEBRIS_VISUAL_MODEL_FILE_PATH = "environmentObjects/debris/2x4.g3dj";
    public static final RigidBodyTransform DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
+   public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
+   static
+   {
+      ARUCO_MARKER_SIZES.put(BOX_MARKER_ID, BOX_MARKER_SIZE);
+      ARUCO_MARKER_SIZES.put(CAN_OF_SOUP_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+   }
+
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
       if (boxArUcoMarker != null)
       {
-         ensureBoxNodeAdded(sceneGraph, modificationQueue, boxArUcoMarker);
+         SceneNode box = sceneGraph.getNamesToNodesMap().get(BOX_NAME);
+         if (box == null)
+         {
+            ensureBoxNodeAdded(sceneGraph, modificationQueue, boxArUcoMarker);
+         }
       }
 
       ArUcoMarkerNode canOfSoupMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(CAN_OF_SOUP_MARKER_ID);
@@ -116,9 +131,8 @@ public class RigidBodySceneObjectDefinitions
    /**
     * Represents a 2x4 debris
     */
-   public static void ensureDebursNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   public static void ensureDebrisNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
    {
-      // Represents a can of soup detected by a statically nearby placed ArUco marker.
       SceneNode canOfSoup = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                              DEBRIS_NAME,
                                                              sceneGraph.getIDToNodeMap(),

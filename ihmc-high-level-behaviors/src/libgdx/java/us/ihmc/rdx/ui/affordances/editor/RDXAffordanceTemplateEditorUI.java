@@ -73,6 +73,7 @@ public class RDXAffordanceTemplateEditorUI
          DoorSceneNodeDefinitions.ensurePullDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
          RigidBodySceneObjectDefinitions.ensureBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
          RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+         RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
       });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);

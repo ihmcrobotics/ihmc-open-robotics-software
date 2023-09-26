@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,6 +12,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -21,6 +24,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 public class DoorSceneNodeDefinitions
 {
    // PUSH DOOR
+
 
    public static final String PUSH_DOOR_PANEL_NAME = "PushDoorPanel";
    public static final String PUSH_DOOR_FRAME_NAME = "PushDoorFrame";
@@ -133,6 +137,13 @@ public class DoorSceneNodeDefinitions
    {
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
+   }
+
+   public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
+   static
+   {
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.PUSH_DOOR_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.PULL_DOOR_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)

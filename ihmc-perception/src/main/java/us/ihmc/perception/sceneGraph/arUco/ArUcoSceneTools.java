@@ -22,11 +22,20 @@ public class ArUcoSceneTools
       {
          sceneGraph.modifyTree(modificationQueue ->
          {
-               for (TIntIterator iterator = arUcoMarkerDetection.getDetectedIDs().iterator(); iterator.hasNext(); )
+            for (TIntIterator iterator = arUcoMarkerDetection.getDetectedIDs().iterator(); iterator.hasNext(); )
+            {
+               int detectedID = iterator.next();
+               ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
+               if (arUcoMarkerNode == null) // Add ArUco marker node if it is missing
                {
-                  int detectedID = iterator.next();
-                  ArUcoMarkerNode arUcoMarkerNode = sceneGraph.getArUcoMarkerIDToNodeMap().get(detectedID);
-                  if (arUcoMarkerNode == null) // Add ArUco marker node if it is missing
+                  // Make sure the marker is one we know about and get the size
+                  double markerSize = RigidBodySceneObjectDefinitions.ARUCO_MARKER_SIZES.get(detectedID);
+                  if (markerSize == RigidBodySceneObjectDefinitions.ARUCO_MARKER_SIZES.getNoEntryValue())
+                  {
+                     markerSize = DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.get(detectedID);
+                  }
+
+                  if (markerSize != DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.getNoEntryValue())
                   {
                      DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
                      candidateFilter.registerDetection();
@@ -38,14 +47,14 @@ public class ArUcoSceneTools
                         arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(),
                                                               nodeName,
                                                               detectedID,
-                                                              RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+                                                              markerSize);
                         LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
                         modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode()));
                         sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode); // Prevent it getting added twice
                      }
                   }
                }
-
+            }
 
             DoorSceneNodeDefinitions.ensureNodesAdded(sceneGraph, modificationQueue);
             RigidBodySceneObjectDefinitions.ensureNodesAdded(sceneGraph, modificationQueue);
