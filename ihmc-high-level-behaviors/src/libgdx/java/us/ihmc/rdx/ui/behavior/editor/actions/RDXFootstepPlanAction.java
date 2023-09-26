@@ -63,7 +63,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
       actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
-      update(false, -1);
+      update();
    }
 
    @Override
@@ -138,7 +138,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-         update(false, -1);
+         update();
       }
 
       ImGui.pushItemWidth(80.0f);
