@@ -101,7 +101,7 @@ public class HumanoidPerceptionModule
          }
          else
          {
-            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1.0, 0.0);
+            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1);
          }
       }
 
