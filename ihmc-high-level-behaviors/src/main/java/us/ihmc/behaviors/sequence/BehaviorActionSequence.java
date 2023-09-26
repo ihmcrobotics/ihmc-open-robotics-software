@@ -50,10 +50,12 @@ public class BehaviorActionSequence
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("left_hand_pose_joint_angles");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> RIGHT_HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("right_hand_pose_joint_angles");
-   public static final ROS2Topic<BodyPartPoseStatusMessage> CHEST_POSE_STATUS
+   public static final ROS2Topic<BodyPartPoseStatusMessage> CHEST_ORIENTATION_STATUS
          = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("chest_orientation_status");
    public static final ROS2Topic<BodyPartPoseStatusMessage> PELVIS_POSITION_STATUS
          = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("pelvis_position_status");
+   public static final ROS2Topic<BodyPartPoseStatusMessage> IK_CHEST_POSE_STATUS
+         = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("ik_chest_pose_status");
    public static final ROS2Topic<ActionsExecutionStatusMessage> ACTIONS_EXECUTION_STATUS
          = STATUS_TOPIC.withType(ActionsExecutionStatusMessage.class).withSuffix("execution_status");
 

@@ -1,12 +1,17 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionData;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -59,13 +64,18 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    private final RDXInteractableHighlightModel highlightModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
+   private final ROS2ControllerPublishSubscribeAPI ros2;
+   private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
+   private final FramePose3D previousPelvisFramePose = new FramePose3D();
 
    public RDXPelvisHeightPitchAction(RDX3DPanel panel3D,
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
                                      RobotCollisionModel selectionCollisionModel,
-                                     ReferenceFrameLibrary referenceFrameLibrary)
+                                     ReferenceFrameLibrary referenceFrameLibrary,
+                                     ROS2ControllerPublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
@@ -129,6 +139,21 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       else
       {
          highlightModel.setTransparency(0.5);
+      }
+
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) ||
+          (executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
+      {
+         FramePose3D pelvisFramePose = new FramePose3D(getActionData().getParentFrame(), getActionData().getTransformToParent());
+         FramePose3D pelvisFramePoseChange = new FramePose3D(pelvisFramePose);
+
+         pelvisPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
+         MessageTools.toMessage(new RigidBodyTransform(pelvisFramePoseChange.getOrientation(), pelvisFramePoseChange.getPosition()),
+                                pelvisPoseStatus.getTransformToParent());
+         ros2.publish(BehaviorActionSequence.PELVIS_POSITION_STATUS, pelvisPoseStatus);
+
+         previousPelvisFramePose.set(pelvisFramePose);
       }
    }
 

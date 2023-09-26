@@ -13,7 +13,6 @@ import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.opencv.ximgproc.SelectiveSearchSegmentation;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
@@ -679,10 +678,11 @@ public class RDXBehaviorActionSequenceEditor
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
          RDXChestOrientationAction chestOrientationAction = new RDXChestOrientationAction(panel3D,
-                                                   robotModel,
-                                                   syncedRobot.getFullRobotModel(),
-                                                   selectionCollisionModel,
-                                                   referenceFrameLibrary);
+                                                                                          robotModel,
+                                                                                          syncedRobot.getFullRobotModel(),
+                                                                                          selectionCollisionModel,
+                                                                                          referenceFrameLibrary,
+                                                                                          ros2ControllerHelper);
          // Set the new action to where the last one was for faster authoring
          RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
          if (nextPreviousChestOrientationAction != null)
@@ -703,7 +703,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                                         robotModel,
                                                                                         syncedRobot.getFullRobotModel(),
                                                                                         selectionCollisionModel,
-                                                                                        referenceFrameLibrary);
+                                                                                        referenceFrameLibrary,
+                                                                                        ros2ControllerHelper);
          // Set the new action to where the last one was for faster authoring
          RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
          if (nextPreviousPelvisHeightAction != null)

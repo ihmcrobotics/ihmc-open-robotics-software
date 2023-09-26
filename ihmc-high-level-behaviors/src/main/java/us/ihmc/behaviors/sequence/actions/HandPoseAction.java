@@ -39,7 +39,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestOrientationStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -63,7 +63,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
 
-      chestOrientationStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
+      chestPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.IK_CHEST_POSE_STATUS);
    }
 
    @Override
@@ -79,8 +79,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
                   ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
                   armIKSolver.copyActualToWork();
-                  armIKSolver.setChestExternally(getHandReferenceFrameAtTheEndOfAction(getReferenceFrameLibrary(),
-                                                                                       chestOrientationStatusSubscription));
+                  armIKSolver.setChestExternally(getHandReferenceFrameAtTheEndOfAction(getReferenceFrameLibrary(), chestPoseStatusSubscription));
                   computeAndPublishIKSolution(armIKSolver);
       }
       else if (actionIndex == nextExecutionIndex)
