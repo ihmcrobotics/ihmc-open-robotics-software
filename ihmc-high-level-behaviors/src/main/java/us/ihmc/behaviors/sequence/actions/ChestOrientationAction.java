@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
@@ -57,7 +56,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
          chestPoseStatus.getParentFrame().resetQuick();
          chestPoseStatus.getParentFrame().add(getParentFrame().getName());
          MessageTools.toMessage(getTransformToParent(), chestPoseStatus.getTransformToParent());
-         ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_ORIENTATION_STATUS, chestPoseStatus);
+         ros2ControllerHelper.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
       }
    }
 
