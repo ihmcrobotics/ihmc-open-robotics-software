@@ -22,6 +22,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -120,10 +121,22 @@ public class RDXPose3DGizmo implements RenderableProvider
       this(ReferenceFrame.getWorldFrame());
    }
 
+   public RDXPose3DGizmo(String gizmoFrameName)
+   {
+      this(gizmoFrameName, ReferenceFrame.getWorldFrame());
+   }
+
    public RDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
+      this(ReferenceFrameMissingTools.computeFrameName(), parentReferenceFrame);
+   }
+
+   public RDXPose3DGizmo(String gizmoFrameName, ReferenceFrame parentReferenceFrame)
+   {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
-      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,
+                                                                                                  parentReferenceFrame,
+                                                                                                  transformToParent);
       initialize(gizmoFrame, transformToParent);
    }
 
@@ -134,8 +147,14 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public RDXPose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
-      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame,
-                                                                                                         gizmoTransformToParentFrameToModify);
+      this(ReferenceFrameMissingTools.computeFrameName(), gizmoTransformToParentFrameToModify, parentReferenceFrame);
+   }
+
+   public RDXPose3DGizmo(String gizmoFrameName, RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,
+                                                                                                  parentReferenceFrame,
+                                                                                                  gizmoTransformToParentFrameToModify);
       initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 

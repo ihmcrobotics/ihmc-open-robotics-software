@@ -1,0 +1,40 @@
+#ifndef __perception_msgs__msg__ArUcoMarkerNodeMessage__idl__
+#define __perception_msgs__msg__ArUcoMarkerNodeMessage__idl__
+
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * An perception scene node for an ArUco marker
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::ArUcoMarkerNodeMessage_")
+      struct ArUcoMarkerNodeMessage
+      {
+        /**
+         * The detectable scene node information
+         */
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
+        /**
+         * ArUco marker ID
+         */
+        unsigned short marker_id;
+        /**
+         * ArUco marker size
+         */
+        float marker_size;
+        /**
+         * Break frequency filter value for nodes that are alpha filtered
+         */
+        float break_frequency;
+      };
+    };
+  };
+};
+
+#endif
