@@ -115,7 +115,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
 
-      contactStateEstimator = new FootContactStateEstimator(footSwitches, stateEstimatorParameters, registry);
+      contactStateEstimator = new DRCFootContactStateEstimator(footSwitches, stateEstimatorParameters, registry);
 
       footFrames = feet.stream().collect(Collectors.toMap(Function.identity(), foot -> feetContactablePlaneBodies.get(foot).getSoleFrame()));
 

@@ -826,17 +826,19 @@
                   <parameter name="CopFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="4.0" />
                   <parameter name="correctTrustedFeetPositions" type="BooleanParameter" value="false" />
                </registry>
-               <parameter name="TrustOnlyLowestFoot" type="BooleanParameter" value="false" />
-               <parameter name="LowestFootWindowSize" type="IntegerParameter" min="-10" max="10" value="0" />
+               <registry name="DRCFootContactStateEstimator">
+                  <parameter name="TrustOnlyLowestFoot" type="BooleanParameter" value="false" />
+                  <parameter name="LowestFootWindowSize" type="IntegerParameter" min="-10" max="10" value="0" />
+                  <parameter name="delayTimeBeforeTrustingFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                  <parameter name="optimalNumberOfTrustedFeet" type="IntegerParameter" min="-10" max="10" value="2" />
+                  <parameter name="forceZInPercentThresholdToTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+                  <parameter name="forceZInPercentThresholdToNotTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+                  <parameter name="trustImuWhenNoFeetAreInContact" type="BooleanParameter" value="false" />
+			   </registry>
                <parameter name="zeroRootXYPositionAtInitialization" type="BooleanParameter" value="false" />
                <parameter name="zeroFootHeightAtInitialization" type="BooleanParameter" value="true" />
                <parameter name="imuAgainstKinematicsForVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="2.0146195328088035" />
                <parameter name="imuAgainstKinematicsForPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="11.7893" />
-               <parameter name="delayTimeBeforeTrustingFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-               <parameter name="optimalNumberOfTrustedFeet" type="IntegerParameter" min="-10" max="10" value="2" />
-               <parameter name="forceZInPercentThresholdToTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-               <parameter name="forceZInPercentThresholdToNotTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-               <parameter name="trustImuWhenNoFeetAreInContact" type="BooleanParameter" value="false" />
             </registry>
             <registry name="SimpleMomentumStateUpdater">
                <parameter name="grfAgainstIMUAndKinematicsForVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.4261" />
