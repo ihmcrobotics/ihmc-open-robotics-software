@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -15,12 +14,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -75,6 +72,7 @@ public class RDXRapidHeightMapExtractionDemo
 
    private PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
 
+   private int totalCount = 0;
    private int skipIndex = 0;
    private boolean autoIncrement = false;
 
@@ -174,7 +172,7 @@ public class RDXRapidHeightMapExtractionDemo
                loadAndExecute();
             }
 
-            if (skipIndex % 30 == 0 && autoIncrement)
+            if (skipIndex % 30 == 0 && autoIncrement && frameIndex.get() < totalCount - 10)
             {
                frameIndex.set(frameIndex.get() + 1);
                loadAndExecute();
@@ -194,6 +192,10 @@ public class RDXRapidHeightMapExtractionDemo
 
          public void loadAndExecute()
          {
+            if (totalCount == 0)
+            {
+               totalCount = perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1;
+            }
             loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> perceptionDataLoader.loadCompressedDepth(sensorTopicName,
                                                                                                                 frameIndex.get(),
                                                                                                                 depthBytePointer,
@@ -204,7 +206,7 @@ public class RDXRapidHeightMapExtractionDemo
 
          private void renderNavigationPanel()
          {
-            boolean changed = ImGui.sliderInt("Frame Index", frameIndex.getData(), 0, perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
+            boolean changed = ImGui.sliderInt("Frame Index", frameIndex.getData(), 0, totalCount);
 
             if (ImGui.button("Load Previous"))
             {
