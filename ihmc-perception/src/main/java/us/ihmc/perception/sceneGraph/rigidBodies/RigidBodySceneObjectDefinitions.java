@@ -14,10 +14,10 @@ public class RigidBodySceneObjectDefinitions
     * printer. Send ihmc-perception/src/main/resources/arUcoMarkers/Markers0Through3.pdf
     * to IT to get new ones printed.
     */
-   public static final double LARGE_MARKER_WIDTH = 0.150;
+   public static final double LARGE_MARKER_WIDTH = 0.1982;
 
    public static final int BOX_MARKER_ID = 2;
-   public static final double BOX_MARKER_WIDTH = LARGE_MARKER_WIDTH;
+   public static final double BOX_MARKER_WIDTH = 0.150;
    // The box is a cube
    public static final double BOX_SIZE = 0.35;
    public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.154;
