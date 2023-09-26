@@ -872,4 +872,12 @@ public abstract class WalkingControllerParameters
    {
       return false;
    }
+
+   /**
+    * Returns parameters related to joints going offline (becoming uncontrollable)
+    */
+   public JointOfflineParameters getJointOfflineParameters()
+   {
+      return null;
+   };
 }
