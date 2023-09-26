@@ -210,7 +210,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          gridMapGraphic.update();
       }
 
-      if (isActive && enableHeightMapRenderer.get())
+      if (isActive && enableHeightMapRenderer.get() && heightMapImage != null)
       {
          heightMapRenderer.update(zUpToWorldTransform,
                                   heightMapImage.ptr(0),
