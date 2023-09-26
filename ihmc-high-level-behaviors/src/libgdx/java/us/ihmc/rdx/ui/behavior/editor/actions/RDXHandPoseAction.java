@@ -292,7 +292,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       }
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          update(false, -1);
       }
       ImGui.pushItemWidth(80.0f);
