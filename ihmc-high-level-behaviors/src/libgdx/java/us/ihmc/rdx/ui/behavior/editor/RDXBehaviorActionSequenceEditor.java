@@ -175,7 +175,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                action.getActionData().loadFromFile(actionNode);
                action.updateAfterLoading();
-               action.update(false, -1);
+               action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
@@ -802,7 +802,7 @@ public class RDXBehaviorActionSequenceEditor
    private void insertNewAction(RDXBehaviorAction action)
    {
       action.updateAfterLoading();
-      action.update(false, -1);
+      action.update();
 
       int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
       actionSequence.add(insertionIndex, action);
