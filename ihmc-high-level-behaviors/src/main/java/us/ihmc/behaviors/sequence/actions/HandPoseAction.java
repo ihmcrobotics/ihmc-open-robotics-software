@@ -47,6 +47,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
+   private BodyPartPoseStatusMessage chestPoseStatusMessage;
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -84,7 +85,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          ModifiableReferenceFrame chestInteractableReferenceFrame;
          if (chestPoseStatusSubscription.getMessageNotification().poll())
          {
-            BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
+            chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
             chestInteractableReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)).get());
             chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
          }
