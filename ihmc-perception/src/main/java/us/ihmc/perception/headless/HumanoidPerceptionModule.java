@@ -47,7 +47,7 @@ public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final FramePose3D cameraPose = new FramePose3D();
-   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final ImageMessage heightMapImageMessage = new ImageMessage();
    private final BytePointer compressedDepthPointer = new BytePointer();
    private final OpenCLManager openCLManager;
 
@@ -143,15 +143,15 @@ public class HumanoidPerceptionModule
       Instant acquisitionTime = Instant.now();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
-      OpenCVTools.compressImagePNG(rapidHeightMapExtractor.getCroppedGlobalHeightMapImage(), compressedDepthPointer);
+      Mat heightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+      OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                         PerceptionAPI.HEIGHT_MAP_GLOBAL,
-                                                         depthImageMessage,
+                                                         PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
                                                          ros2Helper,
                                                          cameraPose,
                                                          acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
-                                                         rapidHeightMapExtractor.getCroppedGlobalHeightMapImage().rows(),
-                                                         rapidHeightMapExtractor.getCroppedGlobalHeightMapImage().cols(),
+                                                         heightMapImage.rows(),
+                                                         heightMapImage.cols(),
                                                          RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
    }
 
