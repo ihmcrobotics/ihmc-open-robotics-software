@@ -1,12 +1,16 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionData;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -63,13 +67,17 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final RDXInteractableHighlightModel highlightModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
+   private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
+   private final ROS2PublishSubscribeAPI ros2;
 
    public RDXChestOrientationAction(RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
-                                    ReferenceFrameLibrary referenceFrameLibrary)
+                                    ReferenceFrameLibrary referenceFrameLibrary,
+                                    ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
@@ -133,6 +141,17 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       else
       {
          highlightModel.setTransparency(0.5);
+      }
+
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) ||
+          (executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
+      {
+         chestPoseStatus.getParentFrame().resetQuick();
+         chestPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
+         MessageTools.toMessage(getActionData().getTransformToParent(), chestPoseStatus.getTransformToParent());
+         // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
+         ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
       }
    }
 

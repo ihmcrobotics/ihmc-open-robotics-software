@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
@@ -14,10 +15,13 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,6 +46,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -58,6 +63,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
+
+      chestPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
    }
 
    @Override
@@ -69,16 +76,36 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
       if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
-          actionIndex == nextExecutionIndex)
+          (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
-         computeAndPublishIKSolution();
+         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+         armIKSolver.copyActualToWork();
+
+         ModifiableReferenceFrame chestInteractableReferenceFrame;
+         if (chestPoseStatusSubscription.getMessageNotification().poll())
+         {
+            BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
+            chestInteractableReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)).get());
+            chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+         }
+         else
+            chestInteractableReferenceFrame = null;
+
+         armIKSolver.setChestExternally(chestInteractableReferenceFrame == null ? null : chestInteractableReferenceFrame.getReferenceFrame());
+         computeAndPublishIKSolution(armIKSolver);
+      }
+      else if (actionIndex == nextExecutionIndex)
+      {
+         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+         armIKSolver.setChestExternally(null);
+         armIKSolver.copyActualToWork();
+         computeAndPublishIKSolution(armIKSolver);
+
       }
    }
 
-   private void computeAndPublishIKSolution()
+   private void computeAndPublishIKSolution(ArmIKSolver armIKSolver)
    {
-      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-      armIKSolver.copyActualToWork();
       armIKSolver.update(getPalmFrame());
       armIKSolver.solve();
 
