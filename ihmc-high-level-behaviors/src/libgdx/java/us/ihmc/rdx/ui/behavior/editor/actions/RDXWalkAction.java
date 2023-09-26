@@ -185,7 +185,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          update();
       }
       if (ImGui.button(labels.get("Plan")))
