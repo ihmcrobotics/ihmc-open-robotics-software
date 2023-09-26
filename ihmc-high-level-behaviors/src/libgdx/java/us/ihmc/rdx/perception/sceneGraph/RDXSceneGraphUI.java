@@ -28,7 +28,7 @@ import java.util.*;
  * - It renders them in the 3D scene as semi-transparent models.
  * - Allows the operator to override the poses of nodes.
  */
-public class RDXPerceptionSceneGraphUI
+public class RDXSceneGraphUI
 {
    private final ROS2SceneGraph sceneGraph;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
@@ -40,7 +40,7 @@ public class RDXPerceptionSceneGraphUI
    private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
-   public RDXPerceptionSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
+   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
