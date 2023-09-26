@@ -5,6 +5,11 @@ import gnu.trove.list.TFloatList;
 import gnu.trove.list.linked.TFloatLinkedList;
 import us.ihmc.commons.thread.Notification;
 
+/**
+ * This is for filtering the acceptance of detected objects in
+ * the world before considering them to exist, to exclude flickery
+ * false positives.
+ */
 public class DetectionFilter
 {
    public final int HISTORY = 30; // 1 second at 30 HZ
