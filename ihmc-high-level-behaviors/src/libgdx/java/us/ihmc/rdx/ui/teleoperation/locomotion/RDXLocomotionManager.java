@@ -453,6 +453,9 @@ public class RDXLocomotionManager
    public void sendAbortWalkingMessage()
    {
       communicationHelper.publishToController(abortWalkingMessage);
+      // The abort walking message can only be process when the controller is in walking state, this forces the abort to go through
+      pauseWalkingMessage.setPause(false);
+      communicationHelper.publishToController(pauseWalkingMessage);
    }
 
    public void setPauseWalkingAndPublish(boolean pauseWalking)

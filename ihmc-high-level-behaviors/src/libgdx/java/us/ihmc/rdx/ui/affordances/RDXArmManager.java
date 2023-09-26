@@ -196,7 +196,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
          {
-            executeArmHome(side);
+            executeArmAngles(side, PresetArmConfiguration.HOME, teleoperationParameters.getTrajectoryTime());
          }
       }
 
