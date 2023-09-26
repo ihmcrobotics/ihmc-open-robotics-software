@@ -30,7 +30,6 @@ import java.util.*;
 public class RDXSceneGraphUI
 {
    private final ROS2SceneGraph sceneGraph;
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final RDXSceneNode uiRootNode;
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -40,8 +39,6 @@ public class RDXSceneGraphUI
 
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
-
       uiRootNode = new RDXSceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME);
       sceneGraph = new ROS2SceneGraph
       (
