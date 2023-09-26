@@ -270,7 +270,7 @@ public class RDXRapidHeightMapExtractionDemo
       sensorToGroundTransform.getRotation()
                              .set(new Quaternion(0.0f, sensorToGroundTransform.getRotation().getPitch(), sensorToGroundTransform.getRotation().getRoll()));
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
-//      groundToSensorTransform.invert();
+      groundToSensorTransform.invert();
       cameraZUpFrame.getTransformToParent().set(groundToSensorTransform);
 
       humanoidPerception.updateTerrain(ros2Helper,
