@@ -124,9 +124,8 @@ public class RDXAffordanceTemplateEditorUI
 
       mirror = new RDXAffordanceTemplateMirror(interactableHands, handTransformsToWorld, handPoses, status);
       locker = new RDXAffordanceTemplateLocker(handTransformsToWorld, handPoses, status);
-      status.setMirror(mirror);
-      fileManager = new RDXAffordanceTemplateFileManager(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
 
+      fileManager = new RDXAffordanceTemplateFileManager(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
       fileManagerDirectory = new ImGuiDirectory(fileManager.getConfigurationDirectory(),
                                                 fileName -> !currentObjectName.isEmpty() && fileName.contains(currentObjectName),
                                                 pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
