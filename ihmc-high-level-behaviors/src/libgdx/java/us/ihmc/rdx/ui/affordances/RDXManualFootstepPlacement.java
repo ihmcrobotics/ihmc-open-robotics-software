@@ -103,13 +103,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          createNewFootstep(RobotSide.LEFT);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: R");
+      ImGuiTools.previousWidgetTooltip("R");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Right")) || (panel3DIsHovered && ImGui.isKeyPressed('T')))
       {
          createNewFootstep(RobotSide.RIGHT);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: T");
+      ImGuiTools.previousWidgetTooltip("T");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Square Up")))
       {
@@ -120,13 +120,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          exitPlacement();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      ImGuiTools.previousWidgetTooltip("Escape");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          footstepPlan.removeLastStep();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
+      ImGuiTools.previousWidgetTooltip("Delete");
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
