@@ -143,16 +143,17 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          highlightModel.setTransparency(0.5);
       }
 
+      chestPoseStatus.getParentFrame().resetQuick();
+      chestPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
+      MessageTools.toMessage(getActionData().getTransformToParent(), chestPoseStatus.getTransformToParent());
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
       if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) ||
           (executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
-      {
-         chestPoseStatus.getParentFrame().resetQuick();
-         chestPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
-         MessageTools.toMessage(getActionData().getTransformToParent(), chestPoseStatus.getTransformToParent());
-         // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-         ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
-      }
+         chestPoseStatus.setCurrentAndConcurrent(true);
+      else
+         chestPoseStatus.setCurrentAndConcurrent(false);
+      // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
+      ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
    }
 
    @Override
