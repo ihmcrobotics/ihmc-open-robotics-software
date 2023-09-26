@@ -189,7 +189,7 @@ public class RDXTeleoperationManager extends RDXPanel
       RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
       deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
       deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
-      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
+      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Shift + Escape)");
 
       locomotionManager.create(baseUI);
 
