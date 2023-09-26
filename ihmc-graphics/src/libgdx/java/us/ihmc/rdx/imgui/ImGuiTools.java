@@ -241,7 +241,7 @@ public class ImGuiTools
 
    public static void textBold(String text)
    {
-      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+      ImGui.pushFont(getSmallBoldFont());
       ImGui.text(text);
       ImGui.popFont();
    }
