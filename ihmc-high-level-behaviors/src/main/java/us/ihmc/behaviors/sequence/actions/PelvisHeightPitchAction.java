@@ -24,7 +24,6 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionData impleme
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
-   private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
@@ -49,16 +48,6 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionData impleme
       update();
 
       this.actionIndex = actionIndex;
-
-      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      if ((concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)) ||
-          (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
-      {
-         pelvisPoseStatus.getParentFrame().resetQuick();
-         pelvisPoseStatus.getParentFrame().add(getParentFrame().getName());
-         MessageTools.toMessage(getTransformToParent(), pelvisPoseStatus.getTransformToParent());
-         ros2ControllerHelper.publish(BehaviorActionSequence.PELVIS_POSITION_STATUS, pelvisPoseStatus);
-      }
    }
 
    @Override
