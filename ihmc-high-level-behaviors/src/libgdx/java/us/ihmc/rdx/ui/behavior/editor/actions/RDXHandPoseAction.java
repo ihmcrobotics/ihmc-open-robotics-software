@@ -31,7 +31,8 @@ import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.rdx.ui.affordances.*;
+import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
+import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
@@ -161,7 +162,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame());
    }
 
    public void setSide(RobotSide side)

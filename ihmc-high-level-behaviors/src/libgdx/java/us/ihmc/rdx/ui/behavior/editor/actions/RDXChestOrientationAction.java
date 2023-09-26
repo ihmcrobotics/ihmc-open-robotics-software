@@ -89,7 +89,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
