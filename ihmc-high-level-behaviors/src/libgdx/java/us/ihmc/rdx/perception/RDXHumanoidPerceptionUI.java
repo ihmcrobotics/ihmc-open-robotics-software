@@ -115,10 +115,13 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       if (rapidRegionsUI != null)
          rapidRegionsUI.render();
 
-      humanoidPerception.setMappingEnabled(enableMapRegions.get());
-      humanoidPerception.setRapidRegionsEnabled(enableRapidRegions.get());
-      humanoidPerception.setHeightMapEnabled(enableGPUHeightMap.get());
-      //humanoidPerception.setSphericalRegionsEnabled(enableSphericalRapidRegions.get());
+      if (humanoidPerception != null)
+      {
+         humanoidPerception.setMappingEnabled(enableMapRegions.get());
+         humanoidPerception.setRapidRegionsEnabled(enableRapidRegions.get());
+         humanoidPerception.setHeightMapEnabled(enableGPUHeightMap.get());
+         //humanoidPerception.setSphericalRegionsEnabled(enableSphericalRapidRegions.get());
+      }
 
       for (RDXVisualizer visualizer : visualizers.values())
       {
