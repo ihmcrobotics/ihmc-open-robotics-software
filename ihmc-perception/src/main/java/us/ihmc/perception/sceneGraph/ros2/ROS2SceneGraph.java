@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 public class ROS2SceneGraph extends SceneGraph
 {
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
-   private final ROS2IOTopicQualifier subscriptionQualifier;
+   private final ROS2ActorDesignation ros2ActorDesignation;
    private final ROS2SceneGraphSubscription sceneGraphSubscription;
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
@@ -24,7 +24,7 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public ROS2SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, ros2PublishSubscribeAPI, ROS2ActorDesignation.ROBOT);
    }
 
    /**
@@ -34,13 +34,13 @@ public class ROS2SceneGraph extends SceneGraph
    public ROS2SceneGraph(SceneNode rootNode,
                          BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier,
                          ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                         ROS2IOTopicQualifier subscriptionQualifier)
+                         ROS2ActorDesignation ros2ActorDesignation)
    {
       super(rootNode);
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
-      this.subscriptionQualifier = subscriptionQualifier;
+      this.ros2ActorDesignation = ros2ActorDesignation;
 
-      sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, subscriptionQualifier, newNodeSupplier);
+      sceneGraphSubscription = new ROS2SceneGraphSubscription(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getIncomingQualifier(), newNodeSupplier);
    }
 
    /**
@@ -65,7 +65,7 @@ public class ROS2SceneGraph extends SceneGraph
    public void updatePublication()
    {
       if (publishThrottler.run())
-         sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, subscriptionQualifier.getOpposite());
+         sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
    }
 
    public void destroy()
