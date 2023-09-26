@@ -21,7 +21,7 @@ import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
-public class RDXPerceptionSceneGraphDemo
+public class RDXSceneGraphDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
@@ -33,12 +33,12 @@ public class RDXPerceptionSceneGraphDemo
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private ROS2SceneGraph onRobotSceneGraph;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
-   private RDXPerceptionSceneGraphUI perceptionSceneGraphUI;
+   private RDXSceneGraphUI sceneGraphUI;
    private RDXOpenCVArUcoMarkerDetectionUI openCVArUcoMarkerDetectionUI;
    /** Simulate an update rate more similar to what it would be on the robot. */
    private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
 
-   public RDXPerceptionSceneGraphDemo()
+   public RDXSceneGraphDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -88,9 +88,9 @@ public class RDXPerceptionSceneGraphDemo
                                                                       ros2Helper,
                                                                       onRobotSceneGraph.getArUcoMarkerIDToNodeMap());
 
-            perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());
+            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
+            baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
             openCVArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
             openCVArUcoMarkerDetectionUI.create(arUcoMarkerDetection);
@@ -120,7 +120,7 @@ public class RDXPerceptionSceneGraphDemo
                onRobotSceneGraph.updatePublication();
             }
 
-            perceptionSceneGraphUI.update();
+            sceneGraphUI.update();
 
             globalVisualizersUI.update();
 
@@ -142,6 +142,6 @@ public class RDXPerceptionSceneGraphDemo
 
    public static void main(String[] args)
    {
-      new RDXPerceptionSceneGraphDemo();
+      new RDXSceneGraphDemo();
    }
 }
