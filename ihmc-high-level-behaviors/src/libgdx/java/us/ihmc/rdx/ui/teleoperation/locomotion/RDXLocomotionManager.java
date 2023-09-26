@@ -320,7 +320,7 @@ public class RDXLocomotionManager
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGuiTools.previousWidgetTooltip("Space");
       ImGui.sameLine();
       ImGui.endDisabled();
 
@@ -329,7 +329,7 @@ public class RDXLocomotionManager
       {
          setPauseWalkingAndPublish(true);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGuiTools.previousWidgetTooltip("Space");
       ImGui.sameLine();
       ImGui.endDisabled();
 
@@ -338,7 +338,7 @@ public class RDXLocomotionManager
       {
          setPauseWalkingAndPublish(false);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGuiTools.previousWidgetTooltip("Space");
       ImGui.endDisabled();
 
       manualFootstepPlacement.renderImGuiWidgets();

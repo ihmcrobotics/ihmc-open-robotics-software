@@ -66,12 +66,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       leftFootButton.loadAndSetIcon("icons/leftFoot.png");
-      leftFootButton.setTooltipText("Place left footstep (Keybind: R)");
+      leftFootButton.setTooltipText("Place left footstep (R)");
       leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
 
       RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
-      rightFootButton.setTooltipText("Place right footstep (Keybind: T)");
+      rightFootButton.setTooltipText("Place right footstep (T)");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
@@ -103,13 +103,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          createNewFootstep(RobotSide.LEFT);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: R");
+      ImGuiTools.previousWidgetTooltip("R");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Right")) || (panel3DIsHovered && ImGui.isKeyPressed('T')))
       {
          createNewFootstep(RobotSide.RIGHT);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: T");
+      ImGuiTools.previousWidgetTooltip("T");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Square Up")))
       {
@@ -120,13 +120,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          exitPlacement();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      ImGuiTools.previousWidgetTooltip("Escape");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          footstepPlan.removeLastStep();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
+      ImGuiTools.previousWidgetTooltip("Delete");
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
