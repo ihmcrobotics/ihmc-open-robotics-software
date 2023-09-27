@@ -40,6 +40,7 @@ import java.util.Comparator;
  */
 public class RDXBehaviorActionSequenceUI
 {
+
    private final RDXPanel panel = new RDXPanel("Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceResourceDirectory behaviorSequenceStorageDirectory;

@@ -1,14 +1,22 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.esotericsoftware.minlog.Log;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionData;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -26,6 +34,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,13 +68,21 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    private final RDXInteractableHighlightModel highlightModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
+   private final FullHumanoidRobotModel syncedFullRobotModel;
+   private final ROS2PublishSubscribeAPI ros2;
+   private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
+   private volatile boolean running = true;
+   private final Throttler throttler = new Throttler().setFrequency(20.0);
 
    public RDXPelvisHeightPitchAction(RDX3DPanel panel3D,
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
                                      RobotCollisionModel selectionCollisionModel,
-                                     ReferenceFrameLibrary referenceFrameLibrary)
+                                     ReferenceFrameLibrary referenceFrameLibrary,
+                                     ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
+      this.syncedFullRobotModel = syncedFullRobotModel;
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
@@ -85,6 +102,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+
+      ThreadTools.startAsDaemon(this::publishStatusUpdate, "RDXPelvisStatusUpdate");
    }
 
    @Override
@@ -130,6 +149,45 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       {
          highlightModel.setTransparency(0.5);
       }
+
+      pelvisPoseStatus.setActionIndex(getActionIndex());
+      pelvisPoseStatus.getParentFrame().resetQuick();
+      pelvisPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
+
+      // compute transform variation from previous pose
+      FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
+      if (getActionData().getParentFrame() != currentRobotPelvisPose.getReferenceFrame())
+         currentRobotPelvisPose.changeFrame(getActionData().getParentFrame());
+      RigidBodyTransform transformVariation = new RigidBodyTransform();
+      transformVariation.setAndInvert(currentRobotPelvisPose);
+      getActionData().getTransformToParent().transform(transformVariation);
+      MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
+
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) || (
+            executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
+         pelvisPoseStatus.setCurrentAndConcurrent(true);
+      else
+         pelvisPoseStatus.setCurrentAndConcurrent(false);
+   }
+
+   private void publishStatusUpdate()
+   {
+      while (running)
+      {
+         throttler.waitAndRun();
+         if (pelvisPoseStatus.getActionIndex() > 0)
+         {
+            // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pevlis pose
+            ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+         }
+      }
+   }
+
+   public void destroy()
+   {
+      LogTools.info("Destroying RDX chest pose status publisher for action {}", getActionIndex());
+      running = false;
    }
 
    @Override
