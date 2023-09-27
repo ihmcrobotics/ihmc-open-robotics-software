@@ -55,6 +55,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private ByteBuffer incomingCompressedImageBuffer;
    private BytePointer incomingCompressedImageBytePointer;
 
+   private int compressedBufferDefaultSize = 100000;
+
    private ROS2Heartbeat activeHeartbeat;
 
    private float pixelScalingFactor = 10000.0f;
@@ -121,12 +123,10 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
               {
                  heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
                  compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-                 incomingCompressedImageBuffer = NativeMemoryTools.allocate(numberOfBytes * 8);
+                 incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
                  incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-                 LogTools.warn("Creating Buffer of Size: {}", numberOfBytes * 8);
+                 LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
               }
-
-              LogTools.info("Received Image Message with {} bytes", numberOfBytes);
 
               PerceptionMessageTools.convertToHeightMapImage(imageMessage,
                                                              heightMapImage,

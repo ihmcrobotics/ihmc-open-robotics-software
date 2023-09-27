@@ -163,8 +163,7 @@ public class HumanoidPerceptionModule
                                                          heightMapImage.cols(),
                                                          RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
 
-      LogTools.info("{}", perceptionStatistics);
-
+      LogTools.info("Perception Statistics: {}", perceptionStatistics);
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)

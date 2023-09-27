@@ -98,8 +98,7 @@ public class PerceptionStatistics
 
    public String toString()
    {
-      return "PerceptionStatistics: \t" +
-             "Time Height Map: " + averageTimeToComputeHeightMap + " ms\t" +
+      return "Time Height Map: " + averageTimeToComputeHeightMap + " ms\t" +
              "Time Rapid Regions: " + averageTimeToComputeRapidRegions + " ms\t" +
              "Time Spherical: " + averageTimeToComputeSphericalRapidRegions + " ms\t" +
              "Time Map Regions: " + averageTimeToComputeMapRegions + " ms";
