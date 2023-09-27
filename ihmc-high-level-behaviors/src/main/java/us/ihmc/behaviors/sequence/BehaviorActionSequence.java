@@ -265,7 +265,7 @@ public class BehaviorActionSequence
          while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getExecuteWithNextAction());
       }
 
-      if (lastCurrentlyExecutingAction != null && noCurrentActionIsExecuting() && lastCurrentlyExecutingAction.canExecute())
+      if (lastCurrentlyExecutingAction != null && noCurrentActionIsExecuting())
       {
          lastCurrentlyExecutingAction = null;
          currentlyExecutingActions.clear();

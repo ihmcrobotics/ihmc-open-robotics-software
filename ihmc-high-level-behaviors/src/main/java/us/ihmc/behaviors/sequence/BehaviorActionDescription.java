@@ -22,7 +22,7 @@ public interface BehaviorActionDescription
 
    void saveToFile(ObjectNode jsonNode);
 
-   void loadFromFile(JsonNode jsonNode) throws Exception;
+   void loadFromFile(JsonNode jsonNode);
 
    /**
     * A description of the action to help the operator in understanding
