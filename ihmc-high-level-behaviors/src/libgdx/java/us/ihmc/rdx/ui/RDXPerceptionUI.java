@@ -179,7 +179,6 @@ public class RDXPerceptionUI
 
             remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
             remotePerceptionUI.setBlackflyLensProperties(SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
-            baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
 
             environmentBuilder.create();
             environmentBuilder.loadEnvironment("DemoPullDoor.json");

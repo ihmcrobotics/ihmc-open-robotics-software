@@ -13,7 +13,6 @@ import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.opencv.ximgproc.SelectiveSearchSegmentation;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
@@ -176,7 +175,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                action.getActionData().loadFromFile(actionNode);
                action.updateAfterLoading();
-               action.update(false, -1);
+               action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
@@ -804,7 +803,7 @@ public class RDXBehaviorActionSequenceEditor
    private void insertNewAction(RDXBehaviorAction action)
    {
       action.updateAfterLoading();
-      action.update(false, -1);
+      action.update();
 
       int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
       actionSequence.add(insertionIndex, action);

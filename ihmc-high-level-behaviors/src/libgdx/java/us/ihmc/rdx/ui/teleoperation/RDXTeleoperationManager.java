@@ -189,7 +189,7 @@ public class RDXTeleoperationManager extends RDXPanel
       RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
       deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
       deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
-      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
+      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Shift + Escape)");
 
       locomotionManager.create(baseUI);
 
@@ -491,7 +491,7 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          clearInteractablesAndLocomotionGraphics();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Shift + Escape");
+      ImGuiTools.previousWidgetTooltip("Shift + Escape");
       ImGui.sameLine();
       if (interactablesAvailable)
       {
@@ -668,5 +668,10 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionManager.getLocomotionParameters();
+   }
+
+   public RDXLocomotionManager getLocomotionManager()
+   {
+      return locomotionManager;
    }
 }
