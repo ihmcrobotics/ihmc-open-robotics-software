@@ -17,6 +17,7 @@ import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -104,6 +105,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
+   private int previousConcurrentChestIndex = -1;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
@@ -248,19 +250,30 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
 
-            ModifiableReferenceFrame chestInteractableReferenceFrame;
-            if (chestPoseStatusSubscription.getMessageNotification().poll())
+            if (chestPoseStatusSubscription.hasReceivedFirstMessage())
             {
                BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-               chestInteractableReferenceFrame = new ModifiableReferenceFrame(actionData.getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)).get());
+               int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
+               boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
+               LogTools.info("{}  {}  {}", actionData.getSide(), chestIndex, isCurrentAndConcurrent);
+               ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getActionData().getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)).get());
                chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+               if (isCurrentAndConcurrent)
+               {
+                  floatingJoint.getJointPose().set(chestInteractableReferenceFrame.getReferenceFrame().getTransformToRoot());
+                  previousConcurrentChestIndex = chestIndex;
+               }
+               else if (chestIndex == previousConcurrentChestIndex)
+               {
+                  floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+                  previousConcurrentChestIndex = -1;
+               }
             }
-            else
-               chestInteractableReferenceFrame = null;
-            if (chestInteractableReferenceFrame == null)
+            if (previousConcurrentChestIndex < 0)
+            {
                floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            else
-               floatingJoint.getJointPose().set(chestInteractableReferenceFrame.getReferenceFrame().getTransformToRoot());
+            }
+
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
                armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);

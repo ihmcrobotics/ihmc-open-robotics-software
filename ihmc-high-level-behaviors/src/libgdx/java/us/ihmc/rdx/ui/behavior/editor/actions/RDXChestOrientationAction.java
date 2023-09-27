@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -143,6 +144,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          highlightModel.setTransparency(0.5);
       }
 
+      chestPoseStatus.setActionIndex(getActionIndex());
       chestPoseStatus.getParentFrame().resetQuick();
       chestPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
       MessageTools.toMessage(getActionData().getTransformToParent(), chestPoseStatus.getTransformToParent());
@@ -154,6 +156,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          chestPoseStatus.setCurrentAndConcurrent(false);
       // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
       ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+      LogTools.info("{} {}", getActionIndex(), chestPoseStatus.getCurrentAndConcurrent());
+
    }
 
    @Override
