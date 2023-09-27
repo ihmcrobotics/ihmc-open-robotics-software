@@ -197,7 +197,6 @@ public class WalkAction extends WalkActionDescription implements BehaviorAction
       isExecuting = !isComplete;
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());

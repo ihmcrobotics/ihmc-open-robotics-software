@@ -157,7 +157,6 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
                                                      BehaviorActionCompletionComponent.ORIENTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

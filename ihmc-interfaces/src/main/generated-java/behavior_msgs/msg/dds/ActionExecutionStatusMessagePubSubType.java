@@ -15,7 +15,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "951a2e8009dcd7a5da18b491ee4773fef238999b22cab63ca8ec75167c616da7";
+   		return "1d5f57c94dcf559ac4a6d266bbd3106a647070ddc6fe3be9ad58849df895c135";
    }
    
    @Override
@@ -54,7 +54,6 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -92,8 +91,6 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getExecutionRejectionTooltip().length() + 1;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -136,10 +133,6 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       cdr.write_type_2(data.getActionIndex());
 
-      if(data.getExecutionRejectionTooltip().length() <= 255)
-      cdr.write_type_d(data.getExecutionRejectionTooltip());else
-          throw new RuntimeException("execution_rejection_tooltip field exceeds the maximum length");
-
       cdr.write_type_6(data.getNominalExecutionDuration());
 
       cdr.write_type_6(data.getElapsedExecutionTime());
@@ -168,7 +161,6 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       data.setActionIndex(cdr.read_type_2());
       	
-      cdr.read_type_d(data.getExecutionRejectionTooltip());	
       data.setNominalExecutionDuration(cdr.read_type_6());
       	
       data.setElapsedExecutionTime(cdr.read_type_6());
@@ -198,7 +190,6 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    public final void serialize(behavior_msgs.msg.dds.ActionExecutionStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_2("action_index", data.getActionIndex());
-      ser.write_type_d("execution_rejection_tooltip", data.getExecutionRejectionTooltip());
       ser.write_type_6("nominal_execution_duration", data.getNominalExecutionDuration());
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
       ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
@@ -216,7 +207,6 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ActionExecutionStatusMessage data)
    {
       data.setActionIndex(ser.read_type_2("action_index"));
-      ser.read_type_d("execution_rejection_tooltip", data.getExecutionRejectionTooltip());
       data.setNominalExecutionDuration(ser.read_type_6("nominal_execution_duration"));
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
       data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));

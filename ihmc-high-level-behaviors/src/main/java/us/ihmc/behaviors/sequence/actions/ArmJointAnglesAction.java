@@ -58,7 +58,6 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionDescription implem
       isExecuting = executionTimer.isRunning(getTrajectoryDuration());
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }

@@ -38,7 +38,6 @@ public class WaitDurationAction extends WaitDurationActionDescription implements
       isExecuting = executionTimer.isRunning(getWaitDuration());
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
