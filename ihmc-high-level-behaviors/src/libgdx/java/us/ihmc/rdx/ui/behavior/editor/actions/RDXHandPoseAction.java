@@ -87,7 +87,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                                                                                       actionData::setExecuteWithNextAction,
                                                imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater, actionData::setHoldPoseInWorldLater,
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
+                                                                                     actionData::setHoldPoseInWorldLater,
                                                imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
 
    private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(actionData::getJointSpaceControl,
