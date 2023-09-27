@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
 import behavior_msgs.msg.dds.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -27,7 +26,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -103,7 +101,6 @@ public class RDXBehaviorActionSequenceEditor
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
-   private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
 
    public void clear()
    {
@@ -438,11 +435,6 @@ public class RDXBehaviorActionSequenceEditor
          // We use executionStatusMessageToDisplay in order to display the previously
          // executed action's results, otherwise it gets cleared.
          IDLSequence.Object<ActionExecutionStatusMessage> latestActionsExecutionStatus = executionStatusSubscription.getLatest().getActionStatusList();
-         if (!latestActionsExecutionStatus.isEmpty() && !latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString().isEmpty())
-         {
-            executionRejectionTooltipText.renderText("Action rejected: " + latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString(), true);
-         }
-
          ActionExecutionStatusMessage last = latestActionsExecutionStatus.getLast();
          if (last == null || last.getActionIndex() < 0)
          {
