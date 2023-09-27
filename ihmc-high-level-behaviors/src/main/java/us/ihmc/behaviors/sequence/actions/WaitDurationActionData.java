@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.WaitDurationActionMessage;
+import behavior_msgs.msg.dds.WaitDurationActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -24,12 +24,12 @@ public class WaitDurationActionData implements BehaviorActionData
       waitDuration = jsonNode.get("waitDuration").asDouble();
    }
 
-   public void toMessage(WaitDurationActionMessage message)
+   public void toMessage(WaitDurationActionDescriptionMessage message)
    {
       message.setWaitDuration(waitDuration);
    }
 
-   public void fromMessage(WaitDurationActionMessage message)
+   public void fromMessage(WaitDurationActionDescriptionMessage message)
    {
       waitDuration = message.getWaitDuration();
    }

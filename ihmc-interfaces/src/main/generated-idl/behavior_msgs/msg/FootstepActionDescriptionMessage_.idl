@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__FootstepActionMessage__idl__
-#define __behavior_msgs__msg__FootstepActionMessage__idl__
+#ifndef __behavior_msgs__msg__FootstepActionDescriptionMessage__idl__
+#define __behavior_msgs__msg__FootstepActionDescriptionMessage__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
 module behavior_msgs
@@ -12,8 +12,8 @@ module behavior_msgs
       /**
        * A single footstep
        */
-      @TypeCode(type="behavior_msgs::msg::dds_::FootstepActionMessage_")
-      struct FootstepActionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepActionDescriptionMessage_")
+      struct FootstepActionDescriptionMessage
       {
         /**
          * Side, left or right foot

@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * A single footstep
        */
-public class FootstepActionMessage extends Packet<FootstepActionMessage> implements Settable<FootstepActionMessage>, EpsilonComparable<FootstepActionMessage>
+public class FootstepActionDescriptionMessage extends Packet<FootstepActionDescriptionMessage> implements Settable<FootstepActionDescriptionMessage>, EpsilonComparable<FootstepActionDescriptionMessage>
 {
    /**
             * Side, left or right foot
@@ -20,18 +20,18 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
             */
    public us.ihmc.euclid.geometry.Pose3D sole_pose_;
 
-   public FootstepActionMessage()
+   public FootstepActionDescriptionMessage()
    {
       sole_pose_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
-   public FootstepActionMessage(FootstepActionMessage other)
+   public FootstepActionDescriptionMessage(FootstepActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(FootstepActionMessage other)
+   public void set(FootstepActionDescriptionMessage other)
    {
       robot_side_ = other.robot_side_;
 
@@ -63,19 +63,19 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
    }
 
 
-   public static Supplier<FootstepActionMessagePubSubType> getPubSubType()
+   public static Supplier<FootstepActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return FootstepActionMessagePubSubType::new;
+      return FootstepActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return FootstepActionMessagePubSubType::new;
+      return FootstepActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(FootstepActionMessage other, double epsilon)
+   public boolean epsilonEquals(FootstepActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -92,9 +92,9 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof FootstepActionMessage)) return false;
+      if(!(other instanceof FootstepActionDescriptionMessage)) return false;
 
-      FootstepActionMessage otherMyClass = (FootstepActionMessage) other;
+      FootstepActionDescriptionMessage otherMyClass = (FootstepActionDescriptionMessage) other;
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
@@ -108,7 +108,7 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("FootstepActionMessage {");
+      builder.append("FootstepActionDescriptionMessage {");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("sole_pose=");

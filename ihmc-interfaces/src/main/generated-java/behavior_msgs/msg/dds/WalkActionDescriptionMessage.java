@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class WalkActionMessage extends Packet<WalkActionMessage> implements Settable<WalkActionMessage>, EpsilonComparable<WalkActionMessage>
+public class WalkActionDescriptionMessage extends Packet<WalkActionDescriptionMessage> implements Settable<WalkActionDescriptionMessage>, EpsilonComparable<WalkActionDescriptionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -37,7 +37,7 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
             */
    public double transfer_duration_;
 
-   public WalkActionMessage()
+   public WalkActionDescriptionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
@@ -46,13 +46,13 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
       right_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public WalkActionMessage(WalkActionMessage other)
+   public WalkActionDescriptionMessage(WalkActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WalkActionMessage other)
+   public void set(WalkActionDescriptionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       parent_frame_.set(other.parent_frame_);
@@ -141,19 +141,19 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
    }
 
 
-   public static Supplier<WalkActionMessagePubSubType> getPubSubType()
+   public static Supplier<WalkActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return WalkActionMessagePubSubType::new;
+      return WalkActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WalkActionMessagePubSubType::new;
+      return WalkActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WalkActionMessage other, double epsilon)
+   public boolean epsilonEquals(WalkActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -177,9 +177,9 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WalkActionMessage)) return false;
+      if(!(other instanceof WalkActionDescriptionMessage)) return false;
 
-      WalkActionMessage otherMyClass = (WalkActionMessage) other;
+      WalkActionDescriptionMessage otherMyClass = (WalkActionDescriptionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
@@ -199,7 +199,7 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WalkActionMessage {");
+      builder.append("WalkActionDescriptionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("parent_frame=");

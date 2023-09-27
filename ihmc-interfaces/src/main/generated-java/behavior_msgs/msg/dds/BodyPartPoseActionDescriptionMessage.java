@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage> implements Settable<BodyPartPoseActionMessage>, EpsilonComparable<BodyPartPoseActionMessage>
+public class BodyPartPoseActionDescriptionMessage extends Packet<BodyPartPoseActionDescriptionMessage> implements Settable<BodyPartPoseActionDescriptionMessage>, EpsilonComparable<BodyPartPoseActionDescriptionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -17,7 +17,7 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
    /**
-            * Transform that expresses the pelvis pose in the parent frame
+            * Transform that expresses the body part pose in the parent frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
    /**
@@ -33,20 +33,20 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
             */
    public boolean hold_pose_in_world_;
 
-   public BodyPartPoseActionMessage()
+   public BodyPartPoseActionDescriptionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public BodyPartPoseActionMessage(BodyPartPoseActionMessage other)
+   public BodyPartPoseActionDescriptionMessage(BodyPartPoseActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(BodyPartPoseActionMessage other)
+   public void set(BodyPartPoseActionDescriptionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       parent_frame_.set(other.parent_frame_);
@@ -79,7 +79,7 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
 
 
    /**
-            * Transform that expresses the pelvis pose in the parent frame
+            * Transform that expresses the body part pose in the parent frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToParent()
    {
@@ -132,19 +132,19 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
    }
 
 
-   public static Supplier<BodyPartPoseActionMessagePubSubType> getPubSubType()
+   public static Supplier<BodyPartPoseActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return BodyPartPoseActionMessagePubSubType::new;
+      return BodyPartPoseActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return BodyPartPoseActionMessagePubSubType::new;
+      return BodyPartPoseActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(BodyPartPoseActionMessage other, double epsilon)
+   public boolean epsilonEquals(BodyPartPoseActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -168,9 +168,9 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof BodyPartPoseActionMessage)) return false;
+      if(!(other instanceof BodyPartPoseActionDescriptionMessage)) return false;
 
-      BodyPartPoseActionMessage otherMyClass = (BodyPartPoseActionMessage) other;
+      BodyPartPoseActionDescriptionMessage otherMyClass = (BodyPartPoseActionDescriptionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
@@ -190,7 +190,7 @@ public class BodyPartPoseActionMessage extends Packet<BodyPartPoseActionMessage>
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("BodyPartPoseActionMessage {");
+      builder.append("BodyPartPoseActionDescriptionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("parent_frame=");

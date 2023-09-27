@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActionMessage> implements Settable<SidedBodyPartPoseActionMessage>, EpsilonComparable<SidedBodyPartPoseActionMessage>
+public class SidedBodyPartPoseActionDescriptionMessage extends Packet<SidedBodyPartPoseActionDescriptionMessage> implements Settable<SidedBodyPartPoseActionDescriptionMessage>, EpsilonComparable<SidedBodyPartPoseActionDescriptionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -41,20 +41,20 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
             */
    public boolean joint_space_control_;
 
-   public SidedBodyPartPoseActionMessage()
+   public SidedBodyPartPoseActionDescriptionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public SidedBodyPartPoseActionMessage(SidedBodyPartPoseActionMessage other)
+   public SidedBodyPartPoseActionDescriptionMessage(SidedBodyPartPoseActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(SidedBodyPartPoseActionMessage other)
+   public void set(SidedBodyPartPoseActionDescriptionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
@@ -174,19 +174,19 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
    }
 
 
-   public static Supplier<SidedBodyPartPoseActionMessagePubSubType> getPubSubType()
+   public static Supplier<SidedBodyPartPoseActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return SidedBodyPartPoseActionMessagePubSubType::new;
+      return SidedBodyPartPoseActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return SidedBodyPartPoseActionMessagePubSubType::new;
+      return SidedBodyPartPoseActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(SidedBodyPartPoseActionMessage other, double epsilon)
+   public boolean epsilonEquals(SidedBodyPartPoseActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -214,9 +214,9 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof SidedBodyPartPoseActionMessage)) return false;
+      if(!(other instanceof SidedBodyPartPoseActionDescriptionMessage)) return false;
 
-      SidedBodyPartPoseActionMessage otherMyClass = (SidedBodyPartPoseActionMessage) other;
+      SidedBodyPartPoseActionDescriptionMessage otherMyClass = (SidedBodyPartPoseActionDescriptionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
@@ -240,7 +240,7 @@ public class SidedBodyPartPoseActionMessage extends Packet<SidedBodyPartPoseActi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("SidedBodyPartPoseActionMessage {");
+      builder.append("SidedBodyPartPoseActionDescriptionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");

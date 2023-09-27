@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> implements Settable<HandWrenchActionMessage>, EpsilonComparable<HandWrenchActionMessage>
+public class HandConfigurationActionDescriptionMessage extends Packet<HandConfigurationActionDescriptionMessage> implements Settable<HandConfigurationActionDescriptionMessage>, EpsilonComparable<HandConfigurationActionDescriptionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -17,33 +17,33 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * The trajectory duration
+            * The grip type
             */
-   public double trajectory_duration_;
+   public long grip_;
    /**
-            * Amount of force to use
+            * Whether the next action can be executed at the same time of this one
             */
-   public double force_;
+   public boolean execute_with_next_action_;
 
-   public HandWrenchActionMessage()
+   public HandConfigurationActionDescriptionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
    }
 
-   public HandWrenchActionMessage(HandWrenchActionMessage other)
+   public HandConfigurationActionDescriptionMessage(HandConfigurationActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(HandWrenchActionMessage other)
+   public void set(HandConfigurationActionDescriptionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
 
-      trajectory_duration_ = other.trajectory_duration_;
+      grip_ = other.grip_;
 
-      force_ = other.force_;
+      execute_with_next_action_ = other.execute_with_next_action_;
 
    }
 
@@ -72,49 +72,49 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
    }
 
    /**
-            * The trajectory duration
+            * The grip type
             */
-   public void setTrajectoryDuration(double trajectory_duration)
+   public void setGrip(long grip)
    {
-      trajectory_duration_ = trajectory_duration;
+      grip_ = grip;
    }
    /**
-            * The trajectory duration
+            * The grip type
             */
-   public double getTrajectoryDuration()
+   public long getGrip()
    {
-      return trajectory_duration_;
+      return grip_;
    }
 
    /**
-            * Amount of force to use
+            * Whether the next action can be executed at the same time of this one
             */
-   public void setForce(double force)
+   public void setExecuteWithNextAction(boolean execute_with_next_action)
    {
-      force_ = force;
+      execute_with_next_action_ = execute_with_next_action;
    }
    /**
-            * Amount of force to use
+            * Whether the next action can be executed at the same time of this one
             */
-   public double getForce()
+   public boolean getExecuteWithNextAction()
    {
-      return force_;
+      return execute_with_next_action_;
    }
 
 
-   public static Supplier<HandWrenchActionMessagePubSubType> getPubSubType()
+   public static Supplier<HandConfigurationActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return HandWrenchActionMessagePubSubType::new;
+      return HandConfigurationActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return HandWrenchActionMessagePubSubType::new;
+      return HandConfigurationActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(HandWrenchActionMessage other, double epsilon)
+   public boolean epsilonEquals(HandConfigurationActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -122,9 +122,9 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
       if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grip_, other.grip_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.force_, other.force_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
 
 
       return true;
@@ -135,16 +135,16 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof HandWrenchActionMessage)) return false;
+      if(!(other instanceof HandConfigurationActionDescriptionMessage)) return false;
 
-      HandWrenchActionMessage otherMyClass = (HandWrenchActionMessage) other;
+      HandConfigurationActionDescriptionMessage otherMyClass = (HandConfigurationActionDescriptionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
+      if(this.grip_ != otherMyClass.grip_) return false;
 
-      if(this.force_ != otherMyClass.force_) return false;
+      if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
 
 
       return true;
@@ -155,15 +155,15 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("HandWrenchActionMessage {");
+      builder.append("HandConfigurationActionDescriptionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("trajectory_duration=");
-      builder.append(this.trajectory_duration_);      builder.append(", ");
-      builder.append("force=");
-      builder.append(this.force_);
+      builder.append("grip=");
+      builder.append(this.grip_);      builder.append(", ");
+      builder.append("execute_with_next_action=");
+      builder.append(this.execute_with_next_action_);
       builder.append("}");
       return builder.toString();
    }

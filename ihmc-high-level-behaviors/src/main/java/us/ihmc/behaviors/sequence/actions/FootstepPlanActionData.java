@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.FootstepActionMessage;
-import behavior_msgs.msg.dds.FootstepPlanActionMessage;
+import behavior_msgs.msg.dds.FootstepActionDescriptionMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -66,7 +66,7 @@ public class FootstepPlanActionData implements BehaviorActionData
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
 
-   public void toMessage(FootstepPlanActionMessage message)
+   public void toMessage(FootstepPlanActionDescriptionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -81,7 +81,7 @@ public class FootstepPlanActionData implements BehaviorActionData
       }
    }
 
-   public void fromMessage(FootstepPlanActionMessage message)
+   public void fromMessage(FootstepPlanActionDescriptionMessage message)
    {
       planFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       planFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
@@ -89,7 +89,7 @@ public class FootstepPlanActionData implements BehaviorActionData
       transferDuration = message.getTransferDuration();
 
       footsteps.clear();
-      for (FootstepActionMessage footstep : message.getFootsteps())
+      for (FootstepActionDescriptionMessage footstep : message.getFootsteps())
       {
          footsteps.add().fromMessage(footstep);
       }

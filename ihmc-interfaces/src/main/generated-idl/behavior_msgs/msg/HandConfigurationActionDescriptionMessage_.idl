@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__ArmJointAnglesActionMessage__idl__
-#define __behavior_msgs__msg__ArmJointAnglesActionMessage__idl__
+#ifndef __behavior_msgs__msg__HandConfigurationActionDescriptionMessage__idl__
+#define __behavior_msgs__msg__HandConfigurationActionDescriptionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionInformationMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::ArmJointAnglesActionMessage_")
-      struct ArmJointAnglesActionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::HandConfigurationActionDescriptionMessage_")
+      struct HandConfigurationActionDescriptionMessage
       {
         /**
          * Used for syncing action sequences
@@ -22,17 +22,13 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
-         * Preset arm configuration
+         * The grip type
          */
-        long preset;
+        unsigned long grip;
         /**
-         * Joint angles
+         * Whether the next action can be executed at the same time of this one
          */
-        double joint_angles[7];
-        /**
-         * Duration of the trajectory
-         */
-        double trajectory_duration;
+        boolean execute_with_next_action;
       };
     };
   };

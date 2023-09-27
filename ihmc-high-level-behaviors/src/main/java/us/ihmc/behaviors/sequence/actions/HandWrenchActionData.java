@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.HandWrenchActionMessage;
+import behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -31,14 +31,14 @@ public class HandWrenchActionData implements BehaviorActionData
       force = jsonNode.get("force").asDouble();
    }
 
-   public void toMessage(HandWrenchActionMessage message)
+   public void toMessage(HandWrenchActionDescriptionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setForce(force);
    }
 
-   public void fromMessage(HandWrenchActionMessage message)
+   public void fromMessage(HandWrenchActionDescriptionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();

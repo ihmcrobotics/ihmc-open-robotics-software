@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "ArmJointAnglesActionMessage" defined in "ArmJointAnglesActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "ArmJointAnglesActionDescriptionMessage" defined in "ArmJointAnglesActionDescriptionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from ArmJointAnglesActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ArmJointAnglesActionMessage_.idl instead.
+* This file was automatically generated from ArmJointAnglesActionDescriptionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ArmJointAnglesActionDescriptionMessage_.idl instead.
 *
 */
-public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ArmJointAnglesActionMessage>
+public class ArmJointAnglesActionDescriptionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::ArmJointAnglesActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::ArmJointAnglesActionDescriptionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a81dca3c3abc4f016953ca4e646a4812a61ed0220d7e7af1f05f715882670225";
+   		return "411eb356a3f8da09a415621da4e521902310db0916bf24f37ecb7720392d8174";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.ArmJointAnglesActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -66,12 +66,12 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -91,7 +91,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
@@ -107,7 +107,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
 
    }
 
-   public static void read(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
@@ -126,7 +126,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -137,7 +137,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ArmJointAnglesActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -147,15 +147,15 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.ArmJointAnglesActionMessage src, behavior_msgs.msg.dds.ArmJointAnglesActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage src, behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.ArmJointAnglesActionMessage createData()
+   public behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage createData()
    {
-      return new behavior_msgs.msg.dds.ArmJointAnglesActionMessage();
+      return new behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage();
    }
    @Override
    public int getTypeSize()
@@ -169,24 +169,24 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.ArmJointAnglesActionMessage src, behavior_msgs.msg.dds.ArmJointAnglesActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage src, behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public ArmJointAnglesActionMessagePubSubType newInstance()
+   public ArmJointAnglesActionDescriptionMessagePubSubType newInstance()
    {
-      return new ArmJointAnglesActionMessagePubSubType();
+      return new ArmJointAnglesActionDescriptionMessagePubSubType();
    }
 }

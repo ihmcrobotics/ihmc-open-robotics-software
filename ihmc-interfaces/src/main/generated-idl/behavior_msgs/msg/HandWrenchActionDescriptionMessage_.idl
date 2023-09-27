@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__HandConfigurationActionMessage__idl__
-#define __behavior_msgs__msg__HandConfigurationActionMessage__idl__
+#ifndef __behavior_msgs__msg__HandWrenchActionDescriptionMessage__idl__
+#define __behavior_msgs__msg__HandWrenchActionDescriptionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionInformationMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::HandConfigurationActionMessage_")
-      struct HandConfigurationActionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::HandWrenchActionDescriptionMessage_")
+      struct HandWrenchActionDescriptionMessage
       {
         /**
          * Used for syncing action sequences
@@ -22,13 +22,13 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
-         * The grip type
+         * The trajectory duration
          */
-        unsigned long grip;
+        double trajectory_duration;
         /**
-         * Whether the next action can be executed at the same time of this one
+         * Amount of force to use
          */
-        boolean execute_with_next_action;
+        double force;
       };
     };
   };

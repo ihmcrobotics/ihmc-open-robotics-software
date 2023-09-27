@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.FootstepActionMessage;
+import behavior_msgs.msg.dds.FootstepActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -24,13 +24,13 @@ public class FootstepActionData
       JSONTools.toEuclid(jsonNode, solePose);
    }
 
-   public void toMessage(FootstepActionMessage message)
+   public void toMessage(FootstepActionDescriptionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.getSolePose().set(solePose);
    }
 
-   public void fromMessage(FootstepActionMessage message)
+   public void fromMessage(FootstepActionDescriptionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
       solePose.set(message.getSolePose());

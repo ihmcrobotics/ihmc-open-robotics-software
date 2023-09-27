@@ -15,7 +15,7 @@ public class ActionsExecutionStatusMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "288c40c1b8b89abd655dd03308f6dad3dae6a076ab8cfa80af810d9e1344face";
+   		return "c383d3dbf6836a1f7fd35e874692cd28663a6787927eec2e6b45ff6d687252fd";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ActionsExecutionStatusMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionExecutionStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       return current_alignment - initial_alignment;
@@ -77,7 +77,7 @@ public class ActionsExecutionStatusMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(behavior_msgs.msg.dds.ActionsExecutionStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getActionStatusList().size() <= 100)
+      if(data.getActionStatusList().size() <= 200)
       cdr.write_type_e(data.getActionStatusList());else
           throw new RuntimeException("action_status_list field exceeds the maximum length");
 
