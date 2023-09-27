@@ -374,6 +374,40 @@ public class CoMTrajectoryPlannerTools
       addEquals(zObjectiveMatrixToPack, rowStart, 0, weight * centerOfMassVelocityForConstraint.getZ());
    }
 
+   public static void addVRPPositionObjective(double weight,
+                                              FramePoint3DReadOnly vrpPositionForConstraint,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              int rowStart,
+                                              DMatrix objectiveJacobianToPack,
+                                              DMatrix xObjectiveMatrixToPack,
+                                              DMatrix yObjectiveMatrixToPack,
+                                              DMatrix zObjectiveMatrixToPack)
+   {
+      vrpPositionForConstraint.checkReferenceFrameMatch(worldFrame);
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      int colStart = 6 * sequenceId;
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(objectiveJacobianToPack, rowStart, colStart, weight * getVRPPositionFirstCoefficientTimeFunction());
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 1, weight * getVRPPositionSecondCoefficientTimeFunction());
+      }
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      {
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 2, weight * getVRPPositionThirdCoefficientTimeFunction(omega, time));
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 3, weight * getVRPPositionFourthCoefficientTimeFunction(omega, time));
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 4, weight * getVRPPositionFifthCoefficientTimeFunction(time));
+      }
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 5, weight * getVRPPositionSixthCoefficientTimeFunction());
+
+      addEquals(xObjectiveMatrixToPack, rowStart, 0, weight * vrpPositionForConstraint.getX());
+      addEquals(yObjectiveMatrixToPack, rowStart, 0, weight * vrpPositionForConstraint.getY());
+      addEquals(zObjectiveMatrixToPack, rowStart, 0, weight * vrpPositionForConstraint.getZ());
+   }
+
    public static void addCoMVelocityObjective(double weight,
                                               FrameVector3DReadOnly centerOfMassVelocityForConstraint,
                                               double omega,
@@ -398,14 +432,14 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void addCoMJerkObjective(double weight,
-                                              FrameVector3DReadOnly centerOfMassJerkObjective,
-                                              double omega,
-                                              double time,
-                                              int sequenceId,
-                                              DMatrix hessianToPack,
-                                              DMatrix xGradientToPack,
-                                              DMatrix yGradientToPack,
-                                              DMatrix zGradientToPack)
+                                          FrameVector3DReadOnly centerOfMassJerkObjective,
+                                          double omega,
+                                          double time,
+                                          int sequenceId,
+                                          DMatrix hessianToPack,
+                                          DMatrix xGradientToPack,
+                                          DMatrix yGradientToPack,
+                                          DMatrix zGradientToPack)
    {
       addValueObjective(weight,
                         sequenceId,
@@ -509,8 +543,8 @@ public class CoMTrajectoryPlannerTools
     * <p> x<sub>i</sub>(t<sub>i</sub>) + 1 / &omega; d/dt x<sub>i</sub>(t<sub>i</sub>) = &xi;<sub>d</sub>,</p>
     * <p> substituting in the appropriate coefficients. </p>
     *
-    * @param sequenceId i in the above equations
-    * @param time t<sub>i</sub> in the above equations
+    * @param sequenceId         i in the above equations
+    * @param time               t<sub>i</sub> in the above equations
     * @param desiredDCMPosition desired DCM location. &xi;<sub>d</sub> in the above equations.
     */
    public static void addDCMPositionConstraint(int sequenceId,
@@ -606,10 +640,10 @@ public class CoMTrajectoryPlannerTools
     * <p> where J is a Jacobian that maps from a vector of desired VRP waypoints to the constraint form, and </p>
     * <p> v<sub>d,j</sub> = v<sub>r</sub> </p>
     *
-    * @param sequenceId segment of interest, i in the above equations
+    * @param sequenceId               segment of interest, i in the above equations
     * @param vrpWaypointPositionIndex current vrp waypoint index, j in the above equations
-    * @param time time in the segment, t<sub>i</sub> in the above equations
-    * @param desiredVRPPosition reference VRP position, v<sub>r</sub> in the above equations.
+    * @param time                     time in the segment, t<sub>i</sub> in the above equations
+    * @param desiredVRPPosition       reference VRP position, v<sub>r</sub> in the above equations.
     */
    public static void addVRPPositionConstraint(int sequenceId,
                                                int constraintNumber,
@@ -631,7 +665,8 @@ public class CoMTrajectoryPlannerTools
 
       if (checkSizes)
       {
-         if (constraintNumber < 0 || constraintNumber >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0 || startIndex + 5 >= constraintMatrixToPack.getNumCols())
+         if (constraintNumber < 0 || constraintNumber >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0
+             || startIndex + 5 >= constraintMatrixToPack.getNumCols())
             throw new IllegalArgumentException("Outside of matrix bounds");
          if (constraintNumber >= vrpWaypointJacobianToPack.getNumRows())
             throw new IllegalArgumentException("Outside of matrix bounds");
@@ -762,6 +797,25 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   public static void addSegmentVRPSmoothnessObjective(double weight,
+                                                    int sequenceId,
+                                                    double omega,
+                                                    double segmentDuration,
+                                                    int rowStart,
+                                                    DMatrix objectiveJacobianToPack)
+   {
+
+      segmentDuration = Math.min(segmentDuration, sufficientlyLongTime);
+
+      int colStart = 6 * sequenceId;
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 2, weight * getVRPVelocityThirdCoefficientTimeFunction(omega, 0.0));
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 2, -weight * getVRPVelocityThirdCoefficientTimeFunction(omega, segmentDuration));
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 3, weight * getVRPVelocityFourthCoefficientTimeFunction(0.0));
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 3, -weight * getVRPVelocityFourthCoefficientTimeFunction(segmentDuration));
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 4, weight * getVRPVelocityFifthCoefficientTimeFunction());
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 4, -weight * getVRPVelocityFifthCoefficientTimeFunction());
+   }
+
    public static void addValueObjective(double weight,
                                         int sequenceId,
                                         double omega,
@@ -861,13 +915,13 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void addContinuityObjective(double weight,
-                                        int sequenceId1,
-                                        int sequenceId2,
-                                        double omega,
-                                        double time,
-                                        CoefficientProvider coefficientProvider,
-                                        CoefficientSelectedProvider selectedProvider,
-                                        DMatrix hessianToPack)
+                                             int sequenceId1,
+                                             int sequenceId2,
+                                             double omega,
+                                             double time,
+                                             CoefficientProvider coefficientProvider,
+                                             CoefficientSelectedProvider selectedProvider,
+                                             DMatrix hessianToPack)
    {
       int startIndex1 = 6 * sequenceId1;
       int startIndex2 = 6 * sequenceId2;
@@ -932,10 +986,10 @@ public class CoMTrajectoryPlannerTools
     * <p> where J is a Jacobian that maps from a vector of desired VRP waypoints to the constraint form, and </p>
     * <p> v<sub>d,j</sub> = d/dt v<sub>r</sub> </p>
     *
-    * @param sequenceId segment of interest, i in the above equations
+    * @param sequenceId               segment of interest, i in the above equations
     * @param vrpWaypointVelocityIndex current vrp waypoint index, j in the above equations
-    * @param time time in the segment, t<sub>i</sub> in the above equations
-    * @param desiredVRPVelocity reference VRP veloctiy, d/dt v<sub>r</sub> in the above equations.
+    * @param time                     time in the segment, t<sub>i</sub> in the above equations
+    * @param desiredVRPVelocity       reference VRP veloctiy, d/dt v<sub>r</sub> in the above equations.
     */
    public static void addVRPVelocityConstraint(int sequenceId,
                                                int constraintRow,
@@ -955,7 +1009,8 @@ public class CoMTrajectoryPlannerTools
 
       if (checkSizes)
       {
-         if (constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0 || startIndex + 5 >= constraintMatrixToPack.getNumCols())
+         if (constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0
+             || startIndex + 5 >= constraintMatrixToPack.getNumCols())
             throw new IllegalArgumentException("Outside of matrix bounds");
          if (constraintRow >= vrpWaypointJacobianToPack.getNumRows())
             throw new IllegalArgumentException("Outside of matrix bounds");
@@ -1043,7 +1098,7 @@ public class CoMTrajectoryPlannerTools
     * <p> substituting in the trajectory coefficients. </p>
     *
     * @param previousSequence i-1 in the above equations.
-    * @param nextSequence i in the above equations.
+    * @param nextSequence     i in the above equations.
     */
    public static void addCoMPositionContinuityConstraint(int previousSequence,
                                                          int nextSequence,
@@ -1058,7 +1113,8 @@ public class CoMTrajectoryPlannerTools
 
       previousDuration = Math.min(previousDuration, sufficientlyLongTime);
 
-      if (checkSizes && constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || nextStartIndex + 5 < 0 || nextStartIndex + 5 >= constraintMatrixToPack.getNumCols())
+      if (checkSizes && constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || nextStartIndex + 5 < 0
+          || nextStartIndex + 5 >= constraintMatrixToPack.getNumCols())
          throw new IllegalArgumentException("Outside of matrix bounds");
 
       constraintMatrixToPack.unsafe_set(constraintRow, previousStartIndex, getCoMPositionFirstCoefficientTimeFunction(omega, previousDuration));
@@ -1094,7 +1150,7 @@ public class CoMTrajectoryPlannerTools
     * <p> substituting in the trajectory coefficients. </p>
     *
     * @param previousSequence i-1 in the above equations.
-    * @param nextSequence i in the above equations.
+    * @param nextSequence     i in the above equations.
     */
    public static void addCoMPositionContinuityObjective(double weight,
                                                         int previousSequence,
@@ -1152,17 +1208,31 @@ public class CoMTrajectoryPlannerTools
                                                         double previousDuration,
                                                         DMatrix hessianToPack)
    {
-      addContinuityObjective(weight, previousSequence, nextSequence, omega, previousDuration, comPositionCoefficientProvider, comPositionCoefficientSelectedProvider, hessianToPack);
+      addContinuityObjective(weight,
+                             previousSequence,
+                             nextSequence,
+                             omega,
+                             previousDuration,
+                             comPositionCoefficientProvider,
+                             comPositionCoefficientSelectedProvider,
+                             hessianToPack);
    }
 
    public static void addCoMVelocityContinuityObjective(double weight,
-                                                                int previousSequence,
-                                                                int nextSequence,
-                                                                double omega,
-                                                                double previousDuration,
-                                                                DMatrix hessianToPack)
+                                                        int previousSequence,
+                                                        int nextSequence,
+                                                        double omega,
+                                                        double previousDuration,
+                                                        DMatrix hessianToPack)
    {
-      addContinuityObjective(weight, previousSequence, nextSequence, omega, previousDuration, comVelocityCoefficientProvider, comVelocityCoefficientSelectedProvider, hessianToPack);
+      addContinuityObjective(weight,
+                             previousSequence,
+                             nextSequence,
+                             omega,
+                             previousDuration,
+                             comVelocityCoefficientProvider,
+                             comVelocityCoefficientSelectedProvider,
+                             hessianToPack);
    }
 
    /**
@@ -1178,7 +1248,7 @@ public class CoMTrajectoryPlannerTools
     * <p> substituting in the trajectory coefficients. </p>
     *
     * @param previousSequence i-1 in the above equations.
-    * @param nextSequence i in the above equations.
+    * @param nextSequence     i in the above equations.
     */
    public static void addCoMVelocityContinuityConstraint(int previousSequence,
                                                          int nextSequence,
@@ -1193,7 +1263,8 @@ public class CoMTrajectoryPlannerTools
 
       previousDuration = Math.min(previousDuration, sufficientlyLongTime);
 
-      if (checkSizes && constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || nextStartIndex + 5 < 0 || nextStartIndex + 5 >= constraintMatrixToPack.getNumCols())
+      if (checkSizes && constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || nextStartIndex + 5 < 0
+          || nextStartIndex + 5 >= constraintMatrixToPack.getNumCols())
          throw new IllegalArgumentException("Outside of matrix bounds");
 
       constraintMatrixToPack.unsafe_set(constraintRow, previousStartIndex, getCoMVelocityFirstCoefficientTimeFunction(omega, previousDuration));
@@ -1265,7 +1336,7 @@ public class CoMTrajectoryPlannerTools
     * <p> substituting in the trajectory coefficients. </p>
     *
     * @param previousSequence i-1 in the above equations.
-    * @param nextSequence i in the above equations.
+    * @param nextSequence     i in the above equations.
     */
    public static void addVRPPositionContinuityConstraint(int previousSequence,
                                                          int nextSequence,
@@ -1280,7 +1351,8 @@ public class CoMTrajectoryPlannerTools
 
       previousDuration = Math.min(previousDuration, sufficientlyLongTime);
 
-      if (checkSizes && constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || nextStartIndex + 5 < 0 || nextStartIndex + 5 >= constraintMatrixToPack.getNumCols())
+      if (checkSizes && constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || nextStartIndex + 5 < 0
+          || nextStartIndex + 5 >= constraintMatrixToPack.getNumCols())
          throw new IllegalArgumentException("Outside of matrix bounds");
 
       if (SET_ZERO_VALUES)
@@ -1390,7 +1462,8 @@ public class CoMTrajectoryPlannerTools
 
       if (checkSizes)
       {
-         if (constraintNumber < 0 || constraintNumber >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0 || startIndex + 5 >= constraintMatrixToPack.getNumCols())
+         if (constraintNumber < 0 || constraintNumber >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0
+             || startIndex + 5 >= constraintMatrixToPack.getNumCols())
             throw new IllegalArgumentException("Outside of matrix bounds");
          if (constraintNumber >= vrpWaypointJacobianToPack.getNumRows())
             throw new IllegalArgumentException("Outside of matrix bounds");
@@ -1405,33 +1478,33 @@ public class CoMTrajectoryPlannerTools
       if (SET_ZERO_VALUES)
       {
          constraintMatrixToPack.unsafe_set(constraintNumber,
-                                    startIndex + 0,
-                                    CoMTrajectoryPlannerTools.getVRPPositionFirstCoefficientTimeFunction()
-                                    - duration * CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction());
+                                           startIndex + 0,
+                                           CoMTrajectoryPlannerTools.getVRPPositionFirstCoefficientTimeFunction()
+                                           - duration * CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction());
          constraintMatrixToPack.unsafe_set(constraintNumber,
-                                    startIndex + 1,
-                                    CoMTrajectoryPlannerTools.getVRPPositionSecondCoefficientTimeFunction()
-                                    - duration * CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction());
+                                           startIndex + 1,
+                                           CoMTrajectoryPlannerTools.getVRPPositionSecondCoefficientTimeFunction()
+                                           - duration * CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction());
       }
       if (SET_ZERO_VALUES || timeInSegmentIsNonZero || durationIsNonZero)
       {
          constraintMatrixToPack.unsafe_set(constraintNumber,
-                                    startIndex + 2,
-                                    CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, timeInSegment)
-                                    - duration * CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfRelativePosition));
+                                           startIndex + 2,
+                                           CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, timeInSegment)
+                                           - duration * CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfRelativePosition));
          constraintMatrixToPack.unsafe_set(constraintNumber,
-                                    startIndex + 4,
-                                    CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(timeInSegment)
-                                    - duration * CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction());
+                                           startIndex + 4,
+                                           CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(timeInSegment)
+                                           - duration * CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction());
       }
       constraintMatrixToPack.unsafe_set(constraintNumber,
-                                 startIndex + 3,
-                                 CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, timeInSegment)
-                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfRelativePosition));
+                                        startIndex + 3,
+                                        CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, timeInSegment)
+                                        - duration * CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfRelativePosition));
       constraintMatrixToPack.unsafe_set(constraintNumber,
-                                 startIndex + 5,
-                                 CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction()
-                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction());
+                                        startIndex + 5,
+                                        CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction()
+                                        - duration * CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction());
 
       vrpWaypointJacobianToPack.unsafe_set(constraintNumber, vrpWaypointPositionIndex, 1.0);
 
@@ -1463,7 +1536,7 @@ public class CoMTrajectoryPlannerTools
     * <p> substituting in the appropriate coefficients. </p>
     *
     * @param sequenceId segment of interest, i in the above equations.
-    * @param time time for the constraint, t<sub>i</sub> in the above equations.
+    * @param time       time for the constraint, t<sub>i</sub> in the above equations.
     */
    public static void constrainCoMAccelerationToGravity(int sequenceId,
                                                         int constraintRow,
@@ -1479,7 +1552,8 @@ public class CoMTrajectoryPlannerTools
 
       if (checkSizes)
       {
-         if (constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0 || startIndex + 5 >= constraintMatrixToPack.getNumCols())
+         if (constraintRow < 0 || constraintRow >= constraintMatrixToPack.getNumRows() || startIndex + 5 < 0
+             || startIndex + 5 >= constraintMatrixToPack.getNumCols())
             throw new IllegalArgumentException("Outside of matrix bounds");
          if (constraintRow >= zObjectiveMatrixToPack.getNumRows())
             throw new IllegalArgumentException("Outside of matrix bounds");
@@ -1531,14 +1605,14 @@ public class CoMTrajectoryPlannerTools
    }
 
    public static void addCoMAccelerationObjective(double weight,
-                                                           int sequenceId,
-                                                           double omega,
-                                                           double time,
-                                                           FrameVector3DReadOnly gravity,
-                                                           DMatrix hessianToPack,
-                                                           DMatrix xGradientToPack,
-                                                           DMatrix yGradientToPack,
-                                                           DMatrix zGradientToPack)
+                                                  int sequenceId,
+                                                  double omega,
+                                                  double time,
+                                                  FrameVector3DReadOnly gravity,
+                                                  DMatrix hessianToPack,
+                                                  DMatrix xGradientToPack,
+                                                  DMatrix yGradientToPack,
+                                                  DMatrix zGradientToPack)
    {
       addValueObjective(weight,
                         sequenceId,
@@ -1582,7 +1656,7 @@ public class CoMTrajectoryPlannerTools
     * <p> substituting in the appropriate coefficients. </p>
     *
     * @param sequenceId segment of interest, i in the above equations.
-    * @param time time for the constraint, t<sub>i</sub> in the above equations.
+    * @param time       time for the constraint, t<sub>i</sub> in the above equations.
     */
    public static void constrainCoMJerkToZero(double time, double omega, int sequenceId, int rowStart, DMatrix matrixToPack)
    {
@@ -1715,8 +1789,6 @@ public class CoMTrajectoryPlannerTools
             throw new IllegalArgumentException("The order " + order + " must be less than 3.");
       }
    }
-
-
 
    public static boolean getCoMPositionCoefficientNonZero(int coefficient, double time)
    {
@@ -2471,7 +2543,7 @@ public class CoMTrajectoryPlannerTools
       comVelocityToPack.scaleAdd(getCoMVelocityThirdCoefficientTimeFunction(timeInPhase), thirdCoefficient, comVelocityToPack);
       comVelocityToPack.scaleAdd(getCoMVelocityFourthCoefficientTimeFunction(timeInPhase), fourthCoefficient, comVelocityToPack);
       comVelocityToPack.scaleAdd(getCoMVelocityFifthCoefficientTimeFunction(), fifthCoefficient, comVelocityToPack);
-//      comVelocityToPack.scaleAdd(getCoMVelocitySixthCoefficientTimeFunction(), sixthCoefficient, comVelocityToPack);
+      //      comVelocityToPack.scaleAdd(getCoMVelocitySixthCoefficientTimeFunction(), sixthCoefficient, comVelocityToPack);
    }
 
    public static void constructDesiredCoMAcceleration(FixedFrameVector3DBasics comAccelerationToPack,
@@ -2489,8 +2561,8 @@ public class CoMTrajectoryPlannerTools
       comAccelerationToPack.scaleAdd(getCoMAccelerationSecondCoefficientTimeFunction(omega, timeInPhase), secondCoefficient, comAccelerationToPack);
       comAccelerationToPack.scaleAdd(getCoMAccelerationThirdCoefficientTimeFunction(timeInPhase), thirdCoefficient, comAccelerationToPack);
       comAccelerationToPack.scaleAdd(getCoMAccelerationFourthCoefficientTimeFunction(), fourthCoefficient, comAccelerationToPack);
-//      comAccelerationToPack.scaleAdd(getCoMAccelerationFifthCoefficientTimeFunction(), fifthCoefficient, comAccelerationToPack);
-//      comAccelerationToPack.scaleAdd(getCoMAccelerationSixthCoefficientTimeFunction(), sixthCoefficient, comAccelerationToPack);
+      //      comAccelerationToPack.scaleAdd(getCoMAccelerationFifthCoefficientTimeFunction(), fifthCoefficient, comAccelerationToPack);
+      //      comAccelerationToPack.scaleAdd(getCoMAccelerationSixthCoefficientTimeFunction(), sixthCoefficient, comAccelerationToPack);
    }
 
    public static void constructDesiredDCMPosition(FixedFramePoint3DBasics dcmPositionToPack,
@@ -2506,7 +2578,7 @@ public class CoMTrajectoryPlannerTools
       dcmPositionToPack.checkReferenceFrameMatch(worldFrame);
       dcmPositionToPack.setToZero();
       dcmPositionToPack.setAndScale(getDCMPositionFirstCoefficientTimeFunction(omega, timeInPhase), firstCoefficient);
-//      dcmPositionToPack.scaleAdd(getDCMPositionSecondCoefficientTimeFunction(), secondCoefficient, dcmPositionToPack);
+      //      dcmPositionToPack.scaleAdd(getDCMPositionSecondCoefficientTimeFunction(), secondCoefficient, dcmPositionToPack);
       dcmPositionToPack.scaleAdd(getDCMPositionThirdCoefficientTimeFunction(omega, timeInPhase), thirdCoefficient, dcmPositionToPack);
       dcmPositionToPack.scaleAdd(getDCMPositionFourthCoefficientTimeFunction(omega, timeInPhase), fourthCoefficient, dcmPositionToPack);
       dcmPositionToPack.scaleAdd(getDCMPositionFifthCoefficientTimeFunction(omega, timeInPhase), fifthCoefficient, dcmPositionToPack);
