@@ -22,7 +22,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
+import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDescription;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -193,9 +193,9 @@ public class RDXBehaviorActionSequenceEditor
                action.getSelected().set(false);
                action.getExpanded().set(false);
 
-               if (action.getActionDescription() instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+               if (action.getActionDescription() instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
                {
-                  referenceFrameLibrary.addParent(frameBasedBehaviorActionData.getConditionalReferenceFrame());
+                  referenceFrameLibrary.addParent(frameBasedBehaviorActionDescription.getConditionalReferenceFrame());
                }
             }
             else

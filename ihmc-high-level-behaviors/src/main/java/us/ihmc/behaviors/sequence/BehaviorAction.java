@@ -41,9 +41,9 @@ public interface BehaviorAction extends BehaviorActionDescription
    {
       boolean canExecute = true;
 
-      if (this instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+      if (this instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
       {
-         canExecute &= frameBasedBehaviorActionData.getConditionalReferenceFrame().hasParentFrame();
+         canExecute &= frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame();
       }
 
       // TODO: add other conditions
@@ -55,9 +55,9 @@ public interface BehaviorAction extends BehaviorActionDescription
    {
       StringBuilder tooltip = new StringBuilder();
 
-      if (this instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+      if (this instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
       {
-         if (!frameBasedBehaviorActionData.getConditionalReferenceFrame().hasParentFrame())
+         if (!frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame())
          {
             tooltip.append("parent frame does not exist in the scene");
          }

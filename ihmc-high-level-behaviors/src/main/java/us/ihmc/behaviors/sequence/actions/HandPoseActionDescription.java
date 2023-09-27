@@ -3,13 +3,13 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
+import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDescription;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDescription extends FrameBasedBehaviorActionData
+public class HandPoseActionDescription extends FrameBasedBehaviorActionDescription
 {
    private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
