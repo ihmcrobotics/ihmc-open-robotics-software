@@ -2,7 +2,8 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDescription;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
@@ -10,7 +11,7 @@ import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 public class RDXSakeHandCommandAction extends RDXBehaviorAction
 {
-   private final SakeHandCommandActionData actionData = new SakeHandCommandActionData();
+   private final SakeHandCommandActionDescription actionData = new SakeHandCommandActionDescription();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
 
@@ -72,7 +73,7 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    }
 
    @Override
-   public SakeHandCommandActionData getActionData()
+   public SakeHandCommandActionDescription getActionDescription()
    {
       actionData.setGoalPosition(positionValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
       actionData.setGoalTorque(torqueValue[0]);

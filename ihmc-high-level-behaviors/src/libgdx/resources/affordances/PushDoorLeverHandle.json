@@ -15,10 +15,12 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "RDXSakeHandCommandAction",
     "description" : "Pre-grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "HALF_CLOSE",
+    "configuration" : "OPEN",
+    "position" : 0.4999999976514124,
+    "torque" : 0.30000001192092896,
     "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
@@ -49,10 +51,12 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "RDXSakeHandCommandAction",
     "description" : "Grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "CRUSH",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
     "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
@@ -167,10 +171,12 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "RDXSakeHandCommandAction",
     "description" : "Post-grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "CLOSE",
+    "configuration" : "CLOSE",
+    "position" : 0.1000000027827535,
+    "torque" : 0.30000001192092896,
     "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
