@@ -29,4 +29,9 @@ public class ImGuiFrequencyPlot
    {
       return receivedCount > 0;
    }
+
+   public ImGuiPlot getReceivedPlot()
+   {
+      return receivedPlot;
+   }
 }
