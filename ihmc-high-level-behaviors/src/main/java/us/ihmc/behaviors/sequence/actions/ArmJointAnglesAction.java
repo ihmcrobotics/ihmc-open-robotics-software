@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
 
@@ -25,7 +24,7 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionData implements Be
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 
@@ -61,7 +60,12 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionData implements Be
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
+
+   @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
    }
 
    @Override
