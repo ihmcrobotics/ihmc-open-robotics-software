@@ -2,6 +2,7 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
@@ -17,6 +18,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,16 +72,19 @@ public class ActiveMapper
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ActiveMapper(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
+   public ActiveMapper(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, ActiveMappingMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.robotModel = robotModel;
-
-      monteCarloPlanner = new MonteCarloPlanner(offset);
-
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-
       active = true;
+
+      switch (mode)
+      {
+         case CONTINUOUS_MAPPING_COVERAGE:
+            monteCarloPlanner = new MonteCarloPlanner(offset);
+            break;
+      }
    }
 
    public void updatePlan(PlanarRegionMap planarRegionMap)
@@ -128,31 +133,16 @@ public class ActiveMapper
 
          float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
 
-         Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
+         LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
 
-         leftGoalPose.set(goalPose);
-         rightGoalPose.set(goalPose);
-         leftGoalPose.prependTranslation(0.0, 0.12, 0.0);
-         rightGoalPose.prependTranslation(0.0, -0.12, 0.0);
-
-         LogTools.info("Next Goal: {}", goalPose);
-
-         request = new FootstepPlannerRequest();
-         request.setTimeout(1.5);
-         request.setStartFootPoses(leftSolePose, rightSolePose);
+         FootstepPlannerRequest request = createFootstepPlanRequest(goalPosition, yawRobotToGoal);
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
-         request.setPlanBodyPath(false);
-         request.setGoalFootPoses(leftGoalPose, rightGoalPose);
-         request.setPerformAStarSearch(true);
-
          plannerOutput = footstepPlanner.handleRequest(request);
 
          if (plannerOutput != null)
          {
             FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
-
             LogTools.info("Footstep Planning Result: {}", footstepPlanningResult);
-
             LogTools.info(String.format("Planar Regions: %d\t, First Area: %.2f\t Plan Length: %d\n",
                                         planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
                                         planarRegionMap.getMapRegions().getPlanarRegion(0).getArea(),
@@ -160,7 +150,32 @@ public class ActiveMapper
 
             planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
          }
+
       }
+   }
+
+   public void updatePlan(HeightMapData heightMapData, Point2D goalPosition, float yawRobotToGoal)
+   {
+      FootstepPlannerRequest request = createFootstepPlanRequest(goalPosition, yawRobotToGoal);
+      request.setHeightMapData(heightMapData);
+      plannerOutput = footstepPlanner.handleRequest(request);
+   }
+
+   public FootstepPlannerRequest createFootstepPlanRequest(Point2D goalPosition, float yawRobotToGoal)
+   {
+      Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
+      leftGoalPose.set(goalPose);
+      rightGoalPose.set(goalPose);
+      leftGoalPose.prependTranslation(0.0, 0.12, 0.0);
+      rightGoalPose.prependTranslation(0.0, -0.12, 0.0);
+
+      request = new FootstepPlannerRequest();
+      request.setTimeout(1.5);
+      request.setStartFootPoses(leftSolePose, rightSolePose);
+      request.setPlanBodyPath(false);
+      request.setGoalFootPoses(leftGoalPose, rightGoalPose);
+      request.setPerformAStarSearch(true);
+      return request;
    }
 
    public FootstepDataListMessage getFootstepDataListMessage()

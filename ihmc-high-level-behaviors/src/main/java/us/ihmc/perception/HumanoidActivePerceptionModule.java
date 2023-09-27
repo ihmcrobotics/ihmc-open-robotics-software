@@ -2,11 +2,14 @@ package us.ihmc.perception;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousMappingRemoteTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -25,7 +28,8 @@ public class HumanoidActivePerceptionModule
    /* For displaying occupancy grid from the active mapping module. */
    private final Mat gridColor = new Mat();
 
-   private ActiveMappingRemoteTask activeMappingRemoteThread;
+   private ActivePlanarMappingRemoteTask activeMappingRemoteThread;
+   private ContinuousMappingRemoteTask continuousMappingRemoteThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
 
@@ -34,19 +38,23 @@ public class HumanoidActivePerceptionModule
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
    }
 
+   public void setupForImageMessage(ROS2Helper ros2)
+   {
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, continuousMappingRemoteThread::onHeightMapReceived);
+   }
+
    public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteThread = new ActiveMappingRemoteTask(robotName,
-                                                              robotModel,
-                                                              PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                              ros2Node,
-                                                              referenceFrames,
-                                                              () ->
-                                                              {
-                                                              },
-                                                              true);
+      activeMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
+                                                                    PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                    PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                    ros2Node, referenceFrames, () -> {},true);
+   }
+
+   public void initializeContinuousMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   {
+      continuousMappingRemoteThread = new ContinuousMappingRemoteTask(robotModel, ros2Node, referenceFrames);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)

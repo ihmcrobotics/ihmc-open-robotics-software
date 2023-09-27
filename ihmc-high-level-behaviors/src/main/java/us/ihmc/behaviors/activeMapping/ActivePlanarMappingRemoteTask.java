@@ -18,29 +18,26 @@ import us.ihmc.ros2.ROS2Topic;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
+public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
 {
    private final static long UPDATE_PERIOD_MS = 500;
    private final static long PLANNING_PERIOD_MS = 500;
 
    private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(new WalkingStatusMessage());
-
    private final ROS2PublisherMap publisherMap;
-
-   private ActiveMapper activeMappingModule;
-
    private final ROS2Topic controllerFootstepDataTopic;
 
+   private ActiveMapper activeMappingModule;
    private FootstepPlannerRequest request;
 
-   public ActiveMappingRemoteTask(String simpleRobotName,
-                                  DRCRobotModel robotModel,
-                                  ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
-                                  ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
-                                  ROS2Node ros2Node,
-                                  HumanoidReferenceFrames referenceFrames,
-                                  Runnable referenceFramesUpdater,
-                                  boolean smoothing)
+   public ActivePlanarMappingRemoteTask(String simpleRobotName,
+                                        DRCRobotModel robotModel,
+                                        ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
+                                        ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
+                                        ROS2Node ros2Node,
+                                        HumanoidReferenceFrames referenceFrames,
+                                        Runnable referenceFramesUpdater,
+                                        boolean smoothing)
    {
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 
@@ -48,8 +45,7 @@ public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
 
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
-      activeMappingModule = new ActiveMapper(robotModel, referenceFrames);
-
+      activeMappingModule = new ActiveMapper(robotModel, referenceFrames, ActiveMapper.ActiveMappingMode.CONTINUOUS_MAPPING_COVERAGE);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
