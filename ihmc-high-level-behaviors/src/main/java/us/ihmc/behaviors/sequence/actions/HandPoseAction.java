@@ -117,7 +117,7 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
       }
       else
       {
-         FramePose3D frameHand = new FramePose3D(getPalmFrame());
+         FramePose3D frameHand = new FramePose3D(getConditionalReferenceFrame().get());
          frameHand.changeFrame(ReferenceFrame.getWorldFrame());
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(getSide(),
                                                                                                         getTrajectoryDuration(),

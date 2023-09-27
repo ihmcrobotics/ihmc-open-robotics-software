@@ -102,7 +102,7 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
 
    public void disengageHoldPoseInWorld()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getConditionalReferenceFrame().get());
       frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();

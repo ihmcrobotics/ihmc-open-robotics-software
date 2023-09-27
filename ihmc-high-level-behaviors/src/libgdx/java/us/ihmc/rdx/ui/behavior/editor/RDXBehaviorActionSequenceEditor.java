@@ -677,7 +677,7 @@ public class RDXBehaviorActionSequenceEditor
                handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
             }
             if (nextPreviousParentFrame != null)
-            handPoseAction.getActionDescription().changeParentFrameWithoutMoving(nextPreviousParentFrame);
+            handPoseAction.getActionDescription().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
             newAction = handPoseAction;
          }
          if (side.ordinal() < 1)
