@@ -175,7 +175,11 @@ public class SceneGraph
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
    {
-      Function<String, ReferenceFrame> frameLookup = nodeName -> namesToNodesMap.get(nodeName).getNodeFrame();
+      Function<String, ReferenceFrame> frameLookup = nodeName ->
+      {
+         SceneNode sceneNode = namesToNodesMap.get(nodeName);
+         return sceneNode == null ? null : sceneNode.getNodeFrame();
+      };
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 }

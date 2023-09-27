@@ -22,6 +22,7 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
@@ -37,13 +38,13 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
-      update();
+      update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -51,8 +52,8 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
    @Override
    public void triggerActionExecution()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
-      frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getConditionalReferenceFrame().get());
+      frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
@@ -66,7 +67,7 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredChestPose.setFromReferenceFrame(getReferenceFrame());
+      desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
    }
@@ -74,7 +75,7 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredChestPose.setFromReferenceFrame(getReferenceFrame());
+      desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
       boolean wasExecuting = isExecuting;
@@ -100,7 +101,7 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
 
    public void disengageHoldPoseInWorld()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getConditionalReferenceFrame().get());
       frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
