@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * Message used to report the current joint angles for the fingers of the sake gripper.
        */
-public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> implements Settable<HandSakeStatusMessage>, EpsilonComparable<HandSakeStatusMessage>
+public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> implements Settable<SakeHandStatusMessage>, EpsilonComparable<SakeHandStatusMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -30,17 +30,17 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
    public boolean calibrated_;
    public boolean needs_reset_;
 
-   public HandSakeStatusMessage()
+   public SakeHandStatusMessage()
    {
    }
 
-   public HandSakeStatusMessage(HandSakeStatusMessage other)
+   public SakeHandStatusMessage(SakeHandStatusMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(HandSakeStatusMessage other)
+   public void set(SakeHandStatusMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -140,19 +140,19 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
    }
 
 
-   public static Supplier<HandSakeStatusMessagePubSubType> getPubSubType()
+   public static Supplier<SakeHandStatusMessagePubSubType> getPubSubType()
    {
-      return HandSakeStatusMessagePubSubType::new;
+      return SakeHandStatusMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return HandSakeStatusMessagePubSubType::new;
+      return SakeHandStatusMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(HandSakeStatusMessage other, double epsilon)
+   public boolean epsilonEquals(SakeHandStatusMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -180,9 +180,9 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof HandSakeStatusMessage)) return false;
+      if(!(other instanceof SakeHandStatusMessage)) return false;
 
-      HandSakeStatusMessage otherMyClass = (HandSakeStatusMessage) other;
+      SakeHandStatusMessage otherMyClass = (SakeHandStatusMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -207,7 +207,7 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("HandSakeStatusMessage {");
+      builder.append("SakeHandStatusMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
