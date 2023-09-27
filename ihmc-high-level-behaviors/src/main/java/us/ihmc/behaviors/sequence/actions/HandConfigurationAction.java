@@ -4,13 +4,12 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.tools.Timer;
 
-public class HandConfigurationAction extends HandConfigurationActionData implements BehaviorAction
+public class HandConfigurationAction extends HandConfigurationActionDescription implements BehaviorAction
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
@@ -27,7 +26,7 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 
@@ -54,7 +53,12 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
       executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
+
+   @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
    }
 
    @Override

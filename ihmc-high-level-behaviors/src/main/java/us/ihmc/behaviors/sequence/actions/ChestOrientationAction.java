@@ -7,7 +7,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -17,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class ChestOrientationAction extends ChestOrientationActionData implements BehaviorAction
+public class ChestOrientationAction extends ChestOrientationActionDescription implements BehaviorAction
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
@@ -32,6 +31,8 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    private double startOrientationDistanceToGoal;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private double heightVariationInWorld = 0.0;
+   private double previousPelvisHeightInWorld = -1.0;
 
    public ChestOrientationAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -41,7 +42,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update(referenceFrameLibrary);
 
@@ -59,7 +60,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
              .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
                                                                   frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
-                                                                  syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
+                                                                  ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
@@ -77,6 +78,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
+      boolean wasExecuting = isExecuting;
       isExecuting = !completionCalculator.isComplete(desiredChestPose,
                                                      syncedChestPose,
                                                      Double.NaN, ORIENTATION_TOLERANCE,
@@ -91,7 +93,34 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+
+      if (!isExecuting && wasExecuting && !getHoldPoseInWorldLater())
+      {
+         disengageHoldPoseInWorld();
+      }
+   }
+
+   public void disengageHoldPoseInWorld()
+   {
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getReferenceFrame());
+      frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+
+      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+      message.getSo3Trajectory()
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
+                                                                  frameChestQuaternion,
+                                                                  EuclidCoreTools.zeroVector3D,
+                                                                  syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));
+      long frameId = MessageTools.toFrameId(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+      ros2ControllerHelper.publishToController(message);
+   }
+
+   @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
    }
 
    @Override

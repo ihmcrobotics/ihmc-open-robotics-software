@@ -1,7 +1,8 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.internal.ImGui;
-import us.ihmc.behaviors.sequence.actions.HandConfigurationActionData;
+import us.ihmc.behaviors.sequence.actions.HandConfigurationActionDescription;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
@@ -9,15 +10,18 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 
 public class RDXHandConfigurationAction extends RDXBehaviorAction
 {
-   private final HandConfigurationActionData actionData = new HandConfigurationActionData();
+   private final HandConfigurationActionDescription actionDescription = new HandConfigurationActionDescription();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
+   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionDescription::getSide, actionDescription::setSide, labels.get("Side"));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
-   private final ImIntegerWrapper handConfigurationIndex = new ImIntegerWrapper(actionData::getHandConfigurationIndex,
-                                                                                actionData::setHandConfigurationIndex,
+   private final ImIntegerWrapper handConfigurationIndex = new ImIntegerWrapper(actionDescription::getHandConfigurationIndex,
+                                                                                actionDescription::setHandConfigurationIndex,
                                                                                 imInt -> ImGui.combo(labels.get("Grip"),
                                                                                                      imInt,
                                                                                                      handConfigurationNames));
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionDescription::getExecuteWithNextAction,
+                                                                                      actionDescription::setExecuteWithNextAction,
+                                                                                      imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
    public RDXHandConfigurationAction()
    {
@@ -31,6 +35,8 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      imgui.ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
       handConfigurationIndex.renderImGuiWidget();
@@ -38,9 +44,9 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    }
 
    @Override
-   public HandConfigurationActionData getActionData()
+   public HandConfigurationActionDescription getActionDescription()
    {
-      return actionData;
+      return actionDescription;
    }
 
    @Override

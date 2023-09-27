@@ -1,4 +1,4 @@
-# This message is meant to communicate the status of currently executing actions
+# This message is meant to communicate the status of a currently executing action
 
 # Executing action index
 int32 action_index
