@@ -43,7 +43,9 @@ public class NaturalPostureManager
       NaturalPostureParameters naturalPostureParameters = walkingControllerParameters.getNaturalPostureParameters();
       HumanoidRobotNaturalPosture robotNaturalPosture = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
       naturalPostureController = new NaturalPostureController(robotNaturalPosture, naturalPostureParameters, controllerToolbox, registry);
-      naturalPosturePrivilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(controllerToolbox.getFullRobotModel(), registry);
+      naturalPosturePrivilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(naturalPostureParameters,
+                                                                                                            controllerToolbox.getFullRobotModel(),
+                                                                                                            registry);
 
       naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
 
