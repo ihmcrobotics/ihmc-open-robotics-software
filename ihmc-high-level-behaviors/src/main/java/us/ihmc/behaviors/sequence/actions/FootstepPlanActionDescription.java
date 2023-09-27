@@ -111,4 +111,3 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionDescr
       return description;
    }
 }
-}
