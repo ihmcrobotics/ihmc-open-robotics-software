@@ -85,6 +85,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
                                                      BehaviorActionCompletionComponent.ORIENTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
 import behavior_msgs.msg.dds.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -19,12 +20,14 @@ import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -99,6 +102,7 @@ public class RDXBehaviorActionSequenceEditor
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
+   private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
 
    public void clear()
    {
@@ -409,6 +413,10 @@ public class RDXBehaviorActionSequenceEditor
          // We use executionStatusMessageToDisplay in order to display the previously
          // executed action's results, otherwise it gets cleared.
          ActionExecutionStatusMessage latestExecutionStatus = executionStatusSubscription.getLatest();
+         if (!latestExecutionStatus.getExecutionRejectionTooltipAsString().isEmpty())
+         {
+            executionRejectionTooltipText.renderText("Action rejected: " + latestExecutionStatus.getExecutionRejectionTooltipAsString(), true);
+         }
          if (latestExecutionStatus.getActionIndex() < 0)
          {
             if (endOfSequence)

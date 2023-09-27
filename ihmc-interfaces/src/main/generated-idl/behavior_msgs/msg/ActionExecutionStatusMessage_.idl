@@ -18,6 +18,7 @@ module behavior_msgs
          * Executing action index
          */
         long action_index;
+        string execution_rejection_tooltip;
         /**
          * Nominal execution duration
          */

@@ -132,6 +132,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       isExecuting = !isComplete;
 
       executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());

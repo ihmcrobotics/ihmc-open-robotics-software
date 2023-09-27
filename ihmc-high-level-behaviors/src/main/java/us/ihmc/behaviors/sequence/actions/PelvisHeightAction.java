@@ -90,6 +90,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
                                                      BehaviorActionCompletionComponent.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);

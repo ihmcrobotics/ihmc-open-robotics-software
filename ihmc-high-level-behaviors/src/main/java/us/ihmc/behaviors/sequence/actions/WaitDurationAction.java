@@ -39,6 +39,7 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
       isExecuting = executionTimer.isRunning(getWaitDuration());
 
       executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);

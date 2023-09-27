@@ -239,7 +239,7 @@ public class BehaviorActionSequence
          executeNextAction();
       }
 
-      if (currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting())
+      if (currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting() && currentlyExecutingAction.canExecute())
       {
          currentlyExecutingAction = null;
       }
@@ -249,9 +249,16 @@ public class BehaviorActionSequence
    {
       currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
       currentlyExecutingAction.update(excecutionNextIndex, excecutionNextIndex + 1);
-      currentlyExecutingAction.triggerActionExecution();
       currentlyExecutingAction.updateCurrentlyExecuting();
-      excecutionNextIndex++;
+      if (currentlyExecutingAction.canExecute())
+      {
+         currentlyExecutingAction.triggerActionExecution();
+         excecutionNextIndex++;
+      }
+      else
+      {
+         automaticExecution = false;
+      }
    }
 
    private void sendStatus()
