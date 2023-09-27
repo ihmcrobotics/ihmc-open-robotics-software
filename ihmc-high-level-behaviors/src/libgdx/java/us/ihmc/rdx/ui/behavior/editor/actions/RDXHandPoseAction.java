@@ -81,20 +81,24 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
-                                                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+                                               imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
                                                                                       actionData::setExecuteWithNextAction,
-                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
-                                                                                     actionData::setHoldPoseInWorldLater,
-                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+                                               imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater, actionData::setHoldPoseInWorldLater,
+                                               imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+
    private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(actionData::getJointSpaceControl,
                                                                                   actionData::setJointSpaceControl,
-                                                                                  imBoolean -> {
-                                                                                     boolean newVal = ImGui.radioButton(labels.get("Joint space"), imBoolean.get());
-                                                                                     if (newVal)
-                                                                                        imBoolean.set(true);
-                                                                                  });
+                                               imBoolean -> {
+                                                  if (ImGui.radioButton(labels.get("Joint space"), imBoolean.get()))
+                                                     imBoolean.set(true);
+                                                  ImGui.sameLine();
+                                                  if (ImGui.radioButton(labels.get("Task space"), !imBoolean.get()))
+                                                     imBoolean.set(false);
+                                               });
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
@@ -231,7 +235,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    private void visualizeIK()
    {
-
       boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
                                         (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
       if (receivedDataForThisSide)
@@ -281,11 +284,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       jointSpaceControlWrapper.renderImGuiWidget();
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Task space"), !actionData.getJointSpaceControl()))
-      {
-         actionData.setJointSpaceControl(false);
-      }
       if (!actionData.getJointSpaceControl())
       {
          holdPoseInWorldLaterWrapper.renderImGuiWidget();
