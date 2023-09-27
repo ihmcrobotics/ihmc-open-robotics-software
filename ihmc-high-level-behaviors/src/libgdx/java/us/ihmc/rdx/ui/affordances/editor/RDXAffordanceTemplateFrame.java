@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,7 +28,7 @@ public class RDXAffordanceTemplateFrame
    private final SideDependentList<Boolean> isPoseSet = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> poseFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> frameGraphics = new SideDependentList<>();
-   private final SideDependentList<HandConfiguration> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<SakeHandParameters.SakeCommandOption> handConfigurations = new SideDependentList<>();
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
@@ -192,7 +193,7 @@ public class RDXAffordanceTemplateFrame
       }
    }
 
-   public void setHandConfiguration(HandConfiguration configuration, RobotSide side)
+   public void setHandConfiguration(SakeHandParameters.SakeCommandOption configuration, RobotSide side)
    {
       handConfigurations.replace(side, configuration);
    }
@@ -214,7 +215,7 @@ public class RDXAffordanceTemplateFrame
       return poses;
    }
 
-   public HandConfiguration getHandConfiguration(RobotSide side)
+   public SakeHandParameters.SakeCommandOption getHandConfiguration(RobotSide side)
    {
       return handConfigurations.get(side);
    }

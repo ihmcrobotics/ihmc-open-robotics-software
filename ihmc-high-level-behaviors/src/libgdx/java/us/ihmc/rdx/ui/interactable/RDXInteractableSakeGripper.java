@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -76,6 +77,7 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private HandConfiguration handConfiguration;
+   private SakeHandParameters.SakeCommandOption sakeHandConfiguration;
 
    public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
@@ -99,7 +101,8 @@ public class RDXInteractableSakeGripper implements RenderableProvider
          fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);
          fingersFrames[i] = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrameHand, fingersTransforms[i]);
       }
-      handConfiguration = HandConfiguration.CLOSE;
+      //handConfiguration = HandConfiguration.CLOSE;
+      sakeHandConfiguration = SakeHandParameters.SakeCommandOption.CLOSE;
 
       panel3D.addImGui3DViewInputProcessor(this::updateFingers);
    }
@@ -117,28 +120,32 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CRUSH[i]);
-      handConfiguration = HandConfiguration.CRUSH;
+      //handConfiguration = HandConfiguration.CRUSH;
+      sakeHandConfiguration = SakeHandParameters.SakeCommandOption.GRIP_HARD;
    }
 
    public void closeGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CLOSE[i]);
-      handConfiguration = HandConfiguration.CLOSE;
+      //handConfiguration = HandConfiguration.CLOSE;
+      sakeHandConfiguration = SakeHandParameters.SakeCommandOption.CLOSE;
    }
 
    public void openGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_OPEN[i]);
-      handConfiguration = HandConfiguration.OPEN;
+      //handConfiguration = HandConfiguration.OPEN;
+      sakeHandConfiguration = SakeHandParameters.SakeCommandOption.FULLY_OPEN;
    }
 
    public void setGripperToHalfClose()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_HALF_CLOSE[i]);
-      handConfiguration = HandConfiguration.HALF_CLOSE;
+      //handConfiguration = HandConfiguration.HALF_CLOSE;
+      sakeHandConfiguration = SakeHandParameters.SakeCommandOption.OPEN;
    }
 
    public void setGripperClosure(double closure)
@@ -153,14 +160,14 @@ public class RDXInteractableSakeGripper implements RenderableProvider
                                                     closure);
    }
 
-   public void setGripperToConfiguration(HandConfiguration configuration)
+   public void setGripperToConfiguration(SakeHandParameters.SakeCommandOption configuration)
    {
       switch (configuration)
       {
-         case OPEN -> openGripper();
-         case HALF_CLOSE -> setGripperToHalfClose();
+         case FULLY_OPEN -> openGripper();
+         case OPEN -> setGripperToHalfClose();
          case CLOSE -> closeGripper();
-         case CRUSH -> crushGripper();
+         case GRIP_HARD -> crushGripper();
          default ->
          {
          }
@@ -212,9 +219,9 @@ public class RDXInteractableSakeGripper implements RenderableProvider
             fingersModelInstances[i].getRenderables(renderables, pool);
    }
 
-   public HandConfiguration getConfiguration()
+   public SakeHandParameters.SakeCommandOption getConfiguration()
    {
-      return handConfiguration;
+      return sakeHandConfiguration;
    }
 
    public ReferenceFrame getReferenceFrameHand()
