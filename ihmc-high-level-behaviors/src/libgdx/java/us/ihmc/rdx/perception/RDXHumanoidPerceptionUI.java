@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.communication.PerceptionAPI;
@@ -13,6 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
@@ -34,6 +36,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private RDXActiveMappingUI activeMappingUI;
    private RDXRemoteHeightMapPanel heightMapUI;
 
+   private RDXBytedecoImagePanel localHeightMapPanel;
+   private RDXBytedecoImagePanel internalHeightMapPanel;
+   private RDXBytedecoImagePanel croppedHeightMapPanel;
+   private RDXBytedecoImagePanel depthImagePanel;
+
    private final ImBoolean rapidRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean sphericalRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean heightMapCollapsedHeader = new ImBoolean(true);
@@ -41,7 +48,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private final ImBoolean enableRapidRegions = new ImBoolean(false);
    private final ImBoolean enableSphericalRapidRegions = new ImBoolean(false);
-   private final ImBoolean enableGPUHeightMap = new ImBoolean(false);
+   private final ImBoolean enableGPUHeightMap = new ImBoolean(true);
    private final ImBoolean enableMapRegions = new ImBoolean(false);
 
    private ImFloat thresholdHeight = new ImFloat(1.0f);
@@ -110,7 +117,15 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    public void update()
    {
-      heightMapUI.update();
+      if (heightMapUI != null)
+      {
+         heightMapUI.update();
+
+         depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
+         localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
+         croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
+         internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
+      }
 
       if (rapidRegionsUI != null)
          rapidRegionsUI.render();
@@ -167,6 +182,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          ImGui.unindent();
       }
 
+      // Set the next header to remain open by default
+      ImGui.setNextItemOpen(true, ImGuiCond.Once);
       if (ImGui.collapsingHeader("GPU Height Map", heightMapCollapsedHeader))
       {
          ImGui.indent();
@@ -218,6 +235,28 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    public void initializeHeightMapUI(ROS2Helper ros2Helper)
    {
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
+
+      internalHeightMapPanel = new RDXBytedecoImagePanel("Internal Height Map",
+                                                         humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageWidth(),
+                                                         humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageHeight(),
+                                                         RDXImagePanel.FLIP_Y);
+      depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
+                                                  humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().cols(),
+                                                  humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().rows(),
+                                                  RDXImagePanel.FLIP_Y);
+      localHeightMapPanel = new RDXBytedecoImagePanel("Local Height Map",
+                                                      humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageWidth(),
+                                                      humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageHeight(),
+                                                      RDXImagePanel.FLIP_Y);
+      croppedHeightMapPanel = new RDXBytedecoImagePanel("Cropped Height Map",
+                                                        humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().cols(),
+                                                        humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().rows(),
+                                                        RDXImagePanel.FLIP_Y);
+
+      addChild(localHeightMapPanel.getImagePanel());
+      addChild(croppedHeightMapPanel.getImagePanel());
+      addChild(depthImagePanel.getImagePanel());
+      addChild(internalHeightMapPanel.getImagePanel());
    }
 
    public RDXRapidRegionsUI getRapidRegionsUI()
@@ -259,6 +298,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          {
             visualizer.getRenderables(renderables, pool, sceneLevels);
          }
+      }
+
+      if (activeMappingUI != null)
+      {
+         activeMappingUI.getRenderables(renderables, pool);
       }
    }
 }

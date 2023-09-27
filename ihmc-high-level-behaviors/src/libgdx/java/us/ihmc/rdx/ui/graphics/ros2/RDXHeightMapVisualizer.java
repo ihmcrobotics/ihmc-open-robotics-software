@@ -126,6 +126,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
                  LogTools.warn("Creating Buffer of Size: {}", numberOfBytes * 8);
               }
 
+              LogTools.info("Received Image Message with {} bytes", numberOfBytes);
+
               PerceptionMessageTools.convertToHeightMapImage(imageMessage,
                                                              heightMapImage,
                                                              incomingCompressedImageBuffer,

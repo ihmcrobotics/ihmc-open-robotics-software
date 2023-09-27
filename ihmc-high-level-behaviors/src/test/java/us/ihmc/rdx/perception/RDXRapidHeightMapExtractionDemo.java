@@ -59,10 +59,6 @@ public class RDXRapidHeightMapExtractionDemo
    private final PerceptionDataLoader perceptionDataLoader;
    private RDXHumanoidPerceptionUI humanoidPerceptionUI;
    private HumanoidPerceptionModule humanoidPerception;
-   private RDXBytedecoImagePanel localHeightMapPanel;
-   private RDXBytedecoImagePanel internalHeightMapPanel;
-   private RDXBytedecoImagePanel croppedHeightMapPanel;
-   private RDXBytedecoImagePanel depthImagePanel;
    private CameraIntrinsics cameraIntrinsics;
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
@@ -97,42 +93,17 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
             humanoidPerception = new HumanoidPerceptionModule(openCLManager);
+            //            createForSpherical(128, 2048);
+            createForPerspective(720, 1280);
+
             humanoidPerceptionUI = new RDXHumanoidPerceptionUI(humanoidPerception, ros2Helper);
             humanoidPerceptionUI.initializeHeightMapVisualizer(ros2Helper);
             humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
-
-            //            createForSpherical(128, 2048);
-            createForPerspective(720, 1280);
 
             baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI);
             baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
             updateHeightMap();
-
-
-            internalHeightMapPanel = new RDXBytedecoImagePanel("Internal Height Map",
-                                                               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageWidth(),
-                                                               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageHeight(),
-                                                               RDXImagePanel.FLIP_Y);
-            depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
-                                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().cols(),
-                                                         humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().rows(),
-                                                         RDXImagePanel.FLIP_Y);
-            localHeightMapPanel = new RDXBytedecoImagePanel("Local Height Map",
-                                                            humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageWidth(),
-                                                            humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageHeight(),
-                                                            RDXImagePanel.FLIP_Y);
-            croppedHeightMapPanel = new RDXBytedecoImagePanel("Cropped Height Map",
-                                                              humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().cols(),
-                                                              humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().rows(),
-                                                              RDXImagePanel.FLIP_Y);
-
-
-
-            navigationPanel.addChild(localHeightMapPanel.getImagePanel());
-            navigationPanel.addChild(croppedHeightMapPanel.getImagePanel());
-            navigationPanel.addChild(depthImagePanel.getImagePanel());
-            navigationPanel.addChild(internalHeightMapPanel.getImagePanel());
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
@@ -181,16 +152,11 @@ public class RDXRapidHeightMapExtractionDemo
                loadAndExecute();
             }
 
-            if (skipIndex % 30 == 0 && autoIncrement && frameIndex.get() < totalCount - 10)
+            if (skipIndex % 10 == 0 && autoIncrement && frameIndex.get() < totalCount - 10)
             {
                frameIndex.set(frameIndex.get() + 1);
                loadAndExecute();
             }
-
-            depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
-            localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
-            croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
-            internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
 
             humanoidPerceptionUI.update();
 
@@ -261,8 +227,6 @@ public class RDXRapidHeightMapExtractionDemo
       cameraPose.set(position, orientation);
       cameraFrame.setPoseAndUpdate(cameraPose);
 
-      long begin = System.nanoTime();
-
       sensorToWorldTransform.set(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
 
       groundToWorldTransform.set(sensorToWorldTransform);
@@ -287,8 +251,6 @@ public class RDXRapidHeightMapExtractionDemo
                                        true,
                                        false);
 
-      long end = System.nanoTime();
-      LogTools.info("Update Height Map ({}): {} ms", frameIndex.get(), (end - begin) / 1e6);
    }
 
    public static void main(String[] args)

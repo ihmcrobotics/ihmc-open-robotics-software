@@ -25,6 +25,7 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.timing.PerceptionStatistics;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -64,6 +65,8 @@ public class HumanoidPerceptionModule
    private FramePlanarRegionsList sensorFrameRegions;
    private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
+
+   private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
 
    private boolean rapidRegionsEnabled = false;
    private boolean sphericalRegionsEnabled = false;
@@ -124,14 +127,17 @@ public class HumanoidPerceptionModule
 
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
    {
+      long begin = System.nanoTime();
       extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
                                     realsenseDepthImage,
                                     sensorFrameRegions,
                                     cameraFrame);
       filterFramePlanarRegionsList();
+      perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
       PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
                                                            PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                            ros2Helper);
+      perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
    }
 
    private void updateRapidHeightMap(ROS2Helper ros2Helper, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
@@ -141,7 +147,10 @@ public class HumanoidPerceptionModule
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
 
       Instant acquisitionTime = Instant.now();
+
+      long begin = System.nanoTime();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
+      perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
 
       Mat heightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
       OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
@@ -153,6 +162,9 @@ public class HumanoidPerceptionModule
                                                          heightMapImage.rows(),
                                                          heightMapImage.cols(),
                                                          RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
+
+      LogTools.info("{}", perceptionStatistics);
+
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
