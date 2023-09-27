@@ -57,21 +57,6 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionData
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
 
-   public void toMessage(FootstepPlanActionDescriptionMessage message)
-   {
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrame().getName());
-      MessageTools.toMessage(planFrame.getTransformToParent(), message.getTransformToParent());
-      message.setSwingDuration(swingDuration);
-      message.setTransferDuration(transferDuration);
-
-      message.getFootsteps().clear();
-      for (FootstepActionData footstep : footsteps)
-      {
-         footstep.toMessage(message.getFootsteps().add());
-      }
-   }
-
    public void fromMessage(FootstepPlanActionDescriptionMessage message)
    {
       planFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
@@ -114,11 +99,6 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionData
    public RigidBodyTransform getTransformToParent()
    {
       return planFrame.getTransformToParent();
-   }
-
-   public RecyclingArrayList<FootstepActionData> getFootsteps()
-   {
-      return footsteps;
    }
 
    public double getSwingDuration()
@@ -172,7 +152,7 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionData
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
 
-   public void toMessage(FootstepPlanActionMessage message)
+   public void toMessage(FootstepPlanActionDescriptionMessage message)
    {
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
@@ -185,7 +165,22 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionData
       }
    }
 
-   public void fromMessage(FootstepPlanActionMessage message)
+   public void toMessage(FootstepPlanActionDescriptionMessage message)
+   {
+      message.getParentFrame().resetQuick();
+      message.getParentFrame().add(getParentFrame().getName());
+      MessageTools.toMessage(planFrame.getTransformToParent(), message.getTransformToParent());
+      message.setSwingDuration(swingDuration);
+      message.setTransferDuration(transferDuration);
+
+      message.getFootsteps().clear();
+      for (FootstepActionData footstep : footsteps)
+      {
+         footstep.toMessage(message.getFootsteps().add());
+      }
+   }
+
+   public void fromMessage(FootstepPlanActionDescriptionMessage message)
    {
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
