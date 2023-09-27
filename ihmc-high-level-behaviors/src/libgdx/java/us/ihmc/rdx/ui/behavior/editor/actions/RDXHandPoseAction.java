@@ -105,9 +105,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
    private int previousConcurrentChestIndex = -1;
+   private final IKRootCalculator rootCalculator;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
@@ -176,7 +176,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
-      chestPoseStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
+      rootCalculator = new IKRootCalculator(ros2, syncedFullRobotModel, referenceFrameLibrary);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
@@ -238,7 +238,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    private void visualizeIK()
    {
-
       boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
                                         (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
       if (receivedDataForThisSide)
@@ -251,7 +250,13 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-            getAndSetIKTransformToRoot(floatingJoint);
+            rootCalculator.getKinematicsInfo();
+            rootCalculator.computeRoot();
+            ReferenceFrame rootIK = rootCalculator.getRoot();
+            if (rootIK == null)
+               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+            else
+               floatingJoint.getJointPose().set(rootIK.getTransformToRoot());
 
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
@@ -280,32 +285,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                }
             }
          }
-      }
-   }
-
-   private void getAndSetIKTransformToRoot(SixDoFJoint floatingJoint)
-   {
-      if (chestPoseStatusSubscription.getMessageNotification().poll())
-      {
-         BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-         int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
-         boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-         ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getActionData().getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
-         chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-         if (isCurrentAndConcurrent)
-         {
-            floatingJoint.getJointPose().set(chestInteractableReferenceFrame.getReferenceFrame().getTransformToRoot());
-            previousConcurrentChestIndex = chestIndex;
-         }
-         else if (chestIndex == previousConcurrentChestIndex)
-         {
-            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            previousConcurrentChestIndex = -1;
-         }
-      }
-      if (previousConcurrentChestIndex < 0)
-      {
-         floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
       }
    }
 
