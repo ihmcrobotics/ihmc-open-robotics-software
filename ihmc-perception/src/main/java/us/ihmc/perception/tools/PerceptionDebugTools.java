@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -271,5 +272,60 @@ public class PerceptionDebugTools
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
       display(tag, finalDisplayDepth, delay);
+   }
+
+   public void testProjection(Mat depth)
+   {
+      double radius = 4.0f;
+      double height = 2.0f;
+      double yawUnit = 2 * Math.PI / depth.cols();
+      double pitchUnit = Math.PI / (2 * depth.rows());
+
+      for (int i = 0; i < depth.cols(); i++)
+      {
+         Point3D point = new Point3D(radius * Math.cos(i * yawUnit), radius * Math.sin(i * yawUnit), -height);
+
+         Point2D projection = sphericalProject(point, depth.rows(), depth.cols());
+
+         LogTools.info("[" + i + "] Point : " + String.format("%.2f, %.2f, %.2f", point.getX(), point.getY(), point.getZ()) + " Projection : " + String.format(
+               "%d, %d",
+               (int) projection.getX(),
+               (int) projection.getY()));
+      }
+   }
+
+   public Point2D sphericalProject(Point3D cellCenter, int INPUT_HEIGHT, int INPUT_WIDTH)
+   {
+      Point2D proj = new Point2D();
+
+      double pitchUnit = Math.PI / (2 * INPUT_HEIGHT);
+      double yawUnit = 2 * Math.PI / (INPUT_WIDTH);
+
+      int pitchOffset = INPUT_HEIGHT / 2;
+      int yawOffset = INPUT_WIDTH / 2;
+
+      double x = cellCenter.getX();
+      double y = cellCenter.getY();
+      double z = cellCenter.getZ();
+
+      double radius = Math.sqrt(x * x + y * y);
+
+      double pitch = Math.atan2(z, radius);
+      int pitchCount = (pitchOffset) - (int) (pitch / pitchUnit);
+
+      double yaw = Math.atan2(-y, x);
+      int yawCount = (yawOffset) + (int) (yaw / yawUnit);
+
+      proj.setX(pitchCount);
+      proj.setY(yawCount);
+
+      LogTools.info(String.format("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2f,R:%.2f)\n", yaw, pitch, yawCount, pitchCount, z, radius));
+
+      return proj;
+   }
+
+   public static void clearAllWindows()
+   {
+      opencv_highgui.destroyAllWindows();
    }
 }

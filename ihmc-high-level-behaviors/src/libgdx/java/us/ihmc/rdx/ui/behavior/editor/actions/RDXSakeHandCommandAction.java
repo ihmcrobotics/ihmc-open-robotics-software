@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionData;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
@@ -18,6 +19,10 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    private float[] positionValue = {0.0f};
    private float[] torqueValue = {0.0f};
 
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
+                                                                                      actionData::setExecuteWithNextAction,
+                                                                                      imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+
    public RDXSakeHandCommandAction()
    {
    }
@@ -25,6 +30,9 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      imgui.ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
+      
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
       ImGui.popItemWidth();

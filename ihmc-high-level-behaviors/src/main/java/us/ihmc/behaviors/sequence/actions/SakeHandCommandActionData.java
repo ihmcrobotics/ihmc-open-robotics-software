@@ -14,6 +14,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
    private RobotSide side = RobotSide.LEFT;
    private double goalPosition = 1.0;  // default to open
    private double goalTorque = 0.0;    // default to none
+   private boolean executeWitNextAction = false;
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -22,6 +23,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("position", goalPosition);
       jsonNode.put("torque", goalTorque);
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
    @Override
@@ -31,6 +33,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       goalPosition = jsonNode.get("position").asDouble();
       goalTorque = jsonNode.get("torque").asDouble();
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
    public void toMessage(SakeHandCommandActionMessage message)
@@ -39,6 +42,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
       message.setConfiguration(SAKE_COMMAND_GOTO);
       message.setPositionRatio(goalPosition);
       message.setTorqueRatio(goalTorque);
+      message.setExecuteWithNextAction(executeWitNextAction);
    }
 
    public void fromMessage(SakeHandCommandActionMessage message)
@@ -46,6 +50,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
       side = RobotSide.fromByte(message.getRobotSide());
       goalPosition = message.getPositionRatio();
       goalTorque = message.getTorqueRatio();
+      executeWitNextAction = message.getExecuteWithNextAction();
    }
 
    public RobotSide getSide()
@@ -76,6 +81,16 @@ public class SakeHandCommandActionData implements BehaviorActionData
    public void setGoalTorque(double goalTorque)
    {
       this.goalTorque = goalTorque;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
    }
 
    @Override

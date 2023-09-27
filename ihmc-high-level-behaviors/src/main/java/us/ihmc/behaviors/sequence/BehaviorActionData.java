@@ -34,4 +34,9 @@ public interface BehaviorActionData
     * See {@link #getDescription()}.
     */
    void setDescription(String description);
+
+   default boolean getExecuteWithNextAction()
+   {
+      return false;
+   }
 }

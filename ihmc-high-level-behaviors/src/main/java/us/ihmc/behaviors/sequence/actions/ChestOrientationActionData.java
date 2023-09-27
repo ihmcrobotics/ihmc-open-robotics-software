@@ -21,6 +21,8 @@ public class ChestOrientationActionData implements BehaviorActionData
    private double trajectoryDuration = 4.0;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private boolean executeWitNextAction = false;
+   private boolean holdPoseInWorldLater = false;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -41,6 +43,8 @@ public class ChestOrientationActionData implements BehaviorActionData
       jsonNode.put("parentFrame", chestInteractableReferenceFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, chestInteractableReferenceFrame.getTransformToParent());
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
+      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
    }
 
    @Override
@@ -48,8 +52,10 @@ public class ChestOrientationActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()).get());
+      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
       chestInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
+      holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
    }
 
    public void toMessage(BodyPartPoseActionMessage message)
@@ -58,13 +64,17 @@ public class ChestOrientationActionData implements BehaviorActionData
       message.getParentFrame().add(getParentFrame().getName());
       MessageTools.toMessage(chestInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
+      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setHoldPoseInWorld(holdPoseInWorldLater);
    }
 
    public void fromMessage(BodyPartPoseActionMessage message)
    {
-      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)).get());
+      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
+      executeWitNextAction = message.getExecuteWithNextAction();
+      holdPoseInWorldLater = message.getHoldPoseInWorld();
    }
 
    public void setYaw(double yaw)
@@ -98,6 +108,26 @@ public class ChestOrientationActionData implements BehaviorActionData
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
+   }
+
+   public boolean getHoldPoseInWorldLater()
+   {
+      return holdPoseInWorldLater;
+   }
+
+   public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
+   {
+      this.holdPoseInWorldLater = holdPoseInWorldLater;
    }
 
    public ReferenceFrame getParentFrame()
@@ -140,5 +170,10 @@ public class ChestOrientationActionData implements BehaviorActionData
    public String getDescription()
    {
       return description;
+   }
+
+   public ReferenceFrameLibrary getReferenceFrameLibrary()
+   {
+      return referenceFrameLibrary;
    }
 }

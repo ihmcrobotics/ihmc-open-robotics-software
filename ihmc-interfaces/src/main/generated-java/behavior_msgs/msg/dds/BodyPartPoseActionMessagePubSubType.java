@@ -15,7 +15,7 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "40226a681e6368d09ac889fd9f3f7c6caa5c4d0b9e7a9e939d380f2b58337e5b";
+   		return "ae25ca574817ae16581083381c035cd885ee0e01cede06251280dfea68050350";
    }
    
    @Override
@@ -62,6 +62,10 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -87,6 +91,12 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -101,6 +111,10 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
+      cdr.write_type_7(data.getExecuteWithNextAction());
+
+      cdr.write_type_7(data.getHoldPoseInWorld());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BodyPartPoseActionMessage data, us.ihmc.idl.CDR cdr)
@@ -109,6 +123,10 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       cdr.read_type_e(data.getParentFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
+      	
+      data.setExecuteWithNextAction(cdr.read_type_7());
+      	
+      data.setHoldPoseInWorld(cdr.read_type_7());
       	
 
    }
@@ -122,6 +140,8 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
+      ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
+      ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
    }
 
    @Override
@@ -133,6 +153,8 @@ public class BodyPartPoseActionMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
+      data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
+      data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BodyPartPoseActionMessage src, behavior_msgs.msg.dds.BodyPartPoseActionMessage dest)
