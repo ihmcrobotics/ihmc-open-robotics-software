@@ -7,6 +7,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 /**
  * Interface for a description of an action with
  * support for saving and loading an action to file.
+ *
+ * This data includes only the information that describes an action,
+ * which does not include the runtime state of it whether inactive
+ * or currently executing it. This is only the information that gets
+ * saved to/from JSON.
  */
 public interface BehaviorActionDescription
 {
