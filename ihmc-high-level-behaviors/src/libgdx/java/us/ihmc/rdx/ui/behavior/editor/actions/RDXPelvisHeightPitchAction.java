@@ -176,9 +176,9 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       while (running)
       {
          throttler.waitAndRun();
-         if (pelvisPoseStatus.getActionIndex() > 0)
+         if (pelvisPoseStatus.getActionIndex() >= 0 && getActionIndex() >= 0)
          {
-            // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pevlis pose
+            // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
             ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
          }
       }

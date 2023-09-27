@@ -1123,6 +1123,13 @@ public class MessageTools
                                                  rigidBodyTransformMessage.getM22());
    }
 
+   public static RigidBodyTransform toEuclid(RigidBodyTransformMessage rigidBodyTransformMessage)
+   {
+      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+      toEuclid(rigidBodyTransformMessage, rigidBodyTransform);
+      return  rigidBodyTransform;
+   }
+
    public static Box3DMessage createBox3DMessage(Box3DReadOnly box)
    {
       Box3DMessage message = new Box3DMessage();

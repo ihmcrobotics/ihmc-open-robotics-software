@@ -11,6 +11,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
+import us.ihmc.behaviors.sequence.actions.IKRootCalculator;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
@@ -250,28 +251,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-            if (chestPoseStatusSubscription.getMessageNotification().poll())
-            {
-               BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-               int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
-               boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-               ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getActionData().getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
-               chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-               if (isCurrentAndConcurrent)
-               {
-                  floatingJoint.getJointPose().set(chestInteractableReferenceFrame.getReferenceFrame().getTransformToRoot());
-                  previousConcurrentChestIndex = chestIndex;
-               }
-               else if (chestIndex == previousConcurrentChestIndex)
-               {
-                  floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-                  previousConcurrentChestIndex = -1;
-               }
-            }
-            if (previousConcurrentChestIndex < 0)
-            {
-               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            }
+            getAndSetIKTransformToRoot(floatingJoint);
 
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
@@ -300,6 +280,32 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                }
             }
          }
+      }
+   }
+
+   private void getAndSetIKTransformToRoot(SixDoFJoint floatingJoint)
+   {
+      if (chestPoseStatusSubscription.getMessageNotification().poll())
+      {
+         BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
+         int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
+         boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
+         ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getActionData().getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
+         chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
+         if (isCurrentAndConcurrent)
+         {
+            floatingJoint.getJointPose().set(chestInteractableReferenceFrame.getReferenceFrame().getTransformToRoot());
+            previousConcurrentChestIndex = chestIndex;
+         }
+         else if (chestIndex == previousConcurrentChestIndex)
+         {
+            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+            previousConcurrentChestIndex = -1;
+         }
+      }
+      if (previousConcurrentChestIndex < 0)
+      {
+         floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
       }
    }
 
