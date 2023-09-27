@@ -3,9 +3,9 @@ package us.ihmc.rdx.imgui;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ConditionalReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
 /**
  * Used to select between the reference frames in a library by human readable names.
@@ -30,11 +30,11 @@ public class ImGuiReferenceFrameLibraryCombo
       {
          for (int i = 0; i < referenceFrameNamesArray.length; i++)
          {
-            ReferenceFrameSupplier referenceFrameSupplier = referenceFrameLibrary.findFrameByName(referenceFrameNamesArray[i]);
+            ReferenceFrame referenceFrame = referenceFrameLibrary.findFrameByName(referenceFrameNamesArray[i]);
 
-            if (referenceFrameSupplier != null)
+            if (referenceFrame != null)
             {
-               boolean frameHasNoParentFrame = referenceFrameSupplier.get().equals(ConditionalReferenceFrame.INVALID_FRAME);
+               boolean frameHasNoParentFrame = referenceFrame.equals(ConditionalReferenceFrame.INVALID_FRAME);
 
                if (frameHasNoParentFrame)
                   ImGui.pushStyleColor(ImGuiCol.Text, Color.RED.toIntBits());
@@ -58,8 +58,8 @@ public class ImGuiReferenceFrameLibraryCombo
       this.selectedReferenceFrame = referenceFrame;
    }
 
-   public ReferenceFrameSupplier getSelectedReferenceFrame()
+   public ReferenceFrame getSelectedReferenceFrame()
    {
-      return selectedReferenceFrame;
+      return selectedReferenceFrame.get();
    }
 }

@@ -20,13 +20,13 @@ import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionData;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -47,6 +47,7 @@ import us.ihmc.tools.io.*;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -93,12 +94,12 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
-   private IHMCROS2Input<ActionExecutionStatusMessage> executionStatusSubscription;
-   private final ActionExecutionStatusMessage executionStatusMessageToDisplay = new ActionExecutionStatusMessage();
-   private RDXBehaviorAction currentlyExecutingAction;
+   private IHMCROS2Input<ActionsExecutionStatusMessage> executionStatusSubscription;
+   private final List<ActionExecutionStatusMessage> executionStatusMessagesToDisplay = new ArrayList<>();
+   private final List<RDXBehaviorAction> currentlyExecutingActions = new ArrayList<>();
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
-   private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
+   private final ArrayList<BehaviorActionDescription> actionDescriptionForMessage = new ArrayList<>();
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
@@ -148,8 +149,7 @@ public class RDXBehaviorActionSequenceEditor
       automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
       sequenceStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
-      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTION_EXECUTION_STATUS);
-      executionStatusSubscription.getLatest().setActionIndex(-1); // To indicate to the user that nothing was yet received.
+      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTIONS_EXECUTION_STATUS);
    }
 
    public void loadNameFromFile()
@@ -180,7 +180,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                try
                {
-                  action.getActionData().loadFromFile(actionNode);
+                  action.getActionDescription().loadFromFile(actionNode);
                }
                catch (Exception exception)
                {
@@ -193,7 +193,7 @@ public class RDXBehaviorActionSequenceEditor
                action.getSelected().set(false);
                action.getExpanded().set(false);
 
-               if (action.getActionData() instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+               if (action.getActionDescription() instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
                {
                   referenceFrameLibrary.addParent(frameBasedBehaviorActionData.getConditionalReferenceFrame());
                }
@@ -232,7 +232,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", behaviorAction.getClass().getSimpleName());
-               behaviorAction.getActionData().saveToFile(actionNode);
+               behaviorAction.getActionDescription().saveToFile(actionNode);
                behaviorAction.updateAfterLoading();
             }
          });
@@ -272,9 +272,34 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXBehaviorAction action = actionSequence.get(i);
          action.setActionIndex(i);
-         action.setActionNextExcecutionIndex(executionNextIndexStatus);
-         action.update();
+         action.setActionNextExecutionIndex(executionNextIndexStatus);
+         boolean concurrencyWithPreviousAction = false;
+         if (i > 0)
+            concurrencyWithPreviousAction = actionSequence.get(i - 1).getActionDescription().getExecuteWithNextAction();
+         action.update(concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndexStatus));
       }
+   }
+
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
+   {
+      if (concurrencyWithPreviousAction)
+      {
+         boolean isNotRootOfConcurrency = true;
+         for (int j = 1; j <= actionIndex; j++)
+         {
+            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getActionDescription().getExecuteWithNextAction();
+            isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
+            if (!isNotRootOfConcurrency)
+            {
+               return (j - 1);
+            }
+            else if ((actionIndex - j) == 0 && thisPreviousActionIsConcurrent)
+            {
+               return j;
+            }
+         }
+      }
+      return -1;
    }
 
    public void renderFileMenu()
@@ -361,13 +386,13 @@ public class RDXBehaviorActionSequenceEditor
       long remoteSequenceSize = sequenceStatusSubscription.getLatest().getSequenceSize();
       if (sequenceStatusSubscription.getMessageNotification().poll())
       {
-         RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage);
+         RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDescriptionForMessage, actionSequenceUpdateMessage);
          outOfSync = !sequenceStatusSubscription.getMessageNotification().read().equals(actionSequenceUpdateMessage);
 
          if (outOfSync)
          {
             // Automatically attempt to get back in sync
-            RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage);
+            RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDescriptionForMessage, actionSequenceUpdateMessage);
             ros2ControllerHelper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
          }
       }
@@ -412,12 +437,13 @@ public class RDXBehaviorActionSequenceEditor
       {  // These brackets here to take `latestExecutionStatus` out of scope below.
          // We use executionStatusMessageToDisplay in order to display the previously
          // executed action's results, otherwise it gets cleared.
-         ActionExecutionStatusMessage latestExecutionStatus = executionStatusSubscription.getLatest();
-         if (!latestExecutionStatus.getExecutionRejectionTooltipAsString().isEmpty())
+         IDLSequence.Object<ActionExecutionStatusMessage> latestActionsExecutionStatus = executionStatusSubscription.getLatest().getActionStatusList();
+         if (!latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString().isEmpty())
          {
-            executionRejectionTooltipText.renderText("Action rejected: " + latestExecutionStatus.getExecutionRejectionTooltipAsString(), true);
+            executionRejectionTooltipText.renderText("Action rejected: " + latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString(), true);
          }
-         if (latestExecutionStatus.getActionIndex() < 0)
+
+         if (latestActionsExecutionStatus.getLast() == null || last.getActionIndex() < 0)
          {
             if (endOfSequence)
             {
@@ -430,69 +456,80 @@ public class RDXBehaviorActionSequenceEditor
          }
          else
          {
-            executionStatusMessageToDisplay.set(latestExecutionStatus);
-            currentlyExecutingAction = actionSequence.get(executionStatusMessageToDisplay.getActionIndex());
-            ImGui.text("Executing: %s (%s)".formatted(currentlyExecutingAction.getDescription(), currentlyExecutingAction.getActionTypeTitle()));
+            executionStatusMessagesToDisplay.clear();
+            currentlyExecutingActions.clear();
+            for (int i = 0; i < latestActionsExecutionStatus.size(); i++)
+            {
+               executionStatusMessagesToDisplay.add(latestActionsExecutionStatus.get(i));
+               currentlyExecutingActions.add(actionSequence.get(executionStatusMessagesToDisplay.get(i).getActionIndex()));
+            }
          }
       }
 
-      widgetAligner.text("Expected time remaining:");
-      double elapsedTime = executionStatusMessageToDisplay.getElapsedExecutionTime();
-      double nominalDuration = executionStatusMessageToDisplay.getNominalExecutionDuration();
-      double percentComplete = elapsedTime / nominalDuration;
-      double percentLeft = 1.0 - percentComplete;
-      ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
+      for (int i = 0; i < executionStatusMessagesToDisplay.size(); i++)
+      {
+         ImGui.text("Executing: ");
+         ImGui.sameLine();
+         ImGui.text("%s (%s)".formatted(currentlyExecutingActions.get(i).getDescription(), currentlyExecutingActions.get(i).getActionTypeTitle()));
 
-      ImGui.spacing();
-      widgetAligner.text("Position error (m):");
-      double currentPositionError = executionStatusMessageToDisplay.getCurrentPositionDistanceToGoal();
-      double startPositionError = executionStatusMessageToDisplay.getStartPositionDistanceToGoal();
-      double positionTolerance = executionStatusMessageToDisplay.getPositionDistanceToGoalTolerance();
-      double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
-      double toleranceMarkPercent = positionTolerance / barEndValue;
-      int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
-      percentLeft = currentPositionError / barEndValue;
-      ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
-                                   barColor,
-                                   percentLeft,
-                                   toleranceMarkPercent,
-                                   "%.2f / %.2f".formatted(currentPositionError, startPositionError));
-      ImGui.spacing();
-      widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
-      double currentOrientationError = executionStatusMessageToDisplay.getCurrentOrientationDistanceToGoal();
-      double startOrientationError = executionStatusMessageToDisplay.getStartOrientationDistanceToGoal();
-      double orientationTolerance = executionStatusMessageToDisplay.getOrientationDistanceToGoalTolerance();
-      barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
-      toleranceMarkPercent = orientationTolerance / barEndValue;
-      barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
-      percentLeft = currentOrientationError / barEndValue;
-      ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
-                                   barColor,
-                                   percentLeft,
-                                   toleranceMarkPercent,
-                                   "%.2f / %.2f".formatted(Math.toDegrees(currentOrientationError), Math.toDegrees(startOrientationError)));
-      ImGui.spacing();
+         widgetAligner.text("Expected time remaining:");
+         double elapsedTime = executionStatusMessagesToDisplay.get(i).getElapsedExecutionTime();
+         double nominalDuration = executionStatusMessagesToDisplay.get(i).getNominalExecutionDuration();
+         double percentComplete = elapsedTime / nominalDuration;
+         double percentLeft = 1.0 - percentComplete;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
 
-      if (currentlyExecutingAction instanceof RDXWalkAction)
-      {
-         widgetAligner.text("Footstep completion:");
-         int incompleteFootsteps = executionStatusMessageToDisplay.getNumberOfIncompleteFootsteps();
-         int totalFootsteps = executionStatusMessageToDisplay.getTotalNumberOfFootsteps();
-         percentLeft = incompleteFootsteps / (double) totalFootsteps;
-         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
-      }
-      else if (currentlyExecutingAction instanceof RDXHandPoseAction)
-      {
-         widgetAligner.text("Hand wrench linear (N?):");
-         double limit = 20.0;
-         double force = executionStatusMessageToDisplay.getHandWrenchMagnitudeLinear();
-         barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
-         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, barColor, force / limit, 0.5, "%.2f".formatted(force));
-      }
-      else // Just to take up the space to avoid varying height.
-      {
-         widgetAligner.text("");
-         ImGui.progressBar(0.0f, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "");
+         ImGui.spacing();
+         widgetAligner.text("Position error (m):");
+         double currentPositionError = executionStatusMessagesToDisplay.get(i).getCurrentPositionDistanceToGoal();
+         double startPositionError = executionStatusMessagesToDisplay.get(i).getStartPositionDistanceToGoal();
+         double positionTolerance = executionStatusMessagesToDisplay.get(i).getPositionDistanceToGoalTolerance();
+         double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
+         double toleranceMarkPercent = positionTolerance / barEndValue;
+         int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+         percentLeft = currentPositionError / barEndValue;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                      barColor,
+                                      percentLeft,
+                                      toleranceMarkPercent,
+                                      "%.2f / %.2f".formatted(currentPositionError, startPositionError));
+         ImGui.spacing();
+         widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
+         double currentOrientationError = executionStatusMessagesToDisplay.get(i).getCurrentOrientationDistanceToGoal();
+         double startOrientationError = executionStatusMessagesToDisplay.get(i).getStartOrientationDistanceToGoal();
+         double orientationTolerance = executionStatusMessagesToDisplay.get(i).getOrientationDistanceToGoalTolerance();
+         barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
+         toleranceMarkPercent = orientationTolerance / barEndValue;
+         barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+         percentLeft = currentOrientationError / barEndValue;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                      barColor,
+                                      percentLeft,
+                                      toleranceMarkPercent,
+                                      "%.2f / %.2f".formatted(Math.toDegrees(currentOrientationError), Math.toDegrees(startOrientationError)));
+         ImGui.spacing();
+
+         if (currentlyExecutingActions.get(i) instanceof RDXWalkAction)
+         {
+            widgetAligner.text("Footstep completion:");
+            int incompleteFootsteps = executionStatusMessagesToDisplay.get(i).getNumberOfIncompleteFootsteps();
+            int totalFootsteps = executionStatusMessagesToDisplay.get(i).getTotalNumberOfFootsteps();
+            percentLeft = incompleteFootsteps / (double) totalFootsteps;
+            ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
+         }
+         else if (currentlyExecutingActions.get(i) instanceof RDXHandPoseAction)
+         {
+            widgetAligner.text("Hand wrench linear (N?):");
+            double limit = 20.0;
+            double force = executionStatusMessagesToDisplay.get(i).getHandWrenchMagnitudeLinear();
+            barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
+            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, barColor, force / limit, 0.5, "%.2f".formatted(force));
+         }
+         else // Just to take up the space to avoid varying height.
+         {
+            widgetAligner.text("");
+            ImGui.progressBar(0.0f, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "");
+         }
       }
    }
 
@@ -503,7 +540,7 @@ public class RDXBehaviorActionSequenceEditor
       longestDescriptionLength = 50.0f;
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         ImGui.calcTextSize(calcDescriptionTextSize, actionSequence.get(i).getActionData().getDescription());
+         ImGui.calcTextSize(calcDescriptionTextSize, actionSequence.get(i).getActionDescription().getDescription());
          if (calcDescriptionTextSize.x > longestDescriptionLength)
             longestDescriptionLength = calcDescriptionTextSize.x;
       }
@@ -517,7 +554,7 @@ public class RDXBehaviorActionSequenceEditor
             commandNextActionIndex(i);
          }
          ImGuiTools.previousWidgetTooltip("Next for execution. Index " + i);
-         action.getDescription().set(action.getActionData().getDescription());
+         action.getDescription().set(action.getActionDescription().getDescription());
          ImGui.sameLine();
          ImGui.text("->");
 
@@ -538,7 +575,7 @@ public class RDXBehaviorActionSequenceEditor
          ImGui.sameLine();
          ImGui.pushItemWidth(longestDescriptionLength + 30.0f);
          ImGuiTools.inputText(labels.get("", "description", i), action.getDescription());
-         action.getActionData().setDescription(action.getDescription().get());
+         action.getActionDescription().setDescription(action.getDescription().get());
          ImGui.popItemWidth();
          ImGui.sameLine();
          if (i > 0)
@@ -611,7 +648,7 @@ public class RDXBehaviorActionSequenceEditor
          RDXWalkAction walkAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
          walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
          if (nextPreviousParentFrame != null)
-            walkAction.getActionData().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+         walkAction.getActionDescription().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
          newAction = walkAction;
       }
       ImGui.text("Add Hand Pose:");
@@ -639,7 +676,7 @@ public class RDXBehaviorActionSequenceEditor
                handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
             }
             if (nextPreviousParentFrame != null)
-               handPoseAction.getActionData().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            handPoseAction.getActionDescription().changeParentFrameWithoutMoving(nextPreviousParentFrame);
             newAction = handPoseAction;
          }
          if (side.ordinal() < 1)
@@ -652,7 +689,7 @@ public class RDXBehaviorActionSequenceEditor
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandWrench")))
          {
             RDXHandWrenchAction handWrenchAction = new RDXHandWrenchAction();
-            handWrenchAction.getActionData().setSide(side);
+            handWrenchAction.getActionDescription().setSide(side);
             newAction = handWrenchAction;
          }
          if (side.ordinal() < 1)
@@ -665,10 +702,10 @@ public class RDXBehaviorActionSequenceEditor
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
          RDXChestOrientationAction chestOrientationAction = new RDXChestOrientationAction(panel3D,
-                                                   robotModel,
-                                                   syncedRobot.getFullRobotModel(),
-                                                   selectionCollisionModel,
-                                                   referenceFrameLibrary);
+                                                                                          robotModel,
+                                                                                          syncedRobot.getFullRobotModel(),
+                                                                                          selectionCollisionModel,
+                                                                                          referenceFrameLibrary);
          // Set the new action to where the last one was for faster authoring
          RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
          if (nextPreviousChestOrientationAction != null)
@@ -680,18 +717,18 @@ public class RDXBehaviorActionSequenceEditor
          {
             chestOrientationAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getChestFrame());
          }
-         chestOrientationAction.getActionData().getConditionalReferenceFrame().setParentFrameName(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
+         chestOrientationAction.getActionDescription().getConditionalReferenceFrame().setParentFrameName(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
          newAction = chestOrientationAction;
       }
-      if (ImGui.button(labels.get("Add Pelvis Height")))
+      if (ImGui.button(labels.get("Add Pelvis Height and Pitch")))
       {
-         RDXPelvisHeightAction pelvisHeightAction = new RDXPelvisHeightAction(panel3D,
-                                                                              robotModel,
-                                                                              syncedRobot.getFullRobotModel(),
-                                                                              selectionCollisionModel,
-                                                                              referenceFrameLibrary);
+         RDXPelvisHeightPitchAction pelvisHeightAction = new RDXPelvisHeightPitchAction(panel3D,
+                                                                                        robotModel,
+                                                                                        syncedRobot.getFullRobotModel(),
+                                                                                        selectionCollisionModel,
+                                                                                        referenceFrameLibrary);
          // Set the new action to where the last one was for faster authoring
-         RDXPelvisHeightAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightAction.class);
+         RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
          if (nextPreviousPelvisHeightAction != null)
          {
             pelvisHeightAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
@@ -701,7 +738,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             pelvisHeightAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
          }
-         pelvisHeightAction.getActionData().getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+         pelvisHeightAction.getActionDescription().getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
          newAction = pelvisHeightAction;
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
@@ -712,7 +749,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
          if (nextPreviousParentFrame != null)
-            footstepPlanAction.getActionData().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            footstepPlanAction.getActionDescription().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
          newAction = footstepPlanAction;
       }
       if (ImGui.button(labels.get("Add Wait")))
@@ -743,15 +780,15 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (actionSequence.get(i) instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            return footstepPlanAction.getActionData().getConditionalReferenceFrame().get().getParent();
+            return footstepPlanAction.getActionDescription().getConditionalReferenceFrame().get().getParent();
          }
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
-            return handPoseAction.getActionData().getConditionalReferenceFrame().get().getParent();
+            return handPoseAction.getActionDescription().getConditionalReferenceFrame().get().getParent();
          }
          else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
          {
-            return walkAction.getActionData().getConditionalReferenceFrame().get().getParent();
+            return walkAction.getActionDescription().getConditionalReferenceFrame().get().getParent();
          }
       }
       return null;
@@ -764,7 +801,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
-            if (handPoseAction.getActionData().getSide() == side)
+            if (handPoseAction.getActionDescription().getSide() == side)
             {
                previousAction = (RDXHandPoseAction) actionSequence.get(i);
             }

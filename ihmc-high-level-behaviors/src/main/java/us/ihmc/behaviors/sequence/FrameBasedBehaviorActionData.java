@@ -6,7 +6,7 @@ import us.ihmc.robotics.referenceFrames.ConditionalReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
-public abstract class FrameBasedBehaviorActionData implements BehaviorActionData, ReferenceFrameSupplier
+public abstract class FrameBasedBehaviorActionData implements BehaviorActionDescription, ReferenceFrameSupplier
 {
    private static final RigidBodyTransform ZERO_TRANSFORM_TO_PARENT = new RigidBodyTransform();
 

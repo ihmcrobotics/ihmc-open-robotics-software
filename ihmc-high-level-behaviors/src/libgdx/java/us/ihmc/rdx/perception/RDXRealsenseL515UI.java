@@ -1,6 +1,5 @@
 package us.ihmc.rdx.perception;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImFloat;
@@ -17,14 +16,15 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseL515;
@@ -151,7 +151,7 @@ public class RDXRealsenseL515UI
                                        opencv_imgproc.COLOR_RGB2RGBA);
                colorImagePanel.draw();
 
-               CameraPinholeBrown depthCameraIntrinsics = l515.getDepthCameraIntrinsics();
+               CameraIntrinsics depthCameraIntrinsics = l515.getDepthCameraIntrinsics();
 
                double cmosSensorDiagonal = 0.004233; // format 1/6"
                double cmosWidthLocal = cmosWidth.get();
