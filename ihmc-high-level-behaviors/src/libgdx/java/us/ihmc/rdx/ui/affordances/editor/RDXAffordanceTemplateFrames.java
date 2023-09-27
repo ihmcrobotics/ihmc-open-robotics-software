@@ -6,11 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.avatar.sakeGripper.SakeHandParameters;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
@@ -33,9 +32,9 @@ public class RDXAffordanceTemplateFrames
    private boolean changedColor = false;
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
-   private final SideDependentList<List<SakeHandParameters.SakeCommandOption>> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<List<SakeHandCommandOption>> handConfigurations = new SideDependentList<>();
    private final SideDependentList<List<Boolean>> arePosesSet = new SideDependentList<>();
-   private SakeHandParameters.SakeCommandOption selectedFrameConfiguration;
+   private SakeHandCommandOption selectedFrameConfiguration;
    private int selectedIndex = -1;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
@@ -318,7 +317,7 @@ public class RDXAffordanceTemplateFrames
       objectTransforms.add(transform);
    }
 
-   public void addHandConfiguration(SakeHandParameters.SakeCommandOption configuration, RobotSide side)
+   public void addHandConfiguration(SakeHandCommandOption configuration, RobotSide side)
    {
       handConfigurations.get(side).add(configuration);
    }
@@ -366,7 +365,7 @@ public class RDXAffordanceTemplateFrames
       return arePosesSet;
    }
 
-   public SideDependentList<List<SakeHandParameters.SakeCommandOption>> getHandConfigurations()
+   public SideDependentList<List<SakeHandCommandOption>> getHandConfigurations()
    {
       return handConfigurations;
    }

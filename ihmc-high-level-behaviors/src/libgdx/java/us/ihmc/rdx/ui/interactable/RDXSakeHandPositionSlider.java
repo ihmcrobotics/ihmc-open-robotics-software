@@ -1,9 +1,10 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
@@ -12,7 +13,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.CLOSED_FINGER_ANGLE;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 
 /**
  * This slider allows the user to control the Sake hand's finger positions,
@@ -71,7 +73,7 @@ public class RDXSakeHandPositionSlider
 
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) SakeCommandOption.GOTO.getCommandNumber());
+            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
             message.setPostionRatio(positionRatio);
             message.setTorqueRatio(0.3);
 

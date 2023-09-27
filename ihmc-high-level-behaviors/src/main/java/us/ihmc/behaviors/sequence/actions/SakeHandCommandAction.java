@@ -3,11 +3,10 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
-
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 public class SakeHandCommandAction extends SakeHandCommandActionDescription implements BehaviorAction
 {
@@ -38,7 +37,7 @@ public class SakeHandCommandAction extends SakeHandCommandActionDescription impl
    {
       SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
       message.setRobotSide(getSide().toByte());
-      message.setDesiredHandConfiguration((byte) SakeCommandOption.values[getHandConfigurationIndex()].getCommandNumber());
+      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getHandConfigurationIndex()].getCommandNumber());
       message.setPostionRatio(getGoalPosition());
       message.setTorqueRatio(getGoalTorque());
 

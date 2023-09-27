@@ -3,16 +3,15 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 public class SakeHandCommandActionDescription implements BehaviorActionDescription
 {
    private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
-   private int handConfigurationIndex = SakeCommandOption.GOTO.ordinal();
+   private int handConfigurationIndex = SakeHandCommandOption.GOTO.ordinal();
    private double goalPosition = 1.0;  // default to open
    private double goalTorque = 0.0;    // default to none
    private boolean executeWitNextAction = false;
@@ -22,7 +21,7 @@ public class SakeHandCommandActionDescription implements BehaviorActionDescripti
    {
       jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("configuration", SakeCommandOption.values[handConfigurationIndex].name());
+      jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex].name());
       jsonNode.put("position", goalPosition);
       jsonNode.put("torque", goalTorque);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
@@ -33,7 +32,7 @@ public class SakeHandCommandActionDescription implements BehaviorActionDescripti
    {
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      handConfigurationIndex = SakeCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal();
+      handConfigurationIndex = SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal();
       goalPosition = jsonNode.get("position").asDouble();
       goalTorque = jsonNode.get("torque").asDouble();
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
@@ -42,7 +41,7 @@ public class SakeHandCommandActionDescription implements BehaviorActionDescripti
    public void toMessage(SakeHandCommandActionDescriptionMessage message)
    {
       message.setRobotSide(side.toByte());
-      message.setConfiguration(SakeCommandOption.values[handConfigurationIndex].getCommandNumber());
+      message.setConfiguration(SakeHandCommandOption.values[handConfigurationIndex].getCommandNumber());
       message.setPositionRatio(goalPosition);
       message.setTorqueRatio(goalTorque);
       message.setExecuteWithNextAction(executeWitNextAction);
