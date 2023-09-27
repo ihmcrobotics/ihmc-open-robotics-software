@@ -52,7 +52,7 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionDescription 
    @Override
    public void triggerActionExecution()
    {
-      FramePose3D framePose = new FramePose3D(getReferenceFrame());
+      FramePose3D framePose = new FramePose3D(getConditionalReferenceFrame().get());
       FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
       framePose.changeFrame(ReferenceFrame.getWorldFrame());

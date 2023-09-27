@@ -103,7 +103,8 @@ public class FootstepPlanAction extends FootstepPlanActionDescription implements
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(),
+                                                      footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else
@@ -127,7 +128,8 @@ public class FootstepPlanAction extends FootstepPlanActionDescription implements
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(),
+                                                      footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else
