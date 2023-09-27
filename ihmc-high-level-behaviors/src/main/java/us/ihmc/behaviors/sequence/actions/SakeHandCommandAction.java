@@ -38,7 +38,7 @@ public class SakeHandCommandAction extends SakeHandCommandActionData implements 
    {
       HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
       message.setRobotSide(getSide().toByte());
-      message.setDesiredHandConfiguration(SAKE_COMMAND_GOTO);
+      message.setDesiredHandConfiguration((byte) SakeCommandOption.values[getHandConfigurationIndex()].getCommandNumber());
       message.setPostionRatio(getGoalPosition());
       message.setTorqueRatio(getGoalTorque());
 
