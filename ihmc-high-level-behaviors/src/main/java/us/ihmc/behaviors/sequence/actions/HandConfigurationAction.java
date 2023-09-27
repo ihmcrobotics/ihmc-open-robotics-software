@@ -51,6 +51,7 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
       isExecuting = executionTimer.isRunning(WAIT_TIME);
 
       executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);

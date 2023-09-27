@@ -15,6 +15,7 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
             * Executing action index
             */
    public int action_index_;
+   public java.lang.StringBuilder execution_rejection_tooltip_;
    /**
             * Nominal execution duration
             */
@@ -62,6 +63,7 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
    public ActionExecutionStatusMessage()
    {
+      execution_rejection_tooltip_ = new java.lang.StringBuilder(255);
    }
 
    public ActionExecutionStatusMessage(ActionExecutionStatusMessage other)
@@ -73,6 +75,9 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
    public void set(ActionExecutionStatusMessage other)
    {
       action_index_ = other.action_index_;
+
+      execution_rejection_tooltip_.setLength(0);
+      execution_rejection_tooltip_.append(other.execution_rejection_tooltip_);
 
       nominal_execution_duration_ = other.nominal_execution_duration_;
 
@@ -111,6 +116,21 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
    public int getActionIndex()
    {
       return action_index_;
+   }
+
+   public void setExecutionRejectionTooltip(java.lang.String execution_rejection_tooltip)
+   {
+      execution_rejection_tooltip_.setLength(0);
+      execution_rejection_tooltip_.append(execution_rejection_tooltip);
+   }
+
+   public java.lang.String getExecutionRejectionTooltipAsString()
+   {
+      return getExecutionRejectionTooltip().toString();
+   }
+   public java.lang.StringBuilder getExecutionRejectionTooltip()
+   {
+      return execution_rejection_tooltip_;
    }
 
    /**
@@ -298,6 +318,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.execution_rejection_tooltip_, other.execution_rejection_tooltip_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nominal_execution_duration_, other.nominal_execution_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elapsed_execution_time_, other.elapsed_execution_time_, epsilon)) return false;
@@ -335,6 +357,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if(this.action_index_ != otherMyClass.action_index_) return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.execution_rejection_tooltip_, otherMyClass.execution_rejection_tooltip_)) return false;
+
       if(this.nominal_execution_duration_ != otherMyClass.nominal_execution_duration_) return false;
 
       if(this.elapsed_execution_time_ != otherMyClass.elapsed_execution_time_) return false;
@@ -369,6 +393,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       builder.append("ActionExecutionStatusMessage {");
       builder.append("action_index=");
       builder.append(this.action_index_);      builder.append(", ");
+      builder.append("execution_rejection_tooltip=");
+      builder.append(this.execution_rejection_tooltip_);      builder.append(", ");
       builder.append("nominal_execution_duration=");
       builder.append(this.nominal_execution_duration_);      builder.append(", ");
       builder.append("elapsed_execution_time=");

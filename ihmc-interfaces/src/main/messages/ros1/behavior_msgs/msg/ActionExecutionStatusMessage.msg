@@ -3,6 +3,8 @@
 # Executing action index
 int32 action_index
 
+string execution_rejection_tooltip
+
 # Nominal execution duration
 float64 nominal_execution_duration
 

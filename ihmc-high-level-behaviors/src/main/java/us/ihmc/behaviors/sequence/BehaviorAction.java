@@ -14,7 +14,7 @@ public interface BehaviorAction extends BehaviorActionData
    /** Trigger the action to begin executing. Called once per execution. */
    default void triggerActionExecution()
    {
-      
+
    }
 
    /** Called every tick only when this action is executing. */
@@ -27,5 +27,36 @@ public interface BehaviorAction extends BehaviorActionData
    default boolean isExecuting()
    {
       return false;
+   }
+
+   default boolean canExecute()
+   {
+      boolean canExecute = true;
+
+      if (this instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+      {
+         canExecute &= frameBasedBehaviorActionData.getConditionalReferenceFrame().hasParentFrame();
+      }
+
+      // TODO: add other conditions
+
+      return canExecute;
+   }
+
+   default StringBuilder getExecutionRejectionTooltip()
+   {
+      StringBuilder tooltip = new StringBuilder();
+
+      if (this instanceof FrameBasedBehaviorActionData frameBasedBehaviorActionData)
+      {
+         if (!frameBasedBehaviorActionData.getConditionalReferenceFrame().hasParentFrame())
+         {
+            tooltip.append("parent frame does not exist in the scene");
+         }
+      }
+
+      // TODO: add other conditions
+
+      return tooltip;
    }
 }
