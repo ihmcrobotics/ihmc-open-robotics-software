@@ -25,7 +25,7 @@ public class RDXFootstepAction
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final BooleanSupplier planSelected;
-   private FootstepActionData actionData;
+   private FootstepActionData actionDescription;
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
@@ -40,15 +40,15 @@ public class RDXFootstepAction
       this.planSelected = planSelected;
    }
 
-   public void update(FootstepActionData actionData, int stepIndex)
+   public void update(FootstepActionData actionDescription, int stepIndex)
    {
-      this.actionData = actionData;
+      this.actionDescription = actionDescription;
 
       if (interactableFootstep == null
        || stepIndex != interactableFootstep.getIndex()
-       || actionData.getSide() != interactableFootstep.getFootstepSide())
+       || actionDescription.getSide() != interactableFootstep.getFootstepSide())
       {
-         recreateGraphics(actionData.getSide(), stepIndex);
+         recreateGraphics(actionDescription.getSide(), stepIndex);
       }
 
       ReferenceFrame updatedPlanFrame = planFrameSupplier.get();
@@ -60,10 +60,10 @@ public class RDXFootstepAction
       getGizmo().update();
 
       if (getGizmo().getGizmoModifiedByUser().poll())
-         actionData.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
+         actionDescription.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
       else
       {
-         getGizmo().getTransformToParent().set(actionData.getSolePose()); // Update gizmo in case action data changes
+         getGizmo().getTransformToParent().set(actionDescription.getSolePose()); // Update gizmo in case action data changes
          getGizmo().update();
       }
 
@@ -106,7 +106,7 @@ public class RDXFootstepAction
 
    public FootstepActionData getActionData()
    {
-      return actionData;
+      return actionDescription;
    }
 
    public ReferenceFrame getFootstepFrame()
