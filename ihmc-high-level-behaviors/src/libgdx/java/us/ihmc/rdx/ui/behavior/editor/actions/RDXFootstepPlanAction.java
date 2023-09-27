@@ -67,7 +67,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
       actionData.update();
 
@@ -137,7 +137,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          update();
       }
 

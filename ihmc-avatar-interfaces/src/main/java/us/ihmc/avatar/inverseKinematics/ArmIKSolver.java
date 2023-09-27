@@ -34,7 +34,6 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.wholeBodyController.HandTransformTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -158,7 +157,7 @@ public class ArmIKSolver
 
    public void update(ReferenceFrame handControlDesiredFrame)
    {
-      // since this is temporaririly modifying the desired pose and it's passed
+      // since this is temporarily modifying the desired pose, and it's passed
       // to the WBCC command on another thread below, we need to synchronize.
       synchronized (handControlDesiredPose)
       {

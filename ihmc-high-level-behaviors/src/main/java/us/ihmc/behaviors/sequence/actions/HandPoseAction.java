@@ -3,17 +3,20 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,41 +61,45 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 
       this.actionIndex = actionIndex;
 
-      if (actionIndex == nextExecutionIndex)
+      // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
+      if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
+          actionIndex == nextExecutionIndex)
       {
-         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-         armIKSolver.copyActualToWork();
-         armIKSolver.update(getPalmFrame());
-         armIKSolver.solve();
-
-         // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-         handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
-         handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
-         handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
-         for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-         {
-            handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
-         }
-         ros2ControllerHelper.publish(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+         computeAndPublishIKSolution();
       }
+   }
+
+   private void computeAndPublishIKSolution()
+   {
+      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+      armIKSolver.copyActualToWork();
+      armIKSolver.update(getPalmFrame());
+      armIKSolver.solve();
+
+      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+      handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+      handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
+      handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
+      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+      {
+         handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+      }
+      if (getSide() == RobotSide.LEFT)
+         ros2ControllerHelper.publish(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+      else
+         ros2ControllerHelper.publish(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
    }
 
    @Override
    public void triggerActionExecution()
    {
       ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-
-      double solutionQuality = armIKSolver.getQuality();
-      if (solutionQuality < 1.0)
-      {
-         LogTools.error("Solution is low quality ({}). Not sending.", solutionQuality);
-      }
 
       OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
       double[] jointAngles = new double[solutionOneDoFJoints.length];
@@ -103,10 +110,28 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
       armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-      ros2ControllerHelper.publishToController(armTrajectoryMessage);
+      if (getJointSpaceControl())
+      {
+         ros2ControllerHelper.publishToController(armTrajectoryMessage);
+      }
+      else
+      {
+         FramePose3D frameHand = new FramePose3D(getPalmFrame());
+         frameHand.changeFrame(ReferenceFrame.getWorldFrame());
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(getSide(),
+                                                                                                        getTrajectoryDuration(),
+                                                                                                        frameHand.getPosition(),
+                                                                                                        frameHand.getOrientation(),
+                                                                                                        ReferenceFrame.getWorldFrame());
+         handTrajectoryMessage.setForceExecution(true);
+
+         HandHybridJointspaceTaskspaceTrajectoryMessage hybridHandMessage = HumanoidMessageTools.createHandHybridJointspaceTaskspaceTrajectoryMessage(getSide(),
+                                                                                                                                                      handTrajectoryMessage.getSe3Trajectory(),
+                                                                                                                                                      armTrajectoryMessage.getJointspaceTrajectory());
+         ros2ControllerHelper.publishToController(hybridHandMessage);
+      }
 
       executionTimer.reset();
-
       desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
       startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
@@ -119,11 +144,15 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
+      boolean wasExecuting = isExecuting;
       // Left hand broke on Nadia and not in the robot model?
       isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
-                                                     syncedHandControlPose, POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
+                                                     syncedHandControlPose,
+                                                     POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
-                                                     executionTimer);
+                                                     executionTimer,
+                                                     BehaviorActionCompletionComponent.TRANSLATION,
+                                                     BehaviorActionCompletionComponent.ORIENTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
@@ -135,7 +164,32 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(getSide(), true));
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+      if (!isExecuting && wasExecuting && !getJointSpaceControl() && !getHoldPoseInWorldLater())
+      {
+         disengageHoldPoseInWorld();
+      }
+   }
+
+   private void disengageHoldPoseInWorld()
+   {
+      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+
+      OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
+      double[] jointAngles = new double[solutionOneDoFJoints.length];
+      for (int i = 0; i < jointAngles.length; i++)
+      {
+         jointAngles[i] = solutionOneDoFJoints[i].getQ();
+      }
+
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
+      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+      ros2ControllerHelper.publishToController(armTrajectoryMessage);
+   }
+
+   @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
    }
 
    @Override

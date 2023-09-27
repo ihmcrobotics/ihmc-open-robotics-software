@@ -33,7 +33,7 @@ public class RDXActionSequenceTools
       }
       if (actionType.equals(RDXChestOrientationAction.class.getSimpleName()))
       {
-         return new RDXChestOrientationAction();
+         return new RDXChestOrientationAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
       }
       if (actionType.equals(RDXFootstepPlanAction.class.getSimpleName()))
       {
@@ -53,9 +53,9 @@ public class RDXActionSequenceTools
       {
          return robotHasArms ? new RDXHandWrenchAction() : null;
       }
-      if (actionType.equals(RDXPelvisHeightAction.class.getSimpleName()))
+      if (actionType.equals(RDXPelvisHeightPitchAction.class.getSimpleName()))
       {
-         return new RDXPelvisHeightAction();
+         return new RDXPelvisHeightPitchAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
       }
       if (actionType.equals(RDXWaitDurationAction.class.getSimpleName()))
       {

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.HandPoseActionMessage;
+import behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -22,6 +22,9 @@ public class HandPoseActionData implements BehaviorActionData
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame palmFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private double trajectoryDuration = 4.0;
+   private boolean executeWitNextAction = false;
+   private boolean holdPoseInWorldLater = false;
+   private boolean jointSpaceControl = true;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -43,6 +46,9 @@ public class HandPoseActionData implements BehaviorActionData
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
+      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
+      jsonNode.put("jointSpaceControl", jointSpaceControl);
    }
 
    @Override
@@ -51,25 +57,34 @@ public class HandPoseActionData implements BehaviorActionData
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
+      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
       palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
+      holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
+      jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
 
-   public void toMessage(HandPoseActionMessage message)
+   public void toMessage(SidedBodyPartPoseActionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
       MessageTools.toMessage(palmFrame.getTransformToParent(), message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
+      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setHoldPoseInWorld(holdPoseInWorldLater);
+      message.setJointSpaceControl(jointSpaceControl);
    }
 
-   public void fromMessage(HandPoseActionMessage message)
+   public void fromMessage(SidedBodyPartPoseActionMessage message)
    {
-      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
+      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       palmFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
+      executeWitNextAction = message.getExecuteWithNextAction();
+      holdPoseInWorldLater = message.getHoldPoseInWorld();
+      jointSpaceControl = message.getJointSpaceControl();
    }
 
    public ReferenceFrame getParentFrame()
@@ -123,6 +138,37 @@ public class HandPoseActionData implements BehaviorActionData
    }
 
    @Override
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
+   }
+
+   public boolean getHoldPoseInWorldLater()
+   {
+      return holdPoseInWorldLater;
+   }
+
+   public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
+   {
+      this.holdPoseInWorldLater = holdPoseInWorldLater;
+   }
+
+   public boolean getJointSpaceControl()
+   {
+      return jointSpaceControl;
+   }
+
+   public void setJointSpaceControl(boolean jointSpaceControl)
+   {
+      this.jointSpaceControl = jointSpaceControl;
+   }
+
+   @Override
    public void setDescription(String description)
    {
       this.description = description;
@@ -132,5 +178,10 @@ public class HandPoseActionData implements BehaviorActionData
    public String getDescription()
    {
       return description;
+   }
+
+   public ReferenceFrameLibrary getReferenceFrameLibrary()
+   {
+      return referenceFrameLibrary;
    }
 }

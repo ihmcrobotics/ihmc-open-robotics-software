@@ -5,13 +5,13 @@ package us.ihmc.commonWalkingControlModules.configurations;
  * secondary objective based on a provided privileged configuration.
  * <p>
  * Depending on whether the controller core is used in inverse dynamics or inverse kinematics mode,
- * it will computed a set of desired joint accelerations/velocities to bring the robot to a desired
+ * it will compute a set of desired joint accelerations/velocities to bring the robot to a desired
  * privileged configuration.
  * </p>
  * <p>
  * This new jointspace objective is then projected into the nullspace of the principal objectives
  * already submitted by the high-level control. As a result, the privileged configuration objective
- * will have only a little affect onto the main objectives.
+ * will have only a little effect onto the main objectives.
  * </p>
  */
 public class JointPrivilegedConfigurationParameters
