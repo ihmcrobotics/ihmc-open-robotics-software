@@ -9,6 +9,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionData;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,6 +32,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +70,10 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final RDXInteractableHighlightModel highlightModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
-   private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
    private final ROS2PublishSubscribeAPI ros2;
+   private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
+   private volatile boolean running = true;
+   private final Throttler throttler = new Throttler().setFrequency(20.0);
 
    public RDXChestOrientationAction(RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
@@ -98,6 +102,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+
+      ThreadTools.startAsDaemon(this::publishStatusUpdate, "RDXChestStatusUpdate");
    }
 
    @Override
@@ -149,15 +155,30 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       chestPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
       MessageTools.toMessage(getActionData().getTransformToParent(), chestPoseStatus.getTransformToParent());
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) ||
-          (executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
+      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) || (
+            executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
          chestPoseStatus.setCurrentAndConcurrent(true);
       else
          chestPoseStatus.setCurrentAndConcurrent(false);
-      // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-      ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
-      LogTools.info("{} {}", getActionIndex(), chestPoseStatus.getCurrentAndConcurrent());
+   }
 
+   private void publishStatusUpdate()
+   {
+      while (running)
+      {
+         throttler.waitAndRun();
+         if (chestPoseStatus.getActionIndex() > 0)
+         {
+            // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
+            ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+         }
+      }
+   }
+
+   public void destroy()
+   {
+      LogTools.info("Destroying RDX chest pose status publisher for action {}", getActionIndex());
+      running = false;
    }
 
    @Override

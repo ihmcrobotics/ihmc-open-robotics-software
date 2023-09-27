@@ -54,6 +54,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.tools.time.FrequencyStatisticPrinter;
 import us.ihmc.wholeBodyController.HandTransformTools;
 
 import java.util.ArrayList;
@@ -249,14 +250,12 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
-
-            if (chestPoseStatusSubscription.hasReceivedFirstMessage())
+            if (chestPoseStatusSubscription.getMessageNotification().poll())
             {
                BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
                int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
                boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-               LogTools.info("{}  {}  {}", actionData.getSide(), chestIndex, isCurrentAndConcurrent);
-               ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getActionData().getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)).get());
+               ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getActionData().getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
                chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
                if (isCurrentAndConcurrent)
                {

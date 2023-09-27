@@ -102,6 +102,8 @@ public class RDXBehaviorActionSequenceEditor
 
    public void clear()
    {
+      for (RDXBehaviorAction action : actionSequence)
+         action.destroy();
       workspaceFile = null;
    }
 
@@ -154,6 +156,8 @@ public class RDXBehaviorActionSequenceEditor
 
    public boolean loadActionsFromFile()
    {
+      for (RDXBehaviorAction action : actionSequence)
+         action.destroy();
       actionSequence.clear();
       executionNextIndexStatus = 0;
       LogTools.info("Loading from {}", workspaceFile.getFilesystemFile());
@@ -294,6 +298,8 @@ public class RDXBehaviorActionSequenceEditor
          if (!loadActionsFromFile())
          {
             LogTools.warn("Invalid action!");
+            for (RDXBehaviorAction action : actionSequence)
+               action.destroy();
             actionSequence.clear();
          }
       }
@@ -576,6 +582,7 @@ public class RDXBehaviorActionSequenceEditor
          }
          if (ImGui.button(labels.get("X", i)))
          {
+            actionSequence.get(i).destroy();
             RDXBehaviorAction removedAction = actionSequence.remove(i);
             commandNextActionIndex(actionSequence.size());
          }
@@ -703,7 +710,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                                         robotModel,
                                                                                         syncedRobot.getFullRobotModel(),
                                                                                         selectionCollisionModel,
-                                                                                        referenceFrameLibrary);
+                                                                                        referenceFrameLibrary,
+                                                                                        ros2ControllerHelper);
          // Set the new action to where the last one was for faster authoring
          RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
          if (nextPreviousPelvisHeightAction != null)

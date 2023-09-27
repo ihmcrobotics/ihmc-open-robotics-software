@@ -20,16 +20,12 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
@@ -51,7 +47,9 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
+   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPoseStatusSubscription;
    private int previousConcurrentChestIndex = -1;
+   private int previousConcurrentPelvisIndex = -1;
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -70,6 +68,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       }
 
       chestPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
+      pelvisPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS);
    }
 
    @Override
@@ -86,14 +85,23 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copyActualToWork();
 
-         if (chestPoseStatusSubscription.hasReceivedFirstMessage())
+         BodyPartPoseStatusMessage chestPoseStatusMessage;
+         if (chestPoseStatusSubscription.getMessageNotification().poll())
+            chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
+         else
+            chestPoseStatusMessage = null;
+
+         BodyPartPoseStatusMessage pelvisPoseStatusMessage = null;
+         if (pelvisPoseStatusSubscription.getMessageNotification().poll())
+            pelvisPoseStatusMessage = pelvisPoseStatusSubscription.getLatest();
+
+         ModifiableReferenceFrame chestInteractableReferenceFrame;
+         if (chestPoseStatusMessage != null)
          {
-            BodyPartPoseStatusMessage chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
             int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
             boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-            ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)).get());
+            chestInteractableReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
             chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-
             if (isCurrentAndConcurrent)
             {
                armIKSolver.setChestExternally(chestInteractableReferenceFrame.getReferenceFrame());
@@ -163,6 +171,12 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                                                                                                         frameHand.getPosition(),
                                                                                                         frameHand.getOrientation(),
                                                                                                         ReferenceFrame.getWorldFrame());
+         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
          handTrajectoryMessage.setForceExecution(true);
 
          HandHybridJointspaceTaskspaceTrajectoryMessage hybridHandMessage = HumanoidMessageTools.createHandHybridJointspaceTaskspaceTrajectoryMessage(getSide(),

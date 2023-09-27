@@ -87,6 +87,11 @@ public abstract class RDXBehaviorAction
 
    }
 
+   public void destroy()
+   {
+
+   }
+
    public abstract BehaviorActionData getActionData();
 
    public ImBooleanWrapper getSelected()
