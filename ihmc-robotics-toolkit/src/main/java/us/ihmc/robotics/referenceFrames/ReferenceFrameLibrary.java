@@ -113,7 +113,8 @@ public class ReferenceFrameLibrary
    @Nullable
    public ReferenceFrame findFrameByName(String referenceFrameName)
    {
-      return frameNameToSupplierMap.get(referenceFrameName).get();
+      ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
+      return frameSupplier == null ? null : frameSupplier.get();
    }
 
    public int findFrameIndexByName(String referenceFrameName)
