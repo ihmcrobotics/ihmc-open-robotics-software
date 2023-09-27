@@ -12,6 +12,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
 {
    private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
+   private int handConfigurationIndex = SakeCommandOption.GOTO.ordinal();
    private double goalPosition = 1.0;  // default to open
    private double goalTorque = 0.0;    // default to none
    private boolean executeWitNextAction = false;
@@ -21,6 +22,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
    {
       jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
+      jsonNode.put("configuration", SakeCommandOption.values[handConfigurationIndex].name());
       jsonNode.put("position", goalPosition);
       jsonNode.put("torque", goalTorque);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
@@ -31,6 +33,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
+      handConfigurationIndex = SakeCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal();
       goalPosition = jsonNode.get("position").asDouble();
       goalTorque = jsonNode.get("torque").asDouble();
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
@@ -39,7 +42,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
    public void toMessage(SakeHandCommandActionMessage message)
    {
       message.setRobotSide(side.toByte());
-      message.setConfiguration(SAKE_COMMAND_GOTO);
+      message.setConfiguration(SakeCommandOption.values[handConfigurationIndex].getCommandNumber());
       message.setPositionRatio(goalPosition);
       message.setTorqueRatio(goalTorque);
       message.setExecuteWithNextAction(executeWitNextAction);
@@ -48,6 +51,7 @@ public class SakeHandCommandActionData implements BehaviorActionData
    public void fromMessage(SakeHandCommandActionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
+      handConfigurationIndex = (int) message.getConfiguration();
       goalPosition = message.getPositionRatio();
       goalTorque = message.getTorqueRatio();
       executeWitNextAction = message.getExecuteWithNextAction();
@@ -61,6 +65,16 @@ public class SakeHandCommandActionData implements BehaviorActionData
    public void setSide(RobotSide side)
    {
       this.side = side;
+   }
+
+   public int getHandConfigurationIndex()
+   {
+      return handConfigurationIndex;
+   }
+
+   public void setHandConfigurationIndex(int handConfigurationIndex)
+   {
+      this.handConfigurationIndex = handConfigurationIndex;
    }
 
    public double getGoalPosition()
