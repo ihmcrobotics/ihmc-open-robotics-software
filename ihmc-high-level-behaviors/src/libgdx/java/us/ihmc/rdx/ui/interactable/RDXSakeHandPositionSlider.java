@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
-import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 /**
  * This slider allows the user to control the Sake hand's finger positions,

@@ -8,7 +8,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
-import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 public class RDXSakeHandCommandAction extends RDXBehaviorAction
 {

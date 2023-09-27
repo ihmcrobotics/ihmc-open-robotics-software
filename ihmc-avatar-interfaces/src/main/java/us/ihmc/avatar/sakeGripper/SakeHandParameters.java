@@ -1,6 +1,6 @@
 package us.ihmc.avatar.sakeGripper;
 
-public class SakeGripperParameters
+public class SakeHandParameters
 {
    // The following commands are matched to the HandSakeDesiredCommandMessage
    public static byte SAKE_COMMAND_CALIBRATE = 0;
