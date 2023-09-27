@@ -1,14 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchAction extends PelvisHeightPitchActionData implements BehaviorAction
+public class PelvisHeightPitchAction extends PelvisHeightPitchActionDescription implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
