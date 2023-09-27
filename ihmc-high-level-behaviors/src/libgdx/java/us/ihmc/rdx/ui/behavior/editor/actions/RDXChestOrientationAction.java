@@ -145,7 +145,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getName());
+         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);
