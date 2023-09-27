@@ -7,7 +7,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -43,6 +42,8 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    private final SideDependentList<Integer> indexOfLastFoot = new SideDependentList<>();
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
+   private double startPositionDistanceToGoal;
+   private double startOrientationDistanceToGoal;
 
    public FootstepPlanAction(ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
@@ -58,7 +59,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 
@@ -107,6 +108,13 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
          else
             goalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
       }
+      startPositionDistanceToGoal =  0;
+      startOrientationDistanceToGoal = 0;
+      for (RobotSide side : RobotSide.values)
+      {
+         startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(goalFeetPoses.get(side).getTranslation());
+         startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(goalFeetPoses.get(side).getRotation(), true);
+      }
    }
 
    @Override
@@ -116,6 +124,13 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       for (RobotSide side : RobotSide.values)
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+         if (indexOfLastFoot.get(side) >= 0)
+         {
+            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         else
+            goalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
 
          isComplete &= completionCalculator.get(side)
                                            .isComplete(goalFeetPoses.get(side),
@@ -135,13 +150,20 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
       executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+      executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
       executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
                                                                  + completionCalculator.get(RobotSide.RIGHT).getRotationError());
       executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
                                                               + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
+
+   @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
    }
 
    @Override

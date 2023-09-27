@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.tools.Timer;
 
 public class WaitDurationAction extends WaitDurationActionData implements BehaviorAction
@@ -20,7 +19,7 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
 
@@ -41,7 +40,12 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+   }
+
+   @Override
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return executionStatusMessage;
    }
 
    @Override

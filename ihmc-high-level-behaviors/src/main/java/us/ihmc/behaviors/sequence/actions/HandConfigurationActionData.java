@@ -12,6 +12,7 @@ public class HandConfigurationActionData implements BehaviorActionData
    private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
    private int handConfigurationIndex = 6;
+   private boolean executeWitNextAction = false;
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -19,6 +20,7 @@ public class HandConfigurationActionData implements BehaviorActionData
       jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("grip", HandConfiguration.values[handConfigurationIndex].name());
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
    @Override
@@ -27,18 +29,21 @@ public class HandConfigurationActionData implements BehaviorActionData
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       handConfigurationIndex = HandConfiguration.valueOf(jsonNode.get("grip").asText()).ordinal();
+      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
    public void toMessage(HandConfigurationActionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.setGrip(handConfigurationIndex);
+      message.setExecuteWithNextAction(executeWitNextAction);
    }
 
    public void fromMessage(HandConfigurationActionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
       handConfigurationIndex = (int) message.getGrip();
+      executeWitNextAction = message.getExecuteWithNextAction();
    }
 
    public RobotSide getSide()
@@ -59,6 +64,16 @@ public class HandConfigurationActionData implements BehaviorActionData
    public void setHandConfigurationIndex(int handConfigurationIndex)
    {
       this.handConfigurationIndex = handConfigurationIndex;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
    }
 
    @Override
