@@ -50,7 +50,6 @@ public class HandConfigurationAction extends HandConfigurationActionDescription 
       isExecuting = executionTimer.isRunning(WAIT_TIME);
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }

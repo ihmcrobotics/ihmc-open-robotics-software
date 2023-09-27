@@ -96,7 +96,6 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionDescription 
                                                      BehaviorActionCompletionComponent.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setExecutionRejectionTooltip(getExecutionRejectionTooltip().toString());
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
