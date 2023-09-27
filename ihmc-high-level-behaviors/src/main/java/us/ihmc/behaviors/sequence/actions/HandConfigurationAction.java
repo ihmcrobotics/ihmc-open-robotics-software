@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.tools.Timer;
 
-public class HandConfigurationAction extends HandConfigurationActionData implements BehaviorAction
+public class HandConfigurationAction extends HandConfigurationActionDescription implements BehaviorAction
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
