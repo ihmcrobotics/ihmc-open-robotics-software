@@ -3,49 +3,28 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDescription;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDescription;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-import java.util.function.Consumer;
-
-public class HandPoseActionDescription implements BehaviorActionDescription
+public class HandPoseActionDescription extends FrameBasedBehaviorActionDescription
 {
    private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
-   private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ModifiableReferenceFrame palmFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private double trajectoryDuration = 4.0;
    private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private boolean jointSpaceControl = true;
 
    @Override
-   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
-   {
-      this.referenceFrameLibrary = referenceFrameLibrary;
-   }
-
-   @Override
-   public void update()
-   {
-      BehaviorActionSequenceTools.accomodateFrameReplacement(palmFrame, referenceFrameLibrary);
-   }
-
-   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", palmFrame.getReferenceFrame().getParent().getName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      JSONTools.toJSON(jsonNode, getTransformToParent());
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      JSONTools.toJSON(jsonNode, palmFrame.getTransformToParent());
       jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
       jsonNode.put("jointSpaceControl", jointSpaceControl);
@@ -57,8 +36,8 @@ public class HandPoseActionDescription implements BehaviorActionDescription
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
-      palmFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
+      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
+      JSONTools.toEuclid(jsonNode, getTransformToParent());
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
@@ -67,8 +46,8 @@ public class HandPoseActionDescription implements BehaviorActionDescription
    public void toMessage(SidedBodyPartPoseActionDescriptionMessage message)
    {
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrame().getName());
-      MessageTools.toMessage(palmFrame.getTransformToParent(), message.getTransformToParent());
+      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
@@ -78,43 +57,13 @@ public class HandPoseActionDescription implements BehaviorActionDescription
 
    public void fromMessage(SidedBodyPartPoseActionDescriptionMessage message)
    {
-      palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
-      palmFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
+      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
       jointSpaceControl = message.getJointSpaceControl();
-   }
-
-   public ReferenceFrame getParentFrame()
-   {
-      return palmFrame.getReferenceFrame().getParent();
-   }
-
-   public ReferenceFrame getPalmFrame()
-   {
-      return palmFrame.getReferenceFrame();
-   }
-
-   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
-   {
-      palmFrame.changeParentFrameWithoutMoving(parentFrame);
-   }
-
-   public void changeParentFrame(ReferenceFrame parentFrame)
-   {
-      palmFrame.changeParentFrame(parentFrame);
-   }
-
-   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
-   {
-      palmFrame.update(transformToParentConsumer);
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return palmFrame.getTransformToParent();
    }
 
    public RobotSide getSide()
@@ -178,10 +127,5 @@ public class HandPoseActionDescription implements BehaviorActionDescription
    public String getDescription()
    {
       return description;
-   }
-
-   public ReferenceFrameLibrary getReferenceFrameLibrary()
-   {
-      return referenceFrameLibrary;
    }
 }
