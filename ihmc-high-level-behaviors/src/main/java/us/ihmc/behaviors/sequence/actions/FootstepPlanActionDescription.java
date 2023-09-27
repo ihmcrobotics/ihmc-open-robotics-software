@@ -18,22 +18,11 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionDescr
    private final RecyclingArrayList<FootstepActionData> footsteps = new RecyclingArrayList<>(FootstepActionData::new);
 
    @Override
-   public String getDescription()
-   {
-      return description;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", planFrame.getReferenceFrame().getParent().getName());
+      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      JSONTools.toJSON(jsonNode, getTransformToParent());
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
 
@@ -49,18 +38,32 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionDescr
    public void loadFromFile(JsonNode jsonNode)
    {
       description = jsonNode.get("description").textValue();
-      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
+      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
+      JSONTools.toEuclid(jsonNode, getTransformToParent());
 
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
 
+   public void toMessage(FootstepPlanActionDescriptionMessage message)
+   {
+      message.setSwingDuration(swingDuration);
+      message.setTransferDuration(transferDuration);
+      message.getParentFrame().resetQuick();
+      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      message.getFootsteps().clear();
+      for (FootstepActionData footstep : footsteps)
+      {
+         footstep.toMessage(message.getFootsteps().add());
+      }
+   }
+
    public void fromMessage(FootstepPlanActionDescriptionMessage message)
    {
-      planFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
-      planFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
+      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
 
@@ -69,36 +72,6 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionDescr
       {
          footsteps.add().fromMessage(footstep);
       }
-   }
-
-   public ReferenceFrame getParentFrame()
-   {
-      return planFrame.getReferenceFrame().getParent();
-   }
-
-   public ReferenceFrame getPlanFrame()
-   {
-      return planFrame.getReferenceFrame();
-   }
-
-   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
-   {
-      planFrame.changeParentFrameWithoutMoving(parentFrame);
-   }
-
-   public void changeParentFrame(ReferenceFrame parentFrame)
-   {
-      planFrame.changeParentFrame(parentFrame);
-   }
-
-   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
-   {
-      planFrame.update(transformToParentConsumer);
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return planFrame.getTransformToParent();
    }
 
    public double getSwingDuration()
@@ -127,68 +100,15 @@ public class FootstepPlanActionDescription extends FrameBasedBehaviorActionDescr
    }
 
    @Override
-   public void saveToFile(ObjectNode jsonNode)
+   public void setDescription(String description)
    {
-      jsonNode.put("description", description);
-      jsonNode.put("swingDuration", swingDuration);
-      jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
-      for (FootstepActionData footstep : footsteps)
-      {
-         ObjectNode footstepNode = foostepsArrayNode.addObject();
-         footstep.saveToFile(footstepNode);
-      }
+      this.description = description;
    }
 
    @Override
-   public void loadFromFile(JsonNode jsonNode)
+   public String getDescription()
    {
-      description = jsonNode.get("description").textValue();
-      swingDuration = jsonNode.get("swingDuration").asDouble();
-      transferDuration = jsonNode.get("transferDuration").asDouble();
-      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
-      footsteps.clear();
-      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
+      return description;
    }
-
-   public void toMessage(FootstepPlanActionDescriptionMessage message)
-   {
-      message.setSwingDuration(swingDuration);
-      message.setTransferDuration(transferDuration);
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      message.getFootsteps().clear();
-      for (FootstepActionData footstep : footsteps)
-      {
-         footstep.toMessage(message.getFootsteps().add());
-      }
-   }
-
-   public void toMessage(FootstepPlanActionDescriptionMessage message)
-   {
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getParentFrame().getName());
-      MessageTools.toMessage(planFrame.getTransformToParent(), message.getTransformToParent());
-      message.setSwingDuration(swingDuration);
-      message.setTransferDuration(transferDuration);
-
-      message.getFootsteps().clear();
-      for (FootstepActionData footstep : footsteps)
-      {
-         footstep.toMessage(message.getFootsteps().add());
-      }
-   }
-
-   public void fromMessage(FootstepPlanActionDescriptionMessage message)
-   {
-      swingDuration = message.getSwingDuration();
-      transferDuration = message.getTransferDuration();
-      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
-      footsteps.clear();
-      for (FootstepActionMessage footstep : message.getFootsteps())
-      {
-         footsteps.add().fromMessage(footstep);
-      }
-   }
+}
 }
