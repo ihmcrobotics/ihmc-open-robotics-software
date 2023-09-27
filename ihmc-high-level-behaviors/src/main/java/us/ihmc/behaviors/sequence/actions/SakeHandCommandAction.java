@@ -8,7 +8,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 public class SakeHandCommandAction extends SakeHandCommandActionData implements BehaviorAction
 {

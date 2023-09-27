@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import static us.ihmc.avatar.sakeGripper.SakeGripperParameters.*;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
 public class SakeHandCommandActionData implements BehaviorActionData
 {
