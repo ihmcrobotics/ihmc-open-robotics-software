@@ -26,6 +26,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionDescription actionDescription = new FootstepPlanActionDescription();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
@@ -46,30 +47,30 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
-      actionDescription.setReferenceFrameLibrary(referenceFrameLibrary);
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionDescription::getPlanFrame, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionDescription, baseUI, robotModel, getSelected()::get));
    }
 
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getConditionalReferenceFrame());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionDescription.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionDescription.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionDescription.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
    @Override
    public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
-      actionDescription.update();
+      actionDescription.update(referenceFrameLibrary);
 
       // Add a footstep to the action data only
       if (userAddedFootstep.poll())
@@ -97,7 +98,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          double aLittleInFront = 0.15;
          newFootstepPose.getPosition().addX(aLittleInFront);
 
-         newFootstepPose.changeFrame(actionDescription.getPlanFrame());
+         newFootstepPose.changeFrame(actionDescription.getConditionalReferenceFrame().get());
          addedFootstep.getSolePose().set(newFootstepPose);
       }
 
@@ -137,7 +138,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionDescription.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
          update();
       }
 
