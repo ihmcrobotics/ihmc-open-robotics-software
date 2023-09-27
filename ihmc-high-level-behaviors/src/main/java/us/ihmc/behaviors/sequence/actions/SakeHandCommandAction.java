@@ -9,7 +9,7 @@ import us.ihmc.tools.Timer;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.*;
 
-public class SakeHandCommandAction extends SakeHandCommandActionData implements BehaviorAction
+public class SakeHandCommandAction extends SakeHandCommandActionDescription implements BehaviorAction
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
