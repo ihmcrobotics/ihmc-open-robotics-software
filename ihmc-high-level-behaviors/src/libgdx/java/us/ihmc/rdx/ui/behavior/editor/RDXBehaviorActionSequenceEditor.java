@@ -443,7 +443,8 @@ public class RDXBehaviorActionSequenceEditor
             executionRejectionTooltipText.renderText("Action rejected: " + latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString(), true);
          }
 
-         if (latestActionsExecutionStatus.getLast() == null || last.getActionIndex() < 0)
+         ActionExecutionStatusMessage last = latestActionsExecutionStatus.getLast();
+         if (last == null || last.getActionIndex() < 0)
          {
             if (endOfSequence)
             {
