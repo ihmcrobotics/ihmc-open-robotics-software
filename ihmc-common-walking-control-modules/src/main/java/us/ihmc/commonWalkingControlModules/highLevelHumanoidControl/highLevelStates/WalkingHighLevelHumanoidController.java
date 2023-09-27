@@ -661,7 +661,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       reportStatusMessages();
       managerUpdateTimer.stopMeasurement();
 
-      handleChangeInContactState();
+      currentState.handleChangeInContactState();
 
       submitControllerCoreCommands();
 
@@ -684,23 +684,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          legElasticityDebuggator.update();
 
       firstTick = false;
-   }
-
-   private void handleChangeInContactState()
-   {
-      boolean haveContactStatesChanged = false;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
-         if (contactState.peekContactHasChangedNotification())
-            haveContactStatesChanged = true;
-      }
-
-      if (!haveContactStatesChanged)
-         return;
-
-      controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.computeICPPlan();
    }
 
    private void updateAndPublishFootstepQueueStatus()
@@ -740,7 +723,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          commandInputManager.clearAllCommands();
 
          boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT
-
                              || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
          if (enablePushRecoveryOnFailure.getBooleanValue() && !isInSwing)
          {

@@ -88,6 +88,8 @@ public class ZEDColorStereoDepthPublisher
    {
       this.cameraID = cameraID;
 
+      LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
+
       // Create and initialize the camera
       sl_create_camera(cameraID);
 

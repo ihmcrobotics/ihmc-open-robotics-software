@@ -66,17 +66,17 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       leftFootButton.loadAndSetIcon("icons/leftFoot.png");
-      leftFootButton.setTooltipText("Place left footstep (Keybind: R)");
+      leftFootButton.setTooltipText("Place left footstep (R)");
       leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
 
       RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
-      rightFootButton.setTooltipText("Place right footstep (Keybind: T)");
+      rightFootButton.setTooltipText("Place right footstep (T)");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
       RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
-      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete last interactable footstep", "Delete");
       RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
 
@@ -86,6 +86,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          footstepBeingPlaced.update();
          footstepBeingPlaced.updateFootstepIndexText(footstepPlan.getNumberOfFootsteps());
+
+         // Deselect all footsteps since we are placing a new one
+         for (int i = 0; i < footstepPlan.getNumberOfFootsteps(); i++)
+            footstepPlan.getFootsteps().get(i).getSelectablePose3DGizmo().setSelected(false);
       }
    }
 
@@ -99,13 +103,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          createNewFootstep(RobotSide.LEFT);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: R");
+      ImGuiTools.previousWidgetTooltip("R");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Right")) || (panel3DIsHovered && ImGui.isKeyPressed('T')))
       {
          createNewFootstep(RobotSide.RIGHT);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: T");
+      ImGuiTools.previousWidgetTooltip("T");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Square Up")))
       {
@@ -116,13 +120,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          exitPlacement();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      ImGuiTools.previousWidgetTooltip("Escape");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
+      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          footstepPlan.removeLastStep();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
+      ImGuiTools.previousWidgetTooltip("Delete");
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -338,20 +342,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean isFootstepBeingPlacedReachable()
    {
       FramePose3D previousFootstepPose = new FramePose3D();
-      // Find the previous footstep of the opposite side of the footstep being placed
-      int i = footstepPlan.getNumberOfFootsteps() - 1;
-      while (i >= 0 && footstepPlan.getFootsteps().get(i).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
-      {
-         --i;
-      }
-      if (i >= 0)
-      {
-         previousFootstepPose.setIncludingFrame(footstepPlan.getFootsteps().get(i).getFootPose());
-      }
-      else
-      {
-         previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
-      }
+
+      previousFootstepPose.set(stepChecker.getPreviousFootstepOnOppositeSide(footstepPlan.getFootsteps(),
+                                                                             footstepPlan.getNumberOfFootsteps(),
+                                                                             footstepBeingPlaced.getFootstepSide()));
 
       boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaximumStepReach();
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();

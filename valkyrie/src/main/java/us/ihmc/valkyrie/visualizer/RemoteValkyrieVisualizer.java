@@ -30,9 +30,6 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 
    public RemoteValkyrieVisualizer()
    {
-      String host = NetworkParameters.getHost(NetworkParameterKeys.logger);
-      System.out.println("Connecting to host " + host);
-
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.setVariableUpdateRate(8);
       scsVisualizer.addSCSVisualizerStateListener(this);

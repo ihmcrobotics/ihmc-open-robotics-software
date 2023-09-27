@@ -30,7 +30,7 @@ public class ArUcoBoxRobotDefinition extends RobotDefinition
       SixDoFJointDefinition floatingJoint = new SixDoFJointDefinition("boxRootJoint");
 
       double size = RigidBodySceneObjectDefinitions.BOX_SIZE;
-      RigidBodyDefinition box = new RigidBodyDefinition("Box");
+      RigidBodyDefinition box = new RigidBodyDefinition(RigidBodySceneObjectDefinitions.BOX_NAME);
       VisualDefinition modelVisualDefinition = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(RigidBodySceneObjectDefinitions.BOX_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);

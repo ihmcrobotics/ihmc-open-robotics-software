@@ -35,7 +35,7 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof ChestOrientationActionData chestOrientationActionData)
          {
-            ChestOrientationActionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
+            BodyPartPoseActionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
             chestOrientationActionMessage.getActionInformation().setActionIndex(i);
             chestOrientationActionData.toMessage(chestOrientationActionMessage);
          }
@@ -53,7 +53,7 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof HandPoseActionData handPoseActionData)
          {
-            HandPoseActionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
+            SidedBodyPartPoseActionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
             handPoseActionMessage.getActionInformation().setActionIndex(i);
             handPoseActionData.toMessage(handPoseActionMessage);
          }
@@ -63,9 +63,9 @@ public class BehaviorActionSequenceTools
             handWrenchActionMessage.getActionInformation().setActionIndex(i);
             handWrenchActionData.toMessage(handWrenchActionMessage);
          }
-         else if (action instanceof PelvisHeightActionData pelvisHeightActionData)
+         else if (action instanceof PelvisHeightPitchActionData pelvisHeightActionData)
          {
-            PelvisHeightActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
+            BodyPartPoseActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
             pelvisHeightActionData.toMessage(pelvisHeightActionMessage);
          }
@@ -90,7 +90,7 @@ public class BehaviorActionSequenceTools
    public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
    {
       ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
-      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByName(previousParentFrame.getName()).get();
+      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByNameOrWorld(previousParentFrame.getName());
       if (previousParentFrame != nextParentFrame)
       {
          frameToUpdate.changeParentFrame(nextParentFrame);

@@ -219,4 +219,9 @@ public class HeightMapData
       normals[occupiedCells.get(i)] = null;
       occupiedCells.remove(i);
    }
+
+   public void setGridCenter(double x, double y)
+   {
+      gridCenter.set(x, y);
+   }
 }
