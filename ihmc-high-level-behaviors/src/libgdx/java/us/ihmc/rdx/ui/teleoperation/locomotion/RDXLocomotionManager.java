@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -319,7 +320,7 @@ public class RDXLocomotionManager
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGuiTools.previousWidgetTooltip("Space");
       ImGui.sameLine();
       ImGui.endDisabled();
 
@@ -328,7 +329,7 @@ public class RDXLocomotionManager
       {
          setPauseWalkingAndPublish(true);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGuiTools.previousWidgetTooltip("Space");
       ImGui.sameLine();
       ImGui.endDisabled();
 
@@ -337,7 +338,7 @@ public class RDXLocomotionManager
       {
          setPauseWalkingAndPublish(false);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGuiTools.previousWidgetTooltip("Space");
       ImGui.endDisabled();
 
       manualFootstepPlacement.renderImGuiWidgets();
@@ -453,6 +454,9 @@ public class RDXLocomotionManager
    public void sendAbortWalkingMessage()
    {
       communicationHelper.publishToController(abortWalkingMessage);
+      // The abort walking message can only be process when the controller is in walking state, this forces the abort to go through
+      pauseWalkingMessage.setPause(false);
+      communicationHelper.publishToController(pauseWalkingMessage);
    }
 
    public void setPauseWalkingAndPublish(boolean pauseWalking)
@@ -507,6 +511,12 @@ public class RDXLocomotionManager
          statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
          ImGui.popFont();
       }
+   }
+
+   public void submitHeightMapData(HeightMapMessage heightMapData)
+   {
+      footstepPlanning.setHeightMapData(heightMapData);
+      interactableFootstepPlan.setHeightMapMessage(heightMapData);
    }
 
    public RDXLocomotionParameters getLocomotionParameters()

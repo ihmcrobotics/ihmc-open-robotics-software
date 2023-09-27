@@ -5,11 +5,13 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
@@ -18,12 +20,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -73,14 +78,7 @@ public class PerceptionMessageTools
                                                   int width,
                                                   float depthToMetersRatio)
    {
-      packImageMessage(depthImageMessage,
-                       compressedDepthPointer,
-                       cameraPose,
-                       aquisitionTime,
-                       sequenceNumber,
-                       height,
-                       width,
-                       depthToMetersRatio);
+      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
 
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       helper.publish(topic, depthImageMessage);
@@ -97,14 +95,7 @@ public class PerceptionMessageTools
                                                      int width,
                                                      float depthToMetersRatio)
    {
-      packImageMessage(colorImageMessage,
-                       compressedColorPointer,
-                       cameraPose,
-                       aquisitionTime,
-                       sequenceNumber,
-                       height,
-                       width,
-                       depthToMetersRatio);
+      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
       helper.publish(topic, colorImageMessage);
    }
@@ -217,5 +208,57 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 1, (float) quaternion.getY());
       floatPointer.put(startIndex + 2, (float) quaternion.getZ());
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
+   }
+
+   public static void convertToHeightMapData(BytePointer heightMapPointer,
+                                             HeightMapData heightMapData,
+                                             Point3D gridCenter,
+                                             float widthInMeters,
+                                             float cellSizeInMeters)
+   {
+      float maxHeight = 0.7f;
+      float minHeight = 0.0f;
+
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+
+      heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int heightIndex = xIndex * cellsPerAxis + yIndex;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR;
+            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
+            if (cellHeight > maxHeight - 0.01f)
+               cellHeight = 0.0f;
+
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            heightMapData.setHeightAt(key, cellHeight);
+         }
+      }
+   }
+
+   public static void convertToHeightMapImage(ImageMessage imageMessage,
+                                             Mat heightMapImageToPack,
+                                             ByteBuffer compressedByteBuffer,
+                                             BytePointer byteBufferAccessPointer,
+                                             Mat compressedBytesMat)
+   {
+      int numberOfBytes = imageMessage.getData().size();
+      compressedByteBuffer.rewind();
+      compressedByteBuffer.limit(numberOfBytes);
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         compressedByteBuffer.put(imageMessage.getData().get(i));
+      }
+      compressedByteBuffer.flip();
+
+      compressedBytesMat.cols(numberOfBytes);
+      compressedBytesMat.data(byteBufferAccessPointer);
+
+      // Decompress the height map image
+      opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
    }
 }

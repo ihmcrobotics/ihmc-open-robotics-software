@@ -53,9 +53,9 @@ public class RDXActionSequenceTools
       {
          return robotHasArms ? new RDXHandWrenchAction() : null;
       }
-      if (actionType.equals(RDXPelvisHeightAction.class.getSimpleName()))
+      if (actionType.equals(RDXPelvisHeightPitchAction.class.getSimpleName()))
       {
-         return new RDXPelvisHeightAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
+         return new RDXPelvisHeightPitchAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
       }
       if (actionType.equals(RDXWaitDurationAction.class.getSimpleName()))
       {

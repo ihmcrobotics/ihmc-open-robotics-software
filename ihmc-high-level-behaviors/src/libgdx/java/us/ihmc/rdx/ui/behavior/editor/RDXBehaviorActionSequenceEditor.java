@@ -43,6 +43,7 @@ import us.ihmc.tools.io.*;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -89,9 +90,9 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
-   private IHMCROS2Input<ActionExecutionStatusMessage> executionStatusSubscription;
-   private final ActionExecutionStatusMessage executionStatusMessageToDisplay = new ActionExecutionStatusMessage();
-   private RDXBehaviorAction currentlyExecutingAction;
+   private IHMCROS2Input<ActionsExecutionStatusMessage> executionStatusSubscription;
+   private final List<ActionExecutionStatusMessage> executionStatusMessagesToDisplay = new ArrayList<>();
+   private final List<RDXBehaviorAction> currentlyExecutingActions = new ArrayList<>();
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
    private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
@@ -143,8 +144,7 @@ public class RDXBehaviorActionSequenceEditor
       automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
       sequenceStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
-      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTION_EXECUTION_STATUS);
-      executionStatusSubscription.getLatest().setActionIndex(-1); // To indicate to the user that nothing was yet received.
+      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTIONS_EXECUTION_STATUS);
    }
 
    public void loadNameFromFile()
@@ -253,9 +253,34 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXBehaviorAction action = actionSequence.get(i);
          action.setActionIndex(i);
-         action.setActionNextExcecutionIndex(executionNextIndexStatus);
-         action.update();
+         action.setActionNextExecutionIndex(executionNextIndexStatus);
+         boolean concurrencyWithPreviousAction = false;
+         if (i > 0)
+            concurrencyWithPreviousAction = actionSequence.get(i - 1).getActionData().getExecuteWithNextAction();
+         action.update(concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndexStatus));
       }
+   }
+
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
+   {
+      if (concurrencyWithPreviousAction)
+      {
+         boolean isNotRootOfConcurrency = true;
+         for (int j = 1; j <= actionIndex; j++)
+         {
+            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getActionData().getExecuteWithNextAction();
+            isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
+            if (!isNotRootOfConcurrency)
+            {
+               return (j - 1);
+            }
+            else if ((actionIndex - j) == 0 && thisPreviousActionIsConcurrent)
+            {
+               return j;
+            }
+         }
+      }
+      return -1;
    }
 
    public void renderFileMenu()
@@ -393,8 +418,8 @@ public class RDXBehaviorActionSequenceEditor
       {  // These brackets here to take `latestExecutionStatus` out of scope below.
          // We use executionStatusMessageToDisplay in order to display the previously
          // executed action's results, otherwise it gets cleared.
-         ActionExecutionStatusMessage latestExecutionStatus = executionStatusSubscription.getLatest();
-         if (latestExecutionStatus.getActionIndex() < 0)
+         var latestActionsExecutionStatus = executionStatusSubscription.getLatest().getActionStatusList();
+         if (latestActionsExecutionStatus.getLast() == null || latestActionsExecutionStatus.getLast().getActionIndex() < 0)
          {
             if (endOfSequence)
             {
@@ -407,69 +432,80 @@ public class RDXBehaviorActionSequenceEditor
          }
          else
          {
-            executionStatusMessageToDisplay.set(latestExecutionStatus);
-            currentlyExecutingAction = actionSequence.get(executionStatusMessageToDisplay.getActionIndex());
-            ImGui.text("Executing: %s (%s)".formatted(currentlyExecutingAction.getDescription(), currentlyExecutingAction.getActionTypeTitle()));
+            executionStatusMessagesToDisplay.clear();
+            currentlyExecutingActions.clear();
+            for (int i = 0; i < latestActionsExecutionStatus.size(); i++)
+            {
+               executionStatusMessagesToDisplay.add(latestActionsExecutionStatus.get(i));
+               currentlyExecutingActions.add(actionSequence.get(executionStatusMessagesToDisplay.get(i).getActionIndex()));
+            }
          }
       }
 
-      widgetAligner.text("Expected time remaining:");
-      double elapsedTime = executionStatusMessageToDisplay.getElapsedExecutionTime();
-      double nominalDuration = executionStatusMessageToDisplay.getNominalExecutionDuration();
-      double percentComplete = elapsedTime / nominalDuration;
-      double percentLeft = 1.0 - percentComplete;
-      ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
+      for (int i = 0; i < executionStatusMessagesToDisplay.size(); i++)
+      {
+         ImGui.text("Executing: ");
+         ImGui.sameLine();
+         ImGui.text("%s (%s)".formatted(currentlyExecutingActions.get(i).getDescription(), currentlyExecutingActions.get(i).getActionTypeTitle()));
 
-      ImGui.spacing();
-      widgetAligner.text("Position error (m):");
-      double currentPositionError = executionStatusMessageToDisplay.getCurrentPositionDistanceToGoal();
-      double startPositionError = executionStatusMessageToDisplay.getStartPositionDistanceToGoal();
-      double positionTolerance = executionStatusMessageToDisplay.getPositionDistanceToGoalTolerance();
-      double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
-      double toleranceMarkPercent = positionTolerance / barEndValue;
-      int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
-      percentLeft = currentPositionError / barEndValue;
-      ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
-                                   barColor,
-                                   percentLeft,
-                                   toleranceMarkPercent,
-                                   "%.2f / %.2f".formatted(currentPositionError, startPositionError));
-      ImGui.spacing();
-      widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
-      double currentOrientationError = executionStatusMessageToDisplay.getCurrentOrientationDistanceToGoal();
-      double startOrientationError = executionStatusMessageToDisplay.getStartOrientationDistanceToGoal();
-      double orientationTolerance = executionStatusMessageToDisplay.getOrientationDistanceToGoalTolerance();
-      barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
-      toleranceMarkPercent = orientationTolerance / barEndValue;
-      barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
-      percentLeft = currentOrientationError / barEndValue;
-      ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
-                                   barColor,
-                                   percentLeft,
-                                   toleranceMarkPercent,
-                                   "%.2f / %.2f".formatted(Math.toDegrees(currentOrientationError), Math.toDegrees(startOrientationError)));
-      ImGui.spacing();
+         widgetAligner.text("Expected time remaining:");
+         double elapsedTime = executionStatusMessagesToDisplay.get(i).getElapsedExecutionTime();
+         double nominalDuration = executionStatusMessagesToDisplay.get(i).getNominalExecutionDuration();
+         double percentComplete = elapsedTime / nominalDuration;
+         double percentLeft = 1.0 - percentComplete;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
 
-      if (currentlyExecutingAction instanceof RDXWalkAction)
-      {
-         widgetAligner.text("Footstep completion:");
-         int incompleteFootsteps = executionStatusMessageToDisplay.getNumberOfIncompleteFootsteps();
-         int totalFootsteps = executionStatusMessageToDisplay.getTotalNumberOfFootsteps();
-         percentLeft = incompleteFootsteps / (double) totalFootsteps;
-         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
-      }
-      else if (currentlyExecutingAction instanceof RDXHandPoseAction)
-      {
-         widgetAligner.text("Hand wrench linear (N?):");
-         double limit = 20.0;
-         double force = executionStatusMessageToDisplay.getHandWrenchMagnitudeLinear();
-         barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
-         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, barColor, force / limit, 0.5, "%.2f".formatted(force));
-      }
-      else // Just to take up the space to avoid varying height.
-      {
-         widgetAligner.text("");
-         ImGui.progressBar(0.0f, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "");
+         ImGui.spacing();
+         widgetAligner.text("Position error (m):");
+         double currentPositionError = executionStatusMessagesToDisplay.get(i).getCurrentPositionDistanceToGoal();
+         double startPositionError = executionStatusMessagesToDisplay.get(i).getStartPositionDistanceToGoal();
+         double positionTolerance = executionStatusMessagesToDisplay.get(i).getPositionDistanceToGoalTolerance();
+         double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
+         double toleranceMarkPercent = positionTolerance / barEndValue;
+         int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+         percentLeft = currentPositionError / barEndValue;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                      barColor,
+                                      percentLeft,
+                                      toleranceMarkPercent,
+                                      "%.2f / %.2f".formatted(currentPositionError, startPositionError));
+         ImGui.spacing();
+         widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
+         double currentOrientationError = executionStatusMessagesToDisplay.get(i).getCurrentOrientationDistanceToGoal();
+         double startOrientationError = executionStatusMessagesToDisplay.get(i).getStartOrientationDistanceToGoal();
+         double orientationTolerance = executionStatusMessagesToDisplay.get(i).getOrientationDistanceToGoalTolerance();
+         barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
+         toleranceMarkPercent = orientationTolerance / barEndValue;
+         barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+         percentLeft = currentOrientationError / barEndValue;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                      barColor,
+                                      percentLeft,
+                                      toleranceMarkPercent,
+                                      "%.2f / %.2f".formatted(Math.toDegrees(currentOrientationError), Math.toDegrees(startOrientationError)));
+         ImGui.spacing();
+
+         if (currentlyExecutingActions.get(i) instanceof RDXWalkAction)
+         {
+            widgetAligner.text("Footstep completion:");
+            int incompleteFootsteps = executionStatusMessagesToDisplay.get(i).getNumberOfIncompleteFootsteps();
+            int totalFootsteps = executionStatusMessagesToDisplay.get(i).getTotalNumberOfFootsteps();
+            percentLeft = incompleteFootsteps / (double) totalFootsteps;
+            ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
+         }
+         else if (currentlyExecutingActions.get(i) instanceof RDXHandPoseAction)
+         {
+            widgetAligner.text("Hand wrench linear (N?):");
+            double limit = 20.0;
+            double force = executionStatusMessagesToDisplay.get(i).getHandWrenchMagnitudeLinear();
+            barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
+            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, barColor, force / limit, 0.5, "%.2f".formatted(force));
+         }
+         else // Just to take up the space to avoid varying height.
+         {
+            widgetAligner.text("");
+            ImGui.progressBar(0.0f, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "");
+         }
       }
    }
 
@@ -660,15 +696,15 @@ public class RDXBehaviorActionSequenceEditor
          chestOrientationAction.getActionData().changeParentFrameWithoutMoving(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
          newAction = chestOrientationAction;
       }
-      if (ImGui.button(labels.get("Add Pelvis Height")))
+      if (ImGui.button(labels.get("Add Pelvis Height and Pitch")))
       {
-         RDXPelvisHeightAction pelvisHeightAction = new RDXPelvisHeightAction(panel3D,
-                                                                              robotModel,
-                                                                              syncedRobot.getFullRobotModel(),
-                                                                              selectionCollisionModel,
-                                                                              referenceFrameLibrary);
+         RDXPelvisHeightPitchAction pelvisHeightAction = new RDXPelvisHeightPitchAction(panel3D,
+                                                                                        robotModel,
+                                                                                        syncedRobot.getFullRobotModel(),
+                                                                                        selectionCollisionModel,
+                                                                                        referenceFrameLibrary);
          // Set the new action to where the last one was for faster authoring
-         RDXPelvisHeightAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightAction.class);
+         RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
          if (nextPreviousPelvisHeightAction != null)
          {
             pelvisHeightAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),

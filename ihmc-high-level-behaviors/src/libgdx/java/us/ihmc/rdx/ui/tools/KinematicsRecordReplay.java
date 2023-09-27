@@ -4,8 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -38,7 +36,7 @@ public class KinematicsRecordReplay
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
+//   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private boolean objectLocked = false;
    private ReferenceFrame objectFrame;
 
@@ -51,7 +49,7 @@ public class KinematicsRecordReplay
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
-      detectableSceneObjectsSubscription = ros2.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getStatusTopic());
+      // sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -60,16 +58,16 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
-         if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !objectLocked)
-         {
-            DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-            DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-            RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-            MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-            ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                   objectTransformToWorld);
-            objectLocked = true;
-         }
+//         if (sceneGraphSubscription.getMessageNotification().poll() && !objectLocked)
+//         {
+//            SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
+//            DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
+//            RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
+//            MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
+//            ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+//                                                                                   objectTransformToWorld);
+//            objectLocked = true;
+//         }
 
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))

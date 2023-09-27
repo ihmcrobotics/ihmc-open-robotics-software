@@ -27,7 +27,7 @@ public abstract class RDXBehaviorAction
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
    private int actionIndex = -1;
-   private int actionNextExcecutionIndex = -1;
+   private int actionNextExecutionIndex = -1;
 
    public RDXBehaviorAction()
    {
@@ -35,6 +35,11 @@ public abstract class RDXBehaviorAction
    }
 
    public void update()
+   {
+      update(false, -1);
+   }
+
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
 
    }
@@ -111,13 +116,13 @@ public abstract class RDXBehaviorAction
       this.actionIndex = actionIndex;
    }
 
-   public int getActionNextExcecutionIndex()
+   public int getActionNextExecutionIndex()
    {
-      return actionNextExcecutionIndex;
+      return actionNextExecutionIndex;
    }
 
-   public void setActionNextExcecutionIndex(int actionNextExcecutionIndex)
+   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
    {
-      this.actionNextExcecutionIndex = actionNextExcecutionIndex;
+      this.actionNextExecutionIndex = actionNextExecutionIndex;
    }
 }

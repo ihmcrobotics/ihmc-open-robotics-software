@@ -49,6 +49,12 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
+                                                                                      actionData::setExecuteWithNextAction,
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
+                                                                                     actionData::setHoldPoseInWorldLater,
+                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;
@@ -106,7 +112,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
       actionData.update();
 
@@ -133,9 +139,12 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
+      holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          update();
       }
       ImGui.pushItemWidth(80.0f);

@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -81,11 +82,25 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
+                                                                                      actionData::setExecuteWithNextAction,
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionData::getHoldPoseInWorldLater,
+                                                                                     actionData::setHoldPoseInWorldLater,
+                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+   private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(actionData::getJointSpaceControl,
+                                                                                  actionData::setJointSpaceControl,
+                                                                                  imBoolean -> {
+                                                                                     boolean newVal = ImGui.radioButton(labels.get("Joint space"), imBoolean.get());
+                                                                                     if (newVal)
+                                                                                        imBoolean.set(true);
+                                                                                  });
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
    private boolean displayIKSolution = false;
-   private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> handJointAnglesStatusSubscription;
+   private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
+   private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
@@ -153,7 +168,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
 
-      handJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS);
+      leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
+      rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
       syncedChest = syncedFullRobotModel.getChest();
    }
 
@@ -183,7 +199,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
       actionData.update();
 
@@ -206,10 +222,25 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(actionData.getSide()).setTransparency(0.5);
       }
 
-      displayIKSolution = getActionIndex() == getActionNextExcecutionIndex();
-      if (displayIKSolution && handJointAnglesStatusSubscription.hasReceivedFirstMessage())
+      // IK solution visualization via ghost arms
+      displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
+                          (concurrencyWithPreviousAction && indexShiftConcurrentAction > 0 && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
+      if (displayIKSolution)
+         visualizeIK();
+   }
+
+   private void visualizeIK()
+   {
+
+      boolean receivedDataForThisSide = (actionData.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
+                                        (actionData.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
+      if (receivedDataForThisSide)
       {
-         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
+         HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage;
+         if (actionData.getSide() == RobotSide.LEFT)
+            handPoseJointAnglesStatusMessage = leftHandJointAnglesStatusSubscription.getLatest();
+         else
+            handPoseJointAnglesStatusMessage = rightHandJointAnglesStatusSubscription.getLatest();
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
@@ -247,9 +278,21 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
+      jointSpaceControlWrapper.renderImGuiWidget();
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Task space"), !actionData.getJointSpaceControl()))
+      {
+         actionData.setJointSpaceControl(false);
+      }
+      if (!actionData.getJointSpaceControl())
+      {
+         holdPoseInWorldLaterWrapper.renderImGuiWidget();
+      }
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
+         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          update();
       }
       ImGui.pushItemWidth(80.0f);

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
 
 public class RDXAffordanceTemplateFileManager
@@ -111,12 +112,35 @@ public class RDXAffordanceTemplateFileManager
                   {
                      ObjectNode actionNode = actionsArrayNode.addObject();
                      actionNode.put("type", "RDXHandPoseAction");
+                     actionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Pose");
                      actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                      actionNode.put("side", side.getLowerCaseName());
                      actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(i));
                      preGraspPoses.get(side).get(i).changeFrame(affordanceFrame.getReferenceFrame());
                      RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(side).get(i));
                      JSONTools.toJSON(actionNode, transformToParent);
+                     boolean bothPosesAreSet = false;
+                     if (activeSides.size() == 2)
+                     {
+                        // check if both poses are set
+                        bothPosesAreSet = arePreGraspPosesSet.get(RobotSide.RIGHT).get(i) && arePreGraspPosesSet.get(RobotSide.LEFT).get(i);
+                        // also check if a hand configuration has been set
+                        boolean oneHandConfigurationSet =
+                              (preGraspHandConfigurations.get(RobotSide.RIGHT).get(i) != null) || (preGraspHandConfigurations.get(RobotSide.LEFT).get(i) != null);
+                        // if right side (left side always comes first), then do not execute this concurrently with the next action
+                        // otherwise check if the pose of the both hands has been set
+                        boolean executeWithNextAction;
+                        if (oneHandConfigurationSet)
+                           executeWithNextAction = true;
+                        else if (side == RobotSide.RIGHT)
+                           executeWithNextAction = false;
+                        else
+                           executeWithNextAction = bothPosesAreSet;
+                        actionNode.put("executeWithNextAction", executeWithNextAction);
+                     }
+                     else
+                        actionNode.put("executeWithNextAction", preGraspHandConfigurations.get(side).get(i) != null ? true : false);
+                     actionNode.put("holdPoseInWorldLater", true);
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
@@ -132,8 +156,10 @@ public class RDXAffordanceTemplateFileManager
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
                         configurationActionNode.put("type", "RDXHandConfigurationAction");
+                        configurationActionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("grip", preGraspHandConfigurations.get(side).get(i).toString());
+                        configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
                      }
                   }
                }
@@ -144,12 +170,34 @@ public class RDXAffordanceTemplateFileManager
                {
                   ObjectNode actionNode = actionsArrayNode.addObject();
                   actionNode.put("type", "RDXHandPoseAction");
+                  actionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Pose");
                   actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                   actionNode.put("side", side.getLowerCaseName());
                   actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(preGraspPoses.get(side).size()));
                   graspPoses.get(side).changeFrame(affordanceFrame.getReferenceFrame());
                   RigidBodyTransform transformToParent = new RigidBodyTransform(graspPoses.get(side));
                   JSONTools.toJSON(actionNode, transformToParent);
+                  boolean bothPosesAreSet = false;
+                  if (activeSides.size() == 2)
+                  {
+                     // check if both poses are set
+                     bothPosesAreSet = graspFrame.isSet(RobotSide.RIGHT) && graspFrame.isSet(RobotSide.LEFT);
+                     // also check if a hand configuration has been set
+                     boolean oneHandConfigurationSet = (graspFrame.getHandConfiguration(RobotSide.RIGHT) != null) || (graspFrame.getHandConfiguration(RobotSide.LEFT) != null);
+                     // if right side (left side always comes first), then do not execute this concurrently with the next action
+                     // otherwise check if the pose of the both hands has been set
+                     boolean executeWithNextAction;
+                     if (oneHandConfigurationSet)
+                        executeWithNextAction = true;
+                     else if (side == RobotSide.RIGHT)
+                        executeWithNextAction = false;
+                     else
+                        executeWithNextAction = bothPosesAreSet;
+                     actionNode.put("executeWithNextAction", executeWithNextAction);
+                  }
+                  else
+                     actionNode.put("executeWithNextAction", graspFrame.getHandConfiguration(side) != null ? true : false);
+                  actionNode.put("holdPoseInWorldLater", true);
 
                   double[] dataTrajectories = new double[16];
                   transformToParent.get(dataTrajectories);
@@ -159,8 +207,10 @@ public class RDXAffordanceTemplateFileManager
                   {
                      ObjectNode configurationActionNode = actionsArrayNode.addObject();
                      configurationActionNode.put("type", "RDXHandConfigurationAction");
+                     configurationActionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Configuration");
                      configurationActionNode.put("side", side.getLowerCaseName());
                      configurationActionNode.put("grip", graspFrame.getHandConfiguration(side).toString());
+                     configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
 
                      dataTrajectories = new double[16];
                      for (int data = 0; data < dataTrajectories.length; data++)
@@ -183,12 +233,35 @@ public class RDXAffordanceTemplateFileManager
                   {
                      ObjectNode actionNode = actionsArrayNode.addObject();
                      actionNode.put("type", "RDXHandPoseAction");
+                     actionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Pose");
                      actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                      actionNode.put("side", side.getLowerCaseName());
                      actionNode.put("trajectoryDuration", trajectoryDurations.get(side).get(preGraspPoses.get(side).size() + 1 + i));
                      postGraspPoses.get(side).get(i).changeFrame(affordanceFrame.getReferenceFrame());
                      RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(side).get(i));
                      JSONTools.toJSON(actionNode, transformToParent);
+                     boolean bothPosesAreSet = false;
+                     if (activeSides.size() == 2)
+                     {
+                        // check if both poses are set
+                        bothPosesAreSet = arePostGraspPosesSet.get(RobotSide.RIGHT).get(i) && arePostGraspPosesSet.get(RobotSide.LEFT).get(i);
+                        // also check if a hand configuration has been set
+                        boolean oneHandConfigurationSet =
+                              (postGraspHandConfigurations.get(RobotSide.RIGHT).get(i) != null) || (postGraspHandConfigurations.get(RobotSide.LEFT).get(i) != null);
+                        // if right side (left side always comes first), then do not execute this concurrently with the next action
+                        // otherwise check if the pose of the both hands has been set
+                        boolean executeWithNextAction;
+                        if (oneHandConfigurationSet)
+                           executeWithNextAction = true;
+                        else if (side == RobotSide.RIGHT)
+                           executeWithNextAction = false;
+                        else
+                           executeWithNextAction = bothPosesAreSet;
+                        actionNode.put("executeWithNextAction", executeWithNextAction);
+                     }
+                     else
+                        actionNode.put("executeWithNextAction", postGraspHandConfigurations.get(side).get(i) != null ? true : false);
+                     actionNode.put("holdPoseInWorldLater", (i != numberOfPostGraspFrames - 1));
 
                      double[] dataTrajectories = new double[16];
                      transformToParent.get(dataTrajectories);
@@ -204,8 +277,10 @@ public class RDXAffordanceTemplateFileManager
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
                         configurationActionNode.put("type", "RDXHandConfigurationAction");
+                        configurationActionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("grip", postGraspHandConfigurations.get(side).get(i).toString());
+                        configurationActionNode.put("executeWithNextAction", side != RobotSide.RIGHT && bothPosesAreSet);
                      }
                   }
                }
