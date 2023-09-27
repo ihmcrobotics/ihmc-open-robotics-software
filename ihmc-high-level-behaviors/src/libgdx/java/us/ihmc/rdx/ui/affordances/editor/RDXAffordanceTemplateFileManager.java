@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.affordances.editor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -555,7 +556,7 @@ public class RDXAffordanceTemplateFileManager
                {
                   RobotSide side = getSideFromString((gripArrayNode.get(sideIndex).get("side").asText()));
                   String configuration = gripArrayNode.get(sideIndex).get("config").asText();
-                  preGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration), side);
+                  preGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : SakeHandParameters.SakeCommandOption.valueOf(configuration), side);
                }
             }
 
@@ -567,7 +568,7 @@ public class RDXAffordanceTemplateFileManager
             {
                RobotSide side = getSideFromString((gripArrayNode.get(sideIndex).get("side").asText()));
                String configuration = gripArrayNode.get(sideIndex).get("config").asText();
-               graspFrame.setHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration), side);
+               graspFrame.setHandConfiguration(configuration.isEmpty() ? null : SakeHandParameters.SakeCommandOption.valueOf(configuration), side);
             }
 
             for (int i = 0; i < postGraspFramesSize; i++)
@@ -581,7 +582,7 @@ public class RDXAffordanceTemplateFileManager
                {
                   RobotSide side = getSideFromString((gripArrayNode.get(sideIndex).get("side").asText()));
                   String configuration = gripArrayNode.get(sideIndex).get("config").asText();
-                  postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration), side);
+                  postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : SakeHandParameters.SakeCommandOption.valueOf(configuration), side);
                }
             }
          });
