@@ -33,6 +33,7 @@ import java.util.List;
 public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 {
    private final PelvisHeightPitchActionDescription actionDescription = new PelvisHeightPitchActionDescription();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionDescription::getHeight,
                                                                     actionDescription::setHeight,
@@ -44,15 +45,15 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
                                                                                 actionDescription::setTrajectoryDuration,
                                                                                 imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDescription.getReferenceFrame(), actionDescription.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDescription.getConditionalReferenceFrame().get(), actionDescription.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionDescription::getExecuteWithNextAction,
                                                                                       actionDescription::setExecuteWithNextAction,
                                                                                       imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDescription.getReferenceFrame());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDescription.getReferenceFrame());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -66,7 +67,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
                                      RobotCollisionModel selectionCollisionModel,
                                      ReferenceFrameLibrary referenceFrameLibrary)
    {
-      actionDescription.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
@@ -90,33 +91,33 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionDescription.changeParentFrame(parentFrame);
-      actionDescription.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
+      actionDescription.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionDescription.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionDescription.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionDescription.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
    @Override
    public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
-      actionDescription.update();
+      actionDescription.update(referenceFrameLibrary);
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDescription.getReferenceFrame())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDescription.getConditionalReferenceFrame().get())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionDescription.getReferenceFrame());
-         graphicFrame.changeParentFrame(actionDescription.getReferenceFrame());
-         collisionShapeFrame.changeParentFrame(actionDescription.getReferenceFrame());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionDescription.getConditionalReferenceFrame().get());
+         graphicFrame.changeParentFrame(actionDescription.getConditionalReferenceFrame().get());
+         collisionShapeFrame.changeParentFrame(actionDescription.getConditionalReferenceFrame().get());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -139,7 +140,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       executeWithNextActionWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionDescription.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);
