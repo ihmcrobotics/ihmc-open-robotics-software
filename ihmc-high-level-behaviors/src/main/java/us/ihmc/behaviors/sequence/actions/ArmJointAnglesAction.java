@@ -8,7 +8,7 @@ import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
 
-public class ArmJointAnglesAction extends ArmJointAnglesActionData implements BehaviorAction
+public class ArmJointAnglesAction extends ArmJointAnglesActionDescription implements BehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;

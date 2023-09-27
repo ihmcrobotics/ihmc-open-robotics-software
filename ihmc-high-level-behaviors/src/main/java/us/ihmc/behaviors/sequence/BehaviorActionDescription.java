@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
- * Interface for saving and loading an action to file.
+ * Interface for a description of an action with
+ * support for saving and loading an action to file.
  */
-public interface BehaviorActionData
+public interface BehaviorActionDescription
 {
    default void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
    {

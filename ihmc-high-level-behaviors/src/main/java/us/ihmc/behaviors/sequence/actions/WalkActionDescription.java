@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.WalkActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +16,7 @@ import us.ihmc.tools.io.JSONTools;
 
 import java.util.function.Consumer;
 
-public class WalkActionData implements BehaviorActionData
+public class WalkActionDescription implements BehaviorActionDescription
 {
    private String description = "Walk";
    private ReferenceFrameLibrary referenceFrameLibrary;

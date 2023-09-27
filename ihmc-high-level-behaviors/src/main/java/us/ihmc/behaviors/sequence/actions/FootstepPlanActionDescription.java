@@ -5,7 +5,7 @@ import behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
@@ -17,7 +17,7 @@ import us.ihmc.tools.io.JSONTools;
 
 import java.util.function.Consumer;
 
-public class FootstepPlanActionData implements BehaviorActionData
+public class FootstepPlanActionDescription implements BehaviorActionDescription
 {
    private String description = "Footstep plan";
    private ReferenceFrameLibrary referenceFrameLibrary;
