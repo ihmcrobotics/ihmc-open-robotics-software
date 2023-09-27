@@ -438,7 +438,7 @@ public class RDXBehaviorActionSequenceEditor
          // We use executionStatusMessageToDisplay in order to display the previously
          // executed action's results, otherwise it gets cleared.
          IDLSequence.Object<ActionExecutionStatusMessage> latestActionsExecutionStatus = executionStatusSubscription.getLatest().getActionStatusList();
-         if (!latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString().isEmpty())
+         if (!latestActionsExecutionStatus.isEmpty() && !latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString().isEmpty())
          {
             executionRejectionTooltipText.renderText("Action rejected: " + latestActionsExecutionStatus.getFirst().getExecutionRejectionTooltipAsString(), true);
          }

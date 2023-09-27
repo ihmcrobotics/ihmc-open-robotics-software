@@ -78,12 +78,8 @@ public class ReferenceFrameLibrary
       referenceFrameNameArray = referenceFrameNameSet.toArray(referenceFrameNameArray);
    }
 
-   public ReferenceFrame findFrameByIndex(int referenceFrameIndex)
-   {
-      return findFrameByName(getReferenceFrameNameArray()[referenceFrameIndex]);
-   }
-
-   public ReferenceFrame findFrameByNameOrWorld(String referenceFrameName)
+   @Nullable
+   public ReferenceFrame findFrameByName(String referenceFrameName)
    {
       // Check map first, then dynamic collections
       ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
@@ -105,16 +101,7 @@ public class ReferenceFrameLibrary
          }
       }
 
-      if (!frameFound)
-         LogTools.error("Frame not found: {}. Using world frame.", referenceFrameName);
-      return frameFound ? referenceFrame : ReferenceFrame.getWorldFrame();
-   }
-
-   @Nullable
-   public ReferenceFrame findFrameByName(String referenceFrameName)
-   {
-      ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
-      return frameSupplier == null ? null : frameSupplier.get();
+      return frameFound ? referenceFrame : null;
    }
 
    public int findFrameIndexByName(String referenceFrameName)
