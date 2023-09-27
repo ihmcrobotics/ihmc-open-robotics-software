@@ -167,7 +167,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       while (running)
       {
          throttler.waitAndRun();
-         if (chestPoseStatus.getActionIndex() > 0)
+         if (chestPoseStatus.getActionIndex() >= 0 && getActionIndex() >= 0)
          {
             // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
             ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);

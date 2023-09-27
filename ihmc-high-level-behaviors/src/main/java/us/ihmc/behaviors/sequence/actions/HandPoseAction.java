@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
@@ -15,13 +14,10 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,10 +42,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> chestPoseStatusSubscription;
-   private final IHMCROS2Input<BodyPartPoseStatusMessage> pelvisPoseStatusSubscription;
-   private int previousConcurrentChestIndex = -1;
-   private int previousConcurrentPelvisIndex = -1;
+   private final IKRootCalculator rootCalculator;
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -66,9 +59,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
-
-      chestPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
-      pelvisPoseStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS);
+      rootCalculator = new IKRootCalculator(ros2ControllerHelper, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
    }
 
    @Override
@@ -84,48 +75,21 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copyActualToWork();
-
-         BodyPartPoseStatusMessage chestPoseStatusMessage;
-         if (chestPoseStatusSubscription.getMessageNotification().poll())
-            chestPoseStatusMessage = chestPoseStatusSubscription.getLatest();
-         else
-            chestPoseStatusMessage = null;
-
-         BodyPartPoseStatusMessage pelvisPoseStatusMessage = null;
-         if (pelvisPoseStatusSubscription.getMessageNotification().poll())
-            pelvisPoseStatusMessage = pelvisPoseStatusSubscription.getLatest();
-
-         ModifiableReferenceFrame chestInteractableReferenceFrame;
-         if (chestPoseStatusMessage != null)
-         {
-            int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
-            boolean isCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-            chestInteractableReferenceFrame = new ModifiableReferenceFrame(getReferenceFrameLibrary().findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
-            chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
-            if (isCurrentAndConcurrent)
-            {
-               armIKSolver.setChestExternally(chestInteractableReferenceFrame.getReferenceFrame());
-               previousConcurrentChestIndex = chestIndex;
-            }
-            else if (chestIndex == previousConcurrentChestIndex)
-            {
-               armIKSolver.setChestExternally(null);
-            }
-         }
-
-         computeAndPublishIKSolution(armIKSolver);
+         rootCalculator.getKinematicsInfo();
+         rootCalculator.computeRoot();
+         armIKSolver.setChestExternally(rootCalculator.getRoot());
+         computeAndPublishIK(armIKSolver);
       }
       else if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.setChestExternally(null);
          armIKSolver.copyActualToWork();
-         computeAndPublishIKSolution(armIKSolver);
-
+         computeAndPublishIK(armIKSolver);
       }
    }
 
-   private void computeAndPublishIKSolution(ArmIKSolver armIKSolver)
+   private void computeAndPublishIK(ArmIKSolver armIKSolver)
    {
       armIKSolver.update(getPalmFrame());
       armIKSolver.solve();
