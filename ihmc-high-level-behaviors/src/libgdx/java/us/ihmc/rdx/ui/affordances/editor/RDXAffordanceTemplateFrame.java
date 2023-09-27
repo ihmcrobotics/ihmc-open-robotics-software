@@ -6,11 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.avatar.sakeGripper.SakeHandParameters;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
@@ -28,7 +27,7 @@ public class RDXAffordanceTemplateFrame
    private final SideDependentList<Boolean> isPoseSet = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> poseFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> frameGraphics = new SideDependentList<>();
-   private final SideDependentList<SakeHandParameters.SakeCommandOption> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<SakeHandCommandOption> handConfigurations = new SideDependentList<>();
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
@@ -193,7 +192,7 @@ public class RDXAffordanceTemplateFrame
       }
    }
 
-   public void setHandConfiguration(SakeHandParameters.SakeCommandOption configuration, RobotSide side)
+   public void setHandConfiguration(SakeHandCommandOption configuration, RobotSide side)
    {
       handConfigurations.replace(side, configuration);
    }
@@ -215,7 +214,7 @@ public class RDXAffordanceTemplateFrame
       return poses;
    }
 
-   public SakeHandParameters.SakeCommandOption getHandConfiguration(RobotSide side)
+   public SakeHandCommandOption getHandConfiguration(RobotSide side)
    {
       return handConfigurations.get(side);
    }
