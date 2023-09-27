@@ -44,7 +44,6 @@ public class RDXRapidHeightMapExtractionDemo
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final Notification heightMapUpdateNotification = new Notification();
@@ -71,7 +70,8 @@ public class RDXRapidHeightMapExtractionDemo
    private ROS2Helper ros2Helper;
    private ROS2Node ros2Node;
 
-   private PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
 
    private int totalCount = 0;
    private int skipIndex = 0;
@@ -190,6 +190,7 @@ public class RDXRapidHeightMapExtractionDemo
             depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
             localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
             croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
+            internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
 
             humanoidPerceptionUI.update();
 
@@ -275,7 +276,9 @@ public class RDXRapidHeightMapExtractionDemo
                              .set(new Quaternion(0.0f, sensorToGroundTransform.getRotation().getPitch(), sensorToGroundTransform.getRotation().getRoll()));
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
       groundToSensorTransform.invert();
-      cameraZUpFrame.getTransformToParent().set(groundToSensorTransform);
+
+      Pose3D groundPoseInSensorFrame = new Pose3D(groundToSensorTransform);
+      cameraZUpFrame.setPoseAndUpdate(groundPoseInSensorFrame);
 
       humanoidPerception.updateTerrain(ros2Helper,
                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat(),

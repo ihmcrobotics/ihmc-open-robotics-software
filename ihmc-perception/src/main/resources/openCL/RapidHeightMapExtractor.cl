@@ -215,7 +215,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    else
    {
       // this is slightly below the floor height of what we'll accept
-      averageHeightZ = params[MIN_HEIGHT_REGISTRATION] - 0.05F;
+      averageHeightZ = params[MIN_HEIGHT_REGISTRATION] - 0.05f;
    }
    write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }

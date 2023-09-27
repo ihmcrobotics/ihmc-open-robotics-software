@@ -42,7 +42,6 @@ public class RapidHeightMapExtractor
    private int searchWindowHeight = 250;
    private int searchWindowWidth = 140;
 
-
    private float minHeightRegistration = -0.1f;
    private float maxHeightRegistration = 0.7f;
    private float minHeightDifference = -0.05f;
