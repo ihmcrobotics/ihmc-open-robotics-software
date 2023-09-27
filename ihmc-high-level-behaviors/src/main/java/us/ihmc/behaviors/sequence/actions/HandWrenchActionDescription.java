@@ -3,10 +3,10 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandWrenchActionData implements BehaviorActionData
+public class HandWrenchActionDescription implements BehaviorActionDescription
 {
    private String description = "Hand wrench";
    private RobotSide side = RobotSide.LEFT;

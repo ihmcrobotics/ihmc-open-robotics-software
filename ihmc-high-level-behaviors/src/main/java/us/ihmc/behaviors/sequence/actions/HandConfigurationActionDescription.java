@@ -3,11 +3,11 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandConfigurationActionData implements BehaviorActionData
+public class HandConfigurationActionDescription implements BehaviorActionDescription
 {
    private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;

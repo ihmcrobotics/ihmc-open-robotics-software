@@ -5,7 +5,7 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public interface BehaviorAction extends BehaviorActionData
+public interface BehaviorAction extends BehaviorActionDescription
 {
    /** Called every tick. */
    default void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)

@@ -4,12 +4,12 @@ import behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
 
-public class ArmJointAnglesActionData implements BehaviorActionData
+public class ArmJointAnglesActionDescription implements BehaviorActionDescription
 {
    public static final int NUMBER_OF_JOINTS = 7;
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";

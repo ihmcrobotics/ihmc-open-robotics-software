@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDescription;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -15,7 +15,7 @@ import us.ihmc.tools.io.JSONTools;
 
 import java.util.function.Consumer;
 
-public class PelvisHeightPitchActionData implements BehaviorActionData
+public class PelvisHeightPitchActionDescription implements BehaviorActionDescription
 {
    private String description = "Pelvis height and pitch";
    private double trajectoryDuration = 4.0;
