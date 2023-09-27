@@ -15,7 +15,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "89882313e5b22e7dfebbf7eff26828877c7ceb4ad8f29ac64e3e523629f22ab7";
+   		return "f738997c57331546766c68d1b9d5d67e050d7c1fc877f51ef7fd35cd4c305c7c";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -79,6 +81,9 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +95,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_4(data.getGrip());
 
+      cdr.write_type_7(data.getExecuteWithNextAction());
+
    }
 
    public static void read(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
@@ -98,6 +105,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
       data.setRobotSide(cdr.read_type_9());
       	
       data.setGrip(cdr.read_type_4());
+      	
+      data.setExecuteWithNextAction(cdr.read_type_7());
       	
 
    }
@@ -109,6 +118,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_4("grip", data.getGrip());
+      ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
    }
 
    @Override
@@ -118,6 +128,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setGrip(ser.read_type_4("grip"));
+      data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.HandConfigurationActionMessage src, behavior_msgs.msg.dds.HandConfigurationActionMessage dest)

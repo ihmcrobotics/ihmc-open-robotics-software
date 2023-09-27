@@ -1,11 +1,12 @@
 package us.ihmc.perception.opencv;
 
-import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.TIntObjectMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 
 /**
  * Used to publish detected ArUco marker poses over ROS 2.
@@ -23,15 +24,15 @@ public class OpenCVArUcoMarkerROS2Publisher
    private final OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final ROS2PublishSubscribeAPI ros2;
-   private final TIntDoubleHashMap markerIDsToSizesMap;
+   private final TIntObjectMap<ArUcoMarkerNode> markerIDToNodeMap;
 
    public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
                                          ROS2PublishSubscribeAPI ros2,
-                                         TIntDoubleHashMap markerIDsToSizesMap)
+                                         TIntObjectMap<ArUcoMarkerNode> markerIDToNodeMap)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
       this.ros2 = ros2;
-      this.markerIDsToSizesMap = markerIDsToSizesMap;
+      this.markerIDToNodeMap = markerIDToNodeMap;
    }
 
    public void update()
@@ -48,11 +49,11 @@ public class OpenCVArUcoMarkerROS2Publisher
             {
                int markerID = ids.ptr(i, 0).getInt();
 
-               if (markerIDsToSizesMap.containsKey(markerID))
+               if (markerIDToNodeMap.containsKey(markerID))
                {
                   arUcoMarkerPoses.getMarkerId().add(markerID);
 
-                  double markerSize = markerIDsToSizesMap.get(markerID);
+                  double markerSize = markerIDToNodeMap.get(markerID).getMarkerSize();
                   arUcoMarkerDetection.getPose(markerID,
                                                markerSize,
                                                ReferenceFrame.getWorldFrame(),

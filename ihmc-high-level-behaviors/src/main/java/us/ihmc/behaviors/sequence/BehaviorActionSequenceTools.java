@@ -63,7 +63,7 @@ public class BehaviorActionSequenceTools
             handWrenchActionMessage.getActionInformation().setActionIndex(i);
             handWrenchActionData.toMessage(handWrenchActionMessage);
          }
-         else if (action instanceof PelvisHeightActionData pelvisHeightActionData)
+         else if (action instanceof PelvisHeightPitchActionData pelvisHeightActionData)
          {
             BodyPartPoseActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
@@ -90,7 +90,7 @@ public class BehaviorActionSequenceTools
    public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
    {
       ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
-      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByNameOrWorld(previousParentFrame.getName()).get();
+      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByNameOrWorld(previousParentFrame.getName());
       if (previousParentFrame != nextParentFrame)
       {
          frameToUpdate.changeParentFrame(nextParentFrame);

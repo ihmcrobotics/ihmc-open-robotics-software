@@ -6,3 +6,6 @@ byte robot_side 255
 
 # The grip type
 uint32 grip
+
+# Whether the next action can be executed at the same time of this one
+bool execute_with_next_action

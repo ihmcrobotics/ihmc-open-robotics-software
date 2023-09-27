@@ -138,8 +138,7 @@ public class PerceptionAPI
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
-   public static final ROS2IOTopicPair<DetectableSceneNodesMessage> DETECTABLE_SCENE_NODES
-         = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(DetectableSceneNodesMessage.class));
+   public static final ROS2IOTopicPair<SceneGraphMessage> SCENE_GRAPH = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(SceneGraphMessage.class));
 
    /** MoCap Topics */
    public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)
