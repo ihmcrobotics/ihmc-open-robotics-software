@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.SidedBodyPartPoseActionMessage;
+import behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -64,7 +64,7 @@ public class HandPoseActionData implements BehaviorActionData
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
 
-   public void toMessage(SidedBodyPartPoseActionMessage message)
+   public void toMessage(SidedBodyPartPoseActionDescriptionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -76,7 +76,7 @@ public class HandPoseActionData implements BehaviorActionData
       message.setJointSpaceControl(jointSpaceControl);
    }
 
-   public void fromMessage(SidedBodyPartPoseActionMessage message)
+   public void fromMessage(SidedBodyPartPoseActionDescriptionMessage message)
    {
       palmFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       palmFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));

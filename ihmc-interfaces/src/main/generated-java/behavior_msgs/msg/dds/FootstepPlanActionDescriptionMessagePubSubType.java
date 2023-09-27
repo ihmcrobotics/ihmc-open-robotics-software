@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "WalkActionMessage" defined in "WalkActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "FootstepPlanActionDescriptionMessage" defined in "FootstepPlanActionDescriptionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from WalkActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit WalkActionMessage_.idl instead.
+* This file was automatically generated from FootstepPlanActionDescriptionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit FootstepPlanActionDescriptionMessage_.idl instead.
 *
 */
-public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.WalkActionMessage>
+public class FootstepPlanActionDescriptionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::WalkActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::FootstepPlanActionDescriptionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c9ea31e26009e8c08f9dbca8f46908c1f18838a33a7626aedd25dffccb214422";
+   		return "a96d5ad2a3ff602b68a2869e13a6bda93499662d3fe728b705d1600b646c4721";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.WalkActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -60,10 +60,9 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       }
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FootstepActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -72,12 +71,12 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.WalkActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.WalkActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -90,9 +89,10 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       }
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToParent(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getLeftGoalFootTransformToGizmo(), current_alignment);
-
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getRightGoalFootTransformToGizmo(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FootstepActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -104,7 +104,7 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       if(data.getParentFrame().size() <= 1000)
@@ -112,21 +112,22 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
           throw new RuntimeException("parent_frame field exceeds the maximum length");
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getLeftGoalFootTransformToGizmo(), cdr);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getRightGoalFootTransformToGizmo(), cdr);
+      if(data.getFootsteps().size() <= 50)
+      cdr.write_type_e(data.getFootsteps());else
+          throw new RuntimeException("footsteps field exceeds the maximum length");
+
       cdr.write_type_6(data.getSwingDuration());
 
       cdr.write_type_6(data.getTransferDuration());
 
    }
 
-   public static void read(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       cdr.read_type_e(data.getParentFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getLeftGoalFootTransformToGizmo(), cdr);	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getRightGoalFootTransformToGizmo(), cdr);	
+      cdr.read_type_e(data.getFootsteps());	
       data.setSwingDuration(cdr.read_type_6());
       	
       data.setTransferDuration(cdr.read_type_6());
@@ -135,46 +136,40 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
       ser.write_type_e("parent_frame", data.getParentFrame());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
-      ser.write_type_a("left_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getLeftGoalFootTransformToGizmo());
-
-      ser.write_type_a("right_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRightGoalFootTransformToGizmo());
-
+      ser.write_type_e("footsteps", data.getFootsteps());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WalkActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
       ser.read_type_e("parent_frame", data.getParentFrame());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
-      ser.read_type_a("left_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getLeftGoalFootTransformToGizmo());
-
-      ser.read_type_a("right_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRightGoalFootTransformToGizmo());
-
+      ser.read_type_e("footsteps", data.getFootsteps());
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.WalkActionMessage src, behavior_msgs.msg.dds.WalkActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage src, behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.WalkActionMessage createData()
+   public behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage createData()
    {
-      return new behavior_msgs.msg.dds.WalkActionMessage();
+      return new behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage();
    }
    @Override
    public int getTypeSize()
@@ -188,24 +183,24 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.WalkActionMessage src, behavior_msgs.msg.dds.WalkActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage src, behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public WalkActionMessagePubSubType newInstance()
+   public FootstepPlanActionDescriptionMessagePubSubType newInstance()
    {
-      return new WalkActionMessagePubSubType();
+      return new FootstepPlanActionDescriptionMessagePubSubType();
    }
 }

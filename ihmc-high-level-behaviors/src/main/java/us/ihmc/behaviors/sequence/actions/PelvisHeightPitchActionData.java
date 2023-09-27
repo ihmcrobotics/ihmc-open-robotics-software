@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseActionMessage;
+import behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -55,7 +55,7 @@ public class PelvisHeightPitchActionData implements BehaviorActionData
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
-   public void toMessage(BodyPartPoseActionMessage message)
+   public void toMessage(BodyPartPoseActionDescriptionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -64,7 +64,7 @@ public class PelvisHeightPitchActionData implements BehaviorActionData
       message.setExecuteWithNextAction(executeWitNextAction);
    }
 
-   public void fromMessage(BodyPartPoseActionMessage message)
+   public void fromMessage(BodyPartPoseActionDescriptionMessage message)
    {
       pelvisInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       pelvisInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));

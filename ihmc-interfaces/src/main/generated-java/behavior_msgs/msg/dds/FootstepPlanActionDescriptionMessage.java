@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage> implements Settable<FootstepPlanActionMessage>, EpsilonComparable<FootstepPlanActionMessage>
+public class FootstepPlanActionDescriptionMessage extends Packet<FootstepPlanActionDescriptionMessage> implements Settable<FootstepPlanActionDescriptionMessage>, EpsilonComparable<FootstepPlanActionDescriptionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -24,7 +24,7 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
    /**
             * The footsteps, with a maximum of 50
             */
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage>  footsteps_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDescriptionMessage>  footsteps_;
    /**
             * Swing duration
             */
@@ -34,22 +34,22 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
             */
    public double transfer_duration_;
 
-   public FootstepPlanActionMessage()
+   public FootstepPlanActionDescriptionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
-      footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage> (50, new behavior_msgs.msg.dds.FootstepActionMessagePubSubType());
+      footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDescriptionMessage> (50, new behavior_msgs.msg.dds.FootstepActionDescriptionMessagePubSubType());
 
    }
 
-   public FootstepPlanActionMessage(FootstepPlanActionMessage other)
+   public FootstepPlanActionDescriptionMessage(FootstepPlanActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(FootstepPlanActionMessage other)
+   public void set(FootstepPlanActionDescriptionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       parent_frame_.set(other.parent_frame_);
@@ -93,7 +93,7 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
    /**
             * The footsteps, with a maximum of 50
             */
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage>  getFootsteps()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDescriptionMessage>  getFootsteps()
    {
       return footsteps_;
    }
@@ -129,19 +129,19 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
    }
 
 
-   public static Supplier<FootstepPlanActionMessagePubSubType> getPubSubType()
+   public static Supplier<FootstepPlanActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return FootstepPlanActionMessagePubSubType::new;
+      return FootstepPlanActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return FootstepPlanActionMessagePubSubType::new;
+      return FootstepPlanActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(FootstepPlanActionMessage other, double epsilon)
+   public boolean epsilonEquals(FootstepPlanActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -170,9 +170,9 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof FootstepPlanActionMessage)) return false;
+      if(!(other instanceof FootstepPlanActionDescriptionMessage)) return false;
 
-      FootstepPlanActionMessage otherMyClass = (FootstepPlanActionMessage) other;
+      FootstepPlanActionDescriptionMessage otherMyClass = (FootstepPlanActionDescriptionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
@@ -191,7 +191,7 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("FootstepPlanActionMessage {");
+      builder.append("FootstepPlanActionDescriptionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("parent_frame=");

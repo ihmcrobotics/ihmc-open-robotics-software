@@ -1,8 +1,8 @@
-#ifndef __behavior_msgs__msg__FootstepPlanActionMessage__idl__
-#define __behavior_msgs__msg__FootstepPlanActionMessage__idl__
+#ifndef __behavior_msgs__msg__FootstepPlanActionDescriptionMessage__idl__
+#define __behavior_msgs__msg__FootstepPlanActionDescriptionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionInformationMessage_.idl"
-#include "behavior_msgs/msg/./FootstepActionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepActionDescriptionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
@@ -11,8 +11,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionMessage_")
-      struct FootstepPlanActionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionDescriptionMessage_")
+      struct FootstepPlanActionDescriptionMessage
       {
         /**
          * Used for syncing action sequences
@@ -30,7 +30,7 @@ module behavior_msgs
         /**
          * The footsteps, with a maximum of 50
          */
-        sequence<behavior_msgs::msg::dds::FootstepActionMessage, 50> footsteps;
+        sequence<behavior_msgs::msg::dds::FootstepActionDescriptionMessage, 50> footsteps;
         /**
          * Swing duration
          */

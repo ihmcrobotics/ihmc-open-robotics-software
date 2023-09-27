@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "HandConfigurationActionMessage" defined in "HandConfigurationActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "HandConfigurationActionDescriptionMessage" defined in "HandConfigurationActionDescriptionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from HandConfigurationActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit HandConfigurationActionMessage_.idl instead.
+* This file was automatically generated from HandConfigurationActionDescriptionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HandConfigurationActionDescriptionMessage_.idl instead.
 *
 */
-public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandConfigurationActionMessage>
+public class HandConfigurationActionDescriptionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::HandConfigurationActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::HandConfigurationActionDescriptionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f738997c57331546766c68d1b9d5d67e050d7c1fc877f51ef7fd35cd4c305c7c";
+   		return "276d11d82a2163cd2d3516c949b6c759f727a2d5d87107440da4e1cdbde6a6ef";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.HandConfigurationActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -64,12 +64,12 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandConfigurationActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandConfigurationActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -88,7 +88,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
@@ -99,7 +99,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
    }
 
-   public static void read(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
@@ -112,7 +112,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -122,7 +122,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandConfigurationActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -131,15 +131,15 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
       data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.HandConfigurationActionMessage src, behavior_msgs.msg.dds.HandConfigurationActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage src, behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.HandConfigurationActionMessage createData()
+   public behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage createData()
    {
-      return new behavior_msgs.msg.dds.HandConfigurationActionMessage();
+      return new behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage();
    }
    @Override
    public int getTypeSize()
@@ -153,24 +153,24 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.HandConfigurationActionMessage src, behavior_msgs.msg.dds.HandConfigurationActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage src, behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public HandConfigurationActionMessagePubSubType newInstance()
+   public HandConfigurationActionDescriptionMessagePubSubType newInstance()
    {
-      return new HandConfigurationActionMessagePubSubType();
+      return new HandConfigurationActionDescriptionMessagePubSubType();
    }
 }

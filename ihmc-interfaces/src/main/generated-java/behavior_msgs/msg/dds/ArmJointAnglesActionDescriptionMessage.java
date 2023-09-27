@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMessage> implements Settable<ArmJointAnglesActionMessage>, EpsilonComparable<ArmJointAnglesActionMessage>
+public class ArmJointAnglesActionDescriptionMessage extends Packet<ArmJointAnglesActionDescriptionMessage> implements Settable<ArmJointAnglesActionDescriptionMessage>, EpsilonComparable<ArmJointAnglesActionDescriptionMessage>
 {
    /**
             * Used for syncing action sequences
@@ -29,20 +29,20 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
             */
    public double trajectory_duration_;
 
-   public ArmJointAnglesActionMessage()
+   public ArmJointAnglesActionDescriptionMessage()
    {
       action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       joint_angles_ = new double[7];
 
    }
 
-   public ArmJointAnglesActionMessage(ArmJointAnglesActionMessage other)
+   public ArmJointAnglesActionDescriptionMessage(ArmJointAnglesActionDescriptionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(ArmJointAnglesActionMessage other)
+   public void set(ArmJointAnglesActionDescriptionMessage other)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
@@ -123,19 +123,19 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
    }
 
 
-   public static Supplier<ArmJointAnglesActionMessagePubSubType> getPubSubType()
+   public static Supplier<ArmJointAnglesActionDescriptionMessagePubSubType> getPubSubType()
    {
-      return ArmJointAnglesActionMessagePubSubType::new;
+      return ArmJointAnglesActionDescriptionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return ArmJointAnglesActionMessagePubSubType::new;
+      return ArmJointAnglesActionDescriptionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(ArmJointAnglesActionMessage other, double epsilon)
+   public boolean epsilonEquals(ArmJointAnglesActionDescriptionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -161,9 +161,9 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ArmJointAnglesActionMessage)) return false;
+      if(!(other instanceof ArmJointAnglesActionDescriptionMessage)) return false;
 
-      ArmJointAnglesActionMessage otherMyClass = (ArmJointAnglesActionMessage) other;
+      ArmJointAnglesActionDescriptionMessage otherMyClass = (ArmJointAnglesActionDescriptionMessage) other;
 
       if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
@@ -186,7 +186,7 @@ public class ArmJointAnglesActionMessage extends Packet<ArmJointAnglesActionMess
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("ArmJointAnglesActionMessage {");
+      builder.append("ArmJointAnglesActionDescriptionMessage {");
       builder.append("action_information=");
       builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");

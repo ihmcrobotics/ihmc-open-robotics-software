@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseActionMessage;
+import behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -58,7 +58,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
    }
 
-   public void toMessage(BodyPartPoseActionMessage message)
+   public void toMessage(BodyPartPoseActionDescriptionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -68,7 +68,7 @@ public class ChestOrientationActionData implements BehaviorActionData
       message.setHoldPoseInWorld(holdPoseInWorldLater);
    }
 
-   public void fromMessage(BodyPartPoseActionMessage message)
+   public void fromMessage(BodyPartPoseActionDescriptionMessage message)
    {
       chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));

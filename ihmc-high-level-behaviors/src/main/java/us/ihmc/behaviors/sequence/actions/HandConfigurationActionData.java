@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.HandConfigurationActionMessage;
+import behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -32,14 +32,14 @@ public class HandConfigurationActionData implements BehaviorActionData
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
-   public void toMessage(HandConfigurationActionMessage message)
+   public void toMessage(HandConfigurationActionDescriptionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.setGrip(handConfigurationIndex);
       message.setExecuteWithNextAction(executeWitNextAction);
    }
 
-   public void fromMessage(HandConfigurationActionMessage message)
+   public void fromMessage(HandConfigurationActionDescriptionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
       handConfigurationIndex = (int) message.getGrip();

@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__BodyPartPoseActionMessage__idl__
-#define __behavior_msgs__msg__BodyPartPoseActionMessage__idl__
+#ifndef __behavior_msgs__msg__SidedBodyPartPoseActionDescriptionMessage__idl__
+#define __behavior_msgs__msg__SidedBodyPartPoseActionDescriptionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionInformationMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
@@ -10,23 +10,28 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::BodyPartPoseActionMessage_")
-      struct BodyPartPoseActionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::SidedBodyPartPoseActionDescriptionMessage_")
+      struct SidedBodyPartPoseActionDescriptionMessage
       {
         /**
          * Used for syncing action sequences
          */
         behavior_msgs::msg::dds::ActionInformationMessage action_information;
         /**
+         * Specifies the side of the robot that this message refers to.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
          * Name of the frame the this action is expressed in
          */
         sequence<string, 1000> parent_frame;
         /**
-         * Transform that expresses the pelvis pose in the parent frame
+         * Transform that expresses the hand pose in the parent frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_parent;
         /**
-         * Duration of the trajectory
+         * The trajectory duration
          */
         double trajectory_duration;
         /**
@@ -37,6 +42,10 @@ module behavior_msgs
          * Whether maintaining the rigid body controlled in world after the action is complete
          */
         boolean hold_pose_in_world;
+        /**
+         * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+         */
+        boolean joint_space_control;
       };
     };
   };

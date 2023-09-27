@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ArmJointAnglesActionMessage;
+import behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
@@ -54,7 +54,7 @@ public class ArmJointAnglesActionData implements BehaviorActionData
       }
    }
 
-   public void toMessage(ArmJointAnglesActionMessage message)
+   public void toMessage(ArmJointAnglesActionDescriptionMessage message)
    {
       message.setPreset(preset == null ? -1 : preset.ordinal());
       message.setRobotSide(side.toByte());
@@ -65,7 +65,7 @@ public class ArmJointAnglesActionData implements BehaviorActionData
       }
    }
 
-   public void fromMessage(ArmJointAnglesActionMessage message)
+   public void fromMessage(ArmJointAnglesActionDescriptionMessage message)
    {
       int presetOrdinal = message.getPreset();
       preset = presetOrdinal == -1 ? null : PresetArmConfiguration.values()[presetOrdinal];

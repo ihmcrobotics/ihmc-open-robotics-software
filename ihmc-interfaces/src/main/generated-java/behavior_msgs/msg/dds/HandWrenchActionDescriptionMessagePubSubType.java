@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "HandWrenchActionMessage" defined in "HandWrenchActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "HandWrenchActionDescriptionMessage" defined in "HandWrenchActionDescriptionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from HandWrenchActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit HandWrenchActionMessage_.idl instead.
+* This file was automatically generated from HandWrenchActionDescriptionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HandWrenchActionDescriptionMessage_.idl instead.
 *
 */
-public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandWrenchActionMessage>
+public class HandWrenchActionDescriptionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::HandWrenchActionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::HandWrenchActionDescriptionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "11f6f6efb9dbaf358992492fce5c1f121119ecc7d6d06e036790290d78b0fba2";
+   		return "0f1ef12c63eda75e3f7bcf714aefcda346f2c0bd7db19c4a6b96f11f6f77b480";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.HandWrenchActionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -64,12 +64,12 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandWrenchActionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandWrenchActionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -88,7 +88,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
@@ -99,7 +99,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    }
 
-   public static void read(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
@@ -112,7 +112,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -122,7 +122,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandWrenchActionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data)
    {
       ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
 
@@ -131,15 +131,15 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setForce(ser.read_type_6("force"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.HandWrenchActionMessage src, behavior_msgs.msg.dds.HandWrenchActionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage src, behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.HandWrenchActionMessage createData()
+   public behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage createData()
    {
-      return new behavior_msgs.msg.dds.HandWrenchActionMessage();
+      return new behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage();
    }
    @Override
    public int getTypeSize()
@@ -153,24 +153,24 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.HandWrenchActionMessage src, behavior_msgs.msg.dds.HandWrenchActionMessage dest)
+   public void copy(behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage src, behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public HandWrenchActionMessagePubSubType newInstance()
+   public HandWrenchActionDescriptionMessagePubSubType newInstance()
    {
-      return new HandWrenchActionMessagePubSubType();
+      return new HandWrenchActionDescriptionMessagePubSubType();
    }
 }

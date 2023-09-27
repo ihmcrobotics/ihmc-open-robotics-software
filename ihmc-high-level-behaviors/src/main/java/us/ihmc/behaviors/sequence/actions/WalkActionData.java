@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.WalkActionMessage;
+import behavior_msgs.msg.dds.WalkActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -67,7 +67,7 @@ public class WalkActionData implements BehaviorActionData
       transferDuration = jsonNode.get("transferDuration").asDouble();
    }
 
-   public void toMessage(WalkActionMessage message)
+   public void toMessage(WalkActionDescriptionMessage message)
    {
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentFrame().getName());
@@ -78,7 +78,7 @@ public class WalkActionData implements BehaviorActionData
       message.setTransferDuration(transferDuration);
    }
 
-   public void fromMessage(WalkActionMessage message)
+   public void fromMessage(WalkActionDescriptionMessage message)
    {
       goalFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
       goalFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
