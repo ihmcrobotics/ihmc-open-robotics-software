@@ -18,12 +18,13 @@ public class RDXArUcoBoxObject extends RDXEnvironmentObject
       Model realisticModel = RDXModelLoader.load(RigidBodySceneObjectDefinitions.BOX_VISUAL_MODEL_FILE_PATH);
       setRealisticModel(realisticModel);
 
-      double size = 0.35;
       getBoundingSphere().setRadius(0.5);
       setMass(0.3f);
-      Box3D collisionBox = new Box3D(size, size, size);
+      Box3D collisionBox = new Box3D(RigidBodySceneObjectDefinitions.BOX_DEPTH,
+                                     RigidBodySceneObjectDefinitions.BOX_WIDTH,
+                                     RigidBodySceneObjectDefinitions.BOX_HEIGHT);
       setCollisionGeometryObject(collisionBox);
 
-      getRealisticModelOffset().getTranslation().add(-size / 2.0, -size / 2.0, -size / 2.0);
+      getRealisticModelOffset().getTranslation().add(0.0, 0.0, -collisionBox.getSizeZ() / 2.0);
    }
 }
