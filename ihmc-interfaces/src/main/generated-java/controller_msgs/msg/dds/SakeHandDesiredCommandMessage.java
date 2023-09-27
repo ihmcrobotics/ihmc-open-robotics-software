@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * Message for commanding the Sake hands to perform various predefined grasps.
        * Also allows for custom grasps with set positions/torques
        */
-public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommandMessage> implements Settable<HandSakeDesiredCommandMessage>, EpsilonComparable<HandSakeDesiredCommandMessage>
+public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommandMessage> implements Settable<SakeHandDesiredCommandMessage>, EpsilonComparable<SakeHandDesiredCommandMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -43,17 +43,17 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
             */
    public double torque_ratio_;
 
-   public HandSakeDesiredCommandMessage()
+   public SakeHandDesiredCommandMessage()
    {
    }
 
-   public HandSakeDesiredCommandMessage(HandSakeDesiredCommandMessage other)
+   public SakeHandDesiredCommandMessage(SakeHandDesiredCommandMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(HandSakeDesiredCommandMessage other)
+   public void set(SakeHandDesiredCommandMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -143,19 +143,19 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
    }
 
 
-   public static Supplier<HandSakeDesiredCommandMessagePubSubType> getPubSubType()
+   public static Supplier<SakeHandDesiredCommandMessagePubSubType> getPubSubType()
    {
-      return HandSakeDesiredCommandMessagePubSubType::new;
+      return SakeHandDesiredCommandMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return HandSakeDesiredCommandMessagePubSubType::new;
+      return SakeHandDesiredCommandMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(HandSakeDesiredCommandMessage other, double epsilon)
+   public boolean epsilonEquals(SakeHandDesiredCommandMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -179,9 +179,9 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof HandSakeDesiredCommandMessage)) return false;
+      if(!(other instanceof SakeHandDesiredCommandMessage)) return false;
 
-      HandSakeDesiredCommandMessage otherMyClass = (HandSakeDesiredCommandMessage) other;
+      SakeHandDesiredCommandMessage otherMyClass = (SakeHandDesiredCommandMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -202,7 +202,7 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("HandSakeDesiredCommandMessage {");
+      builder.append("SakeHandDesiredCommandMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");

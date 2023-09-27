@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.communication.ROS2Tools;
@@ -36,7 +36,7 @@ public class SakeHandCommandAction extends SakeHandCommandActionData implements 
    @Override
    public void triggerActionExecution()
    {
-      HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
+      SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
       message.setRobotSide(getSide().toByte());
       message.setDesiredHandConfiguration((byte) SakeCommandOption.values[getHandConfigurationIndex()].getCommandNumber());
       message.setPostionRatio(getGoalPosition());

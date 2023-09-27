@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -69,7 +69,7 @@ public class RDXSakeHandPositionSlider
          {
             double positionRatio = sliderValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
 
-            HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
+            SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) SakeCommandOption.GOTO.getCommandNumber());
             message.setPostionRatio(positionRatio);
