@@ -16,7 +16,6 @@ import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -249,8 +248,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionDescription().getSide()).getRigidBody().getChildrenJoints().get(0);
             rootCalculator.getKinematicsInfo();
-//            LogTools.info("RDX {}", getActionDescription().getSide().getUpperCaseName());
-            rootCalculator.computeRoot();
+            rootCalculator.computeRoot("RDX", getActionDescription().getSide(), getActionIndex());
             floatingJoint.getJointPose().set(rootCalculator.getRoot().getTransformToRoot());
 
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)

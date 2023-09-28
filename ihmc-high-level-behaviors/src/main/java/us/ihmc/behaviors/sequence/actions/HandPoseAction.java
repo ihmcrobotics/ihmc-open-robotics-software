@@ -14,7 +14,6 @@ import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -74,8 +73,7 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copySourceToWork();
          rootCalculator.getKinematicsInfo();
-//         LogTools.info("REAL {}", getSide().getUpperCaseName());
-         rootCalculator.computeRoot();
+         rootCalculator.computeRoot("REAL", getSide(), actionIndex);
          ReferenceFrame chestFrame = rootCalculator.getRoot();
          armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
          armIKSolver.solve();

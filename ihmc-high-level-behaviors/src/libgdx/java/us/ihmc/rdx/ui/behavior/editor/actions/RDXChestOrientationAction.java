@@ -13,7 +13,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDescription;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -72,7 +71,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final RDX3DPanelTooltip tooltip;
    private final ROS2PublishSubscribeAPI ros2;
    private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
-   private final Throttler throttler = new Throttler().setFrequency(20.0);
+   private final Throttler throttler = new Throttler().setFrequency(10.0);
+   private boolean wasConcurrent = false;
 
    public RDXChestOrientationAction(RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
@@ -152,18 +152,22 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       chestPoseStatus.getParentFrame().add(getActionDescription().get().getParent().getName());
       MessageTools.toMessage(getActionDescription().getTransformToParent(), chestPoseStatus.getTransformToParent());
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
       if (concurrentActionIsNextForExecution)
-         chestPoseStatus.setCurrentAndConcurrent(true);
-      else
-         chestPoseStatus.setCurrentAndConcurrent(false);
-
-      if (throttler.run())
       {
-         if (chestPoseStatus.getActionIndex() >= 0)
+         wasConcurrent = true;
+         chestPoseStatus.setCurrentAndConcurrent(true);
+         if (throttler.run())
          {
-            // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-            ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+            if (chestPoseStatus.getActionIndex() >= 0)
+               ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
          }
+      }
+      else if (wasConcurrent)
+      {
+         chestPoseStatus.setCurrentAndConcurrent(false);
+         ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+         wasConcurrent = false;
       }
    }
 
