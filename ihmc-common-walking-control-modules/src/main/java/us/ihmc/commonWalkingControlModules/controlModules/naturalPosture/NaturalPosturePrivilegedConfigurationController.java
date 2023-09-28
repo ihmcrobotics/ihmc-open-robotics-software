@@ -291,7 +291,7 @@ public class NaturalPosturePrivilegedConfigurationController
       for (RobotSide side : RobotSide.values)
       {
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.SHOULDER_PITCH),
-                                                            side.negateIfRightSide(shoulderPrivilegedOrientation.getPitch()),
+                                                            shoulderPrivilegedOrientation.getPitch(),
                                                             pPoseShoulderQPWeight.getPitch(),
                                                             pPoseShoulderKp.getPitch(),
                                                             pPoseShoulderKd.getPitch());
@@ -307,7 +307,7 @@ public class NaturalPosturePrivilegedConfigurationController
                                                             pPoseShoulderKd.getYaw());
 
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.ELBOW_PITCH),
-                                                            side.negateIfRightSide(pPoseElbow.getDoubleValue()),
+                                                            pPoseElbow.getDoubleValue(),
                                                             pPoseElbowWeight.getDoubleValue(),
                                                             pPoseElbowKp.getDoubleValue(),
                                                             pPoseElbowKd.getDoubleValue());
