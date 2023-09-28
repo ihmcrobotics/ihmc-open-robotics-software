@@ -113,7 +113,7 @@ public class RDXBehaviorActionSequenceEditor
    public void clear()
    {
       for (RDXBehaviorAction action : actionSequence)
-         action.destroy();
+         action.updateBeforeRemoving();
       workspaceFile = null;
    }
 
@@ -168,7 +168,7 @@ public class RDXBehaviorActionSequenceEditor
    public boolean loadActionsFromFile()
    {
       for (RDXBehaviorAction action : actionSequence)
-         action.destroy();
+         action.updateBeforeRemoving();
       actionSequence.clear();
       executionNextIndexStatus = 0;
       lastManualExecutionActionIndex = -1;
@@ -329,7 +329,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             LogTools.warn("Invalid action!");
             for (RDXBehaviorAction action : actionSequence)
-               action.destroy();
+               action.updateBeforeRemoving();
             actionSequence.clear();
          }
       }
@@ -602,7 +602,7 @@ public class RDXBehaviorActionSequenceEditor
          }
          if (ImGui.button(labels.get("X", i)))
          {
-            actionSequence.get(i).destroy();
+            actionSequence.get(i).updateBeforeRemoving();
             RDXBehaviorAction removedAction = actionSequence.remove(i);
             commandNextActionIndex(actionSequence.size());
          }

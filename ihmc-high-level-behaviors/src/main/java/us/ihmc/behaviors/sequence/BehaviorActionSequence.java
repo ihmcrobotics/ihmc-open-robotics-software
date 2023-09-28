@@ -79,7 +79,6 @@ public class BehaviorActionSequence
 
    private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
    public final Int32 executionNextIndexStatusMessage = new Int32();
-   public final std_msgs.msg.dds.String executionNextIndexRejectionMessage = new std_msgs.msg.dds.String();
    public final Bool automaticExecutionStatusMessage = new Bool();
 
    private final Throttler oneHertzThrottler = new Throttler();
