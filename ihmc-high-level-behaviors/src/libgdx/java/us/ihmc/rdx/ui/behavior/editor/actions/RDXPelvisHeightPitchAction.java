@@ -4,16 +4,15 @@ import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.esotericsoftware.minlog.Log;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDescription;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -41,27 +40,28 @@ import java.util.List;
 
 public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 {
-   private final PelvisHeightPitchActionData actionData = new PelvisHeightPitchActionData();
+   private final PelvisHeightPitchActionDescription actionDescription = new PelvisHeightPitchActionDescription();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionData::getHeight,
-                                                                    actionData::setHeight,
+   private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(actionDescription::getHeight,
+                                                                    actionDescription::setHeight,
                                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
-   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(actionData::getPitch,
-                                                                    actionData::setPitch,
+   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(actionDescription::getPitch,
+                                                                    actionDescription::setPitch,
                                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
-                                                                                actionData::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionDescription::getTrajectoryDuration,
+                                                                                actionDescription::setTrajectoryDuration,
                                                                                 imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDescription.getConditionalReferenceFrame().get(), actionDescription.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
-                                                                                      actionData::setExecuteWithNextAction,
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionDescription::getExecuteWithNextAction,
+                                                                                      actionDescription::setExecuteWithNextAction,
                                                                                       imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -83,7 +83,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    {
       this.ros2 = ros2;
       this.syncedFullRobotModel = syncedFullRobotModel;
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
@@ -109,33 +109,33 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.changeParentFrame(parentFrame);
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
+      actionDescription.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionDescription.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
    @Override
    public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
-      actionData.update();
+      actionDescription.update(referenceFrameLibrary);
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDescription.getConditionalReferenceFrame().get())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
-         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
-         collisionShapeFrame.changeParentFrame(actionData.getReferenceFrame());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionDescription.getConditionalReferenceFrame().get());
+         graphicFrame.changeParentFrame(actionDescription.getConditionalReferenceFrame().get());
+         collisionShapeFrame.changeParentFrame(actionDescription.getConditionalReferenceFrame().get());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -152,15 +152,15 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
       pelvisPoseStatus.setActionIndex(getActionIndex());
       pelvisPoseStatus.getParentFrame().resetQuick();
-      pelvisPoseStatus.getParentFrame().add(getActionData().getParentFrame().getName());
+      pelvisPoseStatus.getParentFrame().add(getActionDescription().get().getParent().getName());
 
       // compute transform variation from previous pose
       FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
-      if (getActionData().getParentFrame() != currentRobotPelvisPose.getReferenceFrame())
-         currentRobotPelvisPose.changeFrame(getActionData().getParentFrame());
+      if (getActionDescription().get().getParent() != currentRobotPelvisPose.getReferenceFrame())
+         currentRobotPelvisPose.changeFrame(getActionDescription().get().getParent());
       RigidBodyTransform transformVariation = new RigidBodyTransform();
       transformVariation.setAndInvert(currentRobotPelvisPose);
-      getActionData().getTransformToParent().transform(transformVariation);
+      getActionDescription().getTransformToParent().transform(transformVariation);
       MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
 
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
@@ -200,7 +200,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       executeWithNextActionWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
          update();
       }
       ImGui.pushItemWidth(80.0f);
@@ -216,7 +216,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           getActionIndex(),
-                                                                          actionData.getDescription()));
+                                                                          actionDescription.getDescription()));
       }
    }
 
@@ -271,9 +271,9 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    }
 
    @Override
-   public PelvisHeightPitchActionData getActionData()
+   public PelvisHeightPitchActionDescription getActionDescription()
    {
-      return actionData;
+      return actionDescription;
    }
 
    @Override

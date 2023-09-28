@@ -361,7 +361,7 @@ public class RDXLocomotionManager
       }
 
       // Handles all shortcuts for when the spacebar key is pressed
-      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
+      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
       {
          if (walkAvailable)
          {
