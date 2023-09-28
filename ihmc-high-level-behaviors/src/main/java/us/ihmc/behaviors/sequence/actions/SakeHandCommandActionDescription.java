@@ -1,17 +1,19 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessage;
+import behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorActionDescription;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandConfigurationActionDescription implements BehaviorActionDescription
+public class SakeHandCommandActionDescription implements BehaviorActionDescription
 {
    private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
-   private int handConfigurationIndex = 6;
+   private int handConfigurationIndex = SakeHandCommandOption.GOTO.ordinal();
+   private double goalPosition = 1.0;  // default to open
+   private double goalTorque = 0.0;    // default to none
    private boolean executeWitNextAction = false;
 
    @Override
@@ -19,7 +21,9 @@ public class HandConfigurationActionDescription implements BehaviorActionDescrip
    {
       jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("grip", HandConfiguration.values[handConfigurationIndex].name());
+      jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex].name());
+      jsonNode.put("position", goalPosition);
+      jsonNode.put("torque", goalTorque);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
@@ -28,21 +32,27 @@ public class HandConfigurationActionDescription implements BehaviorActionDescrip
    {
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      handConfigurationIndex = HandConfiguration.valueOf(jsonNode.get("grip").asText()).ordinal();
+      handConfigurationIndex = SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal();
+      goalPosition = jsonNode.get("position").asDouble();
+      goalTorque = jsonNode.get("torque").asDouble();
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
-   public void toMessage(HandConfigurationActionDescriptionMessage message)
+   public void toMessage(SakeHandCommandActionDescriptionMessage message)
    {
       message.setRobotSide(side.toByte());
-      message.setGrip(handConfigurationIndex);
+      message.setConfiguration(SakeHandCommandOption.values[handConfigurationIndex].getCommandNumber());
+      message.setPositionRatio(goalPosition);
+      message.setTorqueRatio(goalTorque);
       message.setExecuteWithNextAction(executeWitNextAction);
    }
 
-   public void fromMessage(HandConfigurationActionDescriptionMessage message)
+   public void fromMessage(SakeHandCommandActionDescriptionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
-      handConfigurationIndex = (int) message.getGrip();
+      handConfigurationIndex = (int) message.getConfiguration();
+      goalPosition = message.getPositionRatio();
+      goalTorque = message.getTorqueRatio();
       executeWitNextAction = message.getExecuteWithNextAction();
    }
 
@@ -64,6 +74,26 @@ public class HandConfigurationActionDescription implements BehaviorActionDescrip
    public void setHandConfigurationIndex(int handConfigurationIndex)
    {
       this.handConfigurationIndex = handConfigurationIndex;
+   }
+
+   public double getGoalPosition()
+   {
+      return goalPosition;
+   }
+
+   public double getGoalTorque()
+   {
+      return goalTorque;
+   }
+
+   public void setGoalPosition(double goalPosition)
+   {
+      this.goalPosition = goalPosition;
+   }
+
+   public void setGoalTorque(double goalTorque)
+   {
+      this.goalTorque = goalTorque;
    }
 
    public boolean getExecuteWithNextAction()
