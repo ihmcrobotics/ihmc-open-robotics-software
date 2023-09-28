@@ -7,6 +7,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -85,10 +86,10 @@ public class IKRootCalculator
          boolean isPelvisCurrentAndConcurrent = pelvisPoseStatusMessage.getCurrentAndConcurrent();
          FramePose3D pelvisFramePoseVariation = new FramePose3D(referenceFrameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame().getString(0)),
                                                                 MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent()));
+//         LogTools.info(pelvisFramePoseVariation.getReferenceFrame());
          if (concurrentChestFrame != null)
          {
             latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(concurrentChestFrame.getReferenceFrame().getParent());
-            // ikchest only ref changes over time. need to copy chestframe
             latestCombinedPelvisAndChestFrame.update(transformToParent -> copyTransform(concurrentChestFrame.getTransformToParent(), transformToParent));
          }
          else
@@ -130,7 +131,10 @@ public class IKRootCalculator
    private void updateIKChestTransform(ModifiableReferenceFrame IKChestFrame, FramePose3D pelvisFramePoseVariation, RigidBodyTransform IKChestTransform)
    {
       if (pelvisFramePoseVariation.getReferenceFrame() != IKChestFrame.getReferenceFrame().getParent())
+      {
+//         LogTools.info(IKChestFrame.getReferenceFrame());
          pelvisFramePoseVariation.changeFrame(IKChestFrame.getReferenceFrame().getParent());
+      }
       IKChestTransform.set(IKChestFrame.getReferenceFrame().getTransformToRoot());
 //      pelvisFramePoseVariation.transform(IKChestTransform);
       IKChestTransform.getTranslation().setZ(IKChestTransform.getTranslationZ() + pelvisFramePoseVariation.getTranslationZ());
