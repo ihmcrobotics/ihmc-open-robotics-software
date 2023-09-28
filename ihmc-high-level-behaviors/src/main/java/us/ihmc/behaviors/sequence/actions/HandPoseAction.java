@@ -73,7 +73,7 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copySourceToWork();
          rootCalculator.getKinematicsInfo();
-         rootCalculator.computeRoot("REAL", getSide(), actionIndex);
+         rootCalculator.computeRoot();
          ReferenceFrame chestFrame = rootCalculator.getRoot();
          armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
          armIKSolver.solve();
