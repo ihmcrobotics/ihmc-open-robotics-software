@@ -138,7 +138,7 @@ public class NaturalPostureController
       npQPweightMatrix.set(2, 2, npParameters.getQPWeights().getZ());
 
       // Get current NP:   GMN - we're assuming NP compute() is getting called somewhere else?
-      yoCurrentNaturalPosture.set(robotNaturalPosture.getNaturalPostureQuaternion());
+      yoCurrentNaturalPosture.set(robotNaturalPosture.getCenterOfMassOrientation());
       yoDesiredNaturalPosture.setYawPitchRoll(comAngleDesired.getYaw(), comAngleDesired.getPitch(), comAngleDesired.getRoll());
 
       // Update the measured natural posture frame
@@ -216,7 +216,7 @@ public class NaturalPostureController
       // Populate the QPObjectiveCommand:
       naturalPostureControlCommand.setDoNullSpaceProjection(doNullSpaceProjectionForNaturalPosture.getBooleanValue());
       naturalPostureControlCommand.getObjective().set(npQPobjective);
-      naturalPostureControlCommand.getJacobian().set(robotNaturalPosture.getNaturalPostureJacobian());
+      naturalPostureControlCommand.getJacobian().set(robotNaturalPosture.getCenterOfMassOrientationJacobian());
       naturalPostureControlCommand.getSelectionMatrix().set(npQPselectionMatrix);
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
 
