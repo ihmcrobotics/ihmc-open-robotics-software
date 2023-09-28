@@ -69,7 +69,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    private final FullHumanoidRobotModel syncedFullRobotModel;
    private final ROS2PublishSubscribeAPI ros2;
    private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
-   private final Throttler throttler = new Throttler().setFrequency(20.0);
+   private final Throttler throttler = new Throttler().setFrequency(10.0);
+   private boolean wasConcurrent = false;
 
    public RDXPelvisHeightPitchAction(RDX3DPanel panel3D,
                                      DRCRobotModel robotModel,
@@ -158,19 +159,24 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       getActionDescription().getTransformToParent().transform(transformVariation);
       MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
 
-      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      if (concurrentActionIsNextForExecution)
-         pelvisPoseStatus.setCurrentAndConcurrent(true);
-      else
-         pelvisPoseStatus.setCurrentAndConcurrent(false);
 
-      if (throttler.run())
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
+      if (concurrentActionIsNextForExecution)
       {
-         if (pelvisPoseStatus.getActionIndex() >= 0)
+         wasConcurrent = true;
+         pelvisPoseStatus.setCurrentAndConcurrent(true);
+         if (throttler.run())
          {
-            // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
-            ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+            if (pelvisPoseStatus.getActionIndex() >= 0)
+               ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
          }
+      }
+      else if (wasConcurrent)
+      {
+         pelvisPoseStatus.setCurrentAndConcurrent(false);
+         ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+         wasConcurrent = false;
       }
    }
 
