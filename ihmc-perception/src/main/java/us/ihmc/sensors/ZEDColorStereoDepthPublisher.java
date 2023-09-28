@@ -21,6 +21,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
@@ -29,9 +31,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Throttler;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -81,12 +86,27 @@ public class ZEDColorStereoDepthPublisher
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
+   private final Boolean logging = true;
+   private final String colorChannelName = PerceptionLoggerConstants.ZED2_COLOR_NAME;
+   private final String depthChannelName = PerceptionLoggerConstants.ZED2_DEPTH_NAME;
+   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
+
    public ZEDColorStereoDepthPublisher(int cameraID,
                                        SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
                                        ROS2Topic<ImageMessage> depthTopic,
                                        Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.cameraID = cameraID;
+
+      if(self.logging){
+         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+         String logFileName = dateFormat.format(new Date()) + "_" + "ZEDPerceptionLog.hdf5";
+         perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+         perceptionDataLogger.addImageChannel(this.depthChannelName);
+         perceptionDataLogger.setChannelEnabled(this.depthChannelName, true);
+         perceptionDataLogger.addImageChannel(this.colorChannelName);
+         perceptionDataLogger.setChannelEnabled(this.colorChannelName, true);
+      }
 
       LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
@@ -244,6 +264,11 @@ public class ZEDColorStereoDepthPublisher
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
          colorImageSequenceNumber.set(side, colorImageSequenceNumber.get(side) + 1L);
 
+         if(self.logging)
+         {
+            perceptionDataLogger.storeBytesFromPointer(colorChannelName, colorJPEGPointer);
+         }
+
          // Close stuff
          colorJPEGPointer.close();
          colorImageBGR.close();
@@ -288,6 +313,11 @@ public class ZEDColorStereoDepthPublisher
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       ros2DepthImagePublisher.publish(depthImageMessage);
+
+      if(self.logging)
+      {
+         perceptionDataLogger.storeBytesFromPointer(depthChannelName, depthPNGPointer);
+      }
 
       // Close stuff
       depthPNGPointer.close();
