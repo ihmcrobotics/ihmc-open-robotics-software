@@ -6,11 +6,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
@@ -251,16 +251,16 @@ public class RDXAffordanceTemplateEditorUI
       {
          RobotSide activeSide = status.getActiveSide();
          ImGui.text("Hand configuration: ");
-         if (ImGui.button(labels.get(HandConfiguration.OPEN.name())))
+         if (ImGui.button(labels.get(SakeHandCommandOption.FULLY_OPEN.name())))
             interactableHands.get(activeSide).openGripper();
          ImGui.sameLine();
-         if (ImGui.button(labels.get(HandConfiguration.HALF_CLOSE.name())))
+         if (ImGui.button(labels.get(SakeHandCommandOption.OPEN.name())))
             interactableHands.get(activeSide).setGripperToHalfClose();
          ImGui.sameLine();
-         if (ImGui.button(labels.get(HandConfiguration.CLOSE.name())))
+         if (ImGui.button(labels.get(SakeHandCommandOption.CLOSE.name())))
             interactableHands.get(activeSide).closeGripper();
          ImGui.sameLine();
-         if (ImGui.button(labels.get(HandConfiguration.CRUSH.name())))
+         if (ImGui.button(labels.get(SakeHandCommandOption.GRIP_HARD.name())))
             interactableHands.get(activeSide).crushGripper();
          if (ImGui.sliderFloat("Set Closure",
                                gripperClosure,

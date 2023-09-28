@@ -14,7 +14,7 @@ public class BehaviorActionSequenceTools
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
       actionSequenceUpdateMessage.getChestOrientationActions().clear();
       actionSequenceUpdateMessage.getFootstepPlanActions().clear();
-      actionSequenceUpdateMessage.getHandConfigurationActions().clear();
+      actionSequenceUpdateMessage.getSakeHandCommandActions().clear();
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
       actionSequenceUpdateMessage.getPelvisHeightActions().clear();
@@ -42,11 +42,11 @@ public class BehaviorActionSequenceTools
             footstepPlanActionDescriptionMessage.getActionInformation().setActionIndex(i);
             footstepPlanActionDescription.toMessage(footstepPlanActionDescriptionMessage);
          }
-         else if (action instanceof HandConfigurationActionDescription handConfigurationActionDescription)
+         else if (action instanceof SakeHandCommandActionDescription sakeHandCommandActionDescription)
          {
-            HandConfigurationActionDescriptionMessage handConfigurationActionDescriptionMessage = actionSequenceUpdateMessage.getHandConfigurationActions().add();
-            handConfigurationActionDescriptionMessage.getActionInformation().setActionIndex(i);
-            handConfigurationActionDescription.toMessage(handConfigurationActionDescriptionMessage);
+            SakeHandCommandActionDescriptionMessage sakehandCommandMessage = actionSequenceUpdateMessage.getSakeHandCommandActions().add();
+            sakehandCommandMessage.getActionInformation().setActionIndex(i);
+            sakeHandCommandActionDescription.toMessage(sakehandCommandMessage);
          }
          else if (action instanceof HandPoseActionDescription handPoseActionDescription)
          {

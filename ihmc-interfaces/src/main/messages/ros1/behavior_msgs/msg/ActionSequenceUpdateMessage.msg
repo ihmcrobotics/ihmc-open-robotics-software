@@ -8,7 +8,7 @@ behavior_msgs/BodyPartPoseActionDescriptionMessage[] chest_orientation_actions
 
 behavior_msgs/FootstepPlanActionDescriptionMessage[] footstep_plan_actions
 
-behavior_msgs/HandConfigurationActionDescriptionMessage[] hand_configuration_actions
+behavior_msgs/SakeHandCommandActionDescriptionMessage[] sake_hand_command_actions
 
 behavior_msgs/SidedBodyPartPoseActionDescriptionMessage[] hand_pose_actions
 

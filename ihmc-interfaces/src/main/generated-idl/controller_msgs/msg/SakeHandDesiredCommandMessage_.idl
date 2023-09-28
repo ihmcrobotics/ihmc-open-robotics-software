@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__HandSakeDesiredCommandMessage__idl__
-#define __controller_msgs__msg__HandSakeDesiredCommandMessage__idl__
+#ifndef __controller_msgs__msg__SakeHandDesiredCommandMessage__idl__
+#define __controller_msgs__msg__SakeHandDesiredCommandMessage__idl__
 
 module controller_msgs
 {
@@ -42,8 +42,8 @@ module controller_msgs
        * Message for commanding the Sake hands to perform various predefined grasps.
        * Also allows for custom grasps with set positions/torques
        */
-      @TypeCode(type="controller_msgs::msg::dds_::HandSakeDesiredCommandMessage_")
-      struct HandSakeDesiredCommandMessage
+      @TypeCode(type="controller_msgs::msg::dds_::SakeHandDesiredCommandMessage_")
+      struct SakeHandDesiredCommandMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.

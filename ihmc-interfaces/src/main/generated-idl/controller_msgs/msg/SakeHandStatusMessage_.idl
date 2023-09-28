@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__HandSakeStatusMessage__idl__
-#define __controller_msgs__msg__HandSakeStatusMessage__idl__
+#ifndef __controller_msgs__msg__SakeHandStatusMessage__idl__
+#define __controller_msgs__msg__SakeHandStatusMessage__idl__
 
 module controller_msgs
 {
@@ -17,8 +17,8 @@ module controller_msgs
       /**
        * Message used to report the current joint angles for the fingers of the sake gripper.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::HandSakeStatusMessage_")
-      struct HandSakeStatusMessage
+      @TypeCode(type="controller_msgs::msg::dds_::SakeHandStatusMessage_")
+      struct SakeHandStatusMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
