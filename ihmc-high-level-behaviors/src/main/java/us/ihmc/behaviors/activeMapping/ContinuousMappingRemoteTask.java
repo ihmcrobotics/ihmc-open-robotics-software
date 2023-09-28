@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousMappingRemoteTask
 {
-   private final static long PLANNING_PERIOD_MS = 3000;
+   private final static long PLANNING_PERIOD_MS = 2000;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                    getClass(),
@@ -92,7 +92,7 @@ public class ContinuousMappingRemoteTask
          activeMappingModule.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
          if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
          {
-            activeMappingModule.updatePlan(latestHeightMapData, new Point2D(), 0.1f);
+            activeMappingModule.updatePlan(latestHeightMapData);
          }
       }
 
@@ -106,37 +106,34 @@ public class ContinuousMappingRemoteTask
 
    public void onHeightMapReceived(ImageMessage imageMessage)
    {
-      //executorService.submit(() ->
-      //  {
-           if (heightMapImage == null)
-           {
-              heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
-              compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-              incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
-              incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-              LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
-           }
+        if (heightMapImage == null)
+        {
+           heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
+           compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+           incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
+           incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+           LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
+        }
 
-           PerceptionMessageTools.convertToHeightMapImage(imageMessage,
-                                                          heightMapImage,
-                                                          incomingCompressedImageBuffer,
-                                                          incomingCompressedImageBytePointer,
-                                                          compressedBytesMat);
-           zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
+        PerceptionMessageTools.convertToHeightMapImage(imageMessage,
+                                                       heightMapImage,
+                                                       incomingCompressedImageBuffer,
+                                                       incomingCompressedImageBytePointer,
+                                                       compressedBytesMat);
+        zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
-           if (latestHeightMapData == null)
-           {
-              latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+        if (latestHeightMapData == null)
+        {
+           latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                   RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                   imageMessage.getPosition().getX(),
+                                                   imageMessage.getPosition().getY());
+        }
+        PerceptionMessageTools.convertToHeightMapData(heightMapImage.ptr(0),
+                                                      latestHeightMapData,
+                                                      imageMessage.getPosition(),
                                                       RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                      imageMessage.getPosition().getX(),
-                                                      imageMessage.getPosition().getY());
-           }
-           PerceptionMessageTools.convertToHeightMapData(heightMapImage.ptr(0),
-                                                         latestHeightMapData,
-                                                         imageMessage.getPosition(),
-                                                         RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                         RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
-        //});
+                                                      RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
    }
 
    public ActiveMapper getActiveMappingModule()

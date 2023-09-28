@@ -161,14 +161,14 @@ public class ActiveMapper
       }
    }
 
-   public void updatePlan(HeightMapData heightMapData, Point2D goalPosition, float yawRobotToGoal)
+   public void updatePlan(HeightMapData heightMapData)
    {
       leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
       rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
       leftGoalPose.setToZero();
       rightGoalPose.setToZero();
 
-      ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.8f);
+      ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 1.0f);
       FootstepPlannerRequest request = createFootstepPlanRequest();
       request.setHeightMapData(heightMapData);
 
@@ -189,7 +189,7 @@ public class ActiveMapper
    public FootstepPlannerRequest createFootstepPlanRequest()
    {
       request = new FootstepPlannerRequest();
-      request.setTimeout(2.0);
+      request.setTimeout(1.2);
       request.setStartFootPoses(leftSolePose, rightSolePose);
       request.setPlanBodyPath(false);
       request.setGoalFootPoses(leftGoalPose, rightGoalPose);
