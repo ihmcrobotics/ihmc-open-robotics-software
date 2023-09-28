@@ -231,7 +231,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       // IK solution visualization via ghost arms
       displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
-                          (concurrencyWithPreviousAction && indexShiftConcurrentAction > 0 && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
+                          (concurrencyWithPreviousAction && indexShiftConcurrentAction > 0 &&
+                           getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
       if (displayIKSolution)
          visualizeIK();
    }
