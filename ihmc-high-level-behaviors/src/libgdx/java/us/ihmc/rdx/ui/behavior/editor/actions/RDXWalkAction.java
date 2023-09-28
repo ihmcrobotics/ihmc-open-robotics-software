@@ -112,7 +112,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean executeWithPreviousAction)
    {
       actionDescription.update(referenceFrameLibrary);
 

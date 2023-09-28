@@ -269,21 +269,25 @@ public class RDXBehaviorActionSequenceEditor
 
    public void update()
    {
-      for (int i = 0; i < actionSequence.size(); i++)
+      for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
-         RDXBehaviorAction action = actionSequence.get(i);
-         action.setActionIndex(i);
+         RDXBehaviorAction action = actionSequence.get(actionIndex);
+         action.setActionIndex(actionIndex);
          action.setActionNextExecutionIndex(executionNextIndexStatus);
-         boolean concurrencyWithPreviousAction = false;
-         if (i > 0)
-            concurrencyWithPreviousAction = actionSequence.get(i - 1).getActionDescription().getExecuteWithNextAction();
-         action.update(concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndexStatus));
+         boolean executeWithPreviousAction = false;
+         if (actionIndex > 0)
+            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getActionDescription().getExecuteWithNextAction();
+
+         boolean firstConcurrentActionIsNextForExecution = (actionSequence.get(actionIndex).getExecuteWithNextAction() && actionIndex == executionNextIndexStatus);
+         boolean otherConcurrentActionIsNextForExecution = executeWithPreviousAction && actionIndex == (executionNextIndexStatus + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndexStatus, true));
+         boolean concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
+         action.update(concurrentActionIsNextForExecution);
       }
    }
 
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, int executionNextIndex, boolean executeWithPreviousAction)
    {
-      if (concurrencyWithPreviousAction)
+      if (executeWithPreviousAction)
       {
          boolean isNotRootOfConcurrency = true;
          for (int j = 1; j <= actionIndex; j++)

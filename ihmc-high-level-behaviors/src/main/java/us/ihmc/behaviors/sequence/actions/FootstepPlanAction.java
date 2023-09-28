@@ -60,7 +60,7 @@ public class FootstepPlanAction extends FootstepPlanActionDescription implements
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update(referenceFrameLibrary);
 
