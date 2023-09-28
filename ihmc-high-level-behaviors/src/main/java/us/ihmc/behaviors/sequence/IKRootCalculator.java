@@ -60,7 +60,7 @@ public class IKRootCalculator
    /**
     * Computes and sets the root reference frame based on chest and pelvis pose status messages.
     */
-   public void computeRoot(String ui, RobotSide side, int index)
+   public void computeRoot()
    {
       if (chestPoseStatusMessage != null)
       {
@@ -68,56 +68,38 @@ public class IKRootCalculator
          latestChestFrame = new ModifiableReferenceFrame(referenceFrameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
          latestChestFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
          if (isChestCurrentAndConcurrent)
-         {
             concurrentChestFrame = latestChestFrame;
-         }
          else
-         {
             concurrentChestFrame = null;
-         }
       }
 
-//      if (pelvisPoseStatusMessage != null)
-//      {
-//         int pelvisIndex = (int) pelvisPoseStatusMessage.getActionIndex();
-//         boolean isPelvisCurrentAndConcurrent = pelvisPoseStatusMessage.getCurrentAndConcurrent();
-//         FramePose3D pelvisFramePoseVariation = new FramePose3D(referenceFrameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame().getString(0)),
-//                                                                MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent()));
-//         if (concurrentChestFrame != null)
-//         {
-//            latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(concurrentChestFrame.getReferenceFrame().getParent());
-//            latestCombinedPelvisAndChestFrame.update(transformToParent -> copyTransform(concurrentChestFrame.getTransformToParent(), transformToParent));
-//         }
-//         else
-//            latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(syncedRobot.getChest()
-//                                                                                        .getParentJoint()
-//                                                                                        .getFrameAfterJoint());
-//         latestCombinedPelvisAndChestFrame.update(transformToParent -> updateIKChestTransform(latestCombinedPelvisAndChestFrame,
-//                                                                                              pelvisFramePoseVariation,
-//                                                                                              transformToParent));
-//         if (isPelvisCurrentAndConcurrent)
-//         {
-//            concurrentCombinedPelvisAndChestFrame = latestCombinedPelvisAndChestFrame.getReferenceFrame();
-//            previousConcurrentPelvisIndex = pelvisIndex;
-//         }
-//         else if (pelvisIndex == previousConcurrentPelvisIndex)
-//         {
-//            concurrentCombinedPelvisAndChestFrame = null;
-//               if (ui.equals("RDX"))
-//                  LogTools.info("RDX {} {} - nullCHEST {}", side, index, chestIndex);
-//               else
-//                  LogTools.info("REAL {} {} - nullCHEST {}", side, index, chestIndex);
-//         }
-//      }
+      if (pelvisPoseStatusMessage != null)
+      {
+         boolean isPelvisCurrentAndConcurrent = pelvisPoseStatusMessage.getCurrentAndConcurrent();
+         FramePose3D pelvisFramePoseVariation = new FramePose3D(referenceFrameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame().getString(0)),
+                                                                MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent()));
+         if (concurrentChestFrame != null)
+         {
+            latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(concurrentChestFrame.getReferenceFrame().getParent());
+            latestCombinedPelvisAndChestFrame.update(transformToParent -> copyTransform(concurrentChestFrame.getTransformToParent(), transformToParent));
+         }
+         else
+            latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(syncedRobot.getChest()
+                                                                                        .getParentJoint()
+                                                                                        .getFrameAfterJoint());
+         latestCombinedPelvisAndChestFrame.update(transformToParent -> updateIKChestTransform(latestCombinedPelvisAndChestFrame,
+                                                                                              pelvisFramePoseVariation,
+                                                                                              transformToParent));
+         if (isPelvisCurrentAndConcurrent)
+            concurrentCombinedPelvisAndChestFrame = latestCombinedPelvisAndChestFrame.getReferenceFrame();
+         else
+            concurrentCombinedPelvisAndChestFrame = null;
+      }
 
-//      if (concurrentCombinedPelvisAndChestFrame == null)
-//      {
+      if (concurrentCombinedPelvisAndChestFrame == null)
          rootReferenceFrame = concurrentChestFrame == null ? syncedRobot.getChest().getParentJoint().getFrameAfterJoint() : concurrentChestFrame.getReferenceFrame();
-//      }
-//      else
-//      {
-//         rootReferenceFrame = concurrentCombinedPelvisAndChestFrame;
-//      }
+      else
+         rootReferenceFrame = concurrentCombinedPelvisAndChestFrame;
    }
 
    public ReferenceFrame getRoot()
