@@ -112,6 +112,7 @@ public class RDXBehaviorActionSequenceEditor
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private long lastManualExecutionConfirmTime = 0;
+   private int lastManualExecutionActionIndex = -1;
 
    public void clear()
    {
@@ -174,6 +175,7 @@ public class RDXBehaviorActionSequenceEditor
          action.destroy();
       actionSequence.clear();
       executionNextIndexStatus = 0;
+      lastManualExecutionActionIndex = -1;
       LogTools.info("Loading from {}", workspaceFile.getFilesystemFile());
       MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
       JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode ->
@@ -439,7 +441,8 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.endDisabled();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
-         if (!automaticExecution.get())
+         if (!automaticExecution.get()
+             && (lastManualExecutionActionIndex != executionNextIndexStatus)) // Prevent spamming the Manual button and sending the current action more than once
          {
             ImGui.sameLine();
 
@@ -449,6 +452,7 @@ public class RDXBehaviorActionSequenceEditor
                if (ImGui.button(labels.get("Manually")))
                {
                   ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+                  lastManualExecutionActionIndex = executionNextIndexStatus;
                }
             }
             else
@@ -459,6 +463,7 @@ public class RDXBehaviorActionSequenceEditor
                   if (ImGui.button(labels.get("Manually (confirm)")))
                   {
                      ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+                     lastManualExecutionActionIndex = executionNextIndexStatus;
                      lastManualExecutionConfirmTime = 0;
                   }
                   ImGui.popStyleColor();
