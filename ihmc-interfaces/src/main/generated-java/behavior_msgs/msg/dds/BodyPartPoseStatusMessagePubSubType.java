@@ -15,7 +15,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "626db517eac0a1dcd0ed7519aad68fbc2701f987befa3f2b465a948e3f1f6c17";
+   		return "eca11de31701994a440d69b8f6425ba1ac0c298ad29f4950439cc3428759f0ac";
    }
    
    @Override
@@ -52,8 +52,6 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
@@ -75,9 +73,6 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -94,8 +89,6 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(behavior_msgs.msg.dds.BodyPartPoseStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getActionIndex());
-
       cdr.write_type_7(data.getCurrentAndConcurrent());
 
       if(data.getParentFrame().size() <= 1000)
@@ -107,8 +100,6 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(behavior_msgs.msg.dds.BodyPartPoseStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setActionIndex(cdr.read_type_4());
-      	
       data.setCurrentAndConcurrent(cdr.read_type_7());
       	
       cdr.read_type_e(data.getParentFrame());	
@@ -119,7 +110,6 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(behavior_msgs.msg.dds.BodyPartPoseStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("action_index", data.getActionIndex());
       ser.write_type_7("current_and_concurrent", data.getCurrentAndConcurrent());
       ser.write_type_e("parent_frame", data.getParentFrame());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
@@ -129,7 +119,6 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BodyPartPoseStatusMessage data)
    {
-      data.setActionIndex(ser.read_type_4("action_index"));
       data.setCurrentAndConcurrent(ser.read_type_7("current_and_concurrent"));
       ser.read_type_e("parent_frame", data.getParentFrame());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
