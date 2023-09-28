@@ -179,6 +179,9 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    {
       LogTools.info("Destroying RDX chest pose status publisher for action {}", getActionIndex());
       running = false;
+      chestPoseStatus.setActionIndex(getActionIndex());
+      chestPoseStatus.setCurrentAndConcurrent(false);
+      ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
    }
 
    @Override
