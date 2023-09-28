@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import us.ihmc.tools.string.StringTools;
 
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
@@ -59,7 +60,8 @@ public interface BehaviorAction extends BehaviorActionDescription
       {
          if (!frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame())
          {
-            tooltip.append("parent frame does not exist in the scene");
+            tooltip.append(StringTools.format("Parent frame [{}] does not exist in the scene",
+                                              frameBasedBehaviorActionDescription.getConditionalReferenceFrame().getConditionallyValidParentFrameName()).get());
          }
       }
 
