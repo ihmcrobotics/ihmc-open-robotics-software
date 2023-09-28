@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
@@ -444,18 +445,22 @@ public class RDXBehaviorActionSequenceEditor
             {
                if (System.currentTimeMillis() - lastManualExecutionConfirmTime < 5000)
                {
+                  ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
                   if (ImGui.button(labels.get("Manually (confirm)")))
                   {
                      ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
                      lastManualExecutionConfirmTime = 0;
                   }
+                  ImGui.popStyleColor();
                }
                else
                {
+                  ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
                   if (ImGui.button(labels.get("Manually")))
                   {
                      lastManualExecutionConfirmTime = System.currentTimeMillis();
                   }
+                  ImGui.popStyleColor();
                }
             }
 
