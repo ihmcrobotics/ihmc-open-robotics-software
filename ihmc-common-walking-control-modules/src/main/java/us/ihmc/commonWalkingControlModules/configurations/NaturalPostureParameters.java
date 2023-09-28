@@ -18,8 +18,8 @@ public abstract class NaturalPostureParameters
    private final FrameYawPitchRoll angularComKdGains = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 5.0, 5.0, 5.0);
    private final FrameYawPitchRoll pelvisPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.02, 0.0);
    private final FrameYawPitchRoll pelvisPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1000.0, 3000.0, 1500.0);
-   private final FrameYawPitchRoll pelvisPrivilegedOrientationKdFactor = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.15, 0.15, 0.15);
-   private final Vector3D pelvisQPWeights = new Vector3D(1, 1, 1);
+   private final FrameYawPitchRoll pelvisPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 150.0, 150.0, 150.0);
+   private final FrameYawPitchRoll pelvisQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
 
    public FrameYawPitchRoll getComAngleDesired()
    {
@@ -46,24 +46,9 @@ public abstract class NaturalPostureParameters
       return angularComKdGains;
    }
 
-   public FrameYawPitchRoll getPelvisPrivilegedOrientation()
+   public MultiDOFJointPrivilegedParameters getPelvisPrivilegedParameters()
    {
-      return pelvisPrivilegedOrientation;
-   }
-
-   public FrameYawPitchRoll getPelvisPrivilegedOrientationKp()
-   {
-      return pelvisPrivilegedOrientationKp;
-   }
-
-   public FrameYawPitchRoll getPelvisPrivilegedOrientationKdFactor()
-   {
-      return pelvisPrivilegedOrientationKdFactor;
-   }
-
-   public Vector3D getPelvisQPWeights()
-   {
-      return pelvisQPWeights;
+      return new MultiDOFJointPrivilegedParameters(pelvisPrivilegedOrientation, pelvisPrivilegedOrientationKp, pelvisPrivilegedOrientationKd, pelvisQPWeights);
    }
    /* End NaturalPostureControllerParameters */
 
@@ -72,29 +57,28 @@ public abstract class NaturalPostureParameters
 
    private final FrameYawPitchRoll spinePrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
    private final FrameYawPitchRoll spinePrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 300.0, 50.0, 50.0);
-   private final FrameYawPitchRoll spinePrivilegedOrientationKdFactor = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.15, 0.15, 0.15);
+   private final FrameYawPitchRoll spinePrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 45.0, 45.0, 45.0);
    private final FrameYawPitchRoll spinePrivilegedOrientationQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 0.0, 0.0);
 
    private final FrameYawPitchRoll shoulderPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.1, 0.0);
    private final FrameYawPitchRoll shoulderPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 80.0, 80.0, 80.0);
-   private final FrameYawPitchRoll shoulderPrivilegedOrientationKdFactor = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.15, 0.15, 0.15);
+   private final FrameYawPitchRoll shoulderPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 12.0, 12.0, 12.0);
    private final FrameYawPitchRoll shoulderPrivilegedOrientationQPWeight = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
 
    private final double elbowPrivilegedOrientation = -0.2;
    private final double elbowPrivilegedOrientationKp = 30.0;
-   private final double elbowPrivilegedOrientationKdFactor = 0.15;
+   private final double elbowPrivilegedOrientationKd = 4.5;
    private final double elbowPrivilegedQPWeight = 1.0;
 
    private final double wristPrivilegedOrientation = 0.0;
    private final double wristPrivilegedOrientationKp = 40.0;
-   private final double wristPrivilegedOrientationKdFactor = 6.0/40.0;
+   private final double wristPrivilegedOrientationKd = 6.0;
    private final double wristPrivilegedQPWeight = 1.0;
 
    private final double anklePrivilegedOrientation = 0.0;
    private final double anklePrivilegedOrientationKp = 4.0;
-   private final double anklePrivilegedOrientationKdFactor = 0.6/4.0;
+   private final double anklePrivilegedOrientationKd = 0.6;
    private final double anklePrivilegedQPWeight = 1.0;
-
 
    public boolean getUseSpinePrivilegedCommand()
    {
@@ -110,7 +94,7 @@ public abstract class NaturalPostureParameters
    {
       return new MultiDOFJointPrivilegedParameters(spinePrivilegedOrientation,
                                                    spinePrivilegedOrientationKp,
-                                                   spinePrivilegedOrientationKdFactor,
+                                                   spinePrivilegedOrientationKd,
                                                    spinePrivilegedOrientationQPWeights);
    }
 
@@ -118,7 +102,7 @@ public abstract class NaturalPostureParameters
    {
       return new MultiDOFJointPrivilegedParameters(shoulderPrivilegedOrientation,
                                                    shoulderPrivilegedOrientationKp,
-                                                   shoulderPrivilegedOrientationKdFactor,
+                                                   shoulderPrivilegedOrientationKd,
                                                    shoulderPrivilegedOrientationQPWeight);
    }
 
@@ -126,7 +110,7 @@ public abstract class NaturalPostureParameters
    {
       return new SingleDOFJointPrivilegedParameters(elbowPrivilegedOrientation,
                                                     elbowPrivilegedOrientationKp,
-                                                    elbowPrivilegedOrientationKdFactor,
+                                                    elbowPrivilegedOrientationKd,
                                                     elbowPrivilegedQPWeight);
    }
 
@@ -134,7 +118,7 @@ public abstract class NaturalPostureParameters
    {
       return new SingleDOFJointPrivilegedParameters(wristPrivilegedOrientation,
                                                     wristPrivilegedOrientationKp,
-                                                    wristPrivilegedOrientationKdFactor,
+                                                    wristPrivilegedOrientationKd,
                                                     wristPrivilegedQPWeight);
    }
 
@@ -142,7 +126,7 @@ public abstract class NaturalPostureParameters
    {
       return new SingleDOFJointPrivilegedParameters(anklePrivilegedOrientation,
                                                     anklePrivilegedOrientationKp,
-                                                    anklePrivilegedOrientationKdFactor,
+                                                    anklePrivilegedOrientationKd,
                                                     anklePrivilegedQPWeight);
    }
 
@@ -156,18 +140,21 @@ public abstract class NaturalPostureParameters
       return 0.7;
    }
 
-   public class MultiDOFJointPrivilegedParameters
+   public static class MultiDOFJointPrivilegedParameters
    {
       private final FrameYawPitchRoll privilegedOrientation;
       private final FrameYawPitchRoll kpGains;
-      private final FrameYawPitchRoll kdGainFactors;
+      private final FrameYawPitchRoll kdGains;
       private final FrameYawPitchRoll qpWeights;
 
-      public MultiDOFJointPrivilegedParameters(FrameYawPitchRoll privilegedOrientation, FrameYawPitchRoll kpGains, FrameYawPitchRoll kdGainFactors, FrameYawPitchRoll qpWeights)
+      public MultiDOFJointPrivilegedParameters(FrameYawPitchRoll privilegedOrientation,
+                                               FrameYawPitchRoll kpGains,
+                                               FrameYawPitchRoll kdGains,
+                                               FrameYawPitchRoll qpWeights)
       {
          this.privilegedOrientation = privilegedOrientation;
          this.kpGains = kpGains;
-         this.kdGainFactors = kdGainFactors;
+         this.kdGains = kdGains;
          this.qpWeights = qpWeights;
       }
 
@@ -181,9 +168,9 @@ public abstract class NaturalPostureParameters
          return kpGains;
       }
 
-      public FrameYawPitchRoll getKdGainFactor()
+      public FrameYawPitchRoll getKdGain()
       {
-         return kdGainFactors;
+         return kdGains;
       }
 
       public FrameYawPitchRoll getQPWeight()
@@ -192,18 +179,18 @@ public abstract class NaturalPostureParameters
       }
    }
 
-   public class SingleDOFJointPrivilegedParameters
+   public static class SingleDOFJointPrivilegedParameters
    {
       private final double privilegedOrientation;
       private final double kpGain;
-      private final double kdGainFactor;
+      private final double kdGain;
       private final double qpWeight;
 
-      public SingleDOFJointPrivilegedParameters(double privilegedOrientation, double kpGain, double kdGainFactor, double qpWeight)
+      public SingleDOFJointPrivilegedParameters(double privilegedOrientation, double kpGain, double kdGain, double qpWeight)
       {
          this.privilegedOrientation = privilegedOrientation;
          this.kpGain = kpGain;
-         this.kdGainFactor = kdGainFactor;
+         this.kdGain = kdGain;
          this.qpWeight = qpWeight;
       }
 
@@ -217,9 +204,9 @@ public abstract class NaturalPostureParameters
          return kpGain;
       }
 
-      public double getKdGainFactor()
+      public double getKdGain()
       {
-         return kdGainFactor;
+         return kdGain;
       }
 
       public double getQPWeight()
