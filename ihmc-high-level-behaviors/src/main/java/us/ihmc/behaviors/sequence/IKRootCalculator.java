@@ -59,7 +59,7 @@ public class IKRootCalculator
    }
 
    /**
-    * Computes and sets the root reference frame for based on chest and pelvis pose status messages.
+    * Computes and sets the root reference frame based on chest and pelvis pose status messages.
     */
    public void computeRoot()
    {

@@ -214,12 +214,16 @@ public class BehaviorActionSequence
          currentlyExecutingActions.clear();
       }
 
-      for (int i = 0; i < actionSequence.size(); i++)
+      for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
-         boolean concurrencyWithPreviousAction = false;
-         if (i > 0)
-            concurrencyWithPreviousAction = actionSequence.get(i - 1).getExecuteWithNextAction();
-         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndex));
+         boolean executeWithPreviousAction = false;
+         if (actionIndex > 0)
+            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getExecuteWithNextAction();
+
+         boolean firstConcurrentActionIsNextForExecution = actionSequence.get(actionIndex).getExecuteWithNextAction() && actionIndex == executionNextIndex;
+         boolean otherConcurrentActionIsNextForExecution = executeWithPreviousAction && actionIndex == (executionNextIndex + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndex,true));
+         boolean concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
+         actionSequence.get(actionIndex).update(actionIndex, executionNextIndex, concurrentActionIsNextForExecution);
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -278,14 +282,13 @@ public class BehaviorActionSequence
 
    /**
     * @param actionIndex Index of the current action
-    * @param concurrencyWithPreviousAction Whether this action has to be executed at the same time of the previous one
     * @param executionNextIndex Index of the next action to be executed
+    * @param executeWithPreviousAction Whether this action has to be executed at the same time of the previous one
     * @return Index shift in the actionSequence array from the current action to the first action of the same group of concurrent actions
-    * Note. the first action of the same group cannot be an action that happens before the executionNextIndex
     */
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, int executionNextIndex, boolean executeWithPreviousAction)
    {
-      if (concurrencyWithPreviousAction)
+      if (executeWithPreviousAction)
       {
          boolean isNotRootOfConcurrency = true;
          for (int j = 1; j <= actionIndex; j++)
@@ -307,12 +310,11 @@ public class BehaviorActionSequence
 
    private void executeNextAction()
    {
-      boolean concurrencyWithPreviousAction = false;
+      boolean executeWithPreviousAction = false;
       if (lastCurrentlyExecutingAction != null)
-         concurrencyWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
+         executeWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
-      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrencyWithPreviousAction,
-                                          getIndexShiftFromConcurrentActionRoot(executionNextIndex, concurrencyWithPreviousAction, executionNextIndex));
+      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, executeWithPreviousAction);
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);

@@ -128,7 +128,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
       actionDescription.update(referenceFrameLibrary);
 
@@ -156,8 +156,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       chestPoseStatus.getParentFrame().add(getActionDescription().get().getParent().getName());
       MessageTools.toMessage(getActionDescription().getTransformToParent(), chestPoseStatus.getTransformToParent());
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) || (
-            executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
+      if (concurrentActionIsNextForExecution)
          chestPoseStatus.setCurrentAndConcurrent(true);
       else
          chestPoseStatus.setCurrentAndConcurrent(false);
@@ -176,6 +175,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       }
    }
 
+   @Override
    public void destroy()
    {
       LogTools.info("Destroying RDX chest pose status publisher for action {}", getActionIndex());

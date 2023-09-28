@@ -72,7 +72,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
-   private final RigidBodyBasics syncedChest;
    private final Color goodQualityColor;
    private final Color badQualityColor;
    private boolean isMouseHovering = false;
@@ -177,7 +176,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
       rootCalculator = new IKRootCalculator(ros2, syncedFullRobotModel, referenceFrameLibrary);
-      syncedChest = syncedFullRobotModel.getChest();
    }
 
    @Override
@@ -206,7 +204,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
       actionDescription.update(referenceFrameLibrary);
 
@@ -230,9 +228,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       }
 
       // IK solution visualization via ghost arms
-      displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) ||
-                          (concurrencyWithPreviousAction && indexShiftConcurrentAction > 0 &&
-                           getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction));
+      displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) || concurrentActionIsNextForExecution;
       if (displayIKSolution)
          visualizeIK();
    }
@@ -377,5 +373,11 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    public HandPoseActionDescription getActionDescription()
    {
       return actionDescription;
+   }
+
+   @Override
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWithNextActionWrapper.get();
    }
 }

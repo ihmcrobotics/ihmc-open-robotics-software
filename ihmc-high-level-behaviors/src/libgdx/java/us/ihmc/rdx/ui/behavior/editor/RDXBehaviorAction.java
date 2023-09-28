@@ -37,15 +37,20 @@ public abstract class RDXBehaviorAction
 
    public void update()
    {
-      update(false, -1);
+      update(false);
    }
 
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
 
    }
 
    public void updateAfterLoading()
+   {
+
+   }
+
+   public void destroy()
    {
 
    }
@@ -84,11 +89,6 @@ public abstract class RDXBehaviorAction
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-
-   }
-
-   public void destroy()
    {
 
    }
@@ -135,5 +135,10 @@ public abstract class RDXBehaviorAction
    public void setActionNextExecutionIndex(int actionNextExecutionIndex)
    {
       this.actionNextExecutionIndex = actionNextExecutionIndex;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return false;
    }
 }

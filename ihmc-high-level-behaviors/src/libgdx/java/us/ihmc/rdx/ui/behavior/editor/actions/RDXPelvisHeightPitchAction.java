@@ -127,7 +127,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
       actionDescription.update(referenceFrameLibrary);
 
@@ -164,8 +164,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
 
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      if ((concurrencyWithPreviousAction && getActionIndex() == (getActionNextExecutionIndex() + indexShiftConcurrentAction)) || (
-            executeWithNextActionWrapper.get() && getActionIndex() == getActionNextExecutionIndex()))
+      if (concurrentActionIsNextForExecution)
          pelvisPoseStatus.setCurrentAndConcurrent(true);
       else
          pelvisPoseStatus.setCurrentAndConcurrent(false);
@@ -184,6 +183,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       }
    }
 
+   @Override
    public void destroy()
    {
       LogTools.info("Destroying RDX pelvis pose status publisher for action {}", getActionIndex());

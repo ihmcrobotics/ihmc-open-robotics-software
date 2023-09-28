@@ -61,15 +61,11 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
-
-      // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
-      boolean concurrentActionIsNextForExecution = concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)
-                                                   || (getExecuteWithNextAction() && actionIndex == nextExecutionIndex);
       boolean isNextForExecution = concurrentActionIsNextForExecution || actionIndex == nextExecutionIndex;
 
       if (isNextForExecution)
