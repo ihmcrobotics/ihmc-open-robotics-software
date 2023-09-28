@@ -2,16 +2,18 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -37,6 +39,7 @@ public class ActiveMapper
 
    public ActiveMappingMode activeMappingMode = ActiveMappingMode.CONTINUOUS_MAPPING_STRAIGHT;
 
+   private final FootstepPlannerLogger footstepPlannerLogger;
    private final FootstepPlanningModule footstepPlanner;
    private final DRCRobotModel robotModel;
    private final HumanoidReferenceFrames referenceFrames;
@@ -51,8 +54,8 @@ public class ActiveMapper
 
    private Pose3D leftGoalPose = new Pose3D();
    private Pose3D rightGoalPose = new Pose3D();
-   private Pose3D leftSolePose = new Pose3D();
-   private Pose3D rightSolePose = new Pose3D();
+   private FramePose3D leftStartSolePose = new FramePose3D();
+   private FramePose3D rightStartSolePose = new FramePose3D();
 
    private ArrayList<Point2D> frontierPoints = new ArrayList<>();
 
@@ -78,6 +81,7 @@ public class ActiveMapper
       this.referenceFrames = humanoidReferenceFrames;
       this.robotModel = robotModel;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       active = true;
 
       switch (mode)
@@ -100,12 +104,12 @@ public class ActiveMapper
       {
          LogTools.info("Footstep Planning Request");
 
-         leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-         rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+         leftStartSolePose.setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
+         rightStartSolePose.setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
          leftGoalPose.setToZero();
          rightGoalPose.setToZero();
 
-         robotLocation.set((leftSolePose.getX() + rightSolePose.getX()) / 2.0f, (leftSolePose.getY() + rightSolePose.getY()) / 2.0f);
+         robotLocation.set((leftStartSolePose.getX() + rightStartSolePose.getX()) / 2.0f, (leftStartSolePose.getY() + rightStartSolePose.getY()) / 2.0f);
 
          //Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
          //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
@@ -142,7 +146,7 @@ public class ActiveMapper
          leftGoalPose.prependTranslation(0.0, 0.12, 0.0);
          rightGoalPose.prependTranslation(0.0, -0.12, 0.0);
 
-         FootstepPlannerRequest request = createFootstepPlanRequest();
+         FootstepPlannerRequest request = createFootstepPlannerRequest();
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
          plannerOutput = footstepPlanner.handleRequest(request);
 
@@ -163,19 +167,22 @@ public class ActiveMapper
 
    public void updatePlan(HeightMapData heightMapData)
    {
-      leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      leftStartSolePose.setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
+      rightStartSolePose.setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
       leftGoalPose.setToZero();
       rightGoalPose.setToZero();
 
-      ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 1.0f);
-      FootstepPlannerRequest request = createFootstepPlanRequest();
+      ActiveMappingTools.getStraightGoalFootPoses(leftStartSolePose, rightStartSolePose, leftGoalPose, rightGoalPose, 1.0f);
+      FootstepPlannerRequest request = createFootstepPlannerRequest();
+      request.setSnapGoalSteps(true);
       request.setHeightMapData(heightMapData);
 
       //if (plannerOutput != null)
       //   request.setReferencePlan(plannerOutput.getFootstepPlan());
 
       plannerOutput = footstepPlanner.handleRequest(request);
+      footstepPlannerLogger.logSession();
+      FootstepPlannerLogger.deleteOldLogs();
 
       if (plannerOutput != null)
       {
@@ -186,14 +193,16 @@ public class ActiveMapper
       }
    }
 
-   public FootstepPlannerRequest createFootstepPlanRequest()
+   public FootstepPlannerRequest createFootstepPlannerRequest()
    {
       request = new FootstepPlannerRequest();
-      request.setTimeout(1.2);
-      request.setStartFootPoses(leftSolePose, rightSolePose);
+      request.setTimeout(0.25);
+      request.setStartFootPoses(leftStartSolePose, rightStartSolePose);
       request.setPlanBodyPath(false);
       request.setGoalFootPoses(leftGoalPose, rightGoalPose);
       request.setPerformAStarSearch(true);
+      request.setAssumeFlatGround(false);
+      request.setSwingPlannerType(SwingPlannerType.NONE);
       return request;
    }
 
@@ -250,5 +259,10 @@ public class ActiveMapper
    public MonteCarloPlanner getPlanner()
    {
       return monteCarloPlanner;
+   }
+
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   {
+      return footstepPlanner.getFootstepPlannerParameters();
    }
 }

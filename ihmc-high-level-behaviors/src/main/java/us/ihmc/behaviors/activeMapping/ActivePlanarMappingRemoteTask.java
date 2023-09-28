@@ -7,7 +7,6 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -28,7 +27,6 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2Topic controllerFootstepDataTopic;
 
    private ActiveMapper activeMappingModule;
-   private FootstepPlannerRequest request;
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,

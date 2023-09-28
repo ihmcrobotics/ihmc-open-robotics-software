@@ -34,7 +34,6 @@ public class RDXActiveMappingUI implements RenderableProvider
          new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
-   private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
    private ActiveMapper activeMapper;
    private RDXPanel panel;
 
@@ -63,53 +62,32 @@ public class RDXActiveMappingUI implements RenderableProvider
       }
    }
 
-   public RDXActiveMappingUI(String name, ROS2Helper ros2Helper)
+   public RDXActiveMappingUI(String name, PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
       panel = new RDXPanel(name, this::renderImGuiWidgets);
-      perceptionConfigurationParameters = new PerceptionConfigurationParameters();
-      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
-      remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
+      this.perceptionConfigurationParameters = perceptionConfigurationParameters;
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get("Render Enabled"), renderEnabled);
-
-      if (remotePropertySets != null)
+      if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
-         remotePropertySets.renderImGuiWidgets();
-
-         if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+         LogTools.info("Calculating footstep plan");
+         if (perceptionConfigurationParameters != null)
          {
-            LogTools.info("Enabled Remove Active Mapping");
-            if (perceptionConfigurationParameters != null)
-            {
-               perceptionConfigurationParameters.setActiveMapping(true);
-            }
-         }
-      }
-      else
-      {
-         if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
-         {
-            LogTools.info("Triggered footstep plan calculation");
-            activeMapper.updatePlan(planarRegionMap);
-            activeMapper.setPlanAvailable(true);
+            perceptionConfigurationParameters.setActiveMapping(true);
          }
       }
    }
 
    public void render3DGraphics()
    {
-      if (remotePropertySets == null)
+      synchronized (mapPlanarRegionsGraphic)
       {
-         synchronized (mapPlanarRegionsGraphic)
+         if (renderEnabled.get())
          {
-            if (renderEnabled.get())
-            {
-               mapPlanarRegionsGraphic.generateMeshes(planarRegionMap.getMapRegions());
-               mapPlanarRegionsGraphic.update();
-            }
+            mapPlanarRegionsGraphic.generateMeshes(planarRegionMap.getMapRegions());
+            mapPlanarRegionsGraphic.update();
          }
       }
 

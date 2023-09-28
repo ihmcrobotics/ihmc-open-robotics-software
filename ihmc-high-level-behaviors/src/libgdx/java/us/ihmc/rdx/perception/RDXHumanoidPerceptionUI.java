@@ -72,9 +72,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
    }
 
-   public void intializeActiveMappingUI(ROS2Helper ros2Helper)
+   public void initializeActiveMappingUI()
    {
-      this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", ros2Helper);
+      this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", remotePerceptionUI.getPerceptionConfigurationParameters());
    }
 
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node)

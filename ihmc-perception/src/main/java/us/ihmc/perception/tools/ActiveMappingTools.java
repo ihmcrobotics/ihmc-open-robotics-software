@@ -2,6 +2,8 @@ package us.ihmc.perception.tools;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -11,11 +13,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class ActiveMappingTools
 {
-   public static void getStraightGoalFootPoses(Pose3D leftSolePose, Pose3D rightSolePose, Pose3D leftGoalPose, Pose3D rightGoalPose, float distance)
+   public static void getStraightGoalFootPoses(Pose3DReadOnly leftSolePose, Pose3DReadOnly rightSolePose, Pose3DBasics leftGoalPose, Pose3DBasics rightGoalPose, float distance)
    {
-      leftSolePose.setZ(0);
-      rightSolePose.setZ(0);
-
       leftGoalPose.set(leftSolePose);
       leftGoalPose.appendTranslation(distance, 0.0, 0.0);
 

@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HeightMapVisualizer extends AnimationTimer
 {
-   private static final boolean RENDER_BORDERS = true;
-   private static final boolean RENDER_MAX_HEIGHT = true;
-   private static final boolean RENDER_DEBUG_POSITION = true;
+   private static final boolean RENDER_BORDERS = false;
+   private static final boolean RENDER_MAX_HEIGHT = false;
+   private static final boolean RENDER_DEBUG_POSITION = false;
 
    private final Color heightMapColor;
    private final Color groundPlaneColor;

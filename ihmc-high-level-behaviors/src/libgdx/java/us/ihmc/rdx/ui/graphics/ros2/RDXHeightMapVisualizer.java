@@ -156,10 +156,10 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
                  heightMapMessageGenerated = true;
               }
 
-              if (displayGlobalHeightMapImage.get())
-                 PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
-              else
-                 PerceptionDebugTools.clearAllWindows();
+//              if (displayGlobalHeightMapImage.get())
+//                 PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
+//              else
+//                 PerceptionDebugTools.clearAllWindows();
            });
       }
    }

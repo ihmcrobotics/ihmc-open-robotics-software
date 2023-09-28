@@ -5,40 +5,33 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.headless.LocalizationAndMappingTask;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousMappingRemoteTask
 {
-   private final static long PLANNING_PERIOD_MS = 2000;
+   private final static long PLANNING_PERIOD_MS = 350;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                    getClass(),
@@ -54,19 +47,22 @@ public class ContinuousMappingRemoteTask
    private Mat compressedBytesMat;
    private ByteBuffer incomingCompressedImageBuffer;
    private BytePointer incomingCompressedImageBytePointer;
+   private PerceptionConfigurationParameters perceptionConfigurationParameters;
 
    private int compressedBufferDefaultSize = 100000;
 
-   private ActiveMapper activeMappingModule;
+   private ActiveMapper activeMapper;
    private ROS2Helper ros2Helper;
 
    public ContinuousMappingRemoteTask(DRCRobotModel robotModel,
                                       ROS2Node ros2Node,
-                                      HumanoidReferenceFrames referenceFrames)
+                                      HumanoidReferenceFrames referenceFrames,
+                                      PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
+      this.perceptionConfigurationParameters = perceptionConfigurationParameters;
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
-      activeMappingModule = new ActiveMapper(robotModel, referenceFrames, ActiveMapper.ActiveMappingMode.CONTINUOUS_MAPPING_COVERAGE);
+      activeMapper = new ActiveMapper(robotModel, referenceFrames, ActiveMapper.ActiveMappingMode.CONTINUOUS_MAPPING_COVERAGE);
       ros2Helper = new ROS2Helper(ros2Node);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
@@ -87,20 +83,23 @@ public class ContinuousMappingRemoteTask
     */
    private void updateActiveMappingPlan()
    {
-      if (walkingStatusMessage.get() != null)
+      if (perceptionConfigurationParameters.getActiveMapping())
       {
-         activeMappingModule.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
-         if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
+         if (walkingStatusMessage.get() != null)
          {
-            activeMappingModule.updatePlan(latestHeightMapData);
+            activeMapper.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
+            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMapper.isPlanAvailable())
+            {
+               activeMapper.updatePlan(latestHeightMapData);
+            }
          }
-      }
 
-      if (activeMappingModule.isPlanAvailable())
-      {
-         FootstepDataListMessage footstepDataList = activeMappingModule.getFootstepDataListMessage();
-         publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-         activeMappingModule.setPlanAvailable(false);
+         if (activeMapper.isPlanAvailable())
+         {
+            FootstepDataListMessage footstepDataList = activeMapper.getFootstepDataListMessage();
+            publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+            activeMapper.setPlanAvailable(false);
+         }
       }
    }
 
@@ -122,6 +121,8 @@ public class ContinuousMappingRemoteTask
                                                        compressedBytesMat);
         zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
+        PerceptionDebugTools.displayHeightMap("Height Map", heightMapImage, 1, 1.2f);
+
         if (latestHeightMapData == null)
         {
            latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
@@ -136,9 +137,14 @@ public class ContinuousMappingRemoteTask
                                                       RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
    }
 
-   public ActiveMapper getActiveMappingModule()
+   public void setLatestHeightMapData(HeightMapData latestHeightMapData)
    {
-      return activeMappingModule;
+      this.latestHeightMapData = latestHeightMapData;
+   }
+
+   public ActiveMapper getActiveMapper()
+   {
+      return activeMapper;
    }
 
    public void destroy()

@@ -42,7 +42,7 @@ public class HumanoidActivePerceptionModule
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, continuousElevationMappingRemoteThread::onHeightMapReceived);
    }
 
-   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
+   public void initializeActivePlaneMappingTask(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
    {
       LogTools.info("Initializing Active Mapping Process");
       activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
@@ -51,9 +51,9 @@ public class HumanoidActivePerceptionModule
                                                                          ros2Node, referenceFrames, () -> {}, true);
    }
 
-   public void initializeContinuousMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   public void initializeContinuousElevationMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousElevationMappingRemoteThread = new ContinuousMappingRemoteTask(robotModel, ros2Node, referenceFrames);
+      continuousElevationMappingRemoteThread = new ContinuousMappingRemoteTask(robotModel, ros2Node, referenceFrames, perceptionConfigurationParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -111,5 +111,10 @@ public class HumanoidActivePerceptionModule
 
       if (continuousElevationMappingRemoteThread != null)
          continuousElevationMappingRemoteThread.destroy();
+   }
+
+   public ContinuousMappingRemoteTask getContinuousMappingRemoteThread()
+   {
+      return continuousElevationMappingRemoteThread;
    }
 }
