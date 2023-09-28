@@ -110,9 +110,8 @@ public class NaturalPostureController
       npQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
 
-      //TODO wasnt this already decided in NaturalPostureManager?
       //switches
-      doNullSpaceProjectionForNaturalPosture.set(true);
+      doNullSpaceProjectionForNaturalPosture.set(npParameters.getdoNullSpaceProjectionForNaturalPosture());
 
       // Desired NP values (wrt world)
       comAngleDesired.set(npParameters.getComAngleDesired());   // (0.0, -0.03, 0.0)

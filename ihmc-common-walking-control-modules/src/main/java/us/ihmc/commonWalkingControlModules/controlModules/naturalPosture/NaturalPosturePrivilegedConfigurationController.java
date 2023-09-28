@@ -164,7 +164,7 @@ public class NaturalPosturePrivilegedConfigurationController
       pelvisPrivilegedOrientationKd.set(npParameters.getPelvisPrivilegedParameters().getKdGain());
       pelvisQPWeight.set(npParameters.getPelvisPrivilegedParameters().getQPWeight());
 
-      doNullSpaceProjectionForPelvis.set(true);
+      doNullSpaceProjectionForPelvis.set(npParameters.getDoNullSpaceProjectionForPelvis());
 
       parentRegistry.addChild(registry);
 

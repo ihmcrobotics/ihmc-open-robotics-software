@@ -17,6 +17,11 @@ public abstract class NaturalPostureParameters
    private final FrameYawPitchRoll angularComKpGains = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
    private final FrameYawPitchRoll angularComKdGains = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 5.0, 5.0, 5.0);
 
+   public boolean getdoNullSpaceProjectionForNaturalPosture()
+   {
+      return true;
+   }
+
    public FrameYawPitchRoll getComAngleDesired()
    {
       return comAngleDesired;
@@ -78,6 +83,11 @@ public abstract class NaturalPostureParameters
    private final FrameYawPitchRoll anklePrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.6, 0.6);
    private final FrameYawPitchRoll anklePrivilegedQPWeight = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 1.0);
 
+
+   public boolean getDoNullSpaceProjectionForPelvis()
+   {
+      return true;
+   }
 
    public FrameYawPitchRoll getSpineNaturalPostureOrientationKp()
    {
