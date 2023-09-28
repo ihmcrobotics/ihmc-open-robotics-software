@@ -46,7 +46,7 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
-   public static final ROS2Topic<String> EXECUTION_NEXT_INDEX_REJECTION_TOPIC = STATUS_TOPIC.withType(String.class).withSuffix("execution_next_index_rejection");
+   public static final ROS2Topic<std_msgs.msg.dds.String> EXECUTION_NEXT_INDEX_REJECTION_TOPIC = STATUS_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("execution_next_index_rejection");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> LEFT_HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("left_hand_pose_joint_angles");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> RIGHT_HAND_POSE_JOINT_ANGLES_STATUS
@@ -79,6 +79,7 @@ public class BehaviorActionSequence
 
    private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
    public final Int32 executionNextIndexStatusMessage = new Int32();
+   public final std_msgs.msg.dds.String executionNextIndexRejectionMessage = new std_msgs.msg.dds.String();
    public final Bool automaticExecutionStatusMessage = new Bool();
 
    private final Throttler oneHertzThrottler = new Throttler();
