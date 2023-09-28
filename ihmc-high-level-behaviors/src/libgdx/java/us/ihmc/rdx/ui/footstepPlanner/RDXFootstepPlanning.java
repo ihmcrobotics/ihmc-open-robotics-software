@@ -6,6 +6,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -36,10 +37,12 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 
+import javax.naming.ldap.Control;
 import java.util.ArrayList;
 
 public class RDXFootstepPlanning
 {
+   private final ControllerStatusTracker controllerStatusTracker;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -64,13 +67,15 @@ public class RDXFootstepPlanning
    private boolean terminatePlan = false;
    private final TypedNotification<FootstepPlannerOutput> plannerOutputNotification = new TypedNotification<>();
 
-   public RDXFootstepPlanning(DRCRobotModel robotModel,
+   public RDXFootstepPlanning(ControllerStatusTracker controllerStatusTracker,
+                              DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
                               RDXLocomotionParameters locomotionParameters,
                               FootstepPlannerParametersBasics footstepPlannerParameters,
                               AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters,
                               SwingPlannerParametersBasics swingFootPlannerParameters)
    {
+      this.controllerStatusTracker = controllerStatusTracker;
       this.syncedRobot = syncedRobot;
       this.locomotionParameters = locomotionParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -139,7 +144,12 @@ public class RDXFootstepPlanning
 
       footstepPlannerRequest.getStartFootPoses().forEach((side, pose3D) ->
       {
-         FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
+         FramePose3DReadOnly soleFramePose;
+         if (controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
+            soleFramePose = controllerStatusTracker.getFootstepTracker().getLastFootstepQueuedOnOppositeSide(side);
+         else
+            soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
+
          soleFramePose.get(pose3D);
       });
 

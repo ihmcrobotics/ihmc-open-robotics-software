@@ -117,7 +117,8 @@ public class RDXLocomotionManager
       teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
       teleoperationPanel.addChild(swingFootPlanningParametersTuner);
 
-      footstepPlanning = new RDXFootstepPlanning(robotModel,
+      footstepPlanning = new RDXFootstepPlanning(controllerStatusTracker,
+                                                 robotModel,
                                                  syncedRobot,
                                                  locomotionParameters,
                                                  footstepPlannerParameters,
