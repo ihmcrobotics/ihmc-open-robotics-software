@@ -710,7 +710,6 @@ public class RDXBehaviorActionSequenceEditor
                                                                                           selectionCollisionModel,
                                                                                           referenceFrameLibrary,
                                                                                           ros2ControllerHelper);
-
          // Set the new action to where the last one was for faster authoring
          RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
          if (nextPreviousChestOrientationAction != null)
