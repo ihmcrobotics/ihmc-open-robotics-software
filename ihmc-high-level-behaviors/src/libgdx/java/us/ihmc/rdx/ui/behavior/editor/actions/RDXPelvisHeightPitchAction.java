@@ -8,14 +8,12 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDescription;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -71,7 +69,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    private final FullHumanoidRobotModel syncedFullRobotModel;
    private final ROS2PublishSubscribeAPI ros2;
    private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
-   private volatile boolean running = true;
    private final Throttler throttler = new Throttler().setFrequency(20.0);
 
    public RDXPelvisHeightPitchAction(RDX3DPanel panel3D,
@@ -102,8 +99,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
-
-      ThreadTools.startAsDaemon(this::publishStatusUpdate, "RDXPelvisStatusUpdate");
    }
 
    @Override
@@ -168,14 +163,10 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          pelvisPoseStatus.setCurrentAndConcurrent(true);
       else
          pelvisPoseStatus.setCurrentAndConcurrent(false);
-   }
 
-   private void publishStatusUpdate()
-   {
-      while (running)
+      if (throttler.run())
       {
-         throttler.waitAndRun();
-         if (pelvisPoseStatus.getActionIndex() >= 0 && getActionIndex() >= 0)
+         if (pelvisPoseStatus.getActionIndex() >= 0)
          {
             // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
             ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
@@ -184,10 +175,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    }
 
    @Override
-   public void destroy()
+   public void updateBeforeRemoving()
    {
-      LogTools.info("Destroying RDX pelvis pose status publisher for action {}", getActionIndex());
-      running = false;
       pelvisPoseStatus.setActionIndex(getActionIndex());
       pelvisPoseStatus.setCurrentAndConcurrent(false);
       ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
@@ -279,5 +268,11 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Pelvis Height and Pitch";
+   }
+
+   @Override
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWithNextActionWrapper.get();
    }
 }

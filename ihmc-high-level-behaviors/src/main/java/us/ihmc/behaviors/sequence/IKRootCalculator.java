@@ -63,6 +63,16 @@ public class IKRootCalculator
     */
    public void computeRoot()
    {
+//      if(chestPoseStatusMessage != null)
+//         LogTools.info("chest {}, {}",chestPoseStatusMessage.getActionIndex(), chestPoseStatusMessage.getCurrentAndConcurrent());
+//      else
+//         LogTools.info("chest null");
+//
+//      if(pelvisPoseStatusMessage != null)
+//         LogTools.info("pelvis {}, {}",pelvisPoseStatusMessage.getActionIndex(), pelvisPoseStatusMessage.getCurrentAndConcurrent());
+//      else
+//         LogTools.info("pelvis null");
+
       if (chestPoseStatusMessage != null)
       {
          int chestIndex = (int) chestPoseStatusMessage.getActionIndex();
