@@ -34,17 +34,17 @@ public class NaturalPosturePrivilegedConfigurationController
 
    private final YoFrameYawPitchRoll spinePrivilegedOrientation = new YoFrameYawPitchRoll("pPoseSpine", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll pPoseSpineKp = new YoFrameYawPitchRoll("pPoseSpineKp", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll pPoseSpineKdFactor = new YoFrameYawPitchRoll("pPoseSpineKdFactor", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll pPoseSpineKd = new YoFrameYawPitchRoll("pPoseSpineKd", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll pPoseSpineQPWeight = new YoFrameYawPitchRoll("pPoseSpineWeight", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFrameYawPitchRoll shoulderPrivilegedOrientation = new YoFrameYawPitchRoll("pPoseShoulder", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll pPoseShoulderKp = new YoFrameYawPitchRoll("pPoseShoulderKp", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll pPoseShoulderKdFactor = new YoFrameYawPitchRoll("pPoseShoulderKdFactor", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll pPoseShoulderKd = new YoFrameYawPitchRoll("pPoseShoulderKd", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll pPoseShoulderQPWeight = new YoFrameYawPitchRoll("pPoseShoulderQPWeight", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble pPoseElbow = new YoDouble("pPoseElbow", registry);
    private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
-   private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
+   private final YoDouble pPoseElbowKd = new YoDouble("pPoseElbowKd", registry);
    private final YoDouble pPoseElbowWeight = new YoDouble("pPoseElbowWeight", registry);
 
    //TODO These weren't used anywhere, do we need to keep them?
@@ -64,6 +64,8 @@ public class NaturalPosturePrivilegedConfigurationController
    private final OneDoFJointFeedbackControlCommand spineRollCommand = new OneDoFJointFeedbackControlCommand();
 
    private final FullHumanoidRobotModel fullRobotModel;
+   private final NaturalPostureParameters.SingleDOFJointPrivilegedParameters wristPrivilegedParameters;
+   private final NaturalPostureParameters.SingleDOFJointPrivilegedParameters anklePrivilegedParameters;
 
    public NaturalPosturePrivilegedConfigurationController(NaturalPostureParameters npParameters,
                                                           FullHumanoidRobotModel fullRobotModel,
@@ -98,13 +100,13 @@ public class NaturalPosturePrivilegedConfigurationController
       }
 
       pPoseSpineKp.set(npParameters.getSpinePrivilegedParameters().getKpGain());
-      pPoseSpineKdFactor.set(npParameters.getSpinePrivilegedParameters().getKdGainFactor());
+      pPoseSpineKd.set(npParameters.getSpinePrivilegedParameters().getKdGain());
 
       pPoseShoulderKp.set(npParameters.getShoulderPrivilegedParameters().getKpGain());
-      pPoseShoulderKdFactor.set(npParameters.getShoulderPrivilegedParameters().getKdGainFactor());
+      pPoseShoulderKd.set(npParameters.getShoulderPrivilegedParameters().getKdGain());
 
       pPoseElbowKp.set(npParameters.getElbowPrivilegedParameters().getKpGain());
-      pPoseElbowKdFactor.set(npParameters.getElbowPrivilegedParameters().getKdGainFactor());
+      pPoseElbowKd.set(npParameters.getElbowPrivilegedParameters().getKdGain());
 
       //TODO These weren't used anywhere, do we need to keep them?
       // privileged configuration for lower body
@@ -121,6 +123,9 @@ public class NaturalPosturePrivilegedConfigurationController
 
       spineRollCommand.clear();
       spineRollCommand.setJoint(spineRoll);
+
+      wristPrivilegedParameters = npParameters.getWristPrivilegedParameters();
+      anklePrivilegedParameters = npParameters.getAnklePrivilegedParameters();
 
       parentRegistry.addChild(registry);
 
@@ -182,55 +187,50 @@ public class NaturalPosturePrivilegedConfigurationController
                                                             side.negateIfRightSide(shoulderPrivilegedOrientation.getPitch()),
                                                             pPoseShoulderQPWeight.getPitch(),
                                                             pPoseShoulderKp.getPitch(),
-                                                            pPoseShoulderKdFactor.getPitch() * pPoseShoulderKp.getPitch());
+                                                            pPoseShoulderKd.getPitch());
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.SHOULDER_ROLL),
                                                             shoulderPrivilegedOrientation.getRoll(),
                                                             pPoseShoulderQPWeight.getRoll(),
                                                             pPoseShoulderKp.getRoll(),
-                                                            pPoseShoulderKdFactor.getRoll() * pPoseShoulderKp.getRoll());
+                                                            pPoseShoulderKd.getRoll());
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.SHOULDER_YAW),
                                                             shoulderPrivilegedOrientation.getYaw(),
                                                             pPoseShoulderQPWeight.getYaw(),
                                                             pPoseShoulderKp.getYaw(),
-                                                            pPoseShoulderKdFactor.getYaw() * pPoseShoulderKp.getYaw());
+                                                            pPoseShoulderKd.getYaw());
 
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.ELBOW_PITCH),
                                                             side.negateIfRightSide(pPoseElbow.getDoubleValue()),
                                                             pPoseElbowWeight.getDoubleValue(),
                                                             pPoseElbowKp.getDoubleValue(),
-                                                            pPoseElbowKdFactor.getDoubleValue() * pPoseElbowKp.getDoubleValue());
+                                                            pPoseElbowKd.getDoubleValue());
 
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.WRIST_YAW),
-                                                            npParameters.getWristPrivilegedParameters().getPrivilegedOrientation(),
-                                                            npParameters.getWristPrivilegedParameters().getQPWeight(),
-                                                            npParameters.getWristPrivilegedParameters().getKpGain(),
-                                                            npParameters.getWristPrivilegedParameters().getKdGainFactor()
-                                                            * npParameters.getWristPrivilegedParameters().getKpGain());
+                                                            wristPrivilegedParameters.getPrivilegedOrientation(),
+                                                            wristPrivilegedParameters.getQPWeight(),
+                                                            wristPrivilegedParameters.getKpGain(),
+                                                            wristPrivilegedParameters.getKdGain());
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.WRIST_ROLL),
-                                                            npParameters.getWristPrivilegedParameters().getPrivilegedOrientation(),
-                                                            npParameters.getWristPrivilegedParameters().getQPWeight(),
-                                                            npParameters.getWristPrivilegedParameters().getKpGain(),
-                                                            npParameters.getWristPrivilegedParameters().getKdGainFactor()
-                                                            * npParameters.getWristPrivilegedParameters().getKpGain());
+                                                            wristPrivilegedParameters.getPrivilegedOrientation(),
+                                                            wristPrivilegedParameters.getQPWeight(),
+                                                            wristPrivilegedParameters.getKpGain(),
+                                                            wristPrivilegedParameters.getKdGain());
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getArmJoint(side, ArmJointName.FIRST_WRIST_PITCH),
-                                                            npParameters.getWristPrivilegedParameters().getPrivilegedOrientation(),
-                                                            npParameters.getWristPrivilegedParameters().getQPWeight(),
-                                                            npParameters.getWristPrivilegedParameters().getKpGain(),
-                                                            npParameters.getWristPrivilegedParameters().getKdGainFactor()
-                                                            * npParameters.getWristPrivilegedParameters().getKpGain());
+                                                            wristPrivilegedParameters.getPrivilegedOrientation(),
+                                                            wristPrivilegedParameters.getQPWeight(),
+                                                            wristPrivilegedParameters.getKpGain(),
+                                                            wristPrivilegedParameters.getKdGain());
 
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL),
-                                                            npParameters.getAnklePrivilegedParameters().getPrivilegedOrientation(),
-                                                            npParameters.getAnklePrivilegedParameters().getQPWeight(),
-                                                            npParameters.getAnklePrivilegedParameters().getKpGain(),
-                                                            npParameters.getAnklePrivilegedParameters().getKdGainFactor()
-                                                            * npParameters.getAnklePrivilegedParameters().getKpGain());
+                                                            anklePrivilegedParameters.getPrivilegedOrientation(),
+                                                            anklePrivilegedParameters.getQPWeight(),
+                                                            anklePrivilegedParameters.getKpGain(),
+                                                            anklePrivilegedParameters.getKdGain());
          createAndAddJointPrivilegedConfigurationParameters(fullRobotModel.getLegJoint(side, LegJointName.ANKLE_PITCH),
-                                                            npParameters.getAnklePrivilegedParameters().getPrivilegedOrientation(),
-                                                            npParameters.getAnklePrivilegedParameters().getQPWeight(),
-                                                            npParameters.getAnklePrivilegedParameters().getKpGain(),
-                                                            npParameters.getAnklePrivilegedParameters().getKdGainFactor()
-                                                            * npParameters.getAnklePrivilegedParameters().getKpGain());
+                                                            anklePrivilegedParameters.getPrivilegedOrientation(),
+                                                            anklePrivilegedParameters.getQPWeight(),
+                                                            anklePrivilegedParameters.getKpGain(),
+                                                            anklePrivilegedParameters.getKdGain());
       }
    }
 
@@ -240,7 +240,7 @@ public class NaturalPosturePrivilegedConfigurationController
                                                          spinePrivilegedOrientation.getRoll(),
                                                          pPoseSpineQPWeight.getRoll(),
                                                          pPoseSpineKp.getRoll(),
-                                                         pPoseSpineKp.getRoll() * pPoseSpineKdFactor.getRoll());
+                                                         pPoseSpineKd.getRoll());
    }
 
    private void spinePitchPrivilegedConfigurationParameters()
@@ -250,7 +250,7 @@ public class NaturalPosturePrivilegedConfigurationController
                                                          spinePrivilegedOrientation.getPitch(),
                                                          pPoseSpineQPWeight.getPitch(),
                                                          pPoseSpineKp.getPitch(),
-                                                         pPoseSpineKp.getPitch() * pPoseSpineKdFactor.getPitch());
+                                                         pPoseSpineKd.getPitch());
    }
 
    private void spineYawPrivilegedConfigurationParameters()
@@ -259,14 +259,10 @@ public class NaturalPosturePrivilegedConfigurationController
                                                          spinePrivilegedOrientation.getYaw(),
                                                          pPoseSpineQPWeight.getYaw(),
                                                          pPoseSpineKp.getYaw(),
-                                                         pPoseSpineKp.getYaw() * pPoseSpineKdFactor.getYaw());
+                                                         pPoseSpineKd.getYaw());
    }
 
-   private OneDoFJointPrivilegedConfigurationParameters createAndAddJointPrivilegedConfigurationParameters(OneDoFJointBasics joint,
-                                                                                                           double privilegedAngle,
-                                                                                                           double weight,
-                                                                                                           double pgain,
-                                                                                                           double dgain)
+   private void createAndAddJointPrivilegedConfigurationParameters(OneDoFJointBasics joint, double privilegedAngle, double weight, double pgain, double dgain)
    {
       OneDoFJointPrivilegedConfigurationParameters jointParameters = privilegedConfigurationMap.get(joint);
       if (jointParameters == null)
@@ -283,7 +279,5 @@ public class NaturalPosturePrivilegedConfigurationController
       jointParameters.setPrivilegedConfiguration(privilegedAngle);
 
       privilegedConfigurationCommand.addJoint(joint, jointParameters);
-
-      return jointParameters;
    }
 }

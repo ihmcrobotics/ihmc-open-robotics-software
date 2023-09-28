@@ -24,7 +24,6 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -87,16 +86,11 @@ public class NaturalPostureController
    private final OrientationFrame naturalPostureFrame = new OrientationFrame(yoCurrentNaturalPosture);
 
    private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
-   private final YoVector3D pelvisQPWeight = new YoVector3D("pelvisQPWeight", registry);
-   private final YoFrameYawPitchRoll pelvisPrivilegedOrientation = new YoFrameYawPitchRoll("pPosePelvis",
-                                                                                           ReferenceFrame.getWorldFrame(),
-                                                                                           registry);
-   private final YoFrameYawPitchRoll pelvisPrivilegedOrientationKp = new YoFrameYawPitchRoll("pPosePelvisKp",
-                                                                                             ReferenceFrame.getWorldFrame(),
-                                                                                             registry);
-   private final YoFrameYawPitchRoll pelvisPrivilegedOrientationKdFactor = new YoFrameYawPitchRoll("pPosePelvisKdFactor",
-                                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                                   registry);
+   private final YoFrameYawPitchRoll pelvisPrivilegedOrientation = new YoFrameYawPitchRoll("pPosePelvis", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll pelvisPrivilegedOrientationKp = new YoFrameYawPitchRoll("pPosePelvisKp", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll pelvisPrivilegedOrientationKd = new YoFrameYawPitchRoll("pPosePelvisKd", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll pelvisQPWeight = new YoFrameYawPitchRoll("pelvisQPWeight", ReferenceFrame.getWorldFrame(), registry);
+
    private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPjacobian = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPweightMatrix = new DMatrixRMaj(1, 1);
@@ -168,10 +162,10 @@ public class NaturalPostureController
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
 
-      pelvisQPWeight.set(npParameters.getPelvisQPWeights());
-      pelvisPrivilegedOrientation.set(npParameters.getPelvisPrivilegedOrientation());
-      pelvisPrivilegedOrientationKp.set(npParameters.getPelvisPrivilegedOrientation());
-      pelvisPrivilegedOrientationKdFactor.set(npParameters.getPelvisPrivilegedOrientationKdFactor());
+      pelvisPrivilegedOrientation.set(npParameters.getPelvisPrivilegedParameters().getPrivilegedOrientation());
+      pelvisPrivilegedOrientationKp.set(npParameters.getPelvisPrivilegedParameters().getKpGain());
+      pelvisPrivilegedOrientationKd.set(npParameters.getPelvisPrivilegedParameters().getKdGain());
+      pelvisQPWeight.set(npParameters.getPelvisPrivilegedParameters().getQPWeight());
 
       parentRegistry.addChild(registry);
    }
@@ -320,9 +314,9 @@ public class NaturalPostureController
    //pose of the pelvis (via task null-space projection)
    private void pelvisPrivilegedPoseQPObjectiveCommand()
    {
-      pelvisQPweightMatrix.set(0, 0, pelvisQPWeight.getX());
-      pelvisQPweightMatrix.set(1, 1, pelvisQPWeight.getY());
-      pelvisQPweightMatrix.set(2, 2, pelvisQPWeight.getZ());
+      pelvisQPweightMatrix.set(0, 0, pelvisQPWeight.getRoll());
+      pelvisQPweightMatrix.set(1, 1, pelvisQPWeight.getPitch());
+      pelvisQPweightMatrix.set(2, 2, pelvisQPWeight.getYaw());
 
       // Get current pelvis YPR and omega:
       pelvisYPR.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
@@ -351,11 +345,11 @@ public class NaturalPostureController
 
       // The pelvis equilibrium pose servo:
       pelvisAngularAcceleration.setYaw(pelvisPrivilegedOrientationKp.getYaw() * (pelvisPrivilegedOrientation.getYaw() - pelvisYPR.getYaw())
-                                       - pelvisPrivilegedOrientationKdFactor.getYaw() * pelvisPrivilegedOrientationKp.getYaw() * pelvisYPRdot.get(0, 0));
+                                       - pelvisPrivilegedOrientationKd.getYaw() * pelvisYPRdot.get(0, 0));
       pelvisAngularAcceleration.setPitch(pelvisPrivilegedOrientationKp.getPitch() * (pelvisPrivilegedOrientation.getPitch() - pelvisYPR.getPitch())
-                                         - pelvisPrivilegedOrientationKdFactor.getPitch() * pelvisPrivilegedOrientationKp.getPitch() * pelvisYPRdot.get(1, 0));
+                                         - pelvisPrivilegedOrientationKd.getPitch() * pelvisYPRdot.get(1, 0));
       pelvisAngularAcceleration.setRoll(pelvisPrivilegedOrientationKp.getRoll() * (pelvisPrivilegedOrientation.getRoll() - pelvisYPR.getRoll())
-                                        - pelvisPrivilegedOrientationKdFactor.getRoll() * pelvisPrivilegedOrientationKp.getRoll() * pelvisYPRdot.get(2, 0));
+                                        - pelvisPrivilegedOrientationKd.getRoll() * pelvisYPRdot.get(2, 0));
 
       yprDDot.set(0, 0, pelvisAngularAcceleration.getYaw());
       yprDDot.set(1, 0, pelvisAngularAcceleration.getPitch());
