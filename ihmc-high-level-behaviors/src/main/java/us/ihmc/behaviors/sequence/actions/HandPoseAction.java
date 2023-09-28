@@ -67,29 +67,20 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
 
       this.actionIndex = actionIndex;
 
+      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+      armIKSolver.copySourceToWork();
+
+      ReferenceFrame chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
       // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
       if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
           (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
       {
-         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-         armIKSolver.copyActualToWork();
          rootCalculator.getKinematicsInfo();
          rootCalculator.computeRoot();
-         armIKSolver.setChestExternally(rootCalculator.getRoot());
-         computeAndPublishIK(armIKSolver);
+         chestFrame = rootCalculator.getRoot();
       }
-      else if (actionIndex == nextExecutionIndex)
-      {
-         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-         armIKSolver.setChestExternally(null);
-         armIKSolver.copyActualToWork();
-         computeAndPublishIK(armIKSolver);
-      }
-   }
 
-   private void computeAndPublishIK(ArmIKSolver armIKSolver)
-   {
-      armIKSolver.update(getConditionalReferenceFrame().get());
+      armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
       armIKSolver.solve();
 
       // Send the solution back to the UI so the user knows what's gonna happen with the arm.
