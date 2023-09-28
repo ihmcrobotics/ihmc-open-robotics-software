@@ -69,6 +69,17 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       }
    }
 
+   public RDXFootstepPlanGraphic(SideDependentList<ConvexPolygon2D> footPolygons)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         footPolygons.get(robotSide).getPolygonVerticesView().forEach(defaultFoothold::addVertex);
+         defaultFoothold.update();
+         defaultContactPoints.put(robotSide, defaultFoothold);
+      }
+   }
+
    public RDXFootstepPlanGraphic()
    {
    }

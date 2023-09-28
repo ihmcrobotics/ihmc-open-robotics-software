@@ -10,6 +10,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.ActiveMapper;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -29,7 +30,8 @@ public class RDXActiveMappingUI implements RenderableProvider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
-   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic();
+   private final RDXFootstepPlanGraphic footstepPlanGraphic =
+         new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
@@ -110,6 +112,12 @@ public class RDXActiveMappingUI implements RenderableProvider
             }
          }
       }
+
+      if (activeMapper.getFootstepDataListMessage() != null)
+      {
+         footstepPlanGraphic.generateMeshesAsync(activeMapper.getFootstepDataListMessage(), "Continuous Planner");
+         footstepPlanGraphic.update();
+      }
    }
 
    public RDXPanel getImGuiPanel()
@@ -123,6 +131,7 @@ public class RDXActiveMappingUI implements RenderableProvider
       if (renderEnabled.get())
       {
          mapPlanarRegionsGraphic.getRenderables(renderables, pool);
+         footstepPlanGraphic.getRenderables(renderables, pool);
 
          for (ModelInstance gridCylinder : gridCylinders)
          {

@@ -8,7 +8,6 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -28,8 +27,8 @@ public class HumanoidActivePerceptionModule
    /* For displaying occupancy grid from the active mapping module. */
    private final Mat gridColor = new Mat();
 
-   private ActivePlanarMappingRemoteTask activeMappingRemoteThread;
-   private ContinuousMappingRemoteTask continuousMappingRemoteThread;
+   private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
+   private ContinuousMappingRemoteTask continuousElevationMappingRemoteThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
 
@@ -40,26 +39,26 @@ public class HumanoidActivePerceptionModule
 
    public void setupForImageMessage(ROS2Helper ros2)
    {
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, continuousMappingRemoteThread::onHeightMapReceived);
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, continuousElevationMappingRemoteThread::onHeightMapReceived);
    }
 
    public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
-                                                                    PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                    PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                    ros2Node, referenceFrames, () -> {},true);
+      activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
+                                                                         PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                         PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                         ros2Node, referenceFrames, () -> {}, true);
    }
 
    public void initializeContinuousMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousMappingRemoteThread = new ContinuousMappingRemoteTask(robotModel, ros2Node, referenceFrames);
+      continuousElevationMappingRemoteThread = new ContinuousMappingRemoteTask(robotModel, ros2Node, referenceFrames);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
    {
-      if (activeMappingRemoteThread == null)
+      if (activePlaneMappingRemoteThread == null)
       {
          int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
                                                                 perceptionConfigurationParameters.getOccupancyGridResolution(),
@@ -84,12 +83,12 @@ public class HumanoidActivePerceptionModule
 
    public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
    {
-      if (activeMappingRemoteThread != null)
+      if (activePlaneMappingRemoteThread != null)
       {
          LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
 
-         world = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
-         agent = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
+         world = activePlaneMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
+         agent = activePlaneMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
       }
       else
       {
@@ -107,7 +106,10 @@ public class HumanoidActivePerceptionModule
 
    public void destroy()
    {
-      if (activeMappingRemoteThread != null)
-         activeMappingRemoteThread.destroy();
+      if (activePlaneMappingRemoteThread != null)
+         activePlaneMappingRemoteThread.destroy();
+
+      if (continuousElevationMappingRemoteThread != null)
+         continuousElevationMappingRemoteThread.destroy();
    }
 }

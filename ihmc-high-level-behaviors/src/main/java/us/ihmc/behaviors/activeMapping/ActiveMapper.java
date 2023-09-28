@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -135,7 +136,13 @@ public class ActiveMapper
 
          LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
 
-         FootstepPlannerRequest request = createFootstepPlanRequest(goalPosition, yawRobotToGoal);
+         Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
+         leftGoalPose.set(goalPose);
+         rightGoalPose.set(goalPose);
+         leftGoalPose.prependTranslation(0.0, 0.12, 0.0);
+         rightGoalPose.prependTranslation(0.0, -0.12, 0.0);
+
+         FootstepPlannerRequest request = createFootstepPlanRequest();
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
          plannerOutput = footstepPlanner.handleRequest(request);
 
@@ -156,21 +163,33 @@ public class ActiveMapper
 
    public void updatePlan(HeightMapData heightMapData, Point2D goalPosition, float yawRobotToGoal)
    {
-      FootstepPlannerRequest request = createFootstepPlanRequest(goalPosition, yawRobotToGoal);
+      leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+      rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      leftGoalPose.setToZero();
+      rightGoalPose.setToZero();
+
+      ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.8f);
+      FootstepPlannerRequest request = createFootstepPlanRequest();
       request.setHeightMapData(heightMapData);
+
+      //if (plannerOutput != null)
+      //   request.setReferencePlan(plannerOutput.getFootstepPlan());
+
       plannerOutput = footstepPlanner.handleRequest(request);
+
+      if (plannerOutput != null)
+      {
+         FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+         LogTools.info("Footstep Planning Result: {}", footstepPlanningResult);
+
+         planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
+      }
    }
 
-   public FootstepPlannerRequest createFootstepPlanRequest(Point2D goalPosition, float yawRobotToGoal)
+   public FootstepPlannerRequest createFootstepPlanRequest()
    {
-      Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
-      leftGoalPose.set(goalPose);
-      rightGoalPose.set(goalPose);
-      leftGoalPose.prependTranslation(0.0, 0.12, 0.0);
-      rightGoalPose.prependTranslation(0.0, -0.12, 0.0);
-
       request = new FootstepPlannerRequest();
-      request.setTimeout(1.5);
+      request.setTimeout(2.0);
       request.setStartFootPoses(leftSolePose, rightSolePose);
       request.setPlanBodyPath(false);
       request.setGoalFootPoses(leftGoalPose, rightGoalPose);
