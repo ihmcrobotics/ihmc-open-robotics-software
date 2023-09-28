@@ -67,34 +67,44 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
 
       this.actionIndex = actionIndex;
 
-      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-      armIKSolver.copySourceToWork();
-
-      ReferenceFrame chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
       // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
-      if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
-          (getExecuteWithNextAction() && actionIndex == nextExecutionIndex))
-      {
-         rootCalculator.getKinematicsInfo();
-         rootCalculator.computeRoot();
-         chestFrame = rootCalculator.getRoot();
-      }
+      boolean concurrentActionIsNextForExecution = concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction)
+                                                   || (getExecuteWithNextAction() && actionIndex == nextExecutionIndex);
+      boolean isNextForExecution = concurrentActionIsNextForExecution || actionIndex == nextExecutionIndex;
 
-      armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
-      armIKSolver.solve();
-
-      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-      handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
-      handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
-      handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
-      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+      if (isNextForExecution)
       {
-         handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+         armIKSolver.copySourceToWork();
+
+         ReferenceFrame chestFrame;
+         if (concurrentActionIsNextForExecution)
+         {
+            rootCalculator.getKinematicsInfo();
+            rootCalculator.computeRoot();
+            chestFrame = rootCalculator.getRoot();
+         }
+         else
+         {
+            chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
+         }
+
+         armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
+         armIKSolver.solve();
+
+         // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+         handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+         handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
+         handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
+         for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+         {
+            handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+         }
+         if (getSide() == RobotSide.LEFT)
+            ros2ControllerHelper.publish(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+         else
+            ros2ControllerHelper.publish(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
       }
-      if (getSide() == RobotSide.LEFT)
-         ros2ControllerHelper.publish(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
-      else
-         ros2ControllerHelper.publish(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
    }
 
    @Override
