@@ -77,14 +77,16 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
          armIKSolver.copySourceToWork();
 
-         ReferenceFrame chestFrame;
+         ReferenceFrame chestFrame = null;
          if (concurrentActionIsNextForExecution)
          {
             rootCalculator.getKinematicsInfo();
             rootCalculator.computeRoot();
             chestFrame = rootCalculator.getRoot();
          }
-         else
+
+         // TODO: Should rootCalculator.getRoot() be returning null?
+         if (chestFrame == null)
          {
             chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
          }
