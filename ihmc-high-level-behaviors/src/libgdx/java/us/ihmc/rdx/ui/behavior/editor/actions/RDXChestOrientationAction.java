@@ -33,7 +33,6 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.thread.Throttler;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
    private volatile boolean running = true;
    private final Throttler throttler = new Throttler().setFrequency(20.0);
-   private final FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
 
    public RDXChestOrientationAction(RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
@@ -87,7 +85,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    {
       this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
-
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
@@ -164,7 +161,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          chestPoseStatus.setCurrentAndConcurrent(true);
       else
          chestPoseStatus.setCurrentAndConcurrent(false);
-      hz.ping();
    }
 
    private void publishStatusUpdate()

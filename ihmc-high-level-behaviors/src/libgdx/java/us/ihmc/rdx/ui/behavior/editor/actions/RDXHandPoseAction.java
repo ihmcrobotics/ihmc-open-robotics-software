@@ -109,7 +109,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
-   private int previousConcurrentChestIndex = -1;
    private final IKRootCalculator rootCalculator;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
@@ -124,8 +123,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       ColorDefinition goodQualityColorDefinition = ColorDefinitions.parse(GOOD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5);
       goodQualityColor = RDXVisualTools.toColor(goodQualityColorDefinition);
       badQualityColor = RDXVisualTools.toColor(ColorDefinitions.parse(BAD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5));
-
-      RDXRobotCollisionModel robotCollisionModel = new RDXRobotCollisionModel(selectionCollisionModel);
+      
       for (RobotSide side : RobotSide.values)
       {
          handNames.put(side, syncedFullRobotModel.getHand(side).getName());

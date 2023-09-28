@@ -88,7 +88,6 @@ public abstract class RDXBehaviorAction
 
    }
 
-
    public void destroy()
    {
 
