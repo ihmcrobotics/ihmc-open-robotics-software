@@ -1127,7 +1127,7 @@ public class MessageTools
    {
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       toEuclid(rigidBodyTransformMessage, rigidBodyTransform);
-      return  rigidBodyTransform;
+      return rigidBodyTransform;
    }
 
    public static Box3DMessage createBox3DMessage(Box3DReadOnly box)

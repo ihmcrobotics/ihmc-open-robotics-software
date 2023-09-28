@@ -31,8 +31,6 @@ public class ChestOrientationAction extends ChestOrientationActionDescription im
    private double startOrientationDistanceToGoal;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
-   private double heightVariationInWorld = 0.0;
-   private double previousPelvisHeightInWorld = -1.0;
 
    public ChestOrientationAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
    {
