@@ -1,14 +1,18 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import behavior_msgs.msg.dds.ActionSequenceUpdateMessage;
+import behavior_msgs.msg.dds.ActionsExecutionStatusMessage;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.internal.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
+import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -26,12 +30,13 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -40,7 +45,10 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.io.*;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -91,6 +99,7 @@ public class RDXBehaviorActionSequenceEditor
    private final Int32 currentActionIndexCommandMessage = new Int32();
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
+   private IHMCROS2Input<std_msgs.msg.dds.String> executionNextIndexRejectionSubscription;
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
    private IHMCROS2Input<ActionsExecutionStatusMessage> executionStatusSubscription;
    private final List<ActionExecutionStatusMessage> executionStatusMessagesToDisplay = new ArrayList<>();
@@ -101,6 +110,8 @@ public class RDXBehaviorActionSequenceEditor
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
+   private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
+   private long lastManualExecutionConfirmTime = 0;
 
    public void clear()
    {
@@ -146,6 +157,7 @@ public class RDXBehaviorActionSequenceEditor
 
       executionNextIndexStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
       automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
+      executionNextIndexRejectionSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_REJECTION_TOPIC);
       sequenceStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
       executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTIONS_EXECUTION_STATUS);
@@ -407,25 +419,67 @@ public class RDXBehaviorActionSequenceEditor
       boolean endOfSequence = executionNextIndexStatus >= actionSequence.size();
       if (!endOfSequence && !outOfSync)
       {
+         String nextActionRejectionTooltip = executionNextIndexRejectionSubscription.getLatest().getDataAsString();
+         boolean canExecuteNextAction = nextActionRejectionTooltip.isEmpty();
+
          ImGui.sameLine();
          ImGui.text("Execute");
          ImGui.sameLine();
 
          automaticExecution.set(automaticExecutionStatusSubscription.getLatest().getData());
+
+         if (!canExecuteNextAction)
+            ImGui.beginDisabled();
          if (ImGui.checkbox(labels.get("Autonomously"), automaticExecution))
          {
             automaticExecutionCommandMessage.setData(automaticExecution.get());
             ros2ControllerHelper.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
          }
+         if (!canExecuteNextAction)
+            ImGui.endDisabled();
+
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
          if (!automaticExecution.get())
          {
             ImGui.sameLine();
-            if (ImGui.button(labels.get("Manually")))
+
+            // Ensure we don't get the confirmation if it's safe to execute the action
+            if (canExecuteNextAction)
             {
-               ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+               if (ImGui.button(labels.get("Manually")))
+               {
+                  ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+               }
             }
+            else
+            {
+               if (System.currentTimeMillis() - lastManualExecutionConfirmTime < 5000)
+               {
+                  ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
+                  if (ImGui.button(labels.get("Manually (confirm)")))
+                  {
+                     ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+                     lastManualExecutionConfirmTime = 0;
+                  }
+                  ImGui.popStyleColor();
+               }
+               else
+               {
+                  ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
+                  if (ImGui.button(labels.get("Manually")))
+                  {
+                     lastManualExecutionConfirmTime = System.currentTimeMillis();
+                  }
+                  ImGui.popStyleColor();
+               }
+            }
+
             ImGuiTools.previousWidgetTooltip("Executes the next action.");
+
+            if (!executionNextIndexRejectionSubscription.getLatest().getDataAsString().isEmpty())
+            {
+               executionRejectionTooltipText.renderText(executionNextIndexRejectionSubscription.getLatest().getDataAsString(), true);
+            }
          }
       }
 
