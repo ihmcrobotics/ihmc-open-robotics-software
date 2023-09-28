@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -113,8 +114,7 @@ public class IKRootCalculator
          IKChestReferenceFrame = new ModifiableReferenceFrame(syncedRobot.getChest()
                                                                                                   .getParentJoint()
                                                                                                   .getFrameAfterJoint());
-         IKChestReferenceFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-         IKChestReferenceFrame.update(transformToParent -> updateIKChestTransform(IKChestReferenceFrame.getReferenceFrame(),
+         IKChestReferenceFrame.update(transformToParent -> updateIKChestTransform(IKChestReferenceFrame,
                                                                                    pelvisFramePoseVariation,
                                                                                    transformToParent));
          if (isPelvisCurrentAndConcurrent)
@@ -122,7 +122,7 @@ public class IKRootCalculator
             rootFrame = IKChestReferenceFrame.getReferenceFrame();
             previousConcurrentPelvisIndex = pelvisIndex;
          }
-         else if (pelvisIndex == previousConcurrentChestIndex)
+         else if (pelvisIndex == previousConcurrentPelvisIndex)
          {
             rootFrame = null;
          }
@@ -141,11 +141,12 @@ public class IKRootCalculator
     * @param pelvisFramePoseVariation The variation in the pelvis frame's pose.
     * @param IKChestTransform       The transform to update with the new chest pose.
     */
-   private void updateIKChestTransform(ReferenceFrame IKChestFrame, FramePose3D pelvisFramePoseVariation, RigidBodyTransform IKChestTransform)
+   private void updateIKChestTransform(ModifiableReferenceFrame IKChestFrame, FramePose3D pelvisFramePoseVariation, RigidBodyTransform IKChestTransform)
    {
-      if (pelvisFramePoseVariation.getReferenceFrame() != IKChestFrame)
-         pelvisFramePoseVariation.changeFrame(IKChestFrame);
-      IKChestTransform.set(IKChestFrame.getTransformToParent());
-      pelvisFramePoseVariation.transform(IKChestTransform);
+      if (pelvisFramePoseVariation.getReferenceFrame() != IKChestFrame.getReferenceFrame().getParent())
+         pelvisFramePoseVariation.changeFrame(IKChestFrame.getReferenceFrame().getParent());
+      IKChestTransform.set(IKChestFrame.getReferenceFrame().getTransformToRoot());
+//      pelvisFramePoseVariation.transform(IKChestTransform);
+      IKChestTransform.getTranslation().setZ(IKChestTransform.getTranslationZ() + pelvisFramePoseVariation.getTranslationZ());
    }
 }
