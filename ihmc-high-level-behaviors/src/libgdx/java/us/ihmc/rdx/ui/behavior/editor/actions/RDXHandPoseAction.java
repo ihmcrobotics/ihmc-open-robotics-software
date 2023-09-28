@@ -256,11 +256,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionDescription().getSide()).getRigidBody().getChildrenJoints().get(0);
             rootCalculator.getKinematicsInfo();
             rootCalculator.computeRoot();
-            ReferenceFrame rootIK = rootCalculator.getRoot();
-            if (rootIK == null)
-               floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-            else
-               floatingJoint.getJointPose().set(rootIK.getTransformToRoot());
+            floatingJoint.getJointPose().set(rootCalculator.getRoot().getTransformToRoot());
 
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {

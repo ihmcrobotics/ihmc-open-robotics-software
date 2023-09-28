@@ -86,7 +86,6 @@ public class IKRootCalculator
          boolean isPelvisCurrentAndConcurrent = pelvisPoseStatusMessage.getCurrentAndConcurrent();
          FramePose3D pelvisFramePoseVariation = new FramePose3D(referenceFrameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame().getString(0)),
                                                                 MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent()));
-//         LogTools.info(pelvisFramePoseVariation.getReferenceFrame());
          if (concurrentChestFrame != null)
          {
             latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(concurrentChestFrame.getReferenceFrame().getParent());
@@ -111,7 +110,8 @@ public class IKRootCalculator
       }
 
       if (concurrentCombinedPelvisAndChestFrame == null)
-         rootReferenceFrame = concurrentChestFrame == null ? null : concurrentChestFrame.getReferenceFrame();
+         rootReferenceFrame = concurrentChestFrame == null ? syncedRobot.getChest().getParentJoint().getFrameAfterJoint()
+                                                           : concurrentChestFrame.getReferenceFrame();
       else
          rootReferenceFrame = concurrentCombinedPelvisAndChestFrame;
    }
@@ -132,11 +132,9 @@ public class IKRootCalculator
    {
       if (pelvisFramePoseVariation.getReferenceFrame() != IKChestFrame.getReferenceFrame().getParent())
       {
-//         LogTools.info(IKChestFrame.getReferenceFrame());
          pelvisFramePoseVariation.changeFrame(IKChestFrame.getReferenceFrame().getParent());
       }
       IKChestTransform.set(IKChestFrame.getReferenceFrame().getTransformToRoot());
-//      pelvisFramePoseVariation.transform(IKChestTransform);
       IKChestTransform.getTranslation().setZ(IKChestTransform.getTranslationZ() + pelvisFramePoseVariation.getTranslationZ());
    }
 
