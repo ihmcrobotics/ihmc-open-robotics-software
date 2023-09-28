@@ -4,8 +4,8 @@
 #include "behavior_msgs/msg/./ArmJointAnglesActionDescriptionMessage_.idl"
 #include "behavior_msgs/msg/./BodyPartPoseActionDescriptionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./HandConfigurationActionDescriptionMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionDescriptionMessage_.idl"
+#include "behavior_msgs/msg/./SakeHandCommandActionDescriptionMessage_.idl"
 #include "behavior_msgs/msg/./SidedBodyPartPoseActionDescriptionMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionDescriptionMessage_.idl"
 #include "behavior_msgs/msg/./WalkActionDescriptionMessage_.idl"
@@ -26,7 +26,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::ArmJointAnglesActionDescriptionMessage, 200> arm_joint_angles_actions;
         sequence<behavior_msgs::msg::dds::BodyPartPoseActionDescriptionMessage, 200> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionDescriptionMessage, 200> footstep_plan_actions;
-        sequence<behavior_msgs::msg::dds::HandConfigurationActionDescriptionMessage, 200> hand_configuration_actions;
+        sequence<behavior_msgs::msg::dds::SakeHandCommandActionDescriptionMessage, 200> sake_hand_command_actions;
         sequence<behavior_msgs::msg::dds::SidedBodyPartPoseActionDescriptionMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionDescriptionMessage, 200> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::BodyPartPoseActionDescriptionMessage, 200> pelvis_height_actions;

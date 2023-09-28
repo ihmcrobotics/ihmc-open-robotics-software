@@ -39,9 +39,9 @@ public class RDXActionSequenceTools
       {
          return new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
       }
-      if (actionType.equals(RDXHandConfigurationAction.class.getSimpleName()))
+      if (actionType.equals(RDXSakeHandCommandAction.class.getSimpleName()))
       {
-         return robotHasArms ? new RDXHandConfigurationAction() : null;
+         return robotHasArms ? new RDXSakeHandCommandAction() : null;
       }
       if (actionType.equals(RDXHandPoseAction.class.getSimpleName()))
       {

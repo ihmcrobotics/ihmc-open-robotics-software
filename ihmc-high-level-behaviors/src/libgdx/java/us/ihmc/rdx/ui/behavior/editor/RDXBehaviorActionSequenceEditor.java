@@ -700,7 +700,7 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Hand Configuration")))
       {
-         newAction = new RDXHandConfigurationAction();
+         newAction = new RDXSakeHandCommandAction();
       }
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {

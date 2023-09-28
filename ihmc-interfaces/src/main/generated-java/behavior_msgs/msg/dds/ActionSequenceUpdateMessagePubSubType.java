@@ -15,7 +15,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1ca51e1c0e1c6e656e4a2bf122a123188210e5e0f5a240811462a1cdde1a2304";
+   		return "49fa758543bc4986befdb2e0f523535cb63e35bb4297238568ee72835a821f7a";
    }
    
    @Override
@@ -65,7 +65,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -113,9 +113,9 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getFootstepPlanActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getHandConfigurationActions().size(); ++i0)
+      for(int i0 = 0; i0 < data.getSakeHandCommandActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.HandConfigurationActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getHandConfigurationActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getSakeHandCommandActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getHandPoseActions().size(); ++i0)
@@ -162,9 +162,9 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_e(data.getFootstepPlanActions());else
           throw new RuntimeException("footstep_plan_actions field exceeds the maximum length");
 
-      if(data.getHandConfigurationActions().size() <= 200)
-      cdr.write_type_e(data.getHandConfigurationActions());else
-          throw new RuntimeException("hand_configuration_actions field exceeds the maximum length");
+      if(data.getSakeHandCommandActions().size() <= 200)
+      cdr.write_type_e(data.getSakeHandCommandActions());else
+          throw new RuntimeException("sake_hand_command_actions field exceeds the maximum length");
 
       if(data.getHandPoseActions().size() <= 200)
       cdr.write_type_e(data.getHandPoseActions());else
@@ -195,7 +195,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.read_type_e(data.getArmJointAnglesActions());	
       cdr.read_type_e(data.getChestOrientationActions());	
       cdr.read_type_e(data.getFootstepPlanActions());	
-      cdr.read_type_e(data.getHandConfigurationActions());	
+      cdr.read_type_e(data.getSakeHandCommandActions());	
       cdr.read_type_e(data.getHandPoseActions());	
       cdr.read_type_e(data.getHandWrenchActions());	
       cdr.read_type_e(data.getPelvisHeightActions());	
@@ -211,7 +211,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       ser.write_type_e("arm_joint_angles_actions", data.getArmJointAnglesActions());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.write_type_e("footstep_plan_actions", data.getFootstepPlanActions());
-      ser.write_type_e("hand_configuration_actions", data.getHandConfigurationActions());
+      ser.write_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
       ser.write_type_e("hand_pose_actions", data.getHandPoseActions());
       ser.write_type_e("hand_wrench_actions", data.getHandWrenchActions());
       ser.write_type_e("pelvis_height_actions", data.getPelvisHeightActions());
@@ -226,7 +226,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       ser.read_type_e("arm_joint_angles_actions", data.getArmJointAnglesActions());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.read_type_e("footstep_plan_actions", data.getFootstepPlanActions());
-      ser.read_type_e("hand_configuration_actions", data.getHandConfigurationActions());
+      ser.read_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
       ser.read_type_e("hand_pose_actions", data.getHandPoseActions());
       ser.read_type_e("hand_wrench_actions", data.getHandWrenchActions());
       ser.read_type_e("pelvis_height_actions", data.getPelvisHeightActions());

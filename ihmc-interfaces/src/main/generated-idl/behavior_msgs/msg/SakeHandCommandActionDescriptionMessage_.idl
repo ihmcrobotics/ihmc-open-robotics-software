@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__HandConfigurationActionDescriptionMessage__idl__
-#define __behavior_msgs__msg__HandConfigurationActionDescriptionMessage__idl__
+#ifndef __behavior_msgs__msg__SakeHandCommandActionDescriptionMessage__idl__
+#define __behavior_msgs__msg__SakeHandCommandActionDescriptionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionInformationMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::HandConfigurationActionDescriptionMessage_")
-      struct HandConfigurationActionDescriptionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::SakeHandCommandActionDescriptionMessage_")
+      struct SakeHandCommandActionDescriptionMessage
       {
         /**
          * Used for syncing action sequences
@@ -22,9 +22,17 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
-         * The grip type
+         * Hand configuration type
          */
-        unsigned long grip;
+        unsigned long configuration;
+        /**
+         * Goal position as ratio from 0.0 (closed) to 1.0 (open)
+         */
+        double position_ratio;
+        /**
+         * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
+         */
+        double torque_ratio;
         /**
          * Whether the next action can be executed at the same time of this one
          */

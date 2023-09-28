@@ -2,20 +2,20 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "HandSakeDesiredCommandMessage" defined in "HandSakeDesiredCommandMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "SakeHandDesiredCommandMessage" defined in "SakeHandDesiredCommandMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from HandSakeDesiredCommandMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit HandSakeDesiredCommandMessage_.idl instead.
+* This file was automatically generated from SakeHandDesiredCommandMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SakeHandDesiredCommandMessage_.idl instead.
 *
 */
-public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandSakeDesiredCommandMessage>
+public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SakeHandDesiredCommandMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::HandSakeDesiredCommandMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::SakeHandDesiredCommandMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "22305c68d3c88a32d98689c96452b8e810ebde4fc7b99b8a983bf213a3a6c39d";
+   		return "f78813ecc39f58314d7b334c0e08265b3d2b19f06992f7be1ec117d81e8ab732";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HandSakeDesiredCommandMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.SakeHandDesiredCommandMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -66,12 +66,12 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -94,7 +94,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
 
@@ -108,7 +108,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
    }
 
-   public static void read(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
@@ -124,7 +124,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
@@ -134,7 +134,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandSakeDesiredCommandMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SakeHandDesiredCommandMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
@@ -143,15 +143,15 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.HandSakeDesiredCommandMessage src, controller_msgs.msg.dds.HandSakeDesiredCommandMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.SakeHandDesiredCommandMessage src, controller_msgs.msg.dds.SakeHandDesiredCommandMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.HandSakeDesiredCommandMessage createData()
+   public controller_msgs.msg.dds.SakeHandDesiredCommandMessage createData()
    {
-      return new controller_msgs.msg.dds.HandSakeDesiredCommandMessage();
+      return new controller_msgs.msg.dds.SakeHandDesiredCommandMessage();
    }
    @Override
    public int getTypeSize()
@@ -165,24 +165,24 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.HandSakeDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.HandSakeDesiredCommandMessage src, controller_msgs.msg.dds.HandSakeDesiredCommandMessage dest)
+   public void copy(controller_msgs.msg.dds.SakeHandDesiredCommandMessage src, controller_msgs.msg.dds.SakeHandDesiredCommandMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public HandSakeDesiredCommandMessagePubSubType newInstance()
+   public SakeHandDesiredCommandMessagePubSubType newInstance()
    {
-      return new HandSakeDesiredCommandMessagePubSubType();
+      return new SakeHandDesiredCommandMessagePubSubType();
    }
 }

@@ -1,15 +1,14 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.tools.Timer;
 
-public class HandConfigurationAction extends HandConfigurationActionDescription implements BehaviorAction
+public class SakeHandCommandAction extends SakeHandCommandActionDescription implements BehaviorAction
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
@@ -20,7 +19,7 @@ public class HandConfigurationAction extends HandConfigurationActionDescription 
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public HandConfigurationAction(ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
    }
@@ -36,10 +35,13 @@ public class HandConfigurationAction extends HandConfigurationActionDescription 
    @Override
    public void triggerActionExecution()
    {
-      HandDesiredConfigurationMessage message
-            = HumanoidMessageTools.createHandDesiredConfigurationMessage(getSide(),
-                                                                         HandConfiguration.values[getHandConfigurationIndex()]);
-      ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
+      SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
+      message.setRobotSide(getSide().toByte());
+      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getHandConfigurationIndex()].getCommandNumber());
+      message.setPostionRatio(getGoalPosition());
+      message.setTorqueRatio(getGoalTorque());
+
+      ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
 
       executionTimer.reset();
    }

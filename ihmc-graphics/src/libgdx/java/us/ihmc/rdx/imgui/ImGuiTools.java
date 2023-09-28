@@ -125,6 +125,35 @@ public class ImGuiTools
          ImGui.styleColorsLight();
    }
 
+   /**
+    * Method for getting color ranging from green to red based on value inputted (greater value = more red)
+    * Values at which color changes are provided using the colorSwitchValues varargs.
+    * e.g.
+    *    greenToRedGradiatedColor(0.5, 0.7, 0.9) -> returns green color       (0.5 < 0.7)
+    *    greenToRedGradiatedColor(0.8, 0.7, 0.9) -> returns orange-ish color  (0.7 < 0.8 < 0.9)
+    *    greenToRedGradiatedColor(1.0, 0.7, 0.9) -> returns red color         (1.0 > 0.9)
+    *
+    * @param value The value which determines returned color
+    * @param colorSwitchValues values at which color changes (if given 3 values, color will switch from green -> yellow -> orange -> red)
+    * @return Integer value representing color
+    */
+   public static int greenToRedGradiatedColor(double value, double... colorSwitchValues)
+   {
+      float redValue = 0.0f;
+      float greenValue = 1.0f;
+
+      for (double switchValue : colorSwitchValues)
+      {
+         if (value < switchValue)
+            break;
+
+         redValue = 1.0f;
+         greenValue -= 1.0 / colorSwitchValues.length;
+      }
+
+      return new Color(redValue, greenValue, 0.0f, 0.5f).toIntBits();
+   }
+
    public static int nextWidgetIndex()
    {
       return GLOBAL_WIDGET_INDEX.getAndIncrement();
