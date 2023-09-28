@@ -37,7 +37,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 
-import javax.naming.ldap.Control;
 import java.util.ArrayList;
 
 public class RDXFootstepPlanning
