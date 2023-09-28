@@ -16,10 +16,6 @@ public abstract class NaturalPostureParameters
    private final FrameYawPitchRoll comAngleDesired = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
    private final FrameYawPitchRoll angularComKpGains = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
    private final FrameYawPitchRoll angularComKdGains = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 5.0, 5.0, 5.0);
-   private final FrameYawPitchRoll pelvisPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.02, 0.0);
-   private final FrameYawPitchRoll pelvisPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1000.0, 3000.0, 1500.0);
-   private final FrameYawPitchRoll pelvisPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 150.0, 150.0, 150.0);
-   private final FrameYawPitchRoll pelvisQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
 
    public FrameYawPitchRoll getComAngleDesired()
    {
@@ -45,19 +41,19 @@ public abstract class NaturalPostureParameters
    {
       return angularComKdGains;
    }
-
-   public MultiDOFJointPrivilegedParameters getPelvisPrivilegedParameters()
-   {
-      return new MultiDOFJointPrivilegedParameters(pelvisPrivilegedOrientation, pelvisPrivilegedOrientationKp, pelvisPrivilegedOrientationKd, pelvisQPWeights);
-   }
    /* End NaturalPostureControllerParameters */
 
    /* Begin NaturalPosturePrivilegedConfigurationControllerParameters */
+   private final FrameYawPitchRoll pelvisPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.02, 0.0);
+   private final FrameYawPitchRoll pelvisPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1000.0, 3000.0, 1500.0);
+   private final FrameYawPitchRoll pelvisPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 150.0, 450.0, 225.0);
+   private final FrameYawPitchRoll pelvisQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+
    private final FrameYawPitchRoll spineNaturalPostureOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 100.0, 100.0);
 
    private final FrameYawPitchRoll spinePrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
    private final FrameYawPitchRoll spinePrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 300.0, 50.0, 50.0);
-   private final FrameYawPitchRoll spinePrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 45.0, 45.0, 45.0);
+   private final FrameYawPitchRoll spinePrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 45.0, 7.5, 7.5);
    private final FrameYawPitchRoll spinePrivilegedOrientationQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 0.0, 0.0);
 
    private final FrameYawPitchRoll shoulderPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.1, 0.0);
@@ -79,6 +75,11 @@ public abstract class NaturalPostureParameters
    private final double anklePrivilegedOrientationKp = 4.0;
    private final double anklePrivilegedOrientationKd = 0.6;
    private final double anklePrivilegedQPWeight = 1.0;
+
+   public MultiDOFJointPrivilegedParameters getPelvisPrivilegedParameters()
+   {
+      return new MultiDOFJointPrivilegedParameters(pelvisPrivilegedOrientation, pelvisPrivilegedOrientationKp, pelvisPrivilegedOrientationKd, pelvisQPWeights);
+   }
 
    public boolean getUseSpinePrivilegedCommand()
    {
