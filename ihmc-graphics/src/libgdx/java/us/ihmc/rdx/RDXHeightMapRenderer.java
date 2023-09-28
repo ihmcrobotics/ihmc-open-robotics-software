@@ -23,6 +23,7 @@ import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
+import java.util.stream.IntStream;
 
 public class RDXHeightMapRenderer implements RenderableProvider
 {
@@ -101,9 +102,9 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       Point3D spritePoint = new Point3D();
 
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      IntStream.range(0, cellsPerAxis).parallel().forEach(xIndex ->
       {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         IntStream.range(0, cellsPerAxis).parallel().forEach(yIndex ->
          {
             spritePoint.setToZero();
 
@@ -141,8 +142,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
             // Size
             intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
-         }
-      }
+         });
+      });
 
       renderable.meshPart.size = totalCells;
       renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);

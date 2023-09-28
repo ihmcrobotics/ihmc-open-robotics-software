@@ -102,10 +102,13 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       executorService.submit(() ->
         {
-           gridMapGraphic.setInPaintHeight(inPaintHeight.get());
-           gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
-           gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
-           gridMapGraphic.generateMeshesAsync(heightMapMessage);
+           if (enableHeightMapVisualizer.get())
+           {
+              gridMapGraphic.setInPaintHeight(inPaintHeight.get());
+              gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
+              gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
+              gridMapGraphic.generateMeshesAsync(heightMapMessage);
+           }
         });
    }
 
@@ -117,7 +120,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          executorService.submit(() ->
            {
               pixelScalingFactor = imageMessage.getDepthDiscretization();
-              int numberOfBytes = imageMessage.getData().size();
+              zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
               if (heightMapImage == null)
               {
@@ -128,27 +131,22 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
                  LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
               }
 
+              if (latestHeightMapData == null)
+              {
+                 latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                         RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                         imageMessage.getPosition().getX(),
+                                                         imageMessage.getPosition().getY());
+              }
+
               PerceptionMessageTools.convertToHeightMapImage(imageMessage,
                                                              heightMapImage,
                                                              incomingCompressedImageBuffer,
                                                              incomingCompressedImageBytePointer,
                                                              compressedBytesMat);
-              zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
-              if (displayGlobalHeightMapImage.get())
-                 PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
-              else
-                 PerceptionDebugTools.clearAllWindows();
-
-              if (enableHeightMapVisualizer.get() && !heightMapMessageGenerated)
+              if (!heightMapMessageGenerated)
               {
-                 if (latestHeightMapData == null)
-                 {
-                    latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                                            RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                            imageMessage.getPosition().getX(),
-                                                            imageMessage.getPosition().getY());
-                 }
                  PerceptionMessageTools.convertToHeightMapData(heightMapImage.ptr(0),
                                                                latestHeightMapData,
                                                                imageMessage.getPosition(),
@@ -157,6 +155,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
                  latestHeightMapMessage = HeightMapMessageTools.toMessage(latestHeightMapData);
                  heightMapMessageGenerated = true;
               }
+
+              if (displayGlobalHeightMapImage.get())
+                 PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
+              else
+                 PerceptionDebugTools.clearAllWindows();
            });
       }
    }

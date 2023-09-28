@@ -48,6 +48,7 @@ public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final FramePose3D cameraPose = new FramePose3D();
+   private final FramePose3D lidarPose = new FramePose3D();
    private final ImageMessage heightMapImageMessage = new ImageMessage();
    private final BytePointer compressedDepthPointer = new BytePointer();
    private final OpenCLManager openCLManager;
@@ -72,6 +73,7 @@ public class HumanoidPerceptionModule
    private boolean sphericalRegionsEnabled = false;
    private boolean heightMapEnabled = false;
    private boolean mappingEnabled = false;
+   private boolean occupancyGridEnabled = false;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -146,6 +148,9 @@ public class HumanoidPerceptionModule
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
 
+      cameraPose.setToZero(cameraFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
       Instant acquisitionTime = Instant.now();
 
       long begin = System.nanoTime();
@@ -154,28 +159,27 @@ public class HumanoidPerceptionModule
 
       Mat heightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
       OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
-      PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                         PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
-                                                         ros2Helper,
-                                                         cameraPose,
-                                                         acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
-                                                         heightMapImage.rows(),
-                                                         heightMapImage.cols(),
-                                                         RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
+      PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
+                                                         ros2Helper, cameraPose, acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
+                                                         heightMapImage.rows(), heightMapImage.cols(), RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
 
       LogTools.info("Perception Statistics: {}", perceptionStatistics);
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
    {
-      cameraPose.setToZero(sensorFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-      extractOccupancyGrid(pointCloud,
-                           occupancy,
-                           sensorFrame.getTransformToWorldFrame(),
-                           thresholdHeight,
-                           perceptionConfigurationParameters.getOccupancyGridResolution(),
-                           70);
+      lidarPose.setToZero(sensorFrame);
+      lidarPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      if (occupancyGridEnabled)
+      {
+         executorService.submit(() ->
+           {
+              extractOccupancyGrid(pointCloud, occupancy, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
+                                   perceptionConfigurationParameters.getOccupancyGridResolution(), 70);
+           });
+      }
+
 
       // TODO: Publish the occupancy grid as ImageMessage using the ROS2Helper.
    }

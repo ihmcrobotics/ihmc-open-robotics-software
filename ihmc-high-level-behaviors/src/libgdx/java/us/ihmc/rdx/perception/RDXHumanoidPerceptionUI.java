@@ -243,7 +243,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
                                                   humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().cols(),
                                                   humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().rows(),
-                                                  RDXImagePanel.FLIP_Y);
+                                                  RDXImagePanel.DO_NOT_FLIP_Y);
       localHeightMapPanel = new RDXBytedecoImagePanel("Local Height Map",
                                                       humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageWidth(),
                                                       humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getImageHeight(),

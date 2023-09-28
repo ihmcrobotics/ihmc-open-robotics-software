@@ -32,6 +32,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.stream.IntStream;
 
 public class PerceptionMessageTools
 {
