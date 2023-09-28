@@ -12,9 +12,13 @@
     "pitchInDegrees" : -2.14,
     "yawInDegrees" : 90.0
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "RDXSakeHandCommandAction",
+    "description" : "Open (half close)",
     "side" : "right",
-    "grip" : "HALF_CLOSE"
+    "configuration" : "OPEN",
+    "position" : 0.4999999976514124,
+    "torque" : 0.30000001192092896,
+    "executeWithNextAction" : false
   }, {
     "type" : "RDXHandPoseAction",
     "parentFrame" : "2x4Debris",
@@ -38,8 +42,12 @@
     "pitchInDegrees" : -2.14,
     "yawInDegrees" : 90.0
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "RDXSakeHandCommandAction",
+    "description" : "Crush",
     "side" : "right",
-    "grip" : "CRUSH"
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
+    "executeWithNextAction" : false
   } ]
 }
