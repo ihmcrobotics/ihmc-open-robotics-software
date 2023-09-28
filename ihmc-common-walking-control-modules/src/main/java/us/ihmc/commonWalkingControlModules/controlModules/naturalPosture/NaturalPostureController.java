@@ -84,27 +84,7 @@ public class NaturalPostureController
    private final FrameVector3D derivativeFeedback = new FrameVector3D();
 
    private final OrientationFrame naturalPostureFrame = new OrientationFrame(yoCurrentNaturalPosture);
-
-   private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
-   private final YoFrameYawPitchRoll pelvisPrivilegedOrientation = new YoFrameYawPitchRoll("pPosePelvis", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll pelvisPrivilegedOrientationKp = new YoFrameYawPitchRoll("pPosePelvisKp", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll pelvisPrivilegedOrientationKd = new YoFrameYawPitchRoll("pPosePelvisKd", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll pelvisQPWeight = new YoFrameYawPitchRoll("pelvisQPWeight", ReferenceFrame.getWorldFrame(), registry);
-
-   private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj pelvisQPjacobian = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj pelvisQPweightMatrix = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj pelvisQPselectionMatrix = new DMatrixRMaj(1, 1);
-   private final YawPitchRoll pelvisYPR = new YawPitchRoll();
-   private final DMatrixRMaj pelvisYPRdot = new DMatrixRMaj(3, 1);
-   private final FrameVector3D pelvisOmegaVec = new FrameVector3D();
-   private final DMatrixRMaj pelvisOmega = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj Dpelvis = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj invDpelvis = new DMatrixRMaj(3, 3);
-   private final YoFrameYawPitchRoll pelvisAngularAcceleration = new YoFrameYawPitchRoll("pelvisAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
-
    private final YoBoolean doNullSpaceProjectionForNaturalPosture = new YoBoolean("doNullSpaceProjectionForNaturalPosture", registry);
-   private final YoBoolean doNullSpaceProjectionForPelvis = new YoBoolean("doNullSpaceProjectionForPelvis", registry);
 
    private final FullHumanoidRobotModel fullRobotModel;
 
@@ -147,25 +127,12 @@ public class NaturalPostureController
       //TODO wasnt this already decided in NaturalPostureManager?
       //switches
       doNullSpaceProjectionForNaturalPosture.set(true);
-      doNullSpaceProjectionForPelvis.set(true);
 
       // Desired NP values (wrt world)
       comAngleDesired.set(npParameters.getComAngleDesired());   // (0.0, -0.03, 0.0)
 
       KpComAngle.set(npParameters.getAngularComKpGains());
       KdComAngle.set(npParameters.getAngularComKdGains());
-
-      // Pelvis privileged pose
-      pelvisQPobjective.reshape(3, 1);
-      pelvisQPjacobian.reshape(3, 6 + fullRobotModel.getOneDoFJoints().length);
-      pelvisQPweightMatrix.reshape(3, 3);
-      pelvisQPselectionMatrix.reshape(3, 3);
-      CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
-
-      pelvisPrivilegedOrientation.set(npParameters.getPelvisPrivilegedParameters().getPrivilegedOrientation());
-      pelvisPrivilegedOrientationKp.set(npParameters.getPelvisPrivilegedParameters().getKpGain());
-      pelvisPrivilegedOrientationKd.set(npParameters.getPelvisPrivilegedParameters().getKdGain());
-      pelvisQPWeight.set(npParameters.getPelvisPrivilegedParameters().getQPWeight());
 
       parentRegistry.addChild(registry);
    }
@@ -174,9 +141,6 @@ public class NaturalPostureController
    {
       // Update NP values
       robotNaturalPosture.compute(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-
-      // Set QP objective for pelvis privileged pose:
-      pelvisPrivilegedPoseQPObjectiveCommand();
 
       // POPULATE QP MATRICES HERE:
       npQPweightMatrix.set(0, 0, npParameters.getQPWeights().getX());
@@ -309,71 +273,7 @@ public class NaturalPostureController
       return naturalPostureControlCommand;
    }
 
-   //TODO should this and its getter live in NaturalPosturePrivilegedController?
-   //Implements a YPR servo on the pelvis, which is then used for the privileged
-   //pose of the pelvis (via task null-space projection)
-   private void pelvisPrivilegedPoseQPObjectiveCommand()
-   {
-      pelvisQPweightMatrix.set(0, 0, pelvisQPWeight.getRoll());
-      pelvisQPweightMatrix.set(1, 1, pelvisQPWeight.getPitch());
-      pelvisQPweightMatrix.set(2, 2, pelvisQPWeight.getYaw());
 
-      // Get current pelvis YPR and omega:
-      pelvisYPR.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
-      pelvisOmegaVec.setIncludingFrame(fullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame().getAngularPart());
-      // Ugh...
-      pelvisOmega.set(0, 0, pelvisOmegaVec.getX());
-      pelvisOmega.set(1, 0, pelvisOmegaVec.getY());
-      pelvisOmega.set(2, 0, pelvisOmegaVec.getZ());
-
-      double sbe = Math.sin(pelvisYPR.getPitch());
-      double cbe = Math.cos(pelvisYPR.getPitch());
-      double sal = Math.sin(pelvisYPR.getRoll());
-      double cal = Math.cos(pelvisYPR.getRoll());
-      Dpelvis.set(0, 0, -sbe);
-      Dpelvis.set(0, 1, 0.0);
-      Dpelvis.set(0, 2, 1.0);
-      Dpelvis.set(1, 0, cbe * sal);
-      Dpelvis.set(1, 1, cal);
-      Dpelvis.set(1, 2, 0.0);
-      Dpelvis.set(2, 0, cbe * cal);
-      Dpelvis.set(2, 1, -sal);
-      Dpelvis.set(2, 2, 0.0);
-
-      CommonOps_DDRM.invert(Dpelvis, invDpelvis);
-      CommonOps_DDRM.mult(invDpelvis, pelvisOmega, pelvisYPRdot); // pelvis YPR rates
-
-      // The pelvis equilibrium pose servo:
-      pelvisAngularAcceleration.setYaw(pelvisPrivilegedOrientationKp.getYaw() * (pelvisPrivilegedOrientation.getYaw() - pelvisYPR.getYaw())
-                                       - pelvisPrivilegedOrientationKd.getYaw() * pelvisYPRdot.get(0, 0));
-      pelvisAngularAcceleration.setPitch(pelvisPrivilegedOrientationKp.getPitch() * (pelvisPrivilegedOrientation.getPitch() - pelvisYPR.getPitch())
-                                         - pelvisPrivilegedOrientationKd.getPitch() * pelvisYPRdot.get(1, 0));
-      pelvisAngularAcceleration.setRoll(pelvisPrivilegedOrientationKp.getRoll() * (pelvisPrivilegedOrientation.getRoll() - pelvisYPR.getRoll())
-                                        - pelvisPrivilegedOrientationKd.getRoll() * pelvisYPRdot.get(2, 0));
-
-      yprDDot.set(0, 0, pelvisAngularAcceleration.getYaw());
-      yprDDot.set(1, 0, pelvisAngularAcceleration.getPitch());
-      yprDDot.set(2, 0, pelvisAngularAcceleration.getRoll());
-
-      CommonOps_DDRM.mult(Dpelvis, yprDDot, pelvisQPobjective); // GMN: missing D-dot*yprDot term
-
-      pelvisQPjacobian.zero(); // GMN: necessary??
-      pelvisQPjacobian.set(0, 0, 1.0);
-      pelvisQPjacobian.set(1, 1, 1.0);
-      pelvisQPjacobian.set(2, 2, 1.0);
-
-      // Populate the QPObjectiveCommand:
-      pelvisQPObjectiveCommand.setDoNullSpaceProjection(doNullSpaceProjectionForPelvis.getBooleanValue());
-      pelvisQPObjectiveCommand.getObjective().set(pelvisQPobjective);
-      pelvisQPObjectiveCommand.getJacobian().set(pelvisQPjacobian);
-      pelvisQPObjectiveCommand.getSelectionMatrix().set(pelvisQPselectionMatrix);
-      pelvisQPObjectiveCommand.getWeightMatrix().set(pelvisQPweightMatrix);
-   }
-
-   public InverseDynamicsCommand<?> getPelvisPrivilegedPoseCommand()
-   {
-      return pelvisQPObjectiveCommand;
-   }
 
    ///////////////////// methods for generating data for paper
 

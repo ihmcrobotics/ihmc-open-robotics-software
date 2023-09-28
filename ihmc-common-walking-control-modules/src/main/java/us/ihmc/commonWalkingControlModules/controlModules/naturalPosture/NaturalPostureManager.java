@@ -70,7 +70,7 @@ public class NaturalPostureManager
 
    public InverseDynamicsCommand<?> getPelvisPrivilegedPoseCommand()
    {
-      return naturalPostureController.getPelvisPrivilegedPoseCommand();
+      return naturalPosturePrivilegedConfigurationController.getPelvisPrivilegedPoseCommand();
    }
 
    public JointLimitEnforcementMethodCommand getJointLimitEnforcementCommand()
@@ -80,9 +80,8 @@ public class NaturalPostureManager
 
    public void compute()
    {
-      naturalPosturePrivilegedConfigurationController.compute(); //this is intentionally outside the time measurement
-
       naturalPostureTimer.startMeasurement();
+      naturalPosturePrivilegedConfigurationController.compute();
       naturalPostureController.compute();
       naturalPostureTimer.stopMeasurement();
    }
