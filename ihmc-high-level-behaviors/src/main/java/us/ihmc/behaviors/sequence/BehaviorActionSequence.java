@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.*;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
+import std_msgs.msg.dds.String;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -46,6 +47,7 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
+   public static final ROS2Topic<String> EXECUTION_NEXT_INDEX_REJECTION_TOPIC = STATUS_TOPIC.withType(String.class).withSuffix("execution_next_index_rejection");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> LEFT_HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("left_hand_pose_joint_angles");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> RIGHT_HAND_POSE_JOINT_ANGLES_STATUS
@@ -78,6 +80,7 @@ public class BehaviorActionSequence
 
    private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
    public final Int32 executionNextIndexStatusMessage = new Int32();
+   public final String executionNextIndexRejectionMessage = new String();
    public final Bool automaticExecutionStatusMessage = new Bool();
 
    private final Throttler oneHertzThrottler = new Throttler();
@@ -315,6 +318,18 @@ public class BehaviorActionSequence
          executeWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
       lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, executeWithPreviousAction);
+      // If automatic execution, we want to ensure it's able to execute before we perform the execution.
+      // If it's unable to execute, disable automatic execution.
+      if (automaticExecution)
+      {
+         if (!lastCurrentlyExecutingAction.canExecute())
+         {
+            automaticExecution = false;
+            // Early return
+            return;
+         }
+      }
+      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, executeWithPreviousAction);
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);
@@ -337,6 +352,13 @@ public class BehaviorActionSequence
       ros2.publish(EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
       automaticExecutionStatusMessage.setData(automaticExecution);
       ros2.publish(AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);
+
+      if (executionNextIndex < actionSequence.size())
+      {
+         BehaviorAction nextExecutionAction = actionSequence.get(executionNextIndex);
+         executionNextIndexRejectionMessage.setData(nextExecutionAction.getExecutionRejectionTooltip().toString());
+         ros2.publish(EXECUTION_NEXT_INDEX_REJECTION_TOPIC, executionNextIndexRejectionMessage);
+      }
 
       if (oneHertzThrottler.run(1.0))
       {
