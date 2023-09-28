@@ -50,7 +50,7 @@ public class NaturalPosturePaperDataComputanator
       relativeAngularVel.setY(relativeVel.get(1));
       relativeAngularVel.setZ(relativeVel.get(2));
 
-      DMatrixRMaj b_omega_bc = MatrixTools.mult(robotNaturalPosture.getNaturalPostureJacobianRtBaseEwrtBase(), momentumData.jointVelocity);
+      DMatrixRMaj b_omega_bc = MatrixTools.mult(robotNaturalPosture.getCenterOfMassOrientationJacobianRelativeToBase(), momentumData.jointVelocity);
       omega_bc.setX(b_omega_bc.get(0));
       omega_bc.setY(b_omega_bc.get(1));
       omega_bc.setZ(b_omega_bc.get(2));
