@@ -186,8 +186,11 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
    public void destroy()
    {
-      LogTools.info("Destroying RDX chest pose status publisher for action {}", getActionIndex());
+      LogTools.info("Destroying RDX pelvis pose status publisher for action {}", getActionIndex());
       running = false;
+      pelvisPoseStatus.setActionIndex(getActionIndex());
+      pelvisPoseStatus.setCurrentAndConcurrent(false);
+      ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
    }
 
    @Override
