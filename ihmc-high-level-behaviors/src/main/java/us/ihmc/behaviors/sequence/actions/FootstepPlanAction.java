@@ -22,7 +22,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class FootstepPlanAction extends FootstepPlanActionData implements BehaviorAction
+public class FootstepPlanAction extends FootstepPlanActionDescription implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -30,6 +30,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final WalkingControllerParameters walkingControllerParameters;
    private int actionIndex;
    private final FramePose3D solePose = new FramePose3D();
@@ -54,14 +55,14 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
-      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
-      update();
+      update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -72,7 +73,7 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       footstepPlanToExecute.clear();
       for (FootstepActionData footstep : getFootsteps())
       {
-         solePose.setIncludingFrame(getPlanFrame(), footstep.getSolePose());
+         solePose.setIncludingFrame(getConditionalReferenceFrame().get().getParent(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }
@@ -102,7 +103,8 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get().getParent(),
+                                                      footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else
@@ -126,7 +128,8 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(), footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get().getParent(),
+                                                      footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else

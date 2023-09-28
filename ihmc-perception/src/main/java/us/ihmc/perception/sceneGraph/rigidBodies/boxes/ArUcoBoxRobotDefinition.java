@@ -29,24 +29,25 @@ public class ArUcoBoxRobotDefinition extends RobotDefinition
       RigidBodyDefinition elevator = new RigidBodyDefinition("boxRootBody");
       SixDoFJointDefinition floatingJoint = new SixDoFJointDefinition("boxRootJoint");
 
-      double size = RigidBodySceneObjectDefinitions.BOX_SIZE;
       RigidBodyDefinition box = new RigidBodyDefinition(RigidBodySceneObjectDefinitions.BOX_NAME);
       VisualDefinition modelVisualDefinition = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(RigidBodySceneObjectDefinitions.BOX_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       box.addVisualDefinition(modelVisualDefinition);
 
-      CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition(new Box3DDefinition(size, size, size));
-      collisionShapeDefinition.getOriginPose().getTranslation().set(size / 2.0, size / 2.0, size / 2.0);
+      CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition(new Box3DDefinition(RigidBodySceneObjectDefinitions.BOX_DEPTH,
+                                                                                                           RigidBodySceneObjectDefinitions.BOX_WIDTH,
+                                                                                                           RigidBodySceneObjectDefinitions.BOX_HEIGHT));
+      collisionShapeDefinition.getOriginPose().getTranslation().set(RigidBodySceneObjectDefinitions.BOX_DEPTH / 2.0, RigidBodySceneObjectDefinitions.BOX_WIDTH / 2.0, 0.0);
       box.addCollisionShapeDefinition(collisionShapeDefinition);
 
       box.setMass(0.5);
       double radiusOfGyrationPercent = 0.8;
       box.setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(box.getMass(),
-                                                                               radiusOfGyrationPercent * size,
-                                                                               radiusOfGyrationPercent * size,
-                                                                               radiusOfGyrationPercent * size));
-      Point3D centerOfMassOffset = new Point3D(size / 2.0, size / 2.0, size / 2.0);
+                                                                               radiusOfGyrationPercent * RigidBodySceneObjectDefinitions.BOX_DEPTH,
+                                                                               radiusOfGyrationPercent * RigidBodySceneObjectDefinitions.BOX_WIDTH,
+                                                                               radiusOfGyrationPercent * RigidBodySceneObjectDefinitions.BOX_HEIGHT));
+      Point3D centerOfMassOffset = new Point3D(RigidBodySceneObjectDefinitions.BOX_DEPTH / 2.0, RigidBodySceneObjectDefinitions.BOX_WIDTH / 2.0, RigidBodySceneObjectDefinitions.BOX_HEIGHT / 2.0);
       box.getInertiaPose().getTranslation().set(centerOfMassOffset);
       box.getInertiaPose().getRotation().setToZero();
 

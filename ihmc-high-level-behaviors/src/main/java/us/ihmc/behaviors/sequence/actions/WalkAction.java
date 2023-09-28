@@ -28,7 +28,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class WalkAction extends WalkActionData implements BehaviorAction
+public class WalkAction extends WalkActionDescription implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -41,6 +41,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int actionIndex;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
@@ -64,19 +65,19 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
-      update();
+      update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
 
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(getGoalFrame(), getGoalFootstepToParentTransforms().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
