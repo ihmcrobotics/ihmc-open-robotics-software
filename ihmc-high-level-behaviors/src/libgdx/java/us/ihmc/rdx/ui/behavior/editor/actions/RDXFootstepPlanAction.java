@@ -68,7 +68,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
       actionDescription.update(referenceFrameLibrary);
 

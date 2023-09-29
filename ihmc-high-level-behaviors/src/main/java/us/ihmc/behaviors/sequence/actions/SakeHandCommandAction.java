@@ -25,7 +25,7 @@ public class SakeHandCommandAction extends SakeHandCommandActionDescription impl
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update();
 

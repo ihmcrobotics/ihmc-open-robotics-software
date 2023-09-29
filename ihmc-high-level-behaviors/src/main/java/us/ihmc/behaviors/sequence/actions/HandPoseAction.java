@@ -9,10 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
-import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.*;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -43,6 +40,7 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final IKRootCalculator rootCalculator;
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -59,42 +57,40 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
+      rootCalculator = new IKRootCalculator(ros2ControllerHelper, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
+      boolean isNextForExecution = concurrentActionIsNextForExecution || actionIndex == nextExecutionIndex;
 
-      // while the first action is being executed and the corresponding IK solution is computed, also do that for the following concurrent actions
-      if (concurrencyWithPreviousIndex && actionIndex == (nextExecutionIndex + indexShiftConcurrentAction) ||
-          actionIndex == nextExecutionIndex)
+      if (isNextForExecution)
       {
-         computeAndPublishIKSolution();
-      }
-   }
+         ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+         armIKSolver.copySourceToWork();
+         rootCalculator.getKinematicsInfo();
+         rootCalculator.computeRoot();
+         ReferenceFrame chestFrame = rootCalculator.getRoot();
+         armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
+         armIKSolver.solve();
 
-   private void computeAndPublishIKSolution()
-   {
-      ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
-      armIKSolver.copyActualToWork();
-      armIKSolver.update(getConditionalReferenceFrame().get());
-      armIKSolver.solve();
-
-      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-      handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
-      handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
-      handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
-      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-      {
-         handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+         // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+         handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+         handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
+         handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
+         for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+         {
+            handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+         }
+         if (getSide() == RobotSide.LEFT)
+            ros2ControllerHelper.publish(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+         else
+            ros2ControllerHelper.publish(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
       }
-      if (getSide() == RobotSide.LEFT)
-         ros2ControllerHelper.publish(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
-      else
-         ros2ControllerHelper.publish(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
    }
 
    @Override
@@ -124,6 +120,12 @@ public class HandPoseAction extends HandPoseActionDescription implements Behavio
                                                                                                         frameHand.getPosition(),
                                                                                                         frameHand.getOrientation(),
                                                                                                         ReferenceFrame.getWorldFrame());
+         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
+         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
          handTrajectoryMessage.setForceExecution(true);
 
          HandHybridJointspaceTaskspaceTrajectoryMessage hybridHandMessage = HumanoidMessageTools.createHandHybridJointspaceTaskspaceTrajectoryMessage(getSide(),

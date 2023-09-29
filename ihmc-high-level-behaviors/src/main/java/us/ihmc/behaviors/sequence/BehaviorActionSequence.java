@@ -4,7 +4,6 @@ import behavior_msgs.msg.dds.*;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
-import std_msgs.msg.dds.String;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -52,6 +51,10 @@ public class BehaviorActionSequence
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("left_hand_pose_joint_angles");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> RIGHT_HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("right_hand_pose_joint_angles");
+   public static final ROS2Topic<BodyPartPoseStatusMessage> CHEST_POSE_STATUS
+         = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("chest_pose_status");
+   public static final ROS2Topic<BodyPartPoseStatusMessage> PELVIS_POSE_VARIATION_STATUS
+         = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("pelvis_pose_status");
    public static final ROS2Topic<ActionsExecutionStatusMessage> ACTIONS_EXECUTION_STATUS
          = STATUS_TOPIC.withType(ActionsExecutionStatusMessage.class).withSuffix("execution_status");
 
@@ -76,7 +79,6 @@ public class BehaviorActionSequence
 
    private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
    public final Int32 executionNextIndexStatusMessage = new Int32();
-   public final std_msgs.msg.dds.String executionNextIndexRejectionMessage = new std_msgs.msg.dds.String();
    public final Bool automaticExecutionStatusMessage = new Bool();
 
    private final Throttler oneHertzThrottler = new Throttler();
@@ -213,12 +215,16 @@ public class BehaviorActionSequence
          currentlyExecutingActions.clear();
       }
 
-      for (int i = 0; i < actionSequence.size(); i++)
+      for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
-         boolean concurrencyWithPreviousAction = false;
-         if (i > 0)
-            concurrencyWithPreviousAction = actionSequence.get(i - 1).getExecuteWithNextAction();
-         actionSequence.get(i).update(i, executionNextIndex, concurrencyWithPreviousAction, getIndexShiftFromConcurrentActionRoot(i, concurrencyWithPreviousAction, executionNextIndex));
+         boolean executeWithPreviousAction = false;
+         if (actionIndex > 0)
+            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getExecuteWithNextAction();
+
+         boolean firstConcurrentActionIsNextForExecution = actionSequence.get(actionIndex).getExecuteWithNextAction() && actionIndex == executionNextIndex;
+         boolean otherConcurrentActionIsNextForExecution = executeWithPreviousAction && actionIndex == (executionNextIndex + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndex,true));
+         boolean concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
+         actionSequence.get(actionIndex).update(actionIndex, executionNextIndex, concurrentActionIsNextForExecution);
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -277,14 +283,13 @@ public class BehaviorActionSequence
 
    /**
     * @param actionIndex Index of the current action
-    * @param concurrencyWithPreviousAction Whether this action has to be executed at the same time of the previous one
     * @param executionNextIndex Index of the next action to be executed
+    * @param executeWithPreviousAction Whether this action has to be executed at the same time of the previous one
     * @return Index shift in the actionSequence array from the current action to the first action of the same group of concurrent actions
-    * Note. the first action of the same group cannot be an action that happens before the executionNextIndex
     */
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, boolean concurrencyWithPreviousAction, int executionNextIndex)
+   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, int executionNextIndex, boolean executeWithPreviousAction)
    {
-      if (concurrencyWithPreviousAction)
+      if (executeWithPreviousAction)
       {
          boolean isNotRootOfConcurrency = true;
          for (int j = 1; j <= actionIndex; j++)
@@ -306,12 +311,10 @@ public class BehaviorActionSequence
 
    private void executeNextAction()
    {
-      boolean concurrencyWithPreviousAction = false;
+      boolean executeWithPreviousAction = false;
       if (lastCurrentlyExecutingAction != null)
-         concurrencyWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
-
+         executeWithPreviousAction = lastCurrentlyExecutingAction.getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
-
       // If automatic execution, we want to ensure it's able to execute before we perform the execution.
       // If it's unable to execute, disable automatic execution.
       if (automaticExecution)
@@ -323,9 +326,8 @@ public class BehaviorActionSequence
             return;
          }
       }
-
-      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrencyWithPreviousAction,
-                                          getIndexShiftFromConcurrentActionRoot(executionNextIndex, concurrencyWithPreviousAction, executionNextIndex));
+      boolean concurrentActionIsNextForExecution = lastCurrentlyExecutingAction.getExecuteWithNextAction() || executeWithPreviousAction;
+      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrentActionIsNextForExecution);
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);
@@ -348,13 +350,6 @@ public class BehaviorActionSequence
       ros2.publish(EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
       automaticExecutionStatusMessage.setData(automaticExecution);
       ros2.publish(AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);
-
-      if (executionNextIndex < actionSequence.size())
-      {
-         BehaviorAction nextExecutionAction = actionSequence.get(executionNextIndex);
-         executionNextIndexRejectionMessage.setData(nextExecutionAction.getExecutionRejectionTooltip().toString());
-         ros2.publish(EXECUTION_NEXT_INDEX_REJECTION_TOPIC, executionNextIndexRejectionMessage);
-      }
 
       if (oneHertzThrottler.run(1.0))
       {
