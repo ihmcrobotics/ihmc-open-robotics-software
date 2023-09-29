@@ -147,7 +147,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          highlightModel.setTransparency(0.5);
       }
 
-      chestPoseStatus.setActionIndex(getActionIndex());
       chestPoseStatus.getParentFrame().resetQuick();
       chestPoseStatus.getParentFrame().add(getActionDescription().get().getParent().getName());
       MessageTools.toMessage(getActionDescription().getTransformToParent(), chestPoseStatus.getTransformToParent());
@@ -159,7 +158,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          chestPoseStatus.setCurrentAndConcurrent(true);
          if (throttler.run())
          {
-            if (chestPoseStatus.getActionIndex() >= 0)
+            if (getActionIndex() >= 0)
                ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
          }
       }
@@ -174,7 +173,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void updateBeforeRemoving()
    {
-      chestPoseStatus.setActionIndex(getActionIndex());
       chestPoseStatus.setCurrentAndConcurrent(false);
       ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
    }
