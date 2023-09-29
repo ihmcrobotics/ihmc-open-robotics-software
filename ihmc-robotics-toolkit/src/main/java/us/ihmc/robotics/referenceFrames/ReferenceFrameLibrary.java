@@ -75,7 +75,7 @@ public class ReferenceFrameLibrary
          for (String dynamicFrameName : dynamicCollection.getFrameNameList())
             referenceFrameNameSet.add(dynamicFrameName);
 
-      referenceFrameNameArray = referenceFrameNameSet.toArray(referenceFrameNameArray);
+      getReferenceFrameNameArray();
    }
 
    @Nullable
