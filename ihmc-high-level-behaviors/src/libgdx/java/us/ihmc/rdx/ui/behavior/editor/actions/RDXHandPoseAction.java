@@ -182,7 +182,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getConditionalReferenceFrame());
+      referenceFrameLibraryCombo.setSelectedParentReferenceFrameName(actionDescription.getConditionalReferenceFrame().getConditionallyValidParentFrameName());
    }
 
    public void setSide(RobotSide side)
@@ -292,7 +292,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       }
       if (referenceFrameLibraryCombo.render())
       {
-         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedParentReferenceFrameName());
       }
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
