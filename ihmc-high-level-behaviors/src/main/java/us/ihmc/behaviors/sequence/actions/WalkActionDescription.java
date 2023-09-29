@@ -37,6 +37,7 @@ public class WalkActionDescription extends FrameBasedBehaviorActionDescription
    {
       description = jsonNode.get("description").textValue();
       getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
+      System.out.println(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       JSONTools.toEuclid(jsonNode, getTransformToParent());
       for (RobotSide side : RobotSide.values)
       {
