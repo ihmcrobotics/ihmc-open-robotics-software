@@ -146,7 +146,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          highlightModel.setTransparency(0.5);
       }
 
-      pelvisPoseStatus.setActionIndex(getActionIndex());
       pelvisPoseStatus.getParentFrame().resetQuick();
       pelvisPoseStatus.getParentFrame().add(getActionDescription().get().getParent().getName());
 
@@ -168,7 +167,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          pelvisPoseStatus.setCurrentAndConcurrent(true);
          if (throttler.run())
          {
-            if (pelvisPoseStatus.getActionIndex() >= 0)
+            if (getActionIndex() >= 0)
                ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
          }
       }
@@ -183,7 +182,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void updateBeforeRemoving()
    {
-      pelvisPoseStatus.setActionIndex(getActionIndex());
       pelvisPoseStatus.setCurrentAndConcurrent(false);
       ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
    }
