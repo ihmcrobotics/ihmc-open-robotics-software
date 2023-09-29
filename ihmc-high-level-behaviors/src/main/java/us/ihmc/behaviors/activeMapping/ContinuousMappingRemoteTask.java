@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -31,13 +33,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousMappingRemoteTask
 {
-   private final static long PLANNING_PERIOD_MS = 350;
+   private final static long ACTIVE_MAPPING_UPDATE_TICK_MS = 10;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                    getClass(),
                                                                    ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(new WalkingStatusMessage());
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
+   private final AtomicReference<FootstepQueueStatusMessage> footstepQueueStatusMessage = new AtomicReference<>(new FootstepQueueStatusMessage());
+
    private final ROS2PublisherMap publisherMap;
    private final ROS2Topic controllerFootstepDataTopic;
 
@@ -68,8 +73,56 @@ public class ContinuousMappingRemoteTask
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepStatusReceived);
+      //ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepQueueStatusReceived);
 
-      executorService.scheduleAtFixedRate(this::updateActiveMappingPlan,0, PLANNING_PERIOD_MS, TimeUnit.MILLISECONDS);
+
+      executorService.scheduleAtFixedRate(this::updateActiveMapper, 0, ACTIVE_MAPPING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
+   }
+
+   /**
+    * Runs the continuous mapper state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The status messages decide the state of the machine.
+    */
+   private void updateActiveMapper()
+   {
+      //LogTools.info("PlanAvailable:{}, WalkingStatus:{}",
+      //              activeMapper.isPlanAvailable(),
+      //              walkingStatusMessage.get().getWalkingStatus());
+
+      if (perceptionConfigurationParameters.getActiveMapping())
+      {
+         if (!activeMapper.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
+         {
+            if (!activeMapper.isPlanAvailable()) // Only try to initialize if a plan doesn't already exist
+            {
+               activeMapper.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
+            }
+            else
+            {
+               FootstepDataListMessage footstepDataList = activeMapper.getLimitedFootstepDataListMessage(1); // Get only the first footstep
+               publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+               activeMapper.setPlanAvailable(false);
+               activeMapper.setInitialized(true);
+            }
+         }
+         else // Initialized, so we can run the state machine in normal mode to eternity
+         {
+            if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED) // start planning, swing has started
+            {
+               activeMapper.updatePlan(latestHeightMapData);
+            }
+            else if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED) // send the next footstep
+            {
+               if (activeMapper.isPlanAvailable()) // Only send the next footstep if a plan is available
+               {
+                  FootstepDataListMessage footstepDataList = activeMapper.getLimitedFootstepDataListMessage(1); // Get only the first footstep from plan
+                  publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
+                  activeMapper.updateStanceAndSwitchSides();
+                  activeMapper.setPlanAvailable(false);
+               }
+            }
+         }
+      }
    }
 
    private void walkingStatusReceived(WalkingStatusMessage walkingStatusMessage)
@@ -78,29 +131,16 @@ public class ContinuousMappingRemoteTask
       this.walkingStatusMessage.set(walkingStatusMessage);
    }
 
-   /**
-    * Scheduled on regular intervals to compute and send the active mapping plan to the controller.
-    */
-   private void updateActiveMappingPlan()
+   private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
-      if (perceptionConfigurationParameters.getActiveMapping())
-      {
-         if (walkingStatusMessage.get() != null)
-         {
-            activeMapper.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
-            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMapper.isPlanAvailable())
-            {
-               activeMapper.updatePlan(latestHeightMapData);
-            }
-         }
+      LogTools.warn("Received Footstep Status Message: {}", footstepStatusMessage);
+      this.footstepStatusMessage.set(footstepStatusMessage);
+   }
 
-         if (activeMapper.isPlanAvailable())
-         {
-            FootstepDataListMessage footstepDataList = activeMapper.getFootstepDataListMessage();
-            publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-            activeMapper.setPlanAvailable(false);
-         }
-      }
+   private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   {
+      LogTools.warn("Received Footstep Queue Status Message: {}", footstepQueueStatusMessage);
+      this.footstepQueueStatusMessage.set(footstepQueueStatusMessage);
    }
 
    public void onHeightMapReceived(ImageMessage imageMessage)

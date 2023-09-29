@@ -88,8 +88,6 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       {
          if (walkingStatusMessage.get() != null)
          {
-            activeMappingModule.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
-
             if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
             {
                activeMappingModule.updatePlan(planarRegionMap);

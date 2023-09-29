@@ -30,6 +30,8 @@ public class RDXActiveMappingUI implements RenderableProvider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
+   private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
+
    private final RDXFootstepPlanGraphic footstepPlanGraphic =
          new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
 
@@ -70,13 +72,10 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+      ImGui.checkbox("Enable Continuous Planner", enableContinuousPlanner);
+      if (perceptionConfigurationParameters != null)
       {
-         LogTools.info("Calculating footstep plan");
-         if (perceptionConfigurationParameters != null)
-         {
-            perceptionConfigurationParameters.setActiveMapping(true);
-         }
+         perceptionConfigurationParameters.setActiveMapping(enableContinuousPlanner.get());
       }
    }
 
