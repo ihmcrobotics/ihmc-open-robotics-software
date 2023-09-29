@@ -86,31 +86,19 @@ public class ZEDColorStereoDepthPublisher
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
-   private final boolean logging = Boolean.parseBoolean(System.getenv("ENABLE_ZED_LOGGING"));
-//   private final String colorChannelName = PerceptionLoggerConstants.ZED2_COLOR_NAME;
+   private final boolean logging;
+   private final String colorChannelName = PerceptionLoggerConstants.ZED2_COLOR_NAME;
    private final String depthChannelName = PerceptionLoggerConstants.ZED2_DEPTH_NAME;
-   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
 
    public ZEDColorStereoDepthPublisher(int cameraID,
                                        SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
                                        ROS2Topic<ImageMessage> depthTopic,
                                        Supplier<ReferenceFrame> sensorFrameSupplier)
    {
+      this.logging = Boolean.parseBoolean(System.getenv("ENABLE_ZED_LOGGING"));
       this.cameraID = cameraID;
 
-      if (this.logging)
-      {
-         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-         String logFileName = dateFormat.format(new Date()) + "_" + "ZEDPerceptionLog.hdf5";
-
-         perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-
-         perceptionDataLogger.addImageChannel(this.depthChannelName);
-         perceptionDataLogger.setChannelEnabled(this.depthChannelName, true);
-
-//         perceptionDataLogger.addImageChannel(this.colorChannelName);
-//         perceptionDataLogger.setChannelEnabled(this.colorChannelName, true);
-      }
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
       LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
@@ -201,19 +189,52 @@ public class ZEDColorStereoDepthPublisher
 
       colorImagePublishThread = new Thread(() ->
       {
+         PerceptionDataLogger zedColorDataLogger = null;
+         if (this.logging)
+         {
+            zedColorDataLogger = new PerceptionDataLogger();
+            String logFileName = dateFormat.format(new Date()) + "_" + "ZEDPerceptionColorLog.hdf5";
+
+            zedColorDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+
+            zedColorDataLogger.addImageChannel(this.colorChannelName);
+            zedColorDataLogger.setChannelEnabled(this.colorChannelName, true);
+         }
+
          while (running)
          {
             throttler.waitAndRun();
-            retrieveAndPublishColorImage();
+            retrieveAndPublishColorImage(zedColorDataLogger);
+         }
+         if (this.logging)
+         {
+            zedColorDataLogger.closeLogFile();
          }
       }, "ZEDColorImagePublishThread");
 
       depthImagePublishThread = new Thread(() ->
       {
+         PerceptionDataLogger zedDepthDataLogger = null;
+         if (this.logging)
+         {
+            zedDepthDataLogger = new PerceptionDataLogger();
+            String logFileName = dateFormat.format(new Date()) + "_" + "ZEDPerceptionDepthLog.hdf5";
+
+            zedDepthDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+
+            zedDepthDataLogger.addImageChannel(this.depthChannelName);
+            zedDepthDataLogger.setChannelEnabled(this.depthChannelName, true);
+         }
+
          while (running)
          {
             throttler.waitAndRun();
-            retrieveAndPublishDepthImage();
+            retrieveAndPublishDepthImage(zedDepthDataLogger);
+         }
+
+         if (this.logging)
+         {
+            zedDepthDataLogger.closeLogFile();
          }
       }, "ZEDDepthImagePublishThread");
 
@@ -226,7 +247,7 @@ public class ZEDColorStereoDepthPublisher
       depthImagePublishThread.start();
    }
 
-   private void retrieveAndPublishColorImage()
+   private void retrieveAndPublishColorImage(PerceptionDataLogger zedColorDataLogger)
    {
       for (RobotSide side : RobotSide.values())
       {
@@ -249,6 +270,11 @@ public class ZEDColorStereoDepthPublisher
          BytePointer colorJPEGPointer = new BytePointer((long) imageHeight * imageWidth);
          imageEncoder.encodeBGR(colorImageBGR.data(), colorJPEGPointer, imageWidth, imageHeight, colorImageBGR.step());
 
+         if(this.logging)
+         {
+            zedColorDataLogger.storeBytesFromPointer(colorChannelName, colorJPEGPointer);
+         }
+
          // Publish image
          ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
          imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
@@ -268,11 +294,6 @@ public class ZEDColorStereoDepthPublisher
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
          colorImageSequenceNumber.set(side, colorImageSequenceNumber.get(side) + 1L);
 
-//         if(this.logging)
-//         {
-//            perceptionDataLogger.storeBytesFromPointer(colorChannelName, colorJPEGPointer);
-//         }
-
          // Close stuff
          colorJPEGPointer.close();
          colorImageBGR.close();
@@ -280,7 +301,7 @@ public class ZEDColorStereoDepthPublisher
       }
    }
 
-   private void retrieveAndPublishDepthImage()
+   private void retrieveAndPublishDepthImage(PerceptionDataLogger zedDepthDataLogger)
    {
       // Retrieve depth image
       // There is a bug where retrieving the depth image using SL_MEM_CPU causes the depth image to be misaligned and very dark.
@@ -300,6 +321,11 @@ public class ZEDColorStereoDepthPublisher
       BytePointer depthPNGPointer = new BytePointer();
       OpenCVTools.compressImagePNG(cpuDepthImage16UC1, depthPNGPointer);
 
+      if(this.logging)
+      {
+         zedDepthDataLogger.storeBytesFromPointer(depthChannelName, depthPNGPointer);
+      }
+
       // Publish image
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
       imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
@@ -317,11 +343,6 @@ public class ZEDColorStereoDepthPublisher
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       ros2DepthImagePublisher.publish(depthImageMessage);
-
-      if(this.logging)
-      {
-         perceptionDataLogger.storeBytesFromPointer(depthChannelName, depthPNGPointer);
-      }
 
       // Close stuff
       depthPNGPointer.close();
@@ -343,8 +364,6 @@ public class ZEDColorStereoDepthPublisher
       {
          LogTools.error(interruptedException);
       }
-
-      perceptionDataLogger.closeLogFile();
 
       sl_close_camera(cameraID);
       imageEncoder.destroy();
