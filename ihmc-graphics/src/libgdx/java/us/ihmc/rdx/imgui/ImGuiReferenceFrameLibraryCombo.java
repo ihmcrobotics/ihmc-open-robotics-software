@@ -61,7 +61,6 @@ public class ImGuiReferenceFrameLibraryCombo
    public void setSelectedParentReferenceFrameName(String parentReferenceFrameName)
    {
       this.parentReferenceFrameName = parentReferenceFrameName;
-      selectedFrameIndex = referenceFrameLibrary.findFrameIndexByName(parentReferenceFrameName);
    }
 
    public String getSelectedParentReferenceFrameName()
