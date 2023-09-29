@@ -25,9 +25,9 @@ public class NaturalPostureManager
    private final ExecutionTimer naturalPostureTimer;
 
    private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
-   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
-   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
-   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommand", registry);
+   private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommandForNaturalPosture", registry);
+   private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommandsForNaturalPosture", registry);
+   private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommandForNaturalPosture", registry);
 
    public NaturalPostureManager(WalkingControllerParameters walkingControllerParameters,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,

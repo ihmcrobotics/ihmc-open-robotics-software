@@ -29,14 +29,14 @@ public class NaturalPosturePrivilegedConfigurationController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final YoVector3D pelvisPrivilegedOrientation = new YoVector3D("pPosePelvis", registry);
-   private final YoVector3D pelvisPrivilegedOrientationKp = new YoVector3D("pPosePelvisKp", registry);
-   private final YoVector3D pelvisPrivilegedOrientationKd = new YoVector3D("pPosePelvisKd", registry);
-   private final YoVector3D pelvisQPWeight = new YoVector3D("pelvisQPWeight", registry);
+   private final YoVector3D pelvisPrivilegedOrientation = new YoVector3D("naturalPosturePrivilegedOrientationPelvis", registry);
+   private final YoVector3D pelvisPrivilegedOrientationKp = new YoVector3D("naturalPosturePrivilegedOrientationPelvisKp", registry);
+   private final YoVector3D pelvisPrivilegedOrientationKd = new YoVector3D("naturalPosturePrivilegedOrientationKd", registry);
+   private final YoVector3D pelvisQPWeight = new YoVector3D("naturalPosturePrivilegedOrientationPelvisWeight", registry);
    private final DMatrixRMaj yprDDot = new DMatrixRMaj(3, 1);
 
    private final QPObjectiveCommand pelvisQPObjectiveCommand = new QPObjectiveCommand();
-   private final YoBoolean doNullSpaceProjectionForPelvis = new YoBoolean("doNullSpaceProjectionForPelvis", registry);
+   private final YoBoolean doNullSpaceProjectionForPelvis = new YoBoolean("doNullSpaceProjectionForPelvisForNaturalPosture", registry);
    private final DMatrixRMaj pelvisQPobjective = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPjacobian = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj pelvisQPweightMatrix = new DMatrixRMaj(1, 1);
@@ -47,12 +47,12 @@ public class NaturalPosturePrivilegedConfigurationController
    private final DMatrixRMaj pelvisOmega = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj Dpelvis = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj invDpelvis = new DMatrixRMaj(3, 3);
-   private final YoFrameYawPitchRoll pelvisAngularAcceleration = new YoFrameYawPitchRoll("pelvisAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll pelvisAngularAcceleration = new YoFrameYawPitchRoll("naturalPosturePelvisAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
    //TODO what are these 3 guys doing that we cant do with the next 4???
-   private final YoFrameYawPitchRoll npPoseSpineKp = new YoFrameYawPitchRoll("npPoseSpineKp", ReferenceFrame.getWorldFrame(), registry);
-   private final YoPDGains pPoseSpinePitchGains = new YoPDGains("pPoseSpinePitchGains", registry);
-   private final YoPDGains pPoseSpineRollGains = new YoPDGains("pPoseSpineRollGains", registry);
+   private final YoFrameYawPitchRoll spinePrivilegedOrientationKp = new YoFrameYawPitchRoll("naturalPosturePrivilegedOrientationSpineKp", ReferenceFrame.getWorldFrame(), registry);
+   private final YoPDGains spinePrivilegedOrientationPitchGains = new YoPDGains("naturalPosturePrivilegedOrientationSpinePitchGains", registry);
+   private final YoPDGains spinePrivilegedOrientationRollGains = new YoPDGains("naturalPosturePrivilegedOrientationSpineRollGains", registry);
 
    private final ArrayList<YoJointPrivilegedConfigurationParameters> yoJointPrivilegedConfigurationParametersList = new ArrayList<>();
 
@@ -62,9 +62,8 @@ public class NaturalPosturePrivilegedConfigurationController
    //   private final YoDouble pPoseKneeKp = new YoDouble("pPoseKneeKp", registry);
    //   private final YoDouble pPoseKneeKdFactor = new YoDouble("pPoseKneeKdFactor", registry);
 
-   private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommands", registry);
+   private final YoBoolean useSpineRollPitchJointCommands = new YoBoolean("useSpineRollPitchJointCommandsForNaturalPosture", registry);
 
-   private final HashMap<OneDoFJointBasics, OneDoFJointPrivilegedConfigurationParameters> privilegedConfigurationMap = new HashMap<>();
    private final OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -88,14 +87,14 @@ public class NaturalPosturePrivilegedConfigurationController
       useSpineRollPitchJointCommands.set(parameters.getUseSpineRollPitchJointCommands()); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         npPoseSpineKp.set(parameters.getSpineNaturalPostureOrientationKp());
+         spinePrivilegedOrientationKp.set(parameters.getSpineNaturalPostureOrientationKp());
 
-         pPoseSpinePitchGains.setKp(npPoseSpineKp.getPitch()); //25
-         pPoseSpineRollGains.setKp(npPoseSpineKp.getRoll()); //25
-         pPoseSpinePitchGains.setZeta(parameters.getSpineDamping());
-         pPoseSpineRollGains.setZeta(parameters.getSpineDamping());
-         pPoseSpinePitchGains.createDerivativeGainUpdater(true);
-         pPoseSpineRollGains.createDerivativeGainUpdater(true);
+         spinePrivilegedOrientationPitchGains.setKp(spinePrivilegedOrientationKp.getPitch()); //25
+         spinePrivilegedOrientationRollGains.setKp(spinePrivilegedOrientationKp.getRoll()); //25
+         spinePrivilegedOrientationPitchGains.setZeta(parameters.getSpineDamping());
+         spinePrivilegedOrientationRollGains.setZeta(parameters.getSpineDamping());
+         spinePrivilegedOrientationPitchGains.createDerivativeGainUpdater(true);
+         spinePrivilegedOrientationRollGains.createDerivativeGainUpdater(true);
       }
 
       //TODO These weren't used anywhere, do we need to keep them?
@@ -144,18 +143,18 @@ public class NaturalPosturePrivilegedConfigurationController
       // Testing -- track spine joint x and y with highest priority
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         pPoseSpinePitchGains.setKp(npPoseSpineKp.getPitch());
-         pPoseSpineRollGains.setKp(npPoseSpineKp.getRoll());
+         spinePrivilegedOrientationPitchGains.setKp(spinePrivilegedOrientationKp.getPitch());
+         spinePrivilegedOrientationRollGains.setKp(spinePrivilegedOrientationKp.getRoll());
 
          OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
          OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
          spinePitchCommand.setJoint(spinePitch);
          spinePitchCommand.setInverseDynamics(0.0, 0.0, 0.0);
-         spinePitchCommand.setGains(pPoseSpinePitchGains);
+         spinePitchCommand.setGains(spinePrivilegedOrientationPitchGains);
 
          spineRollCommand.setJoint(spineRoll);
          spineRollCommand.setInverseDynamics(0.0, 0.0, 0.0);
-         spineRollCommand.setGains(pPoseSpineRollGains);
+         spineRollCommand.setGains(spinePrivilegedOrientationRollGains);
 
          feedbackControlCommandList.addCommand(spinePitchCommand);
          feedbackControlCommandList.addCommand(spineRollCommand);
