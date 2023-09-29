@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.interactable;
 
 import com.badlogic.gdx.graphics.Color;
-import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
-import controller_msgs.msg.dds.HandSakeStatusMessage;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
@@ -11,7 +11,6 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
@@ -28,7 +27,7 @@ public class RDXSakeHandTorqueSlider
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
-   private final IHMCROS2Input<HandSakeStatusMessage> handStatusMessage;
+   private final IHMCROS2Input<SakeHandStatusMessage> handStatusMessage;
    private final CommunicationHelper communicationHelper;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
@@ -46,7 +45,7 @@ public class RDXSakeHandTorqueSlider
       sliderName = handSide.getPascalCaseName() + " torque";
 
       handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
-                                                                 .withTypeName(HandSakeStatusMessage.class),
+                                                                 .withTypeName(SakeHandStatusMessage.class),
                                                         message -> message.getRobotSide() == handSide.toByte());
    }
 
@@ -65,7 +64,7 @@ public class RDXSakeHandTorqueSlider
       {
          if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION));
          {
-            HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
+            SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
 
             // This attempts to keep the hand's position identical when sending a new goal torque
             // TODO: ensure resending goal position does not interfere with command sent before

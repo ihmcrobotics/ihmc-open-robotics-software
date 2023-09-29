@@ -1,12 +1,15 @@
 package us.ihmc.behaviors.sequence;
 
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import us.ihmc.tools.string.StringTools;
+
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public interface BehaviorAction extends BehaviorActionData
+public interface BehaviorAction extends BehaviorActionDescription
 {
    /** Called every tick. */
-   default void update(int actionIndex, int nextExecutionIndex)
+   default void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
    {
       update();
    }
@@ -14,7 +17,7 @@ public interface BehaviorAction extends BehaviorActionData
    /** Trigger the action to begin executing. Called once per execution. */
    default void triggerActionExecution()
    {
-      
+
    }
 
    /** Called every tick only when this action is executing. */
@@ -24,8 +27,46 @@ public interface BehaviorAction extends BehaviorActionData
    }
 
    /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
+   default ActionExecutionStatusMessage getExecutionStatusMessage()
+   {
+      return new ActionExecutionStatusMessage();
+   }
+
+   /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
    default boolean isExecuting()
    {
       return false;
+   }
+
+   default boolean canExecute()
+   {
+      boolean canExecute = true;
+
+      if (this instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
+      {
+         canExecute &= frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame();
+      }
+
+      // TODO: add other conditions
+
+      return canExecute;
+   }
+
+   default StringBuilder getExecutionRejectionTooltip()
+   {
+      StringBuilder tooltip = new StringBuilder();
+
+      if (this instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
+      {
+         if (!frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame())
+         {
+            tooltip.append(StringTools.format("Parent frame [{}] does not exist in the scene",
+                                              frameBasedBehaviorActionDescription.getConditionalReferenceFrame().getConditionallyValidParentFrameName()).get());
+         }
+      }
+
+      // TODO: add other conditions
+
+      return tooltip;
    }
 }

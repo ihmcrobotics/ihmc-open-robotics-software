@@ -1,9 +1,11 @@
 package us.ihmc.rdx.imgui;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
-import imgui.type.ImInt;
+import imgui.flag.ImGuiCol;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ConditionalReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
 /**
  * Used to select between the reference frames in a library by human readable names.
@@ -11,8 +13,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 public class ImGuiReferenceFrameLibraryCombo
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImInt referenceFrameIndex = new ImInt();
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private ConditionalReferenceFrame selectedReferenceFrame = new ConditionalReferenceFrame();
+   private int selectedFrameIndex;
 
    public ImGuiReferenceFrameLibraryCombo(ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -21,22 +24,42 @@ public class ImGuiReferenceFrameLibraryCombo
 
    public boolean render()
    {
-      return ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameLibrary.getReferenceFrameNameArray());
-   }
+      String[] referenceFrameNamesArray = referenceFrameLibrary.getReferenceFrameNameArray();
 
-   public boolean setSelectedReferenceFrame(String referenceFrameName)
-   {
-      int frameIndex = referenceFrameLibrary.findFrameIndexByName(referenceFrameName);
-      boolean frameFound = frameIndex >= 0;
-      if (frameFound)
+      if (ImGui.beginCombo(labels.get("Parent frame"), referenceFrameNamesArray[selectedFrameIndex]))
       {
-         referenceFrameIndex.set(frameIndex);
+         for (int i = 0; i < referenceFrameNamesArray.length; i++)
+         {
+            ReferenceFrame referenceFrame = referenceFrameLibrary.findFrameByName(referenceFrameNamesArray[i]);
+
+            if (referenceFrame != null)
+            {
+               boolean frameHasNoParentFrame = referenceFrame.equals(ConditionalReferenceFrame.INVALID_FRAME);
+
+               if (frameHasNoParentFrame)
+                  ImGui.pushStyleColor(ImGuiCol.Text, Color.RED.toIntBits());
+
+               if (ImGui.selectable(referenceFrameNamesArray[i], selectedFrameIndex == i))
+                  selectedFrameIndex = i;
+
+               if (frameHasNoParentFrame)
+                  ImGui.popStyleColor();
+            }
+         }
+
+         ImGui.endCombo();
       }
-      return frameFound;
+
+      return true;
    }
 
-   public ReferenceFrameSupplier getSelectedReferenceFrame()
+   public void setSelectedReferenceFrame(ConditionalReferenceFrame referenceFrame)
    {
-      return referenceFrameLibrary.findFrameByIndex(referenceFrameIndex.get());
+      this.selectedReferenceFrame = referenceFrame;
+   }
+
+   public ReferenceFrame getSelectedReferenceFrame()
+   {
+      return selectedReferenceFrame.get();
    }
 }

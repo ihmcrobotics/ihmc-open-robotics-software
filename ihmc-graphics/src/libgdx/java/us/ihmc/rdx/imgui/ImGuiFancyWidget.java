@@ -1,7 +1,6 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 
 /**
@@ -21,8 +20,8 @@ public abstract class ImGuiFancyWidget
    /** Used by a lot of widgets that extend this class. Just here for brevity for those.*/
    protected final String format;
    private final String prefixLabel;
-   private float prefixTextWidth;
-   private boolean textWidthCalculated = false;
+   /** Negative values fill available width. */
+   private float widgetWidth = -1.0f;
    private boolean widgetTextColoring = false;
    private int widgetTextColor = 0;
 
@@ -42,17 +41,9 @@ public abstract class ImGuiFancyWidget
 
    protected void beforeWidgetRender()
    {
-      if (!textWidthCalculated)
-      {
-         textWidthCalculated = true;
-         ImVec2 size = new ImVec2();
-         ImGui.calcTextSize(size, prefixLabel);
-         prefixTextWidth = size.x;
-      }
-
       ImGui.text(prefixLabel);
       ImGui.sameLine();
-      ImGui.pushItemWidth(ImGuiTools.getUsableWindowWidth() - prefixTextWidth);
+      ImGui.pushItemWidth(widgetWidth >= 0.0 ? widgetWidth : ImGui.getColumnWidth());
 
       if (widgetTextColoring)
          ImGui.pushStyleColor(ImGuiCol.Text, widgetTextColor);
@@ -86,5 +77,10 @@ public abstract class ImGuiFancyWidget
    public void clearWidgetTextColor()
    {
       widgetTextColoring = false;
+   }
+
+   public void setWidgetWidth(float widgetWidth)
+   {
+      this.widgetWidth = widgetWidth;
    }
 }

@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.actions.ChestOrientationActionData;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDescription;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -32,25 +32,32 @@ import java.util.List;
 
 public class RDXChestOrientationAction extends RDXBehaviorAction
 {
-   private final ChestOrientationActionData actionData = new ChestOrientationActionData();
+   private final ChestOrientationActionDescription actionDescription = new ChestOrientationActionDescription();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> actionData.getRotation().getYaw(), actionData::setYaw,
+   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> actionDescription.getRotation().getYaw(), actionDescription::setYaw,
                                                                  imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> actionData.getRotation().getPitch(), actionData::setPitch,
+   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> actionDescription.getRotation().getPitch(), actionDescription::setPitch,
                                                                    imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> actionData.getRotation().getRoll(), actionData::setRoll,
+   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> actionDescription.getRotation().getRoll(), actionDescription::setRoll,
                                                                   imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
-                                                                                actionData::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionDescription::getTrajectoryDuration,
+                                                                                actionDescription::setTrajectoryDuration,
                                                                                 imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"),
                                                                                                                            imDouble));
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDescription.getConditionalReferenceFrame().get(), actionDescription.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionDescription::getExecuteWithNextAction,
+                                                                                      actionDescription::setExecuteWithNextAction,
+                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionDescription::getHoldPoseInWorldLater,
+                                                                                     actionDescription::setHoldPoseInWorldLater,
+                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDescription.getConditionalReferenceFrame().get());
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -64,7 +71,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
                                     RobotCollisionModel selectionCollisionModel,
                                     ReferenceFrameLibrary referenceFrameLibrary)
    {
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
@@ -88,33 +95,33 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDescription.getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionData.changeParentFrame(parentFrame);
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
+      actionDescription.setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionDescription.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionDescription.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
    @Override
-   public void update()
+   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
    {
-      actionData.update();
+      actionDescription.update(referenceFrameLibrary);
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionData.getReferenceFrame())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDescription.getConditionalReferenceFrame().get())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
-         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
-         collisionShapeFrame.changeParentFrame(actionData.getReferenceFrame());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionDescription.getConditionalReferenceFrame().get());
+         graphicFrame.changeParentFrame(actionDescription.getConditionalReferenceFrame().get());
+         collisionShapeFrame.changeParentFrame(actionDescription.getConditionalReferenceFrame().get());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -133,10 +140,12 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
+      ImGui.sameLine();
+      executeWithNextActionWrapper.renderImGuiWidget();
+      holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
-         update();
+         actionDescription.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
       }
       ImGui.pushItemWidth(80.0f);
       yawWidget.renderImGuiWidget();
@@ -154,7 +163,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           getActionIndex(),
-                                                                          actionData.getDescription()));
+                                                                          actionDescription.getDescription()));
       }
    }
 
@@ -209,9 +218,9 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    }
 
    @Override
-   public ChestOrientationActionData getActionData()
+   public ChestOrientationActionDescription getActionDescription()
    {
-      return actionData;
+      return actionDescription;
    }
 
    @Override
