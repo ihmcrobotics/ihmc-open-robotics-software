@@ -857,7 +857,7 @@ public abstract class WalkingControllerParameters
       return null;
    }
 
-   public NaturalPostureParameters getNaturalPostureParameters()
+   public NaturalPostureParameters getNaturalPostureParameters(FullHumanoidRobotModel fullRobotModel)
    {
       return null;
    }

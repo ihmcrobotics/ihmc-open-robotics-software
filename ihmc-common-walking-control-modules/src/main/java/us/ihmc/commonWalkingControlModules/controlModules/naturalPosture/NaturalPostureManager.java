@@ -40,7 +40,7 @@ public class NaturalPostureManager
       useBodyManagerCommands.set(false);
       usePelvisOrientationCommand.set(true);
 
-      NaturalPostureParameters naturalPostureParameters = walkingControllerParameters.getNaturalPostureParameters();
+      NaturalPostureParameters naturalPostureParameters = walkingControllerParameters.getNaturalPostureParameters(controllerToolbox.getFullRobotModel());
       HumanoidRobotNaturalPosture robotNaturalPosture = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
       naturalPostureController = new NaturalPostureController(robotNaturalPosture, naturalPostureParameters, controllerToolbox, registry);
       naturalPosturePrivilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(naturalPostureParameters,

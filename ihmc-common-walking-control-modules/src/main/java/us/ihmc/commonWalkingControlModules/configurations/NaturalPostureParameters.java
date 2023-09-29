@@ -4,13 +4,17 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
 
 public abstract class NaturalPostureParameters
 {
-   public abstract String[] getJointsWithRestrictiveLimits();
-
-   public abstract JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName);
-
    /* ~~~~~~~~~~ Begin NaturalPostureControllerParameters ~~~~~~~~~~ */
    private final Vector3D npQPWeights = new Vector3D(0.01, 0.01, 1);
    private final FrameYawPitchRoll comAngleDesired = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
@@ -49,40 +53,53 @@ public abstract class NaturalPostureParameters
    /* ~~~~~~~~~~ End NaturalPostureControllerParameters ~~~~~~~~~~ */
 
    /* ~~~~~~~~~~ Begin NaturalPosturePrivilegedConfigurationControllerParameters ~~~~~~~~~~ */
-   private final FrameYawPitchRoll pelvisPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.02, 0.0);
-   private final FrameYawPitchRoll pelvisPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1000.0, 3000.0, 1500.0);
-   private final FrameYawPitchRoll pelvisPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 150.0, 450.0, 225.0);
-   private final FrameYawPitchRoll pelvisQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+   private final Vector3D pelvisPrivilegedOrientation = new Vector3D(0.0, 0.02, 0.0);
+   private final Vector3D pelvisPrivilegedOrientationKp = new Vector3D(1500.0, 3000.0, 1000.0);
+   private final Vector3D pelvisPrivilegedOrientationKd = new Vector3D(225.0, 450.0, 150.0);
+   private final Vector3D pelvisWeights = new Vector3D(1.0, 1.0, 1.0);
 
    private final FrameYawPitchRoll spineNaturalPostureOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 100.0, 100.0);
 
-   private final FrameYawPitchRoll spinePrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-   private final FrameYawPitchRoll spinePrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 300.0, 50.0, 50.0);
-   private final FrameYawPitchRoll spinePrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 45.0, 7.5, 7.5);
-   private final FrameYawPitchRoll spinePrivilegedOrientationQPWeights = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 0.0, 0.0);
+   private final ArrayList<OneDofJointPrivilegedParameters> parametersList = new ArrayList<>();
+   /* ~~~~~~~~~~ End NaturalPosturePrivilegedConfigurationControllerParameters ~~~~~~~~~~ */
 
-   private final FrameYawPitchRoll shoulderPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.1, 0.0);
-   private final FrameYawPitchRoll shoulderPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 80.0, 80.0, 80.0);
-   private final FrameYawPitchRoll shoulderPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 12.0, 12.0, 12.0);
-   private final FrameYawPitchRoll shoulderPrivilegedOrientationQPWeight = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+   public NaturalPostureParameters(FullHumanoidRobotModel fullRobotModel)
+   {
+      if (getUseSpinePrivilegedCommand())
+      {
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW), 0.0, 300.0, 45.0, 1.0));
+         /* These were not used in the original class, but they had gains assigned. Thus, we leave them here for posterity. */
+         //      jointPrivilegedParametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH), 0.0, 50.0, 7.5, 1.0));
+         //      jointPrivilegedParametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL), 0.0, 50.0, 7.5, 1.0));
+      }
 
-   // Pitch only
-   private final FrameYawPitchRoll elbowPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, -0.2, 0.0);
-   private final FrameYawPitchRoll elbowPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 30.0, 0.0);
-   private final FrameYawPitchRoll elbowPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 4.5, 0.0);
-   private final FrameYawPitchRoll elbowPrivilegedQPWeight = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 0.0);
+      for (RobotSide side : RobotSide.values)
+      {
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.SHOULDER_YAW), 0.0, 80.0, 12.0, 1.0));
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.SHOULDER_PITCH), 0.1, 80.0, 12.0, 1.0));
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.SHOULDER_ROLL), 0.0, 80.0, 12.0, 1.0));
 
-   private final FrameYawPitchRoll wristPrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-   private final FrameYawPitchRoll wristPrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 40.0, 40.0, 40.0);
-   private final FrameYawPitchRoll wristPrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 6.0, 6.0, 6.0);
-   private final FrameYawPitchRoll wristPrivilegedQPWeight = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.ELBOW_PITCH), -0.2, 30.0, 4.5, 1.0));
 
-   // Pitch and Roll
-   private final FrameYawPitchRoll anklePrivilegedOrientation = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-   private final FrameYawPitchRoll anklePrivilegedOrientationKp = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 4.0, 4.0);
-   private final FrameYawPitchRoll anklePrivilegedOrientationKd = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 0.6, 0.6);
-   private final FrameYawPitchRoll anklePrivilegedQPWeight = new FrameYawPitchRoll(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 1.0);
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.WRIST_YAW), 0.0, 40.0, 6.0, 1.0));
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.FIRST_WRIST_PITCH), 0.0, 40.0, 6.0, 1.0));
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getArmJoint(side, ArmJointName.WRIST_ROLL), 0.0, 40.0, 6.0, 1.0));
 
+         //TODO hip and knee values were not used, was this intended?
+
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getLegJoint(side, LegJointName.ANKLE_PITCH), 0.0, 4.0, 0.6, 1.0));
+         parametersList.add(new OneDofJointPrivilegedParameters(fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL), 0.0, 4.0, 0.6, 1.0));
+      }
+   }
+
+   public ArrayList<OneDofJointPrivilegedParameters> getJointPrivilegedParametersList()
+   {
+      return parametersList;
+   }
+
+   public abstract String[] getJointsWithRestrictiveLimits();
+
+   public abstract JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName);
 
    public boolean getDoNullSpaceProjectionForPelvis()
    {
@@ -109,88 +126,87 @@ public abstract class NaturalPostureParameters
       return true;
    }
 
-   public JointPrivilegedParameters getPelvisPrivilegedParameters()
+   public static class OneDofJointPrivilegedParameters
    {
-      return new JointPrivilegedParameters(pelvisPrivilegedOrientation, pelvisPrivilegedOrientationKp, pelvisPrivilegedOrientationKd, pelvisQPWeights);
-   }
+      private final OneDoFJointBasics joint;
+      private final double privilegedOrientation;
+      private final double kp;
+      private final double kd;
+      private final double weight;
 
-   public JointPrivilegedParameters getSpinePrivilegedParameters()
-   {
-      return new JointPrivilegedParameters(spinePrivilegedOrientation,
-                                           spinePrivilegedOrientationKp,
-                                           spinePrivilegedOrientationKd,
-                                           spinePrivilegedOrientationQPWeights);
-   }
-
-   public JointPrivilegedParameters getShoulderPrivilegedParameters()
-   {
-      return new JointPrivilegedParameters(shoulderPrivilegedOrientation,
-                                           shoulderPrivilegedOrientationKp,
-                                           shoulderPrivilegedOrientationKd,
-                                           shoulderPrivilegedOrientationQPWeight);
-   }
-
-   public JointPrivilegedParameters getElbowPrivilegedParameters()
-   {
-      return new JointPrivilegedParameters(elbowPrivilegedOrientation,
-                                           elbowPrivilegedOrientationKp,
-                                           elbowPrivilegedOrientationKd,
-                                           elbowPrivilegedQPWeight);
-   }
-
-   public JointPrivilegedParameters getWristPrivilegedParameters()
-   {
-      return new JointPrivilegedParameters(wristPrivilegedOrientation,
-                                           wristPrivilegedOrientationKp,
-                                           wristPrivilegedOrientationKd,
-                                           wristPrivilegedQPWeight);
-   }
-
-   public JointPrivilegedParameters getAnklePrivilegedParameters()
-   {
-      return new JointPrivilegedParameters(anklePrivilegedOrientation,
-                                           anklePrivilegedOrientationKp,
-                                           anklePrivilegedOrientationKd,
-                                           anklePrivilegedQPWeight);
-   }
-
-   public static class JointPrivilegedParameters
-   {
-      private final FrameYawPitchRoll privilegedOrientation;
-      private final FrameYawPitchRoll kpGains;
-      private final FrameYawPitchRoll kdGains;
-      private final FrameYawPitchRoll qpWeights;
-
-      public JointPrivilegedParameters(FrameYawPitchRoll privilegedOrientation,
-                                       FrameYawPitchRoll kpGains,
-                                       FrameYawPitchRoll kdGains,
-                                       FrameYawPitchRoll qpWeights)
+      public OneDofJointPrivilegedParameters(OneDoFJointBasics joint, double privilegedOrientation, double kp, double kd, double weight)
       {
+         this.joint = joint;
          this.privilegedOrientation = privilegedOrientation;
-         this.kpGains = kpGains;
-         this.kdGains = kdGains;
-         this.qpWeights = qpWeights;
+         this.kp = kp;
+         this.kd = kd;
+         this.weight = weight;
       }
 
-      public FrameYawPitchRoll getPrivilegedOrientation()
+      public OneDoFJointBasics getJoint()
+      {
+         return joint;
+      }
+
+      public double getPrivilegedOrientation()
       {
          return privilegedOrientation;
       }
 
-      public FrameYawPitchRoll getKpGain()
+      public double getKp()
       {
-         return kpGains;
+         return kp;
       }
 
-      public FrameYawPitchRoll getKdGain()
+      public double getKd()
       {
-         return kdGains;
+         return kd;
       }
 
-      public FrameYawPitchRoll getQPWeight()
+      public double getWeight()
       {
-         return qpWeights;
+         return weight;
       }
    }
-   /* ~~~~~~~~~~ End NaturalPosturePrivilegedConfigurationControllerParameters ~~~~~~~~~~ */
+
+   public BodyPrivilegedParameters getPelvisPrivilegedParameters()
+   {
+      return new BodyPrivilegedParameters(pelvisPrivilegedOrientation, pelvisPrivilegedOrientationKp, pelvisPrivilegedOrientationKd, pelvisWeights);
+   }
+
+   public static class BodyPrivilegedParameters
+   {
+      private final Vector3D privilegedOrientation;
+      private final Vector3D kp;
+      private final Vector3D kd;
+      private final Vector3D weight;
+
+      public BodyPrivilegedParameters(Vector3D privilegedOrientation, Vector3D kp, Vector3D kd, Vector3D weight)
+      {
+         this.privilegedOrientation = privilegedOrientation;
+         this.kp = kp;
+         this.kd = kd;
+         this.weight = weight;
+      }
+
+      public Vector3D getPrivilegedOrientation()
+      {
+         return privilegedOrientation;
+      }
+
+      public Vector3D getKpGain()
+      {
+         return kp;
+      }
+
+      public Vector3D getKdGain()
+      {
+         return kd;
+      }
+
+      public Vector3D getQPWeight()
+      {
+         return weight;
+      }
+   }
 }
