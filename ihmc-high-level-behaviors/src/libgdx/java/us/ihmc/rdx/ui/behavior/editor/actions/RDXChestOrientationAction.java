@@ -1,11 +1,15 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
+import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDescription;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,6 +30,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,13 +69,19 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final RDXInteractableHighlightModel highlightModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
+   private final ROS2PublishSubscribeAPI ros2;
+   private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
+   private final Throttler throttler = new Throttler().setFrequency(10.0);
+   private boolean wasConcurrent = false;
 
    public RDXChestOrientationAction(RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
-                                    ReferenceFrameLibrary referenceFrameLibrary)
+                                    ReferenceFrameLibrary referenceFrameLibrary,
+                                    ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
@@ -113,7 +124,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
       actionDescription.update(referenceFrameLibrary);
 
@@ -135,6 +146,35 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       {
          highlightModel.setTransparency(0.5);
       }
+
+      chestPoseStatus.getParentFrame().resetQuick();
+      chestPoseStatus.getParentFrame().add(getActionDescription().get().getParent().getName());
+      MessageTools.toMessage(getActionDescription().getTransformToParent(), chestPoseStatus.getTransformToParent());
+      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+      // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
+      if (concurrentActionIsNextForExecution)
+      {
+         wasConcurrent = true;
+         chestPoseStatus.setCurrentAndConcurrent(true);
+         if (throttler.run())
+         {
+            if (getActionIndex() >= 0)
+               ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+         }
+      }
+      else if (wasConcurrent)
+      {
+         chestPoseStatus.setCurrentAndConcurrent(false);
+         ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+         wasConcurrent = false;
+      }
+   }
+
+   @Override
+   public void updateBeforeRemoving()
+   {
+      chestPoseStatus.setCurrentAndConcurrent(false);
+      ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
    }
 
    @Override
@@ -227,5 +267,11 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Chest Orientation";
+   }
+
+   @Override
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWithNextActionWrapper.get();
    }
 }
