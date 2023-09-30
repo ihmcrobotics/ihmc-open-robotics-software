@@ -6,7 +6,7 @@ import us.ihmc.tools.string.StringTools;
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public interface BehaviorAction extends BehaviorActionDescription
+public interface BehaviorAction extends BehaviorActionDefinition
 {
    /** Called every tick. */
    default void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
@@ -42,9 +42,9 @@ public interface BehaviorAction extends BehaviorActionDescription
    {
       boolean canExecute = true;
 
-      if (this instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
+      if (this instanceof FrameBasedBehaviorActionDefinition frameBasedBehaviorActionDefinition)
       {
-         canExecute &= frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame();
+         canExecute &= frameBasedBehaviorActionDefinition.getConditionalReferenceFrame().hasParentFrame();
       }
 
       // TODO: add other conditions
@@ -56,12 +56,12 @@ public interface BehaviorAction extends BehaviorActionDescription
    {
       StringBuilder tooltip = new StringBuilder();
 
-      if (this instanceof FrameBasedBehaviorActionDescription frameBasedBehaviorActionDescription)
+      if (this instanceof FrameBasedBehaviorActionDefinition frameBasedBehaviorActionDefinition)
       {
-         if (!frameBasedBehaviorActionDescription.getConditionalReferenceFrame().hasParentFrame())
+         if (!frameBasedBehaviorActionDefinition.getConditionalReferenceFrame().hasParentFrame())
          {
             tooltip.append(StringTools.format("Parent frame [{}] does not exist in the scene",
-                                              frameBasedBehaviorActionDescription.getConditionalReferenceFrame().getConditionallyValidParentFrameName()).get());
+                                              frameBasedBehaviorActionDefinition.getConditionalReferenceFrame().getConditionallyValidParentFrameName()).get());
          }
       }
 

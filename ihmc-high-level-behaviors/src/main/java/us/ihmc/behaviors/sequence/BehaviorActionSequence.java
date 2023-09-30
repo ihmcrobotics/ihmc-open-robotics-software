@@ -128,55 +128,55 @@ public class BehaviorActionSequence
 
          BehaviorAction[] actionArray = new BehaviorAction[latestUpdateMessage.getSequenceSize()];
 
-         for (ArmJointAnglesActionDescriptionMessage message : latestUpdateMessage.getArmJointAnglesActions())
+         for (ArmJointAnglesActionDefinitionMessage message : latestUpdateMessage.getArmJointAnglesActions())
          {
             ArmJointAnglesAction action = new ArmJointAnglesAction(robotModel, ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (BodyPartPoseActionDescriptionMessage message : latestUpdateMessage.getChestOrientationActions())
+         for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getChestOrientationActions())
          {
             ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (FootstepPlanActionDescriptionMessage message : latestUpdateMessage.getFootstepPlanActions())
+         for (FootstepPlanActionDefinitionMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
             FootstepPlanAction action = new FootstepPlanAction(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (SakeHandCommandActionDescriptionMessage message : latestUpdateMessage.getSakeHandCommandActions())
+         for (SakeHandCommandActionDefinitionMessage message : latestUpdateMessage.getSakeHandCommandActions())
          {
             SakeHandCommandAction action = new SakeHandCommandAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (SidedBodyPartPoseActionDescriptionMessage message : latestUpdateMessage.getHandPoseActions())
+         for (SidedBodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getHandPoseActions())
          {
             HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandWrenchActionDescriptionMessage message : latestUpdateMessage.getHandWrenchActions())
+         for (HandWrenchActionDefinitionMessage message : latestUpdateMessage.getHandWrenchActions())
          {
             HandWrenchAction action = new HandWrenchAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (BodyPartPoseActionDescriptionMessage message : latestUpdateMessage.getPelvisHeightActions())
+         for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
             PelvisHeightPitchAction action = new PelvisHeightPitchAction(ros2, referenceFrameLibrary, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (WaitDurationActionDescriptionMessage message : latestUpdateMessage.getWaitDurationActions())
+         for (WaitDurationActionDefinitionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
             WaitDurationAction action = new WaitDurationAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (WalkActionDescriptionMessage message : latestUpdateMessage.getWalkActions())
+         for (WalkActionDefinitionMessage message : latestUpdateMessage.getWalkActions())
          {
             WalkAction action = new WalkAction(ros2,
                                                syncedRobot,

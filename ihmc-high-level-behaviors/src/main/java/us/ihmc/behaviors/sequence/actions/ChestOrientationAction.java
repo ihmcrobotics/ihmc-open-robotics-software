@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class ChestOrientationAction extends ChestOrientationActionDescription implements BehaviorAction
+public class ChestOrientationAction extends ChestOrientationActionDefinition implements BehaviorAction
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
