@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 
-public class HandPoseAction extends HandPoseActionDescription implements BehaviorAction
+public class HandPoseAction extends HandPoseActionDefinition implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);

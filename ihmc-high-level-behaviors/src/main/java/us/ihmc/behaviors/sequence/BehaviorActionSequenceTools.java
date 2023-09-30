@@ -7,8 +7,8 @@ import java.util.List;
 
 public class BehaviorActionSequenceTools
 {
-   public static <T extends BehaviorActionDescription> void packActionSequenceUpdateMessage(List<T> actionSequence,
-                                                                                            ActionSequenceUpdateMessage actionSequenceUpdateMessage)
+   public static <T extends BehaviorActionDefinition> void packActionSequenceUpdateMessage(List<T> actionSequence,
+                                                                                           ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
@@ -23,60 +23,60 @@ public class BehaviorActionSequenceTools
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         BehaviorActionDescription action = actionSequence.get(i);
-         if (action instanceof ArmJointAnglesActionDescription armJointAnglesActionDescription)
+         BehaviorActionDefinition action = actionSequence.get(i);
+         if (action instanceof ArmJointAnglesActionDefinition armJointAnglesActionDefinition)
          {
-            ArmJointAnglesActionDescriptionMessage armJointAnglesActionDescriptionMessage = actionSequenceUpdateMessage.getArmJointAnglesActions().add();
-            armJointAnglesActionDescriptionMessage.getActionInformation().setActionIndex(i);
-            armJointAnglesActionDescription.toMessage(armJointAnglesActionDescriptionMessage);
+            ArmJointAnglesActionDefinitionMessage armJointAnglesActionDefinitionMessage = actionSequenceUpdateMessage.getArmJointAnglesActions().add();
+            armJointAnglesActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            armJointAnglesActionDefinition.toMessage(armJointAnglesActionDefinitionMessage);
          }
-         else if (action instanceof ChestOrientationActionDescription chestOrientationActionDescription)
+         else if (action instanceof ChestOrientationActionDefinition chestOrientationActionDefinition)
          {
-            BodyPartPoseActionDescriptionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
+            BodyPartPoseActionDefinitionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
             chestOrientationActionMessage.getActionInformation().setActionIndex(i);
-            chestOrientationActionDescription.toMessage(chestOrientationActionMessage);
+            chestOrientationActionDefinition.toMessage(chestOrientationActionMessage);
          }
-         else if (action instanceof FootstepPlanActionDescription footstepPlanActionDescription)
+         else if (action instanceof FootstepPlanActionDefinition footstepPlanActionDefinition)
          {
-            FootstepPlanActionDescriptionMessage footstepPlanActionDescriptionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
-            footstepPlanActionDescriptionMessage.getActionInformation().setActionIndex(i);
-            footstepPlanActionDescription.toMessage(footstepPlanActionDescriptionMessage);
+            FootstepPlanActionDefinitionMessage footstepPlanActionDefinitionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
+            footstepPlanActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            footstepPlanActionDefinition.toMessage(footstepPlanActionDefinitionMessage);
          }
-         else if (action instanceof SakeHandCommandActionDescription sakeHandCommandActionDescription)
+         else if (action instanceof SakeHandCommandActionDefinition sakeHandCommandActionDefinition)
          {
-            SakeHandCommandActionDescriptionMessage sakehandCommandMessage = actionSequenceUpdateMessage.getSakeHandCommandActions().add();
+            SakeHandCommandActionDefinitionMessage sakehandCommandMessage = actionSequenceUpdateMessage.getSakeHandCommandActions().add();
             sakehandCommandMessage.getActionInformation().setActionIndex(i);
-            sakeHandCommandActionDescription.toMessage(sakehandCommandMessage);
+            sakeHandCommandActionDefinition.toMessage(sakehandCommandMessage);
          }
-         else if (action instanceof HandPoseActionDescription handPoseActionDescription)
+         else if (action instanceof HandPoseActionDefinition handPoseActionDefinition)
          {
-            SidedBodyPartPoseActionDescriptionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
+            SidedBodyPartPoseActionDefinitionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
             handPoseActionMessage.getActionInformation().setActionIndex(i);
-            handPoseActionDescription.toMessage(handPoseActionMessage);
+            handPoseActionDefinition.toMessage(handPoseActionMessage);
          }
-         else if (action instanceof HandWrenchActionDescription handWrenchActionDescription)
+         else if (action instanceof HandWrenchActionDefinition handWrenchActionDefinition)
          {
-            HandWrenchActionDescriptionMessage handWrenchActionDescriptionMessage = actionSequenceUpdateMessage.getHandWrenchActions().add();
-            handWrenchActionDescriptionMessage.getActionInformation().setActionIndex(i);
-            handWrenchActionDescription.toMessage(handWrenchActionDescriptionMessage);
+            HandWrenchActionDefinitionMessage handWrenchActionDefinitionMessage = actionSequenceUpdateMessage.getHandWrenchActions().add();
+            handWrenchActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            handWrenchActionDefinition.toMessage(handWrenchActionDefinitionMessage);
          }
-         else if (action instanceof PelvisHeightPitchActionDescription pelvisHeightActionDescription)
+         else if (action instanceof PelvisHeightPitchActionDefinition pelvisHeightActionDefinition)
          {
-            BodyPartPoseActionDescriptionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
+            BodyPartPoseActionDefinitionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
-            pelvisHeightActionDescription.toMessage(pelvisHeightActionMessage);
+            pelvisHeightActionDefinition.toMessage(pelvisHeightActionMessage);
          }
-         else if (action instanceof WaitDurationActionDescription waitDurationActionDescription)
+         else if (action instanceof WaitDurationActionDefinition waitDurationActionDefinition)
          {
-            WaitDurationActionDescriptionMessage waitDurationActionDescriptionMessage = actionSequenceUpdateMessage.getWaitDurationActions().add();
-            waitDurationActionDescriptionMessage.getActionInformation().setActionIndex(i);
-            waitDurationActionDescription.toMessage(waitDurationActionDescriptionMessage);
+            WaitDurationActionDefinitionMessage waitDurationActionDefinitionMessage = actionSequenceUpdateMessage.getWaitDurationActions().add();
+            waitDurationActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            waitDurationActionDefinition.toMessage(waitDurationActionDefinitionMessage);
          }
-         else if (action instanceof WalkActionDescription walkActionDescription)
+         else if (action instanceof WalkActionDefinition walkActionDefinition)
          {
-            WalkActionDescriptionMessage walkActionDescriptionMessage = actionSequenceUpdateMessage.getWalkActions().add();
-            walkActionDescriptionMessage.getActionInformation().setActionIndex(i);
-            walkActionDescription.toMessage(walkActionDescriptionMessage);
+            WalkActionDefinitionMessage walkActionDefinitionMessage = actionSequenceUpdateMessage.getWalkActions().add();
+            walkActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            walkActionDefinition.toMessage(walkActionDefinitionMessage);
          }
       }
    }
