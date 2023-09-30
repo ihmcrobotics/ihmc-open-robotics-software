@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.behaviors.sequence.BehaviorActionDescription;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -93,7 +93,7 @@ public abstract class RDXBehaviorAction
 
    }
 
-   public abstract BehaviorActionDescription getActionDescription();
+   public abstract BehaviorActionDefinition getActionDefinition();
 
    public ImBooleanWrapper getSelected()
    {

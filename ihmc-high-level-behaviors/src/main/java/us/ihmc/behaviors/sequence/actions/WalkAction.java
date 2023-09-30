@@ -28,7 +28,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class WalkAction extends WalkActionDescription implements BehaviorAction
+public class WalkAction extends WalkActionDefinition implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);

@@ -15,7 +15,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "49fa758543bc4986befdb2e0f523535cb63e35bb4297238568ee72835a821f7a";
+   		return "4fe7ec120a7066b586e8ac2c6f143e0c9c529c6222b3a17fb06ce16fcdebdcd2";
    }
    
    @Override
@@ -56,31 +56,31 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.HandWrenchActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.WaitDurationActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.WalkActionDescriptionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -100,47 +100,47 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getArmJointAnglesActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getArmJointAnglesActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getArmJointAnglesActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getChestOrientationActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getChestOrientationActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getChestOrientationActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getFootstepPlanActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getFootstepPlanActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getFootstepPlanActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getSakeHandCommandActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getSakeHandCommandActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getSakeHandCommandActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getHandPoseActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getHandPoseActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getHandPoseActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getHandWrenchActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.HandWrenchActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getHandWrenchActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getHandWrenchActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getPelvisHeightActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getPelvisHeightActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getPelvisHeightActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getWaitDurationActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.WaitDurationActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getWaitDurationActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getWaitDurationActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getWalkActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.WalkActionDescriptionMessagePubSubType.getCdrSerializedSize(data.getWalkActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getWalkActions().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;

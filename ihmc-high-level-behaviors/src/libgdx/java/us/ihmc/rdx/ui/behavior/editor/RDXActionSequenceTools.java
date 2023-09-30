@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor;
 import behavior_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionDescription;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -70,14 +70,14 @@ public class RDXActionSequenceTools
    }
 
    public static void packActionSequenceUpdateMessage(List<RDXBehaviorAction> actionSequence,
-                                                      ArrayList<BehaviorActionDescription> actionDescriptionForMessage,
+                                                      ArrayList<BehaviorActionDefinition> actionDefinitionForMessage,
                                                       ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
-      actionDescriptionForMessage.clear();
+      actionDefinitionForMessage.clear();
       for (RDXBehaviorAction behaviorAction : actionSequence)
       {
-         actionDescriptionForMessage.add(behaviorAction.getActionDescription());
+         actionDefinitionForMessage.add(behaviorAction.getActionDefinition());
       }
-      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDescriptionForMessage, actionSequenceUpdateMessage);
+      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDefinitionForMessage, actionSequenceUpdateMessage);
    }
 }

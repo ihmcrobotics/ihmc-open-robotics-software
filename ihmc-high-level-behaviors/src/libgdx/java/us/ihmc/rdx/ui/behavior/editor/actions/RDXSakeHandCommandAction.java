@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDescription;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -15,7 +15,7 @@ import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
 
 public class RDXSakeHandCommandAction extends RDXBehaviorAction
 {
-   private final SakeHandCommandActionDescription actionData = new SakeHandCommandActionDescription();
+   private final SakeHandCommandActionDefinition actionData = new SakeHandCommandActionDefinition();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
 
@@ -77,7 +77,7 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    }
 
    @Override
-   public SakeHandCommandActionDescription getActionDescription()
+   public SakeHandCommandActionDefinition getActionDefinition()
    {
       actionData.setGoalPosition(positionValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
       actionData.setGoalTorque(torqueValue[0]);
