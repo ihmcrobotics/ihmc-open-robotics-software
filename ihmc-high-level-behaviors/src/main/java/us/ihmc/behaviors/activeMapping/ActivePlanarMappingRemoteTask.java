@@ -26,7 +26,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2PublisherMap publisherMap;
    private final ROS2Topic controllerFootstepDataTopic;
 
-   private ActiveMapper activeMappingModule;
+   private ContinuousPlanner activeMappingModule;
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,
@@ -43,7 +43,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
 
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
-      activeMappingModule = new ActiveMapper(robotModel, referenceFrames, ActiveMapper.ActiveMappingMode.CONTINUOUS_MAPPING_COVERAGE);
+      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.MAX_COVERAGE);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
@@ -106,7 +106,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       }
    }
 
-   public ActiveMapper getActiveMappingModule()
+   public ContinuousPlanner getActiveMappingModule()
    {
       return activeMappingModule;
    }

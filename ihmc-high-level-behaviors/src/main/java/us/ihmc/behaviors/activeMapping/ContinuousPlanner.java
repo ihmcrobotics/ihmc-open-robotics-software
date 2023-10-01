@@ -26,18 +26,18 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActiveMapper
+public class ContinuousPlanner
 {
-   public enum ActiveMappingMode
+   public enum PlanningMode
    {
-      EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
+      EXECUTE_AND_PAUSE, WALK_STRAIGHT, MAX_COVERAGE, ACTIVE_SEARCH
    }
 
    private final Mat gridColor = new Mat();
 
    private DecisionLayer decisionLayer;
 
-   public ActiveMappingMode activeMappingMode = ActiveMappingMode.CONTINUOUS_MAPPING_STRAIGHT;
+   public PlanningMode planningMode = PlanningMode.WALK_STRAIGHT;
 
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final FootstepPlanningModule footstepPlanner;
@@ -54,6 +54,9 @@ public class ActiveMapper
 
    private SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
+   private FramePose3D lastSentFootstepPose = new FramePose3D();
+   private RobotSide lastSentFootstepSide = RobotSide.RIGHT;
 
    private ArrayList<Point2D> frontierPoints = new ArrayList<>();
 
@@ -73,7 +76,7 @@ public class ActiveMapper
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ActiveMapper(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, ActiveMappingMode mode)
+   public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.robotModel = robotModel;
@@ -83,7 +86,7 @@ public class ActiveMapper
 
       switch (mode)
       {
-         case CONTINUOUS_MAPPING_COVERAGE:
+         case MAX_COVERAGE:
             monteCarloPlanner = new MonteCarloPlanner(offset);
             break;
       }
@@ -137,11 +140,11 @@ public class ActiveMapper
 
          LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
 
-         Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
-         ActiveMapper.this.goalPose.get(RobotSide.LEFT).set(goalPose);
-         ActiveMapper.this.goalPose.get(RobotSide.RIGHT).set(goalPose);
-         ActiveMapper.this.goalPose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
-         ActiveMapper.this.goalPose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
+         Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
+         goalPose.get(RobotSide.LEFT).set(goalPoseToUse);
+         goalPose.get(RobotSide.RIGHT).set(goalPoseToUse);
+         goalPose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
+         goalPose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
 
          FootstepPlannerRequest request = createFootstepPlannerRequest();
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
@@ -162,6 +165,12 @@ public class ActiveMapper
       }
    }
 
+   public void initialize()
+   {
+      startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
+      startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+   }
+
    public void updatePlan(HeightMapData heightMapData)
    {
       if (footstepPlanner.isPlanning())
@@ -169,11 +178,6 @@ public class ActiveMapper
          LogTools.warn("Footstep Planner is Busy!");
          return;
       }
-
-      startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
-      startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
-      goalPose.get(RobotSide.LEFT).setToZero();
-      goalPose.get(RobotSide.RIGHT).setToZero();
 
       ActiveMappingTools.getStraightGoalFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT),
                                                   goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT), 0.5f);
@@ -204,7 +208,7 @@ public class ActiveMapper
    public FootstepPlannerRequest createFootstepPlannerRequest()
    {
       request = new FootstepPlannerRequest();
-      request.setTimeout(0.2);
+      request.setTimeout(0.25);
       request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
       request.setPlanBodyPath(false);
       request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
@@ -220,13 +224,12 @@ public class ActiveMapper
       return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 2.0, 1.0);
    }
 
-   public FootstepDataListMessage getLimitedFootstepDataListMessage(int count)
+   public FootstepDataListMessage getLimitedFootstepDataListMessage(int count, float swingDuration, float transferDuration)
    {
       LogTools.info("Sending Plan to Controller: {}", plannerOutput.getFootstepPlan());
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingDuration(0.84);
-      footstepDataListMessage.setDefaultTransferDuration(0.46);
-      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
+      footstepDataListMessage.setDefaultSwingDuration(swingDuration);
+      footstepDataListMessage.setDefaultTransferDuration(transferDuration);
 
       for (int i = 0; i < count; i++)
       {
@@ -240,7 +243,7 @@ public class ActiveMapper
       return footstepDataListMessage;
    }
 
-   public void updateStanceAndSwitchSides()
+   public void updateStanceAndSwitchSides(FramePose3D lastSentFootstepPose, RobotSide lastSentFootstepSide)
    {
       //FramePose3D midFootGoalPose = new FramePose3D();
       //midFootGoalPose.interpolate(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT), 0.5);
@@ -251,10 +254,13 @@ public class ActiveMapper
       //LogTools.info("Previous Stance for Planning: {}", initialStanceSideForPlanning);
       //initialStanceSideForPlanning = rightDistanceToGoal < leftDistanceToGoal ? RobotSide.RIGHT : RobotSide.LEFT;
 
+      this.lastSentFootstepSide = lastSentFootstepSide;
+      this.lastSentFootstepPose = lastSentFootstepPose;
 
-      initialStanceSideForPlanning = initialStanceSideForPlanning.getOppositeSide();
+      initialStanceSideForPlanning = lastSentFootstepSide;
+      startPose.get(lastSentFootstepSide.getOppositeSide()).setFromReferenceFrame(referenceFrames.getSoleFrame(lastSentFootstepSide.getOppositeSide()));
+      startPose.get(lastSentFootstepSide).set(lastSentFootstepPose);
 
-      startPose.get(initialStanceSideForPlanning).set(goalPose.get(initialStanceSideForPlanning));
       LogTools.info("New Stance for Planning: {}", initialStanceSideForPlanning);
    }
 
@@ -326,5 +332,15 @@ public class ActiveMapper
    public RobotSide getInitialStanceSideForPlanning()
    {
       return initialStanceSideForPlanning;
+   }
+
+   public SideDependentList<FramePose3D> getGoalPose()
+   {
+      return goalPose;
+   }
+
+   public SideDependentList<FramePose3D> getStartPose()
+   {
+      return startPose;
    }
 }

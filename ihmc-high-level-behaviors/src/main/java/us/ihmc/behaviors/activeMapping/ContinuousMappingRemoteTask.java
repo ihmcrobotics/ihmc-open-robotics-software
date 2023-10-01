@@ -12,6 +12,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -21,6 +23,7 @@ import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -34,6 +37,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ContinuousMappingRemoteTask
 {
    private final static long ACTIVE_MAPPING_UPDATE_TICK_MS = 10;
+   private final static float SWING_DURATION = 0.84f;
+   private final static float TRANSFER_DURATION = 0.46f;
+   private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                    getClass(),
@@ -56,7 +62,7 @@ public class ContinuousMappingRemoteTask
 
    private int compressedBufferDefaultSize = 100000;
 
-   private ActiveMapper activeMapper;
+   private ContinuousPlanner continuousPlanner;
    private ROS2Helper ros2Helper;
 
    public ContinuousMappingRemoteTask(DRCRobotModel robotModel,
@@ -67,7 +73,7 @@ public class ContinuousMappingRemoteTask
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
-      activeMapper = new ActiveMapper(robotModel, referenceFrames, ActiveMapper.ActiveMappingMode.CONTINUOUS_MAPPING_COVERAGE);
+      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.MAX_COVERAGE);
       ros2Helper = new ROS2Helper(ros2Node);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
@@ -77,13 +83,13 @@ public class ContinuousMappingRemoteTask
       //ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepQueueStatusReceived);
 
 
-      executorService.scheduleAtFixedRate(this::updateActiveMapper, 0, ACTIVE_MAPPING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::updateContinuousPlanner, 0, ACTIVE_MAPPING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
    }
 
    /**
     * Runs the continuous mapper state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The status messages decide the state of the machine.
     */
-   private void updateActiveMapper()
+   private void updateContinuousPlanner()
    {
       //LogTools.info("PlanAvailable:{}, WalkingStatus:{}",
       //              activeMapper.isPlanAvailable(),
@@ -91,34 +97,46 @@ public class ContinuousMappingRemoteTask
 
       if (perceptionConfigurationParameters.getActiveMapping())
       {
-         if (!activeMapper.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
+         if (!continuousPlanner.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
          {
-            if (!activeMapper.isPlanAvailable()) // Only try to initialize if a plan doesn't already exist
+            if (!continuousPlanner.isPlanAvailable()) // Only try to initialize if a plan doesn't already exist
             {
-               activeMapper.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
+               continuousPlanner.initialize();
+               continuousPlanner.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
             }
             else
             {
-               FootstepDataListMessage footstepDataList = activeMapper.getLimitedFootstepDataListMessage(1); // Get only the first footstep
+               FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(MAXIMUM_FOOTSTEPS_TO_SEND,
+                                                                                                              SWING_DURATION,
+                                                                                                              TRANSFER_DURATION);
                publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-               activeMapper.setPlanAvailable(false);
-               activeMapper.setInitialized(true);
+               continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                            footstepDataList.getFootstepDataList().get(0).getLocation(),
+                                                                            footstepDataList.getFootstepDataList().get(0).getOrientation()),
+                                                            RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide()));
+               continuousPlanner.setPlanAvailable(false);
+               continuousPlanner.setInitialized(true);
             }
          }
          else // Initialized, so we can run the state machine in normal mode to eternity
          {
             if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED) // start planning, swing has started
             {
-               activeMapper.updatePlan(latestHeightMapData);
+               continuousPlanner.updatePlan(latestHeightMapData);
             }
             else if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED) // send the next footstep
             {
-               if (activeMapper.isPlanAvailable()) // Only send the next footstep if a plan is available
+               if (continuousPlanner.isPlanAvailable()) // Only send the next footstep if a plan is available
                {
-                  FootstepDataListMessage footstepDataList = activeMapper.getLimitedFootstepDataListMessage(1); // Get only the first footstep from plan
+                  FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(MAXIMUM_FOOTSTEPS_TO_SEND,
+                                                                                                                 SWING_DURATION,
+                                                                                                                 TRANSFER_DURATION);
                   publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
-                  activeMapper.updateStanceAndSwitchSides();
-                  activeMapper.setPlanAvailable(false);
+                  continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                               footstepDataList.getFootstepDataList().get(0).getLocation(),
+                                                                               footstepDataList.getFootstepDataList().get(0).getOrientation()),
+                                                               RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide()));
+                  continuousPlanner.setPlanAvailable(false);
                }
             }
          }
@@ -182,9 +200,9 @@ public class ContinuousMappingRemoteTask
       this.latestHeightMapData = latestHeightMapData;
    }
 
-   public ActiveMapper getActiveMapper()
+   public ContinuousPlanner getContinuousPlanner()
    {
-      return activeMapper;
+      return continuousPlanner;
    }
 
    public void destroy()

@@ -7,8 +7,10 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -32,8 +34,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private HumanoidPerceptionModule humanoidPerception;
+   private HumanoidActivePerceptionModule activePerceptionModule;
+
    private RDXRapidRegionsUI rapidRegionsUI;
-   private RDXActiveMappingUI activeMappingUI;
+   private RDXContinuousPlanningUI continuousPlanningUI;
    private RDXRemoteHeightMapPanel heightMapUI;
 
    private RDXBytedecoImagePanel localHeightMapPanel;
@@ -66,15 +70,19 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       }
    }
 
+   public void setupForActiveMapping(HumanoidActivePerceptionModule activePerceptionModule, ROS2SyncedRobotModel syncedRobot)
+   {
+      this.activePerceptionModule = activePerceptionModule;
+      this.continuousPlanningUI = new RDXContinuousPlanningUI("Active Mapping",
+                                                              activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner(),
+                                                              remotePerceptionUI.getPerceptionConfigurationParameters(),
+                                                              syncedRobot);
+   }
+
    public void initializeRapidRegionsUI()
    {
       this.rapidRegionsUI = new RDXRapidRegionsUI();
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
-   }
-
-   public void initializeActiveMappingUI()
-   {
-      this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", remotePerceptionUI.getPerceptionConfigurationParameters());
    }
 
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node)
@@ -134,6 +142,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
       if (rapidRegionsUI != null)
          rapidRegionsUI.render();
+
+      if (continuousPlanningUI != null)
+         continuousPlanningUI.render();
 
       if (humanoidPerception != null)
       {
@@ -225,8 +236,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       if (rapidRegionsUI != null)
          rapidRegionsUI.destroy();
 
-      if (activeMappingUI != null)
-         activeMappingUI.destroy();
+      if (continuousPlanningUI != null)
+         continuousPlanningUI.destroy();
 
       if (heightMapUI != null)
          heightMapUI.destroy();
@@ -274,9 +285,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       return remotePerceptionUI;
    }
 
-   public RDXActiveMappingUI getActiveMappingUI()
+   public RDXContinuousPlanningUI getContinuousPlanningUI()
    {
-      return activeMappingUI;
+      return continuousPlanningUI;
    }
 
    public RDXHeightMapVisualizer getHeightMapVisualizer()
@@ -303,11 +314,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          {
             visualizer.getRenderables(renderables, pool, sceneLevels);
          }
-      }
-
-      if (activeMappingUI != null)
-      {
-         activeMappingUI.getRenderables(renderables, pool);
       }
    }
 }
