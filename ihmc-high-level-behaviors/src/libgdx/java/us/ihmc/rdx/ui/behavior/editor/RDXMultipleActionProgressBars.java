@@ -20,7 +20,7 @@ public class RDXMultipleActionProgressBars
 
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         ImGui.text("%s (%s)".formatted(actionProgressBar.getAction().getState().getDefinition().getDescription(),
+         ImGui.text("%s (%s)".formatted(actionProgressBar.getAction().getDefinition().getDescription(),
                                         actionProgressBar.getAction().getActionTypeTitle()));
       }
 

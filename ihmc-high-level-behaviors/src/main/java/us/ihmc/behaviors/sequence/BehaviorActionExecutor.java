@@ -6,7 +6,7 @@ import us.ihmc.tools.string.StringTools;
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public interface BehaviorActionExecutor extends BehaviorActionStateSupplier
+public interface BehaviorActionExecutor extends BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
 {
    /** Called every tick. */
    void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution);

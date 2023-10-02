@@ -425,6 +425,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public HandPoseActionDefinition getDefinition()
    {
       return definition;

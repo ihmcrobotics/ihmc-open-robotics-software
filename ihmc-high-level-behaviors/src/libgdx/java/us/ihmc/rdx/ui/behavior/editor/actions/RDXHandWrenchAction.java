@@ -99,6 +99,7 @@ public class RDXHandWrenchAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public HandWrenchActionDefinition getDefinition()
    {
       return definition;

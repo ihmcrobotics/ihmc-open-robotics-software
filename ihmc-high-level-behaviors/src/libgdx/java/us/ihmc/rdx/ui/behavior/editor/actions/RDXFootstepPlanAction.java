@@ -245,6 +245,7 @@ public class RDXFootstepPlanAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public FootstepPlanActionDefinition getDefinition()
    {
       return definition;

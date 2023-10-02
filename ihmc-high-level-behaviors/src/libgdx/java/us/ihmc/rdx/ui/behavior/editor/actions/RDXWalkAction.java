@@ -307,6 +307,7 @@ public class RDXWalkAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public WalkActionDefinition getDefinition()
    {
       return definition;

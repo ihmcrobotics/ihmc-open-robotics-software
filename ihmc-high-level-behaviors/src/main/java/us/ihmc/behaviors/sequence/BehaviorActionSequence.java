@@ -223,9 +223,9 @@ public class BehaviorActionSequence
       {
          boolean executeWithPreviousAction = false;
          if (actionIndex > 0)
-            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getState().getDefinition().getExecuteWithNextAction();
+            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getDefinition().getExecuteWithNextAction();
 
-         boolean firstConcurrentActionIsNextForExecution = actionSequence.get(actionIndex).getState().getDefinition().getExecuteWithNextAction()
+         boolean firstConcurrentActionIsNextForExecution = actionSequence.get(actionIndex).getDefinition().getExecuteWithNextAction()
                                                            && actionIndex == executionNextIndex;
          boolean otherConcurrentActionIsNextForExecution
                = executeWithPreviousAction
@@ -268,7 +268,7 @@ public class BehaviorActionSequence
                LogTools.info("Automatically executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
                executeNextAction();
             }
-            while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getState().getDefinition().getExecuteWithNextAction());
+            while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction());
          }
       }
       else if (manuallyExecuteSubscription.getMessageNotification().poll())
@@ -278,7 +278,7 @@ public class BehaviorActionSequence
             LogTools.info("Manually executing action: {}", actionSequence.get(executionNextIndex).getClass().getSimpleName());
             executeNextAction();
          }
-         while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getState().getDefinition().getExecuteWithNextAction());
+         while (lastCurrentlyExecutingAction != null && lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction());
       }
 
       if (lastCurrentlyExecutingAction != null && noCurrentActionIsExecuting())
@@ -301,7 +301,7 @@ public class BehaviorActionSequence
          boolean isNotRootOfConcurrency = true;
          for (int j = 1; j <= actionIndex; j++)
          {
-            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getState().getDefinition().getExecuteWithNextAction();
+            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getDefinition().getExecuteWithNextAction();
             isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
             if (!isNotRootOfConcurrency)
             {
@@ -320,7 +320,7 @@ public class BehaviorActionSequence
    {
       boolean executeWithPreviousAction = false;
       if (lastCurrentlyExecutingAction != null)
-         executeWithPreviousAction = lastCurrentlyExecutingAction.getState().getDefinition().getExecuteWithNextAction();
+         executeWithPreviousAction = lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
       // If automatic execution, we want to ensure it's able to execute before we perform the execution.
       // If it's unable to execute, disable automatic execution.
@@ -333,7 +333,7 @@ public class BehaviorActionSequence
             return;
          }
       }
-      boolean concurrentActionIsNextForExecution = lastCurrentlyExecutingAction.getState().getDefinition().getExecuteWithNextAction() || executeWithPreviousAction;
+      boolean concurrentActionIsNextForExecution = lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction() || executeWithPreviousAction;
       lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrentActionIsNextForExecution);
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
