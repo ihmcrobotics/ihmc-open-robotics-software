@@ -1,8 +1,12 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -13,7 +17,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
+import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -25,6 +33,9 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.IHMCCommonPaths;
+
+import java.nio.file.Paths;
 
 public class RDXRapidHeightMapSimulationDemo
 {
@@ -35,6 +46,7 @@ public class RDXRapidHeightMapSimulationDemo
    private final ROS2Helper ros2Helper;
    private final ROS2Node ros2Node;
 
+   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXHighLevelDepthSensorSimulator steppingL515Simulator;
@@ -45,12 +57,12 @@ public class RDXRapidHeightMapSimulationDemo
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
 
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
    private final Pose3D cameraPose = new Pose3D();
-   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
 
    private boolean autoIncrement = false;
    private int autoIncrementCounter = 0;
@@ -60,6 +72,12 @@ public class RDXRapidHeightMapSimulationDemo
    {
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "height_map_simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
+
+      String logFileName = HDF5Tools.generateLogFileName();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -179,6 +197,23 @@ public class RDXRapidHeightMapSimulationDemo
             baseUI.renderEnd();
          }
 
+         private void renderNavigationPanel()
+         {
+            if (ImGui.button("Start"))
+            {
+               autoIncrement = true;
+            }
+            ImGui.sameLine();
+            if (ImGui.button("Stop"))
+            {
+               autoIncrement = false;
+            }
+            if (ImGui.button("Capture Height Map"))
+            {
+               logHeightMap();
+            }
+         }
+
          public void updateFrameState(int counter)
          {
             if (l515PoseGizmo.getTransformToParent().getTranslation().getX() < MAXIMUM_DISTANCE_FROM_ORIGIN)
@@ -188,17 +223,12 @@ public class RDXRapidHeightMapSimulationDemo
             }
          }
 
-         private void renderNavigationPanel()
+         public void logHeightMap()
          {
-            if (ImGui.button("Start"))
-            {
-               autoIncrement = true;
-            }
-
-            if (ImGui.button("Stop"))
-            {
-               autoIncrement = false;
-            }
+            Mat internalHeightMapImage = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+            BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
+            OpenCVTools.compressImagePNG(internalHeightMapImage, compressedDepthPointer);
+            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
          }
 
          @Override
@@ -211,6 +241,7 @@ public class RDXRapidHeightMapSimulationDemo
             humanoidPerception.destroy();
             bytedecoDepthImage.destroy(openCLManager);
             openCLManager.destroy();
+            perceptionDataLogger.closeLogFile();
          }
       });
    }

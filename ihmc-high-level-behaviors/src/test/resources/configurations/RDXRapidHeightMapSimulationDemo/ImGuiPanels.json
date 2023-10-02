@@ -2,6 +2,7 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
+    "Dataset Navigation Panel" : true,
     "Environment###java.lang.Class:Environment" : false,
     "Perception Panel" : true,
     "Cropped Height Map" : true,
