@@ -13,12 +13,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class ImGuiReferenceFrameLibraryCombo
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final String comboName;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private ConditionalReferenceFrame selectedReferenceFrame = new ConditionalReferenceFrame();
    private int selectedFrameIndex;
 
-   public ImGuiReferenceFrameLibraryCombo(ReferenceFrameLibrary referenceFrameLibrary)
+   public ImGuiReferenceFrameLibraryCombo(String comboName, ReferenceFrameLibrary referenceFrameLibrary)
    {
+      this.comboName = comboName;
       this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
@@ -26,7 +28,7 @@ public class ImGuiReferenceFrameLibraryCombo
    {
       String[] referenceFrameNamesArray = referenceFrameLibrary.getReferenceFrameNameArray();
 
-      if (ImGui.beginCombo(labels.get("Parent frame"), referenceFrameNamesArray[selectedFrameIndex]))
+      if (ImGui.beginCombo(labels.get(comboName), referenceFrameNamesArray[selectedFrameIndex]))
       {
          for (int i = 0; i < referenceFrameNamesArray.length; i++)
          {

@@ -39,7 +39,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    private final WalkActionDefinition definition = state.getDefinition();
    private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
-   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(definition.getConditionalReferenceFrame().get(),
                                                                                                                     definition.getTransformToParent());
@@ -63,7 +63,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    {
       this.referenceFrameLibrary = referenceFrameLibrary;
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
 
       footstepPlannerGoalGizmo.create(panel3D);
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
@@ -95,7 +95,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
+      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
       footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(definition.getConditionalReferenceFrame().get());
       for (RobotSide side : RobotSide.values)
       {
@@ -197,9 +197,9 @@ public class RDXWalkAction implements RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
-      if (referenceFrameLibraryCombo.render())
+      if (parentFrameComboBox.render())
       {
-         definition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
       }
       if (ImGui.button(labels.get("Plan")))
       {
