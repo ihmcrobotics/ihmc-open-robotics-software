@@ -68,14 +68,14 @@ public class BehaviorActionSequence
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
 
-   private final LinkedList<BehaviorAction> actionSequence = new LinkedList<>();
+   private final LinkedList<BehaviorActionExecutor> actionSequence = new LinkedList<>();
    private final IHMCROS2Input<Empty> manuallyExecuteSubscription;
    private final IHMCROS2Input<Bool> automaticExecutionSubscription;
    private final IHMCROS2Input<Int32> executionNextIndexSubscription;
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
-   private final List<BehaviorAction> currentlyExecutingActions = new ArrayList<>();
-   private BehaviorAction lastCurrentlyExecutingAction = null;
+   private final List<BehaviorActionExecutor> currentlyExecutingActions = new ArrayList<>();
+   private BehaviorActionExecutor lastCurrentlyExecutingAction = null;
 
    private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
    public final Int32 executionNextIndexStatusMessage = new Int32();
@@ -126,71 +126,71 @@ public class BehaviorActionSequence
 
          ActionSequenceUpdateMessage latestUpdateMessage = updateSubscription.getMessageNotification().read();
 
-         BehaviorAction[] actionArray = new BehaviorAction[latestUpdateMessage.getSequenceSize()];
+         BehaviorActionExecutor[] actionArray = new BehaviorActionExecutor[latestUpdateMessage.getSequenceSize()];
 
-         for (ArmJointAnglesActionDescriptionMessage message : latestUpdateMessage.getArmJointAnglesActions())
+         for (ArmJointAnglesActionDefinitionMessage message : latestUpdateMessage.getArmJointAnglesActions())
          {
-            ArmJointAnglesAction action = new ArmJointAnglesAction(robotModel, ros2);
+            ArmJointAnglesActionExecutor action = new ArmJointAnglesActionExecutor(robotModel, ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (BodyPartPoseActionDescriptionMessage message : latestUpdateMessage.getChestOrientationActions())
+         for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getChestOrientationActions())
          {
-            ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot, referenceFrameLibrary);
+            ChestOrientationActionExecutor action = new ChestOrientationActionExecutor(ros2, syncedRobot, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (FootstepPlanActionDescriptionMessage message : latestUpdateMessage.getFootstepPlanActions())
+         for (FootstepPlanActionDefinitionMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
-            FootstepPlanAction action = new FootstepPlanAction(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
+            FootstepPlanActionExecutor action = new FootstepPlanActionExecutor(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (SakeHandCommandActionDescriptionMessage message : latestUpdateMessage.getSakeHandCommandActions())
+         for (SakeHandCommandActionDefinitionMessage message : latestUpdateMessage.getSakeHandCommandActions())
          {
-            SakeHandCommandAction action = new SakeHandCommandAction(ros2);
+            SakeHandCommandActionExecutor action = new SakeHandCommandActionExecutor(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (SidedBodyPartPoseActionDescriptionMessage message : latestUpdateMessage.getHandPoseActions())
+         for (SidedBodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getHandPoseActions())
          {
-            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
+            HandPoseActionExecutor action = new HandPoseActionExecutor(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandWrenchActionDescriptionMessage message : latestUpdateMessage.getHandWrenchActions())
+         for (HandWrenchActionDefinitionMessage message : latestUpdateMessage.getHandWrenchActions())
          {
-            HandWrenchAction action = new HandWrenchAction(ros2);
+            HandWrenchActionExecutor action = new HandWrenchActionExecutor(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (BodyPartPoseActionDescriptionMessage message : latestUpdateMessage.getPelvisHeightActions())
+         for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
-            PelvisHeightPitchAction action = new PelvisHeightPitchAction(ros2, referenceFrameLibrary, syncedRobot);
+            PelvisHeightPitchActionExecutor action = new PelvisHeightPitchActionExecutor(ros2, referenceFrameLibrary, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (WaitDurationActionDescriptionMessage message : latestUpdateMessage.getWaitDurationActions())
+         for (WaitDurationActionDefinitionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
-            WaitDurationAction action = new WaitDurationAction(ros2);
+            WaitDurationActionExecutor action = new WaitDurationActionExecutor(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (WalkActionDescriptionMessage message : latestUpdateMessage.getWalkActions())
+         for (WalkActionDefinitionMessage message : latestUpdateMessage.getWalkActions())
          {
-            WalkAction action = new WalkAction(ros2,
-                                               syncedRobot,
-                                               footstepTracker,
-                                               footstepPlanner,
-                                               footstepPlannerParameters,
-                                               walkingControllerParameters,
-                                               referenceFrameLibrary);
+            WalkActionExecutor action = new WalkActionExecutor(ros2,
+                                                               syncedRobot,
+                                                               footstepTracker,
+                                                               footstepPlanner,
+                                                               footstepPlannerParameters,
+                                                               walkingControllerParameters,
+                                                               referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
 
          actionSequence.clear();
-         for (BehaviorAction action : actionArray)
+         for (BehaviorActionExecutor action : actionArray)
          {
             actionSequence.add(action);
          }
@@ -230,7 +230,7 @@ public class BehaviorActionSequence
       actionsExecutionStatusMessage.getActionStatusList().clear();
       if (lastCurrentlyExecutingAction != null)
       {
-         for (BehaviorAction currentlyExecutingAction : currentlyExecutingActions)
+         for (BehaviorActionExecutor currentlyExecutingAction : currentlyExecutingActions)
          {
             currentlyExecutingAction.updateCurrentlyExecuting();
             ActionExecutionStatusMessage currentlyExecutingActionMessage = actionsExecutionStatusMessage.getActionStatusList().add();
@@ -337,7 +337,7 @@ public class BehaviorActionSequence
    private boolean noCurrentActionIsExecuting()
    {
       boolean noCurrentActionIsExecuting = true;
-      for (BehaviorAction currentlyExecutingAction : currentlyExecutingActions)
+      for (BehaviorActionExecutor currentlyExecutingAction : currentlyExecutingActions)
       {
          noCurrentActionIsExecuting &= !currentlyExecutingAction.isExecuting();
       }
