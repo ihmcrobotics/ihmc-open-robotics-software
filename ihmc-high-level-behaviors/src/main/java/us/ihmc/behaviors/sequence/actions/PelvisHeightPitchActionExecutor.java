@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefinition implements BehaviorActionExecutor
+public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionState implements BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);

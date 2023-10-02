@@ -8,7 +8,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-public class SakeHandCommandActionExecutor extends SakeHandCommandActionDefinition implements BehaviorActionExecutor
+public class SakeHandCommandActionExecutor extends SakeHandCommandActionState implements BehaviorActionExecutor
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
