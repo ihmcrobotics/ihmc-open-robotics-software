@@ -3,12 +3,13 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
+public class HandPoseActionDefinition implements BehaviorActionDefinition
 {
    private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
@@ -16,13 +17,15 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
    private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private boolean jointSpaceControl = true;
+   private String palmParentFrameName;
+   private final RigidBodyTransform palmTransformToParent = new RigidBodyTransform();
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      JSONTools.toJSON(jsonNode, getTransformToParent());
+      jsonNode.put("parentFrame", palmParentFrameName);
+      JSONTools.toJSON(jsonNode, palmTransformToParent);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
@@ -36,8 +39,8 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
       description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, getTransformToParent());
+      palmParentFrameName = jsonNode.get("parentFrame").textValue();
+      JSONTools.toEuclid(jsonNode, palmTransformToParent);
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
@@ -46,8 +49,8 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
    public void toMessage(SidedBodyPartPoseActionDefinitionMessage message)
    {
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
+      message.getParentFrame().add(palmParentFrameName);
+      MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
@@ -57,8 +60,8 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
 
    public void fromMessage(SidedBodyPartPoseActionDefinitionMessage message)
    {
-      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
-      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
+      palmParentFrameName = message.getParentFrame().getString(0);
+      MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
@@ -127,5 +130,20 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
    public String getDescription()
    {
       return description;
+   }
+
+   public String getPalmParentFrameName()
+   {
+      return palmParentFrameName;
+   }
+
+   public void setPalmParentFrameName(String palmParentFrameName)
+   {
+      this.palmParentFrameName = palmParentFrameName;
+   }
+
+   public RigidBodyTransform getPalmTransformToParent()
+   {
+      return palmTransformToParent;
    }
 }
