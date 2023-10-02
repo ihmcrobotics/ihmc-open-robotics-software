@@ -8,11 +8,13 @@ import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-public class SakeHandCommandActionExecutor extends SakeHandCommandActionState implements BehaviorActionExecutor
+public class SakeHandCommandActionExecutor implements BehaviorActionExecutor
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
 
+   private final SakeHandCommandActionState state = new SakeHandCommandActionState();
+   private final SakeHandCommandActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
@@ -27,7 +29,7 @@ public class SakeHandCommandActionExecutor extends SakeHandCommandActionState im
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update();
+      definition.update();
 
       this.actionIndex = actionIndex;
    }
@@ -36,10 +38,10 @@ public class SakeHandCommandActionExecutor extends SakeHandCommandActionState im
    public void triggerActionExecution()
    {
       SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-      message.setRobotSide(getSide().toByte());
-      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getHandConfigurationIndex()].getCommandNumber());
-      message.setPostionRatio(getGoalPosition());
-      message.setTorqueRatio(getGoalTorque());
+      message.setRobotSide(definition.getSide().toByte());
+      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[definition.getHandConfigurationIndex()].getCommandNumber());
+      message.setPostionRatio(definition.getGoalPosition());
+      message.setTorqueRatio(definition.getGoalTorque());
 
       ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
 
@@ -66,5 +68,16 @@ public class SakeHandCommandActionExecutor extends SakeHandCommandActionState im
    public boolean isExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public SakeHandCommandActionState getState()
+   {
+      return state;
+   }
+
+   public SakeHandCommandActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

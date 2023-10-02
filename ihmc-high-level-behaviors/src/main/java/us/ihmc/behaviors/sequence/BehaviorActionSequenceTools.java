@@ -7,8 +7,8 @@ import java.util.List;
 
 public class BehaviorActionSequenceTools
 {
-   public static <T extends BehaviorActionDefinition> void packActionSequenceUpdateMessage(List<T> actionSequence,
-                                                                                           ActionSequenceUpdateMessage actionSequenceUpdateMessage)
+   public static <T extends BehaviorActionStateSupplier> void packActionSequenceUpdateMessage(List<T> actionSequence,
+                                                                                              ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
@@ -23,7 +23,7 @@ public class BehaviorActionSequenceTools
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         BehaviorActionDefinition action = actionSequence.get(i);
+         BehaviorActionDefinition action = actionSequence.get(i).getState().getDefinition();
          if (action instanceof ArmJointAnglesActionDefinition armJointAnglesActionDefinition)
          {
             ArmJointAnglesActionDefinitionMessage armJointAnglesActionDefinitionMessage = actionSequenceUpdateMessage.getArmJointAnglesActions().add();

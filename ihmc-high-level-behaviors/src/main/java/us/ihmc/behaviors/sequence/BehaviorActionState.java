@@ -1,7 +1,10 @@
 package us.ihmc.behaviors.sequence;
 
-public interface BehaviorActionState extends BehaviorActionDefinition
+// TODO: Include toMessage and fromMessage
+public interface BehaviorActionState
 {
    /** The action's unique ID. */
    long getID();
+
+   BehaviorActionDefinition getDefinition();
 }

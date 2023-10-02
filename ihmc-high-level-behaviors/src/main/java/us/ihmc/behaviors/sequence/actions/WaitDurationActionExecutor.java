@@ -5,8 +5,10 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationActionExecutor extends WaitDurationActionState implements BehaviorActionExecutor
+public class WaitDurationActionExecutor implements BehaviorActionExecutor
 {
+   private final WaitDurationActionState state = new WaitDurationActionState();
+   private final WaitDurationActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
@@ -21,7 +23,7 @@ public class WaitDurationActionExecutor extends WaitDurationActionState implemen
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update();
+      definition.update();
 
       this.actionIndex = actionIndex;
    }
@@ -35,10 +37,10 @@ public class WaitDurationActionExecutor extends WaitDurationActionState implemen
    @Override
    public void updateCurrentlyExecuting()
    {
-      isExecuting = executionTimer.isRunning(getWaitDuration());
+      isExecuting = executionTimer.isRunning(definition.getWaitDuration());
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
+      executionStatusMessage.setNominalExecutionDuration(definition.getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
@@ -52,5 +54,16 @@ public class WaitDurationActionExecutor extends WaitDurationActionState implemen
    public boolean isExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public WaitDurationActionState getState()
+   {
+      return state;
+   }
+
+   public WaitDurationActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

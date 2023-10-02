@@ -1,19 +1,13 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import behavior_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RDXActionSequenceTools
 {
@@ -67,17 +61,5 @@ public class RDXActionSequenceTools
       }
 
       return null;
-   }
-
-   public static void packActionSequenceUpdateMessage(List<RDXBehaviorAction> actionSequence,
-                                                      ArrayList<BehaviorActionDefinition> actionDefinitionForMessage,
-                                                      ActionSequenceUpdateMessage actionSequenceUpdateMessage)
-   {
-      actionDefinitionForMessage.clear();
-      for (RDXBehaviorAction behaviorAction : actionSequence)
-      {
-         actionDefinitionForMessage.add(behaviorAction);
-      }
-      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDefinitionForMessage, actionSequenceUpdateMessage);
    }
 }

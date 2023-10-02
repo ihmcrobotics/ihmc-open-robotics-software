@@ -20,7 +20,8 @@ public class RDXMultipleActionProgressBars
 
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         ImGui.text("%s (%s)".formatted(actionProgressBar.getAction().getDescription(), actionProgressBar.getAction().getActionTypeTitle()));
+         ImGui.text("%s (%s)".formatted(actionProgressBar.getAction().getState().getDefinition().getDescription(),
+                                        actionProgressBar.getAction().getActionTypeTitle()));
       }
 
       widgetAligner.text("Expected time remaining:");

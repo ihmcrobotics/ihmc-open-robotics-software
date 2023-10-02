@@ -22,11 +22,13 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class FootstepPlanActionExecutor extends FootstepPlanActionState implements BehaviorActionExecutor
+public class FootstepPlanActionExecutor implements BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final FootstepPlanActionState state = new FootstepPlanActionState();
+   private final FootstepPlanActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
@@ -62,7 +64,7 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionState implemen
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      definition.update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -71,25 +73,25 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionState implemen
    public void triggerActionExecution()
    {
       footstepPlanToExecute.clear();
-      for (FootstepActionDefinition footstep : getFootsteps())
+      for (FootstepActionDefinition footstep : definition.getFootsteps())
       {
-         solePose.setIncludingFrame(getConditionalReferenceFrame().get().getParent(), footstep.getSolePose());
+         solePose.setIncludingFrame(definition.getConditionalReferenceFrame().get().getParent(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
-                                                                                                                    getSwingDuration(),
-                                                                                                                    getTransferDuration());
+                                                                                                                    definition.getSwingDuration(),
+                                                                                                                    definition.getTransferDuration());
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
       executionTimer.reset();
 
       nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
-                                                                                         getSwingDuration(),
+                                                                                         definition.getSwingDuration(),
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                         getTransferDuration(),
+                                                                                         definition.getTransferDuration(),
                                                                                          walkingControllerParameters.getDefaultFinalTransferTime());
 
       for (RobotSide side : RobotSide.values)
@@ -103,7 +105,7 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionState implemen
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get().getParent(),
+            goalFeetPoses.get(side).setIncludingFrame(definition.getConditionalReferenceFrame().get().getParent(),
                                                       footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
@@ -128,7 +130,7 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionState implemen
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get().getParent(),
+            goalFeetPoses.get(side).setIncludingFrame(definition.getConditionalReferenceFrame().get().getParent(),
                                                       footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
@@ -173,5 +175,16 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionState implemen
    public boolean isExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public FootstepPlanActionState getState()
+   {
+      return state;
+   }
+
+   public FootstepPlanActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

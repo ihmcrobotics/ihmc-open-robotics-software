@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.BehaviorActionStateSupplier;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -14,8 +14,13 @@ import us.ihmc.rdx.vr.RDXVRContext;
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
  */
-public interface RDXBehaviorAction extends BehaviorActionState
+public interface RDXBehaviorAction extends BehaviorActionStateSupplier
 {
+   default void update()
+   {
+      update(false);
+   }
+
    // TODO: Probably remove and use BehaviorActionDefinition#update?
    default void update(boolean concurrentActionIsNextForExecution)
    {
