@@ -46,8 +46,6 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      definition.update(referenceFrameLibrary);
-
       this.actionIndex = actionIndex;
    }
 

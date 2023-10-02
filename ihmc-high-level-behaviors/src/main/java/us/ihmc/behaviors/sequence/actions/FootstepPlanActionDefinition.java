@@ -5,27 +5,29 @@ import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepPlanActionDefinition extends FrameBasedBehaviorActionDefinition
+public class FootstepPlanActionDefinition implements BehaviorActionDefinition
 {
    private String description = "Footstep plan";
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
+   private String parentFrameName;
+   private RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final RecyclingArrayList<FootstepActionDefinition> footsteps = new RecyclingArrayList<>(FootstepActionDefinition::new);
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      JSONTools.toJSON(jsonNode, getTransformToParent());
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
-
+      jsonNode.put("parentFrame", parentFrameName);
+      JSONTools.toJSON(jsonNode, transformToParent);
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (FootstepActionDefinition footstep : footsteps)
       {
@@ -40,8 +42,8 @@ public class FootstepPlanActionDefinition extends FrameBasedBehaviorActionDefini
       description = jsonNode.get("description").textValue();
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
-      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
-
+      parentFrameName = jsonNode.get("parentFrame").textValue();
+      JSONTools.toEuclid(jsonNode, transformToParent);
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
@@ -51,7 +53,8 @@ public class FootstepPlanActionDefinition extends FrameBasedBehaviorActionDefini
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      message.getParentFrame().add(parentFrameName);
+      MessageTools.toMessage(transformToParent, message.getTransformToParent());
       message.getFootsteps().clear();
       for (FootstepActionDefinition footstep : footsteps)
       {
@@ -61,11 +64,10 @@ public class FootstepPlanActionDefinition extends FrameBasedBehaviorActionDefini
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
    {
-      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
-      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
-
+      parentFrameName = message.getParentFrame().getString(0);
+      MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
       footsteps.clear();
       for (FootstepActionDefinitionMessage footstep : message.getFootsteps())
       {
@@ -108,5 +110,25 @@ public class FootstepPlanActionDefinition extends FrameBasedBehaviorActionDefini
    public String getDescription()
    {
       return description;
+   }
+
+   public String getParentFrameName()
+   {
+      return parentFrameName;
+   }
+
+   public void setParentFrameName(String parentFrameName)
+   {
+      this.parentFrameName = parentFrameName;
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      return transformToParent;
+   }
+
+   public void setTransformToParent(RigidBodyTransform transformToParent)
+   {
+      this.transformToParent = transformToParent;
    }
 }

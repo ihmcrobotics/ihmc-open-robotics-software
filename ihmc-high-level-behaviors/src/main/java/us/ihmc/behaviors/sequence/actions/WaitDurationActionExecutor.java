@@ -23,8 +23,6 @@ public class WaitDurationActionExecutor implements BehaviorActionExecutor
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      definition.update();
-
       this.actionIndex = actionIndex;
    }
 
