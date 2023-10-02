@@ -5,7 +5,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationActionExecutor extends WaitDurationActionDefinition implements BehaviorActionExecutor
+public class WaitDurationActionExecutor extends WaitDurationActionState implements BehaviorActionExecutor
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;

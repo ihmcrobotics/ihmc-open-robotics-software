@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandWrenchActionExecutor extends HandWrenchActionDefinition implements BehaviorActionExecutor
+public class HandWrenchActionExecutor extends HandWrenchActionState implements BehaviorActionExecutor
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;

@@ -22,7 +22,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class FootstepPlanActionExecutor extends FootstepPlanActionDefinition implements BehaviorActionExecutor
+public class FootstepPlanActionExecutor extends FootstepPlanActionState implements BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
