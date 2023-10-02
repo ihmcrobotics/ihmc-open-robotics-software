@@ -33,6 +33,7 @@ public class DoorSceneNodeDefinitions
    public static final String RIGHT_DOOR_PANEL_NAME = "RightDoorPanel";
    public static final String RIGHT_DOOR_LEVER_HANDLE_NAME = "RightDoorLeverHandle";
    public static final String RIGHT_DOOR_KNOB_NAME = "RightDoorKnob";
+   public static final String RIGHT_DOOR_EMERGENCY_BAR_NAME = "RightDoorEmergencyBar";
    public static final RigidBodyTransform RIGHT_DOOR_MARKER_TO_OPENER_TRANSFORM = new RigidBodyTransform();
    public static final RigidBodyTransform RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
@@ -80,6 +81,7 @@ public class DoorSceneNodeDefinitions
    public static final String LEFT_DOOR_PANEL_NAME = "LeftDoorPanel";
    public static final String LEFT_DOOR_LEVER_HANDLE_NAME = "LeftDoorLeverHandle";
    public static final String LEFT_DOOR_KNOB_NAME = "LeftDoorKnob";
+   public static final String LEFT_DOOR_EMERGENCY_BAR_NAME = "LeftDoorEmergencyBar";
    public static final RigidBodyTransform LEFT_DOOR_MARKER_TO_OPENER_TRANSFORM = new RigidBodyTransform();
    public static final RigidBodyTransform LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
@@ -134,10 +136,10 @@ public class DoorSceneNodeDefinitions
    public static final RigidBodyTransform PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    public static final RigidBodyTransform PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    public static final String DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj";
-   public static final RigidBodyTransform PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    static
    {
-      PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
+      LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
    }
    public static final RigidBodyTransform RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    static
@@ -147,6 +149,13 @@ public class DoorSceneNodeDefinitions
    }
    public static final String DOOR_KNOB_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorKnob/DoorKnob.g3dj";
    public static final RigidBodyTransform DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final String DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorEmergencyBar/DoorEmergencyBar.g3dj";
+   public static final RigidBodyTransform LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
+   }
+   public static final RigidBodyTransform RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
@@ -219,7 +228,7 @@ public class DoorSceneNodeDefinitions
                                                                 sceneGraph.getIDToNodeMap(),
                                                                 parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                 DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          LogTools.info("Adding LeftDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorLeverHandle, parentNode));
       }
@@ -234,6 +243,18 @@ public class DoorSceneNodeDefinitions
                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          LogTools.info("Adding LeftDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorKnob, parentNode));
+      }
+
+      SceneNode leftDoorEmergencyBar = sceneGraph.getNamesToNodesMap().get(LEFT_DOOR_EMERGENCY_BAR_NAME);
+      if (leftDoorEmergencyBar == null)
+      {
+         leftDoorEmergencyBar = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(), LEFT_DOOR_EMERGENCY_BAR_NAME,
+                                                                 sceneGraph.getIDToNodeMap(),
+                                                                 parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
+                                                                 DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
+                                                                 LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         LogTools.info("Adding LeftEmergencyBar to scene graph.");
+         modificationQueue.accept(new SceneGraphNodeAddition(leftDoorEmergencyBar, parentNode));
       }
    }
 
@@ -274,7 +295,7 @@ public class DoorSceneNodeDefinitions
                                                                 sceneGraph.getIDToNodeMap(),
                                                                 parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                 DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          LogTools.info("Adding LeftDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorLeverHandle, parentNode));
       }
@@ -289,6 +310,18 @@ public class DoorSceneNodeDefinitions
                                                           DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          LogTools.info("Adding LeftDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorKnob, parentNode));
+      }
+
+      SceneNode leftDoorEmergencyBar = sceneGraph.getNamesToNodesMap().get(LEFT_DOOR_EMERGENCY_BAR_NAME);
+      if (leftDoorEmergencyBar == null)
+      {
+         leftDoorEmergencyBar = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(), LEFT_DOOR_EMERGENCY_BAR_NAME,
+                                                                 sceneGraph.getIDToNodeMap(),
+                                                                 parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
+                                                                 DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
+                                                                 LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         LogTools.info("Adding LeftEmergencyBar to scene graph.");
+         modificationQueue.accept(new SceneGraphNodeAddition(leftDoorEmergencyBar, parentNode));
       }
    }
 
@@ -344,6 +377,18 @@ public class DoorSceneNodeDefinitions
          LogTools.info("Adding RightDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorKnob, parentNode));
       }
+
+      SceneNode rightDoorEmergencyBar = sceneGraph.getNamesToNodesMap().get(RIGHT_DOOR_KNOB_NAME);
+      if (rightDoorEmergencyBar == null)
+      {
+         rightDoorEmergencyBar = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(), RIGHT_DOOR_EMERGENCY_BAR_NAME,
+                                                                  sceneGraph.getIDToNodeMap(),
+                                                                  parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
+                                                                  DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
+                                                                  RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         LogTools.info("Adding RightEmergencyBar to scene graph.");
+         modificationQueue.accept(new SceneGraphNodeAddition(rightDoorEmergencyBar, parentNode));
+      }
    }
 
    public static void ensureRightPushDoorNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -397,6 +442,18 @@ public class DoorSceneNodeDefinitions
                                                           DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          LogTools.info("Adding RightDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorKnob, parentNode));
+      }
+
+      SceneNode rightDoorEmergencyBar = sceneGraph.getNamesToNodesMap().get(RIGHT_DOOR_KNOB_NAME);
+      if (rightDoorEmergencyBar == null)
+      {
+         rightDoorEmergencyBar = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(), RIGHT_DOOR_EMERGENCY_BAR_NAME,
+                                                                  sceneGraph.getIDToNodeMap(),
+                                                                  parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
+                                                                  DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
+                                                                  RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         LogTools.info("Adding RightEmergencyBar to scene graph.");
+         modificationQueue.accept(new SceneGraphNodeAddition(rightDoorEmergencyBar, parentNode));
       }
    }
 }
