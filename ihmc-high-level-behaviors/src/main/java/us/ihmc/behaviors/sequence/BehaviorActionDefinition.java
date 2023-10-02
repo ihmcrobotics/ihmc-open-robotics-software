@@ -14,12 +14,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public interface BehaviorActionDefinition
 {
-   /** Needed to keep replaced reference frames up to date. */
-   default void update()
-   {
-
-   }
-
    void saveToFile(ObjectNode jsonNode);
 
    void loadFromFile(JsonNode jsonNode);

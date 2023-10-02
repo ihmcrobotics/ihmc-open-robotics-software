@@ -1,20 +1,18 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
-import us.ihmc.behaviors.sequence.BehaviorActionStateBasics;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class HandPoseActionState implements BehaviorActionState
+public class HandPoseActionState extends BehaviorActionState
 {
    private final HandPoseActionDefinition definition = new HandPoseActionDefinition();
-   private final BehaviorActionStateBasics stateBasics = new BehaviorActionStateBasics();
-
-   private ReferenceFrame palmFrame;
+   private final DetachableReferenceFrame palmFrame = new DetachableReferenceFrame(definition.getPalmTransformToParent());
 
    @Override
-   public long getID()
+   public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      return stateBasics.getID();
+      palmFrame.update(referenceFrameLibrary, definition.getPalmParentFrameName());
    }
 
    @Override
