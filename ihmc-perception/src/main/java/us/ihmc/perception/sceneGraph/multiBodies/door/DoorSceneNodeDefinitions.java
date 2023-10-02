@@ -17,45 +17,56 @@ import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 /**
- * We want to measure this stuff in the right order.
+ * The DoorSceneNodeDefinitions class provides definitions and methods to create and manage
+ * scene graph nodes representing various components of a door, such as panels, frames, knobs,
+ * and handles. It is used to ensure that the necessary scene graph nodes are added to the
+ * scene graph in the correct order and with the correct transformations.
  *
- * It's all based on the one ArUco marker, so it makes setting everything up kinda hard.
+ * This class is designed to work with a scene graph and an ArUco marker-based door model.
+ * It defines constants for the names of various door components and their corresponding
+ * transformations, visual models, and marker sizes.
  */
 public class DoorSceneNodeDefinitions
 {
-   // PUSH DOOR
-
-
-   public static final String PUSH_DOOR_PANEL_NAME = "PushDoorPanel";
    public static final String PUSH_DOOR_FRAME_NAME = "PushDoorFrame";
-   public static final String PUSH_DOOR_LEVER_HANDLE_NAME = "PushDoorLeverHandle";
-   public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM  = new RigidBodyTransform();
-   public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
+   public static final String PULL_DOOR_FRAME_NAME = "PullDoorFrame";
+
+   public static final String LEFT_DOOR_PANEL_NAME = "LeftDoorPanel";
+   public static final String RIGHT_DOOR_PANEL_NAME = "RightDoorPanel";
+
+   public static final String LEFT_DOOR_LEVER_HANDLE_NAME = "LeftDoorLeverHandle";
+   public static final String RIGHT_DOOR_LEVER_HANDLE_NAME = "RightDoorLeverHandle";
+   public static final String LEFT_DOOR_KNOB_NAME = "LeftDoorKnob";
+   public static final String RIGHT_DOOR_KNOB_NAME = "RightDoorKnob";
+
+   // RIGHT DOOR TRANSFORMS
+   public static final RigidBodyTransform RIGHT_DOOR_MARKER_TO_OPENER_TRANSFORM  = new RigidBodyTransform();
+   public static final RigidBodyTransform RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
    static
    {
-      PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setZ(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
-      PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setY(-DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
-      PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM.setAndInvert(PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
+      RIGHT_DOOR_MARKER_TO_OPENER_TRANSFORM.getTranslation().setZ(DoorModelParameters.RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Z);
+      RIGHT_DOOR_MARKER_TO_OPENER_TRANSFORM.getTranslation().setY(-DoorModelParameters.RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Y);
+      RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM.setAndInvert(RIGHT_DOOR_MARKER_TO_OPENER_TRANSFORM);
    }
-   public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM = new RigidBodyTransform();
-   public static final RigidBodyTransform PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform RIGHT_DOOR_MARKER_TO_PANEL_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform RIGHT_DOOR_PANEL_TO_MARKER_TRANSFORM = new RigidBodyTransform();
    static
    {
-      RigidBodyTransform leverToPanelTransform = new RigidBodyTransform();
-      leverToPanelTransform.getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0);
-      leverToPanelTransform.getTranslation().setY(DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_LEVER_HANDLE_INSET);
-      leverToPanelTransform.getTranslation().setZ(DoorModelParameters.DOOR_LEVER_HANDLE_FROM_BOTTOM_OF_PANEL);
+      RigidBodyTransform openerToPanelTransform = new RigidBodyTransform();
+      openerToPanelTransform.getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0);
+      openerToPanelTransform.getTranslation().setY(DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_OPENER_INSET);
+      openerToPanelTransform.getTranslation().setZ(DoorModelParameters.DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
 
       ReferenceFrame panelFrame = ReferenceFrameMissingTools.constructARootFrame();
-      ReferenceFrame leverFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(panelFrame, leverToPanelTransform);
-      ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(leverFrame,
-                                                                                                            PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
+      ReferenceFrame openerFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(panelFrame, openerToPanelTransform);
+      ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(openerFrame,
+                                                                                                            RIGHT_DOOR_MARKER_TO_OPENER_TRANSFORM);
       FramePose3D markerPose = new FramePose3D(markerFrame);
       markerPose.changeFrame(panelFrame);
-      markerPose.get(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      PUSH_DOOR_PANEL_TO_MARKER_TRANSFORM.setAndInvert(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      markerPose.get(RIGHT_DOOR_MARKER_TO_PANEL_TRANSFORM);
+      RIGHT_DOOR_PANEL_TO_MARKER_TRANSFORM.setAndInvert(RIGHT_DOOR_MARKER_TO_PANEL_TRANSFORM);
    }
-   public static final RigidBodyTransform PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform RIGHT_DOOR_FRAME_TO_PANEL_TRANSFORM = new RigidBodyTransform();
    static
    {
       RigidBodyTransform panelToFrameTransform = new RigidBodyTransform();
@@ -67,19 +78,15 @@ public class DoorSceneNodeDefinitions
 
       FramePose3D framePose = new FramePose3D(frameFrame);
       framePose.changeFrame(panelFrame);
-      framePose.get(PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM);
+      framePose.get(RIGHT_DOOR_FRAME_TO_PANEL_TRANSFORM);
    }
 
-   // PULL DOOR
-
-   public static final String PULL_DOOR_PANEL_NAME = "PullDoorPanel";
-   public static final String PULL_DOOR_FRAME_NAME = "PullDoorFrame";
-   public static final String PULL_DOOR_LEVER_HANDLE_NAME = "PullDoorLeverHandle";
-   public static final RigidBodyTransform PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM  = new RigidBodyTransform();
-   public static final RigidBodyTransform PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
+   // LEFT DOOR TRANSFORMS
+   public static final RigidBodyTransform LEFT_DOOR_MARKER_TO_PANEL_TRANSFORM  = new RigidBodyTransform();
+   public static final RigidBodyTransform LEFT_DOOR_PANEL_TO_MARKER_TRANSFORM  = new RigidBodyTransform();
    static
    {
-      PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setZ(DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
+      LEFT_MARKER_TO_OPENER_TRANSFORM.getTranslation().setZ(DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
       PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setY(-DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
       PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM.setAndInvert(PULL_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM);
    }
@@ -137,6 +144,18 @@ public class DoorSceneNodeDefinitions
    {
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
+   }
+   public static final String DOOR_KNOB_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorKnob/DoorKnob.g3dj";
+   public static final RigidBodyTransform PULL_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      PULL_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
+   }
+   public static final RigidBodyTransform PUSH_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      PUSH_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
+      PUSH_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
    }
 
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
@@ -205,6 +224,20 @@ public class DoorSceneNodeDefinitions
          LogTools.info("Adding PullDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(pullDoorLeverHandle, parentNode));
       }
+
+      SceneNode pullDoorKnob = sceneGraph.getNamesToNodesMap().get(PUSH_DOOR_KNOB_NAME);
+      if (pullDoorKnob == null)
+      {
+         pullDoorKnob = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                         PULL_DOOR_KNOB_NAME,
+                                                         sceneGraph.getIDToNodeMap(),
+                                                         parentNode.getID(),
+                                                         PULL_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
+                                                         DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
+                                                         PULL_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         LogTools.info("Adding PushDoorLeverHandle to scene graph.");
+         modificationQueue.accept(new SceneGraphNodeAddition(pullDoorKnob, parentNode));
+      }
    }
 
    public static void ensurePushDoorNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -250,6 +283,20 @@ public class DoorSceneNodeDefinitions
                                                                 PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          LogTools.info("Adding PushDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(pushDoorLeverHandle, parentNode));
+      }
+
+      SceneNode pushDoorKnob = sceneGraph.getNamesToNodesMap().get(PUSH_DOOR_KNOB_NAME);
+      if (pushDoorKnob == null)
+      {
+         pushDoorKnob = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                         PUSH_DOOR_KNOB_NAME,
+                                                         sceneGraph.getIDToNodeMap(),
+                                                         parentNode.getID(),
+                                                         PUSH_DOOR_LEVER_HANDLE_TO_MARKER_TRANSFORM,
+                                                         DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
+                                                         PUSH_DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         LogTools.info("Adding PushDoorLeverHandle to scene graph.");
+         modificationQueue.accept(new SceneGraphNodeAddition(pushDoorKnob, parentNode));
       }
    }
 }
