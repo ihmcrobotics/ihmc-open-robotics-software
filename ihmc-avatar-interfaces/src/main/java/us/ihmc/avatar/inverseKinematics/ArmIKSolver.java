@@ -71,21 +71,23 @@ public class ArmIKSolver
    private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
    private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(armWorldFrame);
    private final FramePose3D controlFramePose = new FramePose3D();
-   private final OneDoFJointBasics[] syncedOneDoFJoints;
+   private final OneDoFJointBasics[] sourceOneDoFJoints;
    private final OneDoFJointBasics[] workingOneDoFJoints;
    private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
    private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
-   private final RigidBodyBasics syncedChest;
    private double quality;
 
-   public ArmIKSolver(RobotSide side, DRCRobotModel robotModel, FullHumanoidRobotModel syncedRobot)
+   /**
+    * @param sourceFullRobotModel The robot model to clone the joint tree from and copy initial values from in {@link #copySourceToWork}
+    */
+   public ArmIKSolver(RobotSide side, DRCRobotModel robotModel, FullHumanoidRobotModel sourceFullRobotModel)
    {
-      syncedChest = syncedRobot.getChest();
-      OneDoFJointBasics syncedFirstArmJoint = syncedRobot.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
-      syncedOneDoFJoints = FullRobotModelUtils.getArmJoints(syncedRobot, side, robotModel.getJointMap().getArmJointNames());
+      RigidBodyBasics sourceChest = sourceFullRobotModel.getChest();
+      OneDoFJointBasics sourceFirstArmJoint = sourceFullRobotModel.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
+      sourceOneDoFJoints = FullRobotModelUtils.getArmJoints(sourceFullRobotModel, side, robotModel.getJointMap().getArmJointNames());
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
-      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, armWorldFrame, syncedFirstArmJoint);
+      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceChest, armWorldFrame, sourceFirstArmJoint);
 
       // Remove fingers
       workHand = MultiBodySystemTools.findRigidBody(workChest, robotModel.getJointMap().getHandName(side));
@@ -93,9 +95,9 @@ public class ArmIKSolver
 
       // Set the control frame pose to our palm centered control frame.
       // The spatial feedback command wants this relative to the fixed CoM of the hand link.
-      FramePose3D syncedControlFramePose = new FramePose3D(syncedRobot.getHandControlFrame(side));
-      syncedControlFramePose.changeFrame(syncedRobot.getHand(side).getBodyFixedFrame());
-      controlFramePose.setIncludingFrame(workHand.getBodyFixedFrame(), syncedControlFramePose);
+      FramePose3D sourceControlFramePose = new FramePose3D(sourceFullRobotModel.getHandControlFrame(side));
+      sourceControlFramePose.changeFrame(sourceFullRobotModel.getHand(side).getBodyFixedFrame());
+      controlFramePose.setIncludingFrame(workHand.getBodyFixedFrame(), sourceControlFramePose);
 
       workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workChest);
 
@@ -150,12 +152,16 @@ public class ArmIKSolver
       }
    }
 
-   public void copyActualToWork()
+   public void copySourceToWork()
    {
-      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(syncedOneDoFJoints, workingOneDoFJoints);
+      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(sourceOneDoFJoints, workingOneDoFJoints);
    }
 
-   public void update(ReferenceFrame handControlDesiredFrame)
+   /**
+    * Computes joint angles from given chest frame such that the hand control frame
+    * matches the given hand control frame, which is usually the palm.
+    */
+   public void update(ReferenceFrame chestFrame, ReferenceFrame handControlDesiredFrame)
    {
       // since this is temporarily modifying the desired pose, and it's passed
       // to the WBCC command on another thread below, we need to synchronize.
@@ -163,7 +169,7 @@ public class ArmIKSolver
       {
          // Get the hand desired pose, but put it in the world of the detached arm
          handControlDesiredPose.setToZero(handControlDesiredFrame);
-         handControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
+         handControlDesiredPose.changeFrame(chestFrame);
          handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
 
          // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame
@@ -183,7 +189,7 @@ public class ArmIKSolver
 
    public void solve()
    {
-      copyActualToWork();
+      copySourceToWork();
       workChest.updateFramesRecursively();
 
       spatialFeedbackControlCommand.set(workChest, workHand);
