@@ -5,7 +5,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationAction extends WaitDurationActionDescription implements BehaviorAction
+public class WaitDurationAction extends WaitDurationActionDefinition implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;
@@ -19,7 +19,7 @@ public class WaitDurationAction extends WaitDurationActionDescription implements
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update();
 

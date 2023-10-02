@@ -8,7 +8,7 @@ import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-public class SakeHandCommandAction extends SakeHandCommandActionDescription implements BehaviorAction
+public class SakeHandCommandAction extends SakeHandCommandActionDefinition implements BehaviorAction
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
@@ -25,7 +25,7 @@ public class SakeHandCommandAction extends SakeHandCommandActionDescription impl
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update();
 

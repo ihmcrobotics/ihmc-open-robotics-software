@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchAction extends PelvisHeightPitchActionDescription implements BehaviorAction
+public class PelvisHeightPitchAction extends PelvisHeightPitchActionDefinition implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -42,7 +42,7 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionDescription 
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update(referenceFrameLibrary);
 

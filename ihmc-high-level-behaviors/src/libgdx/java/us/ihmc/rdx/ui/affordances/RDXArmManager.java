@@ -122,7 +122,8 @@ public class RDXArmManager
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
+         armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(),
+                                       interactableHands.get(side).getControlReferenceFrame());
 
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
@@ -152,7 +153,7 @@ public class RDXArmManager
          readyToSolve = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).copyActualToWork();
+            armIKSolvers.get(side).copySourceToWork();
          }
 
          MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->

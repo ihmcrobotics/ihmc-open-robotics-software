@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage> implements Settable<BodyPartPoseStatusMessage>, EpsilonComparable<BodyPartPoseStatusMessage>
 {
    /**
+            * Whether the action hs to be executed next and is part of a group of concurrent actions
+            */
+   public boolean current_and_concurrent_;
+   /**
             * Name of the frame the this action is expressed in
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
@@ -31,8 +35,25 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
 
    public void set(BodyPartPoseStatusMessage other)
    {
+      current_and_concurrent_ = other.current_and_concurrent_;
+
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
+   }
+
+   /**
+            * Whether the action hs to be executed next and is part of a group of concurrent actions
+            */
+   public void setCurrentAndConcurrent(boolean current_and_concurrent)
+   {
+      current_and_concurrent_ = current_and_concurrent;
+   }
+   /**
+            * Whether the action hs to be executed next and is part of a group of concurrent actions
+            */
+   public boolean getCurrentAndConcurrent()
+   {
+      return current_and_concurrent_;
    }
 
 
@@ -71,6 +92,8 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.current_and_concurrent_, other.current_and_concurrent_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
@@ -87,6 +110,8 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
 
       BodyPartPoseStatusMessage otherMyClass = (BodyPartPoseStatusMessage) other;
 
+      if(this.current_and_concurrent_ != otherMyClass.current_and_concurrent_) return false;
+
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
 
@@ -99,6 +124,8 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("BodyPartPoseStatusMessage {");
+      builder.append("current_and_concurrent=");
+      builder.append(this.current_and_concurrent_);      builder.append(", ");
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
       builder.append("transform_to_parent=");

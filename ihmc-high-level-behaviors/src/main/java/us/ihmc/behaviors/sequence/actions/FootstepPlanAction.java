@@ -22,7 +22,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class FootstepPlanAction extends FootstepPlanActionDescription implements BehaviorAction
+public class FootstepPlanAction extends FootstepPlanActionDefinition implements BehaviorAction
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -60,7 +60,7 @@ public class FootstepPlanAction extends FootstepPlanActionDescription implements
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update(referenceFrameLibrary);
 
@@ -71,7 +71,7 @@ public class FootstepPlanAction extends FootstepPlanActionDescription implements
    public void triggerActionExecution()
    {
       footstepPlanToExecute.clear();
-      for (FootstepActionData footstep : getFootsteps())
+      for (FootstepActionDefinition footstep : getFootsteps())
       {
          solePose.setIncludingFrame(getConditionalReferenceFrame().get().getParent(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
