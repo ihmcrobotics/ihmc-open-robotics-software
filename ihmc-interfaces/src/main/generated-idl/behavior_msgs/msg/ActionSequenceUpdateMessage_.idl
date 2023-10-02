@@ -1,14 +1,14 @@
 #ifndef __behavior_msgs__msg__ActionSequenceUpdateMessage__idl__
 #define __behavior_msgs__msg__ActionSequenceUpdateMessage__idl__
 
-#include "behavior_msgs/msg/./ArmJointAnglesActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./BodyPartPoseActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./FootstepPlanActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./HandWrenchActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./SakeHandCommandActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./SidedBodyPartPoseActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./WaitDurationActionDescriptionMessage_.idl"
-#include "behavior_msgs/msg/./WalkActionDescriptionMessage_.idl"
+#include "behavior_msgs/msg/./ArmJointAnglesActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./BodyPartPoseActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./HandWrenchActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./SakeHandCommandActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./SidedBodyPartPoseActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./WaitDurationActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./WalkActionDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -23,15 +23,15 @@ module behavior_msgs
          * Number of actions within the sequence
          */
         unsigned short sequence_size;
-        sequence<behavior_msgs::msg::dds::ArmJointAnglesActionDescriptionMessage, 200> arm_joint_angles_actions;
-        sequence<behavior_msgs::msg::dds::BodyPartPoseActionDescriptionMessage, 200> chest_orientation_actions;
-        sequence<behavior_msgs::msg::dds::FootstepPlanActionDescriptionMessage, 200> footstep_plan_actions;
-        sequence<behavior_msgs::msg::dds::SakeHandCommandActionDescriptionMessage, 200> sake_hand_command_actions;
-        sequence<behavior_msgs::msg::dds::SidedBodyPartPoseActionDescriptionMessage, 200> hand_pose_actions;
-        sequence<behavior_msgs::msg::dds::HandWrenchActionDescriptionMessage, 200> hand_wrench_actions;
-        sequence<behavior_msgs::msg::dds::BodyPartPoseActionDescriptionMessage, 200> pelvis_height_actions;
-        sequence<behavior_msgs::msg::dds::WaitDurationActionDescriptionMessage, 200> wait_duration_actions;
-        sequence<behavior_msgs::msg::dds::WalkActionDescriptionMessage, 200> walk_actions;
+        sequence<behavior_msgs::msg::dds::ArmJointAnglesActionDefinitionMessage, 200> arm_joint_angles_actions;
+        sequence<behavior_msgs::msg::dds::BodyPartPoseActionDefinitionMessage, 200> chest_orientation_actions;
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionDefinitionMessage, 200> footstep_plan_actions;
+        sequence<behavior_msgs::msg::dds::SakeHandCommandActionDefinitionMessage, 200> sake_hand_command_actions;
+        sequence<behavior_msgs::msg::dds::SidedBodyPartPoseActionDefinitionMessage, 200> hand_pose_actions;
+        sequence<behavior_msgs::msg::dds::HandWrenchActionDefinitionMessage, 200> hand_wrench_actions;
+        sequence<behavior_msgs::msg::dds::BodyPartPoseActionDefinitionMessage, 200> pelvis_height_actions;
+        sequence<behavior_msgs::msg::dds::WaitDurationActionDefinitionMessage, 200> wait_duration_actions;
+        sequence<behavior_msgs::msg::dds::WalkActionDefinitionMessage, 200> walk_actions;
       };
     };
   };
