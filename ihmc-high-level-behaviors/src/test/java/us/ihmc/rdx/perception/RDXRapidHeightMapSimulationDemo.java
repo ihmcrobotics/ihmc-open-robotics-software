@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import imgui.ImGui;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.communication.CommunicationMode;
@@ -10,11 +11,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
@@ -27,6 +28,9 @@ import us.ihmc.ros2.ROS2Node;
 
 public class RDXRapidHeightMapSimulationDemo
 {
+   private final double MAXIMUM_DISTANCE_FROM_ORIGIN = 8.0;
+   private final double SENSOR_STEP_LENGTH = 0.01;
+
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Helper ros2Helper;
    private final ROS2Node ros2Node;
@@ -39,6 +43,7 @@ public class RDXRapidHeightMapSimulationDemo
    private RDXEnvironmentBuilder environmentBuilder;
    private BytedecoImage bytedecoDepthImage;
    private OpenCLManager openCLManager;
+   private RDXPanel navigationPanel;
 
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
@@ -47,6 +52,8 @@ public class RDXRapidHeightMapSimulationDemo
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
 
+   private boolean autoIncrement = false;
+   private int autoIncrementCounter = 0;
    private boolean initialized = false;
 
    public RDXRapidHeightMapSimulationDemo()
@@ -61,14 +68,17 @@ public class RDXRapidHeightMapSimulationDemo
          {
             baseUI.create();
 
+            navigationPanel = new RDXPanel("Dataset Navigation Panel");
+            baseUI.getImGuiPanelManager().addPanel(navigationPanel);
+
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DemoPullDoor.json");
+            environmentBuilder.loadEnvironment("LookAndStepHard.json");
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
-            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
+            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.6);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
@@ -77,7 +87,9 @@ public class RDXRapidHeightMapSimulationDemo
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
-            l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
+            l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(30.0));
+
+            navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
          @Override
@@ -122,6 +134,12 @@ public class RDXRapidHeightMapSimulationDemo
                initialized = true;
             }
 
+            if (autoIncrement)
+            {
+               autoIncrementCounter++;
+               updateFrameState(autoIncrementCounter);
+            }
+
             steppingL515Simulator.render(baseUI.getPrimaryScene());
 
             Point3D position = new Point3D(l515PoseGizmo.getGizmoFrame().getTransformToWorldFrame().getTranslation());
@@ -159,6 +177,28 @@ public class RDXRapidHeightMapSimulationDemo
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         public void updateFrameState(int counter)
+         {
+            if (l515PoseGizmo.getTransformToParent().getTranslation().getX() < MAXIMUM_DISTANCE_FROM_ORIGIN)
+            {
+               l515PoseGizmo.getTransformToParent().prependTranslation(SENSOR_STEP_LENGTH, 0, 0);
+               l515PoseGizmo.update();
+            }
+         }
+
+         private void renderNavigationPanel()
+         {
+            if (ImGui.button("Start"))
+            {
+               autoIncrement = true;
+            }
+
+            if (ImGui.button("Stop"))
+            {
+               autoIncrement = false;
+            }
          }
 
          @Override
