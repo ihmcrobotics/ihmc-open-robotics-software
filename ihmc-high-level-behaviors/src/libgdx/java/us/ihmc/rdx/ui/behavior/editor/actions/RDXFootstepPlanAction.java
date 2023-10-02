@@ -138,6 +138,12 @@ public class RDXFootstepPlanAction extends FootstepPlanActionState implements RD
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       if (referenceFrameLibraryCombo.render())

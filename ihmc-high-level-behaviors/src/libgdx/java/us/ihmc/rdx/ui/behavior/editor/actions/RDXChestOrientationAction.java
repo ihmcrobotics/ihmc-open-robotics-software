@@ -181,6 +181,12 @@ public class RDXChestOrientationAction extends ChestOrientationActionState imple
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       ImGui.sameLine();

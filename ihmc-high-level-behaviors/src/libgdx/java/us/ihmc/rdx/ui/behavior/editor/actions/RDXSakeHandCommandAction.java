@@ -55,6 +55,12 @@ public class RDXSakeHandCommandAction extends SakeHandCommandActionState impleme
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       imgui.ImGui.sameLine();

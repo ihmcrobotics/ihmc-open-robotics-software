@@ -280,6 +280,12 @@ public class RDXHandPoseAction extends HandPoseActionState implements RDXBehavio
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       ImGui.sameLine();

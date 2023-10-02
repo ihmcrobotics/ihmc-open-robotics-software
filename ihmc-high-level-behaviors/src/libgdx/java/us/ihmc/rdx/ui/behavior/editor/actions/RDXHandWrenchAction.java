@@ -22,6 +22,12 @@ public class RDXHandWrenchAction extends HandWrenchActionState implements RDXBeh
                                                                    imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(80.0f);
