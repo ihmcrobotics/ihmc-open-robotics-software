@@ -124,9 +124,7 @@ public class ContinuousPlanningRemoteTask
             {
                continuousPlanner.updatePlan(latestHeightMapData);
             }
-            // TODO: Remove the following condition to be able to send the footsteps to the controller earlier.
             else
-               //if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED) // send the next footstep
             {
                if (continuousPlanner.isPlanAvailable()) // Only send the next footstep if a plan is available
                {

@@ -4,6 +4,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
@@ -17,7 +18,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
-public class RDXPlanarRegionsSimulationDemo
+public class RDXRapidHeightMapSimulationDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXHighLevelDepthSensorSimulator steppingL515Simulator;
@@ -26,12 +27,11 @@ public class RDXPlanarRegionsSimulationDemo
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
-   private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private BytedecoImage bytedecoDepthImage;
 
    private boolean initialized = false;
 
-   public RDXPlanarRegionsSimulationDemo()
+   public RDXRapidHeightMapSimulationDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -83,9 +83,6 @@ public class RDXPlanarRegionsSimulationDemo
                                                          steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
                                                          opencv_core.CV_16UC1);
                   bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-                  rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, steppingL515Simulator.getCopyOfCameraParameters());
-
-                  rapidRegionsUI.create(rapidPlanarRegionsExtractor);
                   baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
                   baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUI, RDXSceneLevel.VIRTUAL);
 
@@ -105,14 +102,6 @@ public class RDXPlanarRegionsSimulationDemo
 
                   // Get the planar regions from the planar region extractor
                   FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
-                  rapidPlanarRegionsExtractor.update(bytedecoDepthImage, steppingL515Simulator.getSensorFrame(), frameRegions);
-                  rapidPlanarRegionsExtractor.setProcessing(false);
-
-                  if (rapidPlanarRegionsExtractor.isModified())
-                  {
-                     rapidRegionsUI.render3DGraphics(frameRegions);
-                     rapidPlanarRegionsExtractor.setProcessing(false);
-                  }
                }
 
 
@@ -132,6 +121,6 @@ public class RDXPlanarRegionsSimulationDemo
 
    public static void main(String[] args)
    {
-      new RDXPlanarRegionsSimulationDemo();
+      new RDXRapidHeightMapSimulationDemo();
    }
 }
