@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandWrenchAction extends HandWrenchActionDescription implements BehaviorAction
+public class HandWrenchAction extends HandWrenchActionDefinition implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;
@@ -21,7 +21,7 @@ public class HandWrenchAction extends HandWrenchActionDescription implements Beh
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrencyWithPreviousIndex, int indexShiftConcurrentAction)
+   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
       update();
 

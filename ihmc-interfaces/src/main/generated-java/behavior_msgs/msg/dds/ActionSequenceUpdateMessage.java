@@ -12,27 +12,27 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
             * Number of actions within the sequence
             */
    public int sequence_size_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage>  arm_joint_angles_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage>  chest_orientation_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage>  footstep_plan_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessage>  sake_hand_command_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessage>  hand_pose_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage>  hand_wrench_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage>  pelvis_height_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDescriptionMessage>  wait_duration_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDescriptionMessage>  walk_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage>  arm_joint_angles_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage>  chest_orientation_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage>  footstep_plan_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage>  sake_hand_command_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage>  hand_pose_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage>  hand_wrench_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage>  pelvis_height_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage>  wait_duration_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDefinitionMessage>  walk_actions_;
 
    public ActionSequenceUpdateMessage()
    {
-      arm_joint_angles_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage> (200, new behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessagePubSubType());
-      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessagePubSubType());
-      footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessagePubSubType());
-      sake_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessage> (200, new behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessagePubSubType());
-      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessage> (200, new behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessagePubSubType());
-      hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionDescriptionMessagePubSubType());
-      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessagePubSubType());
-      wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDescriptionMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionDescriptionMessagePubSubType());
-      walk_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDescriptionMessage> (200, new behavior_msgs.msg.dds.WalkActionDescriptionMessagePubSubType());
+      arm_joint_angles_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage> (200, new behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType());
+      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType());
+      footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType());
+      sake_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage> (200, new behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType());
+      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage> (200, new behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType());
+      hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType());
+      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType());
+      wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType());
+      walk_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDefinitionMessage> (200, new behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType());
 
    }
 
@@ -73,55 +73,55 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionDescriptionMessage>  getArmJointAnglesActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage>  getArmJointAnglesActions()
    {
       return arm_joint_angles_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage>  getChestOrientationActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage>  getChestOrientationActions()
    {
       return chest_orientation_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionDescriptionMessage>  getFootstepPlanActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage>  getFootstepPlanActions()
    {
       return footstep_plan_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionDescriptionMessage>  getSakeHandCommandActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage>  getSakeHandCommandActions()
    {
       return sake_hand_command_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDescriptionMessage>  getHandPoseActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage>  getHandPoseActions()
    {
       return hand_pose_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDescriptionMessage>  getHandWrenchActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage>  getHandWrenchActions()
    {
       return hand_wrench_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDescriptionMessage>  getPelvisHeightActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage>  getPelvisHeightActions()
    {
       return pelvis_height_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDescriptionMessage>  getWaitDurationActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage>  getWaitDurationActions()
    {
       return wait_duration_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDescriptionMessage>  getWalkActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDefinitionMessage>  getWalkActions()
    {
       return walk_actions_;
    }
