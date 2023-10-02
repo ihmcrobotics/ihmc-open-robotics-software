@@ -185,6 +185,12 @@ public class RDXWalkAction extends WalkActionState implements RDXBehaviorAction
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       if (referenceFrameLibraryCombo.render())

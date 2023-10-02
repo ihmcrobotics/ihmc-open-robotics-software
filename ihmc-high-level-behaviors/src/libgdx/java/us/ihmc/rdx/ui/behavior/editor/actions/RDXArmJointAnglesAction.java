@@ -67,6 +67,12 @@ public class RDXArmJointAnglesAction extends ArmJointAnglesActionState implement
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(100.0f);

@@ -19,6 +19,12 @@ public class RDXWaitDurationAction extends WaitDurationActionState implements RD
                                                                           imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(80.0f);

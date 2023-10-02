@@ -190,6 +190,12 @@ public class RDXPelvisHeightPitchAction extends PelvisHeightPitchActionState imp
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      rdxActionBasics.renderImGuiWidgets();
+   }
+
+   @Override
    public void renderImGuiSettingWidgets()
    {
       ImGui.sameLine();
