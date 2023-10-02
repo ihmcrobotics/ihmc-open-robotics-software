@@ -90,14 +90,6 @@ public class RDXBehaviorActionSequenceUI
 
       renderFileMenu();
       renderActionsMenu();
-
-//      if (ImGui.beginMenu(labels.get("View")))
-//      {
-//         // TODO: Toggle visualization settings
-//
-//         ImGui.endMenu();
-//      }
-
       ImGui.endMenuBar();
 
       editor.renderImGuiWidgets();

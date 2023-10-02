@@ -340,6 +340,12 @@ public class CentroidProjectionToeOffCalculatorTest
             return new SwingTrajectoryParameters()
             {
                @Override
+               public double getMaxSwingHeight()
+               {
+                  return 0;
+               }
+
+               @Override
                public double getDesiredTouchdownHeightOffset()
                {
                   return 0;

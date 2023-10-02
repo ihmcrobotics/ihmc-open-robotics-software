@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.actions.FootstepActionData;
+import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.function.BooleanSupplier;
 
 /**
- * This class is a fully mutable and transitive interactable representation of FootstepActionData.
+ * This class is a fully mutable and transitive interactable representation of FootstepActionDefinition.
  */
 public class RDXFootstepAction
 {
@@ -25,7 +25,7 @@ public class RDXFootstepAction
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final BooleanSupplier planSelected;
-   private FootstepActionData actionData;
+   private FootstepActionDefinition actionDefinition;
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
@@ -40,15 +40,15 @@ public class RDXFootstepAction
       this.planSelected = planSelected;
    }
 
-   public void update(FootstepActionData actionData, int stepIndex)
+   public void update(FootstepActionDefinition actionDefinition, int stepIndex)
    {
-      this.actionData = actionData;
+      this.actionDefinition = actionDefinition;
 
       if (interactableFootstep == null
        || stepIndex != interactableFootstep.getIndex()
-       || actionData.getSide() != interactableFootstep.getFootstepSide())
+       || actionDefinition.getSide() != interactableFootstep.getFootstepSide())
       {
-         recreateGraphics(actionData.getSide(), stepIndex);
+         recreateGraphics(actionDefinition.getSide(), stepIndex);
       }
 
       ReferenceFrame updatedPlanFrame = planFrameSupplier.get();
@@ -60,10 +60,10 @@ public class RDXFootstepAction
       getGizmo().update();
 
       if (getGizmo().getGizmoModifiedByUser().poll())
-         actionData.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
+         actionDefinition.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
       else
       {
-         getGizmo().getTransformToParent().set(actionData.getSolePose()); // Update gizmo in case action data changes
+         getGizmo().getTransformToParent().set(actionDefinition.getSolePose()); // Update gizmo in case action data changes
          getGizmo().update();
       }
 
@@ -104,9 +104,9 @@ public class RDXFootstepAction
          flatFootstepGraphic.getRenderables(renderables, pool);
    }
 
-   public FootstepActionData getActionData()
+   public FootstepActionDefinition getActionData()
    {
-      return actionData;
+      return actionDefinition;
    }
 
    public ReferenceFrame getFootstepFrame()
