@@ -113,13 +113,14 @@ public class BehaviorActionSequence
 
    public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
    {
-      referenceFrameLibrary.add(ReferenceFrame::getWorldFrame);
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames()::getChestFrame);
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames()::getMidFeetUnderPelvisFrame);
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames()::getPelvisFrame);
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames()::getPelvisZUpFrame);
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames()::getMidFeetZUpFrame);
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames()::getMidFootZUpGroundFrame);
+
+      referenceFrameLibrary.add(ReferenceFrame.getWorldFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getChestFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
    }
 
    public void update()

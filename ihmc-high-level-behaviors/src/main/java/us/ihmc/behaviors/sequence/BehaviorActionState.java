@@ -1,10 +1,29 @@
 package us.ihmc.behaviors.sequence;
 
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+
 // TODO: Include toMessage and fromMessage
-public interface BehaviorActionState
+public abstract class BehaviorActionState
 {
    /** The action's unique ID. */
-   long getID();
+   private final long id;
 
-   BehaviorActionDefinition getDefinition();
+   public BehaviorActionState()
+   {
+      // TODO: Make parameter
+      id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
+   }
+
+   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   {
+
+   }
+
+   /** The action's unique ID. */
+   public long getID()
+   {
+      return id;
+   }
+
+   public abstract BehaviorActionDefinition getDefinition();
 }
