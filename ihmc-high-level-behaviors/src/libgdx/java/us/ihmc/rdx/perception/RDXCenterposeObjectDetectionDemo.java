@@ -44,7 +44,8 @@ public class RDXCenterposeObjectDetectionDemo
             RDXROS2BoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
                                                                                                             ros2Helper,
                                                                                                             sensorFrame,
-                                                                                                            PerceptionAPI.CENTERPOSE_DETECTED_OBJECT);
+                                                                                                            PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
+                                                                                                            baseUI.getPrimary3DPanel().getCamera3D());
             centerPoseBoundingBoxVisualizer.setActive(true);
 
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
@@ -76,7 +77,7 @@ public class RDXCenterposeObjectDetectionDemo
                                                                                                                               .get(RobotSide.LEFT));
             zed2ColoredPointCloudVisualizer.setSubscribed(true);
             zed2ColoredPointCloudVisualizer.setActive(true);
-            //            globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
+            globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
             globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
 

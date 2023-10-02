@@ -27,7 +27,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -37,7 +36,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
 {
    private final ROS2Topic<DetectedObjectPacket> topic;
    private final IHMCROS2Input<DetectedObjectPacket> subscription;
-   private final RDXFocusBasedCamera primaryPanelCamera;
+   private final RDXFocusBasedCamera camera;
    private ModelInstance markerModelInstance;
    private final RDX3DSituatedText text;
    private final Color BOX_EDGE_COLOR = new Color(Color.WHITE);
@@ -50,7 +49,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final Scalar RED = new Scalar(255, 1, 2, 255);
    private final Scalar WHITE = new Scalar(255, 225, 225, 255);
 
-   public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ReferenceFrame sensorFrame, ROS2Topic<DetectedObjectPacket> topic)
+   public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ReferenceFrame sensorFrame, ROS2Topic<DetectedObjectPacket> topic, RDXFocusBasedCamera camera)
    {
       super(title + " (ROS 2)");
       this.sensorFrame = sensorFrame;
@@ -59,7 +58,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
       this.text = new RDX3DSituatedText("test", 0.05f);
       this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
       this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));
-      primaryPanelCamera = RDXBaseUI.getInstance().getPrimary3DPanel().getCamera3D();
+      this.camera = camera;
    }
 
    @Override
@@ -67,25 +66,25 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    {
       super.update();
 
-      if(subscription.getMessageNotification().poll())
+      if (subscription.getMessageNotification().poll())
       {
-         DetectedObjectPacket DetectedObjectMessage = subscription.getMessageNotification().read();
-         Point3D[] vertices = DetectedObjectMessage.getBoundingBoxVertices();
-         Pose3D objectPoseSensorFrame = DetectedObjectMessage.getPose();
-         double confidence = DetectedObjectMessage.getConfidence();
-         String object_ype = DetectedObjectMessage.getObjectTypeAsString();
+         DetectedObjectPacket detectedObjectMessage = subscription.getMessageNotification().read();
+         Point3D[] vertices = detectedObjectMessage.getBoundingBoxVertices();
+         Pose3D objectPoseSensorFrame = detectedObjectMessage.getPose();
+         double confidence = detectedObjectMessage.getConfidence();
+         String objectType = detectedObjectMessage.getObjectTypeAsString();
 
          if (markerModelInstance != null)
-         {
             markerModelInstance.model.dispose();
-         }
 
          for (int i = 0; i < vertices.length; i++)
          {
             if (vertices3D[i] == null)
                vertices3D[i] = new FramePoint3D();
 
-            vertices3D[i].setIncludingFrame(sensorFrame, vertices[i]);
+            vertices3D[i].changeFrame(sensorFrame);
+            vertices3D[i].interpolate(vertices[i], 0.2);
+
             vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
          }
 
@@ -100,10 +99,10 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
 
          if (previousTextData != null)
             previousTextData.dispose();
-         previousTextData = text.setTextWithoutCache("Confidence: %.1f".formatted(confidence));
+         previousTextData = text.setTextWithoutCache(objectType + " %.1f".formatted(confidence));
       }
 
-      FramePose3D textPose = new FramePose3D(primaryPanelCamera.getCameraFrame());
+      FramePose3D textPose = new FramePose3D(camera.getCameraFrame());
       textPose.getOrientation().appendPitchRotation(3.0 / 2.0 * Math.PI);
       textPose.getOrientation().appendYawRotation(-Math.PI / 2.0);
 
@@ -126,7 +125,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    {
       if (isActive() && sceneLevelCheck(sceneLevels))
       {
-         if(markerModelInstance != null)
+         if (markerModelInstance != null)
          {
             text.getRenderables(renderables, pool);
             markerCoordinateFrameInstance.getRenderables(renderables, pool);
@@ -140,9 +139,10 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    {
       Point3D[] boundingBox2dVertices = subscription.getLatest().getBoundingBox2dVertices();
       Point[] pointVertices = new Point[8];
-      for (int i = 0; i < boundingBox2dVertices.length; i++) {
+      for (int i = 0; i < boundingBox2dVertices.length; i++)
+      {
          pointVertices[i] = new Point((int) boundingBox2dVertices[i].getX(), (int) boundingBox2dVertices[i].getY());
-         opencv_imgproc.circle(rgba8Image, pointVertices[i], (int)(1.0f*i+3), WHITE, 1, opencv_imgproc.LINE_8, 0);
+         opencv_imgproc.circle(rgba8Image, pointVertices[i], (int) (1.0f * i + 3), WHITE, 1, opencv_imgproc.LINE_8, 0);
       }
       opencv_imgproc.line(rgba8Image, pointVertices[0], pointVertices[1], RED, 1, opencv_imgproc.LINE_8, 0);
       opencv_imgproc.line(rgba8Image, pointVertices[0], pointVertices[2], RED, 1, opencv_imgproc.LINE_8, 0);
