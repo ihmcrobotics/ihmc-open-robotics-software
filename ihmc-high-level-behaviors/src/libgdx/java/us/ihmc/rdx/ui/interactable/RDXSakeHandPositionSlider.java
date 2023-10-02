@@ -35,7 +35,6 @@ public class RDXSakeHandPositionSlider
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS2SyncedRobotModel syncedRobot;
    private final IHMCROS2Input<SakeHandStatusMessage> handStatusMessage;
    private final CommunicationHelper communicationHelper;
    private final RobotSide handSide;
@@ -45,11 +44,8 @@ public class RDXSakeHandPositionSlider
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
-   public RDXSakeHandPositionSlider(ROS2SyncedRobotModel syncedRobot,
-                                    CommunicationHelper communicationHelper,
-                                    RobotSide handSide)
+   public RDXSakeHandPositionSlider(CommunicationHelper communicationHelper, RobotSide handSide)
    {
-      this.syncedRobot = syncedRobot;
       this.communicationHelper = communicationHelper;
       this.handSide = handSide;
       sliderName = handSide.getPascalCaseName() + " angle";
