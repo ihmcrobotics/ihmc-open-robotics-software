@@ -89,7 +89,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedParentReferenceFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getConditionalReferenceFrame());
       footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(actionDefinition.getConditionalReferenceFrame().get());
       for (RobotSide side : RobotSide.values)
       {
@@ -187,7 +187,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedParentReferenceFrameName());
+         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
       }
       if (ImGui.button(labels.get("Plan")))
       {

@@ -105,7 +105,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedParentReferenceFrameName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
@@ -193,7 +193,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       executeWithNextActionWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedParentReferenceFrameName());
+         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
       }
       ImGui.pushItemWidth(80.0f);
       heightWidget.renderImGuiWidget();

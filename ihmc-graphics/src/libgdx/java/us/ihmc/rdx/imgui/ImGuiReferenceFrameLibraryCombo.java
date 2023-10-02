@@ -14,7 +14,7 @@ public class ImGuiReferenceFrameLibraryCombo
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private String parentReferenceFrameName;
+   private ConditionalReferenceFrame selectedReferenceFrame = new ConditionalReferenceFrame();
    private int selectedFrameIndex;
 
    public ImGuiReferenceFrameLibraryCombo(ReferenceFrameLibrary referenceFrameLibrary)
@@ -24,8 +24,6 @@ public class ImGuiReferenceFrameLibraryCombo
 
    public boolean render()
    {
-      selectedFrameIndex = referenceFrameLibrary.findFrameIndexByName(parentReferenceFrameName);
-
       String[] referenceFrameNamesArray = referenceFrameLibrary.getReferenceFrameNameArray();
 
       if (ImGui.beginCombo(labels.get("Parent frame"), referenceFrameNamesArray[selectedFrameIndex]))
@@ -42,10 +40,7 @@ public class ImGuiReferenceFrameLibraryCombo
                   ImGui.pushStyleColor(ImGuiCol.Text, Color.RED.toIntBits());
 
                if (ImGui.selectable(referenceFrameNamesArray[i], selectedFrameIndex == i))
-               {
                   selectedFrameIndex = i;
-                  setSelectedParentReferenceFrameName(referenceFrameNamesArray[selectedFrameIndex]);
-               }
 
                if (frameHasNoParentFrame)
                   ImGui.popStyleColor();
@@ -58,13 +53,13 @@ public class ImGuiReferenceFrameLibraryCombo
       return true;
    }
 
-   public void setSelectedParentReferenceFrameName(String parentReferenceFrameName)
+   public void setSelectedReferenceFrame(ConditionalReferenceFrame referenceFrame)
    {
-      this.parentReferenceFrameName = parentReferenceFrameName;
+      this.selectedReferenceFrame = referenceFrame;
    }
 
-   public String getSelectedParentReferenceFrameName()
+   public ReferenceFrame getSelectedReferenceFrame()
    {
-      return parentReferenceFrameName;
+      return selectedReferenceFrame.get();
    }
 }
