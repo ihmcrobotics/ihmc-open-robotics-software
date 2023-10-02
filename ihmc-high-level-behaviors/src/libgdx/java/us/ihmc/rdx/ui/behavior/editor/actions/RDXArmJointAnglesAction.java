@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.actions.ArmJointAnglesAction;
+import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionExecutor;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionDefinition;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -19,7 +19,7 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionDefinition::getSide, actionDefinition::setSide, labels.get("Side"));
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
-   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesAction.NUMBER_OF_JOINTS];
+   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionExecutor.NUMBER_OF_JOINTS];
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionDefinition::getTrajectoryDuration,
                                                                                 actionDefinition::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
@@ -27,13 +27,13 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    {
       this.robotModel = robotModel;
       int c = 0;
-      configurations[c++] = ArmJointAnglesAction.CUSTOM_ANGLES_NAME;
+      configurations[c++] = ArmJointAnglesActionExecutor.CUSTOM_ANGLES_NAME;
       for (PresetArmConfiguration preset : PresetArmConfiguration.values())
       {
          configurations[c++] = preset.name();
       }
 
-      for (int i = 0; i < ArmJointAnglesAction.NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < ArmJointAnglesActionExecutor.NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
          jointAngleWidgets[i] = new ImDoubleWrapper(() -> actionDefinition.getJointAngles()[jointIndex],
@@ -72,7 +72,7 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
       if (actionDefinition.getPreset() == null)
       {
          ImGui.pushItemWidth(80.0f);
-         for (int i = 0; i < ArmJointAnglesAction.NUMBER_OF_JOINTS; i++)
+         for (int i = 0; i < ArmJointAnglesActionExecutor.NUMBER_OF_JOINTS; i++)
          {
             jointAngleWidgets[i].renderImGuiWidget();
          }

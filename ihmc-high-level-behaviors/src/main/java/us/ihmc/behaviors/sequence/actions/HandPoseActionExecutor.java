@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 
-public class HandPoseAction extends HandPoseActionDefinition implements BehaviorAction
+public class HandPoseActionExecutor extends HandPoseActionDefinition implements BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -42,11 +42,11 @@ public class HandPoseAction extends HandPoseActionDefinition implements Behavior
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IKRootCalculator rootCalculator;
 
-   public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
-                         ReferenceFrameLibrary referenceFrameLibrary,
-                         DRCRobotModel robotModel,
-                         ROS2SyncedRobotModel syncedRobot,
-                         HandWrenchCalculator handWrenchCalculator)
+   public HandPoseActionExecutor(ROS2ControllerHelper ros2ControllerHelper,
+                                 ReferenceFrameLibrary referenceFrameLibrary,
+                                 DRCRobotModel robotModel,
+                                 ROS2SyncedRobotModel syncedRobot,
+                                 HandWrenchCalculator handWrenchCalculator)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.referenceFrameLibrary = referenceFrameLibrary;
