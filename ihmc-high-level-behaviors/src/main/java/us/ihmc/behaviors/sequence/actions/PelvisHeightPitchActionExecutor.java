@@ -52,7 +52,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    @Override
    public void triggerActionExecution()
    {
-      FramePose3D framePose = new FramePose3D(definition.getConditionalReferenceFrame().get());
+      FramePose3D framePose = new FramePose3D(state.getPelvisFrame());
       FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -72,7 +72,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredPelvisPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
+      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
@@ -83,7 +83,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredPelvisPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
+      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
