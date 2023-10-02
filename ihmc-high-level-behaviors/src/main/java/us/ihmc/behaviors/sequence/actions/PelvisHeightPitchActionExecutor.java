@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.communication.packets.MessageTools;
@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchAction extends PelvisHeightPitchActionDefinition implements BehaviorAction
+public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefinition implements BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -32,9 +32,9 @@ public class PelvisHeightPitchAction extends PelvisHeightPitchActionDefinition i
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
-   public PelvisHeightPitchAction(ROS2ControllerHelper ros2ControllerHelper,
-                                  ReferenceFrameLibrary referenceFrameLibrary,
-                                  ROS2SyncedRobotModel syncedRobot)
+   public PelvisHeightPitchActionExecutor(ROS2ControllerHelper ros2ControllerHelper,
+                                          ReferenceFrameLibrary referenceFrameLibrary,
+                                          ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.referenceFrameLibrary = referenceFrameLibrary;
