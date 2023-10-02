@@ -85,7 +85,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
-   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                                                 definition::setTrajectoryDuration,
                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
@@ -174,7 +174,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
          armGraphicOneDoFJoints.put(side, MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics.get(side)));
       }
 
-      referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
       poseGizmo.create(panel3D);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
@@ -188,7 +188,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
+      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
@@ -299,9 +299,9 @@ public class RDXHandPoseAction implements RDXBehaviorAction
       {
          holdPoseInWorldLaterWrapper.renderImGuiWidget();
       }
-      if (referenceFrameLibraryCombo.render())
+      if (parentFrameComboBox.render())
       {
-         definition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
       }
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();

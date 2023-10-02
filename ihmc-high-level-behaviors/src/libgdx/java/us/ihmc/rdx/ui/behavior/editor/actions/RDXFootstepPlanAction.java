@@ -35,7 +35,7 @@ public class RDXFootstepPlanAction implements RDXBehaviorAction
    private final FootstepPlanActionState state = new FootstepPlanActionState();
    private final FootstepPlanActionDefinition definition = state.getDefinition();
    private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
-   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
@@ -56,7 +56,7 @@ public class RDXFootstepPlanAction implements RDXBehaviorAction
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
 
       footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(definition, baseUI, robotModel, getSelected()::get));
    }
@@ -64,7 +64,7 @@ public class RDXFootstepPlanAction implements RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
+      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -149,9 +149,9 @@ public class RDXFootstepPlanAction implements RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
-      if (referenceFrameLibraryCombo.render())
+      if (parentFrameComboBox.render())
       {
-         definition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
       }
 
       ImGui.pushItemWidth(80.0f);

@@ -37,33 +37,6 @@ public interface BehaviorActionExecutor extends BehaviorActionStateSupplier, Beh
 
    default boolean canExecute()
    {
-      boolean canExecute = true;
-
-      if (this instanceof FrameBasedBehaviorActionDefinition frameBasedBehaviorActionDefinition)
-      {
-         canExecute &= frameBasedBehaviorActionDefinition.getConditionalReferenceFrame().hasParentFrame();
-      }
-
-      // TODO: add other conditions
-
-      return canExecute;
-   }
-
-   default StringBuilder getExecutionRejectionTooltip()
-   {
-      StringBuilder tooltip = new StringBuilder();
-
-      if (this instanceof FrameBasedBehaviorActionDefinition frameBasedBehaviorActionDefinition)
-      {
-         if (!frameBasedBehaviorActionDefinition.getConditionalReferenceFrame().hasParentFrame())
-         {
-            tooltip.append(StringTools.format("Parent frame [{}] does not exist in the scene",
-                                              frameBasedBehaviorActionDefinition.getConditionalReferenceFrame().getConditionallyValidParentFrameName()).get());
-         }
-      }
-
-      // TODO: add other conditions
-
-      return tooltip;
+      return true;
    }
 }
