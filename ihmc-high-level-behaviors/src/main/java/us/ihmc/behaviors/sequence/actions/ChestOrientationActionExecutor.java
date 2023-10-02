@@ -16,10 +16,12 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class ChestOrientationActionExecutor extends ChestOrientationActionState implements BehaviorActionExecutor
+public class ChestOrientationActionExecutor implements BehaviorActionExecutor
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final ChestOrientationActionState state = new ChestOrientationActionState();
+   private final ChestOrientationActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
@@ -42,7 +44,7 @@ public class ChestOrientationActionExecutor extends ChestOrientationActionState 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      definition.update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -50,12 +52,12 @@ public class ChestOrientationActionExecutor extends ChestOrientationActionState 
    @Override
    public void triggerActionExecution()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getConditionalReferenceFrame().get());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(definition.getConditionalReferenceFrame().get());
       frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
                                                                   frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
                                                                   ReferenceFrame.getWorldFrame()));
@@ -65,7 +67,7 @@ public class ChestOrientationActionExecutor extends ChestOrientationActionState 
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredChestPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
    }
@@ -73,25 +75,25 @@ public class ChestOrientationActionExecutor extends ChestOrientationActionState 
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredChestPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredChestPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
       boolean wasExecuting = isExecuting;
       isExecuting = !completionCalculator.isComplete(desiredChestPose,
                                                      syncedChestPose,
                                                      Double.NaN, ORIENTATION_TOLERANCE,
-                                                     getTrajectoryDuration(),
+                                                     definition.getTrajectoryDuration(),
                                                      executionTimer,
                                                      BehaviorActionCompletionComponent.ORIENTATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
+      executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
-      if (!isExecuting && wasExecuting && !getHoldPoseInWorldLater())
+      if (!isExecuting && wasExecuting && !definition.getHoldPoseInWorldLater())
       {
          disengageHoldPoseInWorld();
       }
@@ -99,12 +101,12 @@ public class ChestOrientationActionExecutor extends ChestOrientationActionState 
 
    public void disengageHoldPoseInWorld()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(getConditionalReferenceFrame().get());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(definition.getConditionalReferenceFrame().get());
       frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(getTrajectoryDuration(),
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
                                                                   frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
                                                                   syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));
@@ -124,5 +126,16 @@ public class ChestOrientationActionExecutor extends ChestOrientationActionState 
    public boolean isExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public ChestOrientationActionState getState()
+   {
+      return state;
+   }
+
+   public ChestOrientationActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

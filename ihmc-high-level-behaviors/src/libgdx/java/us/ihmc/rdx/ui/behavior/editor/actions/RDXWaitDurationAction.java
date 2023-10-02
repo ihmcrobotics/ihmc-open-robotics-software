@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -10,12 +11,14 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 
-public class RDXWaitDurationAction extends WaitDurationActionState implements RDXBehaviorAction
+public class RDXWaitDurationAction implements RDXBehaviorAction
 {
+   private final WaitDurationActionState state = new WaitDurationActionState();
+   private final WaitDurationActionDefinition definition = state.getDefinition();
    private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper waitDurationWidget = new ImDoubleWrapper(this::getWaitDuration,
-                                                                          this::setWaitDuration,
+   private final ImDoubleWrapper waitDurationWidget = new ImDoubleWrapper(definition::getWaitDuration,
+                                                                          definition::setWaitDuration,
                                                                           imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
 
    @Override
@@ -35,7 +38,7 @@ public class RDXWaitDurationAction extends WaitDurationActionState implements RD
    @Override
    public String getActionTypeTitle()
    {
-      return String.format("Wait %.1f s", getWaitDuration());
+      return String.format("Wait %.1f s", definition.getWaitDuration());
    }
 
    @Override
@@ -84,5 +87,16 @@ public class RDXWaitDurationAction extends WaitDurationActionState implements RD
    public void setActionNextExecutionIndex(int actionNextExecutionIndex)
    {
       rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
+   }
+
+   @Override
+   public WaitDurationActionState getState()
+   {
+      return state;
+   }
+
+   public WaitDurationActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

@@ -14,11 +14,13 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionState implements BehaviorActionExecutor
+public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final PelvisHeightPitchActionState state = new PelvisHeightPitchActionState();
+   private final PelvisHeightPitchActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -44,7 +46,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      definition.update(referenceFrameLibrary);
 
       this.actionIndex = actionIndex;
    }
@@ -52,7 +54,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
    @Override
    public void triggerActionExecution()
    {
-      FramePose3D framePose = new FramePose3D(getConditionalReferenceFrame().get());
+      FramePose3D framePose = new FramePose3D(definition.getConditionalReferenceFrame().get());
       FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -60,7 +62,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
 
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
       message.getSe3Trajectory()
-             .set(HumanoidMessageTools.createSE3TrajectoryMessage(getTrajectoryDuration(),
+             .set(HumanoidMessageTools.createSE3TrajectoryMessage(definition.getTrajectoryDuration(),
                                                                         framePose.getPosition(),
                                                                         framePose.getOrientation(),
                                                                         ReferenceFrame.getWorldFrame()));
@@ -72,7 +74,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredPelvisPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredPelvisPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
@@ -83,7 +85,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredPelvisPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredPelvisPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
@@ -91,12 +93,12 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
       isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
                                                      syncedPelvisPose,
                                                      POSITION_TOLERANCE, Double.NaN,
-                                                     getTrajectoryDuration(),
+                                                     definition.getTrajectoryDuration(),
                                                      executionTimer,
                                                      BehaviorActionCompletionComponent.TRANSLATION);
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
+      executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
       executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
@@ -116,5 +118,16 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionStat
    public boolean isExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public PelvisHeightPitchActionState getState()
+   {
+      return state;
+   }
+
+   public PelvisHeightPitchActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

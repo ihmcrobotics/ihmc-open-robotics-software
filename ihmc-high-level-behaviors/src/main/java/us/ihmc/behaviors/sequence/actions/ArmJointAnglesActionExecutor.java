@@ -8,8 +8,10 @@ import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
 
-public class ArmJointAnglesActionExecutor extends ArmJointAnglesActionState implements BehaviorActionExecutor
+public class ArmJointAnglesActionExecutor implements BehaviorActionExecutor
 {
+   private final ArmJointAnglesActionState state = new ArmJointAnglesActionState();
+   private final ArmJointAnglesActionDefinition definition = state.getDefinition();
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private int actionIndex;
@@ -26,7 +28,7 @@ public class ArmJointAnglesActionExecutor extends ArmJointAnglesActionState impl
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update();
+      definition.update();
 
       this.actionIndex = actionIndex;
    }
@@ -35,19 +37,21 @@ public class ArmJointAnglesActionExecutor extends ArmJointAnglesActionState impl
    public void triggerActionExecution()
    {
       double[] jointAngleArray;
-      if (getPreset() == null)
+      if (state.getDefinition().getPreset() == null)
       {
-         jointAngleArray = new double[NUMBER_OF_JOINTS];
-         for (int i = 0; i < NUMBER_OF_JOINTS; i++)
+         jointAngleArray = new double[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
+         for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
          {
-            jointAngleArray[i] = getJointAngles()[i];
+            jointAngleArray[i] = definition.getJointAngles()[i];
          }
       }
       else
       {
-         jointAngleArray = robotModel.getPresetArmConfiguration(getSide(), getPreset());
+         jointAngleArray = robotModel.getPresetArmConfiguration(definition.getSide(), definition.getPreset());
       }
-      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngleArray);
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(definition.getSide(),
+                                                                                                  definition.getTrajectoryDuration(),
+                                                                                                  jointAngleArray);
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
       executionTimer.reset();
    }
@@ -55,10 +59,10 @@ public class ArmJointAnglesActionExecutor extends ArmJointAnglesActionState impl
    @Override
    public void updateCurrentlyExecuting()
    {
-      isExecuting = executionTimer.isRunning(getTrajectoryDuration());
+      isExecuting = executionTimer.isRunning(definition.getTrajectoryDuration());
 
       executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
+      executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
@@ -72,5 +76,16 @@ public class ArmJointAnglesActionExecutor extends ArmJointAnglesActionState impl
    public boolean isExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public ArmJointAnglesActionState getState()
+   {
+      return state;
+   }
+
+   public ArmJointAnglesActionDefinition getDefinition()
+   {
+      return definition;
    }
 }
