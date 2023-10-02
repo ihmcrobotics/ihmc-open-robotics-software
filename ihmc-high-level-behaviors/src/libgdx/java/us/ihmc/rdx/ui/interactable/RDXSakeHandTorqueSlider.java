@@ -1,28 +1,31 @@
 package us.ihmc.rdx.ui.interactable;
 
-import com.badlogic.gdx.graphics.Color;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
+
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MIN_RATIO_VALUE;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_RATIO_VALUE;
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
 
 public class RDXSakeHandTorqueSlider
 {
    private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(10.0);
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
    private static final double ROBOT_DATA_EXPIRATION_DURATION = 1.0;
-   private static final float MAX_TORQUE = 1f;
-   private static final float MIN_TORQUE = 0f;
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -67,9 +70,8 @@ public class RDXSakeHandTorqueSlider
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
 
             // This attempts to keep the hand's position identical when sending a new goal torque
-            // TODO: ensure resending goal position does not interfere with command sent before
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) 5); // GOTO
+            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
             message.setPostionRatio(-1.0);
             message.setTorqueRatio(sliderValue[0]);
 
@@ -91,42 +93,28 @@ public class RDXSakeHandTorqueSlider
       renderPresentTorqueBar();
 
       float previousValue = sliderValue[0];
-      ImGui.sliderFloat(labels.get(sliderName), sliderValue, MIN_TORQUE, MAX_TORQUE);
+      ImGui.sliderFloat(labels.get(sliderName),
+                        sliderValue,
+                        (float) MIN_RATIO_VALUE,
+                        (float) MAX_RATIO_VALUE,
+                        String.format("%.1f N", (sliderValue[0] * MAX_TORQUE_NEWTONS)));
       float currentValue = sliderValue[0];
       return !Double.isNaN(sliderValue[0]) & !MathTools.epsilonEquals(currentValue, previousValue, EPSILON);
    }
 
    private void renderPresentTorqueBar()
    {
-      int barColor = getGreenToRedGradiatedColor(loadValueFromRobot, 0.5, 0.7, 0.9);
+      int barColor = ImGuiTools.greenToRedGradiatedColor(loadValueFromRobot, 0.5, 0.7, 0.9);
       float presentTorqueBar = (float) ((ImGui.getItemRectSizeX() - textSize.x - 12.0f) * loadValueFromRobot);
-      float windowPositionX = ImGui.getWindowPosX();
-      float windowPositionY = ImGui.getWindowPosY();
-      ImGui.getWindowDrawList().addRectFilled(windowPositionX + ImGui.getCursorPosX() + 2.0f,
-                                              windowPositionY + ImGui.getCursorPosY() + 2.0f,
-                                              windowPositionX + ImGui.getCursorPosX() + presentTorqueBar + 12.0f,
-                                              windowPositionY + ImGui.getCursorPosY() + 20.0f,
+
+      ImGui.getWindowDrawList().addRectFilled(ImGui.getCursorScreenPosX() + 2.0f,
+                                              ImGui.getCursorScreenPosY() + 2.0f,
+                                              ImGui.getCursorScreenPosX() + presentTorqueBar + 12.0f,
+                                              ImGui.getCursorScreenPosY() + 20.0f,
                                               barColor);
 
       ImGui.pushStyleColor(ImGuiCol.PlotHistogram, barColor);
       ImGui.calcTextSize(textSize, sliderName);
       ImGui.popStyleColor();
-   }
-
-   private int getGreenToRedGradiatedColor(double value, double... colorSwitchValues)
-   {
-      float redValue = 0.0f;
-      float greenValue = 1.0f;
-
-      for (double switchValue : colorSwitchValues)
-      {
-         if (value < switchValue)
-            break;
-
-         redValue = 1.0f;
-         greenValue -= 1.0 / colorSwitchValues.length;
-      }
-
-      return new Color(redValue, greenValue, 0.0f, 0.5f).toIntBits();
    }
 }
