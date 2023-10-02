@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
-public class BehaviorActionStateBasics implements BehaviorActionState
+public class BehaviorActionStateBasics
 {
    /** The action's unique ID. */
    private final long id;
@@ -11,7 +11,6 @@ public class BehaviorActionStateBasics implements BehaviorActionState
       id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
    }
 
-   @Override
    public long getID()
    {
       return id;

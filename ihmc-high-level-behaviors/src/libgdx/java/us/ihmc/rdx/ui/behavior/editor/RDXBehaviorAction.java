@@ -3,13 +3,10 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
 
@@ -17,128 +14,79 @@ import us.ihmc.rdx.vr.RDXVRContext;
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
  */
-public abstract class RDXBehaviorAction
+public interface RDXBehaviorAction extends BehaviorActionState
 {
-   private final MutableBoolean selected = new MutableBoolean();
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
-                                                                         selected::setValue,
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   private final ImBoolean expanded = new ImBoolean(true);
-   private final ImString description = new ImString();
-   private final ImString rejectionTooltip = new ImString();
-   private int actionIndex = -1;
-   private int actionNextExecutionIndex = -1;
-
-   public RDXBehaviorAction()
+   // TODO: Probably remove and use BehaviorActionDefinition#update?
+   default void update(boolean concurrentActionIsNextForExecution)
    {
 
    }
 
-   public void update()
-   {
-      update(false);
-   }
-
-   public void update(boolean concurrentActionIsNextForExecution)
+   default void updateAfterLoading()
    {
 
    }
 
-   public void updateAfterLoading()
+   default void updateBeforeRemoving()
    {
 
    }
 
-   public void updateBeforeRemoving()
+   default void calculateVRPick(RDXVRContext vrContext)
    {
 
    }
 
-   public void calculateVRPick(RDXVRContext vrContext)
+   default void processVRInput(RDXVRContext vrContext)
    {
 
    }
 
-   public void processVRInput(RDXVRContext vrContext)
+   default void calculate3DViewPick(ImGui3DViewInput input)
    {
 
    }
 
-   public void calculate3DViewPick(ImGui3DViewInput input)
+   default void process3DViewInput(ImGui3DViewInput input)
    {
 
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   default void renderImGuiWidgets()
    {
 
    }
 
-   public final void renderImGuiWidgets()
-   {
-      if (expanded.get())
-      {
-         renderImGuiSettingWidgets();
-      }
-   }
-
-   public void renderImGuiSettingWidgets()
+   default void renderImGuiSettingWidgets()
    {
 
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   default void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
    }
 
-   public abstract BehaviorActionDefinition getActionDefinition();
+   ImBooleanWrapper getSelected();
 
-   public ImBooleanWrapper getSelected()
-   {
-      return selectedWrapper;
-   }
+   ImBoolean getExpanded();
 
-   public ImBoolean getExpanded()
-   {
-      return expanded;
-   }
+   // TODO: Put in BehaviorActionState
+   String getActionTypeTitle();
 
-   public abstract String getActionTypeTitle();
+   ImString getImDescription();
 
-   public ImString getDescription()
-   {
-      return description;
-   }
+   ImString getRejectionTooltip();
 
-   public ImString getRejectionTooltip()
-   {
-      return rejectionTooltip;
-   }
+   // TODO: Put in BehaviorActionState
+   int getActionIndex();
 
-   public int getActionIndex()
-   {
-      return actionIndex;
-   }
+   // TODO: Put in BehaviorActionState
+   void setActionIndex(int actionIndex);
 
-   public void setActionIndex(int actionIndex)
-   {
-      this.actionIndex = actionIndex;
-   }
+   // TODO: Put in BehaviorActionState
+   int getActionNextExecutionIndex();
 
-   public int getActionNextExecutionIndex()
-   {
-      return actionNextExecutionIndex;
-   }
-
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      this.actionNextExecutionIndex = actionNextExecutionIndex;
-   }
-
-   public boolean getExecuteWithNextAction()
-   {
-      return false;
-   }
+   // TODO: Put in BehaviorActionState
+   void setActionNextExecutionIndex(int actionNextExecutionIndex);
 }

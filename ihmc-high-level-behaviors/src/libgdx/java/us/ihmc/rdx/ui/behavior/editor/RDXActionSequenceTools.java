@@ -76,7 +76,7 @@ public class RDXActionSequenceTools
       actionDefinitionForMessage.clear();
       for (RDXBehaviorAction behaviorAction : actionSequence)
       {
-         actionDefinitionForMessage.add(behaviorAction.getActionDefinition());
+         actionDefinitionForMessage.add(behaviorAction);
       }
       BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDefinitionForMessage, actionSequenceUpdateMessage);
    }

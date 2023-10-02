@@ -1,20 +1,24 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
+import imgui.type.ImBoolean;
+import imgui.type.ImString;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 
-public class RDXHandWrenchAction extends RDXBehaviorAction
+public class RDXHandWrenchAction extends HandWrenchActionState implements RDXBehaviorAction
 {
-   private final HandWrenchActionDefinition actionDefinition = new HandWrenchActionDefinition();
+   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionDefinition::getTrajectoryDuration,
-                                                                                actionDefinition::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(this::getTrajectoryDuration,
+                                                                                this::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   private final ImDoubleWrapper forceWidget = new ImDoubleWrapper(actionDefinition::getForce,
-                                                                   actionDefinition::setForce,
+   private final ImDoubleWrapper forceWidget = new ImDoubleWrapper(this::getForce,
+                                                                   this::setForce,
                                                                    imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
 
    @Override
@@ -29,11 +33,54 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    @Override
    public String getActionTypeTitle()
    {
-      return actionDefinition.getSide().getPascalCaseName() + " Hand Wrench";
+      return getSide().getPascalCaseName() + " Hand Wrench";
    }
 
-   public HandWrenchActionDefinition getActionDefinition()
+   @Override
+   public ImBooleanWrapper getSelected()
    {
-      return actionDefinition;
+      return rdxActionBasics.getSelected();
+   }
+
+   @Override
+   public ImBoolean getExpanded()
+   {
+      return rdxActionBasics.getExpanded();
+   }
+
+   @Override
+   public ImString getImDescription()
+   {
+      return rdxActionBasics.getDescription();
+   }
+
+   @Override
+   public ImString getRejectionTooltip()
+   {
+      return rdxActionBasics.getRejectionTooltip();
+   }
+
+   @Override
+   public int getActionIndex()
+   {
+      return rdxActionBasics.getActionIndex();
+   }
+
+   @Override
+   public void setActionIndex(int actionIndex)
+   {
+      rdxActionBasics.setActionIndex(actionIndex);
+   }
+
+   @Override
+   public int getActionNextExecutionIndex()
+   {
+      return rdxActionBasics.getActionNextExecutionIndex();
+   }
+
+   @Override
+   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
+   {
+      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 }
