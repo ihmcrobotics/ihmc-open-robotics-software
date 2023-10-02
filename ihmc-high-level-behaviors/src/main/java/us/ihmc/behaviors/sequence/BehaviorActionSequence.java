@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
+import org.apache.commons.lang3.mutable.MutableLong;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
@@ -57,6 +58,9 @@ public class BehaviorActionSequence
          = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("pelvis_pose_status");
    public static final ROS2Topic<ActionsExecutionStatusMessage> ACTIONS_EXECUTION_STATUS
          = STATUS_TOPIC.withType(ActionsExecutionStatusMessage.class).withSuffix("execution_status");
+
+   /** TODO: Make non-static and assign as actions are created. */
+   public static final MutableLong NEXT_ID = new MutableLong();
 
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2;
