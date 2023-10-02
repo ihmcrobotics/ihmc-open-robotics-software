@@ -1,17 +1,17 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.sequence.actions.WaitDurationActionDescription;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
 public class RDXWaitDurationAction extends RDXBehaviorAction
 {
-   private final WaitDurationActionDescription actionDescription = new WaitDurationActionDescription();
+   private final WaitDurationActionDefinition actionDefinition = new WaitDurationActionDefinition();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper waitDurationWidget = new ImDoubleWrapper(actionDescription::getWaitDuration,
-                                                                          actionDescription::setWaitDuration,
+   private final ImDoubleWrapper waitDurationWidget = new ImDoubleWrapper(actionDefinition::getWaitDuration,
+                                                                          actionDefinition::setWaitDuration,
                                                                           imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
 
    @Override
@@ -23,14 +23,14 @@ public class RDXWaitDurationAction extends RDXBehaviorAction
    }
 
    @Override
-   public WaitDurationActionDescription getActionDescription()
+   public WaitDurationActionDefinition getActionDefinition()
    {
-      return actionDescription;
+      return actionDefinition;
    }
 
    @Override
    public String getActionTypeTitle()
    {
-      return String.format("Wait %.1f s", actionDescription.getWaitDuration());
+      return String.format("Wait %.1f s", actionDefinition.getWaitDuration());
    }
 }
