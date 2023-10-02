@@ -3,7 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
-import us.ihmc.behaviors.activeMapping.ContinuousMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningRemoteTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
@@ -28,7 +28,7 @@ public class HumanoidActivePerceptionModule
    private final Mat gridColor = new Mat();
 
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
-   private ContinuousMappingRemoteTask continuousElevationMappingRemoteThread;
+   private ContinuousPlanningRemoteTask continuousElevationMappingRemoteThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
 
@@ -53,7 +53,7 @@ public class HumanoidActivePerceptionModule
 
    public void initializeContinuousElevationMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousElevationMappingRemoteThread = new ContinuousMappingRemoteTask(robotModel, ros2Node, referenceFrames, perceptionConfigurationParameters);
+      continuousElevationMappingRemoteThread = new ContinuousPlanningRemoteTask(robotModel, ros2Node, referenceFrames, perceptionConfigurationParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -113,7 +113,7 @@ public class HumanoidActivePerceptionModule
          continuousElevationMappingRemoteThread.destroy();
    }
 
-   public ContinuousMappingRemoteTask getContinuousMappingRemoteThread()
+   public ContinuousPlanningRemoteTask getContinuousMappingRemoteThread()
    {
       return continuousElevationMappingRemoteThread;
    }

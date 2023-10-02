@@ -34,9 +34,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ContinuousMappingRemoteTask
+public class ContinuousPlanningRemoteTask
 {
-   private final static long ACTIVE_MAPPING_UPDATE_TICK_MS = 10;
+   private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 10;
    private final static float SWING_DURATION = 0.84f;
    private final static float TRANSFER_DURATION = 0.46f;
    private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
@@ -65,10 +65,10 @@ public class ContinuousMappingRemoteTask
    private ContinuousPlanner continuousPlanner;
    private ROS2Helper ros2Helper;
 
-   public ContinuousMappingRemoteTask(DRCRobotModel robotModel,
-                                      ROS2Node ros2Node,
-                                      HumanoidReferenceFrames referenceFrames,
-                                      PerceptionConfigurationParameters perceptionConfigurationParameters)
+   public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
+                                       ROS2Node ros2Node,
+                                       HumanoidReferenceFrames referenceFrames,
+                                       PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
@@ -83,7 +83,7 @@ public class ContinuousMappingRemoteTask
       //ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepQueueStatusReceived);
 
 
-      executorService.scheduleAtFixedRate(this::updateContinuousPlanner, 0, ACTIVE_MAPPING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::updateContinuousPlanner, 0, CONTINUOUS_PLANNING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -125,7 +125,8 @@ public class ContinuousMappingRemoteTask
                continuousPlanner.updatePlan(latestHeightMapData);
             }
             // TODO: Remove the following condition to be able to send the footsteps to the controller earlier.
-            else if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED) // send the next footstep
+            else
+               //if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED) // send the next footstep
             {
                if (continuousPlanner.isPlanAvailable()) // Only send the next footstep if a plan is available
                {
