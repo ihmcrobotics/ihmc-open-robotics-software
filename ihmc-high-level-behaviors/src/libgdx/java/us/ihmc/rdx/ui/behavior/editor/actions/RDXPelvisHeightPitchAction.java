@@ -331,6 +331,7 @@ public class RDXPelvisHeightPitchAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public PelvisHeightPitchActionDefinition getDefinition()
    {
       return definition;

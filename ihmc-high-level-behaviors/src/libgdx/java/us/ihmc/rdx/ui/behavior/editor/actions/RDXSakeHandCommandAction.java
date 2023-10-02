@@ -164,6 +164,7 @@ public class RDXSakeHandCommandAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public SakeHandCommandActionDefinition getDefinition()
    {
       return definition;

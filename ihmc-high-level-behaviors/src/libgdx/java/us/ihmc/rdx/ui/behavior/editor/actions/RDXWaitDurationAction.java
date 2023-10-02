@@ -95,6 +95,7 @@ public class RDXWaitDurationAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public WaitDurationActionDefinition getDefinition()
    {
       return definition;

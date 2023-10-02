@@ -323,4 +323,10 @@ public class RDXChestOrientationAction implements RDXBehaviorAction
    {
       return state;
    }
+
+   @Override
+   public ChestOrientationActionDefinition getDefinition()
+   {
+      return definition;
+   }
 }

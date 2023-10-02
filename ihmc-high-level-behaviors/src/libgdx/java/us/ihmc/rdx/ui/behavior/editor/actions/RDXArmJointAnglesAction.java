@@ -154,6 +154,7 @@ public class RDXArmJointAnglesAction implements RDXBehaviorAction
       return state;
    }
 
+   @Override
    public ArmJointAnglesActionDefinition getDefinition()
    {
       return definition;
