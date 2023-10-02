@@ -75,7 +75,7 @@ public class ReferenceFrameLibrary
          for (String dynamicFrameName : dynamicCollection.getFrameNameList())
             referenceFrameNameSet.add(dynamicFrameName);
 
-      getReferenceFrameNameArray();
+      referenceFrameNameArray = referenceFrameNameSet.toArray(referenceFrameNameArray);
    }
 
    @Nullable
@@ -123,7 +123,7 @@ public class ReferenceFrameLibrary
       {
          // Sort in alphabetical order
          SortedSet<String> referenceFrameNameSet = new TreeSet<>(frameNameToSupplierMap.keySet());
-         referenceFrameNameArray = referenceFrameNameSet.toArray(new String[referenceFrameNameSet.size()]);
+         referenceFrameNameArray = referenceFrameNameSet.toArray(new String[0]);
       }
 
       return referenceFrameNameArray;

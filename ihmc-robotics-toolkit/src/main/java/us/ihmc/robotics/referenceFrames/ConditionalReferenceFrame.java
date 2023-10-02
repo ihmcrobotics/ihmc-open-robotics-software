@@ -51,7 +51,7 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
    {
       if (referenceFrame.getName().equals(parentFrameName))
       {
-         modifiableReferenceFrame.changeParentFrameWithoutMoving(referenceFrame);
+         modifiableReferenceFrame.changeParentFrame(referenceFrame);
          return true;
       }
       else
@@ -75,7 +75,7 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
       ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
       boolean found = update(rootFrame);
       if (!found)
-         modifiableReferenceFrame.changeParentFrameWithoutMoving(INVALID_FRAME);
+         modifiableReferenceFrame.changeParentFrame(INVALID_FRAME);
    }
 
    /**
@@ -87,9 +87,9 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
    {
       ReferenceFrame parentFrame = referenceFrameLibrary.findFrameByName(parentFrameName);
       if (parentFrame != null)
-         modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+         modifiableReferenceFrame.changeParentFrame(parentFrame);
       else
-         modifiableReferenceFrame.changeParentFrameWithoutMoving(INVALID_FRAME);
+         modifiableReferenceFrame.changeParentFrame(INVALID_FRAME);
    }
 
    /**
