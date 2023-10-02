@@ -2,11 +2,13 @@ package us.ihmc.rdx.ui.interactable;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import controller_msgs.msg.dds.SakeHandStatusMessage;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,11 +32,10 @@ public class RDXSakeHandPositionSlider
 {
    private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(10.0);
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
-   private static final double ROBOT_DATA_EXPIRATION_DURATION = 1.0;
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS2SyncedRobotModel syncedRobot;
+   private final IHMCROS2Input<SakeHandStatusMessage> handStatusMessage;
    private final CommunicationHelper communicationHelper;
    private final RobotSide handSide;
    private final String sliderName;
@@ -43,23 +44,22 @@ public class RDXSakeHandPositionSlider
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
-   public RDXSakeHandPositionSlider(ROS2SyncedRobotModel syncedRobot,
-                                    CommunicationHelper communicationHelper,
-                                    RobotSide handSide)
+   public RDXSakeHandPositionSlider(CommunicationHelper communicationHelper, RobotSide handSide)
    {
-      this.syncedRobot = syncedRobot;
       this.communicationHelper = communicationHelper;
       this.handSide = handSide;
       sliderName = handSide.getPascalCaseName() + " angle";
 
-      syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveRobotConfigurationData);
+      handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
+                                                                 .withTypeName(SakeHandStatusMessage.class),
+                                                        message -> message.getRobotSide() == handSide.toByte());
    }
 
-   private void receiveRobotConfigurationData(RobotConfigurationData robotConfigurationData)
+   private void receiveRobotConfigurationData()
    {
-      if (updateThrottler.run(UPDATE_PERIOD) && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
+      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
       {
-         valueFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
+         valueFromRobot = handStatusMessage.getLatest().getPostionRatio();
       }
    }
 
@@ -67,7 +67,7 @@ public class RDXSakeHandPositionSlider
    {
       if (renderImGuiSliderAndReturnChanged())
       {
-         if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION))
+         if (sendThrottler.run(SEND_PERIOD))
          {
             double positionRatio = sliderValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
 
@@ -82,8 +82,10 @@ public class RDXSakeHandPositionSlider
       }
       else
       {
-         sliderValue[0] = (float) (2.0 * (valueFromRobot - Math.toRadians(CLOSED_FINGER_ANGLE)));
+         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * valueFromRobot);
       }
+
+      receiveRobotConfigurationData();
    }
 
    private boolean renderImGuiSliderAndReturnChanged()
