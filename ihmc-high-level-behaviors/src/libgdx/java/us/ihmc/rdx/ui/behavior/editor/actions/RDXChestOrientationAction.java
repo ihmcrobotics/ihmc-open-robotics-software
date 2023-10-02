@@ -106,7 +106,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getConditionalReferenceFrame());
+      referenceFrameLibraryCombo.setSelectedParentReferenceFrameName(actionDefinition.getConditionalReferenceFrame().getConditionallyValidParentFrameName());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
@@ -185,7 +185,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
-         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedParentReferenceFrameName());
       }
       ImGui.pushItemWidth(80.0f);
       yawWidget.renderImGuiWidget();
