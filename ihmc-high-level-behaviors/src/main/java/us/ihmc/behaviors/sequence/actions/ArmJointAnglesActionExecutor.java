@@ -4,11 +4,11 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
 
-public class ArmJointAnglesAction extends ArmJointAnglesActionDefinition implements BehaviorAction
+public class ArmJointAnglesActionExecutor extends ArmJointAnglesActionDefinition implements BehaviorActionExecutor
 {
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -17,7 +17,7 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionDefinition impleme
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public ArmJointAnglesAction(DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
+   public ArmJointAnglesActionExecutor(DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
