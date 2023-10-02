@@ -158,10 +158,14 @@ public class HumanoidPerceptionModule
       perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
 
       Mat heightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-      OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
-      PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
-                                                         ros2Helper, cameraPose, acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
-                                                         heightMapImage.rows(), heightMapImage.cols(), RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
+
+      if (ros2Helper != null)
+      {
+         OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
+         PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
+                                                            ros2Helper, cameraPose, acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
+                                                            heightMapImage.rows(), heightMapImage.cols(), RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
+      }
 
       //LogTools.info("Perception Statistics: {}", perceptionStatistics);
    }
