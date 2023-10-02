@@ -59,6 +59,7 @@ public class ImGuiTools
    public static int RED = Color.RED.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();
    public static int DARK_GREEN = new Color(0.0f, 0.7f, 0.0f, 1.0f).toIntBits();
+   public static int LIGHT_BLUE = new Color(0.4f, 0.4f, 0.8f, 1.0f).toIntBits();
 
    public static long createContext()
    {
@@ -122,6 +123,35 @@ public class ImGuiTools
    {
       if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
          ImGui.styleColorsLight();
+   }
+
+   /**
+    * Method for getting color ranging from green to red based on value inputted (greater value = more red)
+    * Values at which color changes are provided using the colorSwitchValues varargs.
+    * e.g.
+    *    greenToRedGradiatedColor(0.5, 0.7, 0.9) -> returns green color       (0.5 < 0.7)
+    *    greenToRedGradiatedColor(0.8, 0.7, 0.9) -> returns orange-ish color  (0.7 < 0.8 < 0.9)
+    *    greenToRedGradiatedColor(1.0, 0.7, 0.9) -> returns red color         (1.0 > 0.9)
+    *
+    * @param value The value which determines returned color
+    * @param colorSwitchValues values at which color changes (if given 3 values, color will switch from green -> yellow -> orange -> red)
+    * @return Integer value representing color
+    */
+   public static int greenToRedGradiatedColor(double value, double... colorSwitchValues)
+   {
+      float redValue = 0.0f;
+      float greenValue = 1.0f;
+
+      for (double switchValue : colorSwitchValues)
+      {
+         if (value < switchValue)
+            break;
+
+         redValue = 1.0f;
+         greenValue -= 1.0 / colorSwitchValues.length;
+      }
+
+      return new Color(redValue, greenValue, 0.0f, 0.5f).toIntBits();
    }
 
    public static int nextWidgetIndex()
@@ -238,6 +268,13 @@ public class ImGuiTools
       ImGui.textColored(color.r, color.g, color.b, color.a, text);
    }
 
+   public static void textBold(String text)
+   {
+      ImGui.pushFont(getSmallBoldFont());
+      ImGui.text(text);
+      ImGui.popFont();
+   }
+
    public static void previousWidgetTooltip(String tooltipText)
    {
       if (ImGui.isItemHovered())
@@ -250,9 +287,9 @@ public class ImGuiTools
     * Places a mark, a vertical black line, at some point on the progress bar to
     * convey to the user where a threshold is.
     */
-   public static void markedProgressBar(float barHeight, int color, double percent, double markPercent, String text)
+   public static void markedProgressBar(float barHeight, float barWidth, int color, double percent, double markPercent, String text)
    {
-      float markPosition = (float) (ImGui.getColumnWidth() * markPercent);
+      float markPosition = (float) (barWidth * markPercent);
       float windowPositionX = ImGui.getWindowPosX();
       float windowPositionY = ImGui.getWindowPosY();
       float verticalExtents = 3.0f;
@@ -262,7 +299,7 @@ public class ImGuiTools
                                               windowPositionY + ImGui.getCursorPosY() + barHeight + verticalExtents,
                                               ImGuiTools.BLACK, 1.0f);
       ImGui.pushStyleColor(ImGuiCol.PlotHistogram, color);
-      ImGui.progressBar((float) percent, ImGui.getColumnWidth(), barHeight, text);
+      ImGui.progressBar((float) percent, barWidth, barHeight, text);
       ImGui.popStyleColor();
    }
 
