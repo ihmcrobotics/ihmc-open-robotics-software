@@ -43,7 +43,6 @@ public class RDXRapidHeightMapExtractionDemo
                                                                                                                                          1);
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
-   private final Notification heightMapUpdateNotification = new Notification();
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
