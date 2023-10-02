@@ -2,32 +2,35 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
 
-public class RDXSakeHandCommandAction extends RDXBehaviorAction
+public class RDXSakeHandCommandAction extends SakeHandCommandActionState implements RDXBehaviorAction
 {
-   private final SakeHandCommandActionDefinition actionData = new SakeHandCommandActionDefinition();
+   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
+   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(this::getSide, this::setSide, labels.get("Side"));
 
    private final String[] handConfigurationNames = new String[SakeHandCommandOption.values.length];
-   private final ImIntegerWrapper handCommandOptionIndex = new ImIntegerWrapper(actionData::getHandConfigurationIndex,
-                                                                                actionData::setHandConfigurationIndex,
+   private final ImIntegerWrapper handCommandOptionIndex = new ImIntegerWrapper(this::getHandConfigurationIndex,
+                                                                                this::setHandConfigurationIndex,
                                                                                 imInt -> ImGui.combo(labels.get("Predefined Options"), imInt, handConfigurationNames));
    private final float[] positionValue = {0.0f};
    private final float[] torqueValue = {0.0f};
 
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionData::getExecuteWithNextAction,
-                                                                                      actionData::setExecuteWithNextAction,
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(this::getExecuteWithNextAction,
+                                                                                      this::setExecuteWithNextAction,
                                                                                       imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
    public RDXSakeHandCommandAction()
@@ -36,6 +39,19 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
       {
          handConfigurationNames[i] = SakeHandCommandOption.values[i].name();
       }
+   }
+
+   @Override
+   public void update()
+   {
+      setGoalPosition(positionValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
+      setGoalTorque(torqueValue[0]);
+   }
+
+   @Override
+   public void update(boolean concurrentActionIsNextForExecution)
+   {
+      update();
    }
 
    @Override
@@ -51,7 +67,7 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
       ImGui.popItemWidth();
 
       // Set position and torque slider values to match selected command option
-      SakeHandCommandOption command = SakeHandCommandOption.values[actionData.getHandConfigurationIndex()];
+      SakeHandCommandOption command = SakeHandCommandOption.values[getHandConfigurationIndex()];
       if (command.getGoalPosition() >= 0)
       {
          positionValue[0] = (float) (command.getGoalPosition() * Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
@@ -72,22 +88,61 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
       // if user moved slider, set command to GOTO
       if (positionValue[0] != lastPositionValue || torqueValue[0] != lastTorqueValue)
       {
-         actionData.setHandConfigurationIndex(SakeHandCommandOption.GOTO.ordinal());
+         setHandConfigurationIndex(SakeHandCommandOption.GOTO.ordinal());
       }
-   }
-
-   @Override
-   public SakeHandCommandActionDefinition getActionDefinition()
-   {
-      actionData.setGoalPosition(positionValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
-      actionData.setGoalTorque(torqueValue[0]);
-
-      return actionData;
    }
 
    @Override
    public String getActionTypeTitle()
    {
       return "Hand Configuration";
+   }
+
+   @Override
+   public ImBooleanWrapper getSelected()
+   {
+      return rdxActionBasics.getSelected();
+   }
+
+   @Override
+   public ImBoolean getExpanded()
+   {
+      return rdxActionBasics.getExpanded();
+   }
+
+   @Override
+   public ImString getImDescription()
+   {
+      return rdxActionBasics.getDescription();
+   }
+
+   @Override
+   public ImString getRejectionTooltip()
+   {
+      return rdxActionBasics.getRejectionTooltip();
+   }
+
+   @Override
+   public int getActionIndex()
+   {
+      return rdxActionBasics.getActionIndex();
+   }
+
+   @Override
+   public void setActionIndex(int actionIndex)
+   {
+      rdxActionBasics.setActionIndex(actionIndex);
+   }
+
+   @Override
+   public int getActionNextExecutionIndex()
+   {
+      return rdxActionBasics.getActionNextExecutionIndex();
+   }
+
+   @Override
+   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
+   {
+      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 }

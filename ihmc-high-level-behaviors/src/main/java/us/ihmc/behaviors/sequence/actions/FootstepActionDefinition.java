@@ -3,12 +3,14 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.FootstepActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepActionDefinition
+public class FootstepActionDefinition implements BehaviorActionDefinition
 {
+   private String description = "Footstep";
    private RobotSide side = RobotSide.LEFT;
    private final Pose3D solePose = new Pose3D();
 
@@ -49,5 +51,17 @@ public class FootstepActionDefinition
    {
       side = RobotSide.fromByte(message.getRobotSide());
       solePose.set(message.getSolePose());
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

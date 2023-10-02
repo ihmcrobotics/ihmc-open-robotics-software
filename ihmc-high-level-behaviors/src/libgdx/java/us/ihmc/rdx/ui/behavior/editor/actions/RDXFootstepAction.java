@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -19,13 +20,12 @@ import java.util.function.BooleanSupplier;
 /**
  * This class is a fully mutable and transitive interactable representation of FootstepActionDefinition.
  */
-public class RDXFootstepAction
+public class RDXFootstepAction extends FootstepActionState
 {
    private final ReferenceFrameSupplier planFrameSupplier;
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final BooleanSupplier planSelected;
-   private FootstepActionDefinition actionDefinition;
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
@@ -42,8 +42,6 @@ public class RDXFootstepAction
 
    public void update(FootstepActionDefinition actionDefinition, int stepIndex)
    {
-      this.actionDefinition = actionDefinition;
-
       if (interactableFootstep == null
        || stepIndex != interactableFootstep.getIndex()
        || actionDefinition.getSide() != interactableFootstep.getFootstepSide())
@@ -102,11 +100,6 @@ public class RDXFootstepAction
          interactableFootstep.getVirtualRenderables(renderables, pool);
       else
          flatFootstepGraphic.getRenderables(renderables, pool);
-   }
-
-   public FootstepActionDefinition getActionData()
-   {
-      return actionDefinition;
    }
 
    public ReferenceFrame getFootstepFrame()

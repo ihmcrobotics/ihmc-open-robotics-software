@@ -7,10 +7,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.IKRootCalculator;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,6 +37,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -57,21 +60,21 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXHandPoseAction extends RDXBehaviorAction
+public class RDXHandPoseAction extends HandPoseActionState implements RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final HandPoseActionDefinition actionDefinition = new HandPoseActionDefinition();
+   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDefinition.getConditionalReferenceFrame().get(), actionDefinition.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(getConditionalReferenceFrame().get(), getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDefinition.getConditionalReferenceFrame().get());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDefinition.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(getConditionalReferenceFrame().get());
    private final Color goodQualityColor;
    private final Color badQualityColor;
    private boolean isMouseHovering = false;
@@ -79,20 +82,20 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionDefinition::getTrajectoryDuration,
-                                                                                actionDefinition::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(this::getTrajectoryDuration,
+                                                                                this::setTrajectoryDuration,
                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
 
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionDefinition::getExecuteWithNextAction,
-                                                                                      actionDefinition::setExecuteWithNextAction,
+   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(this::getExecuteWithNextAction,
+                                                                                      this::setExecuteWithNextAction,
                                                imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionDefinition::getHoldPoseInWorldLater,
-                                                                                     actionDefinition::setHoldPoseInWorldLater,
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(this::getHoldPoseInWorldLater,
+                                                                                     this::setHoldPoseInWorldLater,
                                                imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
 
-   private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(actionDefinition::getJointSpaceControl,
-                                                                                  actionDefinition::setJointSpaceControl,
+   private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(this::getJointSpaceControl,
+                                                                                  this::setJointSpaceControl,
                                                imBoolean -> {
                                                   if (ImGui.radioButton(labels.get("Joint space"), imBoolean.get()))
                                                      imBoolean.set(true);
@@ -181,50 +184,45 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getConditionalReferenceFrame());
-   }
-
-   public void setSide(RobotSide side)
-   {
-      actionDefinition.setSide(side);
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(getConditionalReferenceFrame());
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionDefinition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      actionDefinition.setTransformToParent(transformToParent);
+      getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
+      setTransformToParent(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionDefinition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      actionDefinition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
+      getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
    @Override
    public void update(boolean concurrentActionIsNextForExecution)
    {
-      actionDefinition.update(referenceFrameLibrary);
+      update(referenceFrameLibrary);
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDefinition.getConditionalReferenceFrame().get())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != getConditionalReferenceFrame().get())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionDefinition.getConditionalReferenceFrame().get());
-         graphicFrame.changeParentFrame(actionDefinition.getConditionalReferenceFrame().get());
-         collisionShapeFrame.changeParentFrame(actionDefinition.getConditionalReferenceFrame().get());
+         poseGizmo.getPoseGizmo().setGizmoFrame(getConditionalReferenceFrame().get());
+         graphicFrame.changeParentFrame(getConditionalReferenceFrame().get());
+         collisionShapeFrame.changeParentFrame(getConditionalReferenceFrame().get());
       }
 
       poseGizmo.getPoseGizmo().update();
-      highlightModels.get(actionDefinition.getSide()).setPose(graphicFrame.getReferenceFrame());
+      highlightModels.get(getSide()).setPose(graphicFrame.getReferenceFrame());
 
       if (poseGizmo.isSelected() || isMouseHovering)
       {
-         highlightModels.get(actionDefinition.getSide()).setTransparency(0.7);
+         highlightModels.get(getSide()).setTransparency(0.7);
       }
       else
       {
-         highlightModels.get(actionDefinition.getSide()).setTransparency(0.5);
+         highlightModels.get(getSide()).setTransparency(0.5);
       }
 
       // IK solution visualization via ghost arms
@@ -235,36 +233,36 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    private void visualizeIK()
    {
-      boolean receivedDataForThisSide = (actionDefinition.getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
-                                        (actionDefinition.getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
+      boolean receivedDataForThisSide = (getSide() == RobotSide.LEFT && leftHandJointAnglesStatusSubscription.hasReceivedFirstMessage()) ||
+                                        (getSide() == RobotSide.RIGHT && rightHandJointAnglesStatusSubscription.hasReceivedFirstMessage());
       if (receivedDataForThisSide)
       {
          HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage;
-         if (actionDefinition.getSide() == RobotSide.LEFT)
+         if (getSide() == RobotSide.LEFT)
             handPoseJointAnglesStatusMessage = leftHandJointAnglesStatusSubscription.getLatest();
          else
             handPoseJointAnglesStatusMessage = rightHandJointAnglesStatusSubscription.getLatest();
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
-            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionDefinition().getSide()).getRigidBody().getChildrenJoints().get(0);
+            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getSide()).getRigidBody().getChildrenJoints().get(0);
             rootCalculator.getKinematicsInfo();
             rootCalculator.computeRoot();
             floatingJoint.getJointPose().set(rootCalculator.getRoot().getTransformToRoot());
 
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
-               armGraphicOneDoFJoints.get(getActionDefinition().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
+               armGraphicOneDoFJoints.get(getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
             }
-            armMultiBodyGraphics.get(getActionDefinition().getSide()).updateFramesRecursively();
-            armMultiBodyGraphics.get(getActionDefinition().getSide()).updateSubtreeGraphics();
+            armMultiBodyGraphics.get(getSide()).updateFramesRecursively();
+            armMultiBodyGraphics.get(getSide()).updateSubtreeGraphics();
          }
 
          // We probably don't want to recolor the mesh every tick.
          Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
-         if (color != currentColor.get(getActionDefinition().getSide()))
+         if (color != currentColor.get(getSide()))
          {
-            currentColor.put(getActionDefinition().getSide(), color);
-            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionDefinition().getSide()).subtreeIterable())
+            currentColor.put(getSide(), color);
+            for (RigidBodyBasics body : armMultiBodyGraphics.get(getSide()).subtreeIterable())
             {
                if (body instanceof RDXRigidBody rdxRigidBody)
                {
@@ -287,13 +285,13 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       jointSpaceControlWrapper.renderImGuiWidget();
-      if (!actionDefinition.getJointSpaceControl())
+      if (!getJointSpaceControl())
       {
          holdPoseInWorldLaterWrapper.renderImGuiWidget();
       }
       if (referenceFrameLibraryCombo.render())
       {
-         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
       }
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
@@ -306,7 +304,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           getActionIndex(),
-                                                                          actionDefinition.getDescription()));
+                                                                          getDescription()));
       }
    }
 
@@ -345,17 +343,17 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      highlightModels.get(actionDefinition.getSide()).getRenderables(renderables, pool);
+      highlightModels.get(getSide()).getRenderables(renderables, pool);
       poseGizmo.getVirtualRenderables(renderables, pool);
 
       if (displayIKSolution)
-         armMultiBodyGraphics.get(getActionDefinition().getSide()).getVisualRenderables(renderables, pool);
+         armMultiBodyGraphics.get(getSide()).getVisualRenderables(renderables, pool);
    }
 
    @Override
    public String getActionTypeTitle()
    {
-      return actionDefinition.getSide().getPascalCaseName() + " Hand Pose";
+      return getSide().getPascalCaseName() + " Hand Pose";
    }
 
    public ReferenceFrame getReferenceFrame()
@@ -370,14 +368,44 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
-   public HandPoseActionDefinition getActionDefinition()
+   public ImBoolean getExpanded()
    {
-      return actionDefinition;
+      return rdxActionBasics.getExpanded();
    }
 
    @Override
-   public boolean getExecuteWithNextAction()
+   public ImString getImDescription()
    {
-      return executeWithNextActionWrapper.get();
+      return rdxActionBasics.getDescription();
+   }
+
+   @Override
+   public ImString getRejectionTooltip()
+   {
+      return rdxActionBasics.getRejectionTooltip();
+   }
+
+   @Override
+   public int getActionIndex()
+   {
+      return rdxActionBasics.getActionIndex();
+   }
+
+   @Override
+   public void setActionIndex(int actionIndex)
+   {
+      rdxActionBasics.setActionIndex(actionIndex);
+   }
+
+   @Override
+   public int getActionNextExecutionIndex()
+   {
+      return rdxActionBasics.getActionNextExecutionIndex();
+   }
+
+   @Override
+   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
+   {
+      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 }
