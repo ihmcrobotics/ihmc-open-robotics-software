@@ -62,6 +62,7 @@ public class WaitDurationActionExecutor implements BehaviorActionExecutor
       return state;
    }
 
+   @Override
    public WaitDurationActionDefinition getDefinition()
    {
       return definition;

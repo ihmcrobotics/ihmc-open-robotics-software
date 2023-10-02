@@ -215,6 +215,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
       return state;
    }
 
+   @Override
    public HandPoseActionDefinition getDefinition()
    {
       return definition;
