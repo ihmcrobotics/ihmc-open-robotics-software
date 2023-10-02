@@ -62,11 +62,7 @@ public class ReferenceFrameLibrary
       ReferenceFrame referenceFrame = nameToAlwaysPresentFrameMap.get(referenceFrameName);
       boolean frameFound = referenceFrame != null;
 
-      if (frameFound)
-      {
-         referenceFrame = referenceFrame.get();
-      }
-      else
+      if (!frameFound)
       {
          for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
          {
