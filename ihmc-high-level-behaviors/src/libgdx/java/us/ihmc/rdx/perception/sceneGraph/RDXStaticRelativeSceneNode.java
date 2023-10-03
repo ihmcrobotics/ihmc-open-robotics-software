@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
@@ -51,6 +52,12 @@ public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implemen
       ImGui.text("Current distance: %.2f".formatted(getCurrentDistance()));
       ImGui.sameLine();
       distanceToDisableTrackingInput.render();
+   }
+
+   @Override
+   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      predefinedRigidBodySceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
    }
 
    @Override

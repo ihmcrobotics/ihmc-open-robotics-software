@@ -5,7 +5,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
@@ -32,6 +36,15 @@ public class RDXSceneNodeBasics
    public void renderImGuiWidgets()
    {
       ImGui.text(detailsText);
+   }
+
+   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      if (ImGui.button("Remove##" + sceneNode.getID()))
+      {
+         modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
+         modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
