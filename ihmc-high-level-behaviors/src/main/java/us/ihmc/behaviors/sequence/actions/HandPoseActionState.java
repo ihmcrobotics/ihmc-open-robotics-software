@@ -10,15 +10,15 @@ public class HandPoseActionState extends BehaviorActionState
    private final DetachableReferenceFrame palmFrame = new DetachableReferenceFrame(definition.getPalmTransformToParent());
 
    @Override
-   public HandPoseActionDefinition getDefinition()
-   {
-      return definition;
-   }
-
-   @Override
    public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
       palmFrame.update(referenceFrameLibrary, definition.getPalmParentFrameName());
+   }
+
+   @Override
+   public HandPoseActionDefinition getDefinition()
+   {
+      return definition;
    }
 
    public DetachableReferenceFrame getPalmFrame()
