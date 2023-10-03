@@ -1,10 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.FootstepActionDefinitionMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class FootstepActionState extends BehaviorActionState
+public class FootstepActionState extends BehaviorActionState<FootstepActionDefinitionMessage>
 {
    private final FootstepPlanActionState footstepPlan;
    private final FootstepActionDefinition definition = new FootstepActionDefinition();

@@ -1,9 +1,12 @@
 package us.ihmc.behaviors.sequence;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 // TODO: Include toMessage and fromMessage
-public abstract class BehaviorActionState implements BehaviorActionDefinitionSupplier
+public abstract class BehaviorActionState<T extends Packet<T>> implements BehaviorActionDefinitionSupplier<T>
 {
    /** The action's unique ID. */
    private final long id;
@@ -17,6 +20,28 @@ public abstract class BehaviorActionState implements BehaviorActionDefinitionSup
    public void update(ReferenceFrameLibrary referenceFrameLibrary)
    {
 
+   }
+
+   /** This is the default, if there is no subtree for this action */
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      getDefinition().saveToFile(jsonNode);
+   }
+
+   /** This is the default, if there is no subtree for this action */
+   public void loadFromFile(JsonNode jsonNode)
+   {
+      getDefinition().loadFromFile(jsonNode);
+   }
+
+   public void toMessage(T message)
+   {
+      getDefinition().toMessage(message);
+   }
+
+   public void fromMessage(T message)
+   {
+      getDefinition().fromMessage(message);
    }
 
    /** The action's unique ID. */
