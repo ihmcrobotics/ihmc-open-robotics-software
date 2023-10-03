@@ -188,7 +188,7 @@ public class ContinuousPlanningRemoteTask
                                                    imageMessage.getPosition().getX(),
                                                    imageMessage.getPosition().getY());
         }
-        PerceptionMessageTools.convertToHeightMapData(heightMapImage.ptr(0),
+        PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                       latestHeightMapData,
                                                       imageMessage.getPosition(),
                                                       RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,

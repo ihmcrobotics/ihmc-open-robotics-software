@@ -211,13 +211,13 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(BytePointer heightMapPointer,
+   public static void convertToHeightMapData(Mat heightMapPointer,
                                              HeightMapData heightMapData,
                                              Point3D gridCenter,
                                              float widthInMeters,
                                              float cellSizeInMeters)
    {
-      float maxHeight = 0.7f;
+      float maxHeight = 2.0f;
       float minHeight = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
@@ -230,7 +230,7 @@ public class PerceptionMessageTools
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
             int heightIndex = xIndex * cellsPerAxis + yIndex;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR;
+            float cellHeight = (float) (heightMapPointer.ptr(xIndex, yIndex).getShort()) / RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR;
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;

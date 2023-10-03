@@ -30,6 +30,7 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -261,12 +262,12 @@ public class RDXRapidHeightMapSimulationDemo
 
          public void planFootsteps()
          {
-            // set start pose to be 0.65m in front of the camera
+            // set start pose to be below the camera
             startPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
-            startPose.get(RobotSide.LEFT).appendTranslation(0.65, 0.0, 0.0);
+            startPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, 0.0);
 
             startPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
-            startPose.get(RobotSide.RIGHT).appendTranslation(0.65, -0.2, 0.0);
+            startPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.0);
 
             // set goal pose to be 1.65m in front of the camera
             goalPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
@@ -284,22 +285,25 @@ public class RDXRapidHeightMapSimulationDemo
                latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
                                                        RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS, cameraFrame.getX(), cameraFrame.getY());
             }
-            PerceptionMessageTools.convertToHeightMapData(heightMapImage.ptr(0),
+            PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                           latestHeightMapData,
-                                                          new Point3D(cameraFrame.getPosition()),
+                                                          new Point3D(cameraZUpFrame.getTransformToWorldFrame().getTranslation()),
                                                           RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
                                                           RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
 
-            LogTools.info("Planning Footsteps on Height Map: {}", latestHeightMapData.getNumberOfOccupiedCells());
+            LogTools.info("Grid Center: {}", cameraZUpFrame.getTransformToWorldFrame().getTranslation());
+            PerceptionDebugTools.printMat("Height Map", heightMapImage, 4);
+            PerceptionDebugTools.printHeightMap("Height Map Data", latestHeightMapData, 4);
+
             request = new FootstepPlannerRequest();
             request.setHeightMapData(latestHeightMapData);
             request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
             request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
             request.setTimeout(0.25);
+            request.setSnapGoalSteps(true);
             request.setPerformAStarSearch(true);
             request.setAssumeFlatGround(false);
             request.setSwingPlannerType(SwingPlannerType.NONE);
-            request.setSnapGoalSteps(true);
             request.setAbortIfGoalStepSnappingFails(true);
 
             plannerOutput = footstepPlanningModule.handleRequest(request);

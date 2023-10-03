@@ -342,7 +342,7 @@ public class HumanoidPerceptionModule
                                                  rapidHeightMapExtractor.getSensorOrigin().getX(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getY());
       }
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat.ptr(0), latestHeightMapData,
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat, latestHeightMapData,
                                                     rapidHeightMapExtractor.getSensorOrigin(),
                                                     RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
                                                     RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);

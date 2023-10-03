@@ -14,6 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -184,26 +185,50 @@ public class PerceptionDebugTools
       return "unknown image type";
    }
 
-   public static void printMat(String name, Mat image)
+   public static void printMat(String name, Mat image, int skip)
    {
-      LogTools.info(matToString(name, image));
+      LogTools.info(matToString(name, image, skip));
    }
 
    public static void printMatVector(String name, MatVector matVector)
    {
       for (int i = 0; i < matVector.size(); i++)
       {
-         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i)) + "\n");
+         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i), 1) + "\n");
       }
    }
 
-   public static String matToString(String name, Mat image)
+   public static void printHeightMap(String name, HeightMapData heightMapData, int skip)
+   {
+      LogTools.info(heightMapToString(name, heightMapData, skip));
+   }
+
+   public static String heightMapToString(String name, HeightMapData heightMapData, int skip)
+   {
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
+      LogTools.info("Height Map: [Center: {}]", heightMapData.getGridCenter());
+      for (int i = 0; i<heightMapData.getCellsPerAxis(); i+=skip)
+      {
+         for (int j = 0; j<heightMapData.getCellsPerAxis(); j+=skip)
+         {
+            double height = heightMapData.getHeightAt(i, j);
+            if (height > 0.0001)
+               matString.append(String.format("%.2f", height)).append(" ");
+            else
+               matString.append("||||").append(" ");
+         }
+         matString.append("\n");
+      }
+      return matString.toString();
+   }
+
+   public static String matToString(String name, Mat image, int skip)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
 
-      for (int i = 0; i < image.rows(); i++)
+      for (int i = 0; i < image.rows(); i+=skip)
       {
-         for (int j = 0; j < image.cols(); j++)
+         for (int j = 0; j < image.cols(); j+=skip)
          {
             if (image.type() == opencv_core.CV_16UC1)
                matString.append(image.ptr(i, j).getShort()).append("\t");
