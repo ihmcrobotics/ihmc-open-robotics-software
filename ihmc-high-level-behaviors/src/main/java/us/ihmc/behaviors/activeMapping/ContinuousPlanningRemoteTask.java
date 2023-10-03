@@ -91,32 +91,13 @@ public class ContinuousPlanningRemoteTask
     */
    private void updateContinuousPlanner()
    {
-      //LogTools.info("PlanAvailable:{}, WalkingStatus:{}",
-      //              activeMapper.isPlanAvailable(),
-      //              walkingStatusMessage.get().getWalkingStatus());
-
       if (perceptionConfigurationParameters.getActiveMapping())
       {
          if (!continuousPlanner.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
          {
-            if (!continuousPlanner.isPlanAvailable()) // Only try to initialize if a plan doesn't already exist
-            {
                continuousPlanner.initialize();
                continuousPlanner.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
-            }
-            else
-            {
-               FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(MAXIMUM_FOOTSTEPS_TO_SEND,
-                                                                                                              SWING_DURATION,
-                                                                                                              TRANSFER_DURATION);
-               publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-               continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                            footstepDataList.getFootstepDataList().get(0).getLocation(),
-                                                                            footstepDataList.getFootstepDataList().get(0).getOrientation()),
-                                                            RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide()));
-               continuousPlanner.setPlanAvailable(false);
                continuousPlanner.setInitialized(true);
-            }
          }
          else // Initialized, so we can run the state machine in normal mode to eternity
          {
