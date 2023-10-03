@@ -9,11 +9,9 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -21,7 +19,7 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
-import java.util.*;
+import java.util.Set;
 
 /**
  * Manages the perception scene graph.
@@ -96,35 +94,29 @@ public class RDXSceneGraphUI
       ImGui.checkbox(labels.get("View as tree"), viewAsTree);
       ImGui.separator();
 
-      if (viewAsTree.get())
-      {
-         renderSceneNodesAsTree(sceneGraph.getRootNode());
-      }
-      else // Render IDs in order so they don't jump around
-      {
-         sceneGraph.modifyTree(sceneGraphModificationQueue -> {
+      sceneGraph.modifyTree(modificationQueue -> {
+         if (viewAsTree.get())
+         {
+            renderSceneNodesAsTree(sceneGraph.getRootNode(), modificationQueue);
+         }
+         else // Render IDs in order so they don't jump around
+         {
             for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             {
                if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
                {
                   ImGuiTools.textBold(sceneNode.getName());
                   uiSceneNode.renderImGuiWidgets();
-                  if (sceneNode != sceneGraph.getRootNode()) // You cannot remove the root node
-                  {
-                     if (ImGui.button("Remove##" + sceneNode.getName()))
-                     {
-                        sceneGraphModificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
-                        sceneGraphModificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
-                     }
-                  }
+                  if (sceneNode != sceneGraph.getRootNode())
+                     uiSceneNode.renderRemove(modificationQueue, sceneGraph);
                   ImGui.separator();
                }
             }
-         });
-      }
+         }
+      });
    }
 
-   private void renderSceneNodesAsTree(SceneNode sceneNode)
+   private void renderSceneNodesAsTree(SceneNode sceneNode, SceneGraphModificationQueue modificationQueue)
    {
       if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
       {
@@ -141,7 +133,7 @@ public class RDXSceneGraphUI
             uiSceneNode.renderImGuiWidgets();
             for (SceneNode child : sceneNode.getChildren())
             {
-               renderSceneNodesAsTree(child);
+               renderSceneNodesAsTree(child, modificationQueue);
             }
             ImGui.treePop();
          }
