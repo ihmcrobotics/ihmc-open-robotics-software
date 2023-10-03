@@ -9,7 +9,9 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -100,15 +102,25 @@ public class RDXSceneGraphUI
       }
       else // Render IDs in order so they don't jump around
       {
-         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-         {
-            if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+         sceneGraph.modifyTree(sceneGraphModificationQueue -> {
+            for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             {
-               ImGuiTools.textBold(sceneNode.getName());
-               uiSceneNode.renderImGuiWidgets();
-               ImGui.separator();
+               if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+               {
+                  ImGuiTools.textBold(sceneNode.getName());
+                  uiSceneNode.renderImGuiWidgets();
+                  if (sceneNode != sceneGraph.getRootNode()) // You cannot remove the root node
+                  {
+                     if (ImGui.button("Remove##" + sceneNode.getName()))
+                     {
+                        sceneGraphModificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
+                        sceneGraphModificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+                     }
+                  }
+                  ImGui.separator();
+               }
             }
-         }
+         });
       }
    }
 
