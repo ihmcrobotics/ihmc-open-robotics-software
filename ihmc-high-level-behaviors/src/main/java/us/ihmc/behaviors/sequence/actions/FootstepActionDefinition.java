@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepActionDefinition implements BehaviorActionDefinition
+public class FootstepActionDefinition implements BehaviorActionDefinition<FootstepActionDefinitionMessage>
 {
    private String description = "Footstep";
    private RobotSide side = RobotSide.LEFT;
