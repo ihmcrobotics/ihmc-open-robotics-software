@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor;
 import behavior_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -33,15 +33,15 @@ public class RDXActionSequenceTools
       }
       if (actionType.equals(RDXChestOrientationAction.class.getSimpleName()))
       {
-         return new RDXChestOrientationAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
+         return new RDXChestOrientationAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
       }
       if (actionType.equals(RDXFootstepPlanAction.class.getSimpleName()))
       {
          return new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
       }
-      if (actionType.equals(RDXHandConfigurationAction.class.getSimpleName()))
+      if (actionType.equals(RDXSakeHandCommandAction.class.getSimpleName()))
       {
-         return robotHasArms ? new RDXHandConfigurationAction() : null;
+         return robotHasArms ? new RDXSakeHandCommandAction() : null;
       }
       if (actionType.equals(RDXHandPoseAction.class.getSimpleName()))
       {
@@ -55,7 +55,7 @@ public class RDXActionSequenceTools
       }
       if (actionType.equals(RDXPelvisHeightPitchAction.class.getSimpleName()))
       {
-         return new RDXPelvisHeightPitchAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
+         return new RDXPelvisHeightPitchAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
       }
       if (actionType.equals(RDXWaitDurationAction.class.getSimpleName()))
       {
@@ -70,14 +70,14 @@ public class RDXActionSequenceTools
    }
 
    public static void packActionSequenceUpdateMessage(List<RDXBehaviorAction> actionSequence,
-                                                      ArrayList<BehaviorActionData> actionDataForMessage,
+                                                      ArrayList<BehaviorActionDefinition> actionDefinitionForMessage,
                                                       ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
-      actionDataForMessage.clear();
+      actionDefinitionForMessage.clear();
       for (RDXBehaviorAction behaviorAction : actionSequence)
       {
-         actionDataForMessage.add(behaviorAction.getActionData());
+         actionDefinitionForMessage.add(behaviorAction.getActionDefinition());
       }
-      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDataForMessage, actionSequenceUpdateMessage);
+      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDefinitionForMessage, actionSequenceUpdateMessage);
    }
 }

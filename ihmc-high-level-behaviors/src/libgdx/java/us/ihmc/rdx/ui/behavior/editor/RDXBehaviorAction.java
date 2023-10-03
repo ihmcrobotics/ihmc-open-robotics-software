@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.behaviors.sequence.BehaviorActionData;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -26,6 +26,7 @@ public abstract class RDXBehaviorAction
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
+   private final ImString rejectionTooltip = new ImString();
    private int actionIndex = -1;
    private int actionNextExecutionIndex = -1;
 
@@ -36,15 +37,20 @@ public abstract class RDXBehaviorAction
 
    public void update()
    {
-      update(false, -1);
+      update(false);
    }
 
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
 
    }
 
    public void updateAfterLoading()
+   {
+
+   }
+
+   public void updateBeforeRemoving()
    {
 
    }
@@ -87,7 +93,7 @@ public abstract class RDXBehaviorAction
 
    }
 
-   public abstract BehaviorActionData getActionData();
+   public abstract BehaviorActionDefinition getActionDefinition();
 
    public ImBooleanWrapper getSelected()
    {
@@ -104,6 +110,11 @@ public abstract class RDXBehaviorAction
    public ImString getDescription()
    {
       return description;
+   }
+
+   public ImString getRejectionTooltip()
+   {
+      return rejectionTooltip;
    }
 
    public int getActionIndex()
@@ -124,5 +135,10 @@ public abstract class RDXBehaviorAction
    public void setActionNextExecutionIndex(int actionNextExecutionIndex)
    {
       this.actionNextExecutionIndex = actionNextExecutionIndex;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return false;
    }
 }
