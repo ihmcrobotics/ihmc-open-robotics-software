@@ -6,6 +6,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -226,6 +227,13 @@ public class RapidHeightMapExtractor
       cameraIntrinsics.setFy(fy);
       cameraIntrinsics.setCx(cx);
       cameraIntrinsics.setCy(cy);
+   }
+
+   public void reset()
+   {
+      localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
+      globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
+      sequenceNumber = 0;
    }
 
    public boolean isProcessing()

@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
@@ -11,17 +12,25 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -31,8 +40,12 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;
@@ -46,6 +59,7 @@ public class RDXRapidHeightMapSimulationDemo
    private final ROS2Helper ros2Helper;
    private final ROS2Node ros2Node;
 
+   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
@@ -57,7 +71,15 @@ public class RDXRapidHeightMapSimulationDemo
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
 
-   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+   private FootstepPlanningModule footstepPlanningModule;
+   private final FootstepPlannerLogger footstepPlannerLogger;
+   private FootstepPlannerRequest request;
+   private FootstepPlannerOutput plannerOutput;
+   private SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
+   private HeightMapData latestHeightMapData;
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
@@ -77,7 +99,10 @@ public class RDXRapidHeightMapSimulationDemo
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
+      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
+
+      footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
+      footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -106,6 +131,8 @@ public class RDXRapidHeightMapSimulationDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(30.0));
+
+            baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic, RDXSceneLevel.MODEL);
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
@@ -208,9 +235,87 @@ public class RDXRapidHeightMapSimulationDemo
             {
                autoIncrement = false;
             }
+            ImGui.sameLine();
+            if (ImGui.button("Reset"))
+            {
+               autoIncrement = false;
+               autoIncrementCounter = 0;
+               l515PoseGizmo.getTransformToParent().getTranslation().setX(0);
+               l515PoseGizmo.update();
+
+               humanoidPerception.getRapidHeightMapExtractor().reset();
+               humanoidPerceptionUI.update();
+
+            }
+            ImGui.separator();
+            if(ImGui.button("Plan Footsteps"))
+            {
+               planFootsteps();
+            }
+            ImGui.separator();
             if (ImGui.button("Capture Height Map"))
             {
                logHeightMap();
+            }
+         }
+
+         public void planFootsteps()
+         {
+            // set start pose to be 0.65m in front of the camera
+            startPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
+            startPose.get(RobotSide.LEFT).appendTranslation(0.65, 0.0, 0.0);
+
+            startPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
+            startPose.get(RobotSide.RIGHT).appendTranslation(0.65, -0.2, 0.0);
+
+            // set goal pose to be 1.65m in front of the camera
+            goalPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
+            goalPose.get(RobotSide.LEFT).appendTranslation(1.65, 0.0, 0.0);
+
+            goalPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
+            goalPose.get(RobotSide.RIGHT).appendTranslation(1.65, -0.2, 0.0);
+
+            LogTools.info("Start Poses: {} {}", startPose.get(RobotSide.LEFT).getPosition(), startPose.get(RobotSide.RIGHT).getPosition());
+            LogTools.info("Goal Poses: {} {}", goalPose.get(RobotSide.LEFT).getPosition(), goalPose.get(RobotSide.RIGHT).getPosition());
+
+            Mat heightMapImage = humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage();
+            if (latestHeightMapData == null)
+            {
+               latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                       RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS, cameraFrame.getX(), cameraFrame.getY());
+            }
+            PerceptionMessageTools.convertToHeightMapData(heightMapImage.ptr(0),
+                                                          latestHeightMapData,
+                                                          new Point3D(cameraFrame.getPosition()),
+                                                          RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                          RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+
+            LogTools.info("Planning Footsteps on Height Map: {}", latestHeightMapData.getNumberOfOccupiedCells());
+            request = new FootstepPlannerRequest();
+            request.setHeightMapData(latestHeightMapData);
+            request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
+            request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
+            request.setTimeout(0.25);
+            request.setPerformAStarSearch(true);
+            request.setAssumeFlatGround(false);
+            request.setSwingPlannerType(SwingPlannerType.NONE);
+            request.setSnapGoalSteps(true);
+            request.setAbortIfGoalStepSnappingFails(true);
+
+            plannerOutput = footstepPlanningModule.handleRequest(request);
+            footstepPlannerLogger.logSession();
+            FootstepPlannerLogger.deleteOldLogs();
+
+            if (plannerOutput != null)
+            {
+               FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+               LogTools.info(String.format("Plan Result: %s, Steps: %d", footstepPlanningResult,
+                                           footstepPlanningModule.getOutput().getFootstepPlan().getNumberOfSteps()));
+
+               FootstepDataListMessage footstepsMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 2.0, 1.0);
+
+               footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
+               footstepPlanGraphic.update();
             }
          }
 
@@ -228,20 +333,21 @@ public class RDXRapidHeightMapSimulationDemo
             Mat internalHeightMapImage = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
             BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
             OpenCVTools.compressImagePNG(internalHeightMapImage, compressedDepthPointer);
-            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
+            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME, compressedDepthPointer);
          }
 
          @Override
          public void dispose()
          {
             baseUI.dispose();
+            footstepPlanGraphic.destroy();
             environmentBuilder.destroy();
             steppingL515Simulator.dispose();
-            humanoidPerceptionUI.destroy();
             humanoidPerception.destroy();
+            humanoidPerceptionUI.destroy();
+            perceptionDataLogger.closeLogFile();
             bytedecoDepthImage.destroy(openCLManager);
             openCLManager.destroy();
-            perceptionDataLogger.closeLogFile();
          }
       });
    }

@@ -3,7 +3,7 @@
   "windows" : {
     "3D View" : true,
     "Dataset Navigation Panel" : true,
-    "Environment###java.lang.Class:Environment" : false,
+    "Environment###java.lang.Class:Environment" : true,
     "Perception Panel" : true,
     "Cropped Height Map" : true,
     "Depth Image" : true,
