@@ -106,7 +106,7 @@ public class RDXFootstepPlanAction implements RDXBehaviorAction
          newFootstepPose.getPosition().addX(aLittleInFront);
 
          newFootstepPose.changeFrame(definition.getConditionalReferenceFrame().get());
-         addedFootstep.getSolePose().set(newFootstepPose);
+         addedFootstep.getSoleToPlanFrameTransform().set(newFootstepPose);
       }
 
       if (userRemovedFootstep.poll())
