@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 // TODO: Include toMessage and fromMessage
-public abstract class BehaviorActionState
+public abstract class BehaviorActionState implements BehaviorActionDefinitionSupplier
 {
    /** The action's unique ID. */
    private final long id;
