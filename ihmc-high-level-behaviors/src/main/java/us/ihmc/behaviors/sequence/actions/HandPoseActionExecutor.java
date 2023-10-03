@@ -75,7 +75,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
          rootCalculator.getKinematicsInfo();
          rootCalculator.computeRoot();
          ReferenceFrame chestFrame = rootCalculator.getRoot();
-         armIKSolver.update(chestFrame, definition.getConditionalReferenceFrame().get());
+         armIKSolver.update(chestFrame, state.getPalmFrame().getReferenceFrame());
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
@@ -115,7 +115,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
       }
       else
       {
-         FramePose3D frameHand = new FramePose3D(definition.getConditionalReferenceFrame().get());
+         FramePose3D frameHand = new FramePose3D(state.getPalmFrame().getReferenceFrame());
          frameHand.changeFrame(ReferenceFrame.getWorldFrame());
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(definition.getSide(),
                                                                                                         definition.getTrajectoryDuration(),
@@ -139,7 +139,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
 
       executionTimer.reset();
 
-      desiredHandControlPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
+      desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
       startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
       startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
@@ -148,7 +148,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredHandControlPose.setFromReferenceFrame(definition.getConditionalReferenceFrame().get());
+      desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
 
       boolean wasExecuting = isExecuting;

@@ -50,7 +50,7 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
    @Override
    public void triggerActionExecution()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
       frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
@@ -65,7 +65,7 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredChestPose.setFromReferenceFrame(state.getChestFrame());
+      desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
       startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
    }
@@ -73,7 +73,7 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredChestPose.setFromReferenceFrame(state.getChestFrame());
+      desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
       syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
       boolean wasExecuting = isExecuting;
@@ -99,7 +99,7 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
 
    public void disengageHoldPoseInWorld()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame());
+      FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
       frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();

@@ -21,4 +21,8 @@ public class HandPoseActionState extends BehaviorActionState
       palmFrame.update(referenceFrameLibrary, definition.getPalmParentFrameName());
    }
 
+   public DetachableReferenceFrame getPalmFrame()
+   {
+      return palmFrame;
+   }
 }

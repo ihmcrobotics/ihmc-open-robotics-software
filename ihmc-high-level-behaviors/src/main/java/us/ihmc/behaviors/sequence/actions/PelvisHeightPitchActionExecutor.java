@@ -4,9 +4,9 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -52,7 +52,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    @Override
    public void triggerActionExecution()
    {
-      FramePose3D framePose = new FramePose3D(state.getPelvisFrame());
+      FramePose3D framePose = new FramePose3D(state.getPelvisFrame().getReferenceFrame());
       FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -72,7 +72,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame());
+      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
@@ -83,7 +83,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame());
+      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());

@@ -4,9 +4,9 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -73,7 +73,7 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
       footstepPlanToExecute.clear();
       for (FootstepActionDefinition footstep : definition.getFootsteps())
       {
-         solePose.setIncludingFrame(state.getSoleFrame().getParent(), footstep.getSolePose());
+         solePose.setIncludingFrame(state.getSoleFrame().getReferenceFrame().getParent(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }
@@ -103,7 +103,7 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(definition.getConditionalReferenceFrame().get().getParent(),
+            goalFeetPoses.get(side).setIncludingFrame(state.getSoleFrame().getReferenceFrame().getParent(),
                                                       footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
@@ -128,7 +128,7 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(definition.getConditionalReferenceFrame().get().getParent(),
+            goalFeetPoses.get(side).setIncludingFrame(state.getSoleFrame().getReferenceFrame().getParent(),
                                                       footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
