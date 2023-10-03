@@ -22,13 +22,12 @@ public class SceneGraphNodeRemoval implements SceneGraphTreeModification
 
    private void findAndRemove(SceneNode node)
    {
-      if (node.getChildren().contains(nodeToRemove))
+      if (!node.getChildren().remove(nodeToRemove))
       {
-         node.getChildren().remove(nodeToRemove);
-         return;
+         for (SceneNode child : node.getChildren())
+         {
+            findAndRemove(child);
+         }
       }
-
-      for (SceneNode child : node.getChildren())
-         findAndRemove(child);
    }
 }
