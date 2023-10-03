@@ -8,6 +8,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
@@ -111,6 +112,11 @@ public class RDXPredefinedRigidBodySceneNodeBasics
          predefinedRigidBodySceneNode.clearOffset();
          predefinedRigidBodySceneNode.freezeFromModification();
       }
+   }
+
+   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      sceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

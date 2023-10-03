@@ -28,6 +28,11 @@ public interface RDXSceneNodeInterface
       
    }
 
+   default void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+
+   }
+
    default void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
 
