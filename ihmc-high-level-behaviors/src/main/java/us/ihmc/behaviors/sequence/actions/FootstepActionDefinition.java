@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.FootstepActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
@@ -12,7 +12,7 @@ public class FootstepActionDefinition implements BehaviorActionDefinition
 {
    private String description = "Footstep";
    private RobotSide side = RobotSide.LEFT;
-   private final Pose3D solePose = new Pose3D();
+   private final RigidBodyTransform soleToPlanFrameTransform = new RigidBodyTransform();
 
    public RobotSide getSide()
    {
@@ -24,33 +24,33 @@ public class FootstepActionDefinition implements BehaviorActionDefinition
       this.side = side;
    }
 
-   public Pose3D getSolePose()
+   public RigidBodyTransform getSoleToPlanFrameTransform()
    {
-      return solePose;
+      return soleToPlanFrameTransform;
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("side", side.getLowerCaseName());
-      JSONTools.toJSON(jsonNode, solePose);
+      JSONTools.toJSON(jsonNode, soleToPlanFrameTransform);
    }
 
    public void loadFromFile(JsonNode jsonNode)
    {
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      JSONTools.toEuclid(jsonNode, solePose);
+      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform);
    }
 
    public void toMessage(FootstepActionDefinitionMessage message)
    {
       message.setRobotSide(side.toByte());
-      message.getSolePose().set(solePose);
+      message.getSolePose().set(soleToPlanFrameTransform);
    }
 
    public void fromMessage(FootstepActionDefinitionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
-      solePose.set(message.getSolePose());
+      soleToPlanFrameTransform.set(message.getSolePose());
    }
 
    @Override

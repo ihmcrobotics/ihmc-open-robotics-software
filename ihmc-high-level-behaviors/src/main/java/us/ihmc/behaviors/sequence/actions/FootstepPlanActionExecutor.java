@@ -73,7 +73,7 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
       footstepPlanToExecute.clear();
       for (FootstepActionDefinition footstep : definition.getFootsteps())
       {
-         solePose.setIncludingFrame(state.getSoleFrame().getReferenceFrame().getParent(), footstep.getSolePose());
+         solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(), footstep.getSoleToPlanFrameTransform());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }

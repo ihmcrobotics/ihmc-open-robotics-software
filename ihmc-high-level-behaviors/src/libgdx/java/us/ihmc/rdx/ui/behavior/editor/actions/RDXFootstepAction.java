@@ -58,10 +58,10 @@ public class RDXFootstepAction extends FootstepActionState
       getGizmo().update();
 
       if (getGizmo().getGizmoModifiedByUser().poll())
-         actionDefinition.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
+         actionDefinition.getSoleToPlanFrameTransform().set(getGizmo().getTransformToParent()); // Update action data based on user input
       else
       {
-         getGizmo().getTransformToParent().set(actionDefinition.getSolePose()); // Update gizmo in case action data changes
+         getGizmo().getTransformToParent().set(actionDefinition.getSoleToPlanFrameTransform()); // Update gizmo in case action data changes
          getGizmo().update();
       }
 
