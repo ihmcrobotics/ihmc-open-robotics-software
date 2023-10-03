@@ -4,9 +4,9 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -77,7 +77,7 @@ public class WalkActionExecutor implements BehaviorActionExecutor
 
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(definition.getConditionalReferenceFrame().get(),
+         goalFeetPoses.get(side).setIncludingFrame(state.getSoleFrame().getReferenceFrame(),
                                                    definition.getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }

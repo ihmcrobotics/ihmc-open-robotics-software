@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ConditionalReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -15,7 +14,7 @@ public class ImGuiReferenceFrameLibraryCombo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String comboName;
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private ConditionalReferenceFrame selectedReferenceFrame = new ConditionalReferenceFrame();
+//   private ConditionalReferenceFrame selectedReferenceFrame = new ConditionalReferenceFrame();
    private int selectedFrameIndex;
 
    public ImGuiReferenceFrameLibraryCombo(String comboName, ReferenceFrameLibrary referenceFrameLibrary)
@@ -36,7 +35,7 @@ public class ImGuiReferenceFrameLibraryCombo
 
             if (referenceFrame != null)
             {
-               boolean frameHasNoParentFrame = referenceFrame.equals(ConditionalReferenceFrame.INVALID_FRAME);
+               boolean frameHasNoParentFrame = false;
 
                if (frameHasNoParentFrame)
                   ImGui.pushStyleColor(ImGuiCol.Text, Color.RED.toIntBits());
@@ -53,15 +52,5 @@ public class ImGuiReferenceFrameLibraryCombo
       }
 
       return true;
-   }
-
-   public void setSelectedReferenceFrame(ConditionalReferenceFrame referenceFrame)
-   {
-      this.selectedReferenceFrame = referenceFrame;
-   }
-
-   public ReferenceFrame getSelectedReferenceFrame()
-   {
-      return selectedReferenceFrame.get();
    }
 }

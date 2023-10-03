@@ -1,13 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import us.ihmc.behaviors.sequence.BehaviorActionState;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 
 public class FootstepPlanActionState extends BehaviorActionState
 {
    private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
-
-   private ReferenceFrame soleFrame;
+   private final DetachableReferenceFrame soleFrame = new DetachableReferenceFrame(definition.getTransformToParent());
 
    @Override
    public FootstepPlanActionDefinition getDefinition()
@@ -15,7 +14,7 @@ public class FootstepPlanActionState extends BehaviorActionState
       return definition;
    }
 
-   public ReferenceFrame getSoleFrame()
+   public DetachableReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }
