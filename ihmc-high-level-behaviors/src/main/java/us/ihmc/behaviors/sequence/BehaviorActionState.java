@@ -24,6 +24,4 @@ public abstract class BehaviorActionState implements BehaviorActionDefinitionSup
    {
       return id;
    }
-
-   public abstract BehaviorActionDefinition getDefinition();
 }
