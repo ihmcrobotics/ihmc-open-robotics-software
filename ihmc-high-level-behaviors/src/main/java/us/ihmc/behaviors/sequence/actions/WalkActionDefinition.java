@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
-public class WalkActionDefinition implements BehaviorActionDefinition
+public class WalkActionDefinition implements BehaviorActionDefinition<WalkActionDefinitionMessage>
 {
    private String description = "Walk";
    private double swingDuration = 1.2;
@@ -49,6 +49,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition
       }
    }
 
+   @Override
    public void toMessage(WalkActionDefinitionMessage message)
    {
       message.setSwingDuration(swingDuration);
@@ -60,6 +61,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
    }
 
+   @Override
    public void fromMessage(WalkActionDefinitionMessage message)
    {
       swingDuration = message.getSwingDuration();

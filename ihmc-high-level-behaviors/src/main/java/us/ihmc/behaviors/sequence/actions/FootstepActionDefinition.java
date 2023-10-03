@@ -29,24 +29,28 @@ public class FootstepActionDefinition implements BehaviorActionDefinition<Footst
       return soleToPlanFrameTransform;
    }
 
+   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("side", side.getLowerCaseName());
       JSONTools.toJSON(jsonNode, soleToPlanFrameTransform);
    }
 
+   @Override
    public void loadFromFile(JsonNode jsonNode)
    {
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform);
    }
 
+   @Override
    public void toMessage(FootstepActionDefinitionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.getSolePose().set(soleToPlanFrameTransform);
    }
 
+   @Override
    public void fromMessage(FootstepActionDefinitionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());

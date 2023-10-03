@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition implements BehaviorActionDefinition
+public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedBodyPartPoseActionDefinitionMessage>
 {
    private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
@@ -46,6 +46,7 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
 
+   @Override
    public void toMessage(SidedBodyPartPoseActionDefinitionMessage message)
    {
       message.getParentFrame().resetQuick();
@@ -58,6 +59,7 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition
       message.setJointSpaceControl(jointSpaceControl);
    }
 
+   @Override
    public void fromMessage(SidedBodyPartPoseActionDefinitionMessage message)
    {
       palmParentFrameName = message.getParentFrame().getString(0);

@@ -1,10 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class WalkActionState extends BehaviorActionState
+public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMessage>
 {
    private final WalkActionDefinition definition = new WalkActionDefinition();
    private final DetachableReferenceFrame soleFrame = new DetachableReferenceFrame(definition.getTransformToParent());
