@@ -71,11 +71,12 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
    public void triggerActionExecution()
    {
       footstepPlanToExecute.clear();
-      for (FootstepActionDefinition footstep : definition.getFootsteps())
+      for (FootstepActionState footstep : state.getFootsteps())
       {
-         solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(), footstep.getSoleToPlanFrameTransform());
+         solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(),
+                                    footstep.getDefinition().getSoleToPlanFrameTransform());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
+         footstepPlanToExecute.addFootstep(footstep.getDefinition().getSide(), solePose);
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
@@ -101,10 +102,11 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
 
-         if (indexOfLastFoot.get(side) >= 0)
+         int indexOfLastFootSide = indexOfLastFoot.get(side);
+         if (indexOfLastFootSide >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(state.getSoleFrame().getReferenceFrame().getParent(),
-                                                      footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(state.getFootsteps().get(indexOfLastFootSide).getSoleFrame().getReferenceFrame().getParent(),
+                                                      footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else
@@ -126,10 +128,11 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
       for (RobotSide side : RobotSide.values)
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-         if (indexOfLastFoot.get(side) >= 0)
+         int indexOfLastFootSide = indexOfLastFoot.get(side);
+         if (indexOfLastFootSide >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(state.getSoleFrame().getReferenceFrame().getParent(),
-                                                      footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
+            goalFeetPoses.get(side).setIncludingFrame(state.getFootsteps().get(indexOfLastFootSide).getSoleFrame().getReferenceFrame().getParent(),
+                                                      footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
          else

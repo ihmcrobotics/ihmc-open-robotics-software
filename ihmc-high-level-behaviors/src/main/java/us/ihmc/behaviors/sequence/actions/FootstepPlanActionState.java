@@ -70,6 +70,11 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
       }
    }
 
+   public RecyclingArrayList<FootstepActionState> getFootsteps()
+   {
+      return footsteps;
+   }
+
    @Override
    public FootstepPlanActionDefinition getDefinition()
    {
