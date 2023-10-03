@@ -13,6 +13,10 @@ module behavior_msgs
       struct BodyPartPoseStatusMessage
       {
         /**
+         * Whether the action hs to be executed next and is part of a group of concurrent actions
+         */
+        boolean current_and_concurrent;
+        /**
          * Name of the frame the this action is expressed in
          */
         sequence<string, 1000> parent_frame;

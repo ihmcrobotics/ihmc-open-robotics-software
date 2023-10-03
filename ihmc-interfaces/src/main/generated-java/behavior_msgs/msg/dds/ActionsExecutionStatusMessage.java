@@ -18,7 +18,7 @@ public class ActionsExecutionStatusMessage extends Packet<ActionsExecutionStatus
 
    public ActionsExecutionStatusMessage()
    {
-      action_status_list_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionExecutionStatusMessage> (100, new behavior_msgs.msg.dds.ActionExecutionStatusMessagePubSubType());
+      action_status_list_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionExecutionStatusMessage> (200, new behavior_msgs.msg.dds.ActionExecutionStatusMessagePubSubType());
 
    }
 

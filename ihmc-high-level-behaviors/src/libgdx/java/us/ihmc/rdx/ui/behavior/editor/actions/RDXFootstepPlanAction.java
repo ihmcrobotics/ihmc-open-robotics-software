@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.actions.FootstepActionData;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionData;
+import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
@@ -26,17 +26,18 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final FootstepPlanActionData actionData = new FootstepPlanActionData();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final FootstepPlanActionDefinition actionDefinition = new FootstepPlanActionDefinition();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
-   private final ImDoubleWrapper swingDurationWidget = new ImDoubleWrapper(actionData::getSwingDuration,
-                                                                           actionData::setSwingDuration,
+   private final ImDoubleWrapper swingDurationWidget = new ImDoubleWrapper(actionDefinition::getSwingDuration,
+                                                                           actionDefinition::setSwingDuration,
                                                                            imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-   private final ImDoubleWrapper transferDurationWidget = new ImDoubleWrapper(actionData::getTransferDuration,
-                                                                              actionData::setTransferDuration,
+   private final ImDoubleWrapper transferDurationWidget = new ImDoubleWrapper(actionDefinition::getTransferDuration,
+                                                                              actionDefinition::setTransferDuration,
                                                                               imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
    public RDXFootstepPlanAction(RDXBaseUI baseUI,
@@ -46,36 +47,36 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
-      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionData::getPlanFrame, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(actionDefinition, baseUI, robotModel, getSelected()::get));
    }
 
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrame().getName());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getConditionalReferenceFrame());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      actionDefinition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+      actionDefinition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
    @Override
-   public void update(boolean concurrencyWithPreviousAction, int indexShiftConcurrentAction)
+   public void update(boolean concurrentActionIsNextForExecution)
    {
-      actionData.update();
+      actionDefinition.update(referenceFrameLibrary);
 
       // Add a footstep to the action data only
       if (userAddedFootstep.poll())
       {
          RobotSide newSide = userAddedFootstep.read();
-         FootstepActionData addedFootstep = actionData.getFootsteps().add();
+         FootstepActionDefinition addedFootstep = actionDefinition.getFootsteps().add();
          addedFootstep.setSide(newSide);
          FramePose3D newFootstepPose = new FramePose3D();
          if (!footsteps.isEmpty())
@@ -97,20 +98,20 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          double aLittleInFront = 0.15;
          newFootstepPose.getPosition().addX(aLittleInFront);
 
-         newFootstepPose.changeFrame(actionData.getPlanFrame());
+         newFootstepPose.changeFrame(actionDefinition.getConditionalReferenceFrame().get());
          addedFootstep.getSolePose().set(newFootstepPose);
       }
 
       if (userRemovedFootstep.poll())
-         actionData.getFootsteps().remove(actionData.getFootsteps().size() - 1);
+         actionDefinition.getFootsteps().remove(actionDefinition.getFootsteps().size() - 1);
 
       // Synchronizes the RDX footsteps to the action data
       footsteps.clear();
-      while (footsteps.size() < actionData.getFootsteps().size())
+      while (footsteps.size() < actionDefinition.getFootsteps().size())
          footsteps.add();
-      for (int i = 0; i < actionData.getFootsteps().size(); i++)
+      for (int i = 0; i < actionDefinition.getFootsteps().size(); i++)
       {
-         footsteps.get(i).update(actionData.getFootsteps().get(i), i);
+         footsteps.get(i).update(actionDefinition.getFootsteps().get(i), i);
       }
    }
 
@@ -137,8 +138,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-         update();
+         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
       }
 
       ImGui.pushItemWidth(80.0f);
@@ -179,8 +179,8 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    }
 
    @Override
-   public FootstepPlanActionData getActionData()
+   public FootstepPlanActionDefinition getActionDefinition()
    {
-      return actionData;
+      return actionDefinition;
    }
 }

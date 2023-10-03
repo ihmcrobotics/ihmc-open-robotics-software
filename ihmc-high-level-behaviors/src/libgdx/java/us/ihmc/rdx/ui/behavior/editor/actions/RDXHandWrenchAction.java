@@ -1,20 +1,20 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionData;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
 public class RDXHandWrenchAction extends RDXBehaviorAction
 {
-   private final HandWrenchActionData actionData = new HandWrenchActionData();
+   private final HandWrenchActionDefinition actionDefinition = new HandWrenchActionDefinition();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
-                                                                                actionData::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionDefinition::getTrajectoryDuration,
+                                                                                actionDefinition::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   private final ImDoubleWrapper forceWidget = new ImDoubleWrapper(actionData::getForce,
-                                                                   actionData::setForce,
+   private final ImDoubleWrapper forceWidget = new ImDoubleWrapper(actionDefinition::getForce,
+                                                                   actionDefinition::setForce,
                                                                    imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
 
    @Override
@@ -29,11 +29,11 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    @Override
    public String getActionTypeTitle()
    {
-      return actionData.getSide().getPascalCaseName() + " Hand Wrench";
+      return actionDefinition.getSide().getPascalCaseName() + " Hand Wrench";
    }
 
-   public HandWrenchActionData getActionData()
+   public HandWrenchActionDefinition getActionDefinition()
    {
-      return actionData;
+      return actionDefinition;
    }
 }

@@ -1,4 +1,7 @@
 
+# Whether the action hs to be executed next and is part of a group of concurrent actions
+bool current_and_concurrent
+
 # Name of the frame the this action is expressed in
 string[] parent_frame
 

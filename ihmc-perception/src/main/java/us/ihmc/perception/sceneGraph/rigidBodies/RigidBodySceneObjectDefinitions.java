@@ -28,14 +28,17 @@ public class RigidBodySceneObjectDefinitions
    public static final int BOX_MARKER_ID = 2;
    public static final double BOX_MARKER_SIZE = 0.150;
    // The box is a cube
-   public static final double BOX_SIZE = 0.35;
-   public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.154;
-   public static final double BOX_MARKER_FROM_RIGHT_X = 0.1625;
+   public static final double BOX_WIDTH = 0.394;
+   public static final double BOX_DEPTH = 0.31;
+   public static final double BOX_HEIGHT = 0.265;
+   public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.0795;
+   public static final double BOX_MARKER_FROM_RIGHT_Y = 0.0765;
+   public static final double BOX_MARKER_FROM_FRONT_X = 0.1685;
    public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    static
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(BOX_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 0.0);
-      BOX_TRANSFORM_TO_MARKER.getTranslation().set(-BOX_MARKER_FROM_RIGHT_X, 0.0, BOX_MARKER_FROM_BOTTOM_Z);
+      BOX_TRANSFORM_TO_MARKER.getTranslation().set(-BOX_MARKER_FROM_FRONT_X, -BOX_MARKER_FROM_RIGHT_Y, -BOX_MARKER_FROM_BOTTOM_Z);
    }
    public static final String BOX_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/emptyBox.g3dj";
    public static final RigidBodyTransform BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
