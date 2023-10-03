@@ -131,6 +131,7 @@ public class RDXSceneGraphUI
             ImGui.popFont();
 
             uiSceneNode.renderImGuiWidgets();
+            uiSceneNode.renderRemove(modificationQueue, sceneGraph);
             for (SceneNode child : sceneNode.getChildren())
             {
                renderSceneNodesAsTree(child, modificationQueue);
