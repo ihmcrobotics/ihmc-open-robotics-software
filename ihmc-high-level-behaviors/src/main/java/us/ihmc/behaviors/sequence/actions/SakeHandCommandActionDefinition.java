@@ -7,7 +7,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class SakeHandCommandActionDefinition implements BehaviorActionDefinition
+public class SakeHandCommandActionDefinition implements BehaviorActionDefinition<SakeHandCommandActionDefinitionMessage>
 {
    private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
@@ -38,6 +38,7 @@ public class SakeHandCommandActionDefinition implements BehaviorActionDefinition
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
    }
 
+   @Override
    public void toMessage(SakeHandCommandActionDefinitionMessage message)
    {
       message.setRobotSide(side.toByte());
@@ -47,6 +48,7 @@ public class SakeHandCommandActionDefinition implements BehaviorActionDefinition
       message.setExecuteWithNextAction(executeWitNextAction);
    }
 
+   @Override
    public void fromMessage(SakeHandCommandActionDefinitionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());

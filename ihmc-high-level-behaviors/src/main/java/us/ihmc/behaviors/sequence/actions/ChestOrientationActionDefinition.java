@@ -9,7 +9,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition implements BehaviorActionDefinition
+public class ChestOrientationActionDefinition implements BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
 {
    private String description = "Chest orientation";
    private double trajectoryDuration = 4.0;
@@ -40,6 +40,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       JSONTools.toEuclid(jsonNode, transformToParent);
    }
 
+   @Override
    public void toMessage(BodyPartPoseActionDefinitionMessage message)
    {
       message.setTrajectoryDuration(trajectoryDuration);
@@ -50,6 +51,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       MessageTools.toMessage(transformToParent, message.getTransformToParent());
    }
 
+   @Override
    public void fromMessage(BodyPartPoseActionDefinitionMessage message)
    {
       trajectoryDuration = message.getTrajectoryDuration();

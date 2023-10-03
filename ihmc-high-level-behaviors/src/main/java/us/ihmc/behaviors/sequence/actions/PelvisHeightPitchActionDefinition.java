@@ -9,7 +9,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class PelvisHeightPitchActionDefinition implements BehaviorActionDefinition
+public class PelvisHeightPitchActionDefinition implements BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
 {
    private String description = "Pelvis height and pitch";
    private double trajectoryDuration = 4.0;
@@ -37,6 +37,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       JSONTools.toEuclid(jsonNode, transformToParent);
    }
 
+   @Override
    public void toMessage(BodyPartPoseActionDefinitionMessage message)
    {
       message.setTrajectoryDuration(trajectoryDuration);
@@ -46,6 +47,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       MessageTools.toMessage(transformToParent, message.getTransformToParent());
    }
 
+   @Override
    public void fromMessage(BodyPartPoseActionDefinitionMessage message)
    {
       trajectoryDuration = message.getTrajectoryDuration();
