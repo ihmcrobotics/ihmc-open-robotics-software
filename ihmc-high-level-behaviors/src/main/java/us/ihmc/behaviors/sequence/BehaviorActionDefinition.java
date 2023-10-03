@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.communication.packets.Packet;
 
 /**
  * Interface for a definition of an action with
@@ -12,11 +13,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * or currently executing it. This is only the information that gets
  * saved to/from JSON.
  */
-public interface BehaviorActionDefinition
+public interface BehaviorActionDefinition<T extends Packet<T>>
 {
    void saveToFile(ObjectNode jsonNode);
 
    void loadFromFile(JsonNode jsonNode);
+
+   void toMessage(T message);
+
+   void fromMessage(T message);
 
    /**
     * A description of the action to help the operator in understanding
