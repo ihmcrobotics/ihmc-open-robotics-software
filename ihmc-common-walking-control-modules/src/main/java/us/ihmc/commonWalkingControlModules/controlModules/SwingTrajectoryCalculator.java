@@ -211,9 +211,7 @@ public class SwingTrajectoryCalculator
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
-         setWaypointsFromStepPosition(footstep);
-
-//         setWaypointsFromCustomMidpoints(footstep.getCustomPositionWaypoints());
+         setWaypointsFromCustomMidpoints(footstep.getCustomPositionWaypoints());
       }
       else if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
