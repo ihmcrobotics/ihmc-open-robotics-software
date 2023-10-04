@@ -25,7 +25,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -39,11 +38,10 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXChestOrientationAction implements RDXBehaviorAction
+public class RDXChestOrientationAction extends RDXBehaviorAction
 {
-   private final ChestOrientationActionState state = new ChestOrientationActionState();
-   private final ChestOrientationActionDefinition definition = state.getDefinition();
-   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
+   private final ChestOrientationActionState state;
+   private final ChestOrientationActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> definition.getRotation().getYaw(), definition::setYaw,
@@ -90,6 +88,9 @@ public class RDXChestOrientationAction implements RDXBehaviorAction
    {
       this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new ChestOrientationActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
