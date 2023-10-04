@@ -108,6 +108,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       definition = state.getDefinition();
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent());
+      poseGizmo.create(panel3D);
 
       selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                              value -> poseGizmo.getSelected().set(value),
@@ -181,7 +182,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       }
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
-      poseGizmo.create(panel3D);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
