@@ -49,7 +49,7 @@ public class RDXHandConfigurationManager
          Runnable resetHand = () -> publishHandCommand(side, HandConfiguration.RESET);
          handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
-         handPositionSliders.put(side, new RDXSakeHandPositionSlider(syncedRobotModel, communicationHelper, side));
+         handPositionSliders.put(side, new RDXSakeHandPositionSlider(communicationHelper, side));
       }
 
       if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
