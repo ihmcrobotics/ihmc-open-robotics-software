@@ -1,21 +1,20 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
+import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.CLOSED_FINGER_ANGLE;
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 
 /**
@@ -40,7 +39,8 @@ public class RDXSakeHandPositionSlider
    private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
-   private double valueFromRobot = Double.NaN;
+   private double presentGoalPosition = Double.NaN;
+   private double presentGoalTorque = Double.NaN;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
@@ -59,7 +59,8 @@ public class RDXSakeHandPositionSlider
    {
       if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
       {
-         valueFromRobot = handStatusMessage.getLatest().getPostionRatio();
+         presentGoalPosition = handStatusMessage.getLatest().getPostionRatio();
+         presentGoalTorque = handStatusMessage.getLatest().getGoalTorqueRatio();
       }
    }
 
@@ -75,14 +76,14 @@ public class RDXSakeHandPositionSlider
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
             message.setPostionRatio(positionRatio);
-            message.setTorqueRatio(0.3);
+            message.setTorqueRatio(-1.0);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
       }
       else
       {
-         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * valueFromRobot);
+         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * presentGoalPosition);
       }
 
       receiveRobotConfigurationData();
@@ -91,7 +92,20 @@ public class RDXSakeHandPositionSlider
    private boolean renderImGuiSliderAndReturnChanged()
    {
       float previousValue = sliderValue[0];
-      ImGui.sliderAngle(labels.get(sliderName), sliderValue, 0.0f, (float) MAX_ANGLE_BETWEEN_FINGERS);
+
+      if (presentGoalTorque < 0.2)  // render slider with warning that torque is too low
+      {
+         ImGui.pushStyleColor(ImGuiCol.SliderGrab, ImGuiTools.RED);
+         ImGui.sliderAngle(labels.get(sliderName),
+                           sliderValue,
+                           0.0f,
+                           (float) MAX_ANGLE_BETWEEN_FINGERS,
+                           String.format("%.0f deg (Torque Too Low)", Math.toDegrees(sliderValue[0])));
+         ImGui.popStyleColor();
+      }
+      else  // render normal slider
+         ImGui.sliderAngle(labels.get(sliderName), sliderValue, 0.0f, (float) MAX_ANGLE_BETWEEN_FINGERS);
+
       float currentValue = sliderValue[0];
       return !Double.isNaN(sliderValue[0]) && !MathTools.epsilonEquals(currentValue, previousValue, EPSILON);
    }
