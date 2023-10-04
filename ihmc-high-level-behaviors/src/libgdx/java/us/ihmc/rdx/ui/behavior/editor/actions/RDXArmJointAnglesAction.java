@@ -13,14 +13,12 @@ import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 
-public class RDXArmJointAnglesAction implements RDXBehaviorAction
+public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ArmJointAnglesActionState state = new ArmJointAnglesActionState();
    private final ArmJointAnglesActionDefinition definition = state.getDefinition();
-   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];

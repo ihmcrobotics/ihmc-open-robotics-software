@@ -37,7 +37,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -60,14 +59,13 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXHandPoseAction implements RDXBehaviorAction
+public class RDXHandPoseAction extends RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final HandPoseActionState state;
    private final HandPoseActionDefinition definition;
-   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;

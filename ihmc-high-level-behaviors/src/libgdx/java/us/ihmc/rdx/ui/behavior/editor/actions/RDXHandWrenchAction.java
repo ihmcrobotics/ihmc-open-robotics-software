@@ -9,13 +9,11 @@ import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 
-public class RDXHandWrenchAction implements RDXBehaviorAction
+public class RDXHandWrenchAction extends RDXBehaviorAction
 {
    private final HandWrenchActionState state = new HandWrenchActionState();
    private final HandWrenchActionDefinition definition = state.getDefinition();
-   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                                                 definition::setTrajectoryDuration,

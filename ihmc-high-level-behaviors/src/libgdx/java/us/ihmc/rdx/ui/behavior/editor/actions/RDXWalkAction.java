@@ -21,7 +21,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -31,13 +30,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXWalkAction implements RDXBehaviorAction
+public class RDXWalkAction extends RDXBehaviorAction
 {
    private final ReferenceFrameLibrary referenceFrameLibrary;
 
    private final WalkActionState state = new WalkActionState();
    private final WalkActionDefinition definition = state.getDefinition();
-   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();

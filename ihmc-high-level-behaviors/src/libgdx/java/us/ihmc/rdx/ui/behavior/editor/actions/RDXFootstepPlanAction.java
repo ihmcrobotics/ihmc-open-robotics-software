@@ -23,18 +23,16 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXFootstepPlanAction implements RDXBehaviorAction
+public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState state = new FootstepPlanActionState();
    private final FootstepPlanActionDefinition definition = state.getDefinition();
-   private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
