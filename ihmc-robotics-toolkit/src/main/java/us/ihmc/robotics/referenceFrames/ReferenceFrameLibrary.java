@@ -1,10 +1,10 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A library of reference frames. Useful for putting together a specific collection
@@ -15,11 +15,10 @@ import java.util.*;
 public class ReferenceFrameLibrary
 {
    /** These frames are are always present. */
+   private final ArrayList<ReferenceFrame> alwaysPresentFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> nameToAlwaysPresentFrameMap = new HashMap<>();
    /** Lookups allow for a dynamically changing set of frames. */
    private final List<ReferenceFrameDynamicCollection> dynamicCollections = new ArrayList<>();
-   private transient final SortedSet<String> referenceFrameNameSet = new TreeSet<>();
-   private transient String[] referenceFrameNameArray = new String[0];
 
    public ReferenceFrameLibrary()
    {
@@ -31,6 +30,7 @@ public class ReferenceFrameLibrary
    {
       if (referenceFrame != null)
       {
+         alwaysPresentFrames.add(referenceFrame);
          nameToAlwaysPresentFrameMap.put(referenceFrame.getName(), referenceFrame);
       }
    }
@@ -41,18 +41,6 @@ public class ReferenceFrameLibrary
    public void addDynamicCollection(ReferenceFrameDynamicCollection dynamicCollection)
    {
       dynamicCollections.add(dynamicCollection);
-   }
-
-   public void update()
-   {
-      // Sort in alphabetical order
-      referenceFrameNameSet.clear();
-      referenceFrameNameSet.addAll(nameToAlwaysPresentFrameMap.keySet());
-      for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
-         for (String dynamicFrameName : dynamicCollection.getFrameNameList())
-            referenceFrameNameSet.add(dynamicFrameName);
-
-      getReferenceFrameNameArray();
    }
 
    @Nullable
@@ -76,28 +64,19 @@ public class ReferenceFrameLibrary
       return frameFound ? referenceFrame : null;
    }
 
-   public int findFrameIndexByName(String referenceFrameName)
+   public void getAllFrameNames(Consumer<String> frameNameConsumer)
    {
-      for (int i = 0; i < referenceFrameNameArray.length; i++)
+      for (ReferenceFrame frame : alwaysPresentFrames)
       {
-         if (referenceFrameName.equals(referenceFrameNameArray[i]))
+         frameNameConsumer.accept(frame.getName());
+      }
+
+      for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
+      {
+         for (String dynamicFrameName : dynamicCollection.getFrameNameList())
          {
-            return i;
+            frameNameConsumer.accept(dynamicFrameName);
          }
       }
-      LogTools.error("Frame {} is not present in library! {}", referenceFrameName, Arrays.toString(referenceFrameNameArray));
-      return -1;
-   }
-
-   public String[] getReferenceFrameNameArray()
-   {
-      if (referenceFrameNameArray == null || referenceFrameNameArray.length != nameToAlwaysPresentFrameMap.size())
-      {
-         // Sort in alphabetical order
-         SortedSet<String> referenceFrameNameSet = new TreeSet<>(nameToAlwaysPresentFrameMap.keySet());
-         referenceFrameNameArray = referenceFrameNameSet.toArray(new String[referenceFrameNameSet.size()]);
-      }
-
-      return referenceFrameNameArray;
    }
 }
