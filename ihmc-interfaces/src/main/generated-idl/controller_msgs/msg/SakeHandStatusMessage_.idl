@@ -30,11 +30,15 @@ module controller_msgs
         /**
          * 0.0 min, 1.0 max
          */
-        double torque_ratio;
+        double present_torque_ratio;
         /**
          * 0.0 closed, 1.0 open
          */
         double postion_ratio;
+        /**
+         * 0.0 min, 1.0 max
+         */
+        double goal_torque_ratio;
         boolean calibrated;
         boolean needs_reset;
       };
