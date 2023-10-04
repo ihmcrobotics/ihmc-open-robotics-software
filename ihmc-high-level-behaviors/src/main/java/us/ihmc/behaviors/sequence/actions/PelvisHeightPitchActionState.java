@@ -12,7 +12,7 @@ public class PelvisHeightPitchActionState extends BehaviorActionState<BodyPartPo
 
    public PelvisHeightPitchActionState(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getTransformToParent());
+      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getPelvisToParentTransform());
    }
 
    @Override
