@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class HandPoseActionState extends BehaviorActionState<SidedBodyPartPoseActionDefinitionMessage>
 {
@@ -11,9 +10,9 @@ public class HandPoseActionState extends BehaviorActionState<SidedBodyPartPoseAc
    private final DetachableReferenceFrame palmFrame = new DetachableReferenceFrame(definition.getPalmTransformToParent());
 
    @Override
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
-      palmFrame.update(referenceFrameLibrary, definition.getPalmParentFrameName());
+      palmFrame.update(definition.getPalmParentFrameName());
    }
 
    @Override

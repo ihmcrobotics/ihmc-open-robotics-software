@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMessage>
 {
@@ -11,9 +10,9 @@ public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMes
    private final DetachableReferenceFrame soleFrame = new DetachableReferenceFrame(definition.getTransformToParent());
 
    @Override
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
-      soleFrame.update(referenceFrameLibrary, definition.getParentFrameName());
+      soleFrame.update(definition.getParentFrameName());
    }
 
    @Override

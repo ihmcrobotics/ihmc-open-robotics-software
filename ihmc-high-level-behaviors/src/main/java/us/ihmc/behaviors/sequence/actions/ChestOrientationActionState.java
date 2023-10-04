@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class ChestOrientationActionState extends BehaviorActionState<BodyPartPoseActionDefinitionMessage>
 {
@@ -11,9 +10,9 @@ public class ChestOrientationActionState extends BehaviorActionState<BodyPartPos
    private final DetachableReferenceFrame chestFrame = new DetachableReferenceFrame(definition.getTransformToParent());
 
    @Override
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
-      chestFrame.update(referenceFrameLibrary, definition.getParentFrameName());
+      chestFrame.update(definition.getParentFrameName());
    }
 
    @Override

@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 // TODO: Include toMessage and fromMessage
 public abstract class BehaviorActionState<T extends Packet<T>> implements BehaviorActionDefinitionSupplier<T>
@@ -17,7 +16,7 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
       id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
    }
 
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
 
    }
@@ -32,6 +31,7 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
    public void loadFromFile(JsonNode jsonNode)
    {
       getDefinition().loadFromFile(jsonNode);
+      update();
    }
 
    public void toMessage(T message)
