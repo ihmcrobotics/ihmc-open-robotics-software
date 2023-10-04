@@ -57,7 +57,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(definition, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(referenceFrameLibrary, state, baseUI, robotModel, getSelected()::get));
    }
 
    @Override

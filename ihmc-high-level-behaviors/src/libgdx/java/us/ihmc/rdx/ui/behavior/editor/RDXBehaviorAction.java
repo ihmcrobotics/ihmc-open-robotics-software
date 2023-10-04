@@ -100,4 +100,9 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    {
       return rejectionTooltip;
    }
+
+   public RDXBehaviorActionSequenceEditor getEditor()
+   {
+      return editor;
+   }
 }
