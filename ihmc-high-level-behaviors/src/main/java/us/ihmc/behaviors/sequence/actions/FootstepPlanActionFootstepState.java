@@ -8,6 +8,7 @@ public class FootstepPlanActionFootstepState
    private final FootstepPlanActionState footstepPlan;
    private final FootstepPlanActionFootstepDefinition definition = new FootstepPlanActionFootstepDefinition();
    private final DetachableReferenceFrame soleFrame;
+   private int index = -1;
 
    public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary, FootstepPlanActionState footstepPlan)
    {
@@ -29,5 +30,15 @@ public class FootstepPlanActionFootstepState
    public DetachableReferenceFrame getSoleFrame()
    {
       return soleFrame;
+   }
+
+   public int getIndex()
+   {
+      return index;
+   }
+
+   public void setIndex(int index)
+   {
+      this.index = index;
    }
 }

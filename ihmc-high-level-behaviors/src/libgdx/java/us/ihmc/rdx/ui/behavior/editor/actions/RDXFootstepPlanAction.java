@@ -6,14 +6,13 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -31,7 +30,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final FootstepPlanActionState state;
    private final FootstepPlanActionDefinition definition;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
-   private final RecyclingArrayList<RDXFootstepAction> footsteps;
+   private final RecyclingArrayList<RDXFootstepPlanActionFootstep> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
@@ -61,7 +60,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
                                                                 definition::getParentFrameName,
                                                                 definition::setParentFrameName);
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(referenceFrameLibrary, state, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepPlanActionFootstep(referenceFrameLibrary, state, baseUI, robotModel, getSelected()::get));
    }
 
    @Override
@@ -73,12 +72,12 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       if (userAddedFootstep.poll())
       {
          RobotSide newSide = userAddedFootstep.read();
-         FootstepActionDefinition addedFootstep = definition.getFootsteps().add();
+         FootstepPlanActionFootstepDefinition addedFootstep = definition.getFootsteps().add();
          addedFootstep.setSide(newSide);
          FramePose3D newFootstepPose = new FramePose3D();
          if (!footsteps.isEmpty())
          {
-            RDXFootstepAction previousFootstep = footsteps.get(footsteps.size() - 1);
+            RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
             newFootstepPose.setToZero(previousFootstep.getFootstepFrame());
 
             if (previousFootstep.getSide() != newSide)
@@ -115,7 +114,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXFootstepAction footstep : footsteps)
+      for (RDXFootstepPlanActionFootstep footstep : footsteps)
       {
          footstep.calculate3DViewPick(input);
       }
@@ -124,7 +123,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXFootstepAction footstep : footsteps)
+      for (RDXFootstepPlanActionFootstep footstep : footsteps)
       {
          footstep.process3DViewInput(input);
       }
@@ -160,7 +159,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXFootstepAction footstep : footsteps)
+      for (RDXFootstepPlanActionFootstep footstep : footsteps)
       {
          footstep.getVirtualRenderables(renderables, pool);
       }

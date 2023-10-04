@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
-import us.ihmc.behaviors.sequence.actions.FootstepActionState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -16,33 +16,33 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.function.BooleanSupplier;
-
 /**
  * This class is a fully mutable and transitive interactable representation of FootstepActionDefinition.
  */
-public class RDXFootstepAction extends FootstepActionState
+public class RDXFootstepPlanActionFootstep
 {
+   private final FootstepPlanActionState footstepPlan;
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
-   private final BooleanSupplier planSelected;
+   private final FootstepPlanActionFootstepState state;
+   private final FootstepPlanActionFootstepDefinition definition;
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
-   public RDXFootstepAction(ReferenceFrameLibrary referenceFrameLibrary,
-                            FootstepPlanActionState footstepPlan,
-                            RDXBaseUI baseUI,
-                            DRCRobotModel robotModel,
-                            BooleanSupplier planSelected)
+   public RDXFootstepPlanActionFootstep(ReferenceFrameLibrary referenceFrameLibrary,
+                                        FootstepPlanActionState footstepPlan,
+                                        RDXBaseUI baseUI,
+                                        DRCRobotModel robotModel)
    {
-      super(referenceFrameLibrary, footstepPlan);
-
+      this.footstepPlan = footstepPlan;
       this.baseUI = baseUI;
       this.robotModel = robotModel;
-      this.planSelected = planSelected;
+
+      state = new FootstepPlanActionFootstepState(referenceFrameLibrary, footstepPlan);
+      definition = state.getDefinition();
    }
 
-   public void update(FootstepActionDefinition actionDefinition, int stepIndex)
+   public void update()
    {
       if (interactableFootstep == null
        || stepIndex != interactableFootstep.getIndex()

@@ -23,9 +23,10 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
    @Override
    public void update()
    {
-      for (FootstepPlanActionFootstepState footstep : footsteps)
+      for (int i = 0; i < footsteps.size(); i++)
       {
-         footstep.update();
+         footsteps.get(i).setIndex(i);
+         footsteps.get(i).update();
       }
    }
 
