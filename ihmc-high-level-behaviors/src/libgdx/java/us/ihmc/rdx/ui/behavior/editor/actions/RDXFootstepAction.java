@@ -6,13 +6,14 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepActionState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.BooleanSupplier;
@@ -22,19 +23,20 @@ import java.util.function.BooleanSupplier;
  */
 public class RDXFootstepAction extends FootstepActionState
 {
-   private final ReferenceFrameSupplier planFrameSupplier;
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final BooleanSupplier planSelected;
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
-   public RDXFootstepAction(ReferenceFrameSupplier planFrameSupplier,
+   public RDXFootstepAction(ReferenceFrameLibrary referenceFrameLibrary,
+                            FootstepPlanActionState footstepPlan,
                             RDXBaseUI baseUI,
                             DRCRobotModel robotModel,
                             BooleanSupplier planSelected)
    {
-      this.planFrameSupplier = planFrameSupplier;
+      super(referenceFrameLibrary, footstepPlan);
+
       this.baseUI = baseUI;
       this.robotModel = robotModel;
       this.planSelected = planSelected;
