@@ -220,6 +220,7 @@ public class RDXRapidHeightMapSimulationDemo
                                              true);
 
             humanoidPerceptionUI.update();
+            footstepPlanGraphic.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -264,17 +265,17 @@ public class RDXRapidHeightMapSimulationDemo
          {
             // set start pose to be below the camera
             startPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
-            startPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, 0.0);
+            startPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, 0.35);
 
             startPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
-            startPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.0);
+            startPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.35);
 
             // set goal pose to be 1.65m in front of the camera
             goalPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
-            goalPose.get(RobotSide.LEFT).appendTranslation(1.65, 0.0, 0.0);
+            goalPose.get(RobotSide.LEFT).appendTranslation(1.65, 0.0, 0.5);
 
             goalPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
-            goalPose.get(RobotSide.RIGHT).appendTranslation(1.65, -0.2, 0.0);
+            goalPose.get(RobotSide.RIGHT).appendTranslation(1.65, -0.2, 0.5);
 
             LogTools.info("Start Poses: {} {}", startPose.get(RobotSide.LEFT).getPosition(), startPose.get(RobotSide.RIGHT).getPosition());
             LogTools.info("Goal Poses: {} {}", goalPose.get(RobotSide.LEFT).getPosition(), goalPose.get(RobotSide.RIGHT).getPosition());
@@ -299,7 +300,7 @@ public class RDXRapidHeightMapSimulationDemo
             request.setHeightMapData(latestHeightMapData);
             request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
             request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
-            request.setTimeout(0.25);
+            request.setTimeout(2.0);
             request.setSnapGoalSteps(true);
             request.setPerformAStarSearch(true);
             request.setAssumeFlatGround(false);
