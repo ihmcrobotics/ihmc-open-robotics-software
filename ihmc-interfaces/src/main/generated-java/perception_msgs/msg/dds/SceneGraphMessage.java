@@ -19,6 +19,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public static final byte PREDEFINED_RIGID_BODY_NODE_TYPE = (byte) 2;
    public static final byte ARUCO_MARKER_NODE_TYPE = (byte) 3;
    public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 4;
+   public static final byte RESHAPABLE_RIGID_BODY_NODE_TYPE = (byte) 5;
    /**
             * The ID to assign to the next instantiated node
             */
@@ -53,6 +54,10 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
             * Static relative scene nodes
             */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage>  static_relative_scene_nodes_;
+   /**
+            * Reshapable rigid body scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage>  reshapable_rigid_body_scene_nodes_;
 
    public SceneGraphMessage()
    {
@@ -65,6 +70,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       predefined_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType());
       aruco_marker_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ArUcoMarkerNodeMessage> (200, new perception_msgs.msg.dds.ArUcoMarkerNodeMessagePubSubType());
       static_relative_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage> (200, new perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType());
+      reshapable_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessagePubSubType());
 
    }
 
@@ -85,6 +91,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       predefined_rigid_body_scene_nodes_.set(other.predefined_rigid_body_scene_nodes_);
       aruco_marker_scene_nodes_.set(other.aruco_marker_scene_nodes_);
       static_relative_scene_nodes_.set(other.static_relative_scene_nodes_);
+      reshapable_rigid_body_scene_nodes_.set(other.reshapable_rigid_body_scene_nodes_);
    }
 
    /**
@@ -168,6 +175,15 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    }
 
 
+   /**
+            * Reshapable rigid body scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage>  getReshapableRigidBodySceneNodes()
+   {
+      return reshapable_rigid_body_scene_nodes_;
+   }
+
+
    public static Supplier<SceneGraphMessagePubSubType> getPubSubType()
    {
       return SceneGraphMessagePubSubType::new;
@@ -226,6 +242,13 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
          {  if (!this.static_relative_scene_nodes_.get(i).epsilonEquals(other.static_relative_scene_nodes_.get(i), epsilon)) return false; }
       }
 
+      if (this.reshapable_rigid_body_scene_nodes_.size() != other.reshapable_rigid_body_scene_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.reshapable_rigid_body_scene_nodes_.size(); i++)
+         {  if (!this.reshapable_rigid_body_scene_nodes_.get(i).epsilonEquals(other.reshapable_rigid_body_scene_nodes_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -248,6 +271,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       if (!this.predefined_rigid_body_scene_nodes_.equals(otherMyClass.predefined_rigid_body_scene_nodes_)) return false;
       if (!this.aruco_marker_scene_nodes_.equals(otherMyClass.aruco_marker_scene_nodes_)) return false;
       if (!this.static_relative_scene_nodes_.equals(otherMyClass.static_relative_scene_nodes_)) return false;
+      if (!this.reshapable_rigid_body_scene_nodes_.equals(otherMyClass.reshapable_rigid_body_scene_nodes_)) return false;
 
       return true;
    }
@@ -273,7 +297,9 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       builder.append("aruco_marker_scene_nodes=");
       builder.append(this.aruco_marker_scene_nodes_);      builder.append(", ");
       builder.append("static_relative_scene_nodes=");
-      builder.append(this.static_relative_scene_nodes_);
+      builder.append(this.static_relative_scene_nodes_);      builder.append(", ");
+      builder.append("reshapable_rigid_body_scene_nodes=");
+      builder.append(this.reshapable_rigid_body_scene_nodes_);
       builder.append("}");
       return builder.toString();
    }

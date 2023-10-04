@@ -13,6 +13,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.ReshapableRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 /**
@@ -46,6 +47,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
+      sceneGraphMessage.getReshapableRigidBodySceneNodes().clear();
 
       packSceneTreeToMessage(sceneGraph.getRootNode(), sceneGraphMessage);
 
@@ -108,6 +110,17 @@ public class ROS2SceneGraphPublisher
 
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
+      }
+      else if (sceneNode instanceof ReshapableRigidBodySceneNode reshapableRigidBodySceneNode)
+      {
+         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE);
+         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getPredefinedRigidBodySceneNodes().size());
+         ReshapableRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage = sceneGraphMessage.getReshapableRigidBodySceneNodes().add();
+
+         reshapableRigidBodySceneNodeMessage.setInitialParentId(reshapableRigidBodySceneNode.getInitialParentNodeID());
+         MessageTools.toMessage(reshapableRigidBodySceneNode.getInitialTransformToParent(),
+                                reshapableRigidBodySceneNodeMessage.getInitialTransformToParent());
+         sceneNodeMessage = reshapableRigidBodySceneNodeMessage.getSceneNode();
       }
       else // In this case the node is just the most basic type
       {
