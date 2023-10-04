@@ -11,6 +11,18 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class RDXActionSequenceTools
 {
+   public static <T> T createBlankAction(Class<T> actionType,
+                                         DRCRobotModel robotModel,
+                                         ROS2SyncedRobotModel syncedRobot,
+                                         RobotCollisionModel selectionCollisionModel,
+                                         RDXBaseUI baseUI,
+                                         RDX3DPanel panel3D,
+                                         ReferenceFrameLibrary referenceFrameLibrary,
+                                         ROS2ControllerPublishSubscribeAPI ros2)
+   {
+      return (T) createBlankAction(actionType.getSimpleName(), robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
+   }
+
    public static RDXBehaviorAction createBlankAction(String actionType,
                                                      DRCRobotModel robotModel,
                                                      ROS2SyncedRobotModel syncedRobot,
