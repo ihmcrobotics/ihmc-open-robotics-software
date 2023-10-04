@@ -4,6 +4,7 @@
 #include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 #include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
+#include "perception_msgs/msg/./ReshapableRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 #include "perception_msgs/msg/./StaticRelativeSceneNodeMessage_.idl"
 module perception_msgs
@@ -26,6 +27,9 @@ module perception_msgs
 
       const octet STATIC_RELATIVE_NODE_TYPE =
       4;
+
+      const octet RESHAPABLE_RIGID_BODY_NODE_TYPE =
+      5;
 
 
       /**
@@ -71,6 +75,10 @@ module perception_msgs
          * Static relative scene nodes
          */
         sequence<perception_msgs::msg::dds::StaticRelativeSceneNodeMessage, 200> static_relative_scene_nodes;
+        /**
+         * Reshapable rigid body scene nodes
+         */
+        sequence<perception_msgs::msg::dds::ReshapableRigidBodySceneNodeMessage, 200> reshapable_rigid_body_scene_nodes;
       };
     };
   };

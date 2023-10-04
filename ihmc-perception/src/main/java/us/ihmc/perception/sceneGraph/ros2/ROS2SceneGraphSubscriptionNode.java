@@ -17,6 +17,7 @@ public class ROS2SceneGraphSubscriptionNode
    private PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
+   private ReshapableRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -88,6 +89,16 @@ public class ROS2SceneGraphSubscriptionNode
    public void setStaticRelativeSceneNodeMessage(StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage)
    {
       this.staticRelativeSceneNodeMessage = staticRelativeSceneNodeMessage;
+   }
+
+   public ReshapableRigidBodySceneNodeMessage getReshapableRigidBodySceneNodeMessage()
+   {
+      return reshapableRigidBodySceneNodeMessage;
+   }
+
+   public void setReshapableRigidBodySceneNodeMessage(ReshapableRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage)
+   {
+      this.reshapableRigidBodySceneNodeMessage = reshapableRigidBodySceneNodeMessage;
    }
 
    public List<ROS2SceneGraphSubscriptionNode> getChildren()
