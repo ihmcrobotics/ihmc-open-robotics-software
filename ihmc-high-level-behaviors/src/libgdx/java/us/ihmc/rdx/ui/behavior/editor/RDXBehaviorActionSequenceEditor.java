@@ -111,6 +111,7 @@ public class RDXBehaviorActionSequenceEditor
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private long lastManualExecutionConfirmTime = 0;
    private int lastManualExecutionActionIndex = -1;
+   private boolean concurrentActionIsNextForExecution;
 
    public void clear()
    {
@@ -363,8 +364,7 @@ public class RDXBehaviorActionSequenceEditor
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
          RDXBehaviorAction action = actionSequence.get(actionIndex);
-         action.setActionIndex(actionIndex);
-         action.setActionNextExecutionIndex(executionNextIndexStatus);
+         action.getState().setActionIndex(actionIndex);
          boolean executeWithPreviousAction = false;
          if (actionIndex > 0)
             executeWithPreviousAction = actionSequence.get(actionIndex - 1).getDefinition().getExecuteWithNextAction();
@@ -374,8 +374,8 @@ public class RDXBehaviorActionSequenceEditor
          boolean otherConcurrentActionIsNextForExecution
                = executeWithPreviousAction
                && actionIndex == (executionNextIndexStatus + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndexStatus, true));
-         boolean concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
-         action.update(concurrentActionIsNextForExecution);
+         concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
+         action.update();
       }
    }
 
@@ -878,5 +878,15 @@ public class RDXBehaviorActionSequenceEditor
    public boolean isCleared()
    {
       return workspaceFile == null;
+   }
+
+   public int getExecutionNextIndexStatus()
+   {
+      return executionNextIndexStatus;
+   }
+
+   public boolean getConcurrentActionIsNextForExecution()
+   {
+      return concurrentActionIsNextForExecution;
    }
 }

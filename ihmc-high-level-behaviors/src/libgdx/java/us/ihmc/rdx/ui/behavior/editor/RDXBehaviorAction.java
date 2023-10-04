@@ -41,6 +41,12 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
 
    }
 
+   /** @deprecated TODO: Figure out how to remove this. */
+   public void updateBeforeRemoving()
+   {
+
+   }
+
    public void calculateVRPick(RDXVRContext vrContext)
    {
 
