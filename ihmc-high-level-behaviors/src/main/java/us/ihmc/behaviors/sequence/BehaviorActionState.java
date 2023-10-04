@@ -9,6 +9,7 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
 {
    /** The action's unique ID. */
    private final long id;
+   private int actionIndex = -1;
 
    public BehaviorActionState()
    {
@@ -48,5 +49,15 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
    public long getID()
    {
       return id;
+   }
+
+   public void setActionIndex(int actionIndex)
+   {
+      this.actionIndex = actionIndex;
+   }
+
+   public int getActionIndex()
+   {
+      return actionIndex;
    }
 }

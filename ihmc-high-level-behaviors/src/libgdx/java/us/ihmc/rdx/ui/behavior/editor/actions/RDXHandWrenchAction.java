@@ -1,14 +1,12 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 
 public class RDXHandWrenchAction extends RDXBehaviorAction
 {
@@ -22,14 +20,13 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
                                                                    definition::setForce,
                                                                    imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
 
-   @Override
-   public void renderImGuiWidgets()
+   public RDXHandWrenchAction(RDXBehaviorActionSequenceEditor editor)
    {
-      rdxActionBasics.renderImGuiWidgets();
+      super(editor);
    }
 
    @Override
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
@@ -41,54 +38,6 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return definition.getSide().getPascalCaseName() + " Hand Wrench";
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return rdxActionBasics.getSelected();
-   }
-
-   @Override
-   public ImBoolean getExpanded()
-   {
-      return rdxActionBasics.getExpanded();
-   }
-
-   @Override
-   public ImString getImDescription()
-   {
-      return rdxActionBasics.getDescription();
-   }
-
-   @Override
-   public ImString getRejectionTooltip()
-   {
-      return rdxActionBasics.getRejectionTooltip();
-   }
-
-   @Override
-   public int getActionIndex()
-   {
-      return rdxActionBasics.getActionIndex();
-   }
-
-   @Override
-   public void setActionIndex(int actionIndex)
-   {
-      rdxActionBasics.setActionIndex(actionIndex);
-   }
-
-   @Override
-   public int getActionNextExecutionIndex()
-   {
-      return rdxActionBasics.getActionNextExecutionIndex();
-   }
-
-   @Override
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 
    @Override

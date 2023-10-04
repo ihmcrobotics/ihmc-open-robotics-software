@@ -182,6 +182,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             String actionTypeName = actionNode.get("type").asText();
             RDXBehaviorAction action = RDXActionSequenceTools.createBlankAction(actionTypeName,
+                                                                                this,
                                                                                 robotModel,
                                                                                 syncedRobot,
                                                                                 selectionCollisionModel,
@@ -280,6 +281,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          Class<? extends RDXBehaviorAction> actionType = actionToCreate.read();
          RDXBehaviorAction newAction = RDXActionSequenceTools.createBlankAction(actionType,
+                                                                                this,
                                                                                 robotModel,
                                                                                 syncedRobot,
                                                                                 selectionCollisionModel,

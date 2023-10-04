@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepActionDefinition;
@@ -16,13 +14,13 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -45,11 +43,14 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
                                                                               definition::setTransferDuration,
                                                                               imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
-   public RDXFootstepPlanAction(RDXBaseUI baseUI,
+   public RDXFootstepPlanAction(RDXBehaviorActionSequenceEditor editor,
+                                RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(editor);
+
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
@@ -73,7 +74,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrentActionIsNextForExecution)
+   public void update()
    {
       definition.update(referenceFrameLibrary);
 
@@ -139,13 +140,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    }
 
    @Override
-   public void renderImGuiWidgets()
-   {
-      rdxActionBasics.renderImGuiWidgets();
-   }
-
-   @Override
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
       if (parentFrameComboBox.render())
       {
@@ -187,54 +182,6 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Footstep Plan";
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return rdxActionBasics.getSelected();
-   }
-
-   @Override
-   public ImBoolean getExpanded()
-   {
-      return rdxActionBasics.getExpanded();
-   }
-
-   @Override
-   public ImString getImDescription()
-   {
-      return rdxActionBasics.getDescription();
-   }
-
-   @Override
-   public ImString getRejectionTooltip()
-   {
-      return rdxActionBasics.getRejectionTooltip();
-   }
-
-   @Override
-   public int getActionIndex()
-   {
-      return rdxActionBasics.getActionIndex();
-   }
-
-   @Override
-   public void setActionIndex(int actionIndex)
-   {
-      rdxActionBasics.setActionIndex(actionIndex);
-   }
-
-   @Override
-   public int getActionNextExecutionIndex()
-   {
-      return rdxActionBasics.getActionNextExecutionIndex();
-   }
-
-   @Override
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 
    @Override

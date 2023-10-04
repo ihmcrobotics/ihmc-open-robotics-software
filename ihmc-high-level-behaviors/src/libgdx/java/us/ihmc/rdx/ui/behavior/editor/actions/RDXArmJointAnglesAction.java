@@ -1,18 +1,16 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionState;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 
 public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
@@ -27,9 +25,12 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                                                 definition::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   public RDXArmJointAnglesAction(DRCRobotModel robotModel)
+   public RDXArmJointAnglesAction(RDXBehaviorActionSequenceEditor editor, DRCRobotModel robotModel)
    {
+      super(editor);
+
       this.robotModel = robotModel;
+
       int c = 0;
       configurations[c++] = ArmJointAnglesActionDefinition.CUSTOM_ANGLES_NAME;
       for (PresetArmConfiguration preset : PresetArmConfiguration.values())
@@ -47,7 +48,7 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrentActionIsNextForExecution)
+   public void update()
    {
       definition.update();
 
@@ -61,13 +62,7 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    }
 
    @Override
-   public void renderImGuiWidgets()
-   {
-      rdxActionBasics.renderImGuiWidgets();
-   }
-
-   @Override
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
@@ -96,54 +91,6 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Arm Joint Angles";
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return rdxActionBasics.getSelected();
-   }
-
-   @Override
-   public ImBoolean getExpanded()
-   {
-      return rdxActionBasics.getExpanded();
-   }
-
-   @Override
-   public ImString getImDescription()
-   {
-      return rdxActionBasics.getDescription();
-   }
-
-   @Override
-   public ImString getRejectionTooltip()
-   {
-      return rdxActionBasics.getRejectionTooltip();
-   }
-
-   @Override
-   public int getActionIndex()
-   {
-      return rdxActionBasics.getActionIndex();
-   }
-
-   @Override
-   public void setActionIndex(int actionIndex)
-   {
-      rdxActionBasics.setActionIndex(actionIndex);
-   }
-
-   @Override
-   public int getActionNextExecutionIndex()
-   {
-      return rdxActionBasics.getActionNextExecutionIndex();
-   }
-
-   @Override
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 
    @Override
