@@ -65,19 +65,16 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final HandPoseActionState state = new HandPoseActionState();
-   private final HandPoseActionDefinition definition = state.getDefinition();
+   private final HandPoseActionState state;
+   private final HandPoseActionDefinition definition;
    private final RDXBehaviorActionBasics rdxActionBasics = new RDXBehaviorActionBasics(this);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(definition.getConditionalReferenceFrame().get(),
-                                                                                   definition.getTransformToParent());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
-                                                                         value -> poseGizmo.getSelected().set(value),
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+   private final RDXSelectablePose3DGizmo poseGizmo;
+   private final ImBooleanWrapper selectedWrapper;
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(definition.getConditionalReferenceFrame().get());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(definition.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
    private final Color goodQualityColor;
    private final Color badQualityColor;
    private boolean isMouseHovering = false;
@@ -85,27 +82,10 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                                                definition::setTrajectoryDuration,
-                                               imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                                                      definition::setExecuteWithNextAction,
-                                               imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
-                                                                                     definition::setHoldPoseInWorldLater,
-                                               imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
-
-   private final ImBooleanWrapper jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointSpaceControl,
-                                                                                  definition::setJointSpaceControl,
-                                               imBoolean -> {
-                                                  if (ImGui.radioButton(labels.get("Joint space"), imBoolean.get()))
-                                                     imBoolean.set(true);
-                                                  ImGui.sameLine();
-                                                  if (ImGui.radioButton(labels.get("Task space"), !imBoolean.get()))
-                                                     imBoolean.set(false);
-                                               });
+   private final ImDoubleWrapper trajectoryDurationWidget;
+   private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
+   private final ImBooleanWrapper jointSpaceControlWrapper;
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
@@ -123,6 +103,33 @@ public class RDXHandPoseAction implements RDXBehaviorAction
                             ROS2ControllerPublishSubscribeAPI ros2)
    {
       this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new HandPoseActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
+
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent());
+
+      selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
+                                             value -> poseGizmo.getSelected().set(value),
+                                             imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
+                                                     imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
+                                                          definition::setExecuteWithNextAction,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
+                                                         definition::setHoldPoseInWorldLater,
+                                                         imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+      jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointSpaceControl,
+                                                      definition::setJointSpaceControl,
+                                                      imBoolean -> {
+                                                         if (ImGui.radioButton(labels.get("Joint space"), imBoolean.get()))
+                                                            imBoolean.set(true);
+                                                         ImGui.sameLine();
+                                                         if (ImGui.radioButton(labels.get("Task space"), !imBoolean.get()))
+                                                            imBoolean.set(false);
+                                                      });
 
       ColorDefinition goodQualityColorDefinition = ColorDefinitions.parse(GOOD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5);
       goodQualityColor = RDXVisualTools.toColor(goodQualityColorDefinition);
