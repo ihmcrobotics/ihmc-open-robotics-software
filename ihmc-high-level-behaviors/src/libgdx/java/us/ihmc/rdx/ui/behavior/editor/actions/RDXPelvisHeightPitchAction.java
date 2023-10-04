@@ -57,9 +57,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(definition.getConditionalReferenceFrame().get(),
                                                                                    definition.getPelvisToParentTransform());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
-                                                                         value -> poseGizmo.getSelected().set(value),
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
                                                                                       definition::setExecuteWithNextAction,
                                                                                       imBoolean -> ImGui.checkbox(labels.get("Execute with next action"),
@@ -258,12 +255,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    {
       highlightModel.getRenderables(renderables, pool);
       poseGizmo.getVirtualRenderables(renderables, pool);
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return selectedWrapper;
    }
 
    public ReferenceFrame getReferenceFrame()

@@ -202,7 +202,6 @@ public class RDXBehaviorActionSequenceEditor
                   exception.printStackTrace();
                   LogTools.error("Unable to load action sequence file: {}", workspaceFile.getFilesystemFile().getFileName());
                }
-               action.updateAfterLoading();
                action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
@@ -243,7 +242,7 @@ public class RDXBehaviorActionSequenceEditor
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", behaviorAction.getClass().getSimpleName());
                behaviorAction.getState().saveToFile(actionNode);
-               behaviorAction.updateAfterLoading();
+               behaviorAction.update();
             }
          });
       }
@@ -693,7 +692,7 @@ public class RDXBehaviorActionSequenceEditor
 
          if (action.getExpanded().get())
          {
-            action.getSelected().renderImGuiWidget();
+            ImGui.checkbox(labels.get("Selected"), action.getSelected());
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
             ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));

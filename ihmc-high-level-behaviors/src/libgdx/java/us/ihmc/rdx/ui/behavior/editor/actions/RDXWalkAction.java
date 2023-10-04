@@ -42,9 +42,6 @@ public class RDXWalkAction extends RDXBehaviorAction
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(definition.getConditionalReferenceFrame().get(),
                                                                                                                     definition.getGoalToParentTransform());
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(footstepPlannerGoalGizmo::getSelected,
-                                                                         footstepPlannerGoalGizmo::setSelected,
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final SideDependentList<ImBoolean> goalFeetPosesSelected = new SideDependentList<>();
    private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
    private final ImDoubleWrapper swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
@@ -241,12 +238,6 @@ public class RDXWalkAction extends RDXBehaviorAction
       }
       for (RobotSide side : RobotSide.values)
          goalFeetGraphics.get(side).getRenderables(renderables, pool);
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return selectedWrapper;
    }
 
    @Override

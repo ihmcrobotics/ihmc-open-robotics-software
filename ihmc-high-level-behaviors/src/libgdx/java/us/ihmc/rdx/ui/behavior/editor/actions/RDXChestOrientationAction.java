@@ -82,18 +82,18 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      yawWidget = new ImDoubleWrapper(() -> definition.getRotation().getYaw(), definition::setYaw,
+      yawWidget = new ImDoubleWrapper(definition.getRotation()::getYaw, definition::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-      pitchWidget = new ImDoubleWrapper(() -> definition.getRotation().getPitch(), definition::setPitch,
+      pitchWidget = new ImDoubleWrapper(definition.getRotation()::getPitch, definition::setPitch,
                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      rollWidget = new ImDoubleWrapper(() -> definition.getRotation().getRoll(), definition::setRoll,
+      rollWidget = new ImDoubleWrapper(definition.getRotation()::getRoll, definition::setRoll,
                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
-      selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
-                                             value -> poseGizmo.getSelected().set(value),
-                                             imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+      selectedWrapper = new ImBooleanWrapper(poseGizmo.getSelected()::get,
+                                             poseGizmo.getSelected()::set,
+                                             imBoolean -> ImGui.checkbox(labels.get("Selected"), poseGizmo.getSelected()));
       executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
                                                           definition::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
@@ -245,12 +245,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          highlightModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
       }
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return selectedWrapper;
    }
 
    public ReferenceFrame getReferenceFrame()

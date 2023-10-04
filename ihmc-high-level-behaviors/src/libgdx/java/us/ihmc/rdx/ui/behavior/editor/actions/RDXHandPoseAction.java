@@ -68,7 +68,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
-   private final ImBooleanWrapper selectedWrapper;
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
@@ -110,9 +109,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent());
       poseGizmo.create(panel3D);
 
-      selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
-                                             value -> poseGizmo.getSelected().set(value),
-                                             imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
@@ -355,12 +351,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    public ReferenceFrame getReferenceFrame()
    {
       return poseGizmo.getPoseGizmo().getGizmoFrame();
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return selectedWrapper;
    }
 
    @Override

@@ -3,14 +3,10 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinitionSupplier;
 import us.ihmc.behaviors.sequence.BehaviorActionStateSupplier;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
 
@@ -21,12 +17,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
 {
    private transient final RDXBehaviorActionSequenceEditor editor;
-
-   private final MutableBoolean selected = new MutableBoolean();
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
-                                                                         selected::setValue,
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+   private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
    private final ImString rejectionTooltip = new ImString();
@@ -87,9 +78,9 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
 
    public abstract String getActionTypeTitle();
 
-   public ImBooleanWrapper getSelected()
+   public ImBoolean getSelected()
    {
-      return selectedWrapper;
+      return selected;
    }
 
    public ImBoolean getExpanded()
