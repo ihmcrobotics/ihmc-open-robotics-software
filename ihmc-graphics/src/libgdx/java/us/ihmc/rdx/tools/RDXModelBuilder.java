@@ -18,6 +18,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.List;
@@ -161,10 +162,22 @@ public class RDXModelBuilder
 
    public static ModelInstance createCylinder(double height, double radius, Color color)
    {
-      return buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addCylinder(height, radius, new Point3D(), color);
-      }, "cylinder");
+      return buildModelInstance(meshBuilder -> meshBuilder.addCylinder(height, radius, new Point3D(), color), "cylinder");
+   }
+
+   public static ModelInstance createEllipsoid(double xRadius, double yRadius, double zRadius, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addEllipsoid(xRadius, yRadius, zRadius, new Point3D(), color), "ellipsoid");
+   }
+
+   public static ModelInstance createPyramid(double triangleWidth, double triangleHeight, double prismThickness, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addIsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness, new Point3D(), color), "pyramid");
+   }
+
+   public static ModelInstance createTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addArcTorus(startAngle, endAngle, majorRadius, minorRadius, color), "torus");
    }
 
    public static ModelInstance createArrow(double length, Color color)
