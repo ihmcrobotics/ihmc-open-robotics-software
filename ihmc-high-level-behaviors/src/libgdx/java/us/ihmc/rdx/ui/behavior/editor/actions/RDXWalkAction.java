@@ -60,7 +60,10 @@ public class RDXWalkAction extends RDXBehaviorAction
       definition = state.getDefinition();
 
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
 
       footstepPlannerGoalGizmo.create(panel3D);
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
@@ -191,7 +194,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getRingHovered())
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
-                                                                          getActionIndex(),
+                                                                          state.getActionIndex(),
                                                                           definition.getDescription()));
       }
    }
