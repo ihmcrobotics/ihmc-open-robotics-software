@@ -20,6 +20,8 @@ import us.ihmc.rdx.vr.RDXVRContext;
  */
 public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
 {
+   private transient final RDXBehaviorActionSequenceEditor editor;
+
    private final MutableBoolean selected = new MutableBoolean();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
@@ -28,16 +30,13 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
    private final ImString rejectionTooltip = new ImString();
-   private int actionIndex = -1;
-   private int actionNextExecutionIndex = -1;
 
-   public void update()
+   public RDXBehaviorAction(RDXBehaviorActionSequenceEditor editor)
    {
-      update(false);
+      this.editor = editor;
    }
 
-   // TODO: Probably remove and use BehaviorActionDefinition#update?
-   public void update(boolean concurrentActionIsNextForExecution)
+   public void update()
    {
 
    }
@@ -66,11 +65,11 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    {
       if (expanded.get())
       {
-         renderImGuiSettingWidgets();
+         renderImGuiWidgetsInternal();
       }
    }
 
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
 
    }
@@ -80,28 +79,7 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
 
    }
 
-   public abstract ImBooleanWrapper getSelected();
-
-   public abstract ImBoolean getExpanded();
-
-   // TODO: Put in BehaviorActionState
    public abstract String getActionTypeTitle();
-
-   public abstract ImString getImDescription();
-
-   public abstract ImString getRejectionTooltip();
-
-   // TODO: Put in BehaviorActionState
-   public abstract int getActionIndex();
-
-   // TODO: Put in BehaviorActionState
-   public abstract void setActionIndex(int actionIndex);
-
-   // TODO: Put in BehaviorActionState
-   public abstract int getActionNextExecutionIndex();
-
-   // TODO: Put in BehaviorActionState
-   public abstract void setActionNextExecutionIndex(int actionNextExecutionIndex);
 
    public ImBooleanWrapper getSelected()
    {
@@ -121,25 +99,5 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    public ImString getRejectionTooltip()
    {
       return rejectionTooltip;
-   }
-
-   public int getActionIndex()
-   {
-      return actionIndex;
-   }
-
-   public void setActionIndex(int actionIndex)
-   {
-      this.actionIndex = actionIndex;
-   }
-
-   public int getActionNextExecutionIndex()
-   {
-      return actionNextExecutionIndex;
-   }
-
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      this.actionNextExecutionIndex = actionNextExecutionIndex;
    }
 }

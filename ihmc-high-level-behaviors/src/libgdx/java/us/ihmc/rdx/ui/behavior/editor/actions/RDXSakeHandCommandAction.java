@@ -2,8 +2,6 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImString;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
@@ -12,6 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
@@ -37,8 +36,10 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
                                                                                       imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
                                                                                                                         imBoolean));
 
-   public RDXSakeHandCommandAction()
+   public RDXSakeHandCommandAction(RDXBehaviorActionSequenceEditor editor)
    {
+      super(editor);
+
       for (int i = 0; i < SakeHandCommandOption.values.length; ++i)
       {
          handConfigurationNames[i] = SakeHandCommandOption.values[i].name();
@@ -53,19 +54,7 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrentActionIsNextForExecution)
-   {
-      update();
-   }
-
-   @Override
-   public void renderImGuiWidgets()
-   {
-      rdxActionBasics.renderImGuiWidgets();
-   }
-
-   @Override
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
       imgui.ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
@@ -106,54 +95,6 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Hand Configuration";
-   }
-
-   @Override
-   public ImBooleanWrapper getSelected()
-   {
-      return rdxActionBasics.getSelected();
-   }
-
-   @Override
-   public ImBoolean getExpanded()
-   {
-      return rdxActionBasics.getExpanded();
-   }
-
-   @Override
-   public ImString getImDescription()
-   {
-      return rdxActionBasics.getDescription();
-   }
-
-   @Override
-   public ImString getRejectionTooltip()
-   {
-      return rdxActionBasics.getRejectionTooltip();
-   }
-
-   @Override
-   public int getActionIndex()
-   {
-      return rdxActionBasics.getActionIndex();
-   }
-
-   @Override
-   public void setActionIndex(int actionIndex)
-   {
-      rdxActionBasics.setActionIndex(actionIndex);
-   }
-
-   @Override
-   public int getActionNextExecutionIndex()
-   {
-      return rdxActionBasics.getActionNextExecutionIndex();
-   }
-
-   @Override
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 
    @Override

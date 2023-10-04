@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.WalkActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WalkActionState;
@@ -21,6 +20,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -55,11 +55,15 @@ public class RDXWalkAction extends RDXBehaviorAction
                                                                               imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXWalkAction(RDX3DPanel panel3D,
+   public RDXWalkAction(RDXBehaviorActionSequenceEditor editor,
+                        RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
                         ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(editor);
+
       this.referenceFrameLibrary = referenceFrameLibrary;
+
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
 
@@ -116,7 +120,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrentActionIsNextForExecution)
+   public void update()
    {
       definition.update(referenceFrameLibrary);
 
@@ -187,13 +191,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
-   public void renderImGuiWidgets()
-   {
-      rdxActionBasics.renderImGuiWidgets();
-   }
-
-   @Override
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
       if (parentFrameComboBox.render())
       {
@@ -255,48 +253,6 @@ public class RDXWalkAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Walk Goal";
-   }
-
-   @Override
-   public ImBoolean getExpanded()
-   {
-      return rdxActionBasics.getExpanded();
-   }
-
-   @Override
-   public ImString getImDescription()
-   {
-      return rdxActionBasics.getDescription();
-   }
-
-   @Override
-   public ImString getRejectionTooltip()
-   {
-      return rdxActionBasics.getRejectionTooltip();
-   }
-
-   @Override
-   public int getActionIndex()
-   {
-      return rdxActionBasics.getActionIndex();
-   }
-
-   @Override
-   public void setActionIndex(int actionIndex)
-   {
-      rdxActionBasics.setActionIndex(actionIndex);
-   }
-
-   @Override
-   public int getActionNextExecutionIndex()
-   {
-      return rdxActionBasics.getActionNextExecutionIndex();
-   }
-
-   @Override
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 
    @Override

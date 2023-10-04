@@ -6,8 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.type.ImBoolean;
-import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
@@ -25,6 +23,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -79,13 +78,16 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final Throttler throttler = new Throttler().setFrequency(10.0);
    private boolean wasConcurrent = false;
 
-   public RDXChestOrientationAction(RDX3DPanel panel3D,
+   public RDXChestOrientationAction(RDXBehaviorActionSequenceEditor editor,
+                                    RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
                                     ReferenceFrameLibrary referenceFrameLibrary,
                                     ROS2PublishSubscribeAPI ros2)
    {
+      super(editor);
+
       this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
@@ -132,7 +134,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void update(boolean concurrentActionIsNextForExecution)
+   public void update()
    {
       definition.update(referenceFrameLibrary);
 
@@ -186,13 +188,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void renderImGuiWidgets()
-   {
-      rdxActionBasics.renderImGuiWidgets();
-   }
-
-   @Override
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
@@ -275,48 +271,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    public String getActionTypeTitle()
    {
       return "Chest Orientation";
-   }
-
-   @Override
-   public ImBoolean getExpanded()
-   {
-      return rdxActionBasics.getExpanded();
-   }
-
-   @Override
-   public ImString getImDescription()
-   {
-      return rdxActionBasics.getDescription();
-   }
-
-   @Override
-   public ImString getRejectionTooltip()
-   {
-      return rdxActionBasics.getRejectionTooltip();
-   }
-
-   @Override
-   public int getActionIndex()
-   {
-      return rdxActionBasics.getActionIndex();
-   }
-
-   @Override
-   public void setActionIndex(int actionIndex)
-   {
-      rdxActionBasics.setActionIndex(actionIndex);
-   }
-
-   @Override
-   public int getActionNextExecutionIndex()
-   {
-      return rdxActionBasics.getActionNextExecutionIndex();
-   }
-
-   @Override
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      rdxActionBasics.setActionNextExecutionIndex(actionNextExecutionIndex);
    }
 
    @Override
