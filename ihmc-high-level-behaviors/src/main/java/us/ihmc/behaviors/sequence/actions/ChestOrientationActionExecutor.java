@@ -20,8 +20,8 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final ChestOrientationActionState state = new ChestOrientationActionState();
-   private final ChestOrientationActionDefinition definition = state.getDefinition();
+   private final ChestOrientationActionState state;
+   private final ChestOrientationActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
@@ -39,6 +39,9 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new ChestOrientationActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
    }
 
    @Override

@@ -25,8 +25,8 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final HandPoseActionState state = new HandPoseActionState();
-   private final HandPoseActionDefinition definition = state.getDefinition();
+   private final HandPoseActionState state;
+   private final HandPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -54,6 +54,9 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculator = handWrenchCalculator;
+
+      state = new HandPoseActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
 
       for (RobotSide side : RobotSide.values)
       {
