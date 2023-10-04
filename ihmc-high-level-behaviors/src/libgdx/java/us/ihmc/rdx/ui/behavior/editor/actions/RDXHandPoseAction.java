@@ -174,7 +174,10 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          armGraphicOneDoFJoints.put(side, MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics.get(side)));
       }
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
@@ -283,7 +286,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       if (isMouseHovering)
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
-                                                                          getActionIndex(),
+                                                                          state.getActionIndex(),
                                                                           definition.getDescription()));
       }
    }

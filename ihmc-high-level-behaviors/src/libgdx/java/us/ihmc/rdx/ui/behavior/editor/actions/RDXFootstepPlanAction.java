@@ -56,16 +56,12 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       state = new FootstepPlanActionState(referenceFrameLibrary);
       definition = state.getDefinition();
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
 
       footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(referenceFrameLibrary, state, baseUI, robotModel, getSelected()::get));
-   }
-
-   public void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
-      update();
    }
 
    @Override

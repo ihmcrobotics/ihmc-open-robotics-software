@@ -102,7 +102,10 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          mouseCollidables.add(new MouseCollidable(pelvisCollidable));
       }
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
       poseGizmo.create(panel3D);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
@@ -148,13 +151,13 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
       // if the action is part of a group of concurrent actions that is currently executing or about to be executed
       // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
-      if (concurrentActionIsNextForExecution)
+      if (getEditor().getConcurrentActionIsNextForExecution())
       {
          wasConcurrent = true;
          pelvisPoseStatus.setCurrentAndConcurrent(true);
          if (throttler.run())
          {
-            if (getActionIndex() >= 0)
+            if (state.getActionIndex() >= 0)
                ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
          }
       }
@@ -191,7 +194,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       if (isMouseHovering)
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
-                                                                          getActionIndex(),
+                                                                          state.getActionIndex(),
                                                                           definition.getDescription()));
       }
    }
