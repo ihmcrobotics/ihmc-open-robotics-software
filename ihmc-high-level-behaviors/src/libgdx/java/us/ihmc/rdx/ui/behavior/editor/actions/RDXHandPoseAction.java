@@ -272,10 +272,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       {
          holdPoseInWorldLaterWrapper.renderImGuiWidget();
       }
-      if (parentFrameComboBox.render())
-      {
-         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
-      }
+      parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();

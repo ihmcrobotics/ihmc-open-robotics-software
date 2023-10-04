@@ -168,10 +168,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      if (parentFrameComboBox.render())
-      {
-         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
-      }
+      parentFrameComboBox.render();
       if (ImGui.button(labels.get("Plan")))
       {
          // TODO: Plan preview message
