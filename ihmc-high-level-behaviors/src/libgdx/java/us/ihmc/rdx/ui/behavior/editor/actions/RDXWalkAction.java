@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -32,10 +31,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXWalkAction extends RDXBehaviorAction
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-
-   private final WalkActionState state = new WalkActionState();
-   private final WalkActionDefinition definition = state.getDefinition();
+   private final WalkActionState state;
+   private final WalkActionDefinition definition;
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
@@ -59,7 +56,8 @@ public class RDXWalkAction extends RDXBehaviorAction
    {
       super(editor);
 
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      state = new WalkActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
 
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
@@ -92,35 +90,15 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
-   public void updateAfterLoading()
+   public void update()
    {
-      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
+      state.update();
+
       footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(definition.getConditionalReferenceFrame().get());
       for (RobotSide side : RobotSide.values)
       {
          goalFeetGizmos.get(side).setParentFrame(definition.getConditionalReferenceFrame().get());
       }
-   }
-
-   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      definition.setGoalToParentTransform(transformToParent);
-      update();
-   }
-
-   public void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setGoalToParentTransform(referenceFrame.getTransformToWorldFrame());
-      update();
-   }
-
-   @Override
-   public void update()
-   {
-      definition.update(referenceFrameLibrary);
-
       if (!getSelected().get())
          goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
 
