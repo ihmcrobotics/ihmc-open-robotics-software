@@ -106,7 +106,10 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          mouseCollidables.add(new MouseCollidable(chestCollidable));
       }
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
       poseGizmo.create(panel3D);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
