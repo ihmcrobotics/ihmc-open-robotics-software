@@ -137,10 +137,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      if (parentFrameComboBox.render())
-      {
-         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
-      }
+      parentFrameComboBox.render();
 
       ImGui.pushItemWidth(80.0f);
       swingDurationWidget.renderImGuiWidget();
