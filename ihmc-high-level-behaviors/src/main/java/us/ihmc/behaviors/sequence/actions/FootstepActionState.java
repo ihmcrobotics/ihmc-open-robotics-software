@@ -7,14 +7,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class FootstepActionState extends BehaviorActionState<FootstepActionDefinitionMessage>
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState footstepPlan;
    private final FootstepActionDefinition definition = new FootstepActionDefinition();
    private final DetachableReferenceFrame soleFrame;
 
    public FootstepActionState(ReferenceFrameLibrary referenceFrameLibrary, FootstepPlanActionState footstepPlan)
    {
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.footstepPlan = footstepPlan;
 
       soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getSoleToPlanFrameTransform());
