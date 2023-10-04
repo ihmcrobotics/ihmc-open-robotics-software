@@ -16,7 +16,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
    private String parentFrameName;
-   private RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
+   private final RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> goalFootstepToParentTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
 
    @Override
@@ -122,10 +122,5 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    public RigidBodyTransform getGoalToParentTransform()
    {
       return goalToParentTransform;
-   }
-
-   public void setGoalToParentTransform(RigidBodyTransform goalToParentTransform)
-   {
-      this.goalToParentTransform = goalToParentTransform;
    }
 }
