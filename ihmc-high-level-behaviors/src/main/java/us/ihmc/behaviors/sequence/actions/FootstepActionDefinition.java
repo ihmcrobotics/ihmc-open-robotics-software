@@ -6,14 +6,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepActionDefinition implements BehaviorActionDefinition<FootstepActionDefinitionMessage>
+public class FootstepActionDefinition implements BehaviorActionDefinition<FootstepActionDefinitionMessage>, SidedObject
 {
    private String description = "Footstep";
    private RobotSide side = RobotSide.LEFT;
    private final RigidBodyTransform soleToPlanFrameTransform = new RigidBodyTransform();
 
+   @Override
    public RobotSide getSide()
    {
       return side;
