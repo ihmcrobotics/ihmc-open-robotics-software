@@ -28,9 +28,8 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final FootstepPlanActionState state = new FootstepPlanActionState();
-   private final FootstepPlanActionDefinition definition = state.getDefinition();
+   private final FootstepPlanActionState state;
+   private final FootstepPlanActionDefinition definition;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -53,17 +52,13 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new FootstepPlanActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame", referenceFrameLibrary);
 
       footsteps = new RecyclingArrayList<>(() -> new RDXFootstepAction(referenceFrameLibrary, state, baseUI, robotModel, getSelected()::get));
-   }
-
-   @Override
-   public void updateAfterLoading()
-   {
-      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -76,7 +71,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      definition.update(referenceFrameLibrary);
+      state.update();
 
       // Add a footstep to the action data only
       if (userAddedFootstep.poll())

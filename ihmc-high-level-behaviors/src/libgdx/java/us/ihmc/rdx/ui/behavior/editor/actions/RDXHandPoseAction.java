@@ -62,7 +62,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final HandPoseActionState state;
    private final HandPoseActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -100,8 +99,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                             ROS2ControllerPublishSubscribeAPI ros2)
    {
       super(editor);
-
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       state = new HandPoseActionState(referenceFrameLibrary);
       definition = state.getDefinition();
@@ -188,15 +185,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
-   public void updateAfterLoading()
-   {
-      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
-   }
-
-   @Override
    public void update()
    {
-      definition.update(referenceFrameLibrary);
+      state.update();
 
       if (poseGizmo.getPoseGizmo().getGizmoFrame() != definition.getConditionalReferenceFrame().get())
       {

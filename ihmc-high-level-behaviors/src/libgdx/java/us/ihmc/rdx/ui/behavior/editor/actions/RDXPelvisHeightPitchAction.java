@@ -40,9 +40,8 @@ import java.util.List;
 
 public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 {
-   private final PelvisHeightPitchActionState state = new PelvisHeightPitchActionState();
-   private final PelvisHeightPitchActionDefinition definition = state.getDefinition();
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final PelvisHeightPitchActionState state;
+   private final PelvisHeightPitchActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(definition::getHeight,
                                                                     definition::setHeight,
@@ -87,7 +86,9 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
       this.ros2 = ros2;
       this.syncedFullRobotModel = syncedFullRobotModel;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new PelvisHeightPitchActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
@@ -109,29 +110,9 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    }
 
    @Override
-   public void updateAfterLoading()
-   {
-      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
-   }
-
-   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      definition.setPelvisToParentTransform(transformToParent);
-      update();
-   }
-
-   public void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setPelvisToParentTransform(referenceFrame.getTransformToWorldFrame());
-      update();
-   }
-
-   @Override
    public void update()
    {
-      definition.update(referenceFrameLibrary);
+      state.update();
 
       if (poseGizmo.getPoseGizmo().getGizmoFrame() != definition.getConditionalReferenceFrame().get())
       {
