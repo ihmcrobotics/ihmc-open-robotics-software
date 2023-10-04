@@ -80,7 +80,7 @@ public class WalkActionExecutor implements BehaviorActionExecutor
 
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(state.getSoleFrame().getReferenceFrame(),
+         goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
                                                    definition.getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }

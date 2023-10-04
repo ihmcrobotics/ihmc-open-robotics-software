@@ -293,7 +293,7 @@ public class RDXBehaviorActionSequenceEditor
          if (newAction instanceof RDXWalkAction walkAction)
          {
             walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-            walkAction.getState().getSoleFrame().update(findConvenientParentFrameName(walkAction, null));
+            walkAction.getState().getGoalFrame().update(findConvenientParentFrameName(walkAction, null));
          }
          else if (newAction instanceof RDXHandPoseAction handPoseAction)
          {
