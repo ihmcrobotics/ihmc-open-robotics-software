@@ -12,7 +12,7 @@ public class ChestOrientationActionState extends BehaviorActionState<BodyPartPos
 
    public ChestOrientationActionState(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getTransformToParent());
+      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getChestToParentTransform());
    }
 
    @Override

@@ -16,7 +16,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private String parentFrameName;
-   private RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private RigidBodyTransform chestToParentTransform = new RigidBodyTransform();
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -26,7 +26,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
       jsonNode.put("parentFrame", parentFrameName);
-      JSONTools.toJSON(jsonNode, transformToParent);
+      JSONTools.toJSON(jsonNode, chestToParentTransform);
    }
 
    @Override
@@ -37,7 +37,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
       parentFrameName = jsonNode.get("parentFrame").textValue();
-      JSONTools.toEuclid(jsonNode, transformToParent);
+      JSONTools.toEuclid(jsonNode, chestToParentTransform);
    }
 
    @Override
@@ -48,7 +48,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       message.setHoldPoseInWorld(holdPoseInWorldLater);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
-      MessageTools.toMessage(transformToParent, message.getTransformToParent());
+      MessageTools.toMessage(chestToParentTransform, message.getTransformToParent());
    }
 
    @Override
@@ -58,30 +58,30 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       executeWitNextAction = message.getExecuteWithNextAction();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
       parentFrameName = message.getParentFrame().getString(0);
-      MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
+      MessageTools.toEuclid(message.getTransformToParent(), chestToParentTransform);
    }
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = transformToParent.getRotation();
-      transformToParent.getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getRotation();
+      chestToParentTransform.getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = transformToParent.getRotation();
-      transformToParent.getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getRotation();
+      chestToParentTransform.getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = transformToParent.getRotation();
-      transformToParent.getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = chestToParentTransform.getRotation();
+      chestToParentTransform.getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public RotationMatrixBasics getRotation()
    {
-      return transformToParent.getRotation();
+      return chestToParentTransform.getRotation();
    }
 
    public double getTrajectoryDuration()
@@ -136,13 +136,13 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       this.parentFrameName = parentFrameName;
    }
 
-   public RigidBodyTransform getTransformToParent()
+   public RigidBodyTransform getChestToParentTransform()
    {
-      return transformToParent;
+      return chestToParentTransform;
    }
 
-   public void setTransformToParent(RigidBodyTransform transformToParent)
+   public void setChestToParentTransform(RigidBodyTransform chestToParentTransform)
    {
-      this.transformToParent = transformToParent;
+      this.chestToParentTransform = chestToParentTransform;
    }
 }

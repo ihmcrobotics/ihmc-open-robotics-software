@@ -13,7 +13,6 @@ import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -41,32 +40,18 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
 {
    private final ChestOrientationActionState state;
    private final ChestOrientationActionDefinition definition;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> definition.getRotation().getYaw(), definition::setYaw,
-                                                                 imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> definition.getRotation().getPitch(), definition::setPitch,
-                                                                   imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> definition.getRotation().getRoll(), definition::setRoll,
-                                                                  imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                                                definition::setTrajectoryDuration,
-                                                                                imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"),
-                                                                                                                           imDouble));
+   private final ImDoubleWrapper yawWidget;
+   private final ImDoubleWrapper pitchWidget;
+   private final ImDoubleWrapper rollWidget;
+   private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(definition.getConditionalReferenceFrame().get(),
-                                                                                   definition.getTransformToParent());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
-                                                                         value -> poseGizmo.getSelected().set(value),
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                                                      definition::setExecuteWithNextAction,
-                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
-                                                                                     definition::setHoldPoseInWorldLater,
-                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(definition.getConditionalReferenceFrame().get());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(definition.getConditionalReferenceFrame().get());
+   private final RDXSelectablePose3DGizmo poseGizmo;
+   private final ImBooleanWrapper selectedWrapper;
+   private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -89,10 +74,36 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       super(editor);
 
       this.ros2 = ros2;
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       state = new ChestOrientationActionState(referenceFrameLibrary);
       definition = state.getDefinition();
+
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getChestToParentTransform());
+      poseGizmo.create(panel3D);
+
+      // TODO: Can all this be condensed?
+      yawWidget = new ImDoubleWrapper(() -> definition.getRotation().getYaw(), definition::setYaw,
+                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
+      pitchWidget = new ImDoubleWrapper(() -> definition.getRotation().getPitch(), definition::setPitch,
+                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
+      rollWidget = new ImDoubleWrapper(() -> definition.getRotation().getRoll(), definition::setRoll,
+                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
+                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
+      selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
+                                             value -> poseGizmo.getSelected().set(value),
+                                             imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
+                                                          definition::setExecuteWithNextAction,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
+                                                         definition::setHoldPoseInWorldLater,
+                                                         imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
@@ -106,80 +117,57 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          mouseCollidables.add(new MouseCollidable(chestCollidable));
       }
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      poseGizmo.create(panel3D);
-
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
    }
 
    @Override
-   public void updateAfterLoading()
-   {
-      parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
-   }
-
-   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      definition.setTransformToParent(transformToParent);
-      update();
-   }
-
-   public void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
-      update();
-   }
-
-   @Override
    public void update()
    {
-      definition.update(referenceFrameLibrary);
+      state.update();
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != definition.getConditionalReferenceFrame().get())
+      if (state.getChestFrame().isChildOfWorld())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(definition.getConditionalReferenceFrame().get());
-         graphicFrame.changeParentFrame(definition.getConditionalReferenceFrame().get());
-         collisionShapeFrame.changeParentFrame(definition.getConditionalReferenceFrame().get());
-      }
-
-      poseGizmo.getPoseGizmo().update();
-      highlightModel.setPose(graphicFrame.getReferenceFrame());
-
-      if (poseGizmo.isSelected() || isMouseHovering)
-      {
-         highlightModel.setTransparency(0.7);
-      }
-      else
-      {
-         highlightModel.setTransparency(0.5);
-      }
-
-      chestPoseStatus.getParentFrame().resetQuick();
-      chestPoseStatus.getParentFrame().add(definition.get().getParent().getName());
-      MessageTools.toMessage(definition.getTransformToParent(), chestPoseStatus.getTransformToParent());
-      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-      if (concurrentActionIsNextForExecution)
-      {
-         wasConcurrent = true;
-         chestPoseStatus.setCurrentAndConcurrent(true);
-         if (throttler.run())
+         if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getChestFrame().getReferenceFrame())
          {
-            if (getActionIndex() >= 0)
-               ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+            poseGizmo.getPoseGizmo().setGizmoFrame(state.getChestFrame().getReferenceFrame());
+            graphicFrame.changeParentFrame(state.getChestFrame().getReferenceFrame());
+            collisionShapeFrame.changeParentFrame(state.getChestFrame().getReferenceFrame());
          }
-      }
-      else if (wasConcurrent)
-      {
-         chestPoseStatus.setCurrentAndConcurrent(false);
-         ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
-         wasConcurrent = false;
+
+         poseGizmo.getPoseGizmo().update();
+         highlightModel.setPose(graphicFrame.getReferenceFrame());
+
+         if (poseGizmo.isSelected() || isMouseHovering)
+         {
+            highlightModel.setTransparency(0.7);
+         }
+         else
+         {
+            highlightModel.setTransparency(0.5);
+         }
+
+         chestPoseStatus.getParentFrame().resetQuick();
+         chestPoseStatus.getParentFrame().add(definition.getParentFrameName());
+         MessageTools.toMessage(definition.getChestToParentTransform(), chestPoseStatus.getTransformToParent());
+         // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+         // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
+         if (getEditor().getConcurrentActionIsNextForExecution())
+         {
+            wasConcurrent = true;
+            chestPoseStatus.setCurrentAndConcurrent(true);
+            if (throttler.run())
+            {
+               if (state.getActionIndex() >= 0)
+                  ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+            }
+         }
+         else if (wasConcurrent)
+         {
+            chestPoseStatus.setCurrentAndConcurrent(false);
+            ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+            wasConcurrent = false;
+         }
       }
    }
 
@@ -196,10 +184,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
-      if (parentFrameComboBox.render())
-      {
-         definition.getConditionalReferenceFrame().setParentFrameName(parentFrameComboBox.getSelectedReferenceFrame().getParent().getName());
-      }
+      parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       yawWidget.renderImGuiWidget();
       ImGui.sameLine();
@@ -215,7 +200,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       if (isMouseHovering)
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
-                                                                          getActionIndex(),
+                                                                          state.getActionIndex(),
                                                                           definition.getDescription()));
       }
    }
@@ -255,8 +240,11 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      highlightModel.getRenderables(renderables, pool);
-      poseGizmo.getVirtualRenderables(renderables, pool);
+      if (state.getChestFrame().isChildOfWorld())
+      {
+         highlightModel.getRenderables(renderables, pool);
+         poseGizmo.getVirtualRenderables(renderables, pool);
+      }
    }
 
    @Override

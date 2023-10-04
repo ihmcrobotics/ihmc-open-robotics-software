@@ -39,9 +39,8 @@ public class ImGuiReferenceFrameLibraryCombo
       this.currentFrameNameSetter = currentFrameNameSetter;
    }
 
-   public boolean render()
+   public void render()
    {
-
       referenceFrameLibraryNames.clear();
       referenceFrameLibrary.getAllFrameNames(referenceFrameLibraryNames::add);
 
@@ -75,7 +74,5 @@ public class ImGuiReferenceFrameLibraryCombo
 
          ImGui.endCombo();
       }
-
-      return true;
    }
 }
