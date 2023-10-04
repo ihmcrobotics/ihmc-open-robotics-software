@@ -40,7 +40,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(definition.getConditionalReferenceFrame().get(),
-                                                                                                                    definition.getTransformToParent());
+                                                                                                                    definition.getGoalToParentTransform());
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(footstepPlannerGoalGizmo::getSelected,
                                                                          footstepPlannerGoalGizmo::setSelected,
@@ -108,14 +108,14 @@ public class RDXWalkAction extends RDXBehaviorAction
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
       definition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      definition.setTransformToParent(transformToParent);
+      definition.setGoalToParentTransform(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
       definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
+      definition.setGoalToParentTransform(referenceFrame.getTransformToWorldFrame());
       update();
    }
 

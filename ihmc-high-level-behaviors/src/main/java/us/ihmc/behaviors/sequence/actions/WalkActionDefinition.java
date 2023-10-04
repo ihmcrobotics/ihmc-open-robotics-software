@@ -16,7 +16,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
    private String parentFrameName;
-   private RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> goalFootstepToParentTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
 
    @Override
@@ -26,7 +26,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
       jsonNode.put("parentFrame", parentFrameName);
-      JSONTools.toJSON(jsonNode, transformToParent);
+      JSONTools.toJSON(jsonNode, goalToParentTransform);
       for (RobotSide side : RobotSide.values)
       {
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
@@ -41,7 +41,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
       parentFrameName = jsonNode.get("parentFrame").textValue();
-      JSONTools.toEuclid(jsonNode, transformToParent);
+      JSONTools.toEuclid(jsonNode, goalToParentTransform);
       for (RobotSide side : RobotSide.values)
       {
          JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
@@ -56,7 +56,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
-      MessageTools.toMessage(transformToParent, message.getTransformToParent());
+      MessageTools.toMessage(goalToParentTransform, message.getTransformToParent());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
       MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
    }
@@ -67,7 +67,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
       parentFrameName = message.getParentFrame().getString(0);
-      MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
+      MessageTools.toEuclid(message.getTransformToParent(), goalToParentTransform);
       MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.LEFT));
       MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.RIGHT));
    }
@@ -119,13 +119,13 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       this.parentFrameName = parentFrameName;
    }
 
-   public RigidBodyTransform getTransformToParent()
+   public RigidBodyTransform getGoalToParentTransform()
    {
-      return transformToParent;
+      return goalToParentTransform;
    }
 
-   public void setTransformToParent(RigidBodyTransform transformToParent)
+   public void setGoalToParentTransform(RigidBodyTransform goalToParentTransform)
    {
-      this.transformToParent = transformToParent;
+      this.goalToParentTransform = goalToParentTransform;
    }
 }

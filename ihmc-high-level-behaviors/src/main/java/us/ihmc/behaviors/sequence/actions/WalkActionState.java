@@ -8,17 +8,17 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMessage>
 {
    private final WalkActionDefinition definition = new WalkActionDefinition();
-   private final DetachableReferenceFrame soleFrame;
+   private final DetachableReferenceFrame goalFrame;
 
    public WalkActionState(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getTransformToParent());
+      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getGoalToParentTransform());
    }
 
    @Override
    public void update()
    {
-      soleFrame.update(definition.getParentFrameName());
+      goalFrame.update(definition.getParentFrameName());
    }
 
    @Override
@@ -27,8 +27,8 @@ public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMes
       return definition;
    }
 
-   public DetachableReferenceFrame getSoleFrame()
+   public DetachableReferenceFrame getGoalFrame()
    {
-      return soleFrame;
+      return goalFrame;
    }
 }
