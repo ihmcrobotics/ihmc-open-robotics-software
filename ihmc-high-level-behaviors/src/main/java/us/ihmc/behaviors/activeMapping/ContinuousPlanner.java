@@ -45,7 +45,6 @@ public class ContinuousPlanner
    private final HumanoidReferenceFrames referenceFrames;
    private MonteCarloPlanner monteCarloPlanner;
 
-   private FootstepPlannerRequest request;
    private FootstepPlannerOutput plannerOutput;
 
    private RobotSide initialStanceSideForPlanning = RobotSide.LEFT;
