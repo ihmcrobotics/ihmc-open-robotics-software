@@ -66,7 +66,12 @@ public class PredefinedRigidBodySceneNode extends SceneNode
 
    public boolean getTrackingInitialParent()
    {
-      return getNodeFrame().getParent() == sceneGraphIDToNodeMap.get(initialParentNodeID).getNodeFrame();
+      if (sceneGraphIDToNodeMap.containsKey(initialParentNodeID))
+      {
+         return getNodeFrame().getParent() == sceneGraphIDToNodeMap.get(initialParentNodeID).getNodeFrame();
+      }
+
+      return false;
    }
 
    /**
