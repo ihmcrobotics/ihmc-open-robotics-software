@@ -42,6 +42,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
@@ -204,11 +205,6 @@ public class RDXBehaviorActionSequenceEditor
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
-
-               if (action instanceof FrameBasedBehaviorActionDefinition frameBasedBehaviorActionDefinition)
-               {
-                  referenceFrameLibrary.addParent(frameBasedBehaviorActionDefinition.getConditionalReferenceFrame());
-               }
             }
             else
             {
@@ -292,34 +288,36 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 referenceFrameLibrary,
                                                                                 ros2ControllerHelper);
 
-         ReferenceFrame nextPreviousParentFrame = findNextPreviousParentFrame();
-
          if (newAction instanceof RDXWalkAction walkAction)
          {
             walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-            if (nextPreviousParentFrame != null)
-               walkAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            walkAction.getState().getSoleFrame().update(findConvenientParentFrameName(walkAction, null));
          }
          else if (newAction instanceof RDXHandPoseAction handPoseAction)
          {
             // Set the new action to where the last one was for faster authoring
-            handPoseAction.getDefinition().setSide(newActionSide);
-            RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(newActionSide);
-            if (nextPreviousHandPoseAction != null)
+            handPoseAction.getDefinition().setSide(sideOfNewAction);
+            handPoseAction.getDefinition().setPalmParentFrameName(findConvenientParentFrameName(handPoseAction, sideOfNewAction));
+            handPoseAction.getState().update();
+
+            RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousAction(RDXHandPoseAction.class, sideOfNewAction);
+            if (nextPreviousHandPoseAction != null && nextPreviousHandPoseAction.getState().getPalmFrame().isChildOfWorld())
             {
-               handPoseAction.setIncludingFrame(nextPreviousHandPoseAction.getReferenceFrame().getParent(),
-                                                nextPreviousHandPoseAction.getReferenceFrame().getTransformToParent());
+               nextPreviousHandPoseAction.getState().getPalmFrame()
+                        .getReferenceFrame().getTransformToDesiredFrame(handPoseAction.getDefinition().getPalmTransformToParent(),
+                                                                        handPoseAction.getState().getPalmFrame().getReferenceFrame().getParent());
             }
             else // set to current robot's hand pose
             {
-               handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(newActionSide));
+               syncedRobot.getReferenceFrames().getHandFrame(sideOfNewAction)
+                          .getTransformToDesiredFrame(handPoseAction.getDefinition().getPalmTransformToParent(),
+                                                      handPoseAction.getState().getPalmFrame().getReferenceFrame().getParent());
             }
-            if (nextPreviousParentFrame != null)
-               handPoseAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            handPoseAction.getState().getPalmFrame().getReferenceFrame().update();
          }
          else if (newAction instanceof RDXHandWrenchAction handWrenchAction)
          {
-            handWrenchAction.getDefinition().setSide(newActionSide);
+            handWrenchAction.getDefinition().setSide(sideOfNewAction);
          }
          else if (newAction instanceof RDXChestOrientationAction chestOrientationAction)
          {
@@ -793,50 +791,41 @@ public class RDXBehaviorActionSequenceEditor
     *         This helps the authoring process by initializing new actions with
     *         spatially consistent values.
     */
-   private ReferenceFrame findNextPreviousParentFrame()
+   private String findConvenientParentFrameName(RDXBehaviorAction action, @Nullable RobotSide side)
    {
-      for (int i = Math.min(executionNextIndexStatus, actionSequence.size() - 1); i >= 0; i--)
+      RDXBehaviorAction nextPreviousAction = findNextPreviousAction(action.getClass(), side);
+
+      if (nextPreviousAction instanceof RDXFootstepPlanAction footstepPlanAction)
       {
-         if (actionSequence.get(i) instanceof RDXFootstepPlanAction footstepPlanAction)
-         {
-            return footstepPlanAction.getDefinition().getConditionalReferenceFrame().get().getParent();
-         }
-         else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
-         {
-            return handPoseAction.getDefinition().getConditionalReferenceFrame().get().getParent();
-         }
-         else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
-         {
-            return walkAction.getDefinition().getConditionalReferenceFrame().get().getParent();
-         }
+         return footstepPlanAction.getDefinition().getParentFrameName();
       }
-      return null;
+      else if (nextPreviousAction instanceof RDXHandPoseAction handPoseAction)
+      {
+         return handPoseAction.getDefinition().getPalmParentFrameName();
+      }
+      else if (nextPreviousAction instanceof RDXWalkAction walkAction)
+      {
+         return walkAction.getDefinition().getParentFrameName();
+      }
+
+      return ReferenceFrame.getWorldFrame().getName();
    }
 
-   private RDXHandPoseAction findNextPreviousHandPoseAction(RobotSide side)
-   {
-      RDXHandPoseAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
-      {
-         if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
-         {
-            if (handPoseAction.getDefinition().getSide() == side)
-            {
-               previousAction = (RDXHandPoseAction) actionSequence.get(i);
-            }
-         }
-      }
-      return previousAction;
-   }
-
-   private <T extends RDXBehaviorAction> T findNextPreviousAction(Class<T> actionClass)
+   private <T extends RDXBehaviorAction> T findNextPreviousAction(Class<T> actionClass, @Nullable RobotSide side)
    {
       T previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
+      for (int i = Math.min(executionNextIndexStatus, actionSequence.size() - 1); i >= 0; i--)
       {
-         if (actionClass.isInstance(actionSequence.get(i)))
+         RDXBehaviorAction action = actionSequence.get(i);
+         if (actionClass.isInstance(action))
          {
-            previousAction = actionClass.cast(actionSequence.get(i));
+            boolean match = side == null;
+            match |= action.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
+
+            if (match)
+            {
+               previousAction = actionClass.cast(action);
+            }
          }
       }
       return previousAction;
