@@ -36,8 +36,7 @@ public class DetachableReferenceFrame
 
       if (referenceFrame != null)
       {
-         boolean isChildOfWorld = ReferenceFrameMissingTools.checkIsAncestorOfWorld(referenceFrame);
-         frameNeedsRecreating |= shouldBeChildOfWorld != isChildOfWorld;
+         frameNeedsRecreating |= shouldBeChildOfWorld != isChildOfWorld();
          frameNeedsRecreating |= referenceFrame.getParent() != parentFrameInWorld;
       }
 
@@ -55,6 +54,11 @@ public class DetachableReferenceFrame
 
          referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
       }
+   }
+
+   public boolean isChildOfWorld()
+   {
+      return ReferenceFrameMissingTools.checkIsAncestorOfWorld(referenceFrame);
    }
 
    public ReferenceFrame getReferenceFrame()

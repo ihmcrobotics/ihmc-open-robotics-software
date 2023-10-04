@@ -17,7 +17,6 @@ import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -189,20 +188,6 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    public void updateAfterLoading()
    {
       parentFrameComboBox.setSelectedReferenceFrame(definition.getConditionalReferenceFrame());
-   }
-
-   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      definition.setTransformToParent(transformToParent);
-      update();
-   }
-
-   public void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
-      update();
    }
 
    @Override
