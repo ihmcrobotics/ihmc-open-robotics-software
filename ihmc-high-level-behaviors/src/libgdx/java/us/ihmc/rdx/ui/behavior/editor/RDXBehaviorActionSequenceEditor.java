@@ -25,8 +25,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.idl.IDLSequence;
@@ -88,6 +88,8 @@ public class RDXBehaviorActionSequenceEditor
    private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private ROS2ControllerHelper ros2ControllerHelper;
+   private final TypedNotification<Class<? extends RDXBehaviorAction>> actionToCreate = new TypedNotification<>();
+   private RobotSide sideOfNewAction;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private volatile long receivedSequenceStatusMessageCount = 0;
    private long receivedStatusMessageCount = 0;
@@ -278,6 +280,86 @@ public class RDXBehaviorActionSequenceEditor
 
    public void update()
    {
+      if (actionToCreate.poll())
+      {
+         Class<? extends RDXBehaviorAction> actionType = actionToCreate.read();
+         RDXBehaviorAction newAction = RDXActionSequenceTools.createBlankAction(actionType,
+                                                                                robotModel,
+                                                                                syncedRobot,
+                                                                                selectionCollisionModel,
+                                                                                baseUI,
+                                                                                panel3D,
+                                                                                referenceFrameLibrary,
+                                                                                ros2ControllerHelper);
+
+         ReferenceFrame nextPreviousParentFrame = findNextPreviousParentFrame();
+
+         if (newAction instanceof RDXWalkAction walkAction)
+         {
+            walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+            if (nextPreviousParentFrame != null)
+               walkAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+         }
+         else if (newAction instanceof RDXHandPoseAction handPoseAction)
+         {
+            // Set the new action to where the last one was for faster authoring
+            handPoseAction.getDefinition().setSide(newActionSide);
+            RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(newActionSide);
+            if (nextPreviousHandPoseAction != null)
+            {
+               handPoseAction.setIncludingFrame(nextPreviousHandPoseAction.getReferenceFrame().getParent(),
+                                                nextPreviousHandPoseAction.getReferenceFrame().getTransformToParent());
+            }
+            else // set to current robot's hand pose
+            {
+               handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(newActionSide));
+            }
+            if (nextPreviousParentFrame != null)
+               handPoseAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+         }
+         else if (newAction instanceof RDXHandWrenchAction handWrenchAction)
+         {
+            handWrenchAction.getDefinition().setSide(newActionSide);
+         }
+         else if (newAction instanceof RDXChestOrientationAction chestOrientationAction)
+         {
+            // Set the new action to where the last one was for faster authoring
+            RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
+            if (nextPreviousChestOrientationAction != null)
+            {
+               chestOrientationAction.setIncludingFrame(nextPreviousChestOrientationAction.getReferenceFrame().getParent(),
+                                                        nextPreviousChestOrientationAction.getReferenceFrame().getTransformToParent());
+            }
+            else // set to current robot's chest pose
+            {
+               chestOrientationAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getChestFrame());
+            }
+            chestOrientationAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
+         }
+         else if (newAction instanceof RDXPelvisHeightPitchAction pelvisHeightPitchAction)
+         {
+            // Set the new action to where the last one was for faster authoring
+            RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
+            if (nextPreviousPelvisHeightAction != null)
+            {
+               pelvisHeightPitchAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
+                                                         nextPreviousPelvisHeightAction.getReferenceFrame().getTransformToParent());
+            }
+            else // set to current robot's pelvis pose
+            {
+               pelvisHeightPitchAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+            }
+            pelvisHeightPitchAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+         }
+         else if (newAction instanceof RDXFootstepPlanAction footstepPlanAction)
+         {
+            if (nextPreviousParentFrame != null)
+               footstepPlanAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+         }
+
+         insertNewAction(newAction);
+      }
+
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
          RDXBehaviorAction action = actionSequence.get(actionIndex);
@@ -644,17 +726,9 @@ public class RDXBehaviorActionSequenceEditor
          ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
       }
 
-      RDXBehaviorAction newAction = null;
-
-      ReferenceFrame nextPreviousParentFrame = findNextPreviousParentFrame();
-
       if (ImGui.button(labels.get("Add Walk")))
       {
-         RDXWalkAction walkAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
-         walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-         if (nextPreviousParentFrame != null)
-         walkAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
-         newAction = walkAction;
+         actionToCreate.set(RDXWalkAction.class);
       }
       ImGui.text("Add Hand Pose:");
       ImGui.sameLine();
@@ -662,27 +736,8 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandPose")))
          {
-            RDXHandPoseAction handPoseAction = new RDXHandPoseAction(panel3D,
-                                                                     robotModel,
-                                                                     syncedRobot.getFullRobotModel(),
-                                                                     selectionCollisionModel,
-                                                                     referenceFrameLibrary,
-                                                                     ros2ControllerHelper);
-            // Set the new action to where the last one was for faster authoring
-            handPoseAction.getDefinition().setSide(side);
-            RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
-            if (nextPreviousHandPoseAction != null)
-            {
-               handPoseAction.setIncludingFrame(nextPreviousHandPoseAction.getReferenceFrame().getParent(),
-                                                nextPreviousHandPoseAction.getReferenceFrame().getTransformToParent());
-            }
-            else // set to current robot's hand pose
-            {
-               handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
-            }
-            if (nextPreviousParentFrame != null)
-               handPoseAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
-            newAction = handPoseAction;
+            actionToCreate.set(RDXHandPoseAction.class);
+            sideOfNewAction = side;
          }
          if (side.ordinal() < 1)
             ImGui.sameLine();
@@ -693,79 +748,36 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandWrench")))
          {
-            RDXHandWrenchAction handWrenchAction = new RDXHandWrenchAction();
-            handWrenchAction.getDefinition().setSide(side);
-            newAction = handWrenchAction;
+            actionToCreate.set(RDXHandWrenchAction.class);
+            sideOfNewAction = side;
          }
          if (side.ordinal() < 1)
             ImGui.sameLine();
       }
       if (ImGui.button(labels.get("Add Hand Configuration")))
       {
-         newAction = new RDXSakeHandCommandAction();
+         actionToCreate.set(RDXSakeHandCommandAction.class);
       }
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
-         RDXChestOrientationAction chestOrientationAction = new RDXChestOrientationAction(panel3D,
-                                                                                          robotModel,
-                                                                                          syncedRobot.getFullRobotModel(),
-                                                                                          selectionCollisionModel,
-                                                                                          referenceFrameLibrary,
-                                                                                          ros2ControllerHelper);
-         // Set the new action to where the last one was for faster authoring
-         RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
-         if (nextPreviousChestOrientationAction != null)
-         {
-            chestOrientationAction.setIncludingFrame(nextPreviousChestOrientationAction.getReferenceFrame().getParent(),
-                                                     nextPreviousChestOrientationAction.getReferenceFrame().getTransformToParent());
-         }
-         else // set to current robot's chest pose
-         {
-            chestOrientationAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getChestFrame());
-         }
-         chestOrientationAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
-         newAction = chestOrientationAction;
+         actionToCreate.set(RDXChestOrientationAction.class);
       }
       if (ImGui.button(labels.get("Add Pelvis Height and Pitch")))
       {
-         RDXPelvisHeightPitchAction pelvisHeightAction = new RDXPelvisHeightPitchAction(panel3D,
-                                                                                        robotModel,
-                                                                                        syncedRobot.getFullRobotModel(),
-                                                                                        selectionCollisionModel,
-                                                                                        referenceFrameLibrary,
-                                                                                        ros2ControllerHelper);
-         // Set the new action to where the last one was for faster authoring
-         RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
-         if (nextPreviousPelvisHeightAction != null)
-         {
-            pelvisHeightAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
-                                                 nextPreviousPelvisHeightAction.getReferenceFrame().getTransformToParent());
-         }
-         else // set to current robot's pelvis pose
-         {
-            pelvisHeightAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
-         }
-         pelvisHeightAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-         newAction = pelvisHeightAction;
+         actionToCreate.set(RDXPelvisHeightPitchAction.class);
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
-         newAction = new RDXArmJointAnglesAction(robotModel);
+         actionToCreate.set(RDXArmJointAnglesAction.class);
       }
       if (ImGui.button(labels.get("Add Footstep Plan")))
       {
-         RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
-         if (nextPreviousParentFrame != null)
-            footstepPlanAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
-         newAction = footstepPlanAction;
+         actionToCreate.set(RDXFootstepPlanAction.class);
       }
       if (ImGui.button(labels.get("Add Wait")))
       {
-         newAction = new RDXWaitDurationAction();
+         actionToCreate.set(RDXWaitDurationAction.class);
       }
-
-      if (newAction != null)
-         insertNewAction(newAction);
 
       if (workspaceFile == null)
       {
