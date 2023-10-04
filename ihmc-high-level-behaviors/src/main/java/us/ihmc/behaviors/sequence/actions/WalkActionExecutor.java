@@ -33,8 +33,8 @@ public class WalkActionExecutor implements BehaviorActionExecutor
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final WalkActionState state = new WalkActionState();
-   private final WalkActionDefinition definition = state.getDefinition();
+   private final WalkActionState state;
+   private final WalkActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -68,6 +68,9 @@ public class WalkActionExecutor implements BehaviorActionExecutor
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new WalkActionState(referenceFrameLibrary);
+      definition = state.getDefinition();
    }
 
    @Override
