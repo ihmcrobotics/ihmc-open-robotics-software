@@ -56,7 +56,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
                                                                                                                            imDouble));
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(definition.getConditionalReferenceFrame().get(),
-                                                                                   definition.getTransformToParent());
+                                                                                   definition.getPelvisToParentTransform());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
@@ -120,14 +120,14 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
       definition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      definition.setTransformToParent(transformToParent);
+      definition.setPelvisToParentTransform(transformToParent);
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
       definition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      definition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
+      definition.setPelvisToParentTransform(referenceFrame.getTransformToWorldFrame());
       update();
    }
 
@@ -164,7 +164,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          currentRobotPelvisPose.changeFrame(definition.get().getParent());
       RigidBodyTransform transformVariation = new RigidBodyTransform();
       transformVariation.setAndInvert(currentRobotPelvisPose);
-      definition.getTransformToParent().transform(transformVariation);
+      definition.getPelvisToParentTransform().transform(transformVariation);
       MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
 
 

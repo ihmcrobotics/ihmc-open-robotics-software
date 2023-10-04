@@ -15,7 +15,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
    private double trajectoryDuration = 4.0;
    private boolean executeWitNextAction = false;
    private String parentFrameName;
-   private RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private final RigidBodyTransform pelvisToParentTransform = new RigidBodyTransform();
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -24,7 +24,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("parentFrame", parentFrameName);
-      JSONTools.toJSON(jsonNode, transformToParent);
+      JSONTools.toJSON(jsonNode, pelvisToParentTransform);
    }
 
    @Override
@@ -34,7 +34,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       parentFrameName = jsonNode.get("parentFrame").textValue();
-      JSONTools.toEuclid(jsonNode, transformToParent);
+      JSONTools.toEuclid(jsonNode, pelvisToParentTransform);
    }
 
    @Override
@@ -44,7 +44,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       message.setExecuteWithNextAction(executeWitNextAction);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
-      MessageTools.toMessage(transformToParent, message.getTransformToParent());
+      MessageTools.toMessage(pelvisToParentTransform, message.getTransformToParent());
    }
 
    @Override
@@ -53,28 +53,28 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
       parentFrameName = message.getParentFrame().getString(0);
-      MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
+      MessageTools.toEuclid(message.getTransformToParent(), pelvisToParentTransform);
    }
 
    public void setHeight(double height)
    {
-      transformToParent.getTranslation().set(transformToParent.getTranslationX(), transformToParent.getTranslationY(), height);
+      pelvisToParentTransform.getTranslation().set(pelvisToParentTransform.getTranslationX(), pelvisToParentTransform.getTranslationY(), height);
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = transformToParent.getRotation();
-      transformToParent.getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = pelvisToParentTransform.getRotation();
+      pelvisToParentTransform.getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public double getHeight()
    {
-      return transformToParent.getTranslationZ();
+      return pelvisToParentTransform.getTranslationZ();
    }
 
    public double getPitch()
    {
-      return transformToParent.getRotation().getPitch();
+      return pelvisToParentTransform.getRotation().getPitch();
    }
 
    public double getTrajectoryDuration()
@@ -120,13 +120,8 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
       this.parentFrameName = parentFrameName;
    }
 
-   public RigidBodyTransform getTransformToParent()
+   public RigidBodyTransform getPelvisToParentTransform()
    {
-      return transformToParent;
-   }
-
-   public void setTransformToParent(RigidBodyTransform transformToParent)
-   {
-      this.transformToParent = transformToParent;
+      return pelvisToParentTransform;
    }
 }
