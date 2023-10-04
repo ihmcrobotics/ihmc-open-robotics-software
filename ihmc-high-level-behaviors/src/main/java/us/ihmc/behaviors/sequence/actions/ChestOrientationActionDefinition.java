@@ -16,7 +16,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private String parentFrameName;
-   private RigidBodyTransform chestToParentTransform = new RigidBodyTransform();
+   private final RigidBodyTransform chestToParentTransform = new RigidBodyTransform();
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -139,10 +139,5 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    public RigidBodyTransform getChestToParentTransform()
    {
       return chestToParentTransform;
-   }
-
-   public void setChestToParentTransform(RigidBodyTransform chestToParentTransform)
-   {
-      this.chestToParentTransform = chestToParentTransform;
    }
 }
