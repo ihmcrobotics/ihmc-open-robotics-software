@@ -13,17 +13,17 @@ import us.ihmc.tools.io.JSONTools;
 public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanActionDefinitionMessage>
 {
    private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
-   private final RecyclingArrayList<FootstepActionState> footsteps;
+   private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
 
    public FootstepPlanActionState(ReferenceFrameLibrary referenceFrameLibrary)
    {
-      footsteps = new RecyclingArrayList<>(() -> new FootstepActionState(referenceFrameLibrary, this));
+      footsteps = new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepState(referenceFrameLibrary, this));
    }
 
    @Override
    public void update()
    {
-      for (FootstepActionState footstep : footsteps)
+      for (FootstepPlanActionFootstepState footstep : footsteps)
       {
          footstep.update();
       }
@@ -32,13 +32,13 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      definition.saveToFile(jsonNode);
+      super.saveToFile(jsonNode);
 
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
-      for (FootstepActionState footstep : footsteps)
+      for (FootstepPlanActionFootstepState footstep : footsteps)
       {
          ObjectNode footstepNode = foostepsArrayNode.addObject();
-         footstep.saveToFile(footstepNode);
+         footstep.getDefinition().saveToFile(footstepNode);
       }
    }
 
@@ -48,7 +48,7 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
       super.loadFromFile(jsonNode);
 
       footsteps.clear();
-      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
+      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().getDefinition().loadFromFile(footstepNode));
    }
 
    @Override
@@ -57,9 +57,9 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
       definition.toMessage(message);
 
       message.getFootsteps().clear();
-      for (FootstepActionState footstep : footsteps)
+      for (FootstepPlanActionFootstepState footstep : footsteps)
       {
-         footstep.toMessage(message.getFootsteps().add());
+         footstep.getDefinition().toMessage(message.getFootsteps().add());
       }
    }
 
@@ -71,11 +71,11 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
       footsteps.clear();
       for (FootstepActionDefinitionMessage footstep : message.getFootsteps())
       {
-         footsteps.add().fromMessage(footstep);
+         footsteps.add().getDefinition().fromMessage(footstep);
       }
    }
 
-   public RecyclingArrayList<FootstepActionState> getFootsteps()
+   public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
    {
       return footsteps;
    }

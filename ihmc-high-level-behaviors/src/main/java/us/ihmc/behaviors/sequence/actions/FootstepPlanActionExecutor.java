@@ -32,7 +32,6 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final WalkingControllerParameters walkingControllerParameters;
    private int actionIndex;
    private final FramePose3D solePose = new FramePose3D();
@@ -57,7 +56,6 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
       state = new FootstepPlanActionState(referenceFrameLibrary);
@@ -74,7 +72,7 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
    public void triggerActionExecution()
    {
       footstepPlanToExecute.clear();
-      for (FootstepActionState footstep : state.getFootsteps())
+      for (FootstepPlanActionFootstepState footstep : state.getFootsteps())
       {
          solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(),
                                     footstep.getDefinition().getSoleToPlanFrameTransform());
