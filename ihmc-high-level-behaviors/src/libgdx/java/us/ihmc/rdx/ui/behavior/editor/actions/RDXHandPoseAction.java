@@ -61,17 +61,16 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final HandPoseActionDefinition actionDefinition = new HandPoseActionDefinition();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDefinition.getConditionalReferenceFrame().get(), actionDefinition.getTransformToParent());
+   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(actionDefinition.getPalmFrame(), actionDefinition.getTransformToParent());
    private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(() -> poseGizmo.getSelected().get(),
                                                                          value -> poseGizmo.getSelected().set(value),
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDefinition.getConditionalReferenceFrame().get());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDefinition.getConditionalReferenceFrame().get());
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDefinition.getPalmFrame());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDefinition.getPalmFrame());
    private final Color goodQualityColor;
    private final Color badQualityColor;
    private boolean isMouseHovering = false;
@@ -116,7 +115,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                             ReferenceFrameLibrary referenceFrameLibrary,
                             ROS2ControllerPublishSubscribeAPI ros2)
    {
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      actionDefinition.setReferenceFrameLibrary(referenceFrameLibrary);
 
       ColorDefinition goodQualityColorDefinition = ColorDefinitions.parse(GOOD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5);
       goodQualityColor = RDXVisualTools.toColor(goodQualityColorDefinition);
@@ -181,7 +180,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void updateAfterLoading()
    {
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getConditionalReferenceFrame());
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionDefinition.getParentFrame().getName());
    }
 
    public void setSide(RobotSide side)
@@ -191,28 +190,28 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      actionDefinition.getConditionalReferenceFrame().setParentFrameName(parentFrame.getName());
-      actionDefinition.setTransformToParent(transformToParent);
+      actionDefinition.changeParentFrame(parentFrame);
+      actionDefinition.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
       update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
-      actionDefinition.getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
-      actionDefinition.setTransformToParent(referenceFrame.getTransformToWorldFrame());
+      actionDefinition.changeParentFrame(ReferenceFrame.getWorldFrame());
+      actionDefinition.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
       update();
    }
 
    @Override
    public void update(boolean concurrentActionIsNextForExecution)
    {
-      actionDefinition.update(referenceFrameLibrary);
+      actionDefinition.update();
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDefinition.getConditionalReferenceFrame().get())
+      if (poseGizmo.getPoseGizmo().getGizmoFrame() != actionDefinition.getPalmFrame())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(actionDefinition.getConditionalReferenceFrame().get());
-         graphicFrame.changeParentFrame(actionDefinition.getConditionalReferenceFrame().get());
-         collisionShapeFrame.changeParentFrame(actionDefinition.getConditionalReferenceFrame().get());
+         poseGizmo.getPoseGizmo().setGizmoFrame(actionDefinition.getPalmFrame());
+         graphicFrame.changeParentFrame(actionDefinition.getPalmFrame());
+         collisionShapeFrame.changeParentFrame(actionDefinition.getPalmFrame());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -293,7 +292,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       }
       if (referenceFrameLibraryCombo.render())
       {
-         actionDefinition.getConditionalReferenceFrame().setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getParent().getName());
+         actionDefinition.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         update();
       }
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();

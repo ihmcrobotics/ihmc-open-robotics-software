@@ -3,25 +3,46 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDefinition
+import java.util.function.Consumer;
+
+public class ChestOrientationActionDefinition implements BehaviorActionDefinition
 {
    private String description = "Chest orientation";
    private double trajectoryDuration = 4.0;
    private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
+   private ReferenceFrameLibrary referenceFrameLibrary;
+   private final ModifiableReferenceFrame chestInteractableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+
+   @Override
+   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   {
+      this.referenceFrameLibrary = referenceFrameLibrary;
+   }
+
+   @Override
+   public void update()
+   {
+      BehaviorActionSequenceTools.accomodateFrameReplacement(chestInteractableReferenceFrame, referenceFrameLibrary);
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      JSONTools.toJSON(jsonNode, getTransformToParent());
+      jsonNode.put("parentFrame", chestInteractableReferenceFrame.getReferenceFrame().getParent().getName());
+      JSONTools.toJSON(jsonNode, chestInteractableReferenceFrame.getTransformToParent());
       jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
    }
@@ -31,8 +52,8 @@ public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDe
    {
       description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, getTransformToParent());
+      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
+      chestInteractableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
    }
@@ -40,8 +61,8 @@ public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDe
    public void toMessage(BodyPartPoseActionDefinitionMessage message)
    {
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
+      message.getParentFrame().add(getParentFrame().getName());
+      MessageTools.toMessage(chestInteractableReferenceFrame.getTransformToParent(), message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
       message.setHoldPoseInWorld(holdPoseInWorldLater);
@@ -49,11 +70,41 @@ public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDe
 
    public void fromMessage(BodyPartPoseActionDefinitionMessage message)
    {
-      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
-      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
+      chestInteractableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(message.getParentFrame().getString(0)));
+      chestInteractableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
+   }
+
+   public ReferenceFrame getParentFrame()
+   {
+      return chestInteractableReferenceFrame.getReferenceFrame().getParent();
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return chestInteractableReferenceFrame.getReferenceFrame();
+   }
+
+   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
+   {
+      chestInteractableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+   }
+
+   public void changeParentFrame(ReferenceFrame parentFrame)
+   {
+      chestInteractableReferenceFrame.changeParentFrame(parentFrame);
+   }
+
+   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
+   {
+      chestInteractableReferenceFrame.update(transformToParentConsumer);
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      return chestInteractableReferenceFrame.getTransformToParent();
    }
 
    public void setYaw(double yaw)
@@ -119,5 +170,10 @@ public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDe
    public String getDescription()
    {
       return description;
+   }
+
+   public ReferenceFrameLibrary getReferenceFrameLibrary()
+   {
+      return referenceFrameLibrary;
    }
 }

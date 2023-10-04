@@ -25,7 +25,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -189,25 +188,12 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 ros2ControllerHelper);
             if (action != null)
             {
-               try
-               {
-                  action.getActionDefinition().loadFromFile(actionNode);
-               }
-               catch (Exception exception)
-               {
-                  exception.printStackTrace();
-                  LogTools.error("Unable to load action sequence file: {}", workspaceFile.getFilesystemFile().getFileName());
-               }
+               action.getActionDefinition().loadFromFile(actionNode);
                action.updateAfterLoading();
                action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
                action.getExpanded().set(false);
-
-               if (action.getActionDefinition() instanceof FrameBasedBehaviorActionDefinition frameBasedBehaviorActionDefinition)
-               {
-                  referenceFrameLibrary.addParent(frameBasedBehaviorActionDefinition.getConditionalReferenceFrame());
-               }
             }
             else
             {
@@ -651,7 +637,7 @@ public class RDXBehaviorActionSequenceEditor
          RDXWalkAction walkAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
          walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
          if (nextPreviousParentFrame != null)
-         walkAction.getActionDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            walkAction.getActionDefinition().changeParentFrameWithoutMoving(nextPreviousParentFrame);
          newAction = walkAction;
       }
       ImGui.text("Add Hand Pose:");
@@ -679,7 +665,7 @@ public class RDXBehaviorActionSequenceEditor
                handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
             }
             if (nextPreviousParentFrame != null)
-            handPoseAction.getActionDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+               handPoseAction.getActionDefinition().changeParentFrameWithoutMoving(nextPreviousParentFrame);
             newAction = handPoseAction;
          }
          if (side.ordinal() < 1)
@@ -721,7 +707,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             chestOrientationAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getChestFrame());
          }
-         chestOrientationAction.getActionDefinition().getConditionalReferenceFrame().setParentFrameName(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
+         chestOrientationAction.getActionDefinition().changeParentFrameWithoutMoving(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
          newAction = chestOrientationAction;
       }
       if (ImGui.button(labels.get("Add Pelvis Height and Pitch")))
@@ -743,7 +729,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             pelvisHeightAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
          }
-         pelvisHeightAction.getActionDefinition().getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+         pelvisHeightAction.getActionDefinition().changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
          newAction = pelvisHeightAction;
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
@@ -754,7 +740,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
          if (nextPreviousParentFrame != null)
-            footstepPlanAction.getActionDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            footstepPlanAction.getActionDefinition().changeParentFrame(nextPreviousParentFrame);
          newAction = footstepPlanAction;
       }
       if (ImGui.button(labels.get("Add Wait")))
@@ -785,15 +771,15 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (actionSequence.get(i) instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            return footstepPlanAction.getActionDefinition().getConditionalReferenceFrame().get().getParent();
+            return footstepPlanAction.getActionDefinition().getParentFrame();
          }
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
-            return handPoseAction.getActionDefinition().getConditionalReferenceFrame().get().getParent();
+            return handPoseAction.getActionDefinition().getParentFrame();
          }
          else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
          {
-            return walkAction.getActionDefinition().getConditionalReferenceFrame().get().getParent();
+            return walkAction.getActionDefinition().getParentFrame();
          }
       }
       return null;

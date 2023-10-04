@@ -1,6 +1,7 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 /**
  * Represents a ReferenceFrameSupplier which may not have a valid parent ReferenceFrame.
@@ -10,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
  */
 public class ConditionalReferenceFrame implements ReferenceFrameSupplier
 {
-   public static final ReferenceFrame INVALID_FRAME = new PoseReferenceFrame("InvalidFrame", ReferenceFrame.getWorldFrame());
+   public static final ReferenceFrame INVALID_FRAME = ReferenceFrameTools.constructARootFrame("InvalidFrame");
 
    private String parentFrameName;
    private final ModifiableReferenceFrame modifiableReferenceFrame;
@@ -21,25 +22,9 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
       modifiableReferenceFrame = new ModifiableReferenceFrame(frameName, INVALID_FRAME);
    }
 
-   public ConditionalReferenceFrame(String parentFrameName)
-   {
-      this.parentFrameName = parentFrameName;
-      modifiableReferenceFrame = new ModifiableReferenceFrame(INVALID_FRAME);
-   }
-
-   public ConditionalReferenceFrame()
-   {
-      this(INVALID_FRAME.getName());
-   }
-
-   public String getConditionallyValidParentFrameName()
+   public String getParentFrameName()
    {
       return parentFrameName;
-   }
-
-   public String getActualParentFrameName()
-   {
-      return modifiableReferenceFrame.getReferenceFrame().getParent().getName();
    }
 
    public void setParentFrameName(String parentFrameName)
@@ -100,11 +85,6 @@ public class ConditionalReferenceFrame implements ReferenceFrameSupplier
    public boolean hasParentFrame()
    {
       return !modifiableReferenceFrame.getReferenceFrame().getParent().equals(INVALID_FRAME);
-   }
-
-   public ModifiableReferenceFrame getModifiableReferenceFrame()
-   {
-      return modifiableReferenceFrame;
    }
 
    @Override

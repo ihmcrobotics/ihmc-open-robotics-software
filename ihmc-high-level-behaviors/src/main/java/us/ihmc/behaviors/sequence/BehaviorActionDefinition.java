@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
  * Interface for a definition of an action with
@@ -14,6 +15,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public interface BehaviorActionDefinition
 {
+   default void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   {
+
+   }
+
    /** Needed to keep replaced reference frames up to date. */
    default void update()
    {

@@ -30,7 +30,6 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionDefinition imp
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final WalkingControllerParameters walkingControllerParameters;
    private int actionIndex;
    private final FramePose3D solePose = new FramePose3D();
@@ -55,14 +54,14 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionDefinition imp
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      update();
 
       this.actionIndex = actionIndex;
    }
@@ -73,7 +72,7 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionDefinition imp
       footstepPlanToExecute.clear();
       for (FootstepActionDefinition footstep : getFootsteps())
       {
-         solePose.setIncludingFrame(getConditionalReferenceFrame().get().getParent(), footstep.getSolePose());
+         solePose.setIncludingFrame(getPlanFrame(), footstep.getSolePose());
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          footstepPlanToExecute.addFootstep(footstep.getSide(), solePose);
       }
@@ -103,7 +102,7 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionDefinition imp
 
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get().getParent(),
+            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(),
                                                       footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
@@ -128,7 +127,7 @@ public class FootstepPlanActionExecutor extends FootstepPlanActionDefinition imp
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
          if (indexOfLastFoot.get(side) >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get().getParent(),
+            goalFeetPoses.get(side).setIncludingFrame(getPlanFrame(),
                                                       footstepPlanToExecute.getFootstep(indexOfLastFoot.get(side)).getFootstepPose());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }

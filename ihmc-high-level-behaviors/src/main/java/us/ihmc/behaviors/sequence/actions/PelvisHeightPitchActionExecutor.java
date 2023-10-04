@@ -20,7 +20,6 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefi
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private int actionIndex;
    private final Timer executionTimer = new Timer();
@@ -37,14 +36,14 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefi
                                           ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      update();
 
       this.actionIndex = actionIndex;
    }
@@ -52,7 +51,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefi
    @Override
    public void triggerActionExecution()
    {
-      FramePose3D framePose = new FramePose3D(getConditionalReferenceFrame().get());
+      FramePose3D framePose = new FramePose3D(getReferenceFrame());
       FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -72,7 +71,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefi
       ros2ControllerHelper.publishToController(message);
       executionTimer.reset();
 
-      desiredPelvisPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
@@ -83,7 +82,7 @@ public class PelvisHeightPitchActionExecutor extends PelvisHeightPitchActionDefi
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredPelvisPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredPelvisPose.setFromReferenceFrame(getReferenceFrame());
       syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
       desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());

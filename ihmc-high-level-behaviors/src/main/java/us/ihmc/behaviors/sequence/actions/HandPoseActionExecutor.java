@@ -26,7 +26,6 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private int actionIndex;
@@ -49,9 +48,9 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
                                  HandWrenchCalculator handWrenchCalculator)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculator = handWrenchCalculator;
+      setReferenceFrameLibrary(referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -63,7 +62,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      update();
 
       this.actionIndex = actionIndex;
       boolean isNextForExecution = concurrentActionIsNextForExecution || actionIndex == nextExecutionIndex;
@@ -75,7 +74,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
          rootCalculator.getKinematicsInfo();
          rootCalculator.computeRoot();
          ReferenceFrame chestFrame = rootCalculator.getRoot();
-         armIKSolver.update(chestFrame, getConditionalReferenceFrame().get());
+         armIKSolver.update(chestFrame, getPalmFrame());
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
@@ -113,7 +112,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
       }
       else
       {
-         FramePose3D frameHand = new FramePose3D(getConditionalReferenceFrame().get());
+         FramePose3D frameHand = new FramePose3D(getPalmFrame());
          frameHand.changeFrame(ReferenceFrame.getWorldFrame());
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(getSide(),
                                                                                                         getTrajectoryDuration(),
@@ -136,7 +135,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
 
       executionTimer.reset();
 
-      desiredHandControlPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
       startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
       startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
@@ -145,7 +144,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredHandControlPose.setFromReferenceFrame(getConditionalReferenceFrame().get());
+      desiredHandControlPose.setFromReferenceFrame(getPalmFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
       boolean wasExecuting = isExecuting;

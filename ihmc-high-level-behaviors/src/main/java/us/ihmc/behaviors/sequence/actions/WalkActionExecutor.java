@@ -41,7 +41,6 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int actionIndex;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
@@ -65,19 +64,19 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      update(referenceFrameLibrary);
+      update();
 
       this.actionIndex = actionIndex;
 
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(), getGoalFootstepToParentTransforms().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getGoalFrame(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
