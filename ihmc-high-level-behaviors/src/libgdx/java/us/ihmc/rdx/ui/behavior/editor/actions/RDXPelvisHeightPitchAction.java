@@ -242,7 +242,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         selectedWrapper.set(true);
+         getSelected().set(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);

@@ -47,7 +47,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
-   private final ImBooleanWrapper selectedWrapper;
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
@@ -91,9 +90,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
-      selectedWrapper = new ImBooleanWrapper(poseGizmo.getSelected()::get,
-                                             poseGizmo.getSelected()::set,
-                                             imBoolean -> ImGui.checkbox(labels.get("Selected"), poseGizmo.getSelected()));
       executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
                                                           definition::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
@@ -229,7 +225,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         selectedWrapper.set(true);
+         getSelected().set(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);
