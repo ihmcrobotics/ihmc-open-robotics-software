@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanActionDefinitionMessage>
@@ -16,11 +15,11 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
    private final RecyclingArrayList<FootstepActionState> footsteps = new RecyclingArrayList<>(() -> new FootstepActionState(this));
 
    @Override
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
       for (FootstepActionState footstep : footsteps)
       {
-         footstep.update(referenceFrameLibrary);
+         footstep.update();
       }
    }
 
@@ -40,7 +39,7 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      definition.loadFromFile(jsonNode);
+      super.loadFromFile(jsonNode);
 
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));

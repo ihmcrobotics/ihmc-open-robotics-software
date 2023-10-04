@@ -3,7 +3,6 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class PelvisHeightPitchActionState extends BehaviorActionState<BodyPartPoseActionDefinitionMessage>
 {
@@ -11,9 +10,9 @@ public class PelvisHeightPitchActionState extends BehaviorActionState<BodyPartPo
    private final DetachableReferenceFrame pelvisFrame = new DetachableReferenceFrame(definition.getTransformToParent());
 
    @Override
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
-      pelvisFrame.update(referenceFrameLibrary, definition.getParentFrameName());
+      pelvisFrame.update(definition.getParentFrameName());
    }
 
    @Override

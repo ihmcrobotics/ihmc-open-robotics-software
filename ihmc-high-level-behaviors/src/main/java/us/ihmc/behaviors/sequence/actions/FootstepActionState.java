@@ -7,19 +7,23 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class FootstepActionState extends BehaviorActionState<FootstepActionDefinitionMessage>
 {
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState footstepPlan;
    private final FootstepActionDefinition definition = new FootstepActionDefinition();
-   private final DetachableReferenceFrame soleFrame = new DetachableReferenceFrame(definition.getSoleToPlanFrameTransform());
+   private final DetachableReferenceFrame soleFrame;
 
-   public FootstepActionState(FootstepPlanActionState footstepPlan)
+   public FootstepActionState(ReferenceFrameLibrary referenceFrameLibrary, FootstepPlanActionState footstepPlan)
    {
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.footstepPlan = footstepPlan;
+
+      soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getSoleToPlanFrameTransform());
    }
 
    @Override
-   public void update(ReferenceFrameLibrary referenceFrameLibrary)
+   public void update()
    {
-      soleFrame.update(referenceFrameLibrary, footstepPlan.getDefinition().getParentFrameName());
+      soleFrame.update(footstepPlan.getDefinition().getParentFrameName());
    }
 
    @Override

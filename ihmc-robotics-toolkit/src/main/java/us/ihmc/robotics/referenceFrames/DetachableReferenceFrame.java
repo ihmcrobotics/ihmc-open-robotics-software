@@ -14,15 +14,19 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  */
 public class DetachableReferenceFrame
 {
+   private transient final ReferenceFrameLibrary referenceFrameLibrary;
+
    private final RigidBodyTransform transformToParent;
+   /** Never null, but does change. */
    private ReferenceFrame referenceFrame;
 
-   public DetachableReferenceFrame(RigidBodyTransform transformToParent)
+   public DetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary, RigidBodyTransform transformToParent)
    {
       this.transformToParent = transformToParent;
+      this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
-   public void update(ReferenceFrameLibrary referenceFrameLibrary, String parentFrameName)
+   public void update(String parentFrameName)
    {
       ReferenceFrame parentFrameInWorld = referenceFrameLibrary.findFrameByName(parentFrameName);
 
