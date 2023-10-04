@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -39,6 +40,12 @@ public class RDXSceneNode extends SceneNode implements RDXSceneNodeInterface
    public void renderImGuiWidgets()
    {
       sceneNodeBasics.renderImGuiWidgets();
+   }
+
+   @Override
+   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      sceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
    }
 
    @Override
