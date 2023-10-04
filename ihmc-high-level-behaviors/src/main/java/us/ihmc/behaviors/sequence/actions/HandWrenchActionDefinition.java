@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 
-public class HandWrenchActionDefinition implements BehaviorActionDefinition<HandWrenchActionDefinitionMessage>
+public class HandWrenchActionDefinition implements BehaviorActionDefinition<HandWrenchActionDefinitionMessage>, SidedObject
 {
    private String description = "Hand wrench";
    private RobotSide side = RobotSide.LEFT;
@@ -62,6 +63,7 @@ public class HandWrenchActionDefinition implements BehaviorActionDefinition<Hand
       this.force = force;
    }
 
+   @Override
    public RobotSide getSide()
    {
       return side;

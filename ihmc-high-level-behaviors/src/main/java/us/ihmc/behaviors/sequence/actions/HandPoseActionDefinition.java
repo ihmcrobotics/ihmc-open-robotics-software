@@ -7,9 +7,10 @@ import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedBodyPartPoseActionDefinitionMessage>
+public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedBodyPartPoseActionDefinitionMessage>, SidedObject
 {
    private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
@@ -71,6 +72,7 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedB
       jointSpaceControl = message.getJointSpaceControl();
    }
 
+   @Override
    public RobotSide getSide()
    {
       return side;
