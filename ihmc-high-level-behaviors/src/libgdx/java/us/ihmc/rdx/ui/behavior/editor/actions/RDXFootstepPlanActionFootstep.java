@@ -118,4 +118,9 @@ public class RDXFootstepPlanActionFootstep
    {
       return interactableFootstep.getSelectablePose3DGizmo().getPoseGizmo();
    }
+
+   public FootstepPlanActionFootstepDefinition getDefinition()
+   {
+      return definition;
+   }
 }

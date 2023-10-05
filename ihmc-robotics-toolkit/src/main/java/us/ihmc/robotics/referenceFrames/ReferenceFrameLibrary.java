@@ -43,6 +43,26 @@ public class ReferenceFrameLibrary
       dynamicCollections.add(dynamicCollection);
    }
 
+   public boolean containsFrame(String referenceFrameName)
+   {
+      for (ReferenceFrame frame : alwaysPresentFrames)
+      {
+         if (referenceFrameName.equals(frame.getName()))
+            return true;
+      }
+
+      for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
+      {
+         for (String dynamicFrameName : dynamicCollection.getFrameNameList())
+         {
+            if (referenceFrameName.equals(dynamicFrameName))
+               return true;
+         }
+      }
+
+      return false;
+   }
+
    @Nullable
    public ReferenceFrame findFrameByName(String referenceFrameName)
    {
