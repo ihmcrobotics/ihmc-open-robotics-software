@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 
-public class FootstepPlanActionDefinition extends BehaviorActionDefinition<FootstepPlanActionDefinitionMessage>
+public class FootstepPlanActionDefinition extends BehaviorActionDefinition
 {
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
@@ -36,18 +36,20 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition<Foots
       parentFrameName = jsonNode.get("parentFrame").textValue();
    }
 
-   @Override
    public void toMessage(FootstepPlanActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
    }
 
-   @Override
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
       parentFrameName = message.getParentFrame().getString(0);

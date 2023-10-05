@@ -23,7 +23,7 @@ public class BodyPartPoseStatusMessage extends Packet<BodyPartPoseStatusMessage>
 
    public BodyPartPoseStatusMessage()
    {
-      parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
+      parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 

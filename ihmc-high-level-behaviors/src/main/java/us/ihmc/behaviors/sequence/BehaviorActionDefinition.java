@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.sequence;
 
+import behavior_msgs.msg.dds.BehaviorActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.communication.packets.Packet;
 
 /**
  * Interface for a definition of an action with
@@ -13,9 +13,11 @@ import us.ihmc.communication.packets.Packet;
  * or currently executing it. This is only the information that gets
  * saved to/from JSON.
  */
-public abstract class BehaviorActionDefinition<T extends Packet<T>>
+public class BehaviorActionDefinition
 {
+   /** Human readable description of what the action does */
    private String description;
+   // TODO: Is every action concurrent-able?
    private boolean executeWitNextAction = false;
 
    public BehaviorActionDefinition(String description)
@@ -39,9 +41,18 @@ public abstract class BehaviorActionDefinition<T extends Packet<T>>
          executeWitNextAction = false;
    }
 
-   public abstract void toMessage(T message);
+   public void toMessage(BehaviorActionDefinitionMessage message)
+   {
+      message.getDescription().clear();
+      message.getDescription().add(description);
+      message.setExecuteWithNextAction(getExecuteWithNextAction());
+   }
 
-   public abstract void fromMessage(T message);
+   public void fromMessage(BehaviorActionDefinitionMessage message)
+   {
+      description = message.getDescription().toString();
+      executeWitNextAction = message.getExecuteWithNextAction();
+   }
 
    /**
     * A description of the action to help the operator in understanding
@@ -52,9 +63,6 @@ public abstract class BehaviorActionDefinition<T extends Packet<T>>
       this.description = description;
    }
 
-   /**
-    * See {@link #getDescription()}.
-    */
    public String getDescription()
    {
       return description;

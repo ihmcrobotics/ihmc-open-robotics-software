@@ -23,18 +23,16 @@ public class BehaviorActionSequenceTools
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         BehaviorActionDefinition action = actionSequence.get(i).getState().getDefinition();
-         if (action instanceof ArmJointAnglesActionDefinition armJointAnglesActionDefinition)
+         BehaviorActionState action = actionSequence.get(i).getState();
+         if (action instanceof ArmJointAnglesActionState armJointAnglesActionState)
          {
             ArmJointAnglesActionDefinitionMessage armJointAnglesActionDefinitionMessage = actionSequenceUpdateMessage.getArmJointAnglesActions().add();
             armJointAnglesActionDefinitionMessage.getActionInformation().setActionIndex(i);
             armJointAnglesActionDefinition.toMessage(armJointAnglesActionDefinitionMessage);
          }
-         else if (action instanceof ChestOrientationActionDefinition chestOrientationActionDefinition)
+         else if (action instanceof ChestOrientationActionState chestOrientationActionState)
          {
-            BodyPartPoseActionDefinitionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
-            chestOrientationActionMessage.getActionInformation().setActionIndex(i);
-            chestOrientationActionDefinition.toMessage(chestOrientationActionMessage);
+            chestOrientationActionState.toMessage(actionSequenceUpdateMessage.getChestOrientationActions().add());
          }
          else if (action instanceof FootstepPlanActionDefinition footstepPlanActionDefinition)
          {
@@ -50,7 +48,7 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof HandPoseActionDefinition handPoseActionDefinition)
          {
-            SidedBodyPartPoseActionDefinitionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
+            HandPoseActionDefinitionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
             handPoseActionMessage.getActionInformation().setActionIndex(i);
             handPoseActionDefinition.toMessage(handPoseActionMessage);
          }
@@ -62,7 +60,7 @@ public class BehaviorActionSequenceTools
          }
          else if (action instanceof PelvisHeightPitchActionDefinition pelvisHeightActionDefinition)
          {
-            BodyPartPoseActionDefinitionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
+            PelvisHeightPitchActionDefinitionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
             pelvisHeightActionDefinition.toMessage(pelvisHeightActionMessage);
          }

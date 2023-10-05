@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
-import us.ihmc.communication.packets.Packet;
-
-public interface BehaviorActionDefinitionSupplier<T extends Packet<T>>
+public interface BehaviorActionDefinitionSupplier
 {
-   BehaviorActionDefinition<T> getDefinition();
+   BehaviorActionDefinition getDefinition();
 }

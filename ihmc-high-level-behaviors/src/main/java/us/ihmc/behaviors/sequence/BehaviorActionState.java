@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence;
 
+import behavior_msgs.msg.dds.BehaviorActionStateMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.log.LogTools;
 
-// TODO: Include toMessage and fromMessage
-public abstract class BehaviorActionState<T extends Packet<T>> implements BehaviorActionDefinitionSupplier<T>
+public abstract class BehaviorActionState implements BehaviorActionDefinitionSupplier
 {
    /** The action's unique ID. */
    private final long id;
@@ -38,15 +38,22 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
       // TODO: Pack
    }
 
-   public void toMessage(T message)
+   public void toMessage(BehaviorActionStateMessage message)
    {
-      getDefinition().toMessage(message);
-      // TODO: Pack
+      message.setId(id);
+      message.setActionIndex(actionIndex);
+      message.setIsNextForExecution(isNextForExecution);
+      message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
    }
 
-   public void fromMessage(T message)
+   public void fromMessage(BehaviorActionStateMessage message)
    {
-      getDefinition().fromMessage(message);
+      if (id != message.getId())
+         LogTools.error("IDs should match!");
+
+      actionIndex = message.getActionIndex();
+      isNextForExecution = message.getIsNextForExecution();
+      isToBeExecutedConcurrently = message.getIsToBeExecutedConcurrently();
    }
 
    /** The action's unique ID. */

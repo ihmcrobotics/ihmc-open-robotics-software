@@ -1,5 +1,5 @@
-# Used for syncing action sequences
-behavior_msgs/ActionInformationMessage action_information
+# Parent definition fields
+behavior_msgs/BehaviorActionDefinitionMessage action_definition
 
 # Wait duration
 float64 wait_duration

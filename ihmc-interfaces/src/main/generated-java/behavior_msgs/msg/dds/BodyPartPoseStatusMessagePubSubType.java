@@ -15,7 +15,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "eca11de31701994a440d69b8f6425ba1ac0c298ad29f4950439cc3428759f0ac";
+   		return "a80f16bb662b53f4b283abdb2c0a696b8064727236550d9bd7386cbc3983e411";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
@@ -91,7 +91,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       cdr.write_type_7(data.getCurrentAndConcurrent());
 
-      if(data.getParentFrame().size() <= 1000)
+      if(data.getParentFrame().size() <= 1)
       cdr.write_type_e(data.getParentFrame());else
           throw new RuntimeException("parent_frame field exceeds the maximum length");
 

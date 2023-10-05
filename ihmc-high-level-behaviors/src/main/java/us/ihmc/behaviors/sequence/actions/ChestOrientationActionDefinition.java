@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage;
+import behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
@@ -9,7 +9,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition extends BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
+public class ChestOrientationActionDefinition extends BehaviorActionDefinition
 {
    private double trajectoryDuration = 4.0;
    private boolean holdPoseInWorldLater = false;
@@ -43,25 +43,25 @@ public class ChestOrientationActionDefinition extends BehaviorActionDefinition<B
       JSONTools.toEuclid(jsonNode, chestToParentTransform);
    }
 
-   @Override
-   public void toMessage(BodyPartPoseActionDefinitionMessage message)
+   public void toMessage(ChestOrientationActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.setHoldPoseInWorld(holdPoseInWorldLater);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
-      MessageTools.toMessage(chestToParentTransform, message.getTransformToParent());
+      MessageTools.toMessage(chestToParentTransform, message.getChestTransformToParent());
    }
 
-   @Override
-   public void fromMessage(BodyPartPoseActionDefinitionMessage message)
+   public void fromMessage(ChestOrientationActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       trajectoryDuration = message.getTrajectoryDuration();
-      setExecuteWithNextAction(message.getExecuteWithNextAction());
       holdPoseInWorldLater = message.getHoldPoseInWorld();
       parentFrameName = message.getParentFrame().getString(0);
-      MessageTools.toEuclid(message.getTransformToParent(), chestToParentTransform);
+      MessageTools.toEuclid(message.getChestTransformToParent(), chestToParentTransform);
    }
 
    public void setYaw(double yaw)

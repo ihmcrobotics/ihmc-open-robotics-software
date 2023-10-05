@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
-public class WalkActionDefinition extends BehaviorActionDefinition<WalkActionDefinitionMessage>
+public class WalkActionDefinition extends BehaviorActionDefinition
 {
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
@@ -61,9 +61,10 @@ public class WalkActionDefinition extends BehaviorActionDefinition<WalkActionDef
       }
    }
 
-   @Override
    public void toMessage(WalkActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.getParentFrame().resetQuick();
@@ -73,9 +74,10 @@ public class WalkActionDefinition extends BehaviorActionDefinition<WalkActionDef
       MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
    }
 
-   @Override
    public void fromMessage(WalkActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
       parentFrameName = message.getParentFrame().getString(0);

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage;
+import behavior_msgs.msg.dds.HandPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition extends BehaviorActionDefinition<SidedBodyPartPoseActionDefinitionMessage> implements SidedObject
+public class HandPoseActionDefinition extends BehaviorActionDefinition implements SidedObject
 {
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
@@ -50,9 +50,10 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition<SidedBody
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
 
-   @Override
-   public void toMessage(SidedBodyPartPoseActionDefinitionMessage message)
+   public void toMessage(HandPoseActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(palmParentFrameName);
       MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
@@ -63,9 +64,10 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition<SidedBody
       message.setJointSpaceControl(jointSpaceControl);
    }
 
-   @Override
-   public void fromMessage(SidedBodyPartPoseActionDefinitionMessage message)
+   public void fromMessage(HandPoseActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       palmParentFrameName = message.getParentFrame().getString(0);
       MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);
       side = RobotSide.fromByte(message.getRobotSide());

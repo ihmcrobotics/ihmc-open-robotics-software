@@ -1,7 +1,7 @@
-#ifndef __behavior_msgs__msg__SidedBodyPartPoseActionDefinitionMessage__idl__
-#define __behavior_msgs__msg__SidedBodyPartPoseActionDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__HandPoseActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__HandPoseActionDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./ActionInformationMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
@@ -10,13 +10,13 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::SidedBodyPartPoseActionDefinitionMessage_")
-      struct SidedBodyPartPoseActionDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::HandPoseActionDefinitionMessage_")
+      struct HandPoseActionDefinitionMessage
       {
         /**
-         * Used for syncing action sequences
+         * Parent definition fields
          */
-        behavior_msgs::msg::dds::ActionInformationMessage action_information;
+        behavior_msgs::msg::dds::BehaviorActionDefinitionMessage action_definition;
         /**
          * Specifies the side of the robot that this message refers to.
          */
