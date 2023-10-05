@@ -95,7 +95,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      state.update();
+      super.update();
 
       footstepPlannerGoalGizmo.getPathControlRingGizmo().setGizmoFrame(definition.getConditionalReferenceFrame().get());
       for (RobotSide side : RobotSide.values)

@@ -115,7 +115,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      state.update();
+      super.update();
 
       if (poseGizmo.getPoseGizmo().getGizmoFrame() != definition.getConditionalReferenceFrame().get())
       {
