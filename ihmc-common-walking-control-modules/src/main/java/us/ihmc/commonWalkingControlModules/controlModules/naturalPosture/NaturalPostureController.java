@@ -122,7 +122,7 @@ public class NaturalPostureController
       CommonOps_DDRM.setIdentity(selectionMatrix);
 
       //switches
-      doNullSpaceProjectionForNaturalPosture.set(parameters.getdoNullSpaceProjectionForNaturalPosture());
+      doNullSpaceProjectionForNaturalPosture.set(parameters.getDoNullSpaceProjectionForNaturalPosture());
 
       // Desired NP values (wrt world)
       comAngleDesired.set(parameters.getComAngleDesired());   // (0.0, -0.03, 0.0)

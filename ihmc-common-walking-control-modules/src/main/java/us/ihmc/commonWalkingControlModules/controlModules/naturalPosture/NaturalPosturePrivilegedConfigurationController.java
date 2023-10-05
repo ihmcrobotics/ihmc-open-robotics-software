@@ -23,7 +23,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class NaturalPosturePrivilegedConfigurationController
 {
@@ -261,6 +260,6 @@ public class NaturalPosturePrivilegedConfigurationController
       jointParameters.setPrivilegedConfigurationOption(null);
       jointParameters.setPrivilegedConfiguration(privilegedParameters.getPrivilegedOrientation());
 
-      privilegedConfigurationCommand.addJoint(privilegedParameters.getJoint(), jointParameters);
+      privilegedConfigurationCommand.addJoint(fullRobotModel.getOneDoFJointByName(privilegedParameters.getJointName()), jointParameters);
    }
 }
