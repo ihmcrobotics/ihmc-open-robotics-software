@@ -26,11 +26,6 @@ public abstract class RDXSceneNodeBuilder<T extends RDXSceneNodeInterface>
       return parent;
    }
 
-   public String getName()
-   {
-      return name.get();
-   }
-
    public void renderImGuiWidgets()
    {
       ImGui.inputText("Name", name);
