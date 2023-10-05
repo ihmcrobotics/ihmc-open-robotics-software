@@ -1,17 +1,18 @@
 package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
 import us.ihmc.commonWalkingControlModules.configurations.NaturalPostureParameters;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoJointPrivilegedConfigurationParameters
 {
-   private final String jointName;
+   private String jointName;
    private final YoDouble privilegedOrientation;
-   private final YoDouble kp;
-   private final YoDouble kd;
+   private final YoPDGains pdGains;
    private final YoDouble weight;
+   private final YoBoolean isPrimaryTask;
    private NaturalPostureParameters.OneDofJointPrivilegedParameters jointPrivilegedParameters;
 
    public YoJointPrivilegedConfigurationParameters(NaturalPostureParameters.OneDofJointPrivilegedParameters jointPrivilegedParameters, YoRegistry registry)
@@ -19,31 +20,11 @@ public class YoJointPrivilegedConfigurationParameters
       jointName = jointPrivilegedParameters.getJointName();
       String suffix = "_" + jointName.toLowerCase() + "_PrivilegedConfiguration";
       privilegedOrientation = new YoDouble("angle" + suffix, registry);
-      kp = new YoDouble("kp" + suffix, registry);
-      kd = new YoDouble("kd" + suffix, registry);
+      pdGains = new YoPDGains(suffix, registry);
       weight = new YoDouble("weight" + suffix, registry);
+      isPrimaryTask = new YoBoolean("isPrimaryTask" + suffix, registry);
 
       set(jointPrivilegedParameters);
-   }
-
-   public void setPrivilegedOrientation(double privilegedOrientation)
-   {
-      this.privilegedOrientation.set(privilegedOrientation);
-   }
-
-   public void setKp(double kp)
-   {
-      this.kp.set(kp);
-   }
-
-   public void setKd(double kd)
-   {
-      this.kd.set(kd);
-   }
-
-   public void setWeight(double weight)
-   {
-      this.weight.set(weight);
    }
 
    public String getJointName()
@@ -56,19 +37,14 @@ public class YoJointPrivilegedConfigurationParameters
       return privilegedOrientation.getDoubleValue();
    }
 
-   public double getKp()
-   {
-      return kp.getDoubleValue();
-   }
-
-   public double getKd()
-   {
-      return kd.getDoubleValue();
-   }
-
    public double getWeight()
    {
       return weight.getDoubleValue();
+   }
+
+   public boolean getIsPrimaryTask()
+   {
+      return isPrimaryTask.getBooleanValue();
    }
 
    public YoDouble getYoPrivilegedOrientation()
@@ -76,14 +52,9 @@ public class YoJointPrivilegedConfigurationParameters
       return privilegedOrientation;
    }
 
-   public YoDouble getYoKp()
+   public YoPDGains getPDGains()
    {
-      return kp;
-   }
-
-   public YoDouble getYoKd()
-   {
-      return kd;
+      return pdGains;
    }
 
    public YoDouble getYoWeight()
@@ -91,20 +62,28 @@ public class YoJointPrivilegedConfigurationParameters
       return weight;
    }
 
+   public YoBoolean getYoPrimaryTask()
+   {
+      return isPrimaryTask;
+   }
+
    public void set(YoJointPrivilegedConfigurationParameters other)
    {
+      this.jointName = other.getJointName();
       this.privilegedOrientation.set(other.privilegedOrientation.getDoubleValue());
-      this.kp.set(other.kp.getDoubleValue());
-      this.kd.set(other.kd.getDoubleValue());
+      this.pdGains.set(other.getPDGains());
       this.weight.set(other.weight.getDoubleValue());
+      this.isPrimaryTask.set(other.getYoPrimaryTask().getBooleanValue());
    }
 
    private void set(NaturalPostureParameters.OneDofJointPrivilegedParameters parameters)
    {
+      this.jointName = parameters.getJointName();
       this.privilegedOrientation.set(parameters.getPrivilegedOrientation());
-      this.kp.set(parameters.getKp());
-      this.kd.set(parameters.getKd());
+      this.pdGains.setKp(parameters.getKp());
+      this.pdGains.setKd(parameters.getKd());
       this.weight.set(parameters.getWeight());
+      this.isPrimaryTask.set(parameters.getWhetherPrimaryTask());
 
       this.jointPrivilegedParameters = parameters;
    }

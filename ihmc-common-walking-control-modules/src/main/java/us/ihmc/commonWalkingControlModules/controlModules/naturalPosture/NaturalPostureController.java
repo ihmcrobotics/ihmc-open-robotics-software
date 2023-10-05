@@ -143,9 +143,9 @@ public class NaturalPostureController
       robotNaturalPosture.compute(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getRotation());
 
       // POPULATE QP MATRICES HERE:
-      weightMatrix.set(0, 0, parameters.getQPWeights().getX());
-      weightMatrix.set(1, 1, parameters.getQPWeights().getY());
-      weightMatrix.set(2, 2, parameters.getQPWeights().getZ());
+      weightMatrix.set(0, 0, parameters.getWeights().getX());
+      weightMatrix.set(1, 1, parameters.getWeights().getY());
+      weightMatrix.set(2, 2, parameters.getWeights().getZ());
 
       // Get current NP:   GMN - we're assuming NP compute() is getting called somewhere else?
       comAngleQuaternion.set(robotNaturalPosture.getCenterOfMassOrientation());

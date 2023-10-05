@@ -24,7 +24,7 @@ public interface NaturalPostureParameters
 
    double getVelocityBreakFrequency();
 
-   Vector3D getQPWeights();
+   Vector3D getWeights();
 
    FrameYawPitchRoll getAngularComKpGains();
 
@@ -38,13 +38,6 @@ public interface NaturalPostureParameters
 
    boolean getDoNullSpaceProjectionForPelvis();
 
-   FrameYawPitchRoll getSpineNaturalPostureOrientationKp();
-
-   double getSpineDamping();
-
-   boolean getUseSpinePrivilegedCommand();
-
-   boolean getUseSpineRollPitchJointCommands();
    /* ~~~~~~~~~~ End NaturalPosturePrivilegedConfigurationControllerParameters ~~~~~~~~~~ */
 
    class OneDofJointPrivilegedParameters
@@ -54,14 +47,21 @@ public interface NaturalPostureParameters
       private final double kp;
       private final double kd;
       private final double weight;
+      private final boolean isPrimaryTask;
 
       public OneDofJointPrivilegedParameters(String jointName, double privilegedOrientation, double kp, double kd, double weight)
+      {
+         this(jointName, privilegedOrientation, kp, kd, weight, false);
+      }
+
+      public OneDofJointPrivilegedParameters(String jointName, double privilegedOrientation, double kp, double kd, double weight, boolean isPrimaryTask)
       {
          this.jointName = jointName;
          this.privilegedOrientation = privilegedOrientation;
          this.kp = kp;
          this.kd = kd;
          this.weight = weight;
+         this.isPrimaryTask = isPrimaryTask;
       }
 
       public String getJointName()
@@ -87,6 +87,11 @@ public interface NaturalPostureParameters
       public double getWeight()
       {
          return weight;
+      }
+
+      public boolean getWhetherPrimaryTask()
+      {
+         return isPrimaryTask;
       }
    }
 
