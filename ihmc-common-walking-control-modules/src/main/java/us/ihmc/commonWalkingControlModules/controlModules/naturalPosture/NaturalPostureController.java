@@ -89,13 +89,12 @@ public class NaturalPostureController
    // This is used for generating data for the paper.
    private NaturalPosturePaperDataComputanator naturalPosturePaperDataComputanator;
 
-   public NaturalPostureController(HumanoidRobotNaturalPosture robotNaturalPosture,
-                                   NaturalPostureParameters parameters,
+   public NaturalPostureController(NaturalPostureParameters parameters,
                                    HighLevelHumanoidControllerToolbox controllerToolbox,
                                    YoRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
-      this.robotNaturalPosture = robotNaturalPosture;
+      robotNaturalPosture = parameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
       this.parameters = parameters;
 
       if (robotNaturalPosture.getRegistry() != null)

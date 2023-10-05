@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
-import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.configurations.NaturalPostureParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -19,19 +17,17 @@ public class NaturalPostureManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final NaturalPostureController naturalPostureController;
-   private final NaturalPosturePrivilegedConfigurationController naturalPosturePrivilegedConfigurationController;
+   private final NaturalPostureController controller;
+   private final NaturalPosturePrivilegedConfigurationController privilegedConfigurationController;
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
-   private final ExecutionTimer naturalPostureTimer;
+   private final ExecutionTimer timer;
 
    private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
    private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommandForNaturalPosture", registry);
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommandsForNaturalPosture", registry);
    private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommandForNaturalPosture", registry);
 
-   public NaturalPostureManager(WalkingControllerParameters walkingControllerParameters,
-                                HighLevelHumanoidControllerToolbox controllerToolbox,
-                                YoRegistry parentRegistry)
+   public NaturalPostureManager(NaturalPostureParameters parameters, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
@@ -40,23 +36,19 @@ public class NaturalPostureManager
       useBodyManagerCommands.set(false);
       usePelvisOrientationCommand.set(true);
 
-      NaturalPostureParameters naturalPostureParameters = walkingControllerParameters.getNaturalPostureParameters();
-      HumanoidRobotNaturalPosture robotNaturalPosture = walkingControllerParameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
-      naturalPostureController = new NaturalPostureController(robotNaturalPosture, naturalPostureParameters, controllerToolbox, registry);
-      naturalPosturePrivilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(naturalPostureParameters,
-                                                                                                            controllerToolbox.getFullRobotModel(),
-                                                                                                            registry);
+      controller = new NaturalPostureController(parameters, controllerToolbox, registry);
+      privilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(parameters, controllerToolbox.getFullRobotModel(), registry);
 
-      naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
+      timer = new ExecutionTimer("naturalPostureTimer", registry);
 
-      OneDoFJointBasics[] allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
-      String[] jointNamesRestrictiveLimits = naturalPostureParameters.getJointsWithRestrictiveLimits();
-      OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
+      OneDoFJointBasics[] allOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
+      String[] jointNamesRestrictiveLimits = parameters.getJointsWithRestrictiveLimits();
+      OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFJoints,
                                                                                                                          jointNamesRestrictiveLimits),
                                                                                           OneDoFJointBasics.class);
       for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
       {
-         JointLimitParameters limitParameters = naturalPostureParameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
+         JointLimitParameters limitParameters = parameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
          if (limitParameters == null)
             throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
@@ -65,12 +57,12 @@ public class NaturalPostureManager
 
    public InverseDynamicsCommand<?> getQPObjectiveCommand()
    {
-      return naturalPostureController.getInverseDynamicsCommand();
+      return controller.getInverseDynamicsCommand();
    }
 
    public InverseDynamicsCommand<?> getPelvisPrivilegedPoseCommand()
    {
-      return naturalPosturePrivilegedConfigurationController.getPelvisPrivilegedPoseCommand();
+      return privilegedConfigurationController.getPelvisPrivilegedPoseCommand();
    }
 
    public JointLimitEnforcementMethodCommand getJointLimitEnforcementCommand()
@@ -80,20 +72,20 @@ public class NaturalPostureManager
 
    public void compute()
    {
-      naturalPostureTimer.startMeasurement();
-      naturalPosturePrivilegedConfigurationController.compute();
-      naturalPostureController.compute();
-      naturalPostureTimer.stopMeasurement();
+      timer.startMeasurement();
+      privilegedConfigurationController.compute();
+      controller.compute();
+      timer.stopMeasurement();
    }
 
-   public NaturalPostureController getNaturalPostureController()
+   public NaturalPostureController getController()
    {
-      return naturalPostureController;
+      return controller;
    }
 
-   public NaturalPosturePrivilegedConfigurationController getNaturalPosturePrivilegedConfigurationController()
+   public NaturalPosturePrivilegedConfigurationController getPrivilegedConfigurationController()
    {
-      return naturalPosturePrivilegedConfigurationController;
+      return privilegedConfigurationController;
    }
 
    public YoBoolean getUseNaturalPostureCommand()
