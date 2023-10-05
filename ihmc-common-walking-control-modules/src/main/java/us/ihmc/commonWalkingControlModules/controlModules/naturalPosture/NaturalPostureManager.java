@@ -22,7 +22,7 @@ public class NaturalPostureManager
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final ExecutionTimer timer;
 
-   private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
+   private final boolean useNaturalPostureCommand = true; //this must be true to use Natural Posture
    private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommandForNaturalPosture", registry);
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommandsForNaturalPosture", registry);
    private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommandForNaturalPosture", registry);
@@ -31,7 +31,6 @@ public class NaturalPostureManager
    {
       parentRegistry.addChild(registry);
 
-      useNaturalPostureCommand.set(true); //this must be true to use Natural Posture
       usePelvisPrivilegedPoseCommand.set(false);
       useBodyManagerCommands.set(false);
       usePelvisOrientationCommand.set(true);
@@ -55,6 +54,10 @@ public class NaturalPostureManager
       }
    }
 
+   public boolean isEnabled()
+   {
+      return useNaturalPostureCommand;
+   }
    public InverseDynamicsCommand<?> getQPObjectiveCommand()
    {
       return controller.getInverseDynamicsCommand();
@@ -86,11 +89,6 @@ public class NaturalPostureManager
    public NaturalPosturePrivilegedConfigurationController getPrivilegedConfigurationController()
    {
       return privilegedConfigurationController;
-   }
-
-   public YoBoolean getUseNaturalPostureCommand()
-   {
-      return useNaturalPostureCommand;
    }
 
    public YoBoolean getUseBodyManagerCommands()

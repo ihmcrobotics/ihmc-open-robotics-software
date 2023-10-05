@@ -82,7 +82,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private NaturalPostureManager naturalPostureManager;
+   private final NaturalPostureManager naturalPostureManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
@@ -156,13 +156,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-
-      YoBoolean enableNaturalPostureManager = new YoBoolean("enableNaturalPostureManager", registry);
-      enableNaturalPostureManager.set(true);
-      if (enableNaturalPostureManager.getBooleanValue())
-      {
-         this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
-      }
+      this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
@@ -513,7 +507,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFlamingoCommands();
 
-      if (naturalPostureManager == null || !naturalPostureManager.getUseNaturalPostureCommand().getValue())
+      if (naturalPostureManager == null || !naturalPostureManager.isEnabled())
       {
          privilegedConfigurationCommand.clear();
          privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
@@ -759,7 +753,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.compute();
-      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
+      if (naturalPostureManager != null && naturalPostureManager.isEnabled())
       {
          naturalPostureManager.compute();
       }
@@ -877,7 +871,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       planeContactStateCommandPool.clear();
 
-      if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
+      if (naturalPostureManager != null && naturalPostureManager.isEnabled())
       {
          //TODO could this be cleaner?
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPrivilegedConfigurationController()
@@ -933,7 +927,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Natural posture:
-      if ((naturalPostureManager != null) && (naturalPostureManager.getUseNaturalPostureCommand().getValue()))
+      if (naturalPostureManager != null && naturalPostureManager.isEnabled())
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getJointLimitEnforcementCommand());
