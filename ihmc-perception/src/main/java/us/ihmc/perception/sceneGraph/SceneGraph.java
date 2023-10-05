@@ -118,7 +118,6 @@ public class SceneGraph
    private void updateCaches(SceneNode node)
    {
       idToNodeMap.put(node.getID(), node);
-//      System.out.println(idToNodeMap.get(node.getID()).getName());
       nodeNameList.add(node.getName());
       namesToNodesMap.put(node.getName(), node);
       sceneNodesByID.add(node);
