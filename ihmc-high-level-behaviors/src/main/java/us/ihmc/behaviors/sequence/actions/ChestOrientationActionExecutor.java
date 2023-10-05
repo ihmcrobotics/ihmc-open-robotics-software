@@ -24,8 +24,6 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
    private final ChestOrientationActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final FramePose3D desiredChestPose = new FramePose3D();
@@ -38,16 +36,15 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       state = new ChestOrientationActionState(referenceFrameLibrary);
       definition = state.getDefinition();
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
+
    }
 
    @Override
@@ -87,7 +84,7 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
                                                      executionTimer,
                                                      BehaviorActionCompletionComponent.ORIENTATION);
 
-      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

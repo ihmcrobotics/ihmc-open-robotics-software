@@ -43,8 +43,6 @@ public class WalkActionExecutor implements BehaviorActionExecutor
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private int actionIndex;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
@@ -67,17 +65,14 @@ public class WalkActionExecutor implements BehaviorActionExecutor
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       state = new WalkActionState(referenceFrameLibrary, footstepPlannerParameters);
       definition = state.getDefinition();
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
-
       for (RobotSide side : RobotSide.values)
       {
          goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
@@ -200,7 +195,7 @@ public class WalkActionExecutor implements BehaviorActionExecutor
 
       isExecuting = !isComplete;
 
-      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());

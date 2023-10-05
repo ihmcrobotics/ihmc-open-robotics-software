@@ -15,7 +15,6 @@ public class HandWrenchActionExecutor implements BehaviorActionExecutor
    private final HandWrenchActionState state = new HandWrenchActionState();
    private final HandWrenchActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private int actionIndex;
 
    public HandWrenchActionExecutor(ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -23,9 +22,9 @@ public class HandWrenchActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
+
    }
 
    @Override

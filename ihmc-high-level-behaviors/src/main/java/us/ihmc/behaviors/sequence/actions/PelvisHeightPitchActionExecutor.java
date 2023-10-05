@@ -22,9 +22,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    private final PelvisHeightPitchActionState state;
    private final PelvisHeightPitchActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
-   private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
@@ -39,7 +37,6 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
                                           ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
 
       state = new PelvisHeightPitchActionState(referenceFrameLibrary);
@@ -47,9 +44,9 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
+
    }
 
    @Override
@@ -98,7 +95,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
                                                      executionTimer,
                                                      BehaviorActionCompletionComponent.TRANSLATION);
 
-      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

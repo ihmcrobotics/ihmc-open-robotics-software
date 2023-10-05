@@ -177,7 +177,7 @@ public class BehaviorActionSequence
          }
          for (WaitDurationActionDefinitionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
-            WaitDurationActionExecutor action = new WaitDurationActionExecutor(ros2);
+            WaitDurationActionExecutor action = new WaitDurationActionExecutor();
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -230,9 +230,10 @@ public class BehaviorActionSequence
                                                            && actionIndex == executionNextIndex;
          boolean otherConcurrentActionIsNextForExecution
                = executeWithPreviousAction
-               && actionIndex == (executionNextIndex + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndex,true));
+               && actionIndex == (executionNextIndex + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndex, true));
          boolean concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
-         actionSequence.get(actionIndex).update(actionIndex, executionNextIndex, concurrentActionIsNextForExecution);
+         actionSequence.get(actionIndex).getState().setActionIndex(actionIndex);
+         actionSequence.get(actionIndex).update(executionNextIndex, concurrentActionIsNextForExecution);
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -335,7 +336,7 @@ public class BehaviorActionSequence
          }
       }
       boolean concurrentActionIsNextForExecution = lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction() || executeWithPreviousAction;
-      lastCurrentlyExecutingAction.update(executionNextIndex, executionNextIndex + 1, concurrentActionIsNextForExecution);
+      lastCurrentlyExecutingAction.update(executionNextIndex + 1, concurrentActionIsNextForExecution);
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);
