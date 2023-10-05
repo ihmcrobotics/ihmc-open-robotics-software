@@ -639,7 +639,6 @@ public class RDXBehaviorActionSequenceEditor
             commandNextActionIndex(i);
          }
          ImGuiTools.previousWidgetTooltip("Next for execution. Index " + i);
-         action.getImDescription().set(action.getDefinition().getDescription());
          ImGui.sameLine();
          ImGui.text("->");
 
@@ -659,8 +658,7 @@ public class RDXBehaviorActionSequenceEditor
 
          ImGui.sameLine();
          ImGui.pushItemWidth(longestDescriptionLength + 30.0f);
-         ImGuiTools.inputText(labels.get("", "description", i), action.getImDescription());
-         action.getDefinition().setDescription(action.getImDescription().get());
+         action.getDescriptionWrapper().renderImGuiWidget();
          ImGui.popItemWidth();
          ImGui.sameLine();
          if (i > 0)
@@ -834,7 +832,6 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
-      action.updateAfterLoading();
       action.update();
 
       int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
