@@ -19,9 +19,9 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the perception scene graph.
@@ -37,7 +37,7 @@ public class RDXSceneGraphUI
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
-   private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new HashMap<>();
+   private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new ConcurrentHashMap<>();
 
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
