@@ -3,10 +3,12 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -22,11 +24,13 @@ import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.JSONTools;
 
 public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final FootstepPlanActionState state;
    private final FootstepPlanActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -36,6 +40,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> footsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
+   private boolean frameIsChildOfWorld = false;
 
    public RDXFootstepPlanAction(RDXBehaviorActionSequenceEditor editor,
                                 RDXBaseUI baseUI,
@@ -47,13 +52,15 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       state = new FootstepPlanActionState(referenceFrameLibrary);
       definition = state.getDefinition();
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName, definition::setParentFrameName);
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
       swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
                                                 definition::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
@@ -69,64 +76,66 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    {
       super.update();
 
-      // Add a footstep to the action data only
-      if (userAddedFootstep.poll())
+      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(definition.getParentFrameName());
+      if (frameIsChildOfWorld)
       {
-         RobotSide newSide = userAddedFootstep.read();
-         FootstepPlanActionFootstepDefinition addedFootstep = definition.getFootsteps().add();
-         addedFootstep.setSide(newSide);
-         FramePose3D newFootstepPose = new FramePose3D();
-         if (!footsteps.isEmpty())
+         // Add a footstep to the action data only
+         if (userAddedFootstep.poll())
          {
-            RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
-            newFootstepPose.setToZero(previousFootstep.getFootstepFrame());
-
-            if (previousFootstep.getSide() != newSide)
+            RobotSide newSide = userAddedFootstep.read();
+            RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
+            addedFootstep.getDefinition().setSide(newSide);
+            FramePose3D newFootstepPose = new FramePose3D();
+            if (!footsteps.isEmpty())
             {
-               double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
-               newFootstepPose.getPosition().addY(newSide.negateIfRightSide(minStepWidth));
+               RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
+               newFootstepPose.setToZero(previousFootstep.getFootstepFrame());
+
+               if (previousFootstep.getDefinition().getSide() != newSide)
+               {
+                  double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+                  newFootstepPose.getPosition().addY(newSide.negateIfRightSide(minStepWidth));
+               }
             }
+            else
+            {
+               newFootstepPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(newSide));
+            }
+
+            double aLittleInFront = 0.15;
+            newFootstepPose.getPosition().addX(aLittleInFront);
+
+            newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(definition.getParentFrameName()));
+            addedFootstep.getDefinition().getSoleToPlanFrameTransform().set(newFootstepPose);
+            addedFootstep.update();
          }
-         else
-         {
-            newFootstepPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(newSide));
-         }
 
-         double aLittleInFront = 0.15;
-         newFootstepPose.getPosition().addX(aLittleInFront);
-
-         newFootstepPose.changeFrame(definition.getConditionalReferenceFrame().get());
-         addedFootstep.getSoleToPlanFrameTransform().set(newFootstepPose);
-      }
-
-      if (userRemovedFootstep.poll())
-         definition.getFootsteps().remove(definition.getFootsteps().size() - 1);
-
-      // Synchronizes the RDX footsteps to the action data
-      footsteps.clear();
-      while (footsteps.size() < definition.getFootsteps().size())
-         footsteps.add();
-      for (int i = 0; i < definition.getFootsteps().size(); i++)
-      {
-         footsteps.get(i).update(definition.getFootsteps().get(i), i);
+         if (userRemovedFootstep.poll())
+            footsteps.remove(footsteps.size() - 1);
       }
    }
 
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXFootstepPlanActionFootstep footstep : footsteps)
+      if (frameIsChildOfWorld)
       {
-         footstep.calculate3DViewPick(input);
+         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         {
+            footstep.calculate3DViewPick(input);
+         }
       }
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXFootstepPlanActionFootstep footstep : footsteps)
+      if (frameIsChildOfWorld)
       {
-         footstep.process3DViewInput(input);
+         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         {
+            footstep.process3DViewInput(input);
+         }
       }
    }
 
@@ -141,29 +150,58 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       ImGui.popItemWidth();
 
       ImGui.text("Number of footsteps: %d".formatted(footsteps.size()));
-      ImGui.text("Add:");
-      for (RobotSide side : RobotSide.values)
+
+      if (frameIsChildOfWorld) // Not allowing modification if not renderable
       {
+         ImGui.text("Add:");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            if (ImGui.button(labels.get(side.getPascalCaseName())))
+               userAddedFootstep.set(side);
+         }
          ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
-            userAddedFootstep.set(side);
-      }
-      ImGui.sameLine();
-      ImGui.text("Remove:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Last")))
-      {
-         userRemovedFootstep.set();
+         ImGui.text("Remove:");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Last")))
+         {
+            userRemovedFootstep.set();
+         }
       }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      if (frameIsChildOfWorld)
+      {
+         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         {
+            footstep.getVirtualRenderables(renderables, pool);
+         }
+      }
+   }
+
+   @Override
+   public void saveToFile(ObjectNode jsonNode) // FIXME: Duplicated in FootstepPlanActionState
+   {
+      definition.saveToFile(jsonNode);
+
+      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (RDXFootstepPlanActionFootstep footstep : footsteps)
       {
-         footstep.getVirtualRenderables(renderables, pool);
+         ObjectNode footstepNode = foostepsArrayNode.addObject();
+         footstep.getDefinition().saveToFile(footstepNode);
       }
+   }
+
+   @Override
+   public void loadFromFile(JsonNode jsonNode) // FIXME: Duplicated in FootstepPlanActionState
+   {
+      definition.loadFromFile(jsonNode);
+
+      footsteps.clear();
+      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().getDefinition().loadFromFile(footstepNode));
    }
 
    @Override
