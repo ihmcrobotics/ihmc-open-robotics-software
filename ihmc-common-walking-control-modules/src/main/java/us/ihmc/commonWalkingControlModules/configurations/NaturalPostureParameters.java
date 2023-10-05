@@ -3,11 +3,14 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 import java.util.ArrayList;
 
 public interface NaturalPostureParameters
 {
+   HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel);
+
    /* ~~~~~~~~~~ Begin NaturalPostureManager methods ~~~~~~~~~~ */
    String[] getJointsWithRestrictiveLimits();
 

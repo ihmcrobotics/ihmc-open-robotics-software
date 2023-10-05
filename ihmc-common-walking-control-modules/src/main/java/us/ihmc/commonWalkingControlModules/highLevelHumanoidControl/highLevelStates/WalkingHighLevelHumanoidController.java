@@ -880,9 +880,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (naturalPostureManager != null && naturalPostureManager.getUseNaturalPostureCommand().getValue())
       {
          //TODO could this be cleaner?
-         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getNaturalPosturePrivilegedConfigurationController()
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPrivilegedConfigurationController()
                                                                               .getInverseDynamicsCommand());
-         controllerCoreCommand.addFeedbackControlCommand(naturalPostureManager.getNaturalPosturePrivilegedConfigurationController()
+         controllerCoreCommand.addFeedbackControlCommand(naturalPostureManager.getPrivilegedConfigurationController()
                                                                               .getFeedbackControlCommand());
       }
       else

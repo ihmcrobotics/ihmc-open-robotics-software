@@ -852,11 +852,6 @@ public abstract class WalkingControllerParameters
       return Double.POSITIVE_INFINITY;
    }
 
-   public HumanoidRobotNaturalPosture getNaturalPosture(FullHumanoidRobotModel fullRobotModel)
-   {
-      return null;
-   }
-
    public NaturalPostureParameters getNaturalPostureParameters()
    {
       return null;
