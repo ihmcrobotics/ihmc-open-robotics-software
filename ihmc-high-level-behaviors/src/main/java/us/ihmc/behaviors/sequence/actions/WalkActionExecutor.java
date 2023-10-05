@@ -69,7 +69,7 @@ public class WalkActionExecutor implements BehaviorActionExecutor
       this.walkingControllerParameters = walkingControllerParameters;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      state = new WalkActionState(referenceFrameLibrary);
+      state = new WalkActionState(referenceFrameLibrary, footstepPlannerParameters);
       definition = state.getDefinition();
    }
 
@@ -81,7 +81,7 @@ public class WalkActionExecutor implements BehaviorActionExecutor
       for (RobotSide side : RobotSide.values)
       {
          goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
-                                                   definition.getGoalFootstepToParentTransforms().get(side));
+                                                   definition.getGoalFootstepToGoalTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }

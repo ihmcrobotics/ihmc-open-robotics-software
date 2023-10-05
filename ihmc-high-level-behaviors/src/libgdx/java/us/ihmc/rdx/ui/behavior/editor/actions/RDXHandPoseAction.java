@@ -176,8 +176,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
+                                                                definition::getPalmParentFrameName,
+                                                                definition::setPalmParentFrameName);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
@@ -192,29 +192,32 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       super.update();
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != definition.getConditionalReferenceFrame().get())
+      if (state.getPalmFrame().isChildOfWorld())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(definition.getConditionalReferenceFrame().get());
-         graphicFrame.changeParentFrame(definition.getConditionalReferenceFrame().get());
-         collisionShapeFrame.changeParentFrame(definition.getConditionalReferenceFrame().get());
-      }
+         if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
+         {
+            poseGizmo.getPoseGizmo().setGizmoFrame(state.getPalmFrame().getReferenceFrame());
+            graphicFrame.changeParentFrame(state.getPalmFrame().getReferenceFrame());
+            collisionShapeFrame.changeParentFrame(state.getPalmFrame().getReferenceFrame());
+         }
 
-      poseGizmo.getPoseGizmo().update();
-      highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
+         poseGizmo.getPoseGizmo().update();
+         highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
 
-      if (poseGizmo.isSelected() || isMouseHovering)
-      {
-         highlightModels.get(definition.getSide()).setTransparency(0.7);
-      }
-      else
-      {
-         highlightModels.get(definition.getSide()).setTransparency(0.5);
-      }
+         if (poseGizmo.isSelected() || isMouseHovering)
+         {
+            highlightModels.get(definition.getSide()).setTransparency(0.7);
+         }
+         else
+         {
+            highlightModels.get(definition.getSide()).setTransparency(0.5);
+         }
 
-      // IK solution visualization via ghost arms
-      displayIKSolution = (getActionIndex() == getActionNextExecutionIndex()) || concurrentActionIsNextForExecution;
-      if (displayIKSolution)
-         visualizeIK();
+         // IK solution visualization via ghost arms
+         displayIKSolution = (state.getActionIndex() == getEditor().getExecutionNextIndexStatus()) || getEditor().getConcurrentActionIsNextForExecution();
+         if (displayIKSolution)
+            visualizeIK();
+      }
    }
 
    private void visualizeIK()
@@ -228,7 +231,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
             handPoseJointAnglesStatusMessage = leftHandJointAnglesStatusSubscription.getLatest();
          else
             handPoseJointAnglesStatusMessage = rightHandJointAnglesStatusSubscription.getLatest();
-         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
+         if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == state.getActionIndex())
          {
             SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(definition.getSide()).getRigidBody().getChildrenJoints().get(0);
             rootCalculator.getKinematicsInfo();
@@ -294,43 +297,52 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      poseGizmo.calculate3DViewPick(input);
-
-      pickResult.reset();
-      for (MouseCollidable mouseCollidable : mouseCollidables)
+      if (state.getPalmFrame().isChildOfWorld())
       {
-         double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
-         if (!Double.isNaN(collision))
-            pickResult.addPickCollision(collision);
+         poseGizmo.calculate3DViewPick(input);
+
+         pickResult.reset();
+         for (MouseCollidable mouseCollidable : mouseCollidables)
+         {
+            double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
+            if (!Double.isNaN(collision))
+               pickResult.addPickCollision(collision);
+         }
+         if (pickResult.getPickCollisionWasAddedSinceReset())
+            input.addPickResult(pickResult);
       }
-      if (pickResult.getPickCollisionWasAddedSinceReset())
-         input.addPickResult(pickResult);
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      isMouseHovering = input.getClosestPick() == pickResult;
-
-      boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      if (isClickedOn)
+      if (state.getPalmFrame().isChildOfWorld())
       {
-         getSelected().set(true);
+         isMouseHovering = input.getClosestPick() == pickResult;
+
+         boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+         if (isClickedOn)
+         {
+            getSelected().set(true);
+         }
+
+         poseGizmo.process3DViewInput(input, isMouseHovering);
+
+         tooltip.setInput(input);
       }
-
-      poseGizmo.process3DViewInput(input, isMouseHovering);
-
-      tooltip.setInput(input);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
-      poseGizmo.getVirtualRenderables(renderables, pool);
+      if (state.getPalmFrame().isChildOfWorld())
+      {
+         highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
+         poseGizmo.getVirtualRenderables(renderables, pool);
 
-      if (displayIKSolution)
-         armMultiBodyGraphics.get(definition.getSide()).getVisualRenderables(renderables, pool);
+         if (displayIKSolution)
+            armMultiBodyGraphics.get(definition.getSide()).getVisualRenderables(renderables, pool);
+      }
    }
 
    @Override

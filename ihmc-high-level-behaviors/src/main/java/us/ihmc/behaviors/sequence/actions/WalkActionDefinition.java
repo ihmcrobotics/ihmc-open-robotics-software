@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
@@ -17,7 +18,15 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    private double transferDuration = 0.8;
    private String parentFrameName;
    private final RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
-   private final SideDependentList<RigidBodyTransform> goalFootstepToParentTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
+   private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
+
+   public WalkActionDefinition(FootstepPlannerParametersBasics footstepPlannerParameters)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         goalFootstepToGoalTransforms.get(side).getTranslation().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+      }
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
@@ -30,7 +39,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       for (RobotSide side : RobotSide.values)
       {
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toJSON(goalFootNode, goalFootstepToParentTransforms.get(side));
+         JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side));
       }
    }
 
@@ -45,7 +54,7 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       for (RobotSide side : RobotSide.values)
       {
          JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toEuclid(goalFootNode, goalFootstepToParentTransforms.get(side));
+         JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side));
       }
    }
 
@@ -57,8 +66,8 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
       MessageTools.toMessage(goalToParentTransform, message.getTransformToParent());
-      MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
-      MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
+      MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
+      MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
    }
 
    @Override
@@ -68,8 +77,8 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       transferDuration = message.getTransferDuration();
       parentFrameName = message.getParentFrame().getString(0);
       MessageTools.toEuclid(message.getTransformToParent(), goalToParentTransform);
-      MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.LEFT));
-      MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.RIGHT));
+      MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToGoalTransforms.get(RobotSide.LEFT));
+      MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToGoalTransforms.get(RobotSide.RIGHT));
    }
 
    public double getSwingDuration()
@@ -92,9 +101,9 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
       this.transferDuration = transferDuration;
    }
 
-   public SideDependentList<RigidBodyTransform> getGoalFootstepToParentTransforms()
+   public SideDependentList<RigidBodyTransform> getGoalFootstepToGoalTransforms()
    {
-      return goalFootstepToParentTransforms;
+      return goalFootstepToGoalTransforms;
    }
 
    @Override
