@@ -43,25 +43,14 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    private final PelvisHeightPitchActionState state;
    private final PelvisHeightPitchActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper heightWidget = new ImDoubleWrapper(definition::getHeight,
-                                                                    definition::setHeight,
-                                                                    imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
-   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(definition::getPitch,
-                                                                   definition::setPitch,
-                                                                   imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                                                definition::setTrajectoryDuration,
-                                                                                imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"),
-                                                                                                                           imDouble));
+   private final ImDoubleWrapper heightWidget;
+   private final ImDoubleWrapper pitchWidget;
+   private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
-   private final RDXSelectablePose3DGizmo poseGizmo = new RDXSelectablePose3DGizmo(definition.getConditionalReferenceFrame().get(),
-                                                                                   definition.getPelvisToParentTransform());
-   private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                                                      definition::setExecuteWithNextAction,
-                                                                                      imBoolean -> ImGui.checkbox(labels.get("Execute with next action"),
-                                                                                                                  imBoolean));
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(definition.getConditionalReferenceFrame().get());
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(definition.getConditionalReferenceFrame().get());
+   private final RDXSelectablePose3DGizmo poseGizmo;
+   private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -90,6 +79,24 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       state = new PelvisHeightPitchActionState(referenceFrameLibrary);
       definition = state.getDefinition();
 
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPelvisToParentTransform());
+      poseGizmo.create(panel3D);
+
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                definition::setParentFrameName);
+      heightWidget = new ImDoubleWrapper(definition::getHeight,
+                                         definition::setHeight,
+                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
+      pitchWidget = new ImDoubleWrapper(definition::getPitch, definition::setPitch, imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
+                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
+      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
+                                                          definition::setExecuteWithNextAction,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
+
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
@@ -102,12 +109,6 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          mouseCollidables.add(new MouseCollidable(pelvisCollidable));
       }
 
-      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      poseGizmo.create(panel3D);
-
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
    }
@@ -117,55 +118,57 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    {
       super.update();
 
-      if (poseGizmo.getPoseGizmo().getGizmoFrame() != definition.getConditionalReferenceFrame().get())
+      if (state.getPelvisFrame().isChildOfWorld())
       {
-         poseGizmo.getPoseGizmo().setGizmoFrame(definition.getConditionalReferenceFrame().get());
-         graphicFrame.changeParentFrame(definition.getConditionalReferenceFrame().get());
-         collisionShapeFrame.changeParentFrame(definition.getConditionalReferenceFrame().get());
-      }
-
-      poseGizmo.getPoseGizmo().update();
-      highlightModel.setPose(graphicFrame.getReferenceFrame());
-
-      if (poseGizmo.isSelected() || isMouseHovering)
-      {
-         highlightModel.setTransparency(0.7);
-      }
-      else
-      {
-         highlightModel.setTransparency(0.5);
-      }
-
-      pelvisPoseStatus.getParentFrame().resetQuick();
-      pelvisPoseStatus.getParentFrame().add(definition.get().getParent().getName());
-
-      // compute transform variation from previous pose
-      FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
-      if (definition.get().getParent() != currentRobotPelvisPose.getReferenceFrame())
-         currentRobotPelvisPose.changeFrame(definition.get().getParent());
-      RigidBodyTransform transformVariation = new RigidBodyTransform();
-      transformVariation.setAndInvert(currentRobotPelvisPose);
-      definition.getPelvisToParentTransform().transform(transformVariation);
-      MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
-
-
-      // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-      // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
-      if (getEditor().getConcurrentActionIsNextForExecution())
-      {
-         wasConcurrent = true;
-         pelvisPoseStatus.setCurrentAndConcurrent(true);
-         if (throttler.run())
+         if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPelvisFrame().getReferenceFrame())
          {
-            if (state.getActionIndex() >= 0)
-               ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+            poseGizmo.getPoseGizmo().setGizmoFrame(state.getPelvisFrame().getReferenceFrame());
+            graphicFrame.changeParentFrame(state.getPelvisFrame().getReferenceFrame());
+            collisionShapeFrame.changeParentFrame(state.getPelvisFrame().getReferenceFrame());
          }
-      }
-      else if (wasConcurrent)
-      {
-         pelvisPoseStatus.setCurrentAndConcurrent(false);
-         ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
-         wasConcurrent = false;
+
+         poseGizmo.getPoseGizmo().update();
+         highlightModel.setPose(graphicFrame.getReferenceFrame());
+
+         if (poseGizmo.isSelected() || isMouseHovering)
+         {
+            highlightModel.setTransparency(0.7);
+         }
+         else
+         {
+            highlightModel.setTransparency(0.5);
+         }
+
+         pelvisPoseStatus.getParentFrame().resetQuick();
+         pelvisPoseStatus.getParentFrame().add(definition.getParentFrameName());
+
+         // compute transform variation from previous pose
+         FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
+         if (state.getPelvisFrame().getReferenceFrame().getParent() != currentRobotPelvisPose.getReferenceFrame())
+            currentRobotPelvisPose.changeFrame(state.getPelvisFrame().getReferenceFrame().getParent());
+         RigidBodyTransform transformVariation = new RigidBodyTransform();
+         transformVariation.setAndInvert(currentRobotPelvisPose);
+         definition.getPelvisToParentTransform().transform(transformVariation);
+         MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
+
+         // if the action is part of a group of concurrent actions that is currently executing or about to be executed
+         // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
+         if (getEditor().getConcurrentActionIsNextForExecution())
+         {
+            wasConcurrent = true;
+            pelvisPoseStatus.setCurrentAndConcurrent(true);
+            if (throttler.run())
+            {
+               if (state.getActionIndex() >= 0)
+                  ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+            }
+         }
+         else if (wasConcurrent)
+         {
+            pelvisPoseStatus.setCurrentAndConcurrent(false);
+            ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+            wasConcurrent = false;
+         }
       }
    }
 
@@ -202,40 +205,49 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      poseGizmo.calculate3DViewPick(input);
-
-      pickResult.reset();
-      for (MouseCollidable mouseCollidable : mouseCollidables)
+      if (state.getPelvisFrame().isChildOfWorld())
       {
-         double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
-         if (!Double.isNaN(collision))
-            pickResult.addPickCollision(collision);
+         poseGizmo.calculate3DViewPick(input);
+
+         pickResult.reset();
+         for (MouseCollidable mouseCollidable : mouseCollidables)
+         {
+            double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
+            if (!Double.isNaN(collision))
+               pickResult.addPickCollision(collision);
+         }
+         if (pickResult.getPickCollisionWasAddedSinceReset())
+            input.addPickResult(pickResult);
       }
-      if (pickResult.getPickCollisionWasAddedSinceReset())
-         input.addPickResult(pickResult);
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      isMouseHovering = input.getClosestPick() == pickResult;
-
-      boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      if (isClickedOn)
+      if (state.getPelvisFrame().isChildOfWorld())
       {
-         getSelected().set(true);
+         isMouseHovering = input.getClosestPick() == pickResult;
+
+         boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+         if (isClickedOn)
+         {
+            getSelected().set(true);
+         }
+
+         poseGizmo.process3DViewInput(input, isMouseHovering);
+
+         tooltip.setInput(input);
       }
-
-      poseGizmo.process3DViewInput(input, isMouseHovering);
-
-      tooltip.setInput(input);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      highlightModel.getRenderables(renderables, pool);
-      poseGizmo.getVirtualRenderables(renderables, pool);
+      if (state.getPelvisFrame().isChildOfWorld())
+      {
+         highlightModel.getRenderables(renderables, pool);
+         poseGizmo.getVirtualRenderables(renderables, pool);
+      }
    }
 
    public ReferenceFrame getReferenceFrame()
