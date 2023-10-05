@@ -166,26 +166,26 @@ public class RDXSceneGraphUI
       ImGui.separator();
 
       sceneGraph.modifyTree(modificationQueue ->
-                            {
-                               if (viewAsTree.get())
-                               {
-                                  renderSceneNodesAsTree(sceneGraph.getRootNode(), modificationQueue);
-                               }
-                               else // Render IDs in order so they don't jump around
-                               {
-                                  for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-                                  {
-                                     if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
-                                     {
-                                        ImGuiTools.textBold(sceneNode.getName());
-                                        uiSceneNode.renderImGuiWidgets();
-                                        if (sceneNode != sceneGraph.getRootNode())
-                                           uiSceneNode.renderRemove(modificationQueue, sceneGraph);
-                                        ImGui.separator();
-                                     }
-                                  }
-                               }
-                            });
+      {
+         if (viewAsTree.get())
+         {
+            renderSceneNodesAsTree(sceneGraph.getRootNode(), modificationQueue);
+         }
+         else // Render IDs in order so they don't jump around
+         {
+            for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+            {
+               if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+               {
+                  ImGuiTools.textBold(sceneNode.getName());
+                  uiSceneNode.renderImGuiWidgets();
+                  if (sceneNode != sceneGraph.getRootNode())
+                     uiSceneNode.renderRemove(modificationQueue, sceneGraph);
+                  ImGui.separator();
+               }
+            }
+         }
+      });
    }
 
    private void renderSceneNodesAsTree(SceneNode sceneNode, SceneGraphModificationQueue modificationQueue)
