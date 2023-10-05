@@ -22,11 +22,13 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
 
    public RDXPredefinedRigidBodySceneNode build(String modelName)
    {
+      long nextID = sceneGraph.getNextID().getAndIncrement();
+
       return switch (modelName)
       {
          case "Box" ->
          {
-            PredefinedRigidBodySceneNode box = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+            PredefinedRigidBodySceneNode box = new PredefinedRigidBodySceneNode(nextID,
                                                                                 name.get(),
                                                                                 sceneGraph.getIDToNodeMap(),
                                                                                 parent.getID(),
@@ -37,7 +39,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
          }
          case "CanOfSoup" ->
          {
-            PredefinedRigidBodySceneNode canOfSoup = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+            PredefinedRigidBodySceneNode canOfSoup = new PredefinedRigidBodySceneNode(nextID,
                                                                                       name.get(),
                                                                                       sceneGraph.getIDToNodeMap(),
                                                                                       parent.getID(),
@@ -48,7 +50,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
          }
          case "2X4" ->
          {
-            PredefinedRigidBodySceneNode twoByFour = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+            PredefinedRigidBodySceneNode twoByFour = new PredefinedRigidBodySceneNode(nextID,
                                                                                       name.get(),
                                                                                       sceneGraph.getIDToNodeMap(),
                                                                                       parent.getID(),

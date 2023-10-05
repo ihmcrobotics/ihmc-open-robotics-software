@@ -73,8 +73,6 @@ public class ROS2SceneGraphSubscription
          ++numberOfMessagesReceived;
          latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
 
-         sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
-
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);
          buildSubscriptionTree(latestSceneGraphMessage, subscriptionRootNode);
@@ -91,6 +89,9 @@ public class ROS2SceneGraphSubscription
 
             updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
          });
+
+         if (!localTreeFrozen)
+            sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
       }
       return newMessageAvailable;
    }
