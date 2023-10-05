@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ActiveMappingTools
 {
-   public static void getStraightGoalFootPoses(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, float distance)
+   public static void setStraightGoalPoses(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, float distance)
    {
       for (RobotSide side : RobotSide.values)
       {

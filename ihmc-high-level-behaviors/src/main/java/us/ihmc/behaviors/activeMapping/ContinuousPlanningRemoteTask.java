@@ -107,7 +107,7 @@ public class ContinuousPlanningRemoteTask
          if (!continuousPlanner.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
          {
                initialize();
-               ActiveMappingTools.getStraightGoalFootPoses(startPose, goalPose, 0.5f);
+               ActiveMappingTools.setStraightGoalPoses(startPose, goalPose, 0.5f);
                plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, initialStanceSide); // Returns if planning in progress, sets planAvailable if plan was found
                continuousPlanner.setInitialized(true);
          }
@@ -115,7 +115,7 @@ public class ContinuousPlanningRemoteTask
          {
             if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED) // start planning, swing has started
             {
-               ActiveMappingTools.getStraightGoalFootPoses(startPose, goalPose, 0.5f);
+               ActiveMappingTools.setStraightGoalPoses(startPose, goalPose, 0.5f);
                plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, initialStanceSide);
             }
             else
