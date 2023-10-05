@@ -66,7 +66,7 @@ public class ContinuousPlanningRemoteTask
    private ContinuousPlanner continuousPlanner;
    private ROS2Helper ros2Helper;
 
-   private FootstepPlannerOutput footstepPlanner;
+   private FootstepPlannerOutput plannerOutput;
 
    public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
                                        ROS2Node ros2Node,
@@ -99,20 +99,20 @@ public class ContinuousPlanningRemoteTask
          if (!continuousPlanner.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
          {
                continuousPlanner.initialize();
-               footstepPlanner = continuousPlanner.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
+               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
                continuousPlanner.setInitialized(true);
          }
          else // Initialized, so we can run the state machine in normal mode to eternity
          {
             if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED) // start planning, swing has started
             {
-               footstepPlanner = continuousPlanner.updatePlan(latestHeightMapData);
+               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData);
             }
             else
             {
                if (continuousPlanner.isPlanAvailable()) // Only send the next footstep if a plan is available
                {
-                  FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(footstepPlanner,
+                  FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
                                                                                                                  MAXIMUM_FOOTSTEPS_TO_SEND,
                                                                                                                  SWING_DURATION,
                                                                                                                  TRANSFER_DURATION);
