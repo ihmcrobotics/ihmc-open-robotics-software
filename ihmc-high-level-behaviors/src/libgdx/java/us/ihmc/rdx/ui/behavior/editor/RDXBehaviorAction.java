@@ -9,6 +9,9 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinitionSupplier;
 import us.ihmc.behaviors.sequence.BehaviorActionStateSupplier;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
 
@@ -19,10 +22,13 @@ import us.ihmc.rdx.vr.RDXVRContext;
 public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
 {
    private transient final RDXBehaviorActionSequenceEditor editor;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
-   private final ImString description = new ImString();
    private final ImString rejectionTooltip = new ImString();
+   private final ImStringWrapper descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
+                                                                          getDefinition()::setDescription,
+                                                                          imString -> ImGuiTools.inputText(labels.get("description"), imString));
 
    public RDXBehaviorAction(RDXBehaviorActionSequenceEditor editor)
    {
@@ -32,6 +38,7 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    public void update()
    {
       getState().update();
+      description.set(getDefinition().getDescription());
    }
 
    /** @deprecated TODO: Figure out how to remove this. */
@@ -103,9 +110,9 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
       return expanded;
    }
 
-   public ImString getDescription()
+   public ImStringWrapper getDescriptionWrapper()
    {
-      return description;
+      return descriptionWrapper;
    }
 
    public ImString getRejectionTooltip()
