@@ -7,6 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -28,7 +29,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class WalkActionExecutor implements BehaviorActionExecutor
+public class WalkActionExecutor extends BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -51,7 +52,8 @@ public class WalkActionExecutor implements BehaviorActionExecutor
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
-   public WalkActionExecutor(ROS2ControllerHelper ros2ControllerHelper,
+   public WalkActionExecutor(BehaviorActionSequence sequence,
+                             ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
                              WalkingFootstepTracker footstepTracker,
                              FootstepPlanningModule footstepPlanner,
@@ -59,6 +61,8 @@ public class WalkActionExecutor implements BehaviorActionExecutor
                              WalkingControllerParameters walkingControllerParameters,
                              ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
@@ -71,7 +75,7 @@ public class WalkActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
       for (RobotSide side : RobotSide.values)
       {

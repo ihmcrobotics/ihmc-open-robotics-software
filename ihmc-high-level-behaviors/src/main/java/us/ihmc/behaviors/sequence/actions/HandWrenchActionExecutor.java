@@ -5,24 +5,27 @@ import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandWrenchActionExecutor implements BehaviorActionExecutor
+public class HandWrenchActionExecutor extends BehaviorActionExecutor
 {
    private final HandWrenchActionState state = new HandWrenchActionState();
    private final HandWrenchActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
 
-   public HandWrenchActionExecutor(ROS2ControllerHelper ros2ControllerHelper)
+   public HandWrenchActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
 
    }

@@ -13,29 +13,60 @@ import us.ihmc.communication.packets.Packet;
  * or currently executing it. This is only the information that gets
  * saved to/from JSON.
  */
-public interface BehaviorActionDefinition<T extends Packet<T>>
+public abstract class BehaviorActionDefinition<T extends Packet<T>>
 {
-   void saveToFile(ObjectNode jsonNode);
+   private String description;
+   private boolean executeWitNextAction = false;
 
-   void loadFromFile(JsonNode jsonNode);
+   public BehaviorActionDefinition(String description)
+   {
+      this.description = description;
+   }
 
-   void toMessage(T message);
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      jsonNode.put("description", description);
+      jsonNode.put("executeWithNextAction", executeWitNextAction);
+   }
 
-   void fromMessage(T message);
+   public void loadFromFile(JsonNode jsonNode)
+   {
+      description = jsonNode.get("description").textValue();
+      JsonNode executeWithNextActionNode = jsonNode.get("executeWithNextAction");
+      if (executeWithNextActionNode != null)
+         executeWitNextAction = executeWithNextActionNode.asBoolean();
+      else
+         executeWitNextAction = false;
+   }
+
+   public abstract void toMessage(T message);
+
+   public abstract void fromMessage(T message);
 
    /**
     * A description of the action to help the operator in understanding
     * the purpose and context of the action.
     */
-   String getDescription();
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
 
    /**
     * See {@link #getDescription()}.
     */
-   void setDescription(String description);
-
-   default boolean getExecuteWithNextAction()
+   public String getDescription()
    {
-      return false;
+      return description;
+   }
+
+   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   {
+      this.executeWitNextAction = executeWitNextAction;
+   }
+
+   public boolean getExecuteWithNextAction()
+   {
+      return executeWitNextAction;
    }
 }

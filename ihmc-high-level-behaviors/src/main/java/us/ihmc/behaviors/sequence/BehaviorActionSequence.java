@@ -135,55 +135,61 @@ public class BehaviorActionSequence
 
          for (ArmJointAnglesActionDefinitionMessage message : latestUpdateMessage.getArmJointAnglesActions())
          {
-            ArmJointAnglesActionExecutor action = new ArmJointAnglesActionExecutor(robotModel, ros2);
+            ArmJointAnglesActionExecutor action = new ArmJointAnglesActionExecutor(this, robotModel, ros2);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getChestOrientationActions())
          {
-            ChestOrientationActionExecutor action = new ChestOrientationActionExecutor(ros2, syncedRobot, referenceFrameLibrary);
+            ChestOrientationActionExecutor action = new ChestOrientationActionExecutor(this, ros2, syncedRobot, referenceFrameLibrary);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (FootstepPlanActionDefinitionMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
-            FootstepPlanActionExecutor action = new FootstepPlanActionExecutor(ros2, syncedRobot, footstepTracker, referenceFrameLibrary, walkingControllerParameters);
+            FootstepPlanActionExecutor action = new FootstepPlanActionExecutor(this,
+                                                                               ros2,
+                                                                               syncedRobot,
+                                                                               footstepTracker,
+                                                                               referenceFrameLibrary,
+                                                                               walkingControllerParameters);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (SakeHandCommandActionDefinitionMessage message : latestUpdateMessage.getSakeHandCommandActions())
          {
-            SakeHandCommandActionExecutor action = new SakeHandCommandActionExecutor(ros2);
+            SakeHandCommandActionExecutor action = new SakeHandCommandActionExecutor(this, ros2);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (SidedBodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getHandPoseActions())
          {
-            HandPoseActionExecutor action = new HandPoseActionExecutor(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
+            HandPoseActionExecutor action = new HandPoseActionExecutor(this, ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (HandWrenchActionDefinitionMessage message : latestUpdateMessage.getHandWrenchActions())
          {
-            HandWrenchActionExecutor action = new HandWrenchActionExecutor(ros2);
+            HandWrenchActionExecutor action = new HandWrenchActionExecutor(this, ros2);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
-            PelvisHeightPitchActionExecutor action = new PelvisHeightPitchActionExecutor(ros2, referenceFrameLibrary, syncedRobot);
+            PelvisHeightPitchActionExecutor action = new PelvisHeightPitchActionExecutor(this, ros2, referenceFrameLibrary, syncedRobot);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (WaitDurationActionDefinitionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
-            WaitDurationActionExecutor action = new WaitDurationActionExecutor();
+            WaitDurationActionExecutor action = new WaitDurationActionExecutor(this);
             action.getDefinition().fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
          for (WalkActionDefinitionMessage message : latestUpdateMessage.getWalkActions())
          {
-            WalkActionExecutor action = new WalkActionExecutor(ros2,
+            WalkActionExecutor action = new WalkActionExecutor(this,
+                                                               ros2,
                                                                syncedRobot,
                                                                footstepTracker,
                                                                footstepPlanner,
@@ -222,18 +228,41 @@ public class BehaviorActionSequence
 
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
-         boolean executeWithPreviousAction = false;
-         if (actionIndex > 0)
+         boolean executeWithNextAction = actionSequence.get(actionIndex).getDefinition().getExecuteWithNextAction();
+         boolean executeWithPreviousAction;
+         if (actionIndex == 0)
+         {
+            executeWithPreviousAction = false;
+         }
+         else
+         {
             executeWithPreviousAction = actionSequence.get(actionIndex - 1).getDefinition().getExecuteWithNextAction();
+         }
 
-         boolean firstConcurrentActionIsNextForExecution = actionSequence.get(actionIndex).getDefinition().getExecuteWithNextAction()
-                                                           && actionIndex == executionNextIndex;
-         boolean otherConcurrentActionIsNextForExecution
-               = executeWithPreviousAction
-               && actionIndex == (executionNextIndex + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndex, true));
-         boolean concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
+         boolean isNextForExecution;
+
+         if (executionNextIndex > actionIndex) // If it's after, we're definitely not executing next
+         {
+            isNextForExecution = false;
+         }
+         else // We walk backwards while action have the "execute with next action" set to true
+         {
+            int numberOfImmediatelyPriorConcurrentActions = 0;
+            int decrementingActionIndex = actionIndex - 1; // Start one action back
+            while (decrementingActionIndex >= 0 && actionSequence.get(decrementingActionIndex).getDefinition().getExecuteWithNextAction())
+            {
+               numberOfImmediatelyPriorConcurrentActions++;
+               decrementingActionIndex--;
+            }
+
+            // This also applies in the case where nothing is set to be executed concurrently
+            isNextForExecution = executionNextIndex >= actionIndex - numberOfImmediatelyPriorConcurrentActions;
+         }
+
          actionSequence.get(actionIndex).getState().setActionIndex(actionIndex);
-         actionSequence.get(actionIndex).update(executionNextIndex, concurrentActionIsNextForExecution);
+         actionSequence.get(actionIndex).getState().setIsNextForExecution(isNextForExecution);
+         actionSequence.get(actionIndex).getState().setIsToBeExecutedConcurrently(executeWithPreviousAction || executeWithNextAction);
+         actionSequence.get(actionIndex).update();
       }
 
       actionsExecutionStatusMessage.getActionStatusList().clear();
@@ -290,34 +319,6 @@ public class BehaviorActionSequence
       }
    }
 
-   /**
-    * @param actionIndex Index of the current action
-    * @param executionNextIndex Index of the next action to be executed
-    * @param executeWithPreviousAction Whether this action has to be executed at the same time of the previous one
-    * @return Index shift in the actionSequence array from the current action to the first action of the same group of concurrent actions
-    */
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, int executionNextIndex, boolean executeWithPreviousAction)
-   {
-      if (executeWithPreviousAction)
-      {
-         boolean isNotRootOfConcurrency = true;
-         for (int j = 1; j <= actionIndex; j++)
-         {
-            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getDefinition().getExecuteWithNextAction();
-            isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
-            if (!isNotRootOfConcurrency)
-            {
-               return (j - 1);
-            }
-            else if ((actionIndex - j) == 0 && thisPreviousActionIsConcurrent)
-            {
-               return j;
-            }
-         }
-      }
-      return -1;
-   }
-
    private void executeNextAction()
    {
       boolean executeWithPreviousAction = false;
@@ -336,7 +337,7 @@ public class BehaviorActionSequence
          }
       }
       boolean concurrentActionIsNextForExecution = lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction() || executeWithPreviousAction;
-      lastCurrentlyExecutingAction.update(executionNextIndex + 1, concurrentActionIsNextForExecution);
+      lastCurrentlyExecutingAction.update();
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
       currentlyExecutingActions.add(lastCurrentlyExecutingAction);
@@ -376,5 +377,10 @@ public class BehaviorActionSequence
       manuallyExecuteSubscription.destroy();
       automaticExecutionSubscription.destroy();
       executionNextIndexSubscription.destroy();
+   }
+
+   public int getExecutionNextIndex()
+   {
+      return executionNextIndex;
    }
 }

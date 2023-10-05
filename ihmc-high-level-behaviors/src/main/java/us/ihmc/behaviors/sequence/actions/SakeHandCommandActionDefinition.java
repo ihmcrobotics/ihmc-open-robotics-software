@@ -7,19 +7,24 @@ import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class SakeHandCommandActionDefinition implements BehaviorActionDefinition<SakeHandCommandActionDefinitionMessage>
+public class SakeHandCommandActionDefinition extends BehaviorActionDefinition<SakeHandCommandActionDefinitionMessage>
 {
-   private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
    private int handConfigurationIndex = SakeHandCommandOption.GOTO.ordinal();
    private double goalPosition = 1.0;  // default to open
    private double goalTorque = 0.0;    // default to none
    private boolean executeWitNextAction = false;
 
+   public SakeHandCommandActionDefinition()
+   {
+      super("Hand configuration");
+   }
+
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex].name());
       jsonNode.put("position", goalPosition);
@@ -30,7 +35,8 @@ public class SakeHandCommandActionDefinition implements BehaviorActionDefinition
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       handConfigurationIndex = SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal();
       goalPosition = jsonNode.get("position").asDouble();
@@ -106,17 +112,5 @@ public class SakeHandCommandActionDefinition implements BehaviorActionDefinition
    public void setExecuteWithNextAction(boolean executeWitNextAction)
    {
       this.executeWitNextAction = executeWitNextAction;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 }

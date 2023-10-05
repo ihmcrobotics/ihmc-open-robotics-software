@@ -7,6 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
+public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -32,10 +33,13 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
-   public PelvisHeightPitchActionExecutor(ROS2ControllerHelper ros2ControllerHelper,
+   public PelvisHeightPitchActionExecutor(BehaviorActionSequence sequence,
+                                          ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
@@ -44,7 +48,7 @@ public class PelvisHeightPitchActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
 
    }

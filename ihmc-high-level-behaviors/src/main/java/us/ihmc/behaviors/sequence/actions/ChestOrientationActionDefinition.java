@@ -9,21 +9,24 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition implements BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
+public class ChestOrientationActionDefinition extends BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
 {
-   private String description = "Chest orientation";
    private double trajectoryDuration = 4.0;
-   private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private String parentFrameName;
    private final RigidBodyTransform chestToParentTransform = new RigidBodyTransform();
 
+   public ChestOrientationActionDefinition()
+   {
+      super("Chest orientation");
+   }
+
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
       jsonNode.put("parentFrame", parentFrameName);
       JSONTools.toJSON(jsonNode, chestToParentTransform);
@@ -32,9 +35,9 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
       parentFrameName = jsonNode.get("parentFrame").textValue();
       JSONTools.toEuclid(jsonNode, chestToParentTransform);
@@ -44,7 +47,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    public void toMessage(BodyPartPoseActionDefinitionMessage message)
    {
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.setHoldPoseInWorld(holdPoseInWorldLater);
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
@@ -55,7 +58,7 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    public void fromMessage(BodyPartPoseActionDefinitionMessage message)
    {
       trajectoryDuration = message.getTrajectoryDuration();
-      executeWitNextAction = message.getExecuteWithNextAction();
+      setExecuteWithNextAction(message.getExecuteWithNextAction());
       holdPoseInWorldLater = message.getHoldPoseInWorld();
       parentFrameName = message.getParentFrame().getString(0);
       MessageTools.toEuclid(message.getTransformToParent(), chestToParentTransform);
@@ -94,16 +97,6 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
       this.trajectoryDuration = trajectoryDuration;
    }
 
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction;
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction = executeWitNextAction;
-   }
-
    public boolean getHoldPoseInWorldLater()
    {
       return holdPoseInWorldLater;
@@ -112,18 +105,6 @@ public class ChestOrientationActionDefinition implements BehaviorActionDefinitio
    public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
    {
       this.holdPoseInWorldLater = holdPoseInWorldLater;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 
    public String getParentFrameName()

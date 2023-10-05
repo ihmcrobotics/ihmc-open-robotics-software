@@ -10,26 +10,29 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedBodyPartPoseActionDefinitionMessage>, SidedObject
+public class HandPoseActionDefinition extends BehaviorActionDefinition<SidedBodyPartPoseActionDefinitionMessage> implements SidedObject
 {
-   private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
-   private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private boolean jointSpaceControl = true;
    private String palmParentFrameName;
    private final RigidBodyTransform palmTransformToParent = new RigidBodyTransform();
 
+   public HandPoseActionDefinition()
+   {
+      super("Hand pose");
+   }
+
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("parentFrame", palmParentFrameName);
       JSONTools.toJSON(jsonNode, palmTransformToParent);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
       jsonNode.put("jointSpaceControl", jointSpaceControl);
    }
@@ -37,12 +40,12 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedB
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       palmParentFrameName = jsonNode.get("parentFrame").textValue();
       JSONTools.toEuclid(jsonNode, palmTransformToParent);
-      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
@@ -55,7 +58,7 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedB
       MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.setHoldPoseInWorld(holdPoseInWorldLater);
       message.setJointSpaceControl(jointSpaceControl);
    }
@@ -67,7 +70,7 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedB
       MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
-      executeWitNextAction = message.getExecuteWithNextAction();
+      setExecuteWithNextAction(message.getExecuteWithNextAction());
       holdPoseInWorldLater = message.getHoldPoseInWorld();
       jointSpaceControl = message.getJointSpaceControl();
    }
@@ -93,17 +96,6 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedB
       this.trajectoryDuration = trajectoryDuration;
    }
 
-   @Override
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction;
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction = executeWitNextAction;
-   }
-
    public boolean getHoldPoseInWorldLater()
    {
       return holdPoseInWorldLater;
@@ -122,18 +114,6 @@ public class HandPoseActionDefinition implements BehaviorActionDefinition<SidedB
    public void setJointSpaceControl(boolean jointSpaceControl)
    {
       this.jointSpaceControl = jointSpaceControl;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 
    public String getPalmParentFrameName()

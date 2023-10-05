@@ -11,9 +11,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
-public class WalkActionDefinition implements BehaviorActionDefinition<WalkActionDefinitionMessage>
+public class WalkActionDefinition extends BehaviorActionDefinition<WalkActionDefinitionMessage>
 {
-   private String description = "Walk";
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
    private String parentFrameName;
@@ -22,6 +21,8 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
 
    public WalkActionDefinition(FootstepPlannerParametersBasics footstepPlannerParameters)
    {
+      super("Walk");
+
       for (RobotSide side : RobotSide.values)
       {
          goalFootstepToGoalTransforms.get(side).getTranslation().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
@@ -31,7 +32,8 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
       jsonNode.put("parentFrame", parentFrameName);
@@ -46,7 +48,8 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
       parentFrameName = jsonNode.get("parentFrame").textValue();
@@ -104,18 +107,6 @@ public class WalkActionDefinition implements BehaviorActionDefinition<WalkAction
    public SideDependentList<RigidBodyTransform> getGoalFootstepToGoalTransforms()
    {
       return goalFootstepToGoalTransforms;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
    }
 
    public String getParentFrameName()

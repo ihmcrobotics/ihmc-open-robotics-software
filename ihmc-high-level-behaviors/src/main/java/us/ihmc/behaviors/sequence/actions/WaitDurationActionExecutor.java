@@ -2,9 +2,10 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationActionExecutor implements BehaviorActionExecutor
+public class WaitDurationActionExecutor extends BehaviorActionExecutor
 {
    private final WaitDurationActionState state = new WaitDurationActionState();
    private final WaitDurationActionDefinition definition = state.getDefinition();
@@ -12,13 +13,13 @@ public class WaitDurationActionExecutor implements BehaviorActionExecutor
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public WaitDurationActionExecutor()
+   public WaitDurationActionExecutor(BehaviorActionSequence sequence)
    {
-
+      super(sequence);
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
 
    }

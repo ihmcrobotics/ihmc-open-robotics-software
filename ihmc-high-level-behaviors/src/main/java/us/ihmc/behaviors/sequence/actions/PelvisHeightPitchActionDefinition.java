@@ -9,20 +9,23 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class PelvisHeightPitchActionDefinition implements BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
+public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
 {
-   private String description = "Pelvis height and pitch";
    private double trajectoryDuration = 4.0;
-   private boolean executeWitNextAction = false;
    private String parentFrameName;
    private final RigidBodyTransform pelvisToParentTransform = new RigidBodyTransform();
+
+   public PelvisHeightPitchActionDefinition()
+   {
+      super("Pelvis height and pitch");
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("parentFrame", parentFrameName);
       JSONTools.toJSON(jsonNode, pelvisToParentTransform);
    }
@@ -30,9 +33,9 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       parentFrameName = jsonNode.get("parentFrame").textValue();
       JSONTools.toEuclid(jsonNode, pelvisToParentTransform);
    }
@@ -41,7 +44,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
    public void toMessage(BodyPartPoseActionDefinitionMessage message)
    {
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
       MessageTools.toMessage(pelvisToParentTransform, message.getTransformToParent());
@@ -51,7 +54,7 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
    public void fromMessage(BodyPartPoseActionDefinitionMessage message)
    {
       trajectoryDuration = message.getTrajectoryDuration();
-      executeWitNextAction = message.getExecuteWithNextAction();
+      setExecuteWithNextAction(message.getExecuteWithNextAction());
       parentFrameName = message.getParentFrame().getString(0);
       MessageTools.toEuclid(message.getTransformToParent(), pelvisToParentTransform);
    }
@@ -85,29 +88,6 @@ public class PelvisHeightPitchActionDefinition implements BehaviorActionDefiniti
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
-   }
-
-   @Override
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction;
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction = executeWitNextAction;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 
    public String getParentFrameName()

@@ -5,10 +5,11 @@ import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-public class SakeHandCommandActionExecutor implements BehaviorActionExecutor
+public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
@@ -20,13 +21,15 @@ public class SakeHandCommandActionExecutor implements BehaviorActionExecutor
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public SakeHandCommandActionExecutor(ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
 
    }
