@@ -1,4 +1,4 @@
-package us.ihmc.rdx.perception.sceneGraph.creator;
+package us.ihmc.rdx.perception.sceneGraph.builder;
 
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;

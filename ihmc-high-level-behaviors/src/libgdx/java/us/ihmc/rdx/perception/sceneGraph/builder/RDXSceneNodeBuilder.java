@@ -1,4 +1,4 @@
-package us.ihmc.rdx.perception.sceneGraph.creator;
+package us.ihmc.rdx.perception.sceneGraph.builder;
 
 import imgui.ImGui;
 import imgui.type.ImString;
