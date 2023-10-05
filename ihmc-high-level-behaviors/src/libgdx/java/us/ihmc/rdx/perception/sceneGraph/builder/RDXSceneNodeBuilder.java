@@ -4,11 +4,14 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.sceneGraph.ImGuiSceneNodeComboBox;
 import us.ihmc.rdx.perception.sceneGraph.RDXSceneNodeInterface;
 
 public abstract class RDXSceneNodeBuilder<T extends RDXSceneNodeInterface>
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    protected final SceneGraph sceneGraph;
    protected SceneNode parent;
    protected final ImString name = new ImString();
@@ -28,7 +31,7 @@ public abstract class RDXSceneNodeBuilder<T extends RDXSceneNodeInterface>
 
    public void renderImGuiWidgets()
    {
-      ImGui.inputText("Name", name);
+      ImGui.inputText(labels.get("Name"), name);
       sceneNodeComboBox.render();
       parent = sceneNodeComboBox.getSelectedNode();
    }
