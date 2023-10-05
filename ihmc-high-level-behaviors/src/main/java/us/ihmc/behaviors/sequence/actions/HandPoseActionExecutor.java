@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 
-public class HandPoseActionExecutor implements BehaviorActionExecutor
+public class HandPoseActionExecutor extends BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -42,12 +42,15 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IKRootCalculator rootCalculator;
 
-   public HandPoseActionExecutor(ROS2ControllerHelper ros2ControllerHelper,
+   public HandPoseActionExecutor(BehaviorActionSequence sequence,
+                                 ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot,
                                  HandWrenchCalculator handWrenchCalculator)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculator = handWrenchCalculator;
@@ -63,11 +66,9 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
-      boolean isNextForExecution = concurrentActionIsNextForExecution || state.getActionIndex() == nextExecutionIndex;
-
-      if (isNextForExecution)
+      if (state.getIsNextForExecution())
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
          armIKSolver.copySourceToWork();

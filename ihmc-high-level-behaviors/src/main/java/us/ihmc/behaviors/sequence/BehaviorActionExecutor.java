@@ -5,37 +5,49 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public interface BehaviorActionExecutor extends BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
+public abstract class BehaviorActionExecutor implements BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
 {
+   private final BehaviorActionSequence sequence;
+
+   public BehaviorActionExecutor(BehaviorActionSequence sequence)
+   {
+      this.sequence = sequence;
+   }
+
    /** Called every tick. */
-   void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution);
+   public abstract void update();
 
    /** Trigger the action to begin executing. Called once per execution. */
-   default void triggerActionExecution()
+   public void triggerActionExecution()
    {
 
    }
 
    /** Called every tick only when this action is executing. */
-   default void updateCurrentlyExecuting()
+   public void updateCurrentlyExecuting()
    {
 
    }
 
    /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
-   default ActionExecutionStatusMessage getExecutionStatusMessage()
+   public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return new ActionExecutionStatusMessage();
    }
 
    /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
-   default boolean isExecuting()
+   public boolean isExecuting()
    {
       return false;
    }
 
-   default boolean canExecute()
+   public boolean canExecute()
    {
       return true;
+   }
+
+   public BehaviorActionSequence getSequence()
+   {
+      return sequence;
    }
 }

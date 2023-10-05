@@ -10,6 +10,8 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
    /** The action's unique ID. */
    private final long id;
    private int actionIndex = -1;
+   private boolean isNextForExecution = false;
+   private boolean isToBeExecutedConcurrently = false;
 
    public BehaviorActionState()
    {
@@ -33,11 +35,13 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
    {
       getDefinition().loadFromFile(jsonNode);
       update();
+      // TODO: Pack
    }
 
    public void toMessage(T message)
    {
       getDefinition().toMessage(message);
+      // TODO: Pack
    }
 
    public void fromMessage(T message)
@@ -59,5 +63,25 @@ public abstract class BehaviorActionState<T extends Packet<T>> implements Behavi
    public int getActionIndex()
    {
       return actionIndex;
+   }
+
+   public void setIsNextForExecution(boolean isNextForExecution)
+   {
+      this.isNextForExecution = isNextForExecution;
+   }
+
+   public boolean getIsNextForExecution()
+   {
+      return isNextForExecution;
+   }
+
+   public void setIsToBeExecutedConcurrently(boolean isToBeExecutedConcurrently)
+   {
+      this.isToBeExecutedConcurrently = isToBeExecutedConcurrently;
+   }
+
+   public boolean getIsToBeExecutedConcurrently()
+   {
+      return isToBeExecutedConcurrently;
    }
 }

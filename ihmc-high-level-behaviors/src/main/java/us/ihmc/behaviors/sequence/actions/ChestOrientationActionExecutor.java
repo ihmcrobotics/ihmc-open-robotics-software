@@ -7,6 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -16,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class ChestOrientationActionExecutor implements BehaviorActionExecutor
+public class ChestOrientationActionExecutor extends BehaviorActionExecutor
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
@@ -32,8 +33,13 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
-   public ChestOrientationActionExecutor(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionExecutor(BehaviorActionSequence sequence,
+                                         ROS2ControllerHelper ros2ControllerHelper,
+                                         ROS2SyncedRobotModel syncedRobot,
+                                         ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
@@ -42,7 +48,7 @@ public class ChestOrientationActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
 
    }

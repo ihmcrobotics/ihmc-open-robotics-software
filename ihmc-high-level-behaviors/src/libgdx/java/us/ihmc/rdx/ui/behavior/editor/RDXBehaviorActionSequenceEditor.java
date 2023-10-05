@@ -111,7 +111,6 @@ public class RDXBehaviorActionSequenceEditor
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private long lastManualExecutionConfirmTime = 0;
    private int lastManualExecutionActionIndex = -1;
-   private boolean concurrentActionIsNextForExecution;
 
    public void clear()
    {
@@ -371,42 +370,8 @@ public class RDXBehaviorActionSequenceEditor
 
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
-         RDXBehaviorAction action = actionSequence.get(actionIndex);
-         action.getState().setActionIndex(actionIndex);
-         boolean executeWithPreviousAction = false;
-         if (actionIndex > 0)
-            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getDefinition().getExecuteWithNextAction();
-
-         boolean firstConcurrentActionIsNextForExecution = (actionSequence.get(actionIndex).getDefinition().getExecuteWithNextAction()
-                                                            && actionIndex == executionNextIndexStatus);
-         boolean otherConcurrentActionIsNextForExecution
-               = executeWithPreviousAction
-               && actionIndex == (executionNextIndexStatus + getIndexShiftFromConcurrentActionRoot(actionIndex, executionNextIndexStatus, true));
-         concurrentActionIsNextForExecution = firstConcurrentActionIsNextForExecution || otherConcurrentActionIsNextForExecution;
-         action.update();
+         actionSequence.get(actionIndex).update();
       }
-   }
-
-   private int getIndexShiftFromConcurrentActionRoot(int actionIndex, int executionNextIndex, boolean executeWithPreviousAction)
-   {
-      if (executeWithPreviousAction)
-      {
-         boolean isNotRootOfConcurrency = true;
-         for (int j = 1; j <= actionIndex; j++)
-         {
-            boolean thisPreviousActionIsConcurrent = actionSequence.get(actionIndex - j).getDefinition().getExecuteWithNextAction();
-            isNotRootOfConcurrency = thisPreviousActionIsConcurrent && executionNextIndex != (actionIndex - j + 1);
-            if (!isNotRootOfConcurrency)
-            {
-               return (j - 1);
-            }
-            else if ((actionIndex - j) == 0 && thisPreviousActionIsConcurrent)
-            {
-               return j;
-            }
-         }
-      }
-      return -1;
    }
 
    public void renderFileMenu()
@@ -888,10 +853,5 @@ public class RDXBehaviorActionSequenceEditor
    public int getExecutionNextIndexStatus()
    {
       return executionNextIndexStatus;
-   }
-
-   public boolean getConcurrentActionIsNextForExecution()
-   {
-      return concurrentActionIsNextForExecution;
    }
 }

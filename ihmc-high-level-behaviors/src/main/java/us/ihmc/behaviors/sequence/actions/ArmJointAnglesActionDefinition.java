@@ -9,22 +9,26 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
 
-public class ArmJointAnglesActionDefinition implements BehaviorActionDefinition<ArmJointAnglesActionDefinitionMessage>
+public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition<ArmJointAnglesActionDefinitionMessage>
 {
    public static final int NUMBER_OF_JOINTS = 7;
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";
 
-   private String description = "Arm joint angles";
    @Nullable // Preset is null when using explicitly specified custom joint angles
    private PresetArmConfiguration preset = PresetArmConfiguration.HOME;
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
    private final double[] jointAngles = new double[NUMBER_OF_JOINTS];
 
+   public ArmJointAnglesActionDefinition()
+   {
+      super("Arm joint angles");
+   }
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("preset", preset == null ? CUSTOM_ANGLES_NAME : preset.name());
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
@@ -40,7 +44,8 @@ public class ArmJointAnglesActionDefinition implements BehaviorActionDefinition<
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       String presetName = jsonNode.get("preset").textValue();
       preset = presetName.equals(CUSTOM_ANGLES_NAME) ? null : PresetArmConfiguration.valueOf(presetName);
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
@@ -113,17 +118,5 @@ public class ArmJointAnglesActionDefinition implements BehaviorActionDefinition<
    public void setSide(RobotSide side)
    {
       this.side = side;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 }

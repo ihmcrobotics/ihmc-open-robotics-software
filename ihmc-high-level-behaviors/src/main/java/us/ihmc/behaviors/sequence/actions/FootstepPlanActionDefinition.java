@@ -5,17 +5,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 
-public class FootstepPlanActionDefinition implements BehaviorActionDefinition<FootstepPlanActionDefinitionMessage>
+public class FootstepPlanActionDefinition extends BehaviorActionDefinition<FootstepPlanActionDefinitionMessage>
 {
-   private String description = "Footstep plan";
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
    private String parentFrameName;
 
+   public FootstepPlanActionDefinition()
+   {
+      super("Footstep plan");
+   }
+
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
       jsonNode.put("parentFrame", parentFrameName);
@@ -24,7 +29,8 @@ public class FootstepPlanActionDefinition implements BehaviorActionDefinition<Fo
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
       parentFrameName = jsonNode.get("parentFrame").textValue();
@@ -65,18 +71,6 @@ public class FootstepPlanActionDefinition implements BehaviorActionDefinition<Fo
    public void setTransferDuration(double transferDuration)
    {
       this.transferDuration = transferDuration;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 
    public String getParentFrameName()
