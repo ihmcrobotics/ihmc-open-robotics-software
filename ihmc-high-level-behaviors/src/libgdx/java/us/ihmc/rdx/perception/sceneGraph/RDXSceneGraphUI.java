@@ -109,17 +109,17 @@ public class RDXSceneGraphUI
                {
                   ImGui.tableNextRow();
                   ImGui.tableSetColumnIndex(0);
-                  if (ImGui.button("Add box"))
+                  if (ImGui.button(labels.get("Add box")))
                   {
                      modificationQueue.accept(new SceneGraphNodeAddition(predefinedRigidBodySceneNodeBuilder.build("Box"),
                                                                          predefinedRigidBodySceneNodeBuilder.getParent()));
                   }
-                  if (ImGui.button("Add can"))
+                  if (ImGui.button(labels.get("Add can")))
                   {
                      modificationQueue.accept(new SceneGraphNodeAddition(predefinedRigidBodySceneNodeBuilder.build("CanOfSoup"),
                                                                          predefinedRigidBodySceneNodeBuilder.getParent()));
                   }
-                  if (ImGui.button("Add 2x4"))
+                  if (ImGui.button(labels.get("Add 2x4")))
                   {
                      modificationQueue.accept(new SceneGraphNodeAddition(predefinedRigidBodySceneNodeBuilder.build("2X4"),
                                                                          predefinedRigidBodySceneNodeBuilder.getParent()));
