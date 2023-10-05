@@ -49,6 +49,8 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
    @Override
    public void update()
    {
+      super.update();
+
       definition.setGoalPosition(positionValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS));
       definition.setGoalTorque(torqueValue[0]);
    }

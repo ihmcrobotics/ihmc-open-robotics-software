@@ -29,17 +29,13 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanActionState state;
    private final FootstepPlanActionDefinition definition;
-   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
-   private final RecyclingArrayList<RDXFootstepPlanActionFootstep> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImDoubleWrapper swingDurationWidget;
+   private final ImDoubleWrapper transferDurationWidget;
+   private final RecyclingArrayList<RDXFootstepPlanActionFootstep> footsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
-   private final ImDoubleWrapper swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
-                                                                           definition::setSwingDuration,
-                                                                           imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-   private final ImDoubleWrapper transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
-                                                                              definition::setTransferDuration,
-                                                                              imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
    public RDXFootstepPlanAction(RDXBehaviorActionSequenceEditor editor,
                                 RDXBaseUI baseUI,
@@ -57,16 +53,21 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
+                                                                definition::getParentFrameName, definition::setParentFrameName);
+      swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
+                                                definition::setSwingDuration,
+                                                imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
+      transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
+                                                   definition::setTransferDuration,
+                                                   imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepPlanActionFootstep(referenceFrameLibrary, state, baseUI, robotModel, getSelected()::get));
+      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepPlanActionFootstep(referenceFrameLibrary, this, baseUI, robotModel));
    }
 
    @Override
    public void update()
    {
-      state.update();
+      super.update();
 
       // Add a footstep to the action data only
       if (userAddedFootstep.poll())

@@ -41,21 +41,21 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final ChestOrientationActionState state;
    private final ChestOrientationActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper yawWidget;
    private final ImDoubleWrapper pitchWidget;
    private final ImDoubleWrapper rollWidget;
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
-   private final ImBooleanWrapper executeWithNextActionWrapper;
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final RDXInteractableHighlightModel highlightModel;
-   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RDX3DPanelTooltip tooltip;
    private final ROS2PublishSubscribeAPI ros2;
    private final BodyPartPoseStatusMessage chestPoseStatus = new BodyPartPoseStatusMessage();
@@ -81,15 +81,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      yawWidget = new ImDoubleWrapper(definition.getRotation()::getYaw, definition::setYaw,
-                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-      pitchWidget = new ImDoubleWrapper(definition.getRotation()::getPitch, definition::setPitch,
-                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      rollWidget = new ImDoubleWrapper(definition.getRotation()::getRoll, definition::setRoll,
-                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                     definition::setTrajectoryDuration,
-                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
       executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
                                                           definition::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
@@ -100,6 +91,15 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
                                                                 definition::setParentFrameName);
+      yawWidget = new ImDoubleWrapper(definition.getRotation()::getYaw, definition::setYaw,
+                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
+      pitchWidget = new ImDoubleWrapper(definition.getRotation()::getPitch, definition::setPitch,
+                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
+      rollWidget = new ImDoubleWrapper(definition.getRotation()::getRoll, definition::setRoll,
+                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
+                                                     imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
@@ -120,7 +120,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      state.update();
+      super.update();
 
       if (state.getChestFrame().isChildOfWorld())
       {

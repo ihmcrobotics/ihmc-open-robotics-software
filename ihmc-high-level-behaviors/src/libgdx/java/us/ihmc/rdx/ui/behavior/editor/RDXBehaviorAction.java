@@ -3,6 +3,8 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinitionSupplier;
@@ -29,7 +31,7 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
 
    public void update()
    {
-
+      getState().update();
    }
 
    /** @deprecated TODO: Figure out how to remove this. */
@@ -74,6 +76,19 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
+   }
+
+   /** This is the default, if there is no subtree for this action */
+   public void saveToFile(ObjectNode jsonNode)
+   {
+      getState().saveToFile(jsonNode);
+   }
+
+   /** This is the default, if there is no subtree for this action */
+   public void loadFromFile(JsonNode jsonNode)
+   {
+      getState().loadFromFile(jsonNode);
+      update();
    }
 
    public abstract String getActionTypeTitle();
