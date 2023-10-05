@@ -12,32 +12,30 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 
 public class RDXSceneGraphTools
 {
-   public static SceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, RDX3DPanel panel3D, SceneGraph sceneGraph)
+   public static RDXSceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, RDX3DPanel panel3D, SceneGraph sceneGraph)
    {
-      SceneNode uiSceneNode;
       // We create one using this and copy to save on code maintenance
       SceneNode sceneNodeToCopy = ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
 
       if (sceneNodeToCopy instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
-         uiSceneNode = new RDXArUcoMarkerNode(arUcoMarkerNode);
+         return new RDXArUcoMarkerNode(arUcoMarkerNode);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         uiSceneNode = new RDXStaticRelativeSceneNode(staticRelativeSceneNode, panel3D);
+         return new RDXStaticRelativeSceneNode(staticRelativeSceneNode, panel3D);
       }
       else if (sceneNodeToCopy instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
       {
-         uiSceneNode = new RDXPredefinedRigidBodySceneNode(predefinedRigidBodySceneNode, panel3D);
+         return new RDXPredefinedRigidBodySceneNode(predefinedRigidBodySceneNode, panel3D);
       }
       else if (sceneNodeToCopy instanceof DetectableSceneNode detectableSceneNode)
       {
-         uiSceneNode = new RDXDetectableSceneNode(detectableSceneNode);
+         return new RDXDetectableSceneNode(detectableSceneNode);
       }
       else
       {
-         uiSceneNode = new RDXSceneNode(sceneNodeToCopy.getID(), sceneNodeToCopy.getName());
+         return new RDXSceneNode(sceneNodeToCopy);
       }
-      return uiSceneNode;
    }
 }

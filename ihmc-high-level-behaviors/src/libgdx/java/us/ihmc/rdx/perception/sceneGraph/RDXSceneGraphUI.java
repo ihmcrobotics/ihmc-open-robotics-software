@@ -19,6 +19,8 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,23 +32,23 @@ import java.util.Set;
 public class RDXSceneGraphUI
 {
    private final ROS2SceneGraph sceneGraph;
-   private final RDXSceneNode uiRootNode;
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
+   private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new HashMap<>();
 
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
-      uiRootNode = new RDXSceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME);
-      sceneGraph = new ROS2SceneGraph
-      (
-         uiRootNode,
-         (sceneGraph, ros2SceneGraphSubscriptionNode) -> RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph),
-         ros2PublishSubscribeAPI,
-         ROS2ActorDesignation.OPERATOR
-      );
+      sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
+      {
+         RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph);
+         uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
+         return uiSceneNode.getSceneNode();
+      }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR);
+
+      uiSceneNodes.put(sceneGraph.getRootNode(), new RDXSceneNode(sceneGraph.getRootNode()));
 
       sceneGraph.getSceneGraphSubscription().getSceneGraphSubscription().addCallback(message -> subscriptionFrequencyText.ping());
    }
@@ -54,24 +56,8 @@ public class RDXSceneGraphUI
    public void update()
    {
       sceneGraph.updateSubscription();
-      sceneGraph.modifyTree(modificationQueue -> update(uiRootNode, modificationQueue));
+      sceneGraph.modifyTree(modificationQueue -> uiSceneNodes.values().forEach(node -> node.update(modificationQueue)));
       sceneGraph.updatePublication();
-   }
-
-   private void update(RDXSceneNodeInterface uiSceneNode, SceneGraphModificationQueue modificationQueue)
-   {
-      uiSceneNode.update(modificationQueue);
-
-      if (uiSceneNode instanceof SceneNode sceneNode)
-      {
-         for (SceneNode child : sceneNode.getChildren())
-         {
-            if (child instanceof RDXSceneNodeInterface uiChildNode)
-            {
-               update(uiChildNode, modificationQueue);
-            }
-         }
-      }
    }
 
    public void renderImGuiWidgets()
@@ -94,7 +80,8 @@ public class RDXSceneGraphUI
       ImGui.checkbox(labels.get("View as tree"), viewAsTree);
       ImGui.separator();
 
-      sceneGraph.modifyTree(modificationQueue -> {
+      sceneGraph.modifyTree(modificationQueue ->
+      {
          if (viewAsTree.get())
          {
             renderSceneNodesAsTree(sceneGraph.getRootNode(), modificationQueue);
@@ -103,12 +90,12 @@ public class RDXSceneGraphUI
          {
             for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             {
-               if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+               if (uiSceneNodes.containsKey(sceneNode))
                {
                   ImGuiTools.textBold(sceneNode.getName());
-                  uiSceneNode.renderImGuiWidgets();
+                  uiSceneNodes.get(sceneNode).renderImGuiWidgets();
                   if (sceneNode != sceneGraph.getRootNode())
-                     uiSceneNode.renderRemove(modificationQueue, sceneGraph);
+                     uiSceneNodes.get(sceneNode).renderRemove(modificationQueue, sceneGraph);
                   ImGui.separator();
                }
             }
@@ -118,8 +105,10 @@ public class RDXSceneGraphUI
 
    private void renderSceneNodesAsTree(SceneNode sceneNode, SceneGraphModificationQueue modificationQueue)
    {
-      if (sceneNode instanceof RDXSceneNodeInterface uiSceneNode)
+      if (uiSceneNodes.containsKey(sceneNode))
       {
+         RDXSceneNode uiSceneNode = uiSceneNodes.get(sceneNode);
+
          float indentReduction = 10.0f; // Less indent to take less space
          ImGui.unindent(indentReduction);
 
@@ -150,23 +139,7 @@ public class RDXSceneGraphUI
    {
       if (showGraphics.get())
       {
-         getRenderables(uiRootNode, renderables, pool, sceneLevels);
-      }
-   }
-
-   private void getRenderables(RDXSceneNodeInterface uiSceneNode, Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
-   {
-      uiSceneNode.getRenderables(renderables, pool, sceneLevels);
-
-      if (uiSceneNode instanceof SceneNode sceneNode)
-      {
-         for (SceneNode child : sceneNode.getChildren())
-         {
-            if (child instanceof RDXSceneNodeInterface uiChildNode)
-            {
-               getRenderables(uiChildNode, renderables, pool, sceneLevels);
-            }
-         }
+         uiSceneNodes.values().forEach(node -> node.getRenderables(renderables, pool, sceneLevels));
       }
    }
 
