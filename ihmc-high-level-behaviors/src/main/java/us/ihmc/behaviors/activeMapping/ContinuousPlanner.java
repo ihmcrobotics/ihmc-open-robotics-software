@@ -44,14 +44,10 @@ public class ContinuousPlanner
 
    private FootstepPlannerOutput plannerOutput;
 
-   private RobotSide initialStanceSideForPlanning = RobotSide.LEFT;
-
    private Point2D gridOrigin = new Point2D(0.0, -1.0);
 
    private SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-
-   private ArrayList<Point2D> frontierPoints = new ArrayList<>();
 
    private final Point2D goalPosition = new Point2D();
    private final Point2D goalPositionIndices = new Point2D();
@@ -157,13 +153,7 @@ public class ContinuousPlanner
       }
    }
 
-   public void initialize()
-   {
-      startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
-      startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
-   }
-
-   public FootstepPlannerOutput updatePlan(HeightMapData heightMapData)
+   public FootstepPlannerOutput updatePlan(HeightMapData heightMapData, SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, RobotSide stanceSide)
    {
       if (footstepPlanner.isPlanning())
       {
@@ -171,11 +161,8 @@ public class ContinuousPlanner
          return null;
       }
 
-      ActiveMappingTools.getStraightGoalFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT),
-                                                  goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT), 0.5f);
-
       FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
-      request.setRequestedInitialStanceSide(initialStanceSideForPlanning);
+      request.setRequestedInitialStanceSide(stanceSide);
       request.setSnapGoalSteps(true);
       request.setHeightMapData(heightMapData);
       request.setAbortIfGoalStepSnappingFails(true);
@@ -191,7 +178,7 @@ public class ContinuousPlanner
          planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
 
          LogTools.info(String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s", footstepPlanningResult,
-                       footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(), planAvailable, initialStanceSideForPlanning));
+                                     footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(), planAvailable, stanceSide));
       }
 
       return plannerOutput;
@@ -235,13 +222,16 @@ public class ContinuousPlanner
       return footstepDataListMessage;
    }
 
-   public void updateStanceAndSwitchSides(FramePose3D lastSentFootstepPose, RobotSide lastSentFootstepSide)
+   public SideDependentList<FramePose3D> updateStanceAndSwitchSides(FramePose3D lastSentFootstepPose, RobotSide lastSentFootstepSide)
    {
-      initialStanceSideForPlanning = lastSentFootstepSide;
+      SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
       startPose.get(lastSentFootstepSide.getOppositeSide()).setFromReferenceFrame(referenceFrames.getSoleFrame(lastSentFootstepSide.getOppositeSide()));
       startPose.get(lastSentFootstepSide).set(lastSentFootstepPose);
 
-      LogTools.info("New Stance for Planning: {}", initialStanceSideForPlanning);
+      LogTools.info("New Stance for Planning: {}", lastSentFootstepSide);
+
+      return startPose;
    }
 
    public FootstepPlan getFootstepPlan()
@@ -307,20 +297,5 @@ public class ContinuousPlanner
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlanner.getFootstepPlannerParameters();
-   }
-
-   public RobotSide getInitialStanceSideForPlanning()
-   {
-      return initialStanceSideForPlanning;
-   }
-
-   public SideDependentList<FramePose3D> getGoalPose()
-   {
-      return goalPose;
-   }
-
-   public SideDependentList<FramePose3D> getStartPose()
-   {
-      return startPose;
    }
 }

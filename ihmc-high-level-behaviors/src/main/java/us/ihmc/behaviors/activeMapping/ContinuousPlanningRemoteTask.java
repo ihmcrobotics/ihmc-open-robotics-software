@@ -21,10 +21,12 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -59,20 +61,26 @@ public class ContinuousPlanningRemoteTask
    private Mat compressedBytesMat;
    private ByteBuffer incomingCompressedImageBuffer;
    private BytePointer incomingCompressedImageBytePointer;
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
    private int compressedBufferDefaultSize = 100000;
 
    private ContinuousPlanner continuousPlanner;
    private ROS2Helper ros2Helper;
 
+   private final HumanoidReferenceFrames referenceFrames;
+
    private FootstepPlannerOutput plannerOutput;
+   private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private RobotSide initialStanceSide = RobotSide.LEFT;
 
    public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
                                        ROS2Node ros2Node,
                                        HumanoidReferenceFrames referenceFrames,
                                        PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
+      this.referenceFrames = referenceFrames;
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
@@ -98,15 +106,17 @@ public class ContinuousPlanningRemoteTask
       {
          if (!continuousPlanner.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
          {
-               continuousPlanner.initialize();
-               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData); // Returns if planning in progress, sets planAvailable if plan was found
+               initialize();
+               ActiveMappingTools.setStraightGoalPoses(startPose, goalPose, 0.5f);
+               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, initialStanceSide); // Returns if planning in progress, sets planAvailable if plan was found
                continuousPlanner.setInitialized(true);
          }
          else // Initialized, so we can run the state machine in normal mode to eternity
          {
             if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED) // start planning, swing has started
             {
-               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData);
+               ActiveMappingTools.setStraightGoalPoses(startPose, goalPose, 0.5f);
+               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, initialStanceSide);
             }
             else
             {
@@ -117,15 +127,32 @@ public class ContinuousPlanningRemoteTask
                                                                                                                  SWING_DURATION,
                                                                                                                  TRANSFER_DURATION);
                   publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
-                  continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                               footstepDataList.getFootstepDataList().get(0).getLocation(),
-                                                                               footstepDataList.getFootstepDataList().get(0).getOrientation()),
-                                                               RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide()));
+                  initialStanceSide = RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide());
+                  startPose = continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                                           footstepDataList.getFootstepDataList().get(0).getLocation(),
+                                                                                           footstepDataList.getFootstepDataList().get(0).getOrientation()),
+                                                                           initialStanceSide);
                   continuousPlanner.setPlanAvailable(false);
                }
             }
          }
       }
+   }
+
+   public void initialize()
+   {
+      startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
+      startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+   }
+
+   public SideDependentList<FramePose3D> getGoalPose()
+   {
+      return goalPose;
+   }
+
+   public SideDependentList<FramePose3D> getStartPose()
+   {
+      return startPose;
    }
 
    private void walkingStatusReceived(WalkingStatusMessage walkingStatusMessage)

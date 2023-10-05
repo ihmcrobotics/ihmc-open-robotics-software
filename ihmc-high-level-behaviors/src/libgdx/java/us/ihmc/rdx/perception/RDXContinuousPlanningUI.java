@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningRemoteTask;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -26,20 +26,20 @@ public class RDXContinuousPlanningUI implements RenderableProvider
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
    private final ImBoolean renderEnabled = new ImBoolean(true);
+   private final ContinuousPlanningRemoteTask continuousPlanningRemoteTask;
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
-   private ContinuousPlanner continuousPlanner;
    private RDXPanel panel;
    private ROS2SyncedRobotModel syncedRobot;
    private SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
    public RDXContinuousPlanningUI(String name,
-                                  ContinuousPlanner continuousPlanner,
+                                  ContinuousPlanningRemoteTask continuousPlanningRemoteTask,
                                   PerceptionConfigurationParameters perceptionConfigurationParameters,
                                   ROS2SyncedRobotModel syncedRobot)
    {
       panel = new RDXPanel(name, this::renderImGuiWidgets);
-      this.continuousPlanner = continuousPlanner;
+      this.continuousPlanningRemoteTask = continuousPlanningRemoteTask;
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
       this.syncedRobot = syncedRobot;
 
@@ -73,17 +73,11 @@ public class RDXContinuousPlanningUI implements RenderableProvider
 
    public void render()
    {
-      //if (continuousPlanner.getFootstepDataListMessage() != null)
-      //{
-      //   footstepPlanGraphic.generateMeshesAsync(continuousPlanner.getFootstepDataListMessage(), "Continuous Planner");
-      //   footstepPlanGraphic.update();
-      //}
-
-      startFootstepGraphics.get(RobotSide.LEFT).setPose(continuousPlanner.getStartPose().get(RobotSide.LEFT));
-      startFootstepGraphics.get(RobotSide.RIGHT).setPose(continuousPlanner.getStartPose().get(RobotSide.RIGHT));
-
-      goalFootstepGraphics.get(RobotSide.LEFT).setPose(continuousPlanner.getGoalPose().get(RobotSide.LEFT));
-      goalFootstepGraphics.get(RobotSide.RIGHT).setPose(continuousPlanner.getGoalPose().get(RobotSide.RIGHT));
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getStartPose().get(side));
+         goalFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getGoalPose().get(side));
+      }
    }
 
    public RDXPanel getImGuiPanel()
