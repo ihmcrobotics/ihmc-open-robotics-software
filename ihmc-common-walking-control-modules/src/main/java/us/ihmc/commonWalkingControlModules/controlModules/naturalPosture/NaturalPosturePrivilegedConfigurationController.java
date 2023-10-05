@@ -60,7 +60,7 @@ public class NaturalPosturePrivilegedConfigurationController
    private final OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
 
    private final OneDoFJointFeedbackControlCommand controlCommand = new OneDoFJointFeedbackControlCommand();
-   private final ArrayList<OneDoFJointFeedbackControlCommand> controlCommandList = new ArrayList<>();
+   private final ArrayList<OneDoFJointFeedbackControlCommand> primaryTaskCommandList = new ArrayList<>();
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
 
@@ -75,11 +75,8 @@ public class NaturalPosturePrivilegedConfigurationController
       for (int i = 0; i < jointPrivilegedParametersList.size(); i++)
       {
          yoJointPrivilegedConfigurationParametersList.add(new YoJointPrivilegedConfigurationParameters(jointPrivilegedParametersList.get(i), registry));
-         if (yoJointPrivilegedConfigurationParametersList.get(i).getIsPrimaryTask())
-         {
-            OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
-            controlCommandList.add(command);
-         }
+         OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
+         primaryTaskCommandList.add(command);
       }
 
       //TODO These weren't used anywhere, do we need to keep them?
@@ -206,10 +203,11 @@ public class NaturalPosturePrivilegedConfigurationController
       int j = 0;
       for (int i = 0; i < yoJointPrivilegedConfigurationParametersList.size(); i++)
       {
+         /* Here we separate the privileged tasks based on whether they are a primary task or secondary task.
+            Primary tasks are sent as feedback commands, and secondary tasks are sent as privileged configuration commands. */
          if (yoJointPrivilegedConfigurationParametersList.get(i).getIsPrimaryTask())
          {
-            createJointPrivilegedPrimaryTaskCommand(yoJointPrivilegedConfigurationParametersList.get(i), controlCommandList.get(j));
-            j++;
+            createJointPrivilegedPrimaryTaskCommand(yoJointPrivilegedConfigurationParametersList.get(i), primaryTaskCommandList.get(i));
          }
          else
          {
@@ -221,12 +219,6 @@ public class NaturalPosturePrivilegedConfigurationController
    private void createJointPrivilegedPrimaryTaskCommand(YoJointPrivilegedConfigurationParameters privilegedParameters,
                                                         OneDoFJointFeedbackControlCommand command)
    {
-      //      controlCommand.clear();
-      //      controlCommand.setJoint(fullRobotModel.getOneDoFJointByName(privilegedParameters.getJointName()));
-      //      controlCommand.setInverseDynamics(privilegedParameters.getYoPrivilegedOrientation().getDoubleValue(), 0.0, 0.0);
-      //      controlCommand.setGains(privilegedParameters.getPDGains());
-      //      feedbackControlCommandList.addCommand(controlCommand);
-
       command.clear();
       command.setJoint(fullRobotModel.getOneDoFJointByName(privilegedParameters.getJointName()));
       command.setInverseDynamics(privilegedParameters.getYoPrivilegedOrientation().getDoubleValue(), 0.0, 0.0);
