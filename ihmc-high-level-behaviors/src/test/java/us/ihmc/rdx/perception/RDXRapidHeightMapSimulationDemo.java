@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -74,8 +75,6 @@ public class RDXRapidHeightMapSimulationDemo
 
    private FootstepPlanningModule footstepPlanningModule;
    private final FootstepPlannerLogger footstepPlannerLogger;
-   private FootstepPlannerRequest request;
-   private FootstepPlannerOutput plannerOutput;
    private SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
@@ -101,6 +100,8 @@ public class RDXRapidHeightMapSimulationDemo
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
       perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
 
       footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
@@ -236,6 +237,7 @@ public class RDXRapidHeightMapSimulationDemo
             if (ImGui.button("Stop"))
             {
                autoIncrement = false;
+               logHeightMap();
             }
             ImGui.sameLine();
             if (ImGui.button("Reset"))
@@ -252,7 +254,7 @@ public class RDXRapidHeightMapSimulationDemo
             ImGui.separator();
             if(ImGui.button("Plan Footsteps"))
             {
-               planFootsteps();
+               planFootsteps(cameraZUpFrame.getTransformToWorldFrame());
             }
             ImGui.separator();
             if (ImGui.button("Capture Height Map"))
@@ -261,25 +263,8 @@ public class RDXRapidHeightMapSimulationDemo
             }
          }
 
-         public void planFootsteps()
+         public FootstepPlannerOutput planFootsteps(RigidBodyTransform zUpToWorldTransform)
          {
-            // set start pose to be below the camera
-            startPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
-            startPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, 0.35);
-
-            startPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
-            startPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.35);
-
-            // set goal pose to be 1.65m in front of the camera
-            goalPose.get(RobotSide.LEFT).set(cameraZUpFrame.getTransformToWorldFrame());
-            goalPose.get(RobotSide.LEFT).appendTranslation(1.65, 0.0, 0.5);
-
-            goalPose.get(RobotSide.RIGHT).set(cameraZUpFrame.getTransformToWorldFrame());
-            goalPose.get(RobotSide.RIGHT).appendTranslation(1.65, -0.2, 0.5);
-
-            LogTools.info("Start Poses: {} {}", startPose.get(RobotSide.LEFT).getPosition(), startPose.get(RobotSide.RIGHT).getPosition());
-            LogTools.info("Goal Poses: {} {}", goalPose.get(RobotSide.LEFT).getPosition(), goalPose.get(RobotSide.RIGHT).getPosition());
-
             Mat heightMapImage = humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage();
             if (latestHeightMapData == null)
             {
@@ -288,26 +273,57 @@ public class RDXRapidHeightMapSimulationDemo
             }
             PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                           latestHeightMapData,
-                                                          new Point3D(cameraZUpFrame.getTransformToWorldFrame().getTranslation()),
+                                                          new Point3D(zUpToWorldTransform.getTranslation()),
                                                           RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
                                                           RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
 
-            LogTools.info("Grid Center: {}", cameraZUpFrame.getTransformToWorldFrame().getTranslation());
-            PerceptionDebugTools.printMat("Height Map", heightMapImage, 4);
-            PerceptionDebugTools.printHeightMap("Height Map Data", latestHeightMapData, 4);
+            //LogTools.info("Grid Center: {}", zUpToWorldTransform.getTranslation());
+            //PerceptionDebugTools.printMat("Height Map", heightMapImage, 4);
+            //PerceptionDebugTools.printHeightMap("Height Map Data", latestHeightMapData, 4);
 
-            request = new FootstepPlannerRequest();
+            double heightAtStartPose = latestHeightMapData.getHeightAt(zUpToWorldTransform.getTranslation().getX(),
+                                                                      zUpToWorldTransform.getTranslation().getY());
+
+            double heightAtGoalPose = latestHeightMapData.getHeightAt(zUpToWorldTransform.getTranslation().getX() + 1.65,
+                                                                      zUpToWorldTransform.getTranslation().getY());
+
+            if (heightAtStartPose == Double.NaN || heightAtGoalPose == Double.NaN)
+            {
+               LogTools.error("Height at start or goal pose is NaN");
+               return null;
+            }
+
+            // set start pose to be below the camera
+            startPose.get(RobotSide.LEFT).set(zUpToWorldTransform);
+            startPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, heightAtStartPose + 0.1);
+
+            startPose.get(RobotSide.RIGHT).set(zUpToWorldTransform);
+            startPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, heightAtStartPose + 0.1);
+
+            // set goal pose to be 1.65m in front of the camera
+            goalPose.get(RobotSide.LEFT).set(zUpToWorldTransform);
+            goalPose.get(RobotSide.LEFT).appendTranslation(1.65, 0.0, heightAtGoalPose + 0.1);
+
+            goalPose.get(RobotSide.RIGHT).set(zUpToWorldTransform);
+            goalPose.get(RobotSide.RIGHT).appendTranslation(1.65, -0.2, heightAtGoalPose + 0.1);
+
+            LogTools.info("Start Poses: {} {}", startPose.get(RobotSide.LEFT).getPosition(), startPose.get(RobotSide.RIGHT).getPosition());
+            LogTools.info("Goal Poses: {} {}", goalPose.get(RobotSide.LEFT).getPosition(), goalPose.get(RobotSide.RIGHT).getPosition());
+
+
+            FootstepPlannerRequest request = new FootstepPlannerRequest();
             request.setHeightMapData(latestHeightMapData);
             request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
             request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
             request.setTimeout(2.0);
+            request.setPlanBodyPath(false);
             request.setSnapGoalSteps(true);
             request.setPerformAStarSearch(true);
             request.setAssumeFlatGround(false);
             request.setSwingPlannerType(SwingPlannerType.NONE);
             request.setAbortIfGoalStepSnappingFails(true);
 
-            plannerOutput = footstepPlanningModule.handleRequest(request);
+            FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
             footstepPlannerLogger.logSession();
             FootstepPlannerLogger.deleteOldLogs();
 
@@ -322,6 +338,7 @@ public class RDXRapidHeightMapSimulationDemo
                footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
                footstepPlanGraphic.update();
             }
+            return plannerOutput;
          }
 
          public void updateFrameState(int counter)
@@ -330,6 +347,50 @@ public class RDXRapidHeightMapSimulationDemo
             {
                l515PoseGizmo.getTransformToParent().prependTranslation(SENSOR_STEP_LENGTH, 0, 0);
                l515PoseGizmo.update();
+            }
+
+            if (counter % 10 == 0)
+            {
+               FootstepPlannerOutput footstepPlannerOutput = planFootsteps(cameraZUpFrame.getTransformToWorldFrame());
+               logFootsteps(footstepPlannerOutput);
+            }
+         }
+
+         public void logRandomizedFootstepPlans(int numberOfPlans)
+         {
+            for (int i = 0; i < numberOfPlans; i++)
+            {
+               RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
+               zUpToWorldTransform.setTranslationAndIdentityRotation(0.0, 0.0, 0.0);
+               zUpToWorldTransform.getTranslation().setX(Math.random() * 2.0);
+               zUpToWorldTransform.getTranslation().setY(Math.random() * 2.0);
+               zUpToWorldTransform.getTranslation().setZ(0.0);
+               FootstepPlannerOutput plannerOutput = planFootsteps(zUpToWorldTransform);
+
+               if (plannerOutput != null)
+                  logFootsteps(plannerOutput);
+            }
+         }
+
+         public void logFootsteps(FootstepPlannerOutput plannerOutput)
+         {
+            FootstepPlan plan = plannerOutput.getFootstepPlan();
+            Point3D footstepPosition = new Point3D();
+            Quaternion footstepOrientation = new Quaternion();
+            for (int i = 0; i<PerceptionLoggerConstants.LEGACY_BLOCK_SIZE; i++)
+            {
+               if (i < plan.getNumberOfSteps())
+               {
+                  PlannedFootstep footstep = plan.getFootstep(i);
+                  footstepPosition.set(footstep.getFootstepPose().getTranslation());
+                  footstepOrientation.set(footstep.getFootstepPose().getOrientation());
+               }
+               else
+               {
+                  footstepPosition.set(0.0, 0.0, 0.0);
+               }
+               perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_POSITION, footstepPosition);
+               perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, footstepOrientation);
             }
          }
 

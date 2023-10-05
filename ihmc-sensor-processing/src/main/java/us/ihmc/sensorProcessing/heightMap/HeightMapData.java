@@ -5,6 +5,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
 
@@ -23,7 +24,7 @@ public class HeightMapData
    private final Point2D gridCenter = new Point2D();
    private double estimatedGroundHeight = Double.NaN;
 
-   private final double minX, maxX, minY, maxY;
+   private double minX, maxX, minY, maxY;
 
    public HeightMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
    {
@@ -92,6 +93,7 @@ public class HeightMapData
    {
       if (!MathTools.intervalContains(x, minX, maxX) || !MathTools.intervalContains(y, minY, maxY))
       {
+         //LogTools.debug(String.format("Outside height map bounds: %.2f, %.2f, %.2f, %.2f", minX, maxX, minY, maxY));
          return Double.NaN;
       }
 
@@ -223,5 +225,12 @@ public class HeightMapData
    public void setGridCenter(double x, double y)
    {
       gridCenter.set(x, y);
+
+      double epsilon = 1e-8;
+      double halfWidth = 0.5 * (gridSizeXY + gridResolutionXY) - epsilon;
+      minX = gridCenter.getX() - halfWidth;
+      maxX = gridCenter.getX() + halfWidth;
+      minY = gridCenter.getY() - halfWidth;
+      maxY = gridCenter.getY() + halfWidth;
    }
 }

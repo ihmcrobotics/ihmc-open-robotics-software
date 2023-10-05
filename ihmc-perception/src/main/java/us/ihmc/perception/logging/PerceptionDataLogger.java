@@ -633,7 +633,7 @@ public class PerceptionDataLogger
 
       int blockUsed = (int) (pointer.limit() / channels.get(namespace).getFrameSize());
 
-      LogTools.info("Pointer Limit: {}, Block Used: {}, Block Size: {}", pointer.limit(), blockUsed, channels.get(namespace).getBlockSize());
+      LogTools.debug("Pointer Limit: {}, Block Used: {}, Block Size: {}", pointer.limit(), blockUsed, channels.get(namespace).getBlockSize());
 
       if (blockUsed > channels.get(namespace).getBlockSize())
       {
