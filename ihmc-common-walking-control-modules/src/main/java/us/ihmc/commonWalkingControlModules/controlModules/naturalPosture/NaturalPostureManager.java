@@ -17,10 +17,10 @@ public class NaturalPostureManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final NaturalPostureController controller;
-   private final NaturalPosturePrivilegedConfigurationController privilegedConfigurationController;
+   private NaturalPostureController controller;
+   private NaturalPosturePrivilegedConfigurationController privilegedConfigurationController;
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
-   private final ExecutionTimer timer;
+   private ExecutionTimer timer;
 
    private final boolean useNaturalPostureCommand = true; //this must be true to use Natural Posture
    private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommandForNaturalPosture", registry);
@@ -29,28 +29,31 @@ public class NaturalPostureManager
 
    public NaturalPostureManager(NaturalPostureParameters parameters, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
-      parentRegistry.addChild(registry);
-
-      usePelvisPrivilegedPoseCommand.set(false);
-      useBodyManagerCommands.set(false);
-      usePelvisOrientationCommand.set(true);
-
-      controller = new NaturalPostureController(parameters, controllerToolbox, registry);
-      privilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(parameters, controllerToolbox.getFullRobotModel(), registry);
-
-      timer = new ExecutionTimer("naturalPostureTimer", registry);
-
-      OneDoFJointBasics[] allOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
-      String[] jointNamesRestrictiveLimits = parameters.getJointsWithRestrictiveLimits();
-      OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFJoints,
-                                                                                                                         jointNamesRestrictiveLimits),
-                                                                                          OneDoFJointBasics.class);
-      for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
+      if(useNaturalPostureCommand)
       {
-         JointLimitParameters limitParameters = parameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
-         if (limitParameters == null)
-            throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
-         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
+         parentRegistry.addChild(registry);
+
+         usePelvisPrivilegedPoseCommand.set(false);
+         useBodyManagerCommands.set(false);
+         usePelvisOrientationCommand.set(true);
+
+         controller = new NaturalPostureController(parameters, controllerToolbox, registry);
+         privilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(parameters, controllerToolbox.getFullRobotModel(), registry);
+
+         timer = new ExecutionTimer("naturalPostureTimer", registry);
+
+         OneDoFJointBasics[] allOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
+         String[] jointNamesRestrictiveLimits = parameters.getJointsWithRestrictiveLimits();
+         OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFJoints,
+                                                                                                                            jointNamesRestrictiveLimits),
+                                                                                             OneDoFJointBasics.class);
+         for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
+         {
+            JointLimitParameters limitParameters = parameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
+            if (limitParameters == null)
+               throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
+            jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
+         }
       }
    }
 
