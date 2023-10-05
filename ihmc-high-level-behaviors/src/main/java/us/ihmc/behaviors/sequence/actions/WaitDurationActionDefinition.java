@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 
-public class WaitDurationActionDefinition extends BehaviorActionDefinition<WaitDurationActionDefinitionMessage>
+public class WaitDurationActionDefinition extends BehaviorActionDefinition
 {
    private double waitDuration = 4.0;
 
@@ -30,15 +30,17 @@ public class WaitDurationActionDefinition extends BehaviorActionDefinition<WaitD
       waitDuration = jsonNode.get("waitDuration").asDouble();
    }
 
-   @Override
    public void toMessage(WaitDurationActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setWaitDuration(waitDuration);
    }
 
-   @Override
    public void fromMessage(WaitDurationActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       waitDuration = message.getWaitDuration();
    }
 

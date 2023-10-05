@@ -9,9 +9,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMessage> implements Settable<WalkActionDefinitionMessage>, EpsilonComparable<WalkActionDefinitionMessage>
 {
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
    /**
             * Name of the frame the this action is expressed in
             */
@@ -39,7 +39,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
    public WalkActionDefinitionMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
+      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       left_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
@@ -54,7 +54,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
    public void set(WalkActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
+      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.left_goal_foot_transform_to_gizmo_, left_goal_foot_transform_to_gizmo_);
@@ -67,11 +67,11 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
 
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
    {
-      return action_information_;
+      return action_definition_;
    }
 
 
@@ -158,7 +158,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
+      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
@@ -181,7 +181,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
       WalkActionDefinitionMessage otherMyClass = (WalkActionDefinitionMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
+      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if (!this.left_goal_foot_transform_to_gizmo_.equals(otherMyClass.left_goal_foot_transform_to_gizmo_)) return false;
@@ -200,8 +200,8 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkActionDefinitionMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
+      builder.append("action_definition=");
+      builder.append(this.action_definition_);      builder.append(", ");
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
       builder.append("transform_to_parent=");

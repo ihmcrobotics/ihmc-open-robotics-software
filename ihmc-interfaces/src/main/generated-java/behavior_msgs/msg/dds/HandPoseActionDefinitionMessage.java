@@ -6,12 +6,12 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class SidedBodyPartPoseActionDefinitionMessage extends Packet<SidedBodyPartPoseActionDefinitionMessage> implements Settable<SidedBodyPartPoseActionDefinitionMessage>, EpsilonComparable<SidedBodyPartPoseActionDefinitionMessage>
+public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefinitionMessage> implements Settable<HandPoseActionDefinitionMessage>, EpsilonComparable<HandPoseActionDefinitionMessage>
 {
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -41,22 +41,22 @@ public class SidedBodyPartPoseActionDefinitionMessage extends Packet<SidedBodyPa
             */
    public boolean joint_space_control_;
 
-   public SidedBodyPartPoseActionDefinitionMessage()
+   public HandPoseActionDefinitionMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
+      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public SidedBodyPartPoseActionDefinitionMessage(SidedBodyPartPoseActionDefinitionMessage other)
+   public HandPoseActionDefinitionMessage(HandPoseActionDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(SidedBodyPartPoseActionDefinitionMessage other)
+   public void set(HandPoseActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
+      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       robot_side_ = other.robot_side_;
 
       parent_frame_.set(other.parent_frame_);
@@ -73,11 +73,11 @@ public class SidedBodyPartPoseActionDefinitionMessage extends Packet<SidedBodyPa
 
 
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
    {
-      return action_information_;
+      return action_definition_;
    }
 
    /**
@@ -174,24 +174,24 @@ public class SidedBodyPartPoseActionDefinitionMessage extends Packet<SidedBodyPa
    }
 
 
-   public static Supplier<SidedBodyPartPoseActionDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<HandPoseActionDefinitionMessagePubSubType> getPubSubType()
    {
-      return SidedBodyPartPoseActionDefinitionMessagePubSubType::new;
+      return HandPoseActionDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return SidedBodyPartPoseActionDefinitionMessagePubSubType::new;
+      return HandPoseActionDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(SidedBodyPartPoseActionDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(HandPoseActionDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
+      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
@@ -214,11 +214,11 @@ public class SidedBodyPartPoseActionDefinitionMessage extends Packet<SidedBodyPa
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof SidedBodyPartPoseActionDefinitionMessage)) return false;
+      if(!(other instanceof HandPoseActionDefinitionMessage)) return false;
 
-      SidedBodyPartPoseActionDefinitionMessage otherMyClass = (SidedBodyPartPoseActionDefinitionMessage) other;
+      HandPoseActionDefinitionMessage otherMyClass = (HandPoseActionDefinitionMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
+      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
@@ -240,9 +240,9 @@ public class SidedBodyPartPoseActionDefinitionMessage extends Packet<SidedBodyPa
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("SidedBodyPartPoseActionDefinitionMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
+      builder.append("HandPoseActionDefinitionMessage {");
+      builder.append("action_definition=");
+      builder.append(this.action_definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("parent_frame=");

@@ -9,18 +9,13 @@ import us.ihmc.pubsub.TopicDataType;
 public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActionDefinitionMessage> implements Settable<FootstepPlanActionDefinitionMessage>, EpsilonComparable<FootstepPlanActionDefinitionMessage>
 {
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
    /**
-            * Name of the frame the this action is expressed in
+            * Name of the parent frame the footsteps are expressed in
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
-   /**
-            * Transform that expresses the transform to the parent frame
-            * that the footsteps are expressed in.
-            */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
    /**
             * The footsteps, with a maximum of 50
             */
@@ -36,9 +31,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
    public FootstepPlanActionDefinitionMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
+      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
-      transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepActionDefinitionMessagePubSubType());
 
    }
@@ -51,9 +45,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
    public void set(FootstepPlanActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
+      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       parent_frame_.set(other.parent_frame_);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       footsteps_.set(other.footsteps_);
       swing_duration_ = other.swing_duration_;
 
@@ -63,30 +56,20 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
 
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
    {
-      return action_information_;
+      return action_definition_;
    }
 
 
    /**
-            * Name of the frame the this action is expressed in
+            * Name of the parent frame the footsteps are expressed in
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getParentFrame()
    {
       return parent_frame_;
-   }
-
-
-   /**
-            * Transform that expresses the transform to the parent frame
-            * that the footsteps are expressed in.
-            */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToParent()
-   {
-      return transform_to_parent_;
    }
 
 
@@ -146,10 +129,9 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
+      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
-      if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
       if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
       else
       {
@@ -174,9 +156,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       FootstepPlanActionDefinitionMessage otherMyClass = (FootstepPlanActionDefinitionMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
+      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
-      if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
       if(this.swing_duration_ != otherMyClass.swing_duration_) return false;
 
@@ -192,12 +173,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanActionDefinitionMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
+      builder.append("action_definition=");
+      builder.append(this.action_definition_);      builder.append(", ");
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
-      builder.append("transform_to_parent=");
-      builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
       builder.append("swing_duration=");

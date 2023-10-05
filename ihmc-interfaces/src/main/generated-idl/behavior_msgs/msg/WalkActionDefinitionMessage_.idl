@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__WalkActionDefinitionMessage__idl__
 #define __behavior_msgs__msg__WalkActionDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./ActionInformationMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
@@ -14,9 +14,9 @@ module behavior_msgs
       struct WalkActionDefinitionMessage
       {
         /**
-         * Used for syncing action sequences
+         * Parent definition fields
          */
-        behavior_msgs::msg::dds::ActionInformationMessage action_information;
+        behavior_msgs::msg::dds::BehaviorActionDefinitionMessage action_definition;
         /**
          * Name of the frame the this action is expressed in
          */

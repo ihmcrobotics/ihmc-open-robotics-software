@@ -7,7 +7,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 
-public class HandWrenchActionDefinition extends BehaviorActionDefinition<HandWrenchActionDefinitionMessage> implements SidedObject
+public class HandWrenchActionDefinition extends BehaviorActionDefinition implements SidedObject
 {
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 1000.0;
@@ -38,17 +38,19 @@ public class HandWrenchActionDefinition extends BehaviorActionDefinition<HandWre
       force = jsonNode.get("force").asDouble();
    }
 
-   @Override
    public void toMessage(HandWrenchActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setForce(force);
    }
 
-   @Override
    public void fromMessage(HandWrenchActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       force = message.getForce();

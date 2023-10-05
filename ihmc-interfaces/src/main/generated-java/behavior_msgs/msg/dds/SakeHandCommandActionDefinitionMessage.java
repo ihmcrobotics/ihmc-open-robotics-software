@@ -9,9 +9,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandCommandActionDefinitionMessage> implements Settable<SakeHandCommandActionDefinitionMessage>, EpsilonComparable<SakeHandCommandActionDefinitionMessage>
 {
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -35,7 +35,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
    public SakeHandCommandActionDefinitionMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
+      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
    }
 
    public SakeHandCommandActionDefinitionMessage(SakeHandCommandActionDefinitionMessage other)
@@ -46,7 +46,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
    public void set(SakeHandCommandActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
+      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       robot_side_ = other.robot_side_;
 
       configuration_ = other.configuration_;
@@ -61,11 +61,11 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
 
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
    {
-      return action_information_;
+      return action_definition_;
    }
 
    /**
@@ -161,7 +161,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
+      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.configuration_, other.configuration_, epsilon)) return false;
@@ -185,7 +185,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       SakeHandCommandActionDefinitionMessage otherMyClass = (SakeHandCommandActionDefinitionMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
+      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.configuration_ != otherMyClass.configuration_) return false;
@@ -206,8 +206,8 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       StringBuilder builder = new StringBuilder();
 
       builder.append("SakeHandCommandActionDefinitionMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
+      builder.append("action_definition=");
+      builder.append(this.action_definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("configuration=");

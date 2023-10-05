@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
@@ -9,7 +8,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition<BodyPartPoseActionDefinitionMessage>
+public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition
 {
    private double trajectoryDuration = 4.0;
    private String parentFrameName;
@@ -40,9 +39,10 @@ public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition<
       JSONTools.toEuclid(jsonNode, pelvisToParentTransform);
    }
 
-   @Override
    public void toMessage(BodyPartPoseActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.getParentFrame().resetQuick();
@@ -50,9 +50,10 @@ public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition<
       MessageTools.toMessage(pelvisToParentTransform, message.getTransformToParent());
    }
 
-   @Override
    public void fromMessage(BodyPartPoseActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       trajectoryDuration = message.getTrajectoryDuration();
       setExecuteWithNextAction(message.getExecuteWithNextAction());
       parentFrameName = message.getParentFrame().getString(0);

@@ -9,7 +9,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
 
-public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition<ArmJointAnglesActionDefinitionMessage>
+public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition
 {
    public static final int NUMBER_OF_JOINTS = 7;
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";
@@ -59,9 +59,10 @@ public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition<Arm
       }
    }
 
-   @Override
    public void toMessage(ArmJointAnglesActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setPreset(preset == null ? -1 : preset.ordinal());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
@@ -71,9 +72,10 @@ public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition<Arm
       }
    }
 
-   @Override
    public void fromMessage(ArmJointAnglesActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       int presetOrdinal = message.getPreset();
       preset = presetOrdinal == -1 ? null : PresetArmConfiguration.values()[presetOrdinal];
       side = RobotSide.fromByte(message.getRobotSide());

@@ -1,6 +1,6 @@
 
-# Used for syncing action sequences
-behavior_msgs/ActionInformationMessage action_information
+# Parent definition fields
+behavior_msgs/BehaviorActionDefinitionMessage action_definition
 
 # Name of the frame the this action is expressed in
 string[] parent_frame
