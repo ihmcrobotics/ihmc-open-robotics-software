@@ -297,6 +297,9 @@ def launch_plan_viewer(height_map, footstep_positions, footstep_orientations,
         # if current position is not zero, plot footsteps
         plot_footsteps(height_map_display, current_plan_positions, current_plan_orientations)
 
+        # Create a resizeable window and resize by scale factor
+        cv2.namedWindow("Footstep Plan", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("Footstep Plan", 1000, 1000)
         cv2.imshow("Footstep Plan", height_map_display)
         cv2.waitKey(0)
 
