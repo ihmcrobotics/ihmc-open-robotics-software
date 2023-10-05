@@ -42,6 +42,8 @@ public class RDXFootstepPlanActionFootstep
 
    public void update()
    {
+      state.update();
+
       if (interactableFootstep == null
           || state.getIndex() != interactableFootstep.getIndex()
           || definition.getSide() != interactableFootstep.getFootstepSide())

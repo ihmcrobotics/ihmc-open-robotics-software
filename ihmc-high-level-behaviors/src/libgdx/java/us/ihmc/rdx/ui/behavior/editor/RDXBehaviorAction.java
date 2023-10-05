@@ -26,9 +26,7 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
-   private final ImStringWrapper descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
-                                                                          getDefinition()::setDescription,
-                                                                          imString -> ImGuiTools.inputText(labels.get("description"), imString));
+   private ImStringWrapper descriptionWrapper;
 
    public RDXBehaviorAction(RDXBehaviorActionSequenceEditor editor)
    {
@@ -37,6 +35,13 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
 
    public void update()
    {
+      if (descriptionWrapper == null)
+      {
+         descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
+                                                  getDefinition()::setDescription,
+                                                  imString -> ImGuiTools.inputText(labels.get("description"), imString));
+      }
+
       getState().update();
    }
 

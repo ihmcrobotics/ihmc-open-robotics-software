@@ -107,11 +107,15 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 
             newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(definition.getParentFrameName()));
             addedFootstep.getDefinition().getSoleToPlanFrameTransform().set(newFootstepPose);
-            addedFootstep.update();
          }
 
          if (userRemovedFootstep.poll())
             footsteps.remove(footsteps.size() - 1);
+
+         for (RDXFootstepPlanActionFootstep footstep : footsteps)
+         {
+            footstep.update();
+         }
       }
    }
 
