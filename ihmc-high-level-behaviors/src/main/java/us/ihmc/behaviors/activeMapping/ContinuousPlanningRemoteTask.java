@@ -129,8 +129,8 @@ public class ContinuousPlanningRemoteTask
                   publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
                   initialStanceSide = RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide());
                   startPose = continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                               footstepDataList.getFootstepDataList().get(0).getLocation(),
-                                                                               footstepDataList.getFootstepDataList().get(0).getOrientation()),
+                                                                                           footstepDataList.getFootstepDataList().get(0).getLocation(),
+                                                                                           footstepDataList.getFootstepDataList().get(0).getOrientation()),
                                                                            initialStanceSide);
                   continuousPlanner.setPlanAvailable(false);
                }
