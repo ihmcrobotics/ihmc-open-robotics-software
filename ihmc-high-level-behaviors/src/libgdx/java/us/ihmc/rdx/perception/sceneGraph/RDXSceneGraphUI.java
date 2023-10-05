@@ -58,6 +58,10 @@ public class RDXSceneGraphUI
       sceneGraph.updateSubscription();
       sceneGraph.modifyTree(modificationQueue -> uiSceneNodes.values().forEach(node -> node.update(modificationQueue)));
       sceneGraph.updatePublication();
+
+      for (SceneNode sceneNode : uiSceneNodes.keySet())
+         if (!sceneGraph.getSceneNodesByID().contains(sceneNode))
+            uiSceneNodes.remove(sceneNode);
    }
 
    public void renderImGuiWidgets()
