@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 import java.util.ArrayList;
 
@@ -16,7 +15,7 @@ public interface NaturalPostureParameters
    /* ~~~~~~~~~~ End NaturalPostureManager methods ~~~~~~~~~~ */
 
    /* ~~~~~~~~~~ Begin NaturalPostureControllerParameters ~~~~~~~~~~ */
-   boolean getdoNullSpaceProjectionForNaturalPosture();
+   boolean getDoNullSpaceProjectionForNaturalPosture();
 
    FrameYawPitchRoll getComAngleDesired();
 
@@ -47,24 +46,24 @@ public interface NaturalPostureParameters
 
    class OneDofJointPrivilegedParameters
    {
-      private final OneDoFJointBasics joint;
+      private final String jointName;
       private final double privilegedOrientation;
       private final double kp;
       private final double kd;
       private final double weight;
 
-      public OneDofJointPrivilegedParameters(OneDoFJointBasics joint, double privilegedOrientation, double kp, double kd, double weight)
+      public OneDofJointPrivilegedParameters(String jointName, double privilegedOrientation, double kp, double kd, double weight)
       {
-         this.joint = joint;
+         this.jointName = jointName;
          this.privilegedOrientation = privilegedOrientation;
          this.kp = kp;
          this.kd = kd;
          this.weight = weight;
       }
 
-      public OneDoFJointBasics getJoint()
+      public String getJointName()
       {
-         return joint;
+         return jointName;
       }
 
       public double getPrivilegedOrientation()
@@ -88,7 +87,7 @@ public interface NaturalPostureParameters
       }
    }
 
-   public static class BodyPrivilegedParameters
+   class BodyPrivilegedParameters
    {
       private final Vector3D privilegedOrientation;
       private final Vector3D kp;

@@ -7,7 +7,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoJointPrivilegedConfigurationParameters
 {
-   private final OneDoFJointBasics joint;
+   private final String jointName;
    private final YoDouble privilegedOrientation;
    private final YoDouble kp;
    private final YoDouble kd;
@@ -16,8 +16,8 @@ public class YoJointPrivilegedConfigurationParameters
 
    public YoJointPrivilegedConfigurationParameters(NaturalPostureParameters.OneDofJointPrivilegedParameters jointPrivilegedParameters, YoRegistry registry)
    {
-      joint = jointPrivilegedParameters.getJoint();
-      String suffix = "_" + joint.getName().toLowerCase() + "_PrivilegedConfiguration";
+      jointName = jointPrivilegedParameters.getJointName();
+      String suffix = "_" + jointName.toLowerCase() + "_PrivilegedConfiguration";
       privilegedOrientation = new YoDouble("angle" + suffix, registry);
       kp = new YoDouble("kp" + suffix, registry);
       kd = new YoDouble("kd" + suffix, registry);
@@ -46,9 +46,9 @@ public class YoJointPrivilegedConfigurationParameters
       this.weight.set(weight);
    }
 
-   public OneDoFJointBasics getJoint()
+   public String getJointName()
    {
-      return joint;
+      return jointName;
    }
 
    public double getPrivilegedOrientation()
