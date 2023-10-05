@@ -38,7 +38,6 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    public void update()
    {
       getState().update();
-      description.set(getDefinition().getDescription());
    }
 
    /** @deprecated TODO: Figure out how to remove this. */
