@@ -52,6 +52,11 @@ public class PerceptionLoggerConstants
    public static final String MOCAP_RIGID_BODY_ORIENTATION = "/mocap/rigid_body/orientation";
 
    public static final String INTERNAL_HEIGHT_MAP_NAME = "/internal/height/";
+   public static final String CROPPED_HEIGHT_MAP_NAME = "/cropped/height/";
    public static final String FOOTSTEP_POSITION = "/plan/footstep/position/";
    public static final String FOOTSTEP_ORIENTATION = "/plan/footstep/orientation/";
+   public static final String START_FOOTSTEP_POSITION = "/start/footstep/position/";
+   public static final String START_FOOTSTEP_ORIENTATION = "/start/footstep/orientation/";
+   public static final String GOAL_FOOTSTEP_POSITION = "/goal/footstep/position/";
+   public static final String GOAL_FOOTSTEP_ORIENTATION = "/goal/footstep/orientation/";
 }

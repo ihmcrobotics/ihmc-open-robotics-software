@@ -258,12 +258,20 @@ def plan_view_main(data):
     footstep_plan_positions = get_data(data, 'plan/footstep/position/')
     footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
 
+    start_positions = get_data(data, 'start/footstep/position/')
+    start_orientations = get_data(data, 'start/footstep/orientation/')
+
+    goal_positions = get_data(data, 'goal/footstep/position/')
+    goal_orientations = get_data(data, 'goal/footstep/orientation/')
+
     print("Height Map: ", height_map.shape)
     print("Footstep Plan: ", footstep_plan_positions.shape, footstep_plan_orientations.shape)
 
-    launch_plan_viewer(height_map, footstep_plan_positions, footstep_plan_orientations)
+    launch_plan_viewer(height_map, footstep_plan_positions, footstep_plan_orientations, 
+                       start_positions, start_orientations, goal_positions, goal_orientations)
 
-def launch_plan_viewer(height_map, footstep_positions, footstep_orientations):
+def launch_plan_viewer(height_map, footstep_positions, footstep_orientations, 
+                       start_positions, start_orientations, goal_positions, goal_orientations):
     
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
@@ -278,12 +286,15 @@ def launch_plan_viewer(height_map, footstep_positions, footstep_orientations):
         # convert grayscale to RGB
         height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
 
+        print("Start: ", start_positions[i, :], " Goal:", goal_positions[i, :])
+
         current_plan_positions = footstep_positions[i*10:(i+1)*10, :]
         current_plan_orientations = footstep_orientations[i*10:(i+1)*10, :]
 
-        # print("Current Plan Positions: ", current_plan_positions)
-        # print("Current Plan Orientations: ", current_plan_orientations)
+        plot_footstep(height_map_display, start_positions[i, :], start_orientations[i, :], (0, 255, 0), dims=(5,5))
+        plot_footstep(height_map_display, goal_positions[i, :], goal_orientations[i, :], (255, 255, 255), dims=(5,5))
 
+        # if current position is not zero, plot footsteps
         plot_footsteps(height_map_display, current_plan_positions, current_plan_orientations)
 
         cv2.imshow("Footstep Plan", height_map_display)
@@ -298,16 +309,21 @@ def plot_footsteps(display, positions, orientations):
         position = positions[i, :]
         orientation = orientations[i, :]
 
-        position_on_map = (int(position[1]*50 + display.shape[0]/2), int(position[0]*50 + display.shape[0]/2))
+        # set color to red if left foot, yellow if right foot
+        color = (0, 0, 255) if i % 2 == 0 else (0, 255, 255)
 
-        print("Position on Map: ", position_on_map)
+        # if position is not zero, plot footsteps
+        if np.linalg.norm(position) > 0.001:
+            plot_footstep(display, position, orientation, color)
 
-        # Draw a rectangle 2x4 pixels on height map, alternate red and yellow
-        if i % 2 == 0:
-            display = cv2.rectangle(display, (position_on_map[0] - 2, position_on_map[1] - 4), (position_on_map[0] + 2, position_on_map[1] + 4), (0, 0, 255), -1)
-        else:
-            display = cv2.rectangle(display, (position_on_map[0] - 2, position_on_map[1] - 4), (position_on_map[0] + 2, position_on_map[1] + 4), (0, 255, 255), -1)
-        
+def plot_footstep(display, position, orientation, color, dims=(2,4)):
+    
+    position_on_map = (int(position[1]*50 + display.shape[0]/2), int(position[0]*50 + display.shape[0]/2))
+    print("Position on Map: ", position_on_map)
+
+    # Draw a rectangle 2x4 pixels on height map, alternate red and yellow
+    display = cv2.rectangle(display, (position_on_map[0] - dims[0], position_on_map[1] - dims[1]), (position_on_map[0] + dims[0], position_on_map[1] + dims[1]), color, -1)
+
 
 
 if __name__ == '__main__':
@@ -366,5 +382,9 @@ if __name__ == '__main__':
         plan_view_main(data)
 
     
-    data = h5py.File(path + '20231004_193602_PerceptionLog.hdf5', 'r')
+
+    # list of good files
+    # 20231005_001313_PerceptionLog.hdf5
+
+    data = h5py.File(path + '20231005_001313_PerceptionLog.hdf5', 'r')
     plan_view_main(data)

@@ -21,7 +21,6 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -31,7 +30,6 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -101,8 +99,15 @@ public class RDXRapidHeightMapSimulationDemo
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
       perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
+      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
       perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
       perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
 
       footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
@@ -238,11 +243,12 @@ public class RDXRapidHeightMapSimulationDemo
             if (ImGui.button("Stop"))
             {
                autoIncrement = false;
+               logInternalHeightMap();
             }
             ImGui.separator();
             if (ImGui.button("Capture Height Map"))
             {
-               logHeightMap();
+               logInternalHeightMap();
             }
             if (ImGui.button("Reset"))
             {
@@ -351,7 +357,13 @@ public class RDXRapidHeightMapSimulationDemo
             if (counter % 10 == 0)
             {
                FootstepPlannerOutput footstepPlannerOutput = planFootsteps(cameraZUpFrame.getTransformToWorldFrame());
-               logFootsteps(footstepPlannerOutput);
+
+               if (footstepPlannerOutput != null)
+               {
+                  logFootsteps(footstepPlannerOutput);
+                  logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
+                               PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
+               }
             }
          }
 
@@ -391,18 +403,27 @@ public class RDXRapidHeightMapSimulationDemo
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_POSITION, footstepPosition);
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, footstepOrientation);
             }
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, new Point3D(startPose.get(RobotSide.LEFT).getTranslation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, new Quaternion(startPose.get(RobotSide.LEFT).getOrientation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, new Point3D(goalPose.get(RobotSide.LEFT).getTranslation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION, new Quaternion(goalPose.get(RobotSide.LEFT).getOrientation()));
          }
 
-         public void logHeightMap()
+         public void logInternalHeightMap()
          {
             if (!heightMapCaptured)
             {
                Mat internalHeightMapImage = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-               BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
-               OpenCVTools.compressImagePNG(internalHeightMapImage, compressedDepthPointer);
-               perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME, compressedDepthPointer);
+               logHeightMap(internalHeightMapImage, PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
                heightMapCaptured = true;
             }
+         }
+
+         public void logHeightMap(Mat heightMapImage, String namespace)
+         {
+            BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
+            OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
+            perceptionDataLogger.storeBytesFromPointer(namespace, compressedDepthPointer);
          }
 
          @Override
