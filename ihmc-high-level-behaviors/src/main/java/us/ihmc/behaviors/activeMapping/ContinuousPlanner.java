@@ -37,11 +37,8 @@ public class ContinuousPlanner
 
    private DecisionLayer decisionLayer;
 
-   public PlanningMode planningMode = PlanningMode.WALK_STRAIGHT;
-
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final FootstepPlanningModule footstepPlanner;
-   private final DRCRobotModel robotModel;
    private final HumanoidReferenceFrames referenceFrames;
    private MonteCarloPlanner monteCarloPlanner;
 
@@ -67,7 +64,7 @@ public class ContinuousPlanner
 
    private boolean initialized = false;
    private boolean planAvailable = false;
-   private boolean active = true;
+   private boolean active;
 
    private float gridResolution = 10.0f;
    private int offset = 70;
@@ -75,7 +72,6 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
-      this.robotModel = robotModel;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       active = true;
@@ -167,12 +163,12 @@ public class ContinuousPlanner
       startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
    }
 
-   public void updatePlan(HeightMapData heightMapData)
+   public FootstepPlannerOutput updatePlan(HeightMapData heightMapData)
    {
       if (footstepPlanner.isPlanning())
       {
          LogTools.warn("Footstep Planner is Busy!");
-         return;
+         return null;
       }
 
       ActiveMappingTools.getStraightGoalFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT),
@@ -184,9 +180,7 @@ public class ContinuousPlanner
       request.setHeightMapData(heightMapData);
       request.setAbortIfGoalStepSnappingFails(true);
 
-      //if (plannerOutput != null)
-      //   request.setReferencePlan(plannerOutput.getFootstepPlan());
-
+      FootstepPlannerOutput plannerOutput;
       plannerOutput = footstepPlanner.handleRequest(request);
       footstepPlannerLogger.logSession();
       FootstepPlannerLogger.deleteOldLogs();
@@ -199,6 +193,8 @@ public class ContinuousPlanner
          LogTools.info(String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s", footstepPlanningResult,
                        footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(), planAvailable, initialStanceSideForPlanning));
       }
+
+      return plannerOutput;
    }
 
    public FootstepPlannerRequest createFootstepPlannerRequest(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose)
@@ -220,7 +216,7 @@ public class ContinuousPlanner
       return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 2.0, 1.0);
    }
 
-   public FootstepDataListMessage getLimitedFootstepDataListMessage(int count, float swingDuration, float transferDuration)
+   public FootstepDataListMessage getLimitedFootstepDataListMessage(FootstepPlannerOutput plannerOutput, int count, float swingDuration, float transferDuration)
    {
       LogTools.info("Sending Plan to Controller: {}", plannerOutput.getFootstepPlan());
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
