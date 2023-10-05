@@ -292,7 +292,7 @@ public class RDXBehaviorActionSequenceEditor
 
          if (newAction instanceof RDXWalkAction walkAction)
          {
-            walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+            walkAction.getState().getGoalFrame().setToReferenceFrameIncludingParent(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
             walkAction.getState().getGoalFrame().update(findConvenientParentFrameName(walkAction, null));
          }
          else if (newAction instanceof RDXHandPoseAction handPoseAction)
@@ -324,37 +324,46 @@ public class RDXBehaviorActionSequenceEditor
          else if (newAction instanceof RDXChestOrientationAction chestOrientationAction)
          {
             // Set the new action to where the last one was for faster authoring
-            RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class);
+            RDXChestOrientationAction nextPreviousChestOrientationAction = findNextPreviousAction(RDXChestOrientationAction.class, null);
             if (nextPreviousChestOrientationAction != null)
             {
-               chestOrientationAction.setIncludingFrame(nextPreviousChestOrientationAction.getReferenceFrame().getParent(),
-                                                        nextPreviousChestOrientationAction.getReferenceFrame().getTransformToParent());
+               chestOrientationAction.getDefinition().getChestToParentTransform()
+                                     .set(nextPreviousChestOrientationAction.getDefinition().getChestToParentTransform());
+               chestOrientationAction.getState().getChestFrame().update(nextPreviousChestOrientationAction.getDefinition().getParentFrameName());
             }
             else // set to current robot's chest pose
             {
-               chestOrientationAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getChestFrame());
+               chestOrientationAction.getState().getChestFrame().setToReferenceFrameIncludingParent(syncedRobot.getReferenceFrames().getChestFrame());
+               chestOrientationAction.getState().getChestFrame().update(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
             }
-            chestOrientationAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
          }
          else if (newAction instanceof RDXPelvisHeightPitchAction pelvisHeightPitchAction)
          {
             // Set the new action to where the last one was for faster authoring
-            RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class);
+            RDXPelvisHeightPitchAction nextPreviousPelvisHeightAction = findNextPreviousAction(RDXPelvisHeightPitchAction.class, null);
             if (nextPreviousPelvisHeightAction != null)
             {
-               pelvisHeightPitchAction.setIncludingFrame(nextPreviousPelvisHeightAction.getReferenceFrame().getParent(),
-                                                         nextPreviousPelvisHeightAction.getReferenceFrame().getTransformToParent());
+               pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform()
+                                      .set(nextPreviousPelvisHeightAction.getDefinition().getPelvisToParentTransform());
+               pelvisHeightPitchAction.getState().getPelvisFrame().update(nextPreviousPelvisHeightAction.getDefinition().getParentFrameName());
             }
             else // set to current robot's pelvis pose
             {
-               pelvisHeightPitchAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+               pelvisHeightPitchAction.getState().getPelvisFrame().setToReferenceFrameIncludingParent(syncedRobot.getReferenceFrames().getPelvisFrame());
+               pelvisHeightPitchAction.getState().getPelvisFrame().update(ReferenceFrame.getWorldFrame().getName());
             }
-            pelvisHeightPitchAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
          }
          else if (newAction instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            if (nextPreviousParentFrame != null)
-               footstepPlanAction.getDefinition().getConditionalReferenceFrame().setParentFrameName(nextPreviousParentFrame.getName());
+            RDXFootstepPlanAction nextPreviousFootstepPlanAction = findNextPreviousAction(RDXFootstepPlanAction.class, null);
+            if (nextPreviousFootstepPlanAction != null)
+            {
+               footstepPlanAction.getDefinition().setParentFrameName(nextPreviousFootstepPlanAction.getDefinition().getParentFrameName());
+            }
+            else // set to current robot's pelvis pose
+            {
+               footstepPlanAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+            }
          }
 
          insertNewAction(newAction);

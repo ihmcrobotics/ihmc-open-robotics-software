@@ -26,6 +26,15 @@ public class DetachableReferenceFrame
       this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
+   /**
+    * Note: Given frame's parent must be in the ReferenceFrameLibrary.
+    */
+   public void setToReferenceFrameIncludingParent(ReferenceFrame referenceFrame)
+   {
+      referenceFrame.getTransformToDesiredFrame(transformToParent, referenceFrame.getParent());
+      update(referenceFrame.getParent().getName());
+   }
+
    public void update(String parentFrameName)
    {
       ReferenceFrame parentFrameInWorld = referenceFrameLibrary.findFrameByName(parentFrameName);
@@ -53,6 +62,10 @@ public class DetachableReferenceFrame
          }
 
          referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+      }
+      else
+      {
+         referenceFrame.update(); // Neccessary?
       }
    }
 
