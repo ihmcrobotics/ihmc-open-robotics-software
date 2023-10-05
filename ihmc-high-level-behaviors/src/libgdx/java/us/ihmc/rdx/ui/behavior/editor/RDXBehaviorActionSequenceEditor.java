@@ -732,6 +732,37 @@ public class RDXBehaviorActionSequenceEditor
          pelvisHeightAction.getActionDefinition().changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
          newAction = pelvisHeightAction;
       }
+      ImGui.text("Add Foot Pose:");
+      ImGui.sameLine();
+      for (var side : RobotSide.values)
+      {
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "FootPose")))
+         {
+            RDXFootPoseAction footPoseAction = new RDXFootPoseAction(panel3D,
+                                                                     robotModel,
+                                                                     syncedRobot.getFullRobotModel(),
+                                                                     selectionCollisionModel,
+                                                                     referenceFrameLibrary,
+                                                                     ros2ControllerHelper);
+            // Set the new action to where the last one was for faster authoring
+            footPoseAction.setSide(side);
+            RDXFootPoseAction nextPreviousFootPoseAction = findNextPreviousFootPoseAction(side);
+            if (nextPreviousFootPoseAction != null)
+            {
+               footPoseAction.setIncludingFrame(nextPreviousFootPoseAction.getReferenceFrame().getParent(),
+                                                nextPreviousFootPoseAction.getReferenceFrame().getTransformToParent());
+            }
+            else // set to current robot's hand pose
+            {
+               footPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
+            }
+            if (nextPreviousParentFrame != null)
+               footPoseAction.getActionDefinition().changeParentFrameWithoutMoving(nextPreviousParentFrame);
+            newAction = footPoseAction;
+         }
+         if (side.ordinal() < 1)
+            ImGui.sameLine();
+      }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
          newAction = new RDXArmJointAnglesAction(robotModel);
@@ -795,6 +826,22 @@ public class RDXBehaviorActionSequenceEditor
             if (handPoseAction.getActionDefinition().getSide() == side)
             {
                previousAction = (RDXHandPoseAction) actionSequence.get(i);
+            }
+         }
+      }
+      return previousAction;
+   }
+
+   private RDXFootPoseAction findNextPreviousFootPoseAction(RobotSide side)
+   {
+      RDXFootPoseAction previousAction = null;
+      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
+      {
+         if (actionSequence.get(i) instanceof RDXFootPoseAction footPoseAction)
+         {
+            if (footPoseAction.getActionDefinition().getSide() == side)
+            {
+               previousAction = (RDXFootPoseAction) actionSequence.get(i);
             }
          }
       }

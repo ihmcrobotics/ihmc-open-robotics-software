@@ -170,6 +170,12 @@ public class BehaviorActionSequence
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
+         for (SidedBodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getFootPoseActions())
+         {
+            FootPoseActionExecutor action = new FootPoseActionExecutor(ros2, syncedRobot, referenceFrameLibrary);
+            action.fromMessage(message);
+            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+         }
          for (WaitDurationActionDefinitionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
             WaitDurationActionExecutor action = new WaitDurationActionExecutor(ros2);
