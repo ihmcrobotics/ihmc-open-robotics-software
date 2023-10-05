@@ -99,7 +99,7 @@ public class RDXWalkAction extends RDXBehaviorAction
          {
             if (goalFeetGizmos.get(side).getGizmoFrame().getParent() != state.getGoalFrame().getReferenceFrame())
             {
-               goalFeetGizmos.get(side).setParentFrame(tate.getGoalFrame().getReferenceFrame());
+               goalFeetGizmos.get(side).setParentFrame(state.getGoalFrame().getReferenceFrame());
             }
          }
 
