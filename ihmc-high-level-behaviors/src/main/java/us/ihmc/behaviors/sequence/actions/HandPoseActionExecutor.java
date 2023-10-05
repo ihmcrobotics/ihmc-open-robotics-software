@@ -28,10 +28,8 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
    private final HandPoseActionState state;
    private final HandPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
-   private int actionIndex;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandWrenchCalculator handWrenchCalculator;
@@ -51,7 +49,6 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
                                  HandWrenchCalculator handWrenchCalculator)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculator = handWrenchCalculator;
 
@@ -66,10 +63,9 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
-      boolean isNextForExecution = concurrentActionIsNextForExecution || actionIndex == nextExecutionIndex;
+      boolean isNextForExecution = concurrentActionIsNextForExecution || state.getActionIndex() == nextExecutionIndex;
 
       if (isNextForExecution)
       {
@@ -82,7 +78,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-         handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+         handPoseJointAnglesStatus.getActionInformation().setActionIndex(state.getActionIndex());
          handPoseJointAnglesStatus.setRobotSide(definition.getSide().toByte());
          handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
          for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
@@ -164,7 +160,7 @@ public class HandPoseActionExecutor implements BehaviorActionExecutor
                                                      BehaviorActionCompletionComponent.TRANSLATION,
                                                      BehaviorActionCompletionComponent.ORIENTATION);
 
-      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

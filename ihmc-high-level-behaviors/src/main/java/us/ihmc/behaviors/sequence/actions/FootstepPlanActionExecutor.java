@@ -33,7 +33,6 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
    private final WalkingControllerParameters walkingControllerParameters;
-   private int actionIndex;
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Timer executionTimer = new Timer();
@@ -63,9 +62,9 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
+
    }
 
    @Override
@@ -152,7 +151,7 @@ public class FootstepPlanActionExecutor implements BehaviorActionExecutor
 
       isExecuting = !isComplete;
 
-      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());

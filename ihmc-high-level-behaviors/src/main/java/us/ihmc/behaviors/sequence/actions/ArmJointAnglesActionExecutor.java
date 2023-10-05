@@ -14,7 +14,6 @@ public class ArmJointAnglesActionExecutor implements BehaviorActionExecutor
    private final ArmJointAnglesActionDefinition definition = state.getDefinition();
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -26,9 +25,9 @@ public class ArmJointAnglesActionExecutor implements BehaviorActionExecutor
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update(int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
    {
-      this.actionIndex = actionIndex;
+
    }
 
    @Override
@@ -59,7 +58,7 @@ public class ArmJointAnglesActionExecutor implements BehaviorActionExecutor
    {
       isExecuting = executionTimer.isRunning(definition.getTrajectoryDuration());
 
-      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
