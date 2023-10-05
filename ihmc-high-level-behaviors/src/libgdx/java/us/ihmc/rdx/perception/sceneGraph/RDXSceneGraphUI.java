@@ -93,8 +93,8 @@ public class RDXSceneGraphUI
          {
             if (ImGui.beginTable("##predefinedRigidBodyTable", 2))
             {
-               ImGui.tableSetupColumn("Predefined rigid model", ImGuiTableColumnFlags.WidthFixed, 150f);
-               ImGui.tableSetupColumn("Options", ImGuiTableColumnFlags.WidthFixed, 200f);
+               ImGui.tableSetupColumn(labels.get("Predefined rigid model"), ImGuiTableColumnFlags.WidthFixed, 150f);
+               ImGui.tableSetupColumn(labels.get("Options"), ImGuiTableColumnFlags.WidthFixed, 200f);
                ImGui.tableHeadersRow();
 
                // Predefined rigid bodies
