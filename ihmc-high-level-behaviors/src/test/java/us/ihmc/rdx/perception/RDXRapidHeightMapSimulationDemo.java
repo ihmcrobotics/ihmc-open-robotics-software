@@ -89,6 +89,7 @@ public class RDXRapidHeightMapSimulationDemo
    private boolean autoIncrement = false;
    private int autoIncrementCounter = 0;
    private boolean initialized = false;
+   private boolean heightMapCaptured = false;
 
    public RDXRapidHeightMapSimulationDemo()
    {
@@ -123,7 +124,7 @@ public class RDXRapidHeightMapSimulationDemo
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
-            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.6);
+            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(0.0, 0.25, 1.6);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
@@ -237,9 +238,12 @@ public class RDXRapidHeightMapSimulationDemo
             if (ImGui.button("Stop"))
             {
                autoIncrement = false;
+            }
+            ImGui.separator();
+            if (ImGui.button("Capture Height Map"))
+            {
                logHeightMap();
             }
-            ImGui.sameLine();
             if (ImGui.button("Reset"))
             {
                autoIncrement = false;
@@ -255,11 +259,6 @@ public class RDXRapidHeightMapSimulationDemo
             if(ImGui.button("Plan Footsteps"))
             {
                planFootsteps(cameraZUpFrame.getTransformToWorldFrame());
-            }
-            ImGui.separator();
-            if (ImGui.button("Capture Height Map"))
-            {
-               logHeightMap();
             }
          }
 
@@ -396,10 +395,14 @@ public class RDXRapidHeightMapSimulationDemo
 
          public void logHeightMap()
          {
-            Mat internalHeightMapImage = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-            BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
-            OpenCVTools.compressImagePNG(internalHeightMapImage, compressedDepthPointer);
-            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME, compressedDepthPointer);
+            if (!heightMapCaptured)
+            {
+               Mat internalHeightMapImage = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+               BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
+               OpenCVTools.compressImagePNG(internalHeightMapImage, compressedDepthPointer);
+               perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME, compressedDepthPointer);
+               heightMapCaptured = true;
+            }
          }
 
          @Override
