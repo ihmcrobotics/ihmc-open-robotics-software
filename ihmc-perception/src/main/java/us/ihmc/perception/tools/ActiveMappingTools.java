@@ -4,22 +4,25 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ActiveMappingTools
 {
-   public static void getStraightGoalFootPoses(Pose3DReadOnly leftSolePose, Pose3DReadOnly rightSolePose, Pose3DBasics leftGoalPose, Pose3DBasics rightGoalPose, float distance)
+   public static void getStraightGoalFootPoses(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, float distance)
    {
-      leftGoalPose.set(leftSolePose);
-      leftGoalPose.appendTranslation(distance, 0.0, 0.0);
-
-      rightGoalPose.set(rightSolePose);
-      rightGoalPose.appendTranslation(distance, 0.0, 0.0);
+      for (RobotSide side : RobotSide.values)
+      {
+         goalPose.get(side).set(startPose.get(side));
+         goalPose.get(side).appendTranslation(distance, 0.0, 0.0);
+      }
    }
 
    public static Pose2D getNearestUnexploredNode(PlanarRegionsList planarRegionMap, Point2DReadOnly gridOrigin, Pose2D robotPose, int gridSize, float resolution)
