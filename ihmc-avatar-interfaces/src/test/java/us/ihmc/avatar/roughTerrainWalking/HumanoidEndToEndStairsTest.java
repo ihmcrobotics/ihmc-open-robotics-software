@@ -124,7 +124,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       EndToEndTestTools.setStepDurations(footsteps, swingDuration, transferDuration);
       if (corruptor != null)
          corruptor.accept(footsteps);
-//      publishHeightOffset(heightOffset);
+      publishHeightOffset(heightOffset);
 
       simulationTestHelper.setInPoint();
 
