@@ -21,23 +21,26 @@ import us.ihmc.perception.sceneGraph.SceneNode;
  * TODO:
  *   - Add collision information
  */
-public class ReshapableRigidBodySceneNode extends SceneNode
+public class PrimitiveRigidBodySceneNode extends SceneNode
 {
    private final TLongObjectMap<SceneNode> sceneGraphIDToNodeMap;
    private final long initialParentNodeID;
    private final RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D initialPose = new FramePose3D();
+   private final PrimitiveRigidBodyShape shape;
 
-   public ReshapableRigidBodySceneNode(long id,
-                                       String name,
-                                       TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
-                                       long initialParentNodeID,
-                                       RigidBodyTransformReadOnly initialTransformToParent)
+   public PrimitiveRigidBodySceneNode(long id,
+                                      String name,
+                                      TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
+                                      long initialParentNodeID,
+                                      RigidBodyTransformReadOnly initialTransformToParent,
+                                      PrimitiveRigidBodyShape shape)
    {
       super(id, name);
       this.sceneGraphIDToNodeMap = sceneGraphIDToNodeMap;
       this.initialParentNodeID = initialParentNodeID;
       this.initialTransformToParent.set(initialTransformToParent);
+      this.shape = shape;
 
       getNodeToParentFrameTransform().set(initialTransformToParent);
       getNodeFrame().update();
@@ -93,8 +96,18 @@ public class ReshapableRigidBodySceneNode extends SceneNode
       return initialParentNodeID;
    }
 
+   public void setInitialTransformToParent(RigidBodyTransform initialTransformToParent)
+   {
+      this.initialTransformToParent.set(initialTransformToParent);
+   }
+
    public RigidBodyTransform getInitialTransformToParent()
    {
       return initialTransformToParent;
+   }
+
+   public PrimitiveRigidBodyShape getShape()
+   {
+      return shape;
    }
 }

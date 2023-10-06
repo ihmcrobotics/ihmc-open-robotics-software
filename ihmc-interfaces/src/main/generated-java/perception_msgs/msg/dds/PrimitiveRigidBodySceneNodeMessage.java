@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * A reshapable rigid body scene node
        * The topic name identifies the node.
        */
-public class ReshapableRigidBodySceneNodeMessage extends Packet<ReshapableRigidBodySceneNodeMessage> implements Settable<ReshapableRigidBodySceneNodeMessage>, EpsilonComparable<ReshapableRigidBodySceneNodeMessage>
+public class PrimitiveRigidBodySceneNodeMessage extends Packet<PrimitiveRigidBodySceneNodeMessage> implements Settable<PrimitiveRigidBodySceneNodeMessage>, EpsilonComparable<PrimitiveRigidBodySceneNodeMessage>
 {
    /**
             * The base scene node information
@@ -25,19 +25,19 @@ public class ReshapableRigidBodySceneNodeMessage extends Packet<ReshapableRigidB
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage initial_transform_to_parent_;
 
-   public ReshapableRigidBodySceneNodeMessage()
+   public PrimitiveRigidBodySceneNodeMessage()
    {
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
       initial_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public ReshapableRigidBodySceneNodeMessage(ReshapableRigidBodySceneNodeMessage other)
+   public PrimitiveRigidBodySceneNodeMessage(PrimitiveRigidBodySceneNodeMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(ReshapableRigidBodySceneNodeMessage other)
+   public void set(PrimitiveRigidBodySceneNodeMessage other)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.staticCopy(other.scene_node_, scene_node_);
       initial_parent_id_ = other.initial_parent_id_;
@@ -91,7 +91,7 @@ public class ReshapableRigidBodySceneNodeMessage extends Packet<ReshapableRigidB
    }
 
    @Override
-   public boolean epsilonEquals(ReshapableRigidBodySceneNodeMessage other, double epsilon)
+   public boolean epsilonEquals(PrimitiveRigidBodySceneNodeMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -109,9 +109,9 @@ public class ReshapableRigidBodySceneNodeMessage extends Packet<ReshapableRigidB
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ReshapableRigidBodySceneNodeMessage)) return false;
+      if(!(other instanceof PrimitiveRigidBodySceneNodeMessage)) return false;
 
-      ReshapableRigidBodySceneNodeMessage otherMyClass = (ReshapableRigidBodySceneNodeMessage) other;
+      PrimitiveRigidBodySceneNodeMessage otherMyClass = (PrimitiveRigidBodySceneNodeMessage) other;
 
       if (!this.scene_node_.equals(otherMyClass.scene_node_)) return false;
       if(this.initial_parent_id_ != otherMyClass.initial_parent_id_) return false;

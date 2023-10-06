@@ -1,15 +1,15 @@
-package us.ihmc.rdx.perception.sceneGraph;
+package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public enum RDXPrimitiveRigidBodyShapes
+public enum PrimitiveRigidBodyShape
 {
    BOX, PYRAMID, CYLINDER, SPHERE, ELLIPSOID, TORUS;
 
-   public static List<RDXPrimitiveRigidBodyShapes> getAvailableShapes()
+   public static List<PrimitiveRigidBodyShape> getAvailableShapes()
    {
-      List<RDXPrimitiveRigidBodyShapes> availableShapes = new ArrayList<>();
+      List<PrimitiveRigidBodyShape> availableShapes = new ArrayList<>();
       availableShapes.add(BOX);
       availableShapes.add(PYRAMID);
       availableShapes.add(CYLINDER);
