@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.FootstepActionDefinitionMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -54,23 +54,27 @@ public class FootstepPlanActionState extends BehaviorActionState
 
    public void toMessage(FootstepPlanActionStateMessage message)
    {
-      definition.toMessage(message);
+      super.toMessage(message.getActionState());
+
+      definition.toMessage(message.getDefinition());
 
       message.getFootsteps().clear();
       for (FootstepPlanActionFootstepState footstep : footsteps)
       {
-         footstep.getDefinition().toMessage(message.getFootsteps().add());
+         footstep.toMessage(message.getFootsteps().add());
       }
    }
 
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
-      definition.fromMessage(message);
+      super.fromMessage(message.getActionState());
+
+      definition.fromMessage(message.getDefinition());
 
       footsteps.clear();
-      for (FootstepActionDefinitionMessage footstep : message.getFootsteps())
+      for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
       {
-         footsteps.add().getDefinition().fromMessage(footstep);
+         footsteps.add().fromMessage(footstep);
       }
    }
 

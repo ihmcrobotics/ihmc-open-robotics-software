@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./BehaviorActionStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -21,6 +22,10 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::FootstepPlanActionDefinitionMessage definition;
+        /**
+         * The footsteps, with a maximum of 50
+         */
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage, 50> footsteps;
       };
     };
   };

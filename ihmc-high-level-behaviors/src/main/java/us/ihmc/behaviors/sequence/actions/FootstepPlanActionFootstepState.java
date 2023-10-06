@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
@@ -20,6 +21,20 @@ public class FootstepPlanActionFootstepState
    public void update()
    {
       soleFrame.update(footstepPlan.getDefinition().getParentFrameName());
+   }
+
+   public void toMessage(FootstepPlanActionFootstepStateMessage message)
+   {
+      definition.toMessage(message.getDefinition());
+
+      message.setIndex(index);
+   }
+
+   public void fromMessage(FootstepPlanActionFootstepStateMessage message)
+   {
+      definition.fromMessage(message.getDefinition());
+
+      index = message.getIndex();
    }
 
    public FootstepPlanActionFootstepDefinition getDefinition()
