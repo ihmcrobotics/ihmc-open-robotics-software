@@ -78,6 +78,7 @@ public class BehaviorActionSequence
    private final IHMCROS2Input<Int32> executionNextIndexSubscription;
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
+   private final BehaviorActionExecutionStatusCalculator executionStatusCalculator = new BehaviorActionExecutionStatusCalculator();
    private final List<BehaviorActionExecutor> currentlyExecutingActions = new ArrayList<>();
    private BehaviorActionExecutor lastCurrentlyExecutingAction = null;
 
@@ -228,40 +229,12 @@ public class BehaviorActionSequence
 
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
-         boolean executeWithNextAction = actionSequence.get(actionIndex).getDefinition().getExecuteWithNextAction();
-         boolean executeWithPreviousAction;
-         if (actionIndex == 0)
-         {
-            executeWithPreviousAction = false;
-         }
-         else
-         {
-            executeWithPreviousAction = actionSequence.get(actionIndex - 1).getDefinition().getExecuteWithNextAction();
-         }
-
-         boolean isNextForExecution;
-
-         if (executionNextIndex > actionIndex) // If it's after, we're definitely not executing next
-         {
-            isNextForExecution = false;
-         }
-         else // We walk backwards while action have the "execute with next action" set to true
-         {
-            int numberOfImmediatelyPriorConcurrentActions = 0;
-            int decrementingActionIndex = actionIndex - 1; // Start one action back
-            while (decrementingActionIndex >= 0 && actionSequence.get(decrementingActionIndex).getDefinition().getExecuteWithNextAction())
-            {
-               numberOfImmediatelyPriorConcurrentActions++;
-               decrementingActionIndex--;
-            }
-
-            // This also applies in the case where nothing is set to be executed concurrently
-            isNextForExecution = executionNextIndex >= actionIndex - numberOfImmediatelyPriorConcurrentActions;
-         }
+         executionStatusCalculator.update(actionSequence, actionIndex, executionNextIndex);
 
          actionSequence.get(actionIndex).getState().setActionIndex(actionIndex);
-         actionSequence.get(actionIndex).getState().setIsNextForExecution(isNextForExecution);
-         actionSequence.get(actionIndex).getState().setIsToBeExecutedConcurrently(executeWithPreviousAction || executeWithNextAction);
+         actionSequence.get(actionIndex).getState().setIsNextForExecution(executionStatusCalculator.getNextForExecution());
+         actionSequence.get(actionIndex).getState().setIsToBeExecutedConcurrently(executionStatusCalculator.getExecuteWithPreviousAction()
+                                                                                  || executionStatusCalculator.getExecuteWithNextAction());
          actionSequence.get(actionIndex).update();
       }
 

@@ -15,7 +15,7 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "004cf247911dd9ada0a4c833d9e68b72220a64c06593b4a0b0db971b2049a202";
+   		return "afc58748c67cad05b946718a72babdd30cdc91f9a37c4eb275ee39d0023a48bd";
    }
    
    @Override

@@ -2,7 +2,7 @@
 uint32 id
 
 # The action's index in the sequence
-uint16 action_index
+int32 action_index
 
 # If the action is next for execution
 bool is_next_for_execution

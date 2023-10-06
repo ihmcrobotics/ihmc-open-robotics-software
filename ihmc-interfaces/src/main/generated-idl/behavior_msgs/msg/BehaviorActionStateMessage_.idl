@@ -18,7 +18,7 @@ module behavior_msgs
         /**
          * The action's index in the sequence
          */
-        unsigned short action_index;
+        long action_index;
         /**
          * If the action is next for execution
          */
