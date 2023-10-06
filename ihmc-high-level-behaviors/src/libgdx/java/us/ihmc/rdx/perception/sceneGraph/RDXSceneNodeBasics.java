@@ -11,6 +11,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 import java.util.Set;
@@ -44,6 +45,7 @@ public class RDXSceneNodeBasics
       {
          modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
          modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+         RDXBaseUI.getInstance().getPrimary3DPanel().pushNotification("Removed SceneNode [" + sceneNode.getName() + "]");
       }
    }
 
