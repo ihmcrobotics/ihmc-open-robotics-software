@@ -11,7 +11,7 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
    /**
             * Human readable description of what the action does
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  description_;
+   public java.lang.StringBuilder description_;
    /**
             * Execute with next action
             */
@@ -19,7 +19,7 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
 
    public BehaviorActionDefinitionMessage()
    {
-      description_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1, "type_d");
+      description_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorActionDefinitionMessage(BehaviorActionDefinitionMessage other)
@@ -30,16 +30,33 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
 
    public void set(BehaviorActionDefinitionMessage other)
    {
-      description_.set(other.description_);
+      description_.setLength(0);
+      description_.append(other.description_);
+
       execute_with_next_action_ = other.execute_with_next_action_;
 
    }
 
+   /**
+            * Human readable description of what the action does
+            */
+   public void setDescription(java.lang.String description)
+   {
+      description_.setLength(0);
+      description_.append(description);
+   }
 
    /**
             * Human readable description of what the action does
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getDescription()
+   public java.lang.String getDescriptionAsString()
+   {
+      return getDescription().toString();
+   }
+   /**
+            * Human readable description of what the action does
+            */
+   public java.lang.StringBuilder getDescription()
    {
       return description_;
    }
@@ -77,7 +94,7 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.description_, other.description_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.description_, other.description_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
 
@@ -94,7 +111,8 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
 
       BehaviorActionDefinitionMessage otherMyClass = (BehaviorActionDefinitionMessage) other;
 
-      if (!this.description_.equals(otherMyClass.description_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_)) return false;
+
       if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
 
 

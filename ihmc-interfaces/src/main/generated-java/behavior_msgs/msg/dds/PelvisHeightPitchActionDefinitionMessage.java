@@ -15,7 +15,7 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
    /**
             * Name of the frame the this action is expressed in
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
+   public java.lang.StringBuilder parent_frame_name_;
    /**
             * Transform that expresses the pelvis pose in the parent frame
             */
@@ -28,7 +28,7 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
    public PelvisHeightPitchActionDefinitionMessage()
    {
       action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
-      parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
+      parent_frame_name_ = new java.lang.StringBuilder(255);
       pelvis_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
@@ -41,7 +41,9 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
    public void set(PelvisHeightPitchActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
-      parent_frame_.set(other.parent_frame_);
+      parent_frame_name_.setLength(0);
+      parent_frame_name_.append(other.parent_frame_name_);
+
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.pelvis_transform_to_parent_, pelvis_transform_to_parent_);
       trajectory_duration_ = other.trajectory_duration_;
 
@@ -56,13 +58,28 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
       return action_definition_;
    }
 
+   /**
+            * Name of the frame the this action is expressed in
+            */
+   public void setParentFrameName(java.lang.String parent_frame_name)
+   {
+      parent_frame_name_.setLength(0);
+      parent_frame_name_.append(parent_frame_name);
+   }
 
    /**
             * Name of the frame the this action is expressed in
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getParentFrame()
+   public java.lang.String getParentFrameNameAsString()
    {
-      return parent_frame_;
+      return getParentFrameName().toString();
+   }
+   /**
+            * Name of the frame the this action is expressed in
+            */
+   public java.lang.StringBuilder getParentFrameName()
+   {
+      return parent_frame_name_;
    }
 
 
@@ -108,7 +125,7 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
       if(other == this) return true;
 
       if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
 
       if (!this.pelvis_transform_to_parent_.epsilonEquals(other.pelvis_transform_to_parent_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
@@ -127,7 +144,8 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
       PelvisHeightPitchActionDefinitionMessage otherMyClass = (PelvisHeightPitchActionDefinitionMessage) other;
 
       if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
-      if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
+
       if (!this.pelvis_transform_to_parent_.equals(otherMyClass.pelvis_transform_to_parent_)) return false;
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
@@ -143,8 +161,8 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
       builder.append("PelvisHeightPitchActionDefinitionMessage {");
       builder.append("action_definition=");
       builder.append(this.action_definition_);      builder.append(", ");
-      builder.append("parent_frame=");
-      builder.append(this.parent_frame_);      builder.append(", ");
+      builder.append("parent_frame_name=");
+      builder.append(this.parent_frame_name_);      builder.append(", ");
       builder.append("pelvis_transform_to_parent=");
       builder.append(this.pelvis_transform_to_parent_);      builder.append(", ");
       builder.append("trajectory_duration=");

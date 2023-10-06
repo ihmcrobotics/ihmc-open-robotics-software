@@ -14,7 +14,7 @@ module behavior_msgs
         /**
          * Human readable description of what the action does
          */
-        sequence<string, 1> description;
+        string description;
         /**
          * Execute with next action
          */

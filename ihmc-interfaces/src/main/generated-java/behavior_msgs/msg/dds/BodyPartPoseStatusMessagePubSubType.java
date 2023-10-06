@@ -15,7 +15,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a80f16bb662b53f4b283abdb2c0a696b8064727236550d9bd7386cbc3983e411";
+   		return "573f084efc34703c68af2c0a1785c2108da2f431a98cd283f7b885c2ca4e4333";
    }
    
    @Override
@@ -54,10 +54,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -76,11 +73,8 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrame().get(i0).length() + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToParent(), current_alignment);
 
 
@@ -91,9 +85,9 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       cdr.write_type_7(data.getCurrentAndConcurrent());
 
-      if(data.getParentFrame().size() <= 1)
-      cdr.write_type_e(data.getParentFrame());else
-          throw new RuntimeException("parent_frame field exceeds the maximum length");
+      if(data.getParentFrameName().length() <= 255)
+      cdr.write_type_d(data.getParentFrameName());else
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
    }
@@ -102,7 +96,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       data.setCurrentAndConcurrent(cdr.read_type_7());
       	
-      cdr.read_type_e(data.getParentFrame());	
+      cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
 
    }
@@ -111,7 +105,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void serialize(behavior_msgs.msg.dds.BodyPartPoseStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_7("current_and_concurrent", data.getCurrentAndConcurrent());
-      ser.write_type_e("parent_frame", data.getParentFrame());
+      ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
    }
@@ -120,7 +114,7 @@ public class BodyPartPoseStatusMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BodyPartPoseStatusMessage data)
    {
       data.setCurrentAndConcurrent(ser.read_type_7("current_and_concurrent"));
-      ser.read_type_e("parent_frame", data.getParentFrame());
+      ser.read_type_d("parent_frame_name", data.getParentFrameName());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
    }

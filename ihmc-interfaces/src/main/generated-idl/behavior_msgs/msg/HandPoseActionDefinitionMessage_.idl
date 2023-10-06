@@ -25,7 +25,7 @@ module behavior_msgs
         /**
          * Name of the frame the this action is expressed in
          */
-        sequence<string, 1000> parent_frame;
+        string parent_frame_name;
         /**
          * Transform that expresses the hand pose in the parent frame
          */

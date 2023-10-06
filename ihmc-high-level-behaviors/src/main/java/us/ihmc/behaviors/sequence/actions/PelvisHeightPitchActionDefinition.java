@@ -45,8 +45,7 @@ public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition
       super.toMessage(message.getActionDefinition());
 
       message.setTrajectoryDuration(trajectoryDuration);
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(parentFrameName);
+      message.setParentFrameName(parentFrameName);
       MessageTools.toMessage(pelvisToParentTransform, message.getPelvisTransformToParent());
    }
 
@@ -55,7 +54,7 @@ public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition
       super.fromMessage(message.getActionDefinition());
 
       trajectoryDuration = message.getTrajectoryDuration();
-      parentFrameName = message.getParentFrame().getString(0);
+      parentFrameName = message.getParentFrameNameAsString();
       MessageTools.toEuclid(message.getPelvisTransformToParent(), pelvisToParentTransform);
    }
 

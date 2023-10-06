@@ -19,7 +19,7 @@ module behavior_msgs
         /**
          * Name of the parent frame the footsteps are expressed in
          */
-        sequence<string, 1000> parent_frame;
+        string parent_frame_name;
         /**
          * Swing duration
          */

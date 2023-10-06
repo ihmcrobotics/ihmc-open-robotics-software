@@ -2,7 +2,7 @@
 behavior_msgs/BehaviorActionDefinitionMessage action_definition
 
 # Name of the parent frame the footsteps are expressed in
-string[<=1000] parent_frame
+string parent_frame_name
 
 # Swing duration
 float64 swing_duration

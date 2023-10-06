@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "15408d785b35daf910e61e12f5cf2b9b835d6d6f9a6cb3d007c97dd179069803";
+   		return "c2de8192cbf9837704e25a074fb0264716fd77f964095973ee16dc8f907783b9";
    }
    
    @Override
@@ -54,10 +54,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -77,11 +74,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrame().get(i0).length() + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -95,9 +89,9 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    public static void write(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
-      if(data.getParentFrame().size() <= 1000)
-      cdr.write_type_e(data.getParentFrame());else
-          throw new RuntimeException("parent_frame field exceeds the maximum length");
+      if(data.getParentFrameName().length() <= 255)
+      cdr.write_type_d(data.getParentFrameName());else
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
 
       cdr.write_type_6(data.getSwingDuration());
 
@@ -108,7 +102,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
-      cdr.read_type_e(data.getParentFrame());	
+      cdr.read_type_d(data.getParentFrameName());	
       data.setSwingDuration(cdr.read_type_6());
       	
       data.setTransferDuration(cdr.read_type_6());
@@ -121,7 +115,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    {
       ser.write_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
 
-      ser.write_type_e("parent_frame", data.getParentFrame());
+      ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
    }
@@ -131,7 +125,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    {
       ser.read_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
 
-      ser.read_type_e("parent_frame", data.getParentFrame());
+      ser.read_type_d("parent_frame_name", data.getParentFrameName());
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
    }

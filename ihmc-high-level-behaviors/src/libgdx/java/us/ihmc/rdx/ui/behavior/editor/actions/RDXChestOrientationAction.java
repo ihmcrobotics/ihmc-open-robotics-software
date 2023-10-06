@@ -143,8 +143,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
             highlightModel.setTransparency(0.5);
          }
 
-         chestPoseStatus.getParentFrame().resetQuick();
-         chestPoseStatus.getParentFrame().add(definition.getParentFrameName());
+         chestPoseStatus.setParentFrameName(definition.getParentFrameName());
          MessageTools.toMessage(definition.getChestToParentTransform(), chestPoseStatus.getTransformToParent());
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose

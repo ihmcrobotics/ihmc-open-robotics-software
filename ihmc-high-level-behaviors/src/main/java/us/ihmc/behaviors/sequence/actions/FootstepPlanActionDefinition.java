@@ -42,8 +42,7 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
 
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(parentFrameName);
+      message.setParentFrameName(parentFrameName);
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
@@ -52,7 +51,7 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
 
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
-      parentFrameName = message.getParentFrame().getString(0);
+      parentFrameName = message.getParentFrameNameAsString();
    }
 
    public double getSwingDuration()
