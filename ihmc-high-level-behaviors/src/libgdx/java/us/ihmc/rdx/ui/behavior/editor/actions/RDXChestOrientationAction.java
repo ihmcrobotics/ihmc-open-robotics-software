@@ -148,7 +148,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          MessageTools.toMessage(definition.getChestToParentTransform(), chestPoseStatus.getTransformToParent());
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-         if (getEditor().getConcurrentActionIsNextForExecution())
+         if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
          {
             wasConcurrent = true;
             chestPoseStatus.setCurrentAndConcurrent(true);

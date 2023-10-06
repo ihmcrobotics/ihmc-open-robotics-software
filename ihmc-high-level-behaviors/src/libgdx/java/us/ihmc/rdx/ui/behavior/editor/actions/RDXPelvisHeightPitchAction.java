@@ -153,7 +153,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
-         if (getEditor().getConcurrentActionIsNextForExecution())
+         if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
          {
             wasConcurrent = true;
             pelvisPoseStatus.setCurrentAndConcurrent(true);
