@@ -39,7 +39,7 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
       {
          descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
                                                   getDefinition()::setDescription,
-                                                  imString -> ImGuiTools.inputText(labels.get("description"), imString));
+                                                  imString -> ImGuiTools.inputText(labels.getHidden("description"), imString));
       }
 
       getState().update();
