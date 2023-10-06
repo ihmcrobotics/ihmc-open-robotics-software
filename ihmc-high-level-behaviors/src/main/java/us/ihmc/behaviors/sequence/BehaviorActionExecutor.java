@@ -15,7 +15,10 @@ public abstract class BehaviorActionExecutor implements BehaviorActionStateSuppl
    }
 
    /** Called every tick. */
-   public abstract void update();
+   public void update()
+   {
+      getState().update();
+   }
 
    /** Trigger the action to begin executing. Called once per execution. */
    public void triggerActionExecution()

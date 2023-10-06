@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
@@ -50,64 +51,75 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override
    public void triggerActionExecution()
    {
-      FramePose3D framePose = new FramePose3D(state.getPelvisFrame().getReferenceFrame());
-      FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
-      framePose.changeFrame(ReferenceFrame.getWorldFrame());
-      syncedPose.changeFrame(ReferenceFrame.getWorldFrame());
+      if (state.getPelvisFrame().isChildOfWorld())
+      {
+         FramePose3D framePose = new FramePose3D(state.getPelvisFrame().getReferenceFrame());
+         FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+         framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
+         framePose.changeFrame(ReferenceFrame.getWorldFrame());
+         syncedPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
-      message.getSe3Trajectory()
-             .set(HumanoidMessageTools.createSE3TrajectoryMessage(definition.getTrajectoryDuration(),
-                                                                        framePose.getPosition(),
-                                                                        framePose.getOrientation(),
-                                                                        ReferenceFrame.getWorldFrame()));
-      long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
-      ros2ControllerHelper.publishToController(message);
-      executionTimer.reset();
+         PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
+         message.getSe3Trajectory()
+                .set(HumanoidMessageTools.createSE3TrajectoryMessage(definition.getTrajectoryDuration(),
+                                                                     framePose.getPosition(),
+                                                                     framePose.getOrientation(),
+                                                                     ReferenceFrame.getWorldFrame()));
+         long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+         message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
+         message.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
+         message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
+         ros2ControllerHelper.publishToController(message);
+         executionTimer.reset();
 
-      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
-      syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
-      desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
-      startPositionDistanceToGoal = syncedPelvisPose.getTranslation().differenceNorm(desiredPelvisPose.getTranslation());
-      startOrientationDistanceToGoal = syncedPelvisPose.getRotation().distance(desiredPelvisPose.getRotation(), true);
+         desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
+         syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+         desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
+         desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
+         startPositionDistanceToGoal = syncedPelvisPose.getTranslation().differenceNorm(desiredPelvisPose.getTranslation());
+         startOrientationDistanceToGoal = syncedPelvisPose.getRotation().distance(desiredPelvisPose.getRotation(), true);
+      }
+      else
+      {
+         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+      }
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
-      syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
-      desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
+      if (state.getPelvisFrame().isChildOfWorld())
+      {
+         desiredPelvisPose.setFromReferenceFrame(state.getPelvisFrame().getReferenceFrame());
+         syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+         desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
+         desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
 
-      isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
-                                                     syncedPelvisPose,
-                                                     POSITION_TOLERANCE, Double.NaN,
-                                                     definition.getTrajectoryDuration(),
-                                                     executionTimer,
-                                                     BehaviorActionCompletionComponent.TRANSLATION);
+         isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
+                                                        syncedPelvisPose,
+                                                        POSITION_TOLERANCE,
+                                                        Double.NaN,
+                                                        definition.getTrajectoryDuration(),
+                                                        executionTimer,
+                                                        BehaviorActionCompletionComponent.TRANSLATION);
 
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-      executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
-      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         executionStatusMessage.setActionIndex(state.getActionIndex());
+         executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+      }
    }
 
    @Override

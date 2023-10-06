@@ -3,20 +3,19 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.BehaviorActionStateMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.log.LogTools;
 
 public abstract class BehaviorActionState implements BehaviorActionDefinitionSupplier
 {
    /** The action's unique ID. */
-   private final long id;
+   private long id;
    private int actionIndex = -1;
    private boolean isNextForExecution = false;
    private boolean isToBeExecutedConcurrently = false;
 
    public BehaviorActionState()
    {
-      // TODO: Make parameter
-      id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
+      // TODO: Re-enable when we do the CRDT
+//      id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
    }
 
    public void update()
@@ -48,9 +47,10 @@ public abstract class BehaviorActionState implements BehaviorActionDefinitionSup
 
    public void fromMessage(BehaviorActionStateMessage message)
    {
-      if (id != message.getId())
-         LogTools.error("IDs should match!");
+//      if (id != message.getId())
+//         LogTools.error("IDs should match!");
 
+      id = message.getId();
       actionIndex = message.getActionIndex();
       isNextForExecution = message.getIsNextForExecution();
       isToBeExecutedConcurrently = message.getIsToBeExecutedConcurrently();

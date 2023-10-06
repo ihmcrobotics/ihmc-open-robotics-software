@@ -31,7 +31,7 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override

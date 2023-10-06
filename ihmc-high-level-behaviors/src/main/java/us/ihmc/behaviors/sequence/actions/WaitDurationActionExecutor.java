@@ -21,7 +21,7 @@ public class WaitDurationActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override
