@@ -21,6 +21,10 @@ class archType(Enum):
     NOTRACKING = 'dlav1_34'
     TRACKING = 'dla_34'
 
+class experiment_type(Enum):
+    LIVE = 1
+    VIDEO = 2
+
 if __name__ == '__main__':
     my_model = CenterPoseModels.MUG
     print(my_model)

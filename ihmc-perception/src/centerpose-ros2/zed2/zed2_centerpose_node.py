@@ -1,28 +1,38 @@
-import os, timeit, time
+import os, time
+from typing import List, Optional
 
 import cv2
+import h5py
 import numpy as np
 from scipy.spatial.transform import Rotation
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Pose, Quaternion
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from perception_msgs.msg import DetectedObjectPacket
 from perception_msgs.msg import ImageMessage
 
 from lib.opts import opts
 from lib.detectors.object_pose import ObjectPoseDetector
-from models import CenterPoseTrackModels, CenterPoseModels, archType
+from models import CenterPoseTrackModels, CenterPoseModels, archType, experiment_type
+from dataclasses import dataclass
 
-class Image2CenterPose_node(Node):
-    def __init__(self):
-        super().__init__('zed2_centerpose_node')
-        qos_profile = QoSProfile(
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
-            history=QoSHistoryPolicy.KEEP_LAST,
-            depth=1
-        )
+@dataclass
+class Detection():
+    skipDetaction : bool = False
+    objectType: str = 'object_type'
+    kps_2d: List[Point] = None
+    kps_2d_array: np.ndarray = np.zeros((3))
+    kps_3d: List[Point] = None
+    confidence: float = 0.0
+    quaternion_xyzw: Rotation = Rotation.from_quat([0, 0, 0, 1])
+    position: np.ndarray = np.zeros((3))
+
+
+class Image2CenterPose_node():
+    def __init__(self, experiment:experiment_type):
+        self.experiment = experiment
 
         # Default params with commandline input
         self.opt = opts().parser.parse_args()
@@ -34,6 +44,7 @@ class Image2CenterPose_node(Node):
         else:
             my_archType = archType.NOTRACKING
             my_model = CenterPoseModels.MUG
+        self.scale = 10.0
         
         self.opt.arch = my_archType.value
         self.opt.load_model = my_model.value
@@ -94,19 +105,66 @@ class Image2CenterPose_node(Node):
         self.opt.debug = max(self.opt.debug, 1)
         self.detector = ObjectPoseDetector(self.opt)
         self.detector.pause = False
+        
+        if (self.experiment==experiment_type.LIVE):
+            self.ros2_node = Node('zed2_centerpose_node')
+            qos_profile = QoSProfile(
+                reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                history=QoSHistoryPolicy.KEEP_LAST,
+                depth=1)
 
-        self.subscription = self.create_subscription(
-            ImageMessage,
-            '/ihmc/zed2/left_color',
-            self.listener_callback,
-            qos_profile)
+            self.subscription = self.ros2_node.create_subscription(
+                ImageMessage,
+                '/ihmc/zed2/left_color',
+                self.listener_callback,
+                qos_profile)
 
-        # Create a publisher for the pose topic
-        self.centerpose_publisher_ = self.create_publisher(DetectedObjectPacket, '/ihmc/centerpose', 1)
-        self.detected_object = DetectedObjectPacket()
+            # Create a publisher for the pose topic
+            self.centerpose_publisher_ = self.ros2_node.create_publisher(DetectedObjectPacket, '/ihmc/centerpose', 1)
+            self.detected_object = DetectedObjectPacket()
 
-        self.get_logger().info("Waiting for an Image...")
-        self.start_time = timeit.default_timer()
+            self.ros2_node.get_logger().info("Waiting for an Image...")
+        
+        elif (self.experiment==experiment_type.VIDEO):
+            fps = 5
+
+            data = h5py.File('/root/centerpose-ros2/data/20231005_180638_ZEDPerceptionDepthLog.hdf5', 'r')
+            depth_imgs = data['zed2']['depth']
+            color_imgs = data['zed2']['color']
+
+            for x in range(len(depth_imgs.keys())):
+                depthBuffer = depth_imgs[str(x)][:].byteswap().view('uint8')
+                depthBufferImage = np.asarray(depthBuffer, dtype=np.uint8)
+                depthBufferImage = cv2.imdecode(depthBufferImage, cv2.IMREAD_COLOR)
+
+                colorBuffer = color_imgs[str(x)][:].byteswap().view('uint8')
+                colorBufferImage = np.asarray(colorBuffer, dtype=np.uint8)
+                colorBufferImage = cv2.imdecode(colorBufferImage, cv2.IMREAD_COLOR)
+
+                detection:Detection = self.processImage(colorBufferImage)
+                
+                # if detection is not None and isinstance(detection, Detection):
+                #     if detection.skipDetaction == False:
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[0,:]), tuple(detection.kps_2d_array[1,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[0,:]), tuple(detection.kps_2d_array[2,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[0,:]), tuple(detection.kps_2d_array[4,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[1,:]), tuple(detection.kps_2d_array[3,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[1,:]), tuple(detection.kps_2d_array[5,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[2,:]), tuple(detection.kps_2d_array[3,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[2,:]), tuple(detection.kps_2d_array[6,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[3,:]), tuple(detection.kps_2d_array[7,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[4,:]), tuple(detection.kps_2d_array[5,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[4,:]), tuple(detection.kps_2d_array[6,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[5,:]), tuple(detection.kps_2d_array[7,:]), (0, 0, 225), 2)
+                #         cv2.line(colorBufferImage, tuple(detection.kps_2d_array[6,:]), tuple(detection.kps_2d_array[7,:]), (0, 0, 225), 2)
+
+                # img = cv2.hconcat([colorBufferImage, depthBufferImage])
+                
+            #     cv2.imshow(img)
+            #     cv2.waitKey(1000//fps)
+
+            # # Close all windows
+            # cv2.destroyAllWindows()
 
     def listener_callback(self, msg):
         # Skip the ImageMessage if not enough time has passed since we processed the last one to save CPU - it can't
@@ -115,64 +173,72 @@ class Image2CenterPose_node(Node):
             return
         self.last_image_process_time_ns = time.time_ns()
 
-        self.get_logger().info("Processing ImageMessage #" + str(msg.sequence_number))
+        self.ros2_node.get_logger().info("Processing ImageMessage #" + str(msg.sequence_number))
         image_np = np.frombuffer(b''.join(msg.data), dtype=np.uint8)
         image = cv2.imdecode(image_np, cv2.COLOR_BGR2RGB)
+        
+        detection:Detection = self.processImage(image)
+
+        if detection is not None and isinstance(detection, Detection):
+            self.publish_message(detection)
+        
+    def processImage(self, image) -> Optional[Detection]:
         ret = self.detector.run(np.asarray(image), meta_inp=self.meta)
 
-        scale = 10.0
         if len(ret['results']) > 0:
-            current_time = timeit.default_timer()
-                
-            if 'kps_3d_cam' in ret['results'][0]: 
-                nn_out_vertices = ret['results'][0]['kps_3d_cam'] # shape 9x3 (1st row is object centroid location)
-                point_verts = []
-                for vertex in nn_out_vertices:
-                    vertex = vertex/scale
-                    point = Point()
-                    point.x = vertex[0]
-                    point.y = vertex[1]
-                    point.z = vertex[2]
-                    point_verts.append(point)
-                self.detected_object.bounding_box_vertices = point_verts[-8:]
+            detection = Detection()
 
-            projected_points = 'kps'
-            if projected_points in ret['results'][0]:
-                point_3d_verts = []
-                bbox = np.array(ret['results'][0][projected_points]).reshape(-1, 2)
+            detection.confidence = ret['results'][0]['score']
+            detection.objectType = "cup"
+
+            if 'kps_3d_cam' in ret['results'][0]:
+                detection.kps_3d = []
+                for vertex in ret['results'][0]['kps_3d_cam']: # shape 9x3 (1st row is object centroid location)
+                    vertex = vertex/self.scale
+                    point = Point(x=vertex[0], y=vertex[1], z=vertex[2])
+                    detection.kps_3d.append(point)
+            else:
+                detection.skipDetaction = True
+
+            if 'kps' in ret['results'][0]:
+                detection.kps_2d = []
+                detection.kps_2d_array = ret['results'][0]['kps'].reshape(-1, 2)
+                bbox = np.array(ret['results'][0]['kps']).reshape(-1, 2)
                 for vertex in bbox:
-                    point = Point()
-                    point.x = vertex[0]
-                    point.y = vertex[1]
-                    point_3d_verts.append(point)
-                self.detected_object.bounding_box_2d_vertices = point_3d_verts[-8:]
-
+                    point = Point(x=vertex[0], y=vertex[1], z=0.0)
+                    detection.kps_2d.append(point)
+            else:
+                detection.skipDetaction = True
+            
             if 'location' in ret['results'][0]:
-                obj_tform = np.eye(4)
-                obj_tform[:3,:3] = Rotation.from_quat([ret['results'][0]['quaternion_xyzw'][0],
-                                                       ret['results'][0]['quaternion_xyzw'][1],
-                                                       ret['results'][0]['quaternion_xyzw'][2],
-                                                       ret['results'][0]['quaternion_xyzw'][3]]).as_matrix()
-                obj_tform[:3,3] = np.array([ret['results'][0]['location'][0],
-                                            ret['results'][0]['location'][1],
-                                            ret['results'][0]['location'][2]])/scale
-            
-                new_obj_position = obj_tform[:3,3]
-                self.detected_object.pose.position.x = new_obj_position[0]
-                self.detected_object.pose.position.y = new_obj_position[1]
-                self.detected_object.pose.position.z = new_obj_position[2]
-                
-                new_obj_quaternion = Rotation.from_matrix(obj_tform[:3,:3]).as_quat()
-                self.detected_object.pose.orientation.x = new_obj_quaternion[0]
-                self.detected_object.pose.orientation.y = new_obj_quaternion[1]
-                self.detected_object.pose.orientation.z = new_obj_quaternion[2]
-                self.detected_object.pose.orientation.w = new_obj_quaternion[3]
+                detection.quaternion_xyzw = Rotation.from_quat([ret['results'][0]['quaternion_xyzw'][0],
+                                                                ret['results'][0]['quaternion_xyzw'][1],
+                                                                ret['results'][0]['quaternion_xyzw'][2],
+                                                                ret['results'][0]['quaternion_xyzw'][3]])
+                detection.position = np.array([ret['results'][0]['location'][0],
+                                               ret['results'][0]['location'][1],
+                                               ret['results'][0]['location'][2]])/self.scale
+            else:
+                detection.skipDetaction = True
+        
+            return detection
+        else:
+            return None
 
-            self.detected_object.confidence = ret['results'][0]['score']
-            self.detected_object.object_type = "cup"
-            
-            self.get_logger().info('Object Detected in the Image!')
-            self.centerpose_publisher_.publish(self.detected_object)
+    def publish_message(self, detection:Detection):
+        if detection.skipDetaction == True:
+            return
+        
+        self.detected_object.confidence = detection.confidence
+        self.detected_object.object_type = detection.objectType
+        self.detected_object.bounding_box_vertices = detection.kps_3d[-8:]
+        self.detected_object.bounding_box_2d_vertices = detection.kps_2d[-8:]
+        position = Point(x=detection.position[0], y=detection.position[1], z=detection.position[2])
+        quaternion_xyzw = Quaternion(x=detection.quaternion_xyzw.as_quat()[0], y=detection.quaternion_xyzw.as_quat()[1], z=detection.quaternion_xyzw.as_quat()[2], w=detection.quaternion_xyzw.as_quat()[3])
+        self.detected_object.pose = Pose(position=position, orientation=quaternion_xyzw)
+
+        self.ros2_node.get_logger().info('Object Detected in the Image!')
+        self.centerpose_publisher_.publish(self.detected_object)
 
 def main(args=None):
     # Check if models directory exists
@@ -181,14 +247,22 @@ def main(args=None):
         print('Could not find models directory')
         return
 
-    rclpy.init(args=args)
+    experiment = experiment_type.LIVE
 
-    node = Image2CenterPose_node()
-
-    rclpy.spin(node)
-
-    node.destroy_node()
-    rclpy.shutdown()
+    if(experiment==experiment_type.LIVE):
+        print("Running CenterPose Live...")
+        rclpy.init(args=args)
+    
+        detectorClass = Image2CenterPose_node(experiment)
+    
+        node = detectorClass.ros2_node
+        rclpy.spin(node)
+        node.destroy_node()
+        rclpy.shutdown()
+    
+    elif (experiment==experiment_type.VIDEO):
+        print("Running CenterPose on a Video...")
+        detectorClass = Image2CenterPose_node(experiment)
 
 
 if __name__ == '__main__':
