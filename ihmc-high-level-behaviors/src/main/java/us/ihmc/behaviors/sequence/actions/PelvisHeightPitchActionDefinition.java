@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
@@ -39,25 +40,23 @@ public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition
       JSONTools.toEuclid(jsonNode, pelvisToParentTransform);
    }
 
-   public void toMessage(BodyPartPoseActionDefinitionMessage message)
+   public void toMessage(PelvisHeightPitchActionDefinitionMessage message)
    {
       super.toMessage(message.getActionDefinition());
 
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(parentFrameName);
-      MessageTools.toMessage(pelvisToParentTransform, message.getTransformToParent());
+      MessageTools.toMessage(pelvisToParentTransform, message.getPelvisTransformToParent());
    }
 
-   public void fromMessage(BodyPartPoseActionDefinitionMessage message)
+   public void fromMessage(PelvisHeightPitchActionDefinitionMessage message)
    {
       super.fromMessage(message.getActionDefinition());
 
       trajectoryDuration = message.getTrajectoryDuration();
-      setExecuteWithNextAction(message.getExecuteWithNextAction());
       parentFrameName = message.getParentFrame().getString(0);
-      MessageTools.toEuclid(message.getTransformToParent(), pelvisToParentTransform);
+      MessageTools.toEuclid(message.getPelvisTransformToParent(), pelvisToParentTransform);
    }
 
    public void setHeight(double height)

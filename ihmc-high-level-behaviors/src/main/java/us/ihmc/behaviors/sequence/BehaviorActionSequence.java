@@ -133,19 +133,19 @@ public class BehaviorActionSequence
 
          BehaviorActionExecutor[] actionArray = new BehaviorActionExecutor[latestUpdateMessage.getSequenceSize()];
 
-         for (ArmJointAnglesActionDefinitionMessage message : latestUpdateMessage.getArmJointAnglesActions())
+         for (ArmJointAnglesActionStateMessage message : latestUpdateMessage.getArmJointAnglesActions())
          {
             ArmJointAnglesActionExecutor action = new ArmJointAnglesActionExecutor(this, robotModel, ros2);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getChestOrientationActions())
+         for (ChestOrientationActionStateMessage message : latestUpdateMessage.getChestOrientationActions())
          {
             ChestOrientationActionExecutor action = new ChestOrientationActionExecutor(this, ros2, syncedRobot, referenceFrameLibrary);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (FootstepPlanActionDefinitionMessage message : latestUpdateMessage.getFootstepPlanActions())
+         for (FootstepPlanActionStateMessage message : latestUpdateMessage.getFootstepPlanActions())
          {
             FootstepPlanActionExecutor action = new FootstepPlanActionExecutor(this,
                                                                                ros2,
@@ -153,40 +153,40 @@ public class BehaviorActionSequence
                                                                                footstepTracker,
                                                                                referenceFrameLibrary,
                                                                                walkingControllerParameters);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (SakeHandCommandActionDefinitionMessage message : latestUpdateMessage.getSakeHandCommandActions())
+         for (SakeHandCommandActionStateMessage message : latestUpdateMessage.getSakeHandCommandActions())
          {
             SakeHandCommandActionExecutor action = new SakeHandCommandActionExecutor(this, ros2);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (SidedBodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getHandPoseActions())
+         for (HandPoseActionStateMessage message : latestUpdateMessage.getHandPoseActions())
          {
             HandPoseActionExecutor action = new HandPoseActionExecutor(this, ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (HandWrenchActionDefinitionMessage message : latestUpdateMessage.getHandWrenchActions())
+         for (HandWrenchActionStateMessage message : latestUpdateMessage.getHandWrenchActions())
          {
             HandWrenchActionExecutor action = new HandWrenchActionExecutor(this, ros2);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (BodyPartPoseActionDefinitionMessage message : latestUpdateMessage.getPelvisHeightActions())
+         for (PelvisHeightPitchActionStateMessage message : latestUpdateMessage.getPelvisHeightActions())
          {
             PelvisHeightPitchActionExecutor action = new PelvisHeightPitchActionExecutor(this, ros2, referenceFrameLibrary, syncedRobot);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (WaitDurationActionDefinitionMessage message : latestUpdateMessage.getWaitDurationActions())
+         for (WaitDurationActionStateMessage message : latestUpdateMessage.getWaitDurationActions())
          {
             WaitDurationActionExecutor action = new WaitDurationActionExecutor(this);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
-         for (WalkActionDefinitionMessage message : latestUpdateMessage.getWalkActions())
+         for (WalkActionStateMessage message : latestUpdateMessage.getWalkActions())
          {
             WalkActionExecutor action = new WalkActionExecutor(this,
                                                                ros2,
@@ -196,8 +196,8 @@ public class BehaviorActionSequence
                                                                footstepPlannerParameters,
                                                                walkingControllerParameters,
                                                                referenceFrameLibrary);
-            action.getDefinition().fromMessage(message);
-            actionArray[(int) message.getActionInformation().getActionIndex()] = action;
+            action.getState().fromMessage(message);
+            actionArray[message.getActionState().getActionIndex()] = action;
          }
 
          actionSequence.clear();
