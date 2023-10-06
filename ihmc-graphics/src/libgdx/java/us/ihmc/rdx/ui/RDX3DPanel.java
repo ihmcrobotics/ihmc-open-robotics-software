@@ -26,6 +26,7 @@ import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Timer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -70,6 +71,10 @@ public class RDX3DPanel extends RDXPanel
    private float windowDrawMaxY;
    private float windowPositionX;
    private float windowPositionY;
+
+   private final Timer notificationTimer = new Timer();
+   private final RDX3DPanelTooltip notificationTooltip = new RDX3DPanelTooltip(this);
+   private String notificationText;
 
   public RDX3DPanel(String panelName)
    {
@@ -117,6 +122,16 @@ public class RDX3DPanel extends RDXPanel
          scene.addModelInstance(camera3D.getFocusPointSphere(), RDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
+
+      addImGuiOverlayAddition(() ->
+      {
+         // Display notifications for 3 seconds
+         if (notificationTimer.getElapsedTime() < 3 && notificationText != null)
+         {
+            notificationTooltip.render(notificationText);
+         }
+      });
+      notificationTooltip.setInput(new ImGui3DViewInput(this));
    }
 
    public void render()
@@ -275,6 +290,12 @@ public class RDX3DPanel extends RDXPanel
    public void dispose()
    {
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
+   }
+
+   public void pushNotification(String notificationText)
+   {
+      this.notificationText = notificationText;
+      notificationTimer.reset();
    }
 
    public void setViewportBoundsToWindow()
