@@ -84,7 +84,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
-   private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> leftHandJointAnglesStatusSubscription;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> rightHandJointAnglesStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
@@ -214,8 +213,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          }
 
          // IK solution visualization via ghost arms
-         displayIKSolution = (state.getActionIndex() == getEditor().getExecutionNextIndexStatus()) || getEditor().getConcurrentActionIsNextForExecution();
-         if (displayIKSolution)
+         if (state.getIsNextForExecution())
             visualizeIK();
       }
    }
@@ -340,7 +338,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
-         if (displayIKSolution)
+         if (state.getIsNextForExecution())
             armMultiBodyGraphics.get(definition.getSide()).getVisualRenderables(renderables, pool);
       }
    }
