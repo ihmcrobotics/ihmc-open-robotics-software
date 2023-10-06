@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.BehaviorActionStateMessage;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class BehaviorActionState implements BehaviorActionDefinitionSupplier
 {
@@ -21,20 +19,6 @@ public abstract class BehaviorActionState implements BehaviorActionDefinitionSup
    public void update()
    {
 
-   }
-
-   /** This is the default, if there is no subtree for this action */
-   public void saveToFile(ObjectNode jsonNode)
-   {
-      getDefinition().saveToFile(jsonNode);
-   }
-
-   /** This is the default, if there is no subtree for this action */
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      getDefinition().loadFromFile(jsonNode);
-      update();
-      // TODO: Pack
    }
 
    public void toMessage(BehaviorActionStateMessage message)

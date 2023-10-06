@@ -195,7 +195,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                try
                {
-                  action.loadFromFile(actionNode);
+                  action.getDefinition().loadFromFile(actionNode);
                }
                catch (Exception exception)
                {
@@ -241,7 +241,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", behaviorAction.getClass().getSimpleName());
-               behaviorAction.saveToFile(actionNode);
+               behaviorAction.getDefinition().saveToFile(actionNode);
                behaviorAction.update();
             }
          });

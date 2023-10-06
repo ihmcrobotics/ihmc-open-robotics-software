@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,6 +34,7 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final WalkingControllerParameters walkingControllerParameters;
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
@@ -59,6 +61,7 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
       state = new FootstepPlanActionState(referenceFrameLibrary);
@@ -68,60 +71,67 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override
    public void triggerActionExecution()
    {
-      footstepPlanToExecute.clear();
-      for (FootstepPlanActionFootstepState footstep : state.getFootsteps())
+      if (referenceFrameLibrary.containsFrame(state.getDefinition().getParentFrameName()))
       {
-         solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(),
-                                    footstep.getDefinition().getSoleToPlanFrameTransform());
-         solePose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstepPlanToExecute.addFootstep(footstep.getDefinition().getSide(), solePose);
-      }
-
-      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
-                                                                                                                    definition.getSwingDuration(),
-                                                                                                                    definition.getTransferDuration());
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      ros2ControllerHelper.publishToController(footstepDataListMessage);
-      executionTimer.reset();
-
-      nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
-                                                                                         definition.getSwingDuration(),
-                                                                                         walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                         definition.getTransferDuration(),
-                                                                                         walkingControllerParameters.getDefaultFinalTransferTime());
-
-      for (RobotSide side : RobotSide.values)
-         indexOfLastFoot.put(side, -1);
-      for (int i = 0; i < footstepPlanToExecute.getNumberOfSteps(); i++)
-         indexOfLastFoot.put(footstepPlanToExecute.getFootstep(i).getRobotSide(), i);
-
-      for (RobotSide side : RobotSide.values)
-      {
-         syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-
-         int indexOfLastFootSide = indexOfLastFoot.get(side);
-         if (indexOfLastFootSide >= 0)
+         footstepPlanToExecute.clear();
+         for (FootstepPlanActionFootstepState footstep : state.getFootsteps())
          {
-            goalFeetPoses.get(side).setIncludingFrame(state.getFootsteps().get(indexOfLastFootSide).getSoleFrame().getReferenceFrame().getParent(),
-                                                      footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
-            goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(), footstep.getDefinition().getSoleToPlanFrameTransform());
+            solePose.changeFrame(ReferenceFrame.getWorldFrame());
+            footstepPlanToExecute.addFootstep(footstep.getDefinition().getSide(), solePose);
          }
-         else
-            goalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
+
+         FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
+                                                                                                                       definition.getSwingDuration(),
+                                                                                                                       definition.getTransferDuration());
+         footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+         footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+         ros2ControllerHelper.publishToController(footstepDataListMessage);
+         executionTimer.reset();
+
+         nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
+                                                                                            definition.getSwingDuration(),
+                                                                                            walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                                            definition.getTransferDuration(),
+                                                                                            walkingControllerParameters.getDefaultFinalTransferTime());
+
+         for (RobotSide side : RobotSide.values)
+            indexOfLastFoot.put(side, -1);
+         for (int i = 0; i < footstepPlanToExecute.getNumberOfSteps(); i++)
+            indexOfLastFoot.put(footstepPlanToExecute.getFootstep(i).getRobotSide(), i);
+
+         for (RobotSide side : RobotSide.values)
+         {
+            syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+
+            int indexOfLastFootSide = indexOfLastFoot.get(side);
+            if (indexOfLastFootSide >= 0)
+            {
+               goalFeetPoses.get(side)
+                            .setIncludingFrame(state.getFootsteps().get(indexOfLastFootSide).getSoleFrame().getReferenceFrame().getParent(),
+                                               footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
+               goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            else
+               goalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
+         }
+         startPositionDistanceToGoal = 0;
+         startOrientationDistanceToGoal = 0;
+         for (RobotSide side : RobotSide.values)
+         {
+            startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(goalFeetPoses.get(side).getTranslation());
+            startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(goalFeetPoses.get(side).getRotation(), true);
+         }
       }
-      startPositionDistanceToGoal =  0;
-      startOrientationDistanceToGoal = 0;
-      for (RobotSide side : RobotSide.values)
+      else
       {
-         startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(goalFeetPoses.get(side).getTranslation());
-         startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(goalFeetPoses.get(side).getRotation(), true);
+         LogTools.error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 

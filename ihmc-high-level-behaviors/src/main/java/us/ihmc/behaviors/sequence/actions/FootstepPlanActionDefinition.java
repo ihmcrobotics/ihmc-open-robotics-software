@@ -2,14 +2,18 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionDefinition extends BehaviorActionDefinition
 {
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
    private String parentFrameName;
+   private final RecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps = new RecyclingArrayList<>(FootstepPlanActionFootstepDefinition::new);
 
    public FootstepPlanActionDefinition()
    {
@@ -24,6 +28,13 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
       jsonNode.put("parentFrame", parentFrameName);
+
+      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
+      for (FootstepPlanActionFootstepDefinition footstep : footsteps)
+      {
+         ObjectNode footstepNode = foostepsArrayNode.addObject();
+         footstep.saveToFile(footstepNode);
+      }
    }
 
    @Override
@@ -34,6 +45,9 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
       swingDuration = jsonNode.get("swingDuration").asDouble();
       transferDuration = jsonNode.get("transferDuration").asDouble();
       parentFrameName = jsonNode.get("parentFrame").textValue();
+
+      footsteps.clear();
+      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
    }
 
    public void toMessage(FootstepPlanActionDefinitionMessage message)
@@ -82,5 +96,10 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
    public void setParentFrameName(String parentFrameName)
    {
       this.parentFrameName = parentFrameName;
+   }
+
+   public RecyclingArrayList<FootstepPlanActionFootstepDefinition> getFootsteps()
+   {
+      return footsteps;
    }
 }
