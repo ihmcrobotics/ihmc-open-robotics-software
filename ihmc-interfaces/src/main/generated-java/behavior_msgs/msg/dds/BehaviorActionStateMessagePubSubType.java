@@ -15,7 +15,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6b3eb219e8c64036d488106c607dd768f54b7913579dc278961dada185b2c41a";
+   		return "73473abcbe31613ec2e901ffbc6c890ec32d156f9204744153bd0a808eeb7f0a";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -76,7 +76,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -93,7 +93,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.write_type_4(data.getId());
 
-      cdr.write_type_3(data.getActionIndex());
+      cdr.write_type_2(data.getActionIndex());
 
       cdr.write_type_7(data.getIsNextForExecution());
 
@@ -105,7 +105,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       data.setId(cdr.read_type_4());
       	
-      data.setActionIndex(cdr.read_type_3());
+      data.setActionIndex(cdr.read_type_2());
       	
       data.setIsNextForExecution(cdr.read_type_7());
       	
@@ -118,7 +118,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void serialize(behavior_msgs.msg.dds.BehaviorActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("id", data.getId());
-      ser.write_type_3("action_index", data.getActionIndex());
+      ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
       ser.write_type_7("is_to_be_executed_concurrently", data.getIsToBeExecutedConcurrently());
    }
@@ -127,7 +127,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorActionStateMessage data)
    {
       data.setId(ser.read_type_4("id"));
-      data.setActionIndex(ser.read_type_3("action_index"));
+      data.setActionIndex(ser.read_type_2("action_index"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
       data.setIsToBeExecutedConcurrently(ser.read_type_7("is_to_be_executed_concurrently"));
    }

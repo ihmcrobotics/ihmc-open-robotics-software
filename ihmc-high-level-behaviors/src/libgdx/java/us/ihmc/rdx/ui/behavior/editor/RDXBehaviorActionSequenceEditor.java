@@ -23,6 +23,7 @@ import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutionStatusCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.commons.FormattingTools;
@@ -95,6 +96,7 @@ public class RDXBehaviorActionSequenceEditor
    private volatile long receivedSequenceStatusMessageCount = 0;
    private long receivedStatusMessageCount = 0;
    private int executionNextIndexStatus;
+   private final BehaviorActionExecutionStatusCalculator executionStatusCalculator = new BehaviorActionExecutionStatusCalculator();
    private final Int32 currentActionIndexCommandMessage = new Int32();
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
@@ -121,9 +123,10 @@ public class RDXBehaviorActionSequenceEditor
 
    public void createNewSequence(String name, WorkspaceResourceDirectory storageDirectory)
    {
+      clear();
       this.name = name;
       afterNameDetermination();
-      this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
+      workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
    }
 
    public void changeFileToLoadFrom(WorkspaceResourceFile fileToLoadFrom)
@@ -370,6 +373,11 @@ public class RDXBehaviorActionSequenceEditor
 
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
       {
+         executionStatusCalculator.update(actionSequence, actionIndex, executionNextIndexStatus);
+         actionSequence.get(actionIndex).getState().setActionIndex(actionIndex);
+         actionSequence.get(actionIndex).getState().setIsNextForExecution(executionStatusCalculator.getNextForExecution());
+         actionSequence.get(actionIndex).getState().setIsToBeExecutedConcurrently(executionStatusCalculator.getExecuteWithPreviousAction()
+                                                                                  || executionStatusCalculator.getExecuteWithNextAction());
          actionSequence.get(actionIndex).update();
       }
    }
