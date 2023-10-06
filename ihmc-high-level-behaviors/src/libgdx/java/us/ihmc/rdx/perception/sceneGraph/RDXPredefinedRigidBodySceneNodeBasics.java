@@ -33,6 +33,7 @@ public class RDXPredefinedRigidBodySceneNodeBasics
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
    private final PredefinedRigidBodySceneNode predefinedRigidBodySceneNode;
+   private final RDX3DPanel panel3D;
    private final RDXSceneNodeBasics sceneNodeBasics;
    private final RDXModelInstance modelInstance;
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
@@ -46,6 +47,7 @@ public class RDXPredefinedRigidBodySceneNodeBasics
    public RDXPredefinedRigidBodySceneNodeBasics(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
       this.predefinedRigidBodySceneNode = predefinedRigidBodySceneNode;
+      this.panel3D = panel3D;
 
       sceneNodeBasics = new RDXSceneNodeBasics(predefinedRigidBodySceneNode);
 
@@ -116,7 +118,10 @@ public class RDXPredefinedRigidBodySceneNodeBasics
 
    public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      sceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
+      if (sceneNodeBasics.renderRemove(modificationQueue, sceneGraph))
+      {
+         offsetPoseGizmo.removeRenderables(panel3D);
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
