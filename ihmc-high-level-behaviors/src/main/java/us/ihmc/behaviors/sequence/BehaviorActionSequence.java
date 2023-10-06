@@ -294,9 +294,6 @@ public class BehaviorActionSequence
 
    private void executeNextAction()
    {
-      boolean executeWithPreviousAction = false;
-      if (lastCurrentlyExecutingAction != null)
-         executeWithPreviousAction = lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction();
       lastCurrentlyExecutingAction = actionSequence.get(executionNextIndex);
       // If automatic execution, we want to ensure it's able to execute before we perform the execution.
       // If it's unable to execute, disable automatic execution.
@@ -309,7 +306,6 @@ public class BehaviorActionSequence
             return;
          }
       }
-      boolean concurrentActionIsNextForExecution = lastCurrentlyExecutingAction.getDefinition().getExecuteWithNextAction() || executeWithPreviousAction;
       lastCurrentlyExecutingAction.update();
       lastCurrentlyExecutingAction.triggerActionExecution();
       lastCurrentlyExecutingAction.updateCurrentlyExecuting();
