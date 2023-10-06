@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -35,13 +34,15 @@ public interface HumanoidRobotNaturalPosture
    Quaternion getCenterOfMassOrientationRelativeToBase();
 
    /**
-    * This is the task jacobian for the center of mass orientation objective relative to the world frame.
+    * This is the task jacobian for the center of mass orientation objective relative to the world frame. It is used to calculate the angular velocity of the
+    * angular center of mass (ACOM) frame relative to world. This is the method the QP needs for the ACOM tracking task, so you should use this method.
     */
    DMatrixRMaj getCenterOfMassOrientationJacobian();
 
    /**
-    * This is the task jacobian for the center of mass orientation objective relative to the base frame and expressed with respect to the base frame. The base
-    * frame is the frame of the root body (e.g. the pelvis).
+    * This is the task jacobian for the center of mass orientation objective relative to the base frame and expressed with respect to the base frame. It is used
+    * to calculate the angular velocity of the angular center of mass (ACOM) frame relative to the base frame. The base frame is the frame of the root body
+    * (e.g. the pelvis). The QP doesn't need this method, but you could use it for debugging.
     */
    DMatrixRMaj getCenterOfMassOrientationJacobianRelativeToBase();
 
