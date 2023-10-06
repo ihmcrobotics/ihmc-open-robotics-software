@@ -57,7 +57,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    /**
             * Reshapable rigid body scene nodes
             */
-   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage>  reshapable_rigid_body_scene_nodes_;
+   public us.ihmc.idl.IDLSequence.Object<PrimitiveRigidBodySceneNodeMessage>  reshapable_rigid_body_scene_nodes_;
 
    public SceneGraphMessage()
    {
@@ -70,7 +70,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       predefined_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType());
       aruco_marker_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ArUcoMarkerNodeMessage> (200, new perception_msgs.msg.dds.ArUcoMarkerNodeMessagePubSubType());
       static_relative_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage> (200, new perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType());
-      reshapable_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessagePubSubType());
+      reshapable_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<PrimitiveRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessagePubSubType());
 
    }
 
@@ -178,7 +178,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    /**
             * Reshapable rigid body scene nodes
             */
-   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage>  getReshapableRigidBodySceneNodes()
+   public us.ihmc.idl.IDLSequence.Object<PrimitiveRigidBodySceneNodeMessage>  getReshapableRigidBodySceneNodes()
    {
       return reshapable_rigid_body_scene_nodes_;
    }

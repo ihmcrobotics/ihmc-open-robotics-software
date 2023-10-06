@@ -204,7 +204,7 @@ public class ROS2SceneGraphSubscription
          }
          case SceneGraphMessage.RESHAPABLE_RIGID_BODY_NODE_TYPE ->
          {
-            ReshapableRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage = sceneGraphMessage.getReshapableRigidBodySceneNodes().get(indexInTypesList);
+            PrimitiveRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage = sceneGraphMessage.getReshapableRigidBodySceneNodes().get(indexInTypesList);
             subscriptionNode.setReshapableRigidBodySceneNodeMessage(reshapableRigidBodySceneNodeMessage);
             subscriptionNode.setSceneNodeMessage(reshapableRigidBodySceneNodeMessage.getSceneNode());
          }

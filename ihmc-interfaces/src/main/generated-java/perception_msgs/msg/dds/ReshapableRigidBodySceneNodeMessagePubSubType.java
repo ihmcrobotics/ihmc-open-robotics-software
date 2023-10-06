@@ -8,7 +8,7 @@ package perception_msgs.msg.dds;
 * Do not update this file directly, edit ReshapableRigidBodySceneNodeMessage_.idl instead.
 *
 */
-public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage>
+public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<PrimitiveRigidBodySceneNodeMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::ReshapableRigidBodySceneNodeMessage_";
    
@@ -28,7 +28,7 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(PrimitiveRigidBodySceneNodeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, PrimitiveRigidBodySceneNodeMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -62,12 +62,12 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data)
+   public final static int getCdrSerializedSize(PrimitiveRigidBodySceneNodeMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(PrimitiveRigidBodySceneNodeMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -82,7 +82,7 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(PrimitiveRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
       cdr.write_type_4(data.getInitialParentId());
@@ -90,7 +90,7 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getInitialTransformToParent(), cdr);
    }
 
-   public static void read(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(PrimitiveRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
       data.setInitialParentId(cdr.read_type_4());
@@ -100,7 +100,7 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(PrimitiveRigidBodySceneNodeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
@@ -110,7 +110,7 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, PrimitiveRigidBodySceneNodeMessage data)
    {
       ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
@@ -119,15 +119,15 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
 
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage src, perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage dest)
+   public static void staticCopy(PrimitiveRigidBodySceneNodeMessage src, PrimitiveRigidBodySceneNodeMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage createData()
+   public PrimitiveRigidBodySceneNodeMessage createData()
    {
-      return new perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage();
+      return new PrimitiveRigidBodySceneNodeMessage();
    }
    @Override
    public int getTypeSize()
@@ -141,17 +141,17 @@ public class ReshapableRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(PrimitiveRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(PrimitiveRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage src, perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessage dest)
+   public void copy(PrimitiveRigidBodySceneNodeMessage src, PrimitiveRigidBodySceneNodeMessage dest)
    {
       staticCopy(src, dest);
    }

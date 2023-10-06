@@ -5,7 +5,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.ReshapableRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphTools;
@@ -31,9 +31,9 @@ public class RDXSceneGraphTools
       {
          uiSceneNode = new RDXPredefinedRigidBodySceneNode(predefinedRigidBodySceneNode, panel3D);
       }
-      else if (sceneNodeToCopy instanceof ReshapableRigidBodySceneNode resizableRigidBodySceneNode)
+      else if (sceneNodeToCopy instanceof PrimitiveRigidBodySceneNode resizableRigidBodySceneNode)
       {
-         uiSceneNode = new RDXReshapableRigidBodySceneNode(resizableRigidBodySceneNode, panel3D);
+         uiSceneNode = new RDXResizablePrimitiveRigidBodySceneNode(resizableRigidBodySceneNode, panel3D);
       }
       else if (sceneNodeToCopy instanceof DetectableSceneNode detectableSceneNode)
       {
