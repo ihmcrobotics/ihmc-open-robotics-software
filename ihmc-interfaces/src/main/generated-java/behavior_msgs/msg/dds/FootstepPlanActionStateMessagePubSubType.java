@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d16eefd6ca856141b27c9f83fc271de43f24a48635f340b34000f59f1fb9f6c3";
+   		return "5fb6e282f28cedcfbdce728c0ebfb31cb01b1e345efd18b5243e438340cc71e6";
    }
    
    @Override
@@ -56,6 +56,9 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +76,11 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,12 +89,17 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    {
       behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.write(data.getActionState(), cdr);
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      if(data.getFootsteps().size() <= 50)
+      cdr.write_type_e(data.getFootsteps());else
+          throw new RuntimeException("footsteps field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.read(data.getActionState(), cdr);	
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      cdr.read_type_e(data.getFootsteps());	
 
    }
 
@@ -97,6 +110,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_e("footsteps", data.getFootsteps());
    }
 
    @Override
@@ -106,6 +120,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.read_type_e("footsteps", data.getFootsteps());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionStateMessage src, behavior_msgs.msg.dds.FootstepPlanActionStateMessage dest)

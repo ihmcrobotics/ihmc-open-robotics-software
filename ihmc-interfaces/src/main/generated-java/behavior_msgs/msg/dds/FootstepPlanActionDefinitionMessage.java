@@ -17,10 +17,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
    /**
-            * The footsteps, with a maximum of 50
-            */
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDefinitionMessage>  footsteps_;
-   /**
             * Swing duration
             */
    public double swing_duration_;
@@ -33,8 +29,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    {
       action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
-      footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepActionDefinitionMessagePubSubType());
-
    }
 
    public FootstepPlanActionDefinitionMessage(FootstepPlanActionDefinitionMessage other)
@@ -47,7 +41,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    {
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       parent_frame_.set(other.parent_frame_);
-      footsteps_.set(other.footsteps_);
       swing_duration_ = other.swing_duration_;
 
       transfer_duration_ = other.transfer_duration_;
@@ -70,15 +63,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getParentFrame()
    {
       return parent_frame_;
-   }
-
-
-   /**
-            * The footsteps, with a maximum of 50
-            */
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionDefinitionMessage>  getFootsteps()
-   {
-      return footsteps_;
    }
 
    /**
@@ -132,13 +116,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
-      if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.footsteps_.size(); i++)
-         {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
-      }
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_, other.swing_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
@@ -158,7 +135,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
-      if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
       if(this.swing_duration_ != otherMyClass.swing_duration_) return false;
 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
@@ -177,8 +153,6 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.action_definition_);      builder.append(", ");
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
-      builder.append("footsteps=");
-      builder.append(this.footsteps_);      builder.append(", ");
       builder.append("swing_duration=");
       builder.append(this.swing_duration_);      builder.append(", ");
       builder.append("transfer_duration=");

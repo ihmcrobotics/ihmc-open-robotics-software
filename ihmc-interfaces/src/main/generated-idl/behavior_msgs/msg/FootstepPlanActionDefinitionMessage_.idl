@@ -2,7 +2,6 @@
 #define __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
-#include "behavior_msgs/msg/./FootstepActionDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -21,10 +20,6 @@ module behavior_msgs
          * Name of the parent frame the footsteps are expressed in
          */
         sequence<string, 1000> parent_frame;
-        /**
-         * The footsteps, with a maximum of 50
-         */
-        sequence<behavior_msgs::msg::dds::FootstepActionDefinitionMessage, 50> footsteps;
         /**
          * Swing duration
          */

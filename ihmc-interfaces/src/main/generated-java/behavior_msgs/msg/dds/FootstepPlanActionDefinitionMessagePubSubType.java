@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bfcde1369d057952177c24faa12a7975abba9ef696a07248dc8b8a70ace25e75";
+   		return "15408d785b35daf910e61e12f5cf2b9b835d6d6f9a6cb3d007c97dd179069803";
    }
    
    @Override
@@ -58,9 +58,6 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.FootstepActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -85,11 +82,6 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       {
           current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrame().get(i0).length() + 1;
       }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.FootstepActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -107,10 +99,6 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       cdr.write_type_e(data.getParentFrame());else
           throw new RuntimeException("parent_frame field exceeds the maximum length");
 
-      if(data.getFootsteps().size() <= 50)
-      cdr.write_type_e(data.getFootsteps());else
-          throw new RuntimeException("footsteps field exceeds the maximum length");
-
       cdr.write_type_6(data.getSwingDuration());
 
       cdr.write_type_6(data.getTransferDuration());
@@ -121,7 +109,6 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    {
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
       cdr.read_type_e(data.getParentFrame());	
-      cdr.read_type_e(data.getFootsteps());	
       data.setSwingDuration(cdr.read_type_6());
       	
       data.setTransferDuration(cdr.read_type_6());
@@ -135,7 +122,6 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
 
       ser.write_type_e("parent_frame", data.getParentFrame());
-      ser.write_type_e("footsteps", data.getFootsteps());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
    }
@@ -146,7 +132,6 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.read_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
 
       ser.read_type_e("parent_frame", data.getParentFrame());
-      ser.read_type_e("footsteps", data.getFootsteps());
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
    }

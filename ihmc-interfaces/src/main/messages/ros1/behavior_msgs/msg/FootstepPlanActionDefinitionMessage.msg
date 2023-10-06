@@ -5,9 +5,6 @@ behavior_msgs/BehaviorActionDefinitionMessage action_definition
 # Name of the parent frame the footsteps are expressed in
 string[] parent_frame
 
-# The footsteps, with a maximum of 50
-behavior_msgs/FootstepActionDefinitionMessage[] footsteps
-
 # Swing duration
 float64 swing_duration
 

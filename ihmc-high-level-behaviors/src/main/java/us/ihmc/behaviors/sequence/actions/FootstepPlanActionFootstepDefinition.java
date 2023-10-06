@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.FootstepActionDefinitionMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -41,13 +41,13 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
       JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform);
    }
 
-   public void toMessage(FootstepActionDefinitionMessage message)
+   public void toMessage(FootstepPlanActionFootstepDefinitionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.getSolePose().set(soleToPlanFrameTransform);
    }
 
-   public void fromMessage(FootstepActionDefinitionMessage message)
+   public void fromMessage(FootstepPlanActionFootstepDefinitionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
       soleToPlanFrameTransform.set(message.getSolePose());
