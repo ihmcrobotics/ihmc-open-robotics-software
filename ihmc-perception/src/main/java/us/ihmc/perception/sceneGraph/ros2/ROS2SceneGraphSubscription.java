@@ -82,6 +82,9 @@ public class ROS2SceneGraphSubscription
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
 
+         if (!localTreeFrozen)
+            sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
+
          sceneGraph.modifyTree(modificationQueue ->
          {
             if (!localTreeFrozen)
@@ -89,9 +92,6 @@ public class ROS2SceneGraphSubscription
 
             updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
          });
-
-         if (!localTreeFrozen)
-            sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
       }
       return newMessageAvailable;
    }
