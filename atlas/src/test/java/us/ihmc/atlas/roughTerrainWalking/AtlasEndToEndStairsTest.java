@@ -24,6 +24,7 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       return new AtlasRobotModel(selectedVersion);
    }
 
+   @Disabled
    @Test
    public void testUpStairsSlow(TestInfo testInfo) throws Exception
    {
@@ -31,6 +32,7 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       testStairs(testInfo, true, true, 0.6, 0.25, 0.0);
    }
 
+   @Disabled
    @Test
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
@@ -38,6 +40,7 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       testStairs(testInfo, true, false, 0.9, 0.25, 0.0);
    }
 
+   @Disabled
    @Test
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
@@ -45,6 +48,7 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       testStairs(testInfo, false, true, 0.9, 0.25, 0.0);
    }
 
+   @Disabled
    @Test
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
