@@ -5,17 +5,16 @@ import java.util.List;
 
 public enum PrimitiveRigidBodyShape
 {
-   BOX, PYRAMID, CYLINDER, SPHERE, ELLIPSOID, TORUS;
+   BOX, PRISM, ELLIPSOID, CYLINDER, CONE;
 
    public static List<PrimitiveRigidBodyShape> getAvailableShapes()
    {
       List<PrimitiveRigidBodyShape> availableShapes = new ArrayList<>();
       availableShapes.add(BOX);
-      availableShapes.add(PYRAMID);
-      availableShapes.add(CYLINDER);
-      availableShapes.add(SPHERE);
+      availableShapes.add(PRISM);
       availableShapes.add(ELLIPSOID);
-      availableShapes.add(TORUS);
+      availableShapes.add(CYLINDER);
+      availableShapes.add(CONE);
       return availableShapes;
    }
 }

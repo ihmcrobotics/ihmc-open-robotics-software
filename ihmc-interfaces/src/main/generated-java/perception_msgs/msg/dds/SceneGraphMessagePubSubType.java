@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "27afd0a9e3cec601365c5d7860722fb81f7b907a7c172ee56469ec50cd91cba4";
+   		return "ab95e6d45c76b72aa8d6a6c40557cbea3282fc4238c940186d757e8b2d8cfb8d";
    }
    
    @Override
@@ -75,7 +75,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
           current_alignment += perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -126,9 +126,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
           current_alignment += perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType.getCdrSerializedSize(data.getStaticRelativeSceneNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getReshapableRigidBodySceneNodes().size(); ++i0)
+      for(int i0 = 0; i0 < data.getPrimitiveRigidBodySceneNodes().size(); ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.ReshapableRigidBodySceneNodeMessagePubSubType.getCdrSerializedSize(data.getReshapableRigidBodySceneNodes().get(i0), current_alignment);}
+          current_alignment += perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessagePubSubType.getCdrSerializedSize(data.getPrimitiveRigidBodySceneNodes().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -166,9 +166,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getStaticRelativeSceneNodes());else
           throw new RuntimeException("static_relative_scene_nodes field exceeds the maximum length");
 
-      if(data.getReshapableRigidBodySceneNodes().size() <= 200)
-      cdr.write_type_e(data.getReshapableRigidBodySceneNodes());else
-          throw new RuntimeException("reshapable_rigid_body_scene_nodes field exceeds the maximum length");
+      if(data.getPrimitiveRigidBodySceneNodes().size() <= 200)
+      cdr.write_type_e(data.getPrimitiveRigidBodySceneNodes());else
+          throw new RuntimeException("primitive_rigid_body_scene_nodes field exceeds the maximum length");
 
    }
 
@@ -183,7 +183,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getPredefinedRigidBodySceneNodes());	
       cdr.read_type_e(data.getArucoMarkerSceneNodes());	
       cdr.read_type_e(data.getStaticRelativeSceneNodes());	
-      cdr.read_type_e(data.getReshapableRigidBodySceneNodes());	
+      cdr.read_type_e(data.getPrimitiveRigidBodySceneNodes());	
 
    }
 
@@ -198,7 +198,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("predefined_rigid_body_scene_nodes", data.getPredefinedRigidBodySceneNodes());
       ser.write_type_e("aruco_marker_scene_nodes", data.getArucoMarkerSceneNodes());
       ser.write_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
-      ser.write_type_e("reshapable_rigid_body_scene_nodes", data.getReshapableRigidBodySceneNodes());
+      ser.write_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
    }
 
    @Override
@@ -212,7 +212,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("predefined_rigid_body_scene_nodes", data.getPredefinedRigidBodySceneNodes());
       ser.read_type_e("aruco_marker_scene_nodes", data.getArucoMarkerSceneNodes());
       ser.read_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
-      ser.read_type_e("reshapable_rigid_body_scene_nodes", data.getReshapableRigidBodySceneNodes());
+      ser.read_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SceneGraphMessage src, perception_msgs.msg.dds.SceneGraphMessage dest)

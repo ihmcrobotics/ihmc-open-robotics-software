@@ -47,7 +47,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
-      sceneGraphMessage.getReshapableRigidBodySceneNodes().clear();
+      sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
       packSceneTreeToMessage(sceneGraph.getRootNode(), sceneGraphMessage);
 
@@ -113,14 +113,14 @@ public class ROS2SceneGraphPublisher
       }
       else if (sceneNode instanceof PrimitiveRigidBodySceneNode reshapableRigidBodySceneNode)
       {
-         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE);
-         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getPredefinedRigidBodySceneNodes().size());
-         PrimitiveRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage = sceneGraphMessage.getReshapableRigidBodySceneNodes().add();
+         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE);
+         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getPrimitiveRigidBodySceneNodes().size());
+         PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().add();
 
-         reshapableRigidBodySceneNodeMessage.setInitialParentId(reshapableRigidBodySceneNode.getInitialParentNodeID());
+         primitiveRigidBodySceneNodeMessage.setInitialParentId(reshapableRigidBodySceneNode.getInitialParentNodeID());
          MessageTools.toMessage(reshapableRigidBodySceneNode.getInitialTransformToParent(),
-                                reshapableRigidBodySceneNodeMessage.getInitialTransformToParent());
-         sceneNodeMessage = reshapableRigidBodySceneNodeMessage.getSceneNode();
+                                primitiveRigidBodySceneNodeMessage.getInitialTransformToParent());
+         sceneNodeMessage = primitiveRigidBodySceneNodeMessage.getSceneNode();
       }
       else // In this case the node is just the most basic type
       {

@@ -66,7 +66,7 @@ public class ROS2SceneGraphTools
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {
-         PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = subscriptionNode.getReshapableRigidBodySceneNodeMessage();
+         PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = subscriptionNode.getPrimitiveRigidBodySceneNodeMessage();
          RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
          MessageTools.toEuclid(primitiveRigidBodySceneNodeMessage.getInitialTransformToParent(), initialTransformToParent);
          sceneNode = new PrimitiveRigidBodySceneNode(nodeID,
@@ -74,7 +74,7 @@ public class ROS2SceneGraphTools
                                                      sceneGraph.getIDToNodeMap(),
                                                      primitiveRigidBodySceneNodeMessage.getInitialParentId(),
                                                      initialTransformToParent,
-                                                     primitiveRigidBodySceneNodeMessage.getShape());
+                                                     primitiveRigidBodySceneNodeMessage.getShapeAsString());
       }
       else
       {

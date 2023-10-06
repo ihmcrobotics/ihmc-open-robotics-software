@@ -4,30 +4,30 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodyShape;
-import us.ihmc.rdx.perception.sceneGraph.RDXResizablePrimitiveRigidBodySceneNode;
+import us.ihmc.rdx.perception.sceneGraph.RDXPrimitiveRigidBodySceneNode;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.List;
 
 import static us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodyShape.getAvailableShapes;
 
-public class RDXResizablePrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<RDXResizablePrimitiveRigidBodySceneNode>
+public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<RDXPrimitiveRigidBodySceneNode>
 {
    private final List<PrimitiveRigidBodyShape> availableShapes;
 
-   public RDXResizablePrimitiveRigidBodySceneNodeBuilder(SceneGraph sceneGraph)
+   public RDXPrimitiveRigidBodySceneNodeBuilder(SceneGraph sceneGraph)
    {
       super(sceneGraph);
       availableShapes = getAvailableShapes();
    }
 
    @Override
-   public RDXResizablePrimitiveRigidBodySceneNode build()
+   public RDXPrimitiveRigidBodySceneNode build()
    {
       return build("BOX"); // Build a box by default
    }
 
-   public RDXResizablePrimitiveRigidBodySceneNode build(String selectedShape)
+   public RDXPrimitiveRigidBodySceneNode build(String selectedShape)
    {
       long nextID = sceneGraph.getNextID().getAndIncrement();
 
@@ -40,8 +40,8 @@ public class RDXResizablePrimitiveRigidBodySceneNodeBuilder extends RDXSceneNode
                                                                                     sceneGraph.getIDToNodeMap(),
                                                                                     parent.getID(),
                                                                                     new RigidBodyTransform(),
-                                                                                    shape);
-            return new RDXResizablePrimitiveRigidBodySceneNode(sceneNode, RDXBaseUI.getInstance().getPrimary3DPanel());
+                                                                                    selectedShape);
+            return new RDXPrimitiveRigidBodySceneNode(sceneNode, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
       }
       throw new IllegalStateException("Unexpected value: " + selectedShape);

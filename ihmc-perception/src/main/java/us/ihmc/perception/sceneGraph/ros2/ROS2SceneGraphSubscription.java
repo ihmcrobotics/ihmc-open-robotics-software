@@ -202,11 +202,11 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setPredefinedRigidBodySceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode());
             subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode().getSceneNode());
          }
-         case SceneGraphMessage.RESHAPABLE_RIGID_BODY_NODE_TYPE ->
+         case SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE ->
          {
-            PrimitiveRigidBodySceneNodeMessage reshapableRigidBodySceneNodeMessage = sceneGraphMessage.getReshapableRigidBodySceneNodes().get(indexInTypesList);
-            subscriptionNode.setReshapableRigidBodySceneNodeMessage(reshapableRigidBodySceneNodeMessage);
-            subscriptionNode.setSceneNodeMessage(reshapableRigidBodySceneNodeMessage.getSceneNode());
+            PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().get(indexInTypesList);
+            subscriptionNode.setPrimitiveRigidBodySceneNodeMessage(primitiveRigidBodySceneNodeMessage);
+            subscriptionNode.setSceneNodeMessage(primitiveRigidBodySceneNodeMessage.getSceneNode());
          }
       }
 

@@ -27,14 +27,14 @@ public class PrimitiveRigidBodySceneNode extends SceneNode
    private final long initialParentNodeID;
    private final RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D initialPose = new FramePose3D();
-   private final PrimitiveRigidBodyShape shape;
+   private final String shape;
 
    public PrimitiveRigidBodySceneNode(long id,
                                       String name,
                                       TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
                                       long initialParentNodeID,
                                       RigidBodyTransformReadOnly initialTransformToParent,
-                                      PrimitiveRigidBodyShape shape)
+                                      String shape)
    {
       super(id, name);
       this.sceneGraphIDToNodeMap = sceneGraphIDToNodeMap;
@@ -106,7 +106,7 @@ public class PrimitiveRigidBodySceneNode extends SceneNode
       return initialTransformToParent;
    }
 
-   public PrimitiveRigidBodyShape getShape()
+   public String getShape()
    {
       return shape;
    }

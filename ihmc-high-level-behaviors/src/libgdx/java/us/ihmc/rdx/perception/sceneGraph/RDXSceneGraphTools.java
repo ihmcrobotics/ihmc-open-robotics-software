@@ -33,7 +33,7 @@ public class RDXSceneGraphTools
       }
       else if (sceneNodeToCopy instanceof PrimitiveRigidBodySceneNode resizableRigidBodySceneNode)
       {
-         uiSceneNode = new RDXResizablePrimitiveRigidBodySceneNode(resizableRigidBodySceneNode, panel3D);
+         uiSceneNode = new RDXPrimitiveRigidBodySceneNode(resizableRigidBodySceneNode, panel3D);
       }
       else if (sceneNodeToCopy instanceof DetectableSceneNode detectableSceneNode)
       {
