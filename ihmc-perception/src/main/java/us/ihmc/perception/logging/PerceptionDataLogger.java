@@ -547,27 +547,18 @@ public class PerceptionDataLogger
 
    public void storeBytesFromPointer(String namespace, BytePointer bytePointer)
    {
-//      executorService.submit(() ->
-//                             {
-//                                synchronized (hdf5Manager)
-//                                {
-//                                   Group group = hdf5Manager.createOrGetGroup(namespace);
-//
-//                                   int imageCount = channels.get(namespace).getCount();
-//                                   channels.get(namespace).incrementCount();
-//
-//                                   hdf5Tools.storeBytes(group, imageCount, bytePointer);
-//                                }
-//                             });
-      synchronized (hdf5Manager)
-      {
-         Group group = hdf5Manager.createOrGetGroup(namespace);
+      executorService.submit(() ->
+                             {
+                                synchronized (hdf5Manager)
+                                {
+                                   Group group = hdf5Manager.createOrGetGroup(namespace);
 
-         int imageCount = channels.get(namespace).getCount();
-         channels.get(namespace).incrementCount();
+                                   int imageCount = channels.get(namespace).getCount();
+                                   channels.get(namespace).incrementCount();
 
-         hdf5Tools.storeBytes(group, imageCount, bytePointer);
-      }
+                                   hdf5Tools.storeBytes(group, imageCount, bytePointer);
+                                }
+                             });
    }
 
    public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int rows, int columns)
