@@ -27,6 +27,12 @@ public class NaturalPosturePaperDataComputanator
    private final YoVector3D omega_bc = new YoVector3D("omega_bc", registry);
    private final YoVector3D centroidalAngularMomentumApproxByACOM = new YoVector3D("centroidalAngularMomentumApproxByACOM", registry);
 
+   /**
+    * This class contains the code which was used to generate data for the Angular Center of Mass paper [REF: Y.-M. Chen, G. Nelson, R. Griffin, M. Posa, and
+    * J. Pratt, “Angular Center of Mass for Humanoid Robots.” 2022. http://arxiv.org/abs/2210.08111]. It should not be used for anything else, and should
+    * probably be moved to a test.
+    * TODO move this to a test.
+    */
    public NaturalPosturePaperDataComputanator(HumanoidRobotNaturalPosture robotNaturalPosture,
                                               HighLevelHumanoidControllerToolbox controllerToolbox,
                                               YoRegistry parentRegistry)
