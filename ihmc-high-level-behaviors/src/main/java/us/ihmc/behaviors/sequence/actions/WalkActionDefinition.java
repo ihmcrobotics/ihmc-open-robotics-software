@@ -67,8 +67,7 @@ public class WalkActionDefinition extends BehaviorActionDefinition
 
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(parentFrameName);
+      message.setParentFrameName(parentFrameName);
       MessageTools.toMessage(goalToParentTransform, message.getTransformToParent());
       MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
       MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
@@ -80,7 +79,7 @@ public class WalkActionDefinition extends BehaviorActionDefinition
 
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
-      parentFrameName = message.getParentFrame().getString(0);
+      parentFrameName = message.getParentFrameNameAsString();
       MessageTools.toEuclid(message.getTransformToParent(), goalToParentTransform);
       MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToGoalTransforms.get(RobotSide.LEFT));
       MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToGoalTransforms.get(RobotSide.RIGHT));

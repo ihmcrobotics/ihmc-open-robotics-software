@@ -139,8 +139,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
             highlightModel.setTransparency(0.5);
          }
 
-         pelvisPoseStatus.getParentFrame().resetQuick();
-         pelvisPoseStatus.getParentFrame().add(definition.getParentFrameName());
+         pelvisPoseStatus.setParentFrameName(definition.getParentFrameName());
 
          // compute transform variation from previous pose
          FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());

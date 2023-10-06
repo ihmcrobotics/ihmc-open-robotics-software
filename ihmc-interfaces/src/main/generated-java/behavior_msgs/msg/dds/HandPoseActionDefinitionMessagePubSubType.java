@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "61dc8b1f6fc2b3f1ef05022b32db724afac95445522b8599f774f3eb48673208";
+   		return "23eb3e2ef86916acee43dd5ed069ca71bdeaaea0ce8810960567d8cb1b52a7bd";
    }
    
    @Override
@@ -56,10 +56,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -88,11 +85,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrame().get(i0).length() + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToParent(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -116,9 +110,9 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
-      if(data.getParentFrame().size() <= 1000)
-      cdr.write_type_e(data.getParentFrame());else
-          throw new RuntimeException("parent_frame field exceeds the maximum length");
+      if(data.getParentFrameName().length() <= 255)
+      cdr.write_type_d(data.getParentFrameName());else
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
@@ -136,7 +130,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
-      cdr.read_type_e(data.getParentFrame());	
+      cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
@@ -155,7 +149,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_e("parent_frame", data.getParentFrame());
+      ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
@@ -170,7 +164,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.read_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
-      ser.read_type_e("parent_frame", data.getParentFrame());
+      ser.read_type_d("parent_frame_name", data.getParentFrameName());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));

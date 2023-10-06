@@ -7,7 +7,7 @@ behavior_msgs/BehaviorActionDefinitionMessage action_definition
 int8 robot_side
 
 # Name of the frame the this action is expressed in
-string[] parent_frame
+string parent_frame_name
 
 # Transform that expresses the hand pose in the parent frame
 controller_msgs/RigidBodyTransformMessage transform_to_parent

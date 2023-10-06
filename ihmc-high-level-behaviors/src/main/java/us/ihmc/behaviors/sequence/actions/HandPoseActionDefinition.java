@@ -54,8 +54,7 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition implement
    {
       super.toMessage(message.getActionDefinition());
 
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(palmParentFrameName);
+      message.setParentFrameName(palmParentFrameName);
       MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
@@ -68,7 +67,7 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition implement
    {
       super.fromMessage(message.getActionDefinition());
 
-      palmParentFrameName = message.getParentFrame().getString(0);
+      palmParentFrameName = message.getParentFrameNameAsString();
       MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();

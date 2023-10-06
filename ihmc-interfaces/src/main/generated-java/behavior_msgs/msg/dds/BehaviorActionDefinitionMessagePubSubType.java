@@ -15,7 +15,7 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9eb87e5695629fadf87d801d140e5a2bc5e38142a9249cd73a93762330c1e200";
+   		return "85852a4017c7a3779094995913a713cddd9abda407db51555b01232f901226cf";
    }
    
    @Override
@@ -52,10 +52,7 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -71,11 +68,8 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getDescription().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDescription().get(i0).length() + 1;
-      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDescription().length() + 1;
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -85,8 +79,8 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getDescription().size() <= 1)
-      cdr.write_type_e(data.getDescription());else
+      if(data.getDescription().length() <= 255)
+      cdr.write_type_d(data.getDescription());else
           throw new RuntimeException("description field exceeds the maximum length");
 
       cdr.write_type_7(data.getExecuteWithNextAction());
@@ -95,7 +89,7 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_e(data.getDescription());	
+      cdr.read_type_d(data.getDescription());	
       data.setExecuteWithNextAction(cdr.read_type_7());
       	
 
@@ -104,14 +98,14 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_e("description", data.getDescription());
+      ser.write_type_d("description", data.getDescription());
       ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data)
    {
-      ser.read_type_e("description", data.getDescription());
+      ser.read_type_d("description", data.getDescription());
       data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
    }
 

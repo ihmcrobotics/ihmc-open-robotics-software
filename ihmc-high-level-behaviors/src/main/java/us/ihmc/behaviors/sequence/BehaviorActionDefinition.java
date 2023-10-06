@@ -43,14 +43,13 @@ public class BehaviorActionDefinition
 
    public void toMessage(BehaviorActionDefinitionMessage message)
    {
-      message.getDescription().clear();
-      message.getDescription().add(description);
+      message.setDescription(description);
       message.setExecuteWithNextAction(getExecuteWithNextAction());
    }
 
    public void fromMessage(BehaviorActionDefinitionMessage message)
    {
-      description = message.getDescription().toString();
+      description = message.getDescriptionAsString();
       executeWitNextAction = message.getExecuteWithNextAction();
    }
 

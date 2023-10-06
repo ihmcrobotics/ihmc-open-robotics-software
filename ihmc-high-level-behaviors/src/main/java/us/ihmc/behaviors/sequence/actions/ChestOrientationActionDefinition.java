@@ -49,8 +49,7 @@ public class ChestOrientationActionDefinition extends BehaviorActionDefinition
 
       message.setTrajectoryDuration(trajectoryDuration);
       message.setHoldPoseInWorld(holdPoseInWorldLater);
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(parentFrameName);
+      message.setParentFrameName(parentFrameName);
       MessageTools.toMessage(chestToParentTransform, message.getChestTransformToParent());
    }
 
@@ -60,7 +59,7 @@ public class ChestOrientationActionDefinition extends BehaviorActionDefinition
 
       trajectoryDuration = message.getTrajectoryDuration();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
-      parentFrameName = message.getParentFrame().getString(0);
+      parentFrameName = message.getParentFrameNameAsString();
       MessageTools.toEuclid(message.getChestTransformToParent(), chestToParentTransform);
    }
 
