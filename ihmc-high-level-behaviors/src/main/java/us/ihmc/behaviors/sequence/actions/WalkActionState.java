@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
+import behavior_msgs.msg.dds.WalkActionStateMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMessage>
+public class WalkActionState extends BehaviorActionState
 {
    private final WalkActionDefinition definition;
    private final DetachableReferenceFrame goalFrame;
@@ -21,6 +21,20 @@ public class WalkActionState extends BehaviorActionState<WalkActionDefinitionMes
    public void update()
    {
       goalFrame.update(definition.getParentFrameName());
+   }
+
+   public void toMessage(WalkActionStateMessage message)
+   {
+      super.toMessage(message.getActionState());
+
+      definition.toMessage(message.getDefinition());
+   }
+
+   public void fromMessage(WalkActionStateMessage message)
+   {
+      super.fromMessage(message.getActionState());
+
+      definition.fromMessage(message.getDefinition());
    }
 
    @Override

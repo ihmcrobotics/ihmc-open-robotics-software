@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepActionDefinitionMessage;
-import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,7 +10,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanActionDefinitionMessage>
+public class FootstepPlanActionState extends BehaviorActionState
 {
    private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
@@ -52,8 +52,7 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().getDefinition().loadFromFile(footstepNode));
    }
 
-   @Override
-   public void toMessage(FootstepPlanActionDefinitionMessage message)
+   public void toMessage(FootstepPlanActionStateMessage message)
    {
       definition.toMessage(message);
 
@@ -64,8 +63,7 @@ public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanAct
       }
    }
 
-   @Override
-   public void fromMessage(FootstepPlanActionDefinitionMessage message)
+   public void fromMessage(FootstepPlanActionStateMessage message)
    {
       definition.fromMessage(message);
 
