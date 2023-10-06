@@ -3,13 +3,11 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
@@ -22,9 +20,9 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
+import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.JSONTools;
 
 public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
@@ -37,6 +35,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
+   private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> footsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
@@ -68,13 +67,19 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
                                                    definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
-      footsteps = new RecyclingArrayList<>(() -> new RDXFootstepPlanActionFootstep(referenceFrameLibrary, this, baseUI, robotModel));
+      footsteps = new RecyclingArrayList<>(() ->
+         new RDXFootstepPlanActionFootstep(baseUI,
+                                           robotModel,
+                                           this,
+                                           RecyclingArrayListTools.getUnsafe(state.getFootsteps(), numberOfAllocatedFootsteps++)));
    }
 
    @Override
    public void update()
    {
       super.update();
+
+      RecyclingArrayListTools.synchronizeSize(footsteps, state.getFootsteps());
 
       frameIsChildOfWorld = referenceFrameLibrary.containsFrame(definition.getParentFrameName());
       if (frameIsChildOfWorld)
@@ -83,6 +88,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
+            RecyclingArrayListTools.addToAll(definition.getFootsteps(), state.getFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             FramePose3D newFootstepPose = new FramePose3D();
@@ -110,11 +116,18 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          }
 
          if (userRemovedFootstep.poll())
-            footsteps.remove(footsteps.size() - 1);
-
-         for (RDXFootstepPlanActionFootstep footstep : footsteps)
          {
-            footstep.update();
+            RecyclingArrayListTools.removeLast(footsteps);
+            RecyclingArrayListTools.removeLast(state.getFootsteps());
+            RecyclingArrayListTools.removeLast(definition.getFootsteps());
+         }
+
+         state.getFootsteps().clear();
+         for (int i = 0; i < footsteps.size(); i++)
+         {
+            footsteps.get(i).update();
+            FootstepPlanActionFootstepState footstepState = state.getFootsteps().add();
+            footstepState.setIndex(i);
          }
       }
    }
@@ -184,28 +197,6 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
             footstep.getVirtualRenderables(renderables, pool);
          }
       }
-   }
-
-   @Override
-   public void saveToFile(ObjectNode jsonNode) // FIXME: Duplicated in FootstepPlanActionState
-   {
-      definition.saveToFile(jsonNode);
-
-      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
-      for (RDXFootstepPlanActionFootstep footstep : footsteps)
-      {
-         ObjectNode footstepNode = foostepsArrayNode.addObject();
-         footstep.getDefinition().saveToFile(footstepNode);
-      }
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode) // FIXME: Duplicated in FootstepPlanActionState
-   {
-      definition.loadFromFile(jsonNode);
-
-      footsteps.clear();
-      JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().getDefinition().loadFromFile(footstepNode));
    }
 
    @Override

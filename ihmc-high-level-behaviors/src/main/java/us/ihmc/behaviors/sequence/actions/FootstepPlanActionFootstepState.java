@@ -7,13 +7,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class FootstepPlanActionFootstepState
 {
    private final FootstepPlanActionState footstepPlan;
-   private final FootstepPlanActionFootstepDefinition definition = new FootstepPlanActionFootstepDefinition();
+   private final FootstepPlanActionFootstepDefinition definition;
    private final DetachableReferenceFrame soleFrame;
    private int index = -1;
 
-   public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary, FootstepPlanActionState footstepPlan)
+   public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary,
+                                          FootstepPlanActionState footstepPlan,
+                                          FootstepPlanActionFootstepDefinition definition)
    {
       this.footstepPlan = footstepPlan;
+      this.definition = definition;
 
       soleFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getSoleToPlanFrameTransform());
    }

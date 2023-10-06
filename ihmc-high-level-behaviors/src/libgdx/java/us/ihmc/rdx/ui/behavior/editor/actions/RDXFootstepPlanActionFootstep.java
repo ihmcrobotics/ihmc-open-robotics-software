@@ -12,7 +12,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
  * This class is a fully mutable and transitive interactable representation of FootstepActionDefinition.
@@ -27,16 +26,16 @@ public class RDXFootstepPlanActionFootstep
    private RDXInteractableFootstep interactableFootstep;
    private RDXFootstepGraphic flatFootstepGraphic;
 
-   public RDXFootstepPlanActionFootstep(ReferenceFrameLibrary referenceFrameLibrary,
+   public RDXFootstepPlanActionFootstep(RDXBaseUI baseUI,
+                                        DRCRobotModel robotModel,
                                         RDXFootstepPlanAction footstepPlan,
-                                        RDXBaseUI baseUI,
-                                        DRCRobotModel robotModel)
+                                        FootstepPlanActionFootstepState state)
    {
       this.footstepPlan = footstepPlan;
       this.baseUI = baseUI;
       this.robotModel = robotModel;
 
-      state = new FootstepPlanActionFootstepState(referenceFrameLibrary, footstepPlan.getState());
+      this.state = state;
       definition = state.getDefinition();
    }
 
