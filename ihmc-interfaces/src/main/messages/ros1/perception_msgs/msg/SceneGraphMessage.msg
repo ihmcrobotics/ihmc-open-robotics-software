@@ -13,7 +13,7 @@ int8 ARUCO_MARKER_NODE_TYPE=3
 
 int8 STATIC_RELATIVE_NODE_TYPE=4
 
-int8 RESHAPABLE_RIGID_BODY_NODE_TYPE=5
+int8 PRIMITIVE_RIGID_BODY_NODE_TYPE=5
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -42,6 +42,6 @@ perception_msgs/ArUcoMarkerNodeMessage[] aruco_marker_scene_nodes
 perception_msgs/StaticRelativeSceneNodeMessage[] static_relative_scene_nodes
 
 # Reshapable rigid body scene nodes
-perception_msgs/ReshapableRigidBodySceneNodeMessage[] reshapable_rigid_body_scene_nodes
+perception_msgs/PrimitiveRigidBodySceneNodeMessage[] primitive_rigid_body_scene_nodes
 
 
