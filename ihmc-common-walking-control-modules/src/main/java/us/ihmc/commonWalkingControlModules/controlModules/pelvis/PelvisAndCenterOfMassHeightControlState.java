@@ -68,6 +68,4 @@ public interface PelvisAndCenterOfMassHeightControlState extends State, SCS2YoGr
    {
       return null;
    }
-
-   default void setControlHeightWithMomentum(boolean controlHeightWithMomentum) {}
 }
