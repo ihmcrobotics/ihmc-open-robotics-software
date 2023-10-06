@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "20bb82cb64392ebe5a0ed6d5e5c7bfa5c0d19f4db7c017e935cd79f0f6ac29f6";
+   		return "4fbaf008faa78dab77c414c281d498e45e32559066898e55a0aa423b7c18419e";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -94,6 +96,9 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -112,9 +117,11 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_6(data.getTemperature());
 
-      cdr.write_type_6(data.getTorqueRatio());
+      cdr.write_type_6(data.getPresentTorqueRatio());
 
       cdr.write_type_6(data.getPostionRatio());
+
+      cdr.write_type_6(data.getGoalTorqueRatio());
 
       cdr.write_type_7(data.getCalibrated());
 
@@ -130,9 +137,11 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setTemperature(cdr.read_type_6());
       	
-      data.setTorqueRatio(cdr.read_type_6());
+      data.setPresentTorqueRatio(cdr.read_type_6());
       	
       data.setPostionRatio(cdr.read_type_6());
+      	
+      data.setGoalTorqueRatio(cdr.read_type_6());
       	
       data.setCalibrated(cdr.read_type_7());
       	
@@ -147,8 +156,9 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("temperature", data.getTemperature());
-      ser.write_type_6("torque_ratio", data.getTorqueRatio());
+      ser.write_type_6("present_torque_ratio", data.getPresentTorqueRatio());
       ser.write_type_6("postion_ratio", data.getPostionRatio());
+      ser.write_type_6("goal_torque_ratio", data.getGoalTorqueRatio());
       ser.write_type_7("calibrated", data.getCalibrated());
       ser.write_type_7("needs_reset", data.getNeedsReset());
    }
@@ -159,8 +169,9 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setTemperature(ser.read_type_6("temperature"));
-      data.setTorqueRatio(ser.read_type_6("torque_ratio"));
+      data.setPresentTorqueRatio(ser.read_type_6("present_torque_ratio"));
       data.setPostionRatio(ser.read_type_6("postion_ratio"));
+      data.setGoalTorqueRatio(ser.read_type_6("goal_torque_ratio"));
       data.setCalibrated(ser.read_type_7("calibrated"));
       data.setNeedsReset(ser.read_type_7("needs_reset"));
    }

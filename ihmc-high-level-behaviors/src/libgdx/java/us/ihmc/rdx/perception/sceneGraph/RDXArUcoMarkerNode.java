@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
@@ -45,6 +46,12 @@ public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeI
       ImGui.text("Marker ID: %d   Size: %.2f m".formatted(getMarkerID(), getMarkerSize()));
       ImGui.sameLine();
       alphaFilterValueSlider.render();
+   }
+
+   @Override
+   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      detectableSceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
    }
 
    @Override

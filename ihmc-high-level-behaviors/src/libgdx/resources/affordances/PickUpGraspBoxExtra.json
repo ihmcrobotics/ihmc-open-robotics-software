@@ -14,12 +14,12 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "grip" : [ {
+    "configuration": [ {
       "side" : "left",
-      "config" : "HALF_CLOSE"
+      "config" : "OPEN"
     }, {
       "side" : "right",
-      "config" : "HALF_CLOSE"
+      "config" : "OPEN"
     } ]
   }, {
     "x" : 0.0,
@@ -28,21 +28,7 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "grip" : [ {
-      "side" : "left",
-      "config" : ""
-    }, {
-      "side" : "right",
-      "config" : ""
-    } ]
-  }, {
-    "x" : 0.0,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 0.0,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 0.0,
-    "grip" : [ {
+    "configuration": [ {
       "side" : "left",
       "config" : ""
     }, {
@@ -56,12 +42,26 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "grip" : [ {
+    "configuration": [ {
       "side" : "left",
-      "config" : "CRUSH"
+      "config" : ""
     }, {
       "side" : "right",
-      "config" : "CRUSH"
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration": [ {
+      "side" : "left",
+      "config" : "GRIP_HARD"
+    }, {
+      "side" : "right",
+      "config" : "GRIP_HARD"
     } ]
   }, {
     "x" : 0.0,
@@ -70,7 +70,7 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "grip" : [ {
+    "configuration": [ {
       "side" : "left",
       "config" : ""
     }, {
@@ -84,7 +84,7 @@
     "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 0.0,
-    "grip" : [ {
+    "configuration": [ {
       "side" : "left",
       "config" : ""
     }, {
