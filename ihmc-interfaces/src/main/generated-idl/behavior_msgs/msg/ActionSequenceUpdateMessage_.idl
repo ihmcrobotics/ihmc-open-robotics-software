@@ -30,6 +30,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::SidedBodyPartPoseActionDefinitionMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionDefinitionMessage, 200> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::BodyPartPoseActionDefinitionMessage, 200> pelvis_height_actions;
+        sequence<behavior_msgs::msg::dds::SidedBodyPartPoseActionDefinitionMessage, 200> foot_pose_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionDefinitionMessage, 200> wait_duration_actions;
         sequence<behavior_msgs::msg::dds::WalkActionDefinitionMessage, 200> walk_actions;
       };

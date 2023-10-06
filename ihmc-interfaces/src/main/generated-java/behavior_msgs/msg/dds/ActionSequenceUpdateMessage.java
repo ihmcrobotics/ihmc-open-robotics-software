@@ -19,6 +19,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage>  hand_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage>  hand_wrench_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage>  pelvis_height_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage>  foot_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage>  wait_duration_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDefinitionMessage>  walk_actions_;
 
@@ -31,6 +32,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
       hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage> (200, new behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType());
       pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage> (200, new behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType());
+      foot_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage> (200, new behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType());
       wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType());
       walk_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionDefinitionMessage> (200, new behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType());
 
@@ -53,6 +55,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
       hand_pose_actions_.set(other.hand_pose_actions_);
       hand_wrench_actions_.set(other.hand_wrench_actions_);
       pelvis_height_actions_.set(other.pelvis_height_actions_);
+      foot_pose_actions_.set(other.foot_pose_actions_);
       wait_duration_actions_.set(other.wait_duration_actions_);
       walk_actions_.set(other.walk_actions_);
    }
@@ -112,6 +115,12 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage>  getPelvisHeightActions()
    {
       return pelvis_height_actions_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage>  getFootPoseActions()
+   {
+      return foot_pose_actions_;
    }
 
 
@@ -195,6 +204,13 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
          {  if (!this.pelvis_height_actions_.get(i).epsilonEquals(other.pelvis_height_actions_.get(i), epsilon)) return false; }
       }
 
+      if (this.foot_pose_actions_.size() != other.foot_pose_actions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.foot_pose_actions_.size(); i++)
+         {  if (!this.foot_pose_actions_.get(i).epsilonEquals(other.foot_pose_actions_.get(i), epsilon)) return false; }
+      }
+
       if (this.wait_duration_actions_.size() != other.wait_duration_actions_.size()) { return false; }
       else
       {
@@ -231,6 +247,7 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
       if (!this.hand_pose_actions_.equals(otherMyClass.hand_pose_actions_)) return false;
       if (!this.hand_wrench_actions_.equals(otherMyClass.hand_wrench_actions_)) return false;
       if (!this.pelvis_height_actions_.equals(otherMyClass.pelvis_height_actions_)) return false;
+      if (!this.foot_pose_actions_.equals(otherMyClass.foot_pose_actions_)) return false;
       if (!this.wait_duration_actions_.equals(otherMyClass.wait_duration_actions_)) return false;
       if (!this.walk_actions_.equals(otherMyClass.walk_actions_)) return false;
 
@@ -259,6 +276,8 @@ public class ActionSequenceUpdateMessage extends Packet<ActionSequenceUpdateMess
       builder.append(this.hand_wrench_actions_);      builder.append(", ");
       builder.append("pelvis_height_actions=");
       builder.append(this.pelvis_height_actions_);      builder.append(", ");
+      builder.append("foot_pose_actions=");
+      builder.append(this.foot_pose_actions_);      builder.append(", ");
       builder.append("wait_duration_actions=");
       builder.append(this.wait_duration_actions_);      builder.append(", ");
       builder.append("walk_actions=");

@@ -59,7 +59,7 @@ public class RDXActionSequenceTools
       }
       if (actionType.equals(RDXFootPoseAction.class.getSimpleName()))
       {
-         return new RDXFootPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
+         return new RDXFootPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary);
       }
       if (actionType.equals(RDXWaitDurationAction.class.getSimpleName()))
       {

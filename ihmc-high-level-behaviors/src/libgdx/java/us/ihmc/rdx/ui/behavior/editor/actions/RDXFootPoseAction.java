@@ -10,7 +10,6 @@ import us.ihmc.behaviors.sequence.actions.FootPoseActionDefinition;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -30,7 +29,6 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.HandTransformTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +50,6 @@ public class RDXFootPoseAction extends RDXBehaviorAction
    private final ImBooleanWrapper executeWithNextActionWrapper = new ImBooleanWrapper(actionDefinition::getExecuteWithNextAction,
                                                                                       actionDefinition::setExecuteWithNextAction,
                                                                                       imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper = new ImBooleanWrapper(actionDefinition::getHoldPoseInWorldLater,
-                                                                                     actionDefinition::setHoldPoseInWorldLater,
-                                                                                     imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionDefinition.getFootFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionDefinition.getFootFrame());
    private boolean isMouseHovering = false;
@@ -63,36 +58,24 @@ public class RDXFootPoseAction extends RDXBehaviorAction
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final RDX3DPanelTooltip tooltip;
-   private final ROS2PublishSubscribeAPI ros2;
 
    public RDXFootPoseAction(RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
-                                    ReferenceFrameLibrary referenceFrameLibrary,
-                                    ROS2PublishSubscribeAPI ros2)
+                                    ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.ros2 = ros2;
       actionDefinition.setReferenceFrameLibrary(referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {
          footNames.put(side, syncedFullRobotModel.getFoot(side).getName());
-
-         RigidBodyTransformReadOnly graphicToControlFrameTransform = HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel,
-                                                                                                                              robotModel.getUIParameters(),
-                                                                                                                              side);
-         graphicFrame.update(transformToParent -> transformToParent.set(graphicToControlFrameTransform));
-
          String footBodyName = footNames.get(side);
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
          highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
 
          MultiBodySystemBasics footOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getFoot(side));
          List<Collidable> footCollidables = selectionCollisionModel.getRobotCollidables(footOnlySystem);
-
-         RigidBodyTransformReadOnly linkToControlFrameTransform = HandTransformTools.getHandLinkToControlFrameTransform(syncedFullRobotModel, side);
-         collisionShapeFrame.update(transformToParent -> transformToParent.set(linkToControlFrameTransform));
 
          for (Collidable footCollidable : footCollidables)
          {
@@ -162,7 +145,6 @@ public class RDXFootPoseAction extends RDXBehaviorAction
    {
       ImGui.sameLine();
       executeWithNextActionWrapper.renderImGuiWidget();
-      holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (referenceFrameLibraryCombo.render())
       {
          actionDefinition.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
@@ -242,7 +224,7 @@ public class RDXFootPoseAction extends RDXBehaviorAction
    @Override
    public String getActionTypeTitle()
    {
-      return "Chest Orientation";
+      return "Foot Pose";
    }
 
    @Override

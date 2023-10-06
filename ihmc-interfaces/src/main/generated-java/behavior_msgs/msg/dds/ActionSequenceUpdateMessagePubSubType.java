@@ -15,7 +15,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4fe7ec120a7066b586e8ac2c6f143e0c9c529c6222b3a17fb06ce16fcdebdcd2";
+   		return "d38b6c21d881f0e2654b27eb6d46aa850c7c8e056616fda33190905dcdde49e4";
    }
    
    @Override
@@ -77,6 +77,9 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
           current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
+          current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
           current_alignment += behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
@@ -133,6 +136,11 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
           current_alignment += behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getPelvisHeightActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getFootPoseActions().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getFootPoseActions().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getWaitDurationActions().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getWaitDurationActions().get(i0), current_alignment);}
@@ -178,6 +186,10 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_e(data.getPelvisHeightActions());else
           throw new RuntimeException("pelvis_height_actions field exceeds the maximum length");
 
+      if(data.getFootPoseActions().size() <= 200)
+      cdr.write_type_e(data.getFootPoseActions());else
+          throw new RuntimeException("foot_pose_actions field exceeds the maximum length");
+
       if(data.getWaitDurationActions().size() <= 200)
       cdr.write_type_e(data.getWaitDurationActions());else
           throw new RuntimeException("wait_duration_actions field exceeds the maximum length");
@@ -199,6 +211,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.read_type_e(data.getHandPoseActions());	
       cdr.read_type_e(data.getHandWrenchActions());	
       cdr.read_type_e(data.getPelvisHeightActions());	
+      cdr.read_type_e(data.getFootPoseActions());	
       cdr.read_type_e(data.getWaitDurationActions());	
       cdr.read_type_e(data.getWalkActions());	
 
@@ -215,6 +228,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       ser.write_type_e("hand_pose_actions", data.getHandPoseActions());
       ser.write_type_e("hand_wrench_actions", data.getHandWrenchActions());
       ser.write_type_e("pelvis_height_actions", data.getPelvisHeightActions());
+      ser.write_type_e("foot_pose_actions", data.getFootPoseActions());
       ser.write_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.write_type_e("walk_actions", data.getWalkActions());
    }
@@ -230,6 +244,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
       ser.read_type_e("hand_pose_actions", data.getHandPoseActions());
       ser.read_type_e("hand_wrench_actions", data.getHandWrenchActions());
       ser.read_type_e("pelvis_height_actions", data.getPelvisHeightActions());
+      ser.read_type_e("foot_pose_actions", data.getFootPoseActions());
       ser.read_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.read_type_e("walk_actions", data.getWalkActions());
    }

@@ -742,8 +742,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                      robotModel,
                                                                      syncedRobot.getFullRobotModel(),
                                                                      selectionCollisionModel,
-                                                                     referenceFrameLibrary,
-                                                                     ros2ControllerHelper);
+                                                                     referenceFrameLibrary);
             // Set the new action to where the last one was for faster authoring
             footPoseAction.setSide(side);
             RDXFootPoseAction nextPreviousFootPoseAction = findNextPreviousFootPoseAction(side);
@@ -754,7 +753,7 @@ public class RDXBehaviorActionSequenceEditor
             }
             else // set to current robot's hand pose
             {
-               footPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
+               footPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getFootFrame(side));
             }
             if (nextPreviousParentFrame != null)
                footPoseAction.getActionDefinition().changeParentFrameWithoutMoving(nextPreviousParentFrame);
@@ -807,6 +806,10 @@ public class RDXBehaviorActionSequenceEditor
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
             return handPoseAction.getActionDefinition().getParentFrame();
+         }
+         else if (actionSequence.get(i) instanceof RDXFootPoseAction footPoseAction)
+         {
+            return footPoseAction.getActionDefinition().getParentFrame();
          }
          else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
          {

@@ -21,7 +21,6 @@ public class FootPoseActionDefinition implements BehaviorActionDefinition
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
    private boolean executeWitNextAction = false;
-   private boolean holdPoseInWorldLater = false;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame footFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
 
@@ -46,7 +45,6 @@ public class FootPoseActionDefinition implements BehaviorActionDefinition
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
-      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
    }
 
    @Override
@@ -58,7 +56,6 @@ public class FootPoseActionDefinition implements BehaviorActionDefinition
       footFrame.changeParentFrame(referenceFrameLibrary.findFrameByNameOrWorld(jsonNode.get("parentFrame").asText()));
       footFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
-      holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
    }
 
    public void toMessage(SidedBodyPartPoseActionDefinitionMessage message)
@@ -69,7 +66,6 @@ public class FootPoseActionDefinition implements BehaviorActionDefinition
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
       message.setExecuteWithNextAction(executeWitNextAction);
-      message.setHoldPoseInWorld(holdPoseInWorldLater);
    }
 
    public void fromMessage(SidedBodyPartPoseActionDefinitionMessage message)
@@ -79,7 +75,6 @@ public class FootPoseActionDefinition implements BehaviorActionDefinition
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       executeWitNextAction = message.getExecuteWithNextAction();
-      holdPoseInWorldLater = message.getHoldPoseInWorld();
    }
 
    public ReferenceFrame getParentFrame()
@@ -141,16 +136,6 @@ public class FootPoseActionDefinition implements BehaviorActionDefinition
    public void setExecuteWithNextAction(boolean executeWitNextAction)
    {
       this.executeWitNextAction = executeWitNextAction;
-   }
-
-   public boolean getHoldPoseInWorldLater()
-   {
-      return holdPoseInWorldLater;
-   }
-
-   public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
-   {
-      this.holdPoseInWorldLater = holdPoseInWorldLater;
    }
 
    @Override

@@ -61,11 +61,8 @@ public class FootPoseActionExecutor extends FootPoseActionDefinition implements 
       FramePose3D frameFootPose = new FramePose3D(getFootFrame());
       frameFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootTrajectoryMessage message = new FootTrajectoryMessage();
-      message.getSe3Trajectory()
-             .set(HumanoidMessageTools.createSE3TrajectoryMessage(getTrajectoryDuration(),
-                                                                  frameFootPose,
-                                                                  ReferenceFrame.getWorldFrame()));
+      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(getSide(),
+                                                      getTrajectoryDuration(), frameFootPose);
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
       message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 

@@ -16,6 +16,8 @@ behavior_msgs/HandWrenchActionDefinitionMessage[] hand_wrench_actions
 
 behavior_msgs/BodyPartPoseActionDefinitionMessage[] pelvis_height_actions
 
+behavior_msgs/SidedBodyPartPoseActionDefinitionMessage[] foot_pose_actions
+
 behavior_msgs/WaitDurationActionDefinitionMessage[] wait_duration_actions
 
 behavior_msgs/WalkActionDefinitionMessage[] walk_actions

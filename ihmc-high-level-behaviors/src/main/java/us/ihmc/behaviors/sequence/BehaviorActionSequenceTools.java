@@ -21,6 +21,7 @@ public class BehaviorActionSequenceTools
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
       actionSequenceUpdateMessage.getPelvisHeightActions().clear();
+      actionSequenceUpdateMessage.getFootPoseActions().clear();
       actionSequenceUpdateMessage.getWaitDurationActions().clear();
       actionSequenceUpdateMessage.getWalkActions().clear();
 
@@ -68,6 +69,12 @@ public class BehaviorActionSequenceTools
             BodyPartPoseActionDefinitionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
             pelvisHeightActionDefinition.toMessage(pelvisHeightActionMessage);
+         }
+         else if (action instanceof FootPoseActionDefinition footPoseActionDefinition)
+         {
+            SidedBodyPartPoseActionDefinitionMessage footPoseActionMessage = actionSequenceUpdateMessage.getFootPoseActions().add();
+            footPoseActionMessage.getActionInformation().setActionIndex(i);
+            footPoseActionDefinition.toMessage(footPoseActionMessage);
          }
          else if (action instanceof WaitDurationActionDefinition waitDurationActionDefinition)
          {
