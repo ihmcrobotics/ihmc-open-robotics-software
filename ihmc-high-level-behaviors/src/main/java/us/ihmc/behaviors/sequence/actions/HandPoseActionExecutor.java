@@ -14,6 +14,7 @@ import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -68,7 +69,9 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-      if (state.getIsNextForExecution())
+      super.update();
+
+      if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
          armIKSolver.copySourceToWork();
@@ -96,84 +99,95 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    @Override
    public void triggerActionExecution()
    {
-      ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
-
-      OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
-      double[] jointAngles = new double[solutionOneDoFJoints.length];
-      for (int i = 0; i < jointAngles.length; i++)
+      if (state.getPalmFrame().isChildOfWorld())
       {
-         jointAngles[i] = solutionOneDoFJoints[i].getQ();
-      }
+         ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
 
-      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(definition.getSide(),
-                                                                                                  definition.getTrajectoryDuration(),
-                                                                                                  jointAngles);
-      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-      if (definition.getJointSpaceControl())
-      {
-         ros2ControllerHelper.publishToController(armTrajectoryMessage);
+         OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
+         double[] jointAngles = new double[solutionOneDoFJoints.length];
+         for (int i = 0; i < jointAngles.length; i++)
+         {
+            jointAngles[i] = solutionOneDoFJoints[i].getQ();
+         }
+
+         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(definition.getSide(),
+                                                                                                     definition.getTrajectoryDuration(),
+                                                                                                     jointAngles);
+         armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+         if (definition.getJointSpaceControl())
+         {
+            ros2ControllerHelper.publishToController(armTrajectoryMessage);
+         }
+         else
+         {
+            FramePose3D frameHand = new FramePose3D(state.getPalmFrame().getReferenceFrame());
+            frameHand.changeFrame(ReferenceFrame.getWorldFrame());
+            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(definition.getSide(),
+                                                                                                           definition.getTrajectoryDuration(),
+                                                                                                           frameHand.getPosition(),
+                                                                                                           frameHand.getOrientation(),
+                                                                                                           ReferenceFrame.getWorldFrame());
+            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
+            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
+            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
+            handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
+            handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
+            handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
+            handTrajectoryMessage.setForceExecution(true);
+
+            HandHybridJointspaceTaskspaceTrajectoryMessage hybridHandMessage = HumanoidMessageTools.createHandHybridJointspaceTaskspaceTrajectoryMessage(
+                  definition.getSide(),
+                  handTrajectoryMessage.getSe3Trajectory(),
+                  armTrajectoryMessage.getJointspaceTrajectory());
+            ros2ControllerHelper.publishToController(hybridHandMessage);
+         }
+
+         executionTimer.reset();
+
+         desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
+         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
+         startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
+         startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
       }
       else
       {
-         FramePose3D frameHand = new FramePose3D(state.getPalmFrame().getReferenceFrame());
-         frameHand.changeFrame(ReferenceFrame.getWorldFrame());
-         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(definition.getSide(),
-                                                                                                        definition.getTrajectoryDuration(),
-                                                                                                        frameHand.getPosition(),
-                                                                                                        frameHand.getOrientation(),
-                                                                                                        ReferenceFrame.getWorldFrame());
-         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
-         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
-         handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
-         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
-         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
-         handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
-         handTrajectoryMessage.setForceExecution(true);
-
-         HandHybridJointspaceTaskspaceTrajectoryMessage hybridHandMessage
-               = HumanoidMessageTools.createHandHybridJointspaceTaskspaceTrajectoryMessage(definition.getSide(),
-                                                                                           handTrajectoryMessage.getSe3Trajectory(),
-                                                                                           armTrajectoryMessage.getJointspaceTrajectory());
-         ros2ControllerHelper.publishToController(hybridHandMessage);
+         LogTools.error("Cannot execute. Frame is not a child of World frame.");
       }
-
-      executionTimer.reset();
-
-      desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
-      syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
-      startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
-      startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
-      syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
-
-      boolean wasExecuting = isExecuting;
-      // Left hand broke on Nadia and not in the robot model?
-      isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
-                                                     syncedHandControlPose,
-                                                     POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
-                                                     definition.getTrajectoryDuration(),
-                                                     executionTimer,
-                                                     BehaviorActionCompletionComponent.TRANSLATION,
-                                                     BehaviorActionCompletionComponent.ORIENTATION);
-
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-      executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
-      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-      executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(definition.getSide(), true));
-      if (!isExecuting && wasExecuting && !definition.getJointSpaceControl() && !definition.getHoldPoseInWorldLater())
+      if (state.getPalmFrame().isChildOfWorld())
       {
-         disengageHoldPoseInWorld();
+         desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
+         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
+
+         boolean wasExecuting = isExecuting;
+         // Left hand broke on Nadia and not in the robot model?
+         isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
+                                                        syncedHandControlPose,
+                                                        POSITION_TOLERANCE,
+                                                        ORIENTATION_TOLERANCE,
+                                                        definition.getTrajectoryDuration(),
+                                                        executionTimer,
+                                                        BehaviorActionCompletionComponent.TRANSLATION,
+                                                        BehaviorActionCompletionComponent.ORIENTATION);
+
+         executionStatusMessage.setActionIndex(state.getActionIndex());
+         executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(definition.getSide(), true));
+         if (!isExecuting && wasExecuting && !definition.getJointSpaceControl() && !definition.getHoldPoseInWorldLater())
+         {
+            disengageHoldPoseInWorld();
+         }
       }
    }
 

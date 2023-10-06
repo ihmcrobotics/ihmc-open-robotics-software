@@ -77,18 +77,22 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-      for (RobotSide side : RobotSide.values)
+      super.update();
+
+      if (state.getGoalFrame().isChildOfWorld())
       {
-         goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
-                                                   definition.getGoalFootstepToGoalTransforms().get(side));
-         goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         for (RobotSide side : RobotSide.values)
+         {
+            goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(), definition.getGoalFootstepToGoalTransforms().get(side));
+            goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         }
       }
    }
 
    /**
     * TODO: Footstep planning should happen on a thread so it doesn't hang up updates.
     */
-   public void plan()
+   private void plan()
    {
       FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
       FramePose3D rightFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
@@ -170,46 +174,58 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    @Override
    public void triggerActionExecution()
    {
-      plan();
-      if (footstepDataListMessage != null)
+      if (state.getGoalFrame().isChildOfWorld())
       {
-         ros2ControllerHelper.publishToController(footstepDataListMessage);
-         executionTimer.reset();
+         plan();
+         if (footstepDataListMessage != null)
+         {
+            ros2ControllerHelper.publishToController(footstepDataListMessage);
+            executionTimer.reset();
+         }
+      }
+      else
+      {
+         LogTools.error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      boolean isComplete = true;
-      for (RobotSide side : RobotSide.values)
+      if (state.getGoalFrame().isChildOfWorld())
       {
-         syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+         boolean isComplete = true;
+         for (RobotSide side : RobotSide.values)
+         {
+            syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
 
-         isComplete &= completionCalculator.get(side)
-                                           .isComplete(commandedGoalFeetTransformToWorld.get(side),
-                                                       syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
-                                                       nominalExecutionDuration,
-                                                       executionTimer,
-                                                       BehaviorActionCompletionComponent.TRANSLATION,
-                                                       BehaviorActionCompletionComponent.ORIENTATION);
+            isComplete &= completionCalculator.get(side)
+                                              .isComplete(commandedGoalFeetTransformToWorld.get(side),
+                                                          syncedFeetPoses.get(side),
+                                                          POSITION_TOLERANCE,
+                                                          ORIENTATION_TOLERANCE,
+                                                          nominalExecutionDuration,
+                                                          executionTimer,
+                                                          BehaviorActionCompletionComponent.TRANSLATION,
+                                                          BehaviorActionCompletionComponent.ORIENTATION);
+         }
+         int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
+         isComplete &= incompleteFootsteps == 0;
+
+         isExecuting = !isComplete;
+
+         executionStatusMessage.setActionIndex(state.getActionIndex());
+         executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
+         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
+         executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+         executionStatusMessage.setCurrentOrientationDistanceToGoal(
+               completionCalculator.get(RobotSide.LEFT).getRotationError() + completionCalculator.get(RobotSide.RIGHT).getRotationError());
+         executionStatusMessage.setCurrentPositionDistanceToGoal(
+               completionCalculator.get(RobotSide.LEFT).getTranslationError() + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
+         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-      int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
-      isComplete &= incompleteFootsteps == 0;
-
-      isExecuting = !isComplete;
-
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
-      executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
-                                                                 + completionCalculator.get(RobotSide.RIGHT).getRotationError());
-      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
-                                                                 + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
-      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
    }
 
    @Override

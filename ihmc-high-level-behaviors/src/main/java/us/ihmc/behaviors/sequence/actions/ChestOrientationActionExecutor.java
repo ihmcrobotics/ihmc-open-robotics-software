@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
@@ -50,60 +51,71 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override
    public void triggerActionExecution()
    {
-      FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
-      frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      if (state.getChestFrame().isChildOfWorld())
+      {
+         FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
+         frameChestQuaternion.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
-      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
-                                                                  frameChestQuaternion,
-                                                                  EuclidCoreTools.zeroVector3D,
-                                                                  ReferenceFrame.getWorldFrame()));
-      long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+         ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+         message.getSo3Trajectory()
+                .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
+                                                                     frameChestQuaternion,
+                                                                     EuclidCoreTools.zeroVector3D,
+                                                                     ReferenceFrame.getWorldFrame()));
+         long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+         message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
-      ros2ControllerHelper.publishToController(message);
-      executionTimer.reset();
+         ros2ControllerHelper.publishToController(message);
+         executionTimer.reset();
 
-      desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
-      syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-      startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
+         desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
+         syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
+         startOrientationDistanceToGoal = syncedChestPose.getRotation().distance(desiredChestPose.getRotation(), true);
+      }
+      else
+      {
+         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+      }
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
-      syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-
-      boolean wasExecuting = isExecuting;
-      isExecuting = !completionCalculator.isComplete(desiredChestPose,
-                                                     syncedChestPose,
-                                                     Double.NaN, ORIENTATION_TOLERANCE,
-                                                     definition.getTrajectoryDuration(),
-                                                     executionTimer,
-                                                     BehaviorActionCompletionComponent.ORIENTATION);
-
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-
-      if (!isExecuting && wasExecuting && !definition.getHoldPoseInWorldLater())
+      if (state.getChestFrame().isChildOfWorld())
       {
-         disengageHoldPoseInWorld();
+         desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
+         syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
+
+         boolean wasExecuting = isExecuting;
+         isExecuting = !completionCalculator.isComplete(desiredChestPose,
+                                                        syncedChestPose,
+                                                        Double.NaN,
+                                                        ORIENTATION_TOLERANCE,
+                                                        definition.getTrajectoryDuration(),
+                                                        executionTimer,
+                                                        BehaviorActionCompletionComponent.ORIENTATION);
+
+         executionStatusMessage.setActionIndex(state.getActionIndex());
+         executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+
+         if (!isExecuting && wasExecuting && !definition.getHoldPoseInWorldLater())
+         {
+            disengageHoldPoseInWorld();
+         }
       }
    }
 
-   public void disengageHoldPoseInWorld()
+   private void disengageHoldPoseInWorld()
    {
       FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
       frameChestQuaternion.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
