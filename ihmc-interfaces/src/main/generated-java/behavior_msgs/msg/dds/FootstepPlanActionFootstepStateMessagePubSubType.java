@@ -15,7 +15,7 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bca9d67dcd03277ab5513385c485985ed7222164cc09d4b81a0286efe1f797bf";
+   		return "66a13f9b6ceccadd9e9a08b3320426e39e954981db3565c620627d9d39153f4c";
    }
    
    @Override
@@ -52,8 +52,6 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
@@ -69,8 +67,6 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
-
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
@@ -80,14 +76,12 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
 
    public static void write(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_3(data.getIndex());
 
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setIndex(cdr.read_type_3());
       	
 
@@ -96,18 +90,13 @@ public class FootstepPlanActionFootstepStateMessagePubSubType implements us.ihmc
    @Override
    public final void serialize(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType(), data.getDefinition());
-
       ser.write_type_3("index", data.getIndex());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage data)
    {
-      ser.read_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType(), data.getDefinition());
-
-      data.setIndex(ser.read_type_3("index"));
-   }
+      data.setIndex(ser.read_type_3("index"));   }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage src, behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage dest)
    {

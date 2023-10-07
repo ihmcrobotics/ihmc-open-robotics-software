@@ -9,17 +9,12 @@ import us.ihmc.pubsub.TopicDataType;
 public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanActionFootstepStateMessage> implements Settable<FootstepPlanActionFootstepStateMessage>, EpsilonComparable<FootstepPlanActionFootstepStateMessage>
 {
    /**
-            * Parent definition
-            */
-   public behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage definition_;
-   /**
             * Index of the footstep
             */
    public int index_;
 
    public FootstepPlanActionFootstepStateMessage()
    {
-      definition_ = new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage();
    }
 
    public FootstepPlanActionFootstepStateMessage(FootstepPlanActionFootstepStateMessage other)
@@ -30,18 +25,8 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
 
    public void set(FootstepPlanActionFootstepStateMessage other)
    {
-      behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       index_ = other.index_;
 
-   }
-
-
-   /**
-            * Parent definition
-            */
-   public behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage getDefinition()
-   {
-      return definition_;
    }
 
    /**
@@ -77,9 +62,7 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.index_, other.index_, epsilon)) return false;
-
 
       return true;
    }
@@ -93,7 +76,6 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
 
       FootstepPlanActionFootstepStateMessage otherMyClass = (FootstepPlanActionFootstepStateMessage) other;
 
-      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.index_ != otherMyClass.index_) return false;
 
 
@@ -106,8 +88,6 @@ public class FootstepPlanActionFootstepStateMessage extends Packet<FootstepPlanA
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanActionFootstepStateMessage {");
-      builder.append("definition=");
-      builder.append(this.definition_);      builder.append(", ");
       builder.append("index=");
       builder.append(this.index_);
       builder.append("}");

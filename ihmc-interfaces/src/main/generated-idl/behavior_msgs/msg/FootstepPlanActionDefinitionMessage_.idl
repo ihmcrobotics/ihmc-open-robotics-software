@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -28,6 +29,10 @@ module behavior_msgs
          * Transfer duration
          */
         double transfer_duration;
+        /**
+         * The footsteps, with a maximum of 50
+         */
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
       };
     };
   };

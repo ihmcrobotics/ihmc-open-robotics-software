@@ -24,11 +24,17 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             * Transfer duration
             */
    public double transfer_duration_;
+   /**
+            * The footsteps, with a maximum of 50
+            */
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  footsteps_;
 
    public FootstepPlanActionDefinitionMessage()
    {
       action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
+      footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
+
    }
 
    public FootstepPlanActionDefinitionMessage(FootstepPlanActionDefinitionMessage other)
@@ -47,6 +53,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       transfer_duration_ = other.transfer_duration_;
 
+      footsteps_.set(other.footsteps_);
    }
 
 
@@ -113,6 +120,15 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    }
 
 
+   /**
+            * The footsteps, with a maximum of 50
+            */
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  getFootsteps()
+   {
+      return footsteps_;
+   }
+
+
    public static Supplier<FootstepPlanActionDefinitionMessagePubSubType> getPubSubType()
    {
       return FootstepPlanActionDefinitionMessagePubSubType::new;
@@ -137,6 +153,13 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
 
+      if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.footsteps_.size(); i++)
+         {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -157,6 +180,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
+      if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
 
       return true;
    }
@@ -174,7 +198,9 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append("swing_duration=");
       builder.append(this.swing_duration_);      builder.append(", ");
       builder.append("transfer_duration=");
-      builder.append(this.transfer_duration_);
+      builder.append(this.transfer_duration_);      builder.append(", ");
+      builder.append("footsteps=");
+      builder.append(this.footsteps_);
       builder.append("}");
       return builder.toString();
    }

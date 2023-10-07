@@ -28,15 +28,11 @@ public class FootstepPlanActionFootstepState
 
    public void toMessage(FootstepPlanActionFootstepStateMessage message)
    {
-      definition.toMessage(message.getDefinition());
-
       message.setIndex(index);
    }
 
    public void fromMessage(FootstepPlanActionFootstepStateMessage message)
    {
-      definition.fromMessage(message.getDefinition());
-
       index = message.getIndex();
    }
 

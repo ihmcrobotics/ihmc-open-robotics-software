@@ -1,7 +1,6 @@
 #ifndef __behavior_msgs__msg__FootstepPlanActionFootstepStateMessage__idl__
 #define __behavior_msgs__msg__FootstepPlanActionFootstepStateMessage__idl__
 
-#include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -12,10 +11,6 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionFootstepStateMessage_")
       struct FootstepPlanActionFootstepStateMessage
       {
-        /**
-         * Parent definition
-         */
-        behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage definition;
         /**
          * Index of the footstep
          */
