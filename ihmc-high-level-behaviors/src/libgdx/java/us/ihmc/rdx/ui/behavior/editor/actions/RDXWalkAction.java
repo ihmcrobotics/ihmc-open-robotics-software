@@ -51,7 +51,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       state = new WalkActionState(referenceFrameLibrary, robotModel.getFootstepPlannerParameters());
       definition = state.getDefinition();
 
-      footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(), definition.getGoalToParentTransform());
+      footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(), definition.getGoalToParentTransform(), getSelected());
       footstepPlannerGoalGizmo.create(panel3D);
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
