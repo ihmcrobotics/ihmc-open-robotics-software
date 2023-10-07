@@ -1,11 +1,13 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionDefinition extends BehaviorActionDefinition
@@ -57,6 +59,14 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
       message.setParentFrameName(parentFrameName);
+
+      message.getFootsteps().clear();
+      for (FootstepPlanActionFootstepDefinition footstep : footsteps)
+      {
+         FootstepPlanActionFootstepDefinitionMessage footstepMessage = message.getFootsteps().add();
+         footstepMessage.setRobotSide(footstep.getSide().toByte());
+         footstepMessage.getSolePose().set(footstep.getSoleToPlanFrameTransform());
+      }
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
@@ -66,6 +76,14 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
       parentFrameName = message.getParentFrameNameAsString();
+
+      footsteps.clear();
+      for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
+      {
+         FootstepPlanActionFootstepDefinition footstep = footsteps.add();
+         footstep.setSide(RobotSide.fromByte(footstepMessage.getRobotSide()));
+         footstep.getSoleToPlanFrameTransform().set(footstepMessage.getSolePose());
+      }
    }
 
    public double getSwingDuration()

@@ -9,3 +9,6 @@ float64 swing_duration
 
 # Transfer duration
 float64 transfer_duration
+
+# The footsteps, with a maximum of 50
+behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] footsteps

@@ -53,10 +53,8 @@ public class FootstepPlanActionState extends BehaviorActionState
       definition.fromMessage(message.getDefinition());
 
       footsteps.clear();
-      definition.getFootsteps().clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
       {
-         definition.getFootsteps().add();
          footsteps.add().fromMessage(footstep);
       }
    }
