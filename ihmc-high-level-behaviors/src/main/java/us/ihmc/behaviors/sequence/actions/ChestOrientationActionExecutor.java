@@ -27,7 +27,6 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final Timer executionTimer = new Timer();
-   private boolean isExecuting;
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private double startOrientationDistanceToGoal;
@@ -92,14 +91,14 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
 
-         boolean wasExecuting = isExecuting;
-         isExecuting = !completionCalculator.isComplete(desiredChestPose,
-                                                        syncedChestPose,
-                                                        Double.NaN,
-                                                        ORIENTATION_TOLERANCE,
-                                                        definition.getTrajectoryDuration(),
-                                                        executionTimer,
-                                                        BehaviorActionCompletionComponent.ORIENTATION);
+         boolean wasExecuting = state.getIsExecuting();
+         state.setIsExecuting(!completionCalculator.isComplete(desiredChestPose,
+                                                               syncedChestPose,
+                                                               Double.NaN,
+                                                               ORIENTATION_TOLERANCE,
+                                                               definition.getTrajectoryDuration(),
+                                                               executionTimer,
+                                                               BehaviorActionCompletionComponent.ORIENTATION));
 
          executionStatusMessage.setActionIndex(state.getActionIndex());
          executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
@@ -108,7 +107,7 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
          executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
          executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
-         if (!isExecuting && wasExecuting && !definition.getHoldPoseInWorldLater())
+         if (!state.getIsExecuting() && wasExecuting && !definition.getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();
          }
@@ -136,12 +135,6 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return executionStatusMessage;
-   }
-
-   @Override
-   public boolean isExecuting()
-   {
-      return isExecuting;
    }
 
    @Override

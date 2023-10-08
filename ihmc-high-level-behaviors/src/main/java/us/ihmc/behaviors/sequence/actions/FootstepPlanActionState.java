@@ -10,11 +10,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class FootstepPlanActionState extends BehaviorActionState
 {
    private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
 
    public FootstepPlanActionState(ReferenceFrameLibrary referenceFrameLibrary)
    {
+      this.referenceFrameLibrary = referenceFrameLibrary;
+
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              this,
@@ -31,6 +34,8 @@ public class FootstepPlanActionState extends BehaviorActionState
          footsteps.get(i).setIndex(i);
          footsteps.get(i).update();
       }
+
+      setCanExecute(referenceFrameLibrary.containsFrame(definition.getParentFrameName()));
    }
 
    public void toMessage(FootstepPlanActionStateMessage message)

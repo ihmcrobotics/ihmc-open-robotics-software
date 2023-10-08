@@ -39,7 +39,6 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Timer executionTimer = new Timer();
-   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -163,7 +162,7 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
       int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
       isComplete &= incompleteFootsteps == 0;
 
-      isExecuting = !isComplete;
+      state.setIsExecuting(!isComplete);
 
       executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
@@ -184,12 +183,6 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return executionStatusMessage;
-   }
-
-   @Override
-   public boolean isExecuting()
-   {
-      return isExecuting;
    }
 
    @Override

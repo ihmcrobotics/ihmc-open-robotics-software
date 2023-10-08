@@ -19,6 +19,7 @@ public class ChestOrientationActionState extends BehaviorActionState
    public void update()
    {
       chestFrame.update(definition.getParentFrameName());
+      setCanExecute(chestFrame.isChildOfWorld());
    }
 
    public void toMessage(ChestOrientationActionStateMessage message)

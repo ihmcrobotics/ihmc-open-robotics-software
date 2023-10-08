@@ -299,7 +299,7 @@ public class BehaviorActionSequence
       // If it's unable to execute, disable automatic execution.
       if (automaticExecution)
       {
-         if (!lastCurrentlyExecutingAction.canExecute())
+         if (!lastCurrentlyExecutingAction.getState().getCanExecute())
          {
             automaticExecution = false;
             // Early return
@@ -318,7 +318,7 @@ public class BehaviorActionSequence
       boolean noCurrentActionIsExecuting = true;
       for (BehaviorActionExecutor currentlyExecutingAction : currentlyExecutingActions)
       {
-         noCurrentActionIsExecuting &= !currentlyExecutingAction.isExecuting();
+         noCurrentActionIsExecuting &= !currentlyExecutingAction.getState().getIsExecuting();
       }
       return noCurrentActionIsExecuting;
    }

@@ -26,7 +26,6 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final Timer executionTimer = new Timer();
-   private boolean isExecuting;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private double startPositionDistanceToGoal;
@@ -102,13 +101,13 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
          desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
          desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
 
-         isExecuting = !completionCalculator.isComplete(desiredPelvisPose,
-                                                        syncedPelvisPose,
-                                                        POSITION_TOLERANCE,
-                                                        Double.NaN,
-                                                        definition.getTrajectoryDuration(),
-                                                        executionTimer,
-                                                        BehaviorActionCompletionComponent.TRANSLATION);
+         state.setIsExecuting(!completionCalculator.isComplete(desiredPelvisPose,
+                                                               syncedPelvisPose,
+                                                               POSITION_TOLERANCE,
+                                                               Double.NaN,
+                                                               definition.getTrajectoryDuration(),
+                                                               executionTimer,
+                                                               BehaviorActionCompletionComponent.TRANSLATION));
 
          executionStatusMessage.setActionIndex(state.getActionIndex());
          executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
@@ -126,12 +125,6 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return executionStatusMessage;
-   }
-
-   @Override
-   public boolean isExecuting()
-   {
-      return isExecuting;
    }
 
    @Override

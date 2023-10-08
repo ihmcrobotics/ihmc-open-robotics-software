@@ -19,6 +19,7 @@ public class HandPoseActionState extends BehaviorActionState
    public void update()
    {
       palmFrame.update(definition.getPalmParentFrameName());
+      setCanExecute(palmFrame.isChildOfWorld());
    }
 
    public void toMessage(HandPoseActionStateMessage message)

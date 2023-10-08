@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -622,6 +622,9 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXBehaviorAction action = actionSequence.get(i);
 
+         if (!action.getState().getCanExecute())
+            ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.RED);
+
          if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
          {
             commandNextActionIndex(i);
@@ -678,6 +681,9 @@ public class RDXBehaviorActionSequenceEditor
 
          action.renderImGuiWidgets();
 
+         if (!action.getState().getCanExecute())
+            ImGui.popStyleColor();
+
          ImGui.separator();
       }
 
@@ -699,7 +705,7 @@ public class RDXBehaviorActionSequenceEditor
    {
       if (workspaceFile == null)
       {
-         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+         imgui.internal.ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
          ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
       }
 
@@ -759,7 +765,7 @@ public class RDXBehaviorActionSequenceEditor
       if (workspaceFile == null)
       {
          ImGui.popStyleVar();
-         ImGui.popItemFlag();
+         imgui.internal.ImGui.popItemFlag();
       }
    }
 

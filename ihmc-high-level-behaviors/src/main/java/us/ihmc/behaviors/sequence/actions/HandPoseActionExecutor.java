@@ -36,7 +36,6 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
-   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
@@ -163,16 +162,16 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
 
-         boolean wasExecuting = isExecuting;
+         boolean wasExecuting = state.getIsExecuting();
          // Left hand broke on Nadia and not in the robot model?
-         isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
-                                                        syncedHandControlPose,
-                                                        POSITION_TOLERANCE,
-                                                        ORIENTATION_TOLERANCE,
-                                                        definition.getTrajectoryDuration(),
-                                                        executionTimer,
-                                                        BehaviorActionCompletionComponent.TRANSLATION,
-                                                        BehaviorActionCompletionComponent.ORIENTATION);
+         state.setIsExecuting(!completionCalculator.isComplete(desiredHandControlPose,
+                                                               syncedHandControlPose,
+                                                               POSITION_TOLERANCE,
+                                                               ORIENTATION_TOLERANCE,
+                                                               definition.getTrajectoryDuration(),
+                                                               executionTimer,
+                                                               BehaviorActionCompletionComponent.TRANSLATION,
+                                                               BehaviorActionCompletionComponent.ORIENTATION));
 
          executionStatusMessage.setActionIndex(state.getActionIndex());
          executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
@@ -184,7 +183,7 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
          executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
          executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(definition.getSide(), true));
-         if (!isExecuting && wasExecuting && !definition.getJointSpaceControl() && !definition.getHoldPoseInWorldLater())
+         if (!state.getIsExecuting() && wasExecuting && !definition.getJointSpaceControl() && !definition.getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();
          }
@@ -213,12 +212,6 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return executionStatusMessage;
-   }
-
-   @Override
-   public boolean isExecuting()
-   {
-      return isExecuting;
    }
 
    @Override
