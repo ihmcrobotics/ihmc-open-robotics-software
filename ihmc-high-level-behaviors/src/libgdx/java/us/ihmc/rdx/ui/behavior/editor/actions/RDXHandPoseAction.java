@@ -102,7 +102,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       state = new HandPoseActionState(referenceFrameLibrary);
       definition = state.getDefinition();
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent(), getSelected());
       poseGizmo.create(panel3D);
 
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,

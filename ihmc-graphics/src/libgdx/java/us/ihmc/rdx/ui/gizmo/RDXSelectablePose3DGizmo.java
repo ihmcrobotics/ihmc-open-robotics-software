@@ -20,20 +20,28 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 public class RDXSelectablePose3DGizmo
 {
    private final RDXPose3DGizmo poseGizmo;
-   private final ImBoolean selected = new ImBoolean(false);
+   private final ImBoolean selected;
 
    public RDXSelectablePose3DGizmo()
    {
+      this.selected = new ImBoolean(false);
       poseGizmo = new RDXPose3DGizmo();
    }
 
    public RDXSelectablePose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
+      this.selected = new ImBoolean(false);
       poseGizmo = new RDXPose3DGizmo(parentReferenceFrame);
    }
 
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
+      this(gizmoFrame, gizmoTransformToParentFrameToModify, new ImBoolean(false));
+   }
+
+   public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify, ImBoolean selected)
+   {
+      this.selected = selected;
       poseGizmo = new RDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
