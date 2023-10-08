@@ -47,7 +47,6 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
-   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
@@ -212,7 +211,7 @@ public class WalkActionExecutor extends BehaviorActionExecutor
          int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
          isComplete &= incompleteFootsteps == 0;
 
-         isExecuting = !isComplete;
+         state.setIsExecuting(!isComplete);
 
          executionStatusMessage.setActionIndex(state.getActionIndex());
          executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
@@ -232,12 +231,6 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return executionStatusMessage;
-   }
-
-   @Override
-   public boolean isExecuting()
-   {
-      return isExecuting;
    }
 
    @Override

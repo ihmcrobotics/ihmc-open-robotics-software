@@ -19,6 +19,7 @@ public class PelvisHeightPitchActionState extends BehaviorActionState
    public void update()
    {
       pelvisFrame.update(definition.getParentFrameName());
+      setCanExecute(pelvisFrame.isChildOfWorld());
    }
 
    public void toMessage(PelvisHeightPitchActionStateMessage message)

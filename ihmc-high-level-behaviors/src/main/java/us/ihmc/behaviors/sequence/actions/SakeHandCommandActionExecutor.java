@@ -18,7 +18,6 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    private final SakeHandCommandActionDefinition definition = state.getDefinition();
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
-   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public SakeHandCommandActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
@@ -51,7 +50,7 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    @Override
    public void updateCurrentlyExecuting()
    {
-      isExecuting = executionTimer.isRunning(WAIT_TIME);
+      state.setIsExecuting(executionTimer.isRunning(WAIT_TIME));
 
       executionStatusMessage.setActionIndex(state.getActionIndex());
       executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
@@ -62,12 +61,6 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return executionStatusMessage;
-   }
-
-   @Override
-   public boolean isExecuting()
-   {
-      return isExecuting;
    }
 
    @Override

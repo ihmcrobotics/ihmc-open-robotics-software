@@ -9,6 +9,8 @@ public abstract class BehaviorActionState implements BehaviorActionDefinitionSup
    private int actionIndex = -1;
    private boolean isNextForExecution = false;
    private boolean isToBeExecutedConcurrently = false;
+   private boolean canExecute = true;
+   private boolean isExecuting = false;
 
    public BehaviorActionState()
    {
@@ -74,5 +76,26 @@ public abstract class BehaviorActionState implements BehaviorActionDefinitionSup
    public boolean getIsToBeExecutedConcurrently()
    {
       return isToBeExecutedConcurrently;
+   }
+
+   public void setCanExecute(boolean canExecute)
+   {
+      this.canExecute = canExecute;
+   }
+
+   public boolean getCanExecute()
+   {
+      return canExecute;
+   }
+
+   public void setIsExecuting(boolean isExecuting)
+   {
+      this.isExecuting = isExecuting;
+   }
+
+   /** Should return a precalculated value from {@link BehaviorActionExecutor#updateCurrentlyExecuting} */
+   public boolean getIsExecuting()
+   {
+      return isExecuting;
    }
 }

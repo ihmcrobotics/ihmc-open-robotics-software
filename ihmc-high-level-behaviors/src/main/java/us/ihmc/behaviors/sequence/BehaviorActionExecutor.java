@@ -38,17 +38,6 @@ public abstract class BehaviorActionExecutor implements BehaviorActionStateSuppl
       return new ActionExecutionStatusMessage();
    }
 
-   /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
-   public boolean isExecuting()
-   {
-      return false;
-   }
-
-   public boolean canExecute()
-   {
-      return true;
-   }
-
    public BehaviorActionSequence getSequence()
    {
       return sequence;

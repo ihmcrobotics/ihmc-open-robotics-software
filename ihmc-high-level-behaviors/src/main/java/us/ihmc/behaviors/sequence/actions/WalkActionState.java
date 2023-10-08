@@ -21,6 +21,7 @@ public class WalkActionState extends BehaviorActionState
    public void update()
    {
       goalFrame.update(definition.getParentFrameName());
+      setCanExecute(goalFrame.isChildOfWorld());
    }
 
    public void toMessage(WalkActionStateMessage message)
