@@ -32,6 +32,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -292,7 +293,9 @@ public class RDXBehaviorActionSequenceEditor
 
          if (newAction instanceof RDXWalkAction walkAction)
          {
-            walkAction.getState().getGoalFrame().setToReferenceFrameIncludingParent(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+            MovingReferenceFrame parentFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
+            walkAction.getDefinition().setParentFrameName(parentFrame.getName());
+            walkAction.getState().getGoalFrame().setToReferenceFrameIncludingParent(parentFrame);
             walkAction.getState().getGoalFrame().update(findConvenientParentFrameName(walkAction, null));
          }
          else if (newAction instanceof RDXHandPoseAction handPoseAction)
@@ -366,7 +369,15 @@ public class RDXBehaviorActionSequenceEditor
             }
          }
 
-         insertNewAction(newAction);
+         int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
+         actionSequence.add(insertionIndex, newAction);
+
+         for (int i = 0; i < actionSequence.size(); i++)
+         {
+            // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
+            actionSequence.get(i).getSelected().set(i == insertionIndex);
+         }
+         commandNextActionIndex(executionNextIndexStatus + 1);
       }
 
       for (int actionIndex = 0; actionIndex < actionSequence.size(); actionIndex++)
@@ -797,21 +808,6 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
       return previousAction;
-   }
-
-   private void insertNewAction(RDXBehaviorAction action)
-   {
-      action.update();
-
-      int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
-      actionSequence.add(insertionIndex, action);
-
-      for (int i = 0; i < actionSequence.size(); i++)
-      {
-         // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
-         actionSequence.get(i).getSelected().set(i == insertionIndex);
-      }
-      commandNextActionIndex(executionNextIndexStatus + 1);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
