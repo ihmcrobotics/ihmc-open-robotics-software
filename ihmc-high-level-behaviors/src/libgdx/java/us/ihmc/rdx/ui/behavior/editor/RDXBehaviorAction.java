@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinitionSupplier;
@@ -73,6 +74,10 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, 
    {
       if (expanded.get())
       {
+         ImGui.checkbox(labels.get("Selected"), selected);
+         ImGuiTools.previousWidgetTooltip("(Show gizmo)");
+         ImGui.sameLine();
+         ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
          renderImGuiWidgetsInternal();
       }
    }

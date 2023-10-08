@@ -665,14 +665,6 @@ public class RDXBehaviorActionSequenceEditor
             commandNextActionIndex(actionSequence.size());
          }
 
-         if (action.getExpanded().get())
-         {
-            ImGui.checkbox(labels.get("Selected"), action.getSelected());
-            ImGuiTools.previousWidgetTooltip("(Show gizmo)");
-            ImGui.sameLine();
-            ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));
-         }
-
          action.renderImGuiWidgets();
 
          ImGui.separator();
