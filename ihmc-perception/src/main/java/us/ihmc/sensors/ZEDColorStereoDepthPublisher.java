@@ -21,8 +21,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
-import us.ihmc.perception.logging.PerceptionDataLogger;
-import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
@@ -31,12 +29,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Throttler;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -86,19 +81,12 @@ public class ZEDColorStereoDepthPublisher
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
-   private final boolean logging;
-   private final String colorChannelName = PerceptionLoggerConstants.ZED2_COLOR_NAME;
-   private final String depthChannelName = PerceptionLoggerConstants.ZED2_DEPTH_NAME;
-
    public ZEDColorStereoDepthPublisher(int cameraID,
                                        SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
                                        ROS2Topic<ImageMessage> depthTopic,
                                        Supplier<ReferenceFrame> sensorFrameSupplier)
    {
-      this.logging = Boolean.parseBoolean(System.getenv("ENABLE_ZED_LOGGING"));
       this.cameraID = cameraID;
-
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
       LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
@@ -173,70 +161,37 @@ public class ZEDColorStereoDepthPublisher
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
 
       grabImageThread = new Thread(() ->
-      {
-         while (running)
-         {
-            // Continuously grab images from the camera. These images go to GPU memory.
-            // sl_grab processes the stereo images to create the depth image
-            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+                                   {
+                                      while (running)
+                                      {
+                                         // Continuously grab images from the camera. These images go to GPU memory.
+                                         // sl_grab processes the stereo images to create the depth image
+                                         checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
-            // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
-            leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-            leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
-            leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         }
-      }, "ZEDImageGrabThread");
+                                         // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
+                                         leftCameraFramePose.setToZero(sensorFrameSupplier.get());
+                                         leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
+                                         leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                                      }
+                                   }, "ZEDImageGrabThread");
 
       colorImagePublishThread = new Thread(() ->
-      {
-         PerceptionDataLogger zedColorDataLogger = null;
-         if (this.logging)
-         {
-            zedColorDataLogger = new PerceptionDataLogger();
-            String logFileName = dateFormat.format(new Date()) + "_" + "ZEDPerceptionColorLog.hdf5";
-
-            zedColorDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-
-            zedColorDataLogger.addImageChannel(this.colorChannelName);
-            zedColorDataLogger.setChannelEnabled(this.colorChannelName, true);
-         }
-
-         while (running)
-         {
-            throttler.waitAndRun();
-            retrieveAndPublishColorImage(zedColorDataLogger);
-         }
-         if (this.logging)
-         {
-            zedColorDataLogger.closeLogFile();
-         }
-      }, "ZEDColorImagePublishThread");
+                                           {
+                                              while (running)
+                                              {
+                                                 throttler.waitAndRun();
+                                                 retrieveAndPublishColorImage();
+                                              }
+                                           }, "ZEDColorImagePublishThread");
 
       depthImagePublishThread = new Thread(() ->
-      {
-         PerceptionDataLogger zedDepthDataLogger = null;
-         if (this.logging)
-         {
-            zedDepthDataLogger = new PerceptionDataLogger();
-            String logFileName = dateFormat.format(new Date()) + "_" + "ZEDPerceptionDepthLog.hdf5";
-
-            zedDepthDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-
-            zedDepthDataLogger.addImageChannel(this.depthChannelName);
-            zedDepthDataLogger.setChannelEnabled(this.depthChannelName, true);
-         }
-
-         while (running)
-         {
-            throttler.waitAndRun();
-            retrieveAndPublishDepthImage(zedDepthDataLogger);
-         }
-
-         if (this.logging)
-         {
-            zedDepthDataLogger.closeLogFile();
-         }
-      }, "ZEDDepthImagePublishThread");
+                                           {
+                                              while (running)
+                                              {
+                                                 throttler.waitAndRun();
+                                                 retrieveAndPublishDepthImage();
+                                              }
+                                           }, "ZEDDepthImagePublishThread");
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
@@ -247,7 +202,7 @@ public class ZEDColorStereoDepthPublisher
       depthImagePublishThread.start();
    }
 
-   private void retrieveAndPublishColorImage(PerceptionDataLogger zedColorDataLogger)
+   private void retrieveAndPublishColorImage()
    {
       for (RobotSide side : RobotSide.values())
       {
@@ -269,11 +224,6 @@ public class ZEDColorStereoDepthPublisher
 
          BytePointer colorJPEGPointer = new BytePointer((long) imageHeight * imageWidth);
          imageEncoder.encodeBGR(colorImageBGR.data(), colorJPEGPointer, imageWidth, imageHeight, colorImageBGR.step());
-
-         if(this.logging)
-         {
-            zedColorDataLogger.storeBytesFromPointer(colorChannelName, colorJPEGPointer);
-         }
 
          // Publish image
          ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
@@ -301,7 +251,7 @@ public class ZEDColorStereoDepthPublisher
       }
    }
 
-   private void retrieveAndPublishDepthImage(PerceptionDataLogger zedDepthDataLogger)
+   private void retrieveAndPublishDepthImage()
    {
       // Retrieve depth image
       // There is a bug where retrieving the depth image using SL_MEM_CPU causes the depth image to be misaligned and very dark.
@@ -320,11 +270,6 @@ public class ZEDColorStereoDepthPublisher
       // Encode depth image to png
       BytePointer depthPNGPointer = new BytePointer();
       OpenCVTools.compressImagePNG(cpuDepthImage16UC1, depthPNGPointer);
-
-      if(this.logging)
-      {
-         zedDepthDataLogger.storeBytesFromPointer(depthChannelName, depthPNGPointer);
-      }
 
       // Publish image
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());

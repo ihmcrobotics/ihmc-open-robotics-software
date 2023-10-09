@@ -30,7 +30,7 @@ class Detection():
     position: np.ndarray = np.zeros((3))
 
 
-class Image2CenterPose_node():
+class Zed2CenterposeNode():
     def __init__(self, experiment:experiment_type):
         self.experiment = experiment
 
@@ -253,7 +253,7 @@ def main(args=None):
         print("Running CenterPose Live...")
         rclpy.init(args=args)
     
-        detectorClass = Image2CenterPose_node(experiment)
+        detectorClass = Zed2CenterposeNode(experiment)
     
         node = detectorClass.ros2_node
         rclpy.spin(node)
@@ -262,7 +262,7 @@ def main(args=None):
     
     elif (experiment==experiment_type.VIDEO):
         print("Running CenterPose on a Video...")
-        detectorClass = Image2CenterPose_node(experiment)
+        detectorClass = Zed2CenterposeNode(experiment)
 
 
 if __name__ == '__main__':
