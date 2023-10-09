@@ -123,5 +123,5 @@ kernel void computeVertexBuffer(global float* parameters,
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
    pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
    pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
-   pointCloudVertexBuffer[pointStartIndex + 7] = parameters[POINT_SIZE] * eyeDepthInMeters;
+   pointCloudVertexBuffer[pointStartIndex + 7] = parameters[POINT_SIZE] * eyeDepthInMeters / M_PI_F;
 }
