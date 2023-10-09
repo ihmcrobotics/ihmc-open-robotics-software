@@ -15,4 +15,4 @@ cd /root/centerpose-install
 # Source the IHMC ROS2 workspace to bring in all the custom IHMC interfaces
 source /root/ihmc_ros2_ws/install/setup.bash
 
-python3 src/zed2_centerpose_node.py
+python3 src/Zed2CenterposeNode.py
