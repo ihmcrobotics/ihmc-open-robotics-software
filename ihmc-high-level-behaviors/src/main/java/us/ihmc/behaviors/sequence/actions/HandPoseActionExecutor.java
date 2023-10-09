@@ -168,7 +168,6 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(getSide()).getLinearWrenchMagnitude(true));
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTIONS_EXECUTION_STATUS, executionStatusMessage);
       if (!isExecuting && wasExecuting && !getJointSpaceControl() && !getHoldPoseInWorldLater())
       {
          disengageHoldPoseInWorld();
