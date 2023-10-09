@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
-import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -33,7 +33,7 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final HandWrenchCalculator handWrenchCalculator;
+   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -47,13 +47,13 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot,
-                                 HandWrenchCalculator handWrenchCalculator)
+                                 SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators)
    {
       super(sequence);
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.handWrenchCalculator = handWrenchCalculator;
+      this.handWrenchCalculators = handWrenchCalculators;
 
       state = new HandPoseActionState(referenceFrameLibrary);
       definition = state.getDefinition();
@@ -182,7 +182,7 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
          executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
          executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(definition.getSide(), true));
+         executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(definition.getSide()).getLinearWrenchMagnitude(true));
          if (!state.getIsExecuting() && wasExecuting && !definition.getJointSpaceControl() && !definition.getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();
