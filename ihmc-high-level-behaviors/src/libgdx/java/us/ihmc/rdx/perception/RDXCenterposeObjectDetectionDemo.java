@@ -47,6 +47,7 @@ public class RDXCenterposeObjectDetectionDemo
                                                                                                             PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
                                                                                                             baseUI.getPrimary3DPanel().getCamera3D());
             centerPoseBoundingBoxVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                            PubSubImplementation.FAST_RTPS,
@@ -79,7 +80,6 @@ public class RDXCenterposeObjectDetectionDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
 
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);

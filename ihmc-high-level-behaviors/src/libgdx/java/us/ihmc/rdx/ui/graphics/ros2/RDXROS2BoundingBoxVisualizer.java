@@ -39,15 +39,16 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final RDXFocusBasedCamera camera;
    private ModelInstance markerModelInstance;
    private final RDX3DSituatedText text;
-   private final Color BOX_EDGE_COLOR = new Color(Color.WHITE);
    private RDX3DSituatedTextData previousTextData;
    private final RDXModelInstance markerCoordinateFrameInstance;
    private final FramePose3D markerPose = new FramePose3D();
    private final FramePoint3D[] vertices3D = new FramePoint3D[8];
    private final ReferenceFrame sensorFrame;
    private final RDXModelInstance sensorCoordinateFrameInstance;
-   private final Scalar RED = new Scalar(255, 1, 2, 255);
-   private final Scalar WHITE = new Scalar(255, 225, 225, 255);
+   private final static Scalar RED = new Scalar(255, 1, 2, 255);
+   private final static Scalar WHITE = new Scalar(255, 225, 225, 255);
+   private final FramePose3D textPose = new FramePose3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2, ReferenceFrame sensorFrame, ROS2Topic<DetectedObjectPacket> topic, RDXFocusBasedCamera camera)
    {
@@ -75,12 +76,16 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
          String objectType = detectedObjectMessage.getObjectTypeAsString();
 
          if (markerModelInstance != null)
+         {
             markerModelInstance.model.dispose();
+         }
 
          for (int i = 0; i < vertices.length; i++)
          {
             if (vertices3D[i] == null)
+            {
                vertices3D[i] = new FramePoint3D();
+            }
 
             vertices3D[i].changeFrame(sensorFrame);
             vertices3D[i].interpolate(vertices[i], 0.2);
@@ -88,7 +93,7 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
             vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
          }
 
-         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, BOX_EDGE_COLOR));
+         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
          markerModelInstance = new RDXModelInstance(markerModel);
 
          markerPose.setIncludingFrame(sensorFrame, objectPoseSensorFrame);
@@ -98,18 +103,19 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
          sensorCoordinateFrameInstance.setTransformToReferenceFrame(sensorFrame);
 
          if (previousTextData != null)
+         {
             previousTextData.dispose();
+         }
          previousTextData = text.setTextWithoutCache(objectType + " %.1f".formatted(confidence));
       }
 
-      FramePose3D textPose = new FramePose3D(camera.getCameraFrame());
+      textPose.setToZero(camera.getCameraFrame());
       textPose.getOrientation().appendPitchRotation(3.0 / 2.0 * Math.PI);
       textPose.getOrientation().appendYawRotation(-Math.PI / 2.0);
 
       textPose.changeFrame(ReferenceFrame.getWorldFrame());
       textPose.getPosition().set(markerPose.getPosition());
 
-      RigidBodyTransform tempTransform = new RigidBodyTransform();
       LibGDXTools.toLibGDX(textPose, tempTransform, text.getModelTransform());
    }
 
