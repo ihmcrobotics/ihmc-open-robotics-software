@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -40,8 +41,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ContinuousPlanningRemoteTask
 {
    private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 10;
-   private final static float SWING_DURATION = 0.84f;
-   private final static float TRANSFER_DURATION = 0.46f;
+   private final static float SWING_DURATION = 0.5f;
+   private final static float TRANSFER_DURATION = 0.15f;
    private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
@@ -74,6 +75,8 @@ public class ContinuousPlanningRemoteTask
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private RobotSide initialStanceSide = RobotSide.LEFT;
+   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   private long originalFootstepDataListId = -1;
 
    public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
                                        ROS2Node ros2Node,
@@ -126,6 +129,12 @@ public class ContinuousPlanningRemoteTask
                                                                                                                  MAXIMUM_FOOTSTEPS_TO_SEND,
                                                                                                                  SWING_DURATION,
                                                                                                                  TRANSFER_DURATION);
+                  footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
+
+                  if (originalFootstepDataListId == -1)
+                     originalFootstepDataListId = footstepDataList.getUniqueId();
+
+                  footstepDataList.setUniqueId(originalFootstepDataListId);
                   publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
                   initialStanceSide = RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide());
                   startPose = continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
@@ -133,6 +142,7 @@ public class ContinuousPlanningRemoteTask
                                                                                            footstepDataList.getFootstepDataList().get(0).getOrientation()),
                                                                            initialStanceSide);
                   continuousPlanner.setPlanAvailable(false);
+                  executionMode = ExecutionMode.QUEUE;
                }
             }
          }

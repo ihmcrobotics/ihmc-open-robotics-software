@@ -224,12 +224,15 @@ public class PerceptionDebugTools
 
    public static String matToString(String name, Mat image, int skip)
    {
-      StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "], Type: [" + getTypeString(image.type()) + "], Channels: [" + image.channels() + "]\n");
 
       for (int i = 0; i < image.rows(); i+=skip)
       {
          for (int j = 0; j < image.cols(); j+=skip)
          {
+            if (image.type() == opencv_core.CV_8UC1)
+               // get string for byte as 0-255 and not negative
+               matString.append(image.ptr(i, j).get()).append(" ");
             if (image.type() == opencv_core.CV_16UC1)
                matString.append(image.ptr(i, j).getShort()).append("\t");
             if (image.type() == opencv_core.CV_64FC1)

@@ -291,3 +291,56 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    // Put the height value in the global map at the global cell index
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
+
+void kernel contactMapKernel(read_write image2d_t heightMap,
+                                       read_write image2d_t costMap,
+                                       global float *params)
+{
+   // Extract the indices
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   // Compute Sobel operator output for Kx and Ky over the current cell on the height map
+   float Kx = 0;
+   float Ky = 0;
+
+   // Create a float array to store 3x3 neighborhood of height map
+   float heightMapNeighborhood[9];
+
+   // Initialize Sobel operators in two separate arrays
+   float KxSobel[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+   float KySobel[9] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
+
+   // Read in the 3x3 neighborhood of the height map
+   if (xIndex > 0 && xIndex < params[GLOBAL_CELLS_PER_AXIS] - 1 && yIndex > 0 && yIndex < params[GLOBAL_CELLS_PER_AXIS] - 1)
+   {
+      for (int i = -1; i < 2; i++)
+      {
+         for (int j = -1; j < 2; j++)
+         {
+            heightMapNeighborhood[(i + 1) * 3 + (j + 1)] = read_imageui(heightMap, (int2) (xIndex + i, yIndex + j)).x / params[HEIGHT_SCALING_FACTOR];
+         }
+      }
+
+      // Compute Kx and Ky
+      for (int i = 0; i < 9; i++)
+      {
+         Kx += heightMapNeighborhood[i] * KxSobel[i];
+         Ky += heightMapNeighborhood[i] * KySobel[i];
+      }
+   }
+
+   // Compute surface normal from Kx and Ky
+   float3 surfaceNormal = (float3)(0, 0, 0);
+   surfaceNormal.x = -Kx;
+   surfaceNormal.y = -Ky;
+   surfaceNormal.z = 1;
+   surfaceNormal = normalize(surfaceNormal);
+
+   // Compute the dot product between the surface normal and the z-axis
+   float dotProduct = fabs(surfaceNormal.z);
+
+   // Scale-map the dot product to [0, 255] into the cost map in that order
+   int cost = (int) (dotProduct * 255);
+   write_imageui(costMap, (int2)(yIndex, xIndex), (uint4)(cost, 0, 0, 0));
+}

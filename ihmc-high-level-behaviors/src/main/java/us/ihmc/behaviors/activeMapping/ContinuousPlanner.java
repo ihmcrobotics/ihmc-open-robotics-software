@@ -187,7 +187,7 @@ public class ContinuousPlanner
    public FootstepPlannerRequest createFootstepPlannerRequest(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setTimeout(0.25);
+      request.setTimeout(0.15);
       request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
       request.setPlanBodyPath(false);

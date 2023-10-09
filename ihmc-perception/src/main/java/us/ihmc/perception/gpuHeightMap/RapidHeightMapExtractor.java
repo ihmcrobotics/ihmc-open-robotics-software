@@ -74,9 +74,11 @@ public class RapidHeightMapExtractor
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
    private _cl_kernel heightMapRegistrationKernel;
+   private _cl_kernel contactMapKernel;
    private BytedecoImage inputDepthImage;
    private BytedecoImage localHeightMapImage;
    private BytedecoImage globalHeightMapImage;
+   private BytedecoImage contactMapImage;
 
    private Rect cropWindowRectangle = new Rect((globalCellsPerAxis - CROP_WINDOW_SIZE) / 2, (globalCellsPerAxis - CROP_WINDOW_SIZE) / 2,
                                                CROP_WINDOW_SIZE,
@@ -121,8 +123,12 @@ public class RapidHeightMapExtractor
       globalHeightMapImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
       globalHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
+      contactMapImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
+      contactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
+      contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
    }
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
@@ -174,15 +180,22 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, worldToGroundTransformBuffer.getOpenCLBufferObject());
 
-         // Execute kernel with length and width parameters
-         openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
+         // Set kernel arguments for the contact map kernel
+         openCLManager.setKernelArgument(contactMapKernel, 0, globalHeightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(contactMapKernel, 1, contactMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(contactMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
 
-         // Execute kernel with length and width parameters
+         // Execute kernels with length and width parameters
+         openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
          openCLManager.execute2D(heightMapRegistrationKernel, globalCellsPerAxis, globalCellsPerAxis);
+         openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
 
          // Read height map image into CPU memory
          localHeightMapImage.readOpenCLImage(openCLManager);
          globalHeightMapImage.readOpenCLImage(openCLManager);
+         contactMapImage.readOpenCLImage(openCLManager);
+
+         PerceptionDebugTools.printMat("Contact Map", contactMapImage.getBytedecoOpenCVMat(), 16);
 
          sequenceNumber++;
       }
