@@ -1023,7 +1023,7 @@ public class RDXMultiColorMeshBuilder
       return new MeshDataHolder(vertices, outputTexturePoints, triangleIndices, vertexNormals);
    }
 
-   public float[] getTextureLocation(Color color)
+   public static float[] getTextureLocation(Color color)
    {
       // texture 64 vertical pixels of white to black fully saturated hues
       // then, 12 pixels of grayscale blacl left to right white

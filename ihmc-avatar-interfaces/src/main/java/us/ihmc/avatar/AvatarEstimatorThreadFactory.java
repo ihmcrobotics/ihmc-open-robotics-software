@@ -60,7 +60,6 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -800,7 +799,7 @@ public class AvatarEstimatorThreadFactory
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
          factory.setROS2Info(realtimeROS2NodeField.get(), outputTopicField.get());
-         factory.setPublishPeriod(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
+         factory.setPublishPeriod(Conversions.secondsToNanoseconds(StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
       return robotConfigurationDataPublisherField.get();

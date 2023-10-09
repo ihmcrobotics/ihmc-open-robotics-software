@@ -5,9 +5,12 @@ import java.util.List;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.tools.UnitConversions;
 
 public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
+   public static final double ROBOT_CONFIGURATION_DATA_PUBLISH_DT = UnitConversions.hertzToSeconds(120.0);
+
    @Override
    public abstract double getEstimatorDT();
 
