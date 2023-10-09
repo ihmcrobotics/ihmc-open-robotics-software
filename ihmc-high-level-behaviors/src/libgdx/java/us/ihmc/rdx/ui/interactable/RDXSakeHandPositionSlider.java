@@ -1,16 +1,21 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import controller_msgs.msg.dds.SakeHandStatusMessage;
+import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
+
+import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 
 /**
  * This slider allows the user to control the Sake hand's finger positions,
@@ -26,39 +31,36 @@ public class RDXSakeHandPositionSlider
 {
    private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(10.0);
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
-   private static final double ROBOT_DATA_EXPIRATION_DURATION = 1.0;
-   private static final double ANGLE_AT_CLOSE = Math.toRadians(-3.0);
-   private static final double MAX_ANGLE_LIMIT = Math.toRadians(210.0);
-   private static final double MIN_ANGLE_LIMIT = Math.toRadians(0.0);
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS2SyncedRobotModel syncedRobot;
+   private final IHMCROS2Input<SakeHandStatusMessage> handStatusMessage;
    private final CommunicationHelper communicationHelper;
    private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
-   private double valueFromRobot = Double.NaN;
+   private double presentGoalPosition = Double.NaN;
+   private double presentGoalTorque = Double.NaN;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
-   public RDXSakeHandPositionSlider(ROS2SyncedRobotModel syncedRobot,
-                                    CommunicationHelper communicationHelper,
-                                    RobotSide handSide)
+   public RDXSakeHandPositionSlider(CommunicationHelper communicationHelper, RobotSide handSide)
    {
-      this.syncedRobot = syncedRobot;
       this.communicationHelper = communicationHelper;
       this.handSide = handSide;
       sliderName = handSide.getPascalCaseName() + " angle";
 
-      syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveRobotConfigurationData);
+      handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
+                                                                 .withTypeName(SakeHandStatusMessage.class),
+                                                        message -> message.getRobotSide() == handSide.toByte());
    }
 
-   private void receiveRobotConfigurationData(RobotConfigurationData robotConfigurationData)
+   private void receiveRobotConfigurationData()
    {
-      if (updateThrottler.run(UPDATE_PERIOD) && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
+      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
       {
-         valueFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
+         presentGoalPosition = handStatusMessage.getLatest().getPostionRatio();
+         presentGoalTorque = handStatusMessage.getLatest().getGoalTorqueRatio();
       }
    }
 
@@ -66,29 +68,44 @@ public class RDXSakeHandPositionSlider
    {
       if (renderImGuiSliderAndReturnChanged())
       {
-         if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION))
+         if (sendThrottler.run(SEND_PERIOD))
          {
-            double positionRatio = sliderValue[0] / MAX_ANGLE_LIMIT;
+            double positionRatio = sliderValue[0] / Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS);
 
-            HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
+            SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) 5); // GOTO command
+            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
             message.setPostionRatio(positionRatio);
-            message.setTorqueRatio(0.3);
+            message.setTorqueRatio(-1.0);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
       }
       else
       {
-         sliderValue[0] = (float) (2.0 * (valueFromRobot - ANGLE_AT_CLOSE));
+         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * presentGoalPosition);
       }
+
+      receiveRobotConfigurationData();
    }
 
    private boolean renderImGuiSliderAndReturnChanged()
    {
       float previousValue = sliderValue[0];
-      ImGui.sliderAngle(labels.get(sliderName), sliderValue, (float) Math.toDegrees(MIN_ANGLE_LIMIT), (float) Math.toDegrees(MAX_ANGLE_LIMIT));
+
+      if (presentGoalTorque < 0.2)  // render slider with warning that torque is too low
+      {
+         ImGui.pushStyleColor(ImGuiCol.SliderGrab, ImGuiTools.RED);
+         ImGui.sliderAngle(labels.get(sliderName),
+                           sliderValue,
+                           0.0f,
+                           (float) MAX_ANGLE_BETWEEN_FINGERS,
+                           String.format("%.0f deg (Torque Too Low)", Math.toDegrees(sliderValue[0])));
+         ImGui.popStyleColor();
+      }
+      else  // render normal slider
+         ImGui.sliderAngle(labels.get(sliderName), sliderValue, 0.0f, (float) MAX_ANGLE_BETWEEN_FINGERS);
+
       float currentValue = sliderValue[0];
       return !Double.isNaN(sliderValue[0]) && !MathTools.epsilonEquals(currentValue, previousValue, EPSILON);
    }

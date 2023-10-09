@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,9 +18,9 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 
@@ -76,6 +77,7 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private HandConfiguration handConfiguration;
+   private SakeHandCommandOption sakeHandConfiguration;
 
    public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
@@ -99,7 +101,8 @@ public class RDXInteractableSakeGripper implements RenderableProvider
          fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);
          fingersFrames[i] = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrameHand, fingersTransforms[i]);
       }
-      handConfiguration = HandConfiguration.CLOSE;
+      //handConfiguration = HandConfiguration.CLOSE;
+      sakeHandConfiguration = SakeHandCommandOption.CLOSE;
 
       panel3D.addImGui3DViewInputProcessor(this::updateFingers);
    }
@@ -117,28 +120,32 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CRUSH[i]);
-      handConfiguration = HandConfiguration.CRUSH;
+      //handConfiguration = HandConfiguration.CRUSH;
+      sakeHandConfiguration = SakeHandCommandOption.GRIP_HARD;
    }
 
    public void closeGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CLOSE[i]);
-      handConfiguration = HandConfiguration.CLOSE;
+      //handConfiguration = HandConfiguration.CLOSE;
+      sakeHandConfiguration = SakeHandCommandOption.CLOSE;
    }
 
    public void openGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_OPEN[i]);
-      handConfiguration = HandConfiguration.OPEN;
+      //handConfiguration = HandConfiguration.OPEN;
+      sakeHandConfiguration = SakeHandCommandOption.FULLY_OPEN;
    }
 
    public void setGripperToHalfClose()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_HALF_CLOSE[i]);
-      handConfiguration = HandConfiguration.HALF_CLOSE;
+      //handConfiguration = HandConfiguration.HALF_CLOSE;
+      sakeHandConfiguration = SakeHandCommandOption.OPEN;
    }
 
    public void setGripperClosure(double closure)
@@ -153,14 +160,14 @@ public class RDXInteractableSakeGripper implements RenderableProvider
                                                     closure);
    }
 
-   public void setGripperToConfiguration(HandConfiguration configuration)
+   public void setGripperToConfiguration(SakeHandCommandOption configuration)
    {
       switch (configuration)
       {
-         case OPEN -> openGripper();
-         case HALF_CLOSE -> setGripperToHalfClose();
+         case FULLY_OPEN -> openGripper();
+         case OPEN -> setGripperToHalfClose();
          case CLOSE -> closeGripper();
-         case CRUSH -> crushGripper();
+         case GRIP_HARD -> crushGripper();
          default ->
          {
          }
@@ -212,9 +219,9 @@ public class RDXInteractableSakeGripper implements RenderableProvider
             fingersModelInstances[i].getRenderables(renderables, pool);
    }
 
-   public HandConfiguration getConfiguration()
+   public SakeHandCommandOption getConfiguration()
    {
-      return handConfiguration;
+      return sakeHandConfiguration;
    }
 
    public ReferenceFrame getReferenceFrameHand()

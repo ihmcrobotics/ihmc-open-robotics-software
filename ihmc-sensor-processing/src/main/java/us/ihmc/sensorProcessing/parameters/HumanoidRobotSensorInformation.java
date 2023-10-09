@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.parameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
@@ -23,6 +24,11 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
       return ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera",
                                                                              getSteppingCameraParentFrame(referenceFrames),
                                                                              getSteppingCameraTransform());
+   }
+
+   public default ZUpFrame getSteppingCameraZUpFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return new ZUpFrame(getSteppingCameraFrame(referenceFrames), "steppingCameraZUp");
    }
 
    public default RigidBodyTransform getObjectDetectionCameraTransform()

@@ -177,7 +177,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                         interactableHands);
       }
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Ctrl + L");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -189,7 +189,7 @@ public class RDXTeleoperationManager extends RDXPanel
       RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
       deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
       deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
-      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
+      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Shift + Escape)");
 
       locomotionManager.create(baseUI);
 
@@ -487,11 +487,11 @@ public class RDXTeleoperationManager extends RDXPanel
 
       trajectoryTimeSlider.renderImGuiWidget();
 
-      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
+      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyShift() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
       {
          clearInteractablesAndLocomotionGraphics();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + L");
+      ImGuiTools.previousWidgetTooltip("Shift + Escape");
       ImGui.sameLine();
       if (interactablesAvailable)
       {
@@ -668,5 +668,10 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionManager.getLocomotionParameters();
+   }
+
+   public RDXLocomotionManager getLocomotionManager()
+   {
+      return locomotionManager;
    }
 }
