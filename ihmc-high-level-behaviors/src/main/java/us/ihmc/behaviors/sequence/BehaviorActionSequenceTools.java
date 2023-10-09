@@ -2,22 +2,19 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.List;
 
 public class BehaviorActionSequenceTools
 {
-   public static <T extends BehaviorActionData> void packActionSequenceUpdateMessage(List<T> actionSequence,
-                                                                                     ActionSequenceUpdateMessage actionSequenceUpdateMessage)
+   public static <T extends BehaviorActionDefinition> void packActionSequenceUpdateMessage(List<T> actionSequence,
+                                                                                           ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
       actionSequenceUpdateMessage.getChestOrientationActions().clear();
       actionSequenceUpdateMessage.getFootstepPlanActions().clear();
-      actionSequenceUpdateMessage.getHandConfigurationActions().clear();
+      actionSequenceUpdateMessage.getSakeHandCommandActions().clear();
       actionSequenceUpdateMessage.getHandPoseActions().clear();
       actionSequenceUpdateMessage.getHandWrenchActions().clear();
       actionSequenceUpdateMessage.getPelvisHeightActions().clear();
@@ -26,74 +23,61 @@ public class BehaviorActionSequenceTools
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         BehaviorActionData action = actionSequence.get(i);
-         if (action instanceof ArmJointAnglesActionData armJointAnglesActionData)
+         BehaviorActionDefinition action = actionSequence.get(i);
+         if (action instanceof ArmJointAnglesActionDefinition armJointAnglesActionDefinition)
          {
-            ArmJointAnglesActionMessage armJointAnglesActionMessage = actionSequenceUpdateMessage.getArmJointAnglesActions().add();
-            armJointAnglesActionMessage.getActionInformation().setActionIndex(i);
-            armJointAnglesActionData.toMessage(armJointAnglesActionMessage);
+            ArmJointAnglesActionDefinitionMessage armJointAnglesActionDefinitionMessage = actionSequenceUpdateMessage.getArmJointAnglesActions().add();
+            armJointAnglesActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            armJointAnglesActionDefinition.toMessage(armJointAnglesActionDefinitionMessage);
          }
-         else if (action instanceof ChestOrientationActionData chestOrientationActionData)
+         else if (action instanceof ChestOrientationActionDefinition chestOrientationActionDefinition)
          {
-            BodyPartPoseActionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
+            BodyPartPoseActionDefinitionMessage chestOrientationActionMessage = actionSequenceUpdateMessage.getChestOrientationActions().add();
             chestOrientationActionMessage.getActionInformation().setActionIndex(i);
-            chestOrientationActionData.toMessage(chestOrientationActionMessage);
+            chestOrientationActionDefinition.toMessage(chestOrientationActionMessage);
          }
-         else if (action instanceof FootstepPlanActionData footstepPlanActionData)
+         else if (action instanceof FootstepPlanActionDefinition footstepPlanActionDefinition)
          {
-            FootstepPlanActionMessage footstepPlanActionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
-            footstepPlanActionMessage.getActionInformation().setActionIndex(i);
-            footstepPlanActionData.toMessage(footstepPlanActionMessage);
+            FootstepPlanActionDefinitionMessage footstepPlanActionDefinitionMessage = actionSequenceUpdateMessage.getFootstepPlanActions().add();
+            footstepPlanActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            footstepPlanActionDefinition.toMessage(footstepPlanActionDefinitionMessage);
          }
-         else if (action instanceof HandConfigurationActionData handConfigurationActionData)
+         else if (action instanceof SakeHandCommandActionDefinition sakeHandCommandActionDefinition)
          {
-            HandConfigurationActionMessage handConfigurationActionMessage = actionSequenceUpdateMessage.getHandConfigurationActions().add();
-            handConfigurationActionMessage.getActionInformation().setActionIndex(i);
-            handConfigurationActionData.toMessage(handConfigurationActionMessage);
+            SakeHandCommandActionDefinitionMessage sakehandCommandMessage = actionSequenceUpdateMessage.getSakeHandCommandActions().add();
+            sakehandCommandMessage.getActionInformation().setActionIndex(i);
+            sakeHandCommandActionDefinition.toMessage(sakehandCommandMessage);
          }
-         else if (action instanceof HandPoseActionData handPoseActionData)
+         else if (action instanceof HandPoseActionDefinition handPoseActionDefinition)
          {
-            SidedBodyPartPoseActionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
+            SidedBodyPartPoseActionDefinitionMessage handPoseActionMessage = actionSequenceUpdateMessage.getHandPoseActions().add();
             handPoseActionMessage.getActionInformation().setActionIndex(i);
-            handPoseActionData.toMessage(handPoseActionMessage);
+            handPoseActionDefinition.toMessage(handPoseActionMessage);
          }
-         else if (action instanceof HandWrenchActionData handWrenchActionData)
+         else if (action instanceof HandWrenchActionDefinition handWrenchActionDefinition)
          {
-            HandWrenchActionMessage handWrenchActionMessage = actionSequenceUpdateMessage.getHandWrenchActions().add();
-            handWrenchActionMessage.getActionInformation().setActionIndex(i);
-            handWrenchActionData.toMessage(handWrenchActionMessage);
+            HandWrenchActionDefinitionMessage handWrenchActionDefinitionMessage = actionSequenceUpdateMessage.getHandWrenchActions().add();
+            handWrenchActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            handWrenchActionDefinition.toMessage(handWrenchActionDefinitionMessage);
          }
-         else if (action instanceof PelvisHeightActionData pelvisHeightActionData)
+         else if (action instanceof PelvisHeightPitchActionDefinition pelvisHeightActionDefinition)
          {
-            BodyPartPoseActionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
+            BodyPartPoseActionDefinitionMessage pelvisHeightActionMessage = actionSequenceUpdateMessage.getPelvisHeightActions().add();
             pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
-            pelvisHeightActionData.toMessage(pelvisHeightActionMessage);
+            pelvisHeightActionDefinition.toMessage(pelvisHeightActionMessage);
          }
-         else if (action instanceof WaitDurationActionData waitDurationActionData)
+         else if (action instanceof WaitDurationActionDefinition waitDurationActionDefinition)
          {
-            WaitDurationActionMessage waitDurationActionMessage = actionSequenceUpdateMessage.getWaitDurationActions().add();
-            waitDurationActionMessage.getActionInformation().setActionIndex(i);
-            waitDurationActionData.toMessage(waitDurationActionMessage);
+            WaitDurationActionDefinitionMessage waitDurationActionDefinitionMessage = actionSequenceUpdateMessage.getWaitDurationActions().add();
+            waitDurationActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            waitDurationActionDefinition.toMessage(waitDurationActionDefinitionMessage);
          }
-         else if (action instanceof WalkActionData walkActionData)
+         else if (action instanceof WalkActionDefinition walkActionDefinition)
          {
-            WalkActionMessage walkActionMessage = actionSequenceUpdateMessage.getWalkActions().add();
-            walkActionMessage.getActionInformation().setActionIndex(i);
-            walkActionData.toMessage(walkActionMessage);
+            WalkActionDefinitionMessage walkActionDefinitionMessage = actionSequenceUpdateMessage.getWalkActions().add();
+            walkActionDefinitionMessage.getActionInformation().setActionIndex(i);
+            walkActionDefinition.toMessage(walkActionDefinitionMessage);
          }
-      }
-   }
-
-   /**
-    * ReferenceFrames don't have mutable parents, so they get recreated. This accomodates for that.
-    */
-   public static void accomodateFrameReplacement(ModifiableReferenceFrame frameToUpdate, ReferenceFrameLibrary referenceFrameLibrary)
-   {
-      ReferenceFrame previousParentFrame = frameToUpdate.getReferenceFrame().getParent();
-      ReferenceFrame nextParentFrame = referenceFrameLibrary.findFrameByName(previousParentFrame.getName()).get();
-      if (previousParentFrame != nextParentFrame)
-      {
-         frameToUpdate.changeParentFrame(nextParentFrame);
       }
    }
 }

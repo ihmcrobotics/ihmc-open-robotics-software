@@ -88,6 +88,11 @@ public class PerceptionDataLoader
 
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
+      loadPoint3DList(namespace, points, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+   }
+
+   public void loadPoint3DList(String namespace, ArrayList<Point3D> points, int blockSize)
+   {
       //      executorService.submit(() ->
       //      {
       int count = (int) hdf5Manager.getCount(namespace);
@@ -95,7 +100,7 @@ public class PerceptionDataLoader
 
       for (int index = 0; index < count; index++)
       {
-         float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
+         float[] pointFloatArray = new float[3 * blockSize];
          loadFloatArray(namespace, index, pointFloatArray);
 
          for (int i = 0; i < pointFloatArray.length / 3; i++)
@@ -111,12 +116,17 @@ public class PerceptionDataLoader
 
    public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
    {
+      loadQuaternionList(namespace, quaternions, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+   }
+
+   public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions, int blockSize)
+   {
       //      executorService.submit(() ->
       //        {
       int count = (int) hdf5Manager.getCount(namespace);
       for (int index = 0; index < count; index++)
       {
-         float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
+         float[] pointFloatArray = new float[4 * blockSize];
          loadFloatArray(namespace, index, pointFloatArray);
 
          for (int i = 0; i < pointFloatArray.length / 4; i++)

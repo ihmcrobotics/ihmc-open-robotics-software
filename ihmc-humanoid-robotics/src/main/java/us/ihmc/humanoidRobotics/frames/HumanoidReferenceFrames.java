@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
@@ -57,6 +58,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private SideDependentList<ReferenceFrame> situationalAwarenessCameraFrame = new SideDependentList<>();
    private ReferenceFrame experimentalCameraFrame;
    private ReferenceFrame ousterLidarFrame;
+   private ZUpFrame steppingCameraZUpFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
@@ -233,6 +235,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
+         steppingCameraZUpFrame = sensorInformation.getSteppingCameraZUpFrame(this);
       }
    }
 
@@ -396,6 +399,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          lidarSensorFrame.update();
       if (steppingCameraFrame != null)
          steppingCameraFrame.update();
+      if (steppingCameraZUpFrame != null)
+         steppingCameraZUpFrame.update();
       if (objectDetectionCameraFrame != null)
          objectDetectionCameraFrame.update();
       situationalAwarenessCameraFrame.forEach((side, frame) ->
@@ -470,6 +475,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getSteppingCameraFrame()
    {
       return steppingCameraFrame;
+   }
+
+   public ReferenceFrame getSteppingCameraZUpFrame()
+   {
+      return steppingCameraZUpFrame;
    }
 
    public ReferenceFrame getObjectDetectionCameraFrame()

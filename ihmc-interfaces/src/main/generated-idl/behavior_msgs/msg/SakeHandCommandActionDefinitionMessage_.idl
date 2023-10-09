@@ -1,0 +1,45 @@
+#ifndef __behavior_msgs__msg__SakeHandCommandActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__SakeHandCommandActionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionInformationMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::SakeHandCommandActionDefinitionMessage_")
+      struct SakeHandCommandActionDefinitionMessage
+      {
+        /**
+         * Used for syncing action sequences
+         */
+        behavior_msgs::msg::dds::ActionInformationMessage action_information;
+        /**
+         * Specifies the side of the robot that this message refers to.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * Hand configuration type
+         */
+        unsigned long configuration;
+        /**
+         * Goal position as ratio from 0.0 (closed) to 1.0 (open)
+         */
+        double position_ratio;
+        /**
+         * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
+         */
+        double torque_ratio;
+        /**
+         * Whether the next action can be executed at the same time of this one
+         */
+        boolean execute_with_next_action;
+      };
+    };
+  };
+};
+
+#endif
