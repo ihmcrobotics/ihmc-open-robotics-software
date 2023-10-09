@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -37,6 +38,12 @@ public class RDXPredefinedRigidBodySceneNode extends PredefinedRigidBodySceneNod
    public void renderImGuiWidgets()
    {
       predefinedRigidBodySceneNodeBasics.renderImGuiWidgets();
+   }
+
+   @Override
+   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      predefinedRigidBodySceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
    }
 
    @Override
