@@ -22,11 +22,15 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    /**
             * 0.0 min, 1.0 max
             */
-   public double torque_ratio_;
+   public double present_torque_ratio_;
    /**
             * 0.0 closed, 1.0 open
             */
    public double postion_ratio_;
+   /**
+            * 0.0 min, 1.0 max
+            */
+   public double goal_torque_ratio_;
    public boolean calibrated_;
    public boolean needs_reset_;
 
@@ -48,9 +52,11 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       temperature_ = other.temperature_;
 
-      torque_ratio_ = other.torque_ratio_;
+      present_torque_ratio_ = other.present_torque_ratio_;
 
       postion_ratio_ = other.postion_ratio_;
+
+      goal_torque_ratio_ = other.goal_torque_ratio_;
 
       calibrated_ = other.calibrated_;
 
@@ -94,16 +100,16 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    /**
             * 0.0 min, 1.0 max
             */
-   public void setTorqueRatio(double torque_ratio)
+   public void setPresentTorqueRatio(double present_torque_ratio)
    {
-      torque_ratio_ = torque_ratio;
+      present_torque_ratio_ = present_torque_ratio;
    }
    /**
             * 0.0 min, 1.0 max
             */
-   public double getTorqueRatio()
+   public double getPresentTorqueRatio()
    {
-      return torque_ratio_;
+      return present_torque_ratio_;
    }
 
    /**
@@ -119,6 +125,21 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    public double getPostionRatio()
    {
       return postion_ratio_;
+   }
+
+   /**
+            * 0.0 min, 1.0 max
+            */
+   public void setGoalTorqueRatio(double goal_torque_ratio)
+   {
+      goal_torque_ratio_ = goal_torque_ratio;
+   }
+   /**
+            * 0.0 min, 1.0 max
+            */
+   public double getGoalTorqueRatio()
+   {
+      return goal_torque_ratio_;
    }
 
    public void setCalibrated(boolean calibrated)
@@ -163,9 +184,11 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.temperature_, other.temperature_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.present_torque_ratio_, other.present_torque_ratio_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.postion_ratio_, other.postion_ratio_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_torque_ratio_, other.goal_torque_ratio_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calibrated_, other.calibrated_, epsilon)) return false;
 
@@ -190,9 +213,11 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.temperature_ != otherMyClass.temperature_) return false;
 
-      if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
+      if(this.present_torque_ratio_ != otherMyClass.present_torque_ratio_) return false;
 
       if(this.postion_ratio_ != otherMyClass.postion_ratio_) return false;
+
+      if(this.goal_torque_ratio_ != otherMyClass.goal_torque_ratio_) return false;
 
       if(this.calibrated_ != otherMyClass.calibrated_) return false;
 
@@ -214,10 +239,12 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("temperature=");
       builder.append(this.temperature_);      builder.append(", ");
-      builder.append("torque_ratio=");
-      builder.append(this.torque_ratio_);      builder.append(", ");
+      builder.append("present_torque_ratio=");
+      builder.append(this.present_torque_ratio_);      builder.append(", ");
       builder.append("postion_ratio=");
       builder.append(this.postion_ratio_);      builder.append(", ");
+      builder.append("goal_torque_ratio=");
+      builder.append(this.goal_torque_ratio_);      builder.append(", ");
       builder.append("calibrated=");
       builder.append(this.calibrated_);      builder.append(", ");
       builder.append("needs_reset=");

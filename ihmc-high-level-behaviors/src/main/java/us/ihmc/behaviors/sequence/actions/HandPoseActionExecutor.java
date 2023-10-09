@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
-import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -32,7 +32,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
    private int actionIndex;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final HandWrenchCalculator handWrenchCalculator;
+   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
@@ -46,12 +46,12 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot,
-                                 HandWrenchCalculator handWrenchCalculator)
+                                 SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.syncedRobot = syncedRobot;
-      this.handWrenchCalculator = handWrenchCalculator;
+      this.handWrenchCalculators = handWrenchCalculators;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -167,7 +167,7 @@ public class HandPoseActionExecutor extends HandPoseActionDefinition implements 
       executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
       executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-      executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(getSide(), true));
+      executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(getSide()).getLinearWrenchMagnitude(true));
       if (!isExecuting && wasExecuting && !getJointSpaceControl() && !getHoldPoseInWorldLater())
       {
          disengageHoldPoseInWorld();
