@@ -5,32 +5,42 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 
-public class WaitDurationActionDefinition implements BehaviorActionDefinition
+public class WaitDurationActionDefinition extends BehaviorActionDefinition
 {
-   private String description = "Wait";
    private double waitDuration = 4.0;
+
+   public WaitDurationActionDefinition()
+   {
+      super("Wait");
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("waitDuration", waitDuration);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       waitDuration = jsonNode.get("waitDuration").asDouble();
    }
 
    public void toMessage(WaitDurationActionDefinitionMessage message)
    {
+      super.toMessage(message.getActionDefinition());
+
       message.setWaitDuration(waitDuration);
    }
 
    public void fromMessage(WaitDurationActionDefinitionMessage message)
    {
+      super.fromMessage(message.getActionDefinition());
+
       waitDuration = message.getWaitDuration();
    }
 
@@ -42,17 +52,5 @@ public class WaitDurationActionDefinition implements BehaviorActionDefinition
    public void setWaitDuration(double waitDuration)
    {
       this.waitDuration = waitDuration;
-   }
-
-   @Override
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return description;
    }
 }
