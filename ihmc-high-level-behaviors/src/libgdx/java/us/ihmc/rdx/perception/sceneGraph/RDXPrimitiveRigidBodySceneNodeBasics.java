@@ -14,6 +14,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -122,11 +123,11 @@ public class RDXPrimitiveRigidBodySceneNodeBasics
          case "BOX" ->
          {
             boolean reshaped = false;
-            if (ImGui.inputFloat("depth", xLength))
+            if (ImGuiTools.volatileInputFloat("depth", xLength))
                reshaped = true;
-            if (ImGui.inputFloat("width", yLength))
+            if (ImGuiTools.volatileInputFloat("width", yLength))
                reshaped = true;
-            if (ImGui.inputFloat("height", zLength))
+            if (ImGuiTools.volatileInputFloat("height", zLength))
                reshaped = true;
             if (reshaped)
             {
@@ -137,11 +138,11 @@ public class RDXPrimitiveRigidBodySceneNodeBasics
          case "PRISM" ->
          {
             boolean reshaped = false;
-            if (ImGui.inputFloat("depth", xLength))
+            if (ImGuiTools.volatileInputFloat("depth", xLength))
                reshaped = true;
-            if (ImGui.inputFloat("width", yLength))
+            if (ImGuiTools.volatileInputFloat("width", yLength))
                reshaped = true;
-            if (ImGui.inputFloat("height", zLength))
+            if (ImGuiTools.volatileInputFloat("height", zLength))
                reshaped = true;
             if (reshaped)
             {
@@ -152,9 +153,9 @@ public class RDXPrimitiveRigidBodySceneNodeBasics
          case "CYLINDER" ->
          {
             boolean reshaped = false;
-            if (ImGui.inputFloat("radius", xRadius))
+            if (ImGuiTools.volatileInputFloat("radius", xRadius))
                reshaped = true;
-            if (ImGui.inputFloat("height", zLength))
+            if (ImGuiTools.volatileInputFloat("height", zLength))
                reshaped = true;
             if (reshaped)
             {
@@ -165,11 +166,11 @@ public class RDXPrimitiveRigidBodySceneNodeBasics
          case "ELLIPSOID" ->
          {
             boolean reshaped = false;
-            if (ImGui.inputFloat("xRadius", xRadius))
+            if (ImGuiTools.volatileInputFloat("xRadius", xRadius))
                reshaped = true;
-            if (ImGui.inputFloat("yRadius", yRadius))
+            if (ImGuiTools.volatileInputFloat("yRadius", yRadius))
                reshaped = true;
-            if (ImGui.inputFloat("zRadius", zRadius))
+            if (ImGuiTools.volatileInputFloat("zRadius", zRadius))
                reshaped = true;
             if (reshaped)
             {
@@ -180,9 +181,9 @@ public class RDXPrimitiveRigidBodySceneNodeBasics
          case "CONE" ->
          {
             boolean reshaped = false;
-            if (ImGui.inputFloat("radius", xRadius))
+            if (ImGuiTools.volatileInputFloat("radius", xRadius))
                reshaped = true;
-            if (ImGui.inputFloat("height", zLength))
+            if (ImGuiTools.volatileInputFloat("height", zLength))
                reshaped = true;
             if (reshaped)
             {
