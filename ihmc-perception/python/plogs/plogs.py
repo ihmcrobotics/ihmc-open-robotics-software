@@ -253,7 +253,6 @@ def plan_view_main(data):
 
     # Load height map data just as depth data
     # height_map = load_depth(data, 0, 'internal/height/')
-    height_map = load_depth(data, 0, 'internal/height/')
 
     footstep_plan_positions = get_data(data, 'plan/footstep/position/')
     footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
@@ -264,22 +263,22 @@ def plan_view_main(data):
     goal_positions = get_data(data, 'goal/footstep/position/')
     goal_orientations = get_data(data, 'goal/footstep/orientation/')
 
-    print("Height Map: ", height_map.shape)
     print("Footstep Plan: ", footstep_plan_positions.shape, footstep_plan_orientations.shape)
-
-    launch_plan_viewer(height_map, footstep_plan_positions, footstep_plan_orientations, 
+    launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
                        start_positions, start_orientations, goal_positions, goal_orientations)
 
-def launch_plan_viewer(height_map, footstep_positions, footstep_orientations, 
+def launch_plan_viewer(footstep_positions, footstep_orientations, 
                        start_positions, start_orientations, goal_positions, goal_orientations):
     
-    height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
-    height_map = np.minimum(height_map * 10, 255)
 
     total_plans = len(data['plan/footstep/position/'].keys())
 
     # Plot the footstep plan
     for i in range(total_plans):
+
+        height_map = load_depth(data, i, 'cropped/height/')
+        height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
+        height_map = np.minimum(height_map * 10, 255)
 
         height_map_display = height_map.copy()
 
@@ -389,5 +388,5 @@ if __name__ == '__main__':
     # list of good files
     # 20231005_001313_PerceptionLog.hdf5
 
-    data = h5py.File(path + '20231005_001313_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20231010_161751_PerceptionLog.hdf5', 'r')
     plan_view_main(data)
