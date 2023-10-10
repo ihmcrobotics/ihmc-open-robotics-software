@@ -6,10 +6,11 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinitionSupplier;
+import us.ihmc.behaviors.sequence.BehaviorActionStateSupplier;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
 
@@ -17,39 +18,33 @@ import us.ihmc.rdx.vr.RDXVRContext;
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
  */
-public abstract class RDXBehaviorAction
+public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
 {
-   private final MutableBoolean selected = new MutableBoolean();
+   private transient final RDXBehaviorActionSequenceEditor editor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBooleanWrapper selectedWrapper = new ImBooleanWrapper(selected::booleanValue,
-                                                                         selected::setValue,
-                                                                         imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
+   private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
-   private final ImString description = new ImString();
    private final ImString rejectionTooltip = new ImString();
-   private int actionIndex = -1;
-   private int actionNextExecutionIndex = -1;
+   private ImStringWrapper descriptionWrapper;
 
-   public RDXBehaviorAction()
+   public RDXBehaviorAction(RDXBehaviorActionSequenceEditor editor)
    {
-
+      this.editor = editor;
    }
 
    public void update()
    {
-      update(false);
+      if (descriptionWrapper == null)
+      {
+         descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
+                                                  getDefinition()::setDescription,
+                                                  imString -> ImGuiTools.inputText(labels.getHidden("description"), imString));
+      }
+
+      getState().update();
    }
 
-   public void update(boolean concurrentActionIsNextForExecution)
-   {
-
-   }
-
-   public void updateAfterLoading()
-   {
-
-   }
-
+   /** @deprecated TODO: Figure out how to remove this. */
    public void updateBeforeRemoving()
    {
 
@@ -75,15 +70,19 @@ public abstract class RDXBehaviorAction
 
    }
 
-   public final void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
       if (expanded.get())
       {
-         renderImGuiSettingWidgets();
+         ImGui.checkbox(labels.get("Selected"), selected);
+         ImGuiTools.previousWidgetTooltip("(Show gizmo)");
+         ImGui.sameLine();
+         ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
+         renderImGuiWidgetsInternal();
       }
    }
 
-   public void renderImGuiSettingWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
 
    }
@@ -93,11 +92,11 @@ public abstract class RDXBehaviorAction
 
    }
 
-   public abstract BehaviorActionDefinition getActionDefinition();
+   public abstract String getActionTypeTitle();
 
-   public ImBooleanWrapper getSelected()
+   public ImBoolean getSelected()
    {
-      return selectedWrapper;
+      return selected;
    }
 
    public ImBoolean getExpanded()
@@ -105,11 +104,9 @@ public abstract class RDXBehaviorAction
       return expanded;
    }
 
-   public abstract String getActionTypeTitle();
-
-   public ImString getDescription()
+   public ImStringWrapper getDescriptionWrapper()
    {
-      return description;
+      return descriptionWrapper;
    }
 
    public ImString getRejectionTooltip()
@@ -117,28 +114,8 @@ public abstract class RDXBehaviorAction
       return rejectionTooltip;
    }
 
-   public int getActionIndex()
+   public RDXBehaviorActionSequenceEditor getEditor()
    {
-      return actionIndex;
-   }
-
-   public void setActionIndex(int actionIndex)
-   {
-      this.actionIndex = actionIndex;
-   }
-
-   public int getActionNextExecutionIndex()
-   {
-      return actionNextExecutionIndex;
-   }
-
-   public void setActionNextExecutionIndex(int actionNextExecutionIndex)
-   {
-      this.actionNextExecutionIndex = actionNextExecutionIndex;
-   }
-
-   public boolean getExecuteWithNextAction()
-   {
-      return false;
+      return editor;
    }
 }
