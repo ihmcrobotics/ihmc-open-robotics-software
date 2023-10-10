@@ -292,9 +292,9 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
-void kernel contactMapKernel(read_write image2d_t heightMap,
-                                       read_write image2d_t costMap,
-                                       global float *params)
+void kernel terrainCostKernel(read_write image2d_t heightMap,
+                           read_write image2d_t costMap,
+                           global float *params)
 {
    // Extract the indices
    int xIndex = get_global_id(0);
@@ -341,6 +341,29 @@ void kernel contactMapKernel(read_write image2d_t heightMap,
    float dotProduct = fabs(surfaceNormal.z);
 
    // Scale-map the dot product to [0, 255] into the cost map in that order
-   int cost = (int) (dotProduct * 255);
+   uint cost = (uint) (dotProduct * 255);
    write_imageui(costMap, (int2)(yIndex, xIndex), (uint4)(cost, 0, 0, 0));
+}
+
+void kernel contactMapKernel(read_write image2d_t terrainCost,
+                           read_write image2d_t contactMap,
+                           global float *params)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   // Set the contact map at the current cell to be the sum of the 16x16 neighborhood of the terrain cost map
+   int contact = 0;
+   for (int i = -8; i < 8; i++)
+   {
+      for (int j = -8; j < 8; j++)
+      {
+         if (xIndex + i >= 0 && xIndex + i < params[GLOBAL_CELLS_PER_AXIS] && yIndex + j >= 0 && yIndex + j < params[GLOBAL_CELLS_PER_AXIS])
+         {
+            contact += read_imageui(terrainCost, (int2) (xIndex + i, yIndex + j)).x;
+         }
+      }
+   }
+
+   write_imageui(contactMap, (int2)(yIndex, xIndex), (uint4)((uint) (contact / 256), 0, 0, 0));
 }

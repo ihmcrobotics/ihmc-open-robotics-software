@@ -187,14 +187,20 @@ public class PerceptionDebugTools
 
    public static void printMat(String name, Mat image, int skip)
    {
-      LogTools.info(matToString(name, image, skip));
+      LogTools.info(matToString(name, image, 0, 0, image.rows(), image.cols(), skip));
+   }
+
+   public static void printMat(String name, Mat image, int row, int col, int nRows, int nCols, int skip)
+   {
+      LogTools.info(matToString(name, image, row, col, nRows, nCols, skip));
    }
 
    public static void printMatVector(String name, MatVector matVector)
    {
       for (int i = 0; i < matVector.size(); i++)
       {
-         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i), 1) + "\n");
+         printMat("%s %d:".formatted(name, i), matVector.get(i), 1);
+         System.out.println();
       }
    }
 
@@ -222,17 +228,16 @@ public class PerceptionDebugTools
       return matString.toString();
    }
 
-   public static String matToString(String name, Mat image, int skip)
+   public static String matToString(String name, Mat image, int row, int col, int nRows, int nCols, int skip)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "], Type: [" + getTypeString(image.type()) + "], Channels: [" + image.channels() + "]\n");
 
-      for (int i = 0; i < image.rows(); i+=skip)
+      for (int i = row; i < nRows; i+=skip)
       {
-         for (int j = 0; j < image.cols(); j+=skip)
+         for (int j = col; j < nCols; j+=skip)
          {
             if (image.type() == opencv_core.CV_8UC1)
-               // get string for byte as 0-255 and not negative
-               matString.append(image.ptr(i, j).get()).append(" ");
+               matString.append(image.ptr(i, j).get() & 0xFF).append(" ");
             if (image.type() == opencv_core.CV_16UC1)
                matString.append(image.ptr(i, j).getShort()).append("\t");
             if (image.type() == opencv_core.CV_64FC1)
