@@ -73,8 +73,6 @@ public class ROS2SceneGraphSubscription
          ++numberOfMessagesReceived;
          latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
 
-         sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
-
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);
          buildSubscriptionTree(latestSceneGraphMessage, subscriptionRootNode);
@@ -83,6 +81,9 @@ public class ROS2SceneGraphSubscription
          // updates the structure of the tree.
          localTreeFrozen = false;
          checkTreeModified(sceneGraph.getRootNode());
+
+         if (!localTreeFrozen)
+            sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
 
          sceneGraph.modifyTree(modificationQueue ->
          {
@@ -200,6 +201,12 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setStaticRelativeSceneNodeMessage(staticRelativeSceneNodeMessage);
             subscriptionNode.setPredefinedRigidBodySceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode());
             subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE ->
+         {
+            PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().get(indexInTypesList);
+            subscriptionNode.setPrimitiveRigidBodySceneNodeMessage(primitiveRigidBodySceneNodeMessage);
+            subscriptionNode.setSceneNodeMessage(primitiveRigidBodySceneNodeMessage.getSceneNode());
          }
       }
 
