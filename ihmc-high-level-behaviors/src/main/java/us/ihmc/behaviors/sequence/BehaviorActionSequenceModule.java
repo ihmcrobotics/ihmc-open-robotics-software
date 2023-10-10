@@ -50,7 +50,6 @@ public class BehaviorActionSequenceModule
 
          sceneGraph.updateSubscription();
 
-         referenceFrameLibrary.update();
          sequence.update();
       }
 
