@@ -15,18 +15,17 @@ import imgui.flag.ImGuiWindowFlags;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.Timer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -71,10 +70,7 @@ public class RDX3DPanel extends RDXPanel
    private float windowDrawMaxY;
    private float windowPositionX;
    private float windowPositionY;
-
-   private final Timer notificationTimer = new Timer();
-   private final RDX3DPanelTooltip notificationTooltip = new RDX3DPanelTooltip(this);
-   private String notificationText;
+   private final RDX3DPanelNotification notification = new RDX3DPanelNotification(this);
 
   public RDX3DPanel(String panelName)
    {
@@ -123,15 +119,7 @@ public class RDX3DPanel extends RDXPanel
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      addImGuiOverlayAddition(() ->
-      {
-         // Display notifications for 3 seconds
-         if (notificationTimer.getElapsedTime() < 3 && notificationText != null)
-         {
-            notificationTooltip.render(notificationText);
-         }
-      });
-      notificationTooltip.setInput(new ImGui3DViewInput(this));
+      addImGuiOverlayAddition(notification::render);
    }
 
    public void render()
@@ -290,12 +278,6 @@ public class RDX3DPanel extends RDXPanel
    public void dispose()
    {
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
-   }
-
-   public void pushNotification(String notificationText)
-   {
-      this.notificationText = notificationText;
-      notificationTimer.reset();
    }
 
    public void setViewportBoundsToWindow()
@@ -466,5 +448,10 @@ public class RDX3DPanel extends RDXPanel
    public String getPanelName()
    {
       return panelName;
+   }
+
+   public RDX3DPanelNotification getNotification()
+   {
+      return notification;
    }
 }
