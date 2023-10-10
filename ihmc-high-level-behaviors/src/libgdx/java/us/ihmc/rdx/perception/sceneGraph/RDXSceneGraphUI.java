@@ -3,7 +3,8 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
+import imgui.flag.ImGuiTableColumnFlags;
+import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -11,17 +12,24 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNodeBuilder;
+import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodyShape.getAvailableShapes;
 
 /**
  * Manages the perception scene graph.
@@ -32,14 +40,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RDXSceneGraphUI
 {
    private final ROS2SceneGraph sceneGraph;
-   private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new ConcurrentHashMap<>();
 
-   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
+   private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
+   private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
+
+   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D, ReferenceFrameLibrary referenceFrameLibrary)
    {
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
       {
@@ -51,6 +62,9 @@ public class RDXSceneGraphUI
       uiSceneNodes.put(sceneGraph.getRootNode(), new RDXSceneNode(sceneGraph.getRootNode()));
 
       sceneGraph.getSceneGraphSubscription().getSceneGraphSubscription().addCallback(message -> subscriptionFrequencyText.ping());
+
+      predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
+      primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
    }
 
    public void update()
@@ -64,8 +78,137 @@ public class RDXSceneGraphUI
             uiSceneNodes.remove(sceneNode);
    }
 
+   private void renderMenuBar()
+   {
+      if (ImGui.beginMenuBar())
+      {
+         ImGui.pushItemWidth(100.0f);
+         if (ImGui.beginMenu(labels.get("Nodes")))
+         {
+            sceneGraph.modifyTree(modificationQueue ->
+            {
+               // Predefined rigid bodies
+               if (ImGui.beginTable("##predefinedRigidBodyTable", 2))
+               {
+                  ImGui.tableSetupColumn(labels.get("Predefined rigid model"), ImGuiTableColumnFlags.WidthFixed, 150f);
+                  ImGui.tableSetupColumn(labels.get("Options"), ImGuiTableColumnFlags.WidthFixed, 200f);
+                  ImGui.tableHeadersRow();
+
+                  ImGui.tableNextRow();
+                  ImGui.tableSetColumnIndex(0);
+
+                  if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+                  {
+                     ImGui.beginDisabled();
+                  }
+                  if (ImGui.beginTable("##predefinedRigidBodyTableModel", 1))
+                  {
+                     ImGui.tableNextRow();
+                     ImGui.tableSetColumnIndex(0);
+                     if (ImGui.button(labels.get("Add Box")))
+                     {
+                        RDXPredefinedRigidBodySceneNode box = predefinedRigidBodySceneNodeBuilder.build("Box");
+
+                        uiSceneNodes.put(box.getSceneNode(), box);
+
+                        modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(),
+                                                                            predefinedRigidBodySceneNodeBuilder.getParent()));
+                     }
+                     if (ImGui.button(labels.get("Add Can")))
+                     {
+                        RDXPredefinedRigidBodySceneNode canOfSoup = predefinedRigidBodySceneNodeBuilder.build("CanOfSoup");
+
+                        uiSceneNodes.put(canOfSoup.getSceneNode(), canOfSoup);
+
+                        modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup.getSceneNode(),
+                                                                            predefinedRigidBodySceneNodeBuilder.getParent()));
+                     }
+                     if (ImGui.button(labels.get("Add 2x4")))
+                     {
+                        RDXPredefinedRigidBodySceneNode twoByFour = predefinedRigidBodySceneNodeBuilder.build("2X4");
+
+                        uiSceneNodes.put(twoByFour.getSceneNode(), twoByFour);
+
+                        modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(),
+                                                                            predefinedRigidBodySceneNodeBuilder.getParent()));
+                     }
+                     ImGui.endTable();
+                  }
+                  if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+                  {
+                     ImGui.endDisabled();
+                  }
+
+                  ImGui.tableSetColumnIndex(1);
+                  predefinedRigidBodySceneNodeBuilder.renderImGuiWidgets();
+
+                  ImGui.endTable();
+               }
+               if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+               {
+                  ImGuiTools.previousWidgetTooltip(predefinedRigidBodySceneNodeBuilder.getRejectionTooltip());
+               }
+
+               // Primitive rigid bodies
+               if (ImGui.beginTable("##primitiveRigidBodyTable", 2))
+               {
+                  ImGui.tableSetupColumn(labels.get("Primitive shape"), ImGuiTableColumnFlags.WidthFixed, 150f);
+                  ImGui.tableSetupColumn(labels.get("Options"), ImGuiTableColumnFlags.WidthFixed, 200f);
+                  ImGui.tableHeadersRow();
+
+                  ImGui.tableNextRow();
+                  ImGui.tableSetColumnIndex(0);
+
+                  if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+                  {
+                     ImGui.beginDisabled();
+                  }
+                  if (ImGui.beginTable("##primitiveRigidBodyTableModel", 1))
+                  {
+                     ImGui.tableNextRow();
+                     ImGui.tableSetColumnIndex(0);
+                     for (PrimitiveRigidBodyShape shape : getAvailableShapes())
+                     {
+                        if (ImGui.button(labels.get("Add " + shape.toString().toLowerCase())))
+                        {
+                           RDXPrimitiveRigidBodySceneNode rdxPrimitiveRigidBodySceneNode = primitiveRigidBodySceneNodeBuilder.build(shape.toString());
+
+                           uiSceneNodes.put(rdxPrimitiveRigidBodySceneNode.getSceneNode(), rdxPrimitiveRigidBodySceneNode);
+
+                           modificationQueue.accept(new SceneGraphNodeAddition(rdxPrimitiveRigidBodySceneNode.getSceneNode(),
+                                                                               primitiveRigidBodySceneNodeBuilder.getParent()));
+                        }
+                     }
+                     ImGui.endTable();
+                  }
+                  if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+                  {
+                     ImGui.endDisabled();
+                  }
+
+                  ImGui.tableSetColumnIndex(1);
+                  primitiveRigidBodySceneNodeBuilder.renderImGuiWidgets();
+
+                  ImGui.endTable();
+               }
+               if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+               {
+                  ImGuiTools.previousWidgetTooltip(primitiveRigidBodySceneNodeBuilder.getRejectionTooltip());
+               }
+            });
+
+            ImGui.endMenu();
+         }
+         ImGui.popItemWidth();
+      }
+
+      ImGui.endMenuBar();
+   }
+
    public void renderImGuiWidgets()
    {
+      renderMenuBar();
+
       int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
       SceneGraphMessage latestSceneGraphMessage = sceneGraph.getSceneGraphSubscription().getLatestSceneGraphMessage();
       int numberOfOnRobotNodes = latestSceneGraphMessage == null ? 0 : latestSceneGraphMessage.getSceneTreeIndices().size();

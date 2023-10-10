@@ -79,5 +79,5 @@ kernel void computeVertexBuffer(read_only image2d_t depthImageDiscretized,
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
    pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
    pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
-   pointCloudVertexBuffer[pointStartIndex + 7] = parameters[POINT_SIZE];
+   pointCloudVertexBuffer[pointStartIndex + 7] = parameters[POINT_SIZE] * eyeDepthInMeters;
 }

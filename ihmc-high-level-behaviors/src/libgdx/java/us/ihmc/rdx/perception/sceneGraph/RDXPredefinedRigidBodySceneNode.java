@@ -36,12 +36,14 @@ public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
    private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
    private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
    private transient final FramePose3D nodePose = new FramePose3D();
+   private final RDX3DPanel panel3D;
 
    public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
       super(predefinedRigidBodySceneNode);
 
       this.predefinedRigidBodySceneNode = predefinedRigidBodySceneNode;
+      this.panel3D = panel3D;
 
       modelInstance = new RDXModelInstance(RDXModelLoader.load(predefinedRigidBodySceneNode.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
@@ -104,9 +106,14 @@ public class RDXPredefinedRigidBodySceneNode extends RDXSceneNode
       }
    }
 
-   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public boolean renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      super.renderRemove(modificationQueue, sceneGraph);
+      if (super.renderRemove(modificationQueue, sceneGraph))
+      {
+         offsetPoseGizmo.removeRenderables(panel3D);
+         return true;
+      }
+      return false;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
