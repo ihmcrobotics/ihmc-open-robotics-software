@@ -202,6 +202,12 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setPredefinedRigidBodySceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode());
             subscriptionNode.setSceneNodeMessage(staticRelativeSceneNodeMessage.getPredefinedRigidBodySceneNode().getSceneNode());
          }
+         case SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE ->
+         {
+            PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().get(indexInTypesList);
+            subscriptionNode.setPrimitiveRigidBodySceneNodeMessage(primitiveRigidBodySceneNodeMessage);
+            subscriptionNode.setSceneNodeMessage(primitiveRigidBodySceneNodeMessage.getSceneNode());
+         }
       }
 
       for (int i = 0; i < subscriptionNode.getSceneNodeMessage().getNumberOfChildren(); i++)

@@ -13,17 +13,21 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNodeBuilder;
+import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.Set;
+
+import static us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodyShape.getAvailableShapes;
 
 /**
  * Manages the perception scene graph.
@@ -42,6 +46,7 @@ public class RDXSceneGraphUI
    private final ImBoolean viewAsTree = new ImBoolean(false);
 
    private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
+   private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
 
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -55,6 +60,7 @@ public class RDXSceneGraphUI
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
       predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
+      primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
 
       sceneGraph.getSceneGraphSubscription().getSceneGraphSubscription().addCallback(message -> subscriptionFrequencyText.ping());
    }
@@ -139,6 +145,47 @@ public class RDXSceneGraphUI
             if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
             {
                ImGuiTools.previousWidgetTooltip(predefinedRigidBodySceneNodeBuilder.getRejectionTooltip());
+            }
+
+            if (ImGui.beginTable("##primitiveRigidBodyTable", 2))
+            {
+               ImGui.tableSetupColumn(labels.get("Primitive shape"), ImGuiTableColumnFlags.WidthFixed, 150f);
+               ImGui.tableSetupColumn(labels.get("Options"), ImGuiTableColumnFlags.WidthFixed, 200f);
+               ImGui.tableHeadersRow();
+
+               // Predefined rigid bodies
+               ImGui.tableNextRow();
+               ImGui.tableSetColumnIndex(0);
+
+               if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+               {
+                  ImGui.beginDisabled();
+               }
+               if (ImGui.beginTable("##primitiveRigidBodyTableModel", 1))
+               {
+                  ImGui.tableNextRow();
+                  ImGui.tableSetColumnIndex(0);
+                  for (PrimitiveRigidBodyShape shape : getAvailableShapes())
+                     if (ImGui.button(labels.get("Add " + shape.toString().toLowerCase())))
+                     {
+                        modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNodeBuilder.build(shape.toString()),
+                                                                            primitiveRigidBodySceneNodeBuilder.getParent()));
+                     }
+                  ImGui.endTable();
+               }
+               if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+               {
+                  ImGui.endDisabled();
+               }
+
+               ImGui.tableSetColumnIndex(1);
+               primitiveRigidBodySceneNodeBuilder.renderImGuiWidgets();
+
+               ImGui.endTable();
+            }
+            if (!primitiveRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
+            {
+               ImGuiTools.previousWidgetTooltip(primitiveRigidBodySceneNodeBuilder.getRejectionTooltip());
             }
          });
 
