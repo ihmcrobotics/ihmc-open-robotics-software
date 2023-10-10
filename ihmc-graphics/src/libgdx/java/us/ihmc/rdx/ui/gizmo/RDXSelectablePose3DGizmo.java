@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
@@ -21,6 +22,7 @@ public class RDXSelectablePose3DGizmo
 {
    private final RDXPose3DGizmo poseGizmo;
    private final ImBoolean selected;
+   private RDXRenderableAdapter renderableAdapter;
 
    public RDXSelectablePose3DGizmo()
    {
@@ -55,7 +57,16 @@ public class RDXSelectablePose3DGizmo
       create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+      renderableAdapter = panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+   }
+
+   public void removeRenderables(RDX3DPanel panel3D)
+   {
+      if (renderableAdapter != null)
+      {
+         panel3D.getScene().removeRenderableAdapter(renderableAdapter);
+         renderableAdapter = null;
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
