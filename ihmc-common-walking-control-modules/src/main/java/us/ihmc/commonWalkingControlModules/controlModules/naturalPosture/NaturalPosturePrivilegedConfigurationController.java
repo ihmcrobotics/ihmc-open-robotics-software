@@ -205,7 +205,7 @@ public class NaturalPosturePrivilegedConfigurationController
       {
          /* Here we separate the privileged tasks based on whether they are a primary task or secondary task.
             Primary tasks are sent as feedback commands, and secondary tasks are sent as privileged configuration commands. */
-         if (yoJointPrivilegedConfigurationParametersList.get(i).getIsPrimaryTask())
+         if (yoJointPrivilegedConfigurationParametersList.get(i).isPrimaryTask())
          {
             createJointPrivilegedPrimaryTaskCommand(yoJointPrivilegedConfigurationParametersList.get(i), primaryTaskCommandList.get(i));
          }
