@@ -8,6 +8,7 @@ byte DETECTABLE_SCENE_NODE_TYPE=1
 byte PREDEFINED_RIGID_BODY_NODE_TYPE=2
 byte ARUCO_MARKER_NODE_TYPE=3
 byte STATIC_RELATIVE_NODE_TYPE=4
+byte PRIMITIVE_RIGID_BODY_NODE_TYPE=5
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -34,3 +35,6 @@ perception_msgs/ArUcoMarkerNodeMessage[<=200] aruco_marker_scene_nodes
 
 # Static relative scene nodes
 perception_msgs/StaticRelativeSceneNodeMessage[<=200] static_relative_scene_nodes
+
+# Reshapable rigid body scene nodes
+perception_msgs/PrimitiveRigidBodySceneNodeMessage[<=200] primitive_rigid_body_scene_nodes
