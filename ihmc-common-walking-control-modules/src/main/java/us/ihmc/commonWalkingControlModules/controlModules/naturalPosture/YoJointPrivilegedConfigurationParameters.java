@@ -42,7 +42,11 @@ public class YoJointPrivilegedConfigurationParameters
       return weight.getDoubleValue();
    }
 
-   public boolean getIsPrimaryTask()
+   /**
+    * This flag is TRUE when the privileged task should be considered primary and be added with the rest of the tasks in the QP. This flag is FALSE when the
+    * privileged task is secondary and thus should be projected into the nullspace of the primary tasks (this is the usual case for privileged tasks).
+    */
+   public boolean isPrimaryTask()
    {
       return isPrimaryTask.getBooleanValue();
    }
@@ -62,7 +66,11 @@ public class YoJointPrivilegedConfigurationParameters
       return weight;
    }
 
-   public YoBoolean getYoPrimaryTask()
+   /**
+    * This flag is TRUE when the privileged task should be considered primary and be added with the rest of the tasks in the QP. This flag is FALSE when the
+    * privileged task is secondary and thus should be projected into the nullspace of the primary tasks (this is the usual case for privileged tasks).
+    */
+   public YoBoolean getYoIsPrimaryTask()
    {
       return isPrimaryTask;
    }
@@ -73,7 +81,7 @@ public class YoJointPrivilegedConfigurationParameters
       this.privilegedOrientation.set(other.privilegedOrientation.getDoubleValue());
       this.pdGains.set(other.getPDGains());
       this.weight.set(other.weight.getDoubleValue());
-      this.isPrimaryTask.set(other.getYoPrimaryTask().getBooleanValue());
+      this.isPrimaryTask.set(other.getYoIsPrimaryTask().getBooleanValue());
    }
 
    private void set(NaturalPostureParameters.OneDofJointPrivilegedParameters parameters)
@@ -83,7 +91,7 @@ public class YoJointPrivilegedConfigurationParameters
       this.pdGains.setKp(parameters.getKp());
       this.pdGains.setKd(parameters.getKd());
       this.weight.set(parameters.getWeight());
-      this.isPrimaryTask.set(parameters.getWhetherPrimaryTask());
+      this.isPrimaryTask.set(parameters.isPrimaryTask());
 
       this.jointPrivilegedParameters = parameters;
    }

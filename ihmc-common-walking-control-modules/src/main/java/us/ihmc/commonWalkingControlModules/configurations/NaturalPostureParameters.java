@@ -89,7 +89,11 @@ public interface NaturalPostureParameters
          return weight;
       }
 
-      public boolean getWhetherPrimaryTask()
+      /**
+       * This flag is TRUE when the privileged task should be considered primary and be added with the rest of the tasks in the QP. This flag is FALSE when the
+       * privileged task is secondary and thus should be projected into the nullspace of the primary tasks (this is the usual case for privileged tasks).
+       */
+      public boolean isPrimaryTask()
       {
          return isPrimaryTask;
       }
