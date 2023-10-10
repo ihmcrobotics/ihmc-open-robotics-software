@@ -419,6 +419,8 @@ public class RDXRapidHeightMapSimulationDemo
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_POSITION, footstepPosition);
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, footstepOrientation);
             }
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, new Point3D(l515PoseGizmo.getTransformToParent().getTranslation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, new Quaternion(l515PoseGizmo.getTransformToParent().getRotation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, new Point3D(startPose.get(RobotSide.LEFT).getTranslation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, new Quaternion(startPose.get(RobotSide.LEFT).getOrientation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, new Point3D(goalPose.get(RobotSide.LEFT).getTranslation()));
