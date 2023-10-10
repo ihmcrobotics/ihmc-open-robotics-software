@@ -22,45 +22,47 @@ public class NaturalPostureManager
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private ExecutionTimer timer;
 
-   private final boolean useNaturalPostureCommand = true; //this must be true to use Natural Posture
+   private final YoBoolean enableNaturalPosture = new YoBoolean("enableNaturalPosture", registry);
    private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommandForNaturalPosture", registry);
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommandsForNaturalPosture", registry);
    private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommandForNaturalPosture", registry);
 
    public NaturalPostureManager(NaturalPostureParameters parameters, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
-      if(useNaturalPostureCommand)
+      // This must be true to use Natural Posture
+      enableNaturalPosture.set(false);
+
+      usePelvisPrivilegedPoseCommand.set(false);
+      useBodyManagerCommands.set(false);
+      usePelvisOrientationCommand.set(true);
+
+      parentRegistry.addChild(registry);
+
+      controller = new NaturalPostureController(parameters, controllerToolbox, registry);
+      privilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(parameters, controllerToolbox.getFullRobotModel(), registry);
+
+      timer = new ExecutionTimer("naturalPostureTimer", registry);
+
+      OneDoFJointBasics[] allOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
+      String[] jointNamesRestrictiveLimits = parameters.getJointsWithRestrictiveLimits();
+      OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFJoints,
+                                                                                                                         jointNamesRestrictiveLimits),
+                                                                                          OneDoFJointBasics.class);
+
+      for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
       {
-         parentRegistry.addChild(registry);
-
-         usePelvisPrivilegedPoseCommand.set(false);
-         useBodyManagerCommands.set(false);
-         usePelvisOrientationCommand.set(true);
-
-         controller = new NaturalPostureController(parameters, controllerToolbox, registry);
-         privilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(parameters, controllerToolbox.getFullRobotModel(), registry);
-
-         timer = new ExecutionTimer("naturalPostureTimer", registry);
-
-         OneDoFJointBasics[] allOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
-         String[] jointNamesRestrictiveLimits = parameters.getJointsWithRestrictiveLimits();
-         OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFJoints,
-                                                                                                                            jointNamesRestrictiveLimits),
-                                                                                             OneDoFJointBasics.class);
-         for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
-         {
-            JointLimitParameters limitParameters = parameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
-            if (limitParameters == null)
-               throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
-            jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
-         }
+         JointLimitParameters limitParameters = parameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
+         if (limitParameters == null)
+            throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
+         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
    }
 
    public boolean isEnabled()
    {
-      return useNaturalPostureCommand;
+      return enableNaturalPosture.getBooleanValue();
    }
+
    public InverseDynamicsCommand<?> getQPObjectiveCommand()
    {
       return controller.getInverseDynamicsCommand();
@@ -94,18 +96,36 @@ public class NaturalPostureManager
       return privilegedConfigurationController;
    }
 
-   public YoBoolean getUseBodyManagerCommands()
+   /**
+    * This should always evaluate to TRUE if natural posture is disabled.
+    */
+   public boolean getUseBodyManagerCommands()
    {
-      return useBodyManagerCommands;
+      if (enableNaturalPosture.getBooleanValue())
+         return useBodyManagerCommands.getBooleanValue();
+      else
+         return true;
    }
 
-   public YoBoolean getUsePelvisPrivilegedPoseCommand()
+   /**
+    * This should always evaluate to FALSE if natural posture is disabled.
+    */
+   public boolean getUsePelvisPrivilegedPoseCommand()
    {
-      return usePelvisPrivilegedPoseCommand;
+      if (enableNaturalPosture.getBooleanValue())
+         return usePelvisPrivilegedPoseCommand.getBooleanValue();
+      else
+         return false;
    }
 
-   public YoBoolean getUsePelvisOrientationCommand()
+   /**
+    * This should always evaluate to TRUE if natural posture is disabled.
+    */
+   public boolean getUsePelvisOrientationCommand()
    {
-      return usePelvisOrientationCommand;
+      if (enableNaturalPosture.getBooleanValue())
+         return usePelvisOrientationCommand.getBooleanValue();
+      else
+         return true;
    }
 }

@@ -908,7 +908,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Body managers:
-      if ((naturalPostureManager == null || !naturalPostureManager.isEnabled()) || (naturalPostureManager.getUseBodyManagerCommands().getValue()))
+      if (naturalPostureManager == null || (naturalPostureManager.getUseBodyManagerCommands()))
       {
          for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
          {
@@ -935,13 +935,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Privileged pelvis control:
-      if ((naturalPostureManager != null) && (naturalPostureManager.getUsePelvisPrivilegedPoseCommand().getValue()))
+      if (naturalPostureManager != null && naturalPostureManager.getUsePelvisPrivilegedPoseCommand())
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPelvisPrivilegedPoseCommand());
       }
 
       // Higher-level pelvis control:
-      if ((naturalPostureManager == null || !naturalPostureManager.isEnabled()) || (naturalPostureManager.getUsePelvisOrientationCommand().getValue()))
+      if (naturalPostureManager == null || naturalPostureManager.getUsePelvisOrientationCommand())
       {
          controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       }
