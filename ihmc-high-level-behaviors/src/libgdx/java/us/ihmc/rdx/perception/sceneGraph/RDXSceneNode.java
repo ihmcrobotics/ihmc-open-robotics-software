@@ -38,13 +38,15 @@ public class RDXSceneNode
       ImGui.text(detailsText);
    }
 
-   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public boolean renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       if (ImGui.button("Remove##" + sceneNode.getID()))
       {
          modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
          modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+         return true;
       }
+      return false;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

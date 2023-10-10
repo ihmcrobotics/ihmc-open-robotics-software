@@ -69,8 +69,8 @@ public class RDXAffordanceTemplateEditorUI
       SceneGraph sceneGraph = new SceneGraph();
       sceneGraph.modifyTree(modificationQueue ->
       {
-         DoorSceneNodeDefinitions.ensurePushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-         DoorSceneNodeDefinitions.ensurePullDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+         DoorSceneNodeDefinitions.ensureRightPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+         DoorSceneNodeDefinitions.ensureLeftPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
          RigidBodySceneObjectDefinitions.ensureBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
          RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
          RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
