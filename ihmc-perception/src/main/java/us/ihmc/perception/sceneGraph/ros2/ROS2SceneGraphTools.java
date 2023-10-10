@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -9,6 +10,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 public class ROS2SceneGraphTools
@@ -61,6 +63,18 @@ public class ROS2SceneGraphTools
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
          sceneNode = new DetectableSceneNode(nodeID, nodeName);
+      }
+      else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
+      {
+         PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = subscriptionNode.getPrimitiveRigidBodySceneNodeMessage();
+         RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
+         MessageTools.toEuclid(primitiveRigidBodySceneNodeMessage.getInitialTransformToParent(), initialTransformToParent);
+         sceneNode = new PrimitiveRigidBodySceneNode(nodeID,
+                                                     nodeName,
+                                                     sceneGraph.getIDToNodeMap(),
+                                                     primitiveRigidBodySceneNodeMessage.getInitialParentId(),
+                                                     initialTransformToParent,
+                                                     primitiveRigidBodySceneNodeMessage.getShapeAsString());
       }
       else
       {
