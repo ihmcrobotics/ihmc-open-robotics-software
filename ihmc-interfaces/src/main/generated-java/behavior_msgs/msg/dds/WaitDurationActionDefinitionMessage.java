@@ -9,9 +9,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActionDefinitionMessage> implements Settable<WaitDurationActionDefinitionMessage>, EpsilonComparable<WaitDurationActionDefinitionMessage>
 {
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
    /**
             * Wait duration
             */
@@ -19,7 +19,7 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
 
    public WaitDurationActionDefinitionMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
+      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
    }
 
    public WaitDurationActionDefinitionMessage(WaitDurationActionDefinitionMessage other)
@@ -30,18 +30,18 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
 
    public void set(WaitDurationActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
+      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       wait_duration_ = other.wait_duration_;
 
    }
 
 
    /**
-            * Used for syncing action sequences
+            * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
    {
-      return action_information_;
+      return action_definition_;
    }
 
    /**
@@ -77,7 +77,7 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
+      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wait_duration_, other.wait_duration_, epsilon)) return false;
 
 
@@ -93,7 +93,7 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
 
       WaitDurationActionDefinitionMessage otherMyClass = (WaitDurationActionDefinitionMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
+      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
       if(this.wait_duration_ != otherMyClass.wait_duration_) return false;
 
 
@@ -106,8 +106,8 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
       StringBuilder builder = new StringBuilder();
 
       builder.append("WaitDurationActionDefinitionMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
+      builder.append("action_definition=");
+      builder.append(this.action_definition_);      builder.append(", ");
       builder.append("wait_duration=");
       builder.append(this.wait_duration_);
       builder.append("}");

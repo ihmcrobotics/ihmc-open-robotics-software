@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__ChestOrientationActionStateMessage__idl__
+#define __behavior_msgs__msg__ChestOrientationActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorActionStateMessage_.idl"
+#include "behavior_msgs/msg/./ChestOrientationActionDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ChestOrientationActionStateMessage_")
+      struct ChestOrientationActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorActionStateMessage action_state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::ChestOrientationActionDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif
