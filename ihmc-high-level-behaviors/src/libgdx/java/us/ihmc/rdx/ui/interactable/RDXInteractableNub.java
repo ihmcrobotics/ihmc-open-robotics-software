@@ -13,17 +13,17 @@ import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 
-public class RDXInteractableBumper implements RDXInteractableAffordanceTemplateHand
+public class RDXInteractableNub implements RDXInteractableAffordanceTemplateHand
 {
    private RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
    private final ReferenceFrame referenceFrameHand;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
 
-   public RDXInteractableBumper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
+   public RDXInteractableNub(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify, ColorDefinition color)
    {
       this.referenceFrameHand = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                        transformToParentToModify);
-      ModelData handModel = RDXModelLoader.loadModelData("environmentObjects/bumperCycloidalArms/bumper.g3dj");
+      ModelData handModel = RDXModelLoader.loadModelData("environmentObjects/nubCycloidalArms/nub.g3dj");
       interactableHandFrameModel.create(referenceFrameHand, transformToParentToModify, panel3D, handModel, this::calculateClosestCollision);
       interactableHandFrameModel.getModelInstance().setColor(color);
    }

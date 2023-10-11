@@ -10,7 +10,6 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
@@ -20,7 +19,7 @@ import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
-import us.ihmc.rdx.ui.interactable.RDXInteractableBumper;
+import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.tools.ImGuiDirectory;
@@ -48,7 +47,6 @@ public class RDXAffordanceTemplateEditorUI
    private final RDXAffordanceTemplateEditorStatus status;
 
    private final SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands = new SideDependentList<>();
-   private RDXRenderableAdapter fingersRenderableAdapter;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
    private final RDXInteractableObjectBuilder objectBuilder;
@@ -221,18 +219,18 @@ public class RDXAffordanceTemplateEditorUI
          }
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Bumper"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableBumper.class)))
+      if (ImGui.radioButton(labels.get("Nub"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableNub.class)))
       {
-         if (!interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableBumper.class))
+         if (!interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableNub.class))
          {
             for (RobotSide side : RobotSide.values())
             {
                interactableHands.get(side).removeRenderables(panel3D);
                interactableHands.get(side).removeInteractions(panel3D);
                interactableHands.replace(side,
-                                         new RDXInteractableBumper(panel3D,
-                                                                   handTransformsToWorld.get(side),
-                                                                   new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                         new RDXInteractableNub(panel3D,
+                                                                handTransformsToWorld.get(side),
+                                                                new ColorDefinition(HAND_COLORS.get(side).getRed(),
                                                                                        HAND_COLORS.get(side).getGreen(),
                                                                                        HAND_COLORS.get(side).getBlue(),
                                                                                        0.8)));
