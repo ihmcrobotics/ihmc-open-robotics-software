@@ -20,6 +20,9 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 public class ZEDColorDepthImagePublisher
@@ -33,10 +36,25 @@ public class ZEDColorDepthImagePublisher
    private final SideDependentList<IHMCROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
 
-   private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
+   private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>(new CUDAImageEncoder(), new CUDAImageEncoder());
 
    private long lastDepthSequenceNumber = -1L;
    private final SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
+
+   private RawImage nextDepthImage;
+   private SideDependentList<RawImage> nextColorImages = new SideDependentList<>();
+
+   private final Thread publishDepthThread = new DepthPublisherThread();
+   private final Lock depthPublishLock = new ReentrantLock();
+   private final Condition newDepthImageAvailable = depthPublishLock.newCondition();
+
+   private final SideDependentList<Thread> publishColorThreads = new SideDependentList<>(new ColorPublisherThread(RobotSide.LEFT),
+                                                                                         new ColorPublisherThread(RobotSide.RIGHT));
+   private final SideDependentList<Lock> colorPublishLocks = new SideDependentList<>(new ReentrantLock(), new ReentrantLock());
+   private final SideDependentList<Condition> newColorImagesAvailable = new SideDependentList<>(colorPublishLocks.get(RobotSide.LEFT).newCondition(),
+                                                                                                colorPublishLocks.get(RobotSide.RIGHT).newCondition());
+
+   private boolean running = true;
 
    public ZEDColorDepthImagePublisher(ZEDModelData zedModelData,
                                       SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
@@ -53,12 +71,10 @@ public class ZEDColorDepthImagePublisher
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
    }
 
-   public void publishDepthImage(RawImage gpuDepthImage16UC1)
+   private void publishDepthImage(RawImage gpuDepthImage16UC1)
    {
       // Perform safety checks
-      if (gpuDepthImage16UC1 != null &&
-          !gpuDepthImage16UC1.isEmpty() &&
-          gpuDepthImage16UC1.getSequenceNumber() != lastDepthSequenceNumber)
+      if (gpuDepthImage16UC1 != null && !gpuDepthImage16UC1.isEmpty() && gpuDepthImage16UC1.getSequenceNumber() != lastDepthSequenceNumber)
       {
          // Encode depth image to png
          BytePointer depthPNGPointer = new BytePointer();
@@ -97,16 +113,14 @@ public class ZEDColorDepthImagePublisher
       }
    }
 
-   public void publishColorImage(RawImage gpuColorImageBGR, RobotSide side)
+   private void publishColorImage(RawImage gpuColorImageBGR, RobotSide side)
    {
       // Perform safety checks
-      if (gpuColorImageBGR != null &&
-          !gpuColorImageBGR.isEmpty() &&
-          gpuColorImageBGR.getSequenceNumber() != lastColorSequenceNumbers.get(side))
+      if (gpuColorImageBGR != null && !gpuColorImageBGR.isEmpty() && gpuColorImageBGR.getSequenceNumber() != lastColorSequenceNumbers.get(side))
       {
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) gpuColorImageBGR.getImageHeight() * gpuColorImageBGR.getImageWidth());
-         imageEncoder.encodeBGR(gpuColorImageBGR.getGpuImageMatrix().data(),
+         imageEncoders.get(side).encodeBGR(gpuColorImageBGR.getGpuImageMatrix().data(),
                                 colorJPEGPointer,
                                 gpuColorImageBGR.getImageWidth(),
                                 gpuColorImageBGR.getImageHeight(),
@@ -136,6 +150,145 @@ public class ZEDColorDepthImagePublisher
          // Close stuff
          colorJPEGPointer.close();
          gpuColorImageBGR.destroy();
+      }
+   }
+
+   public void start()
+   {
+      publishDepthThread.start();
+      for (RobotSide side : RobotSide.values)
+      {
+         publishColorThreads.get(side).start();
+      }
+   }
+
+   public void stop()
+   {
+      running = false;
+
+      try
+      {
+         publishDepthThread.join();
+         for (RobotSide side : RobotSide.values)
+         {
+            publishColorThreads.get(side).join();
+         }
+      }
+      catch (InterruptedException interruptedException)
+      {
+         interruptedException.printStackTrace();
+      }
+
+      nextDepthImage.destroy();
+      for (RobotSide side : RobotSide.values)
+      {
+         imageEncoders.get(side).destroy();
+         nextColorImages.get(side).destroy();
+      }
+   }
+
+   public void setNextDepthImage(RawImage depthImage)
+   {
+      depthPublishLock.lock();
+      try
+      {
+         nextDepthImage = depthImage;
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
+   }
+
+   public void setNextColorImage(RawImage colorImage, RobotSide side)
+   {
+      colorPublishLocks.get(side).lock();
+      try
+      {
+         nextColorImages.put(side, colorImage);
+         newColorImagesAvailable.get(side).signal();
+      }
+      finally
+      {
+         colorPublishLocks.get(side).unlock();
+      }
+   }
+
+   private class DepthPublisherThread extends Thread
+   {
+      public DepthPublisherThread()
+      {
+         super("ZEDDepthImagePublisher");
+      }
+
+      @Override
+      public void run()
+      {
+         while (running)
+         {
+            depthPublishLock.lock();
+            try
+            {
+               while (nextDepthImage == null ||
+                      nextDepthImage.isEmpty() ||
+                      nextDepthImage.getSequenceNumber() == lastDepthSequenceNumber)
+               {
+                  newDepthImageAvailable.await();
+               }
+
+               RawImage depthImageToPublish = new RawImage(nextDepthImage);
+               publishDepthImage(depthImageToPublish);
+            }
+            catch (InterruptedException interruptedException)
+            {
+               interruptedException.printStackTrace();
+            }
+            finally
+            {
+               depthPublishLock.unlock();
+            }
+         }
+      }
+   }
+
+   private class ColorPublisherThread extends Thread
+   {
+      private final RobotSide side;
+
+      public ColorPublisherThread(RobotSide side)
+      {
+         super("ZED" + side.getPascalCaseName() + "ImagePublisher");
+         this.side = side;
+      }
+
+      @Override
+      public void run()
+      {
+         while (running)
+         {
+            colorPublishLocks.get(side).lock();
+            try
+            {
+               while (nextColorImages.get(side) == null ||
+                      nextColorImages.get(side).isEmpty() ||
+                      nextColorImages.get(side).getSequenceNumber() == lastColorSequenceNumbers.get(side))
+               {
+                  newColorImagesAvailable.get(side).await();
+               }
+
+               RawImage colorImageToPublish = new RawImage(nextColorImages.get(side));
+               publishColorImage(colorImageToPublish, side);
+            }
+            catch (InterruptedException interruptedException)
+            {
+               interruptedException.printStackTrace();
+            }
+            finally
+            {
+               colorPublishLocks.get(side).unlock();
+            }
+         }
       }
    }
 }
