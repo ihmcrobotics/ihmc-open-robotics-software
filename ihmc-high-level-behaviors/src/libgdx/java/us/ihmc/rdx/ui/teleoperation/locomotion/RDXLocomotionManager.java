@@ -26,10 +26,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.imgui.ImGuiTextOverlay;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
@@ -92,7 +91,6 @@ public class RDXLocomotionManager
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
    private final Timer footstepPlanningCompleteTimer = new Timer();
-   private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -497,19 +495,15 @@ public class RDXLocomotionManager
       boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
       if (isPlanning || hasPlannedRecently)
       {
-         ImGui.pushFont(ImGuiTools.getMediumFont());
-         String text;
          if (isPlanning)
          {
             footstepPlanningCompleteTimer.reset();
-            text = "Planning footsteps...";
+            panel3D.getNotification().setText("Planning footsteps...");
          }
          else
          {
-            text = "Footstep planning completed.";
+            panel3D.getNotification().setText("Footstep planning completed.");
          }
-         statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
-         ImGui.popFont();
       }
    }
 
