@@ -15,6 +15,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -42,6 +43,7 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<Float> cameraPrincipalPointX;
    private final SideDependentList<Float> cameraPrincipalPointY;
 
+   private final Pointer colorImagePointer;
    private final Pointer depthImagePointer;
    private long grabSequenceNumber = 0L;
    private final SideDependentList<Long> colorImageSequenceNumber = new SideDependentList<>(0L, 0L);
@@ -53,6 +55,9 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<GpuMat> colorGpuMats = new SideDependentList<>();
    private final SideDependentList<RawImage> rawColorImages = new SideDependentList<>();
    private RawImage rawDepthImage;
+
+   private final Thread grabImageThread;
+   boolean running = true;
 
    public ZEDColorDepthImageRetriever(int cameraID)
    {
@@ -112,13 +117,24 @@ public class ZEDColorDepthImageRetriever
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
+      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
 
       depthGpuMat = new GpuMat(imageHeight, imageWidth, opencv_core.CV_16UC1);
       colorGpuMats.put(RobotSide.LEFT, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
       colorGpuMats.put(RobotSide.RIGHT, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
 
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
+      grabImageThread = new Thread(() ->
+      {
+         while (running)
+         {
+            // sl_grab is blocking, and will wait for next frame available. No need to use throttler
+            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+            retrieveAndSaveDepthImage();
+            retrieveAndSaveColorImage(RobotSide.LEFT);
+            retrieveAndSaveColorImage(RobotSide.RIGHT);
+         }
+      }, "ZEDGrabImageThread");
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
@@ -129,7 +145,6 @@ public class ZEDColorDepthImageRetriever
    {
       int slViewSide = side == RobotSide.LEFT ? SL_VIEW_LEFT : SL_VIEW_RIGHT;
       // Retrieve color image
-      Pointer colorImagePointer = new Pointer();
       checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, slViewSide, SL_MEM_GPU, imageWidth, imageHeight));
       colorImageAcquisitionTime.set(Instant.now());
 
@@ -140,11 +155,7 @@ public class ZEDColorDepthImageRetriever
                                          sl_mat_get_ptr(colorImagePointer, SL_MEM_GPU),
                                          sl_mat_get_step_bytes(colorImagePointer, SL_MEM_GPU));
 
-      if (colorGpuMats.get(side) != null)
-      {
-         colorGpuMats.get(side).releaseReference();
-         colorGpuMats.get(side).close();
-      }
+      colorGpuMats.get(side).close();
       colorGpuMats.put(side, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
       opencv_cudaimgproc.cvtColor(colorImageBGRA, colorGpuMats.get(side), opencv_imgproc.COLOR_BGRA2BGR);
 
@@ -155,7 +166,7 @@ public class ZEDColorDepthImageRetriever
                                       imageHeight,
                                       MILLIMETER_TO_METERS,
                                       null,
-                                      colorGpuMats.get(side),
+                                      colorGpuMats.get(side).clone(),
                                       opencv_core.CV_8UC3,
                                       cameraFocalLengthX.get(side),
                                       cameraFocalLengthY.get(side),
@@ -176,11 +187,7 @@ public class ZEDColorDepthImageRetriever
       checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight));
       depthImageAcquisitionTime.set(Instant.now());
 
-      if (depthGpuMat != null)
-      {
-         depthGpuMat.releaseReference();
-         depthGpuMat.close();
-      }
+      depthGpuMat.close();
       depthGpuMat = new GpuMat(imageHeight,
                                imageWidth,
                                opencv_core.CV_16UC1,
@@ -193,21 +200,12 @@ public class ZEDColorDepthImageRetriever
                                    imageHeight,
                                    MILLIMETER_TO_METERS,
                                    null,
-                                   depthGpuMat,
+                                   depthGpuMat.clone(),
                                    opencv_core.CV_16UC1,
                                    cameraFocalLengthX.get(RobotSide.LEFT),
                                    cameraFocalLengthY.get(RobotSide.LEFT),
                                    cameraPrincipalPointX.get(RobotSide.LEFT),
                                    cameraPrincipalPointY.get(RobotSide.LEFT));
-   }
-
-   // TODO: Put this in a thread and find way to deallocate GPU mats
-   public void grabNextImage()
-   {
-      checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
-      retrieveAndSaveDepthImage();
-      retrieveAndSaveColorImage(RobotSide.LEFT);
-      retrieveAndSaveColorImage(RobotSide.RIGHT);
    }
 
    public RawImage getLatestRawDepthImage()
@@ -225,8 +223,31 @@ public class ZEDColorDepthImageRetriever
       return zedModelData;
    }
 
-   private void destroy()
+   public void start()
    {
+      grabImageThread.start();
+   }
+
+   public void destroy()
+   {
+      running = false;
+      try
+      {
+         grabImageThread.join();
+      }
+      catch (InterruptedException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      depthImagePointer.close();
+      rawDepthImage.destroy();
+
+      colorImagePointer.close();
+      for (RobotSide side : RobotSide.values)
+      {
+         rawColorImages.get(side).destroy();
+      }
       sl_close_camera(cameraID);
    }
 

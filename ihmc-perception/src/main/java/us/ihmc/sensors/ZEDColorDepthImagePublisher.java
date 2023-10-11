@@ -1,7 +1,6 @@
 package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -36,6 +35,9 @@ public class ZEDColorDepthImagePublisher
 
    private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
 
+   private long lastDepthSequenceNumber = -1L;
+   private final SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
+
    public ZEDColorDepthImagePublisher(ZEDModelData zedModelData,
                                       SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
                                       ROS2Topic<ImageMessage> depthTopic,
@@ -53,75 +55,87 @@ public class ZEDColorDepthImagePublisher
 
    public void publishDepthImage(RawImage gpuDepthImage16UC1)
    {
-      Mat cpuDepthImage16UC1 = new Mat(gpuDepthImage16UC1.getImageHeight(), gpuDepthImage16UC1.getImageWidth(), gpuDepthImage16UC1.getOpenCVType());
-      gpuDepthImage16UC1.getGpuImageMatrix().download(cpuDepthImage16UC1);
+      // Perform safety checks
+      if (gpuDepthImage16UC1 != null &&
+          !gpuDepthImage16UC1.isEmpty() &&
+          gpuDepthImage16UC1.getSequenceNumber() != lastDepthSequenceNumber)
+      {
+         // Encode depth image to png
+         BytePointer depthPNGPointer = new BytePointer();
+         OpenCVTools.compressImagePNG(gpuDepthImage16UC1.getCpuImageMatrix(), depthPNGPointer);
 
-      // Encode depth image to png
-      BytePointer depthPNGPointer = new BytePointer();
-      OpenCVTools.compressImagePNG(cpuDepthImage16UC1, depthPNGPointer);
+         // Get present position of sensor
+         leftCameraFramePose.setToZero(sensorFrameSupplier.get());
+         leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
+         leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // Get present position of sensor
-      leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-      leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
-      leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         // Publish image
+         ImageMessage depthImageMessage = new ImageMessage();
+         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
+         imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
+         MessageTools.toMessage(gpuDepthImage16UC1.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
+         depthImageMessage.setFocalLengthXPixels(gpuDepthImage16UC1.getFocalLengthX());
+         depthImageMessage.setFocalLengthYPixels(gpuDepthImage16UC1.getFocalLengthY());
+         depthImageMessage.setPrincipalPointXPixels(gpuDepthImage16UC1.getPrincipalPointX());
+         depthImageMessage.setPrincipalPointYPixels(gpuDepthImage16UC1.getPrincipalPointY());
+         depthImageMessage.setImageWidth(gpuDepthImage16UC1.getImageWidth());
+         depthImageMessage.setImageHeight(gpuDepthImage16UC1.getImageHeight());
+         depthImageMessage.getPosition().set(leftCameraFramePose.getPosition());
+         depthImageMessage.getOrientation().set(leftCameraFramePose.getOrientation());
+         depthImageMessage.setSequenceNumber(gpuDepthImage16UC1.getSequenceNumber());
+         depthImageMessage.setDepthDiscretization(gpuDepthImage16UC1.getDepthDiscretization());
+         CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+         ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
 
-      // Publish image
-      ImageMessage depthImageMessage = new ImageMessage();
-      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
-      imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
-      MessageTools.toMessage(gpuDepthImage16UC1.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
-      depthImageMessage.setFocalLengthXPixels(gpuDepthImage16UC1.getFocalLengthX());
-      depthImageMessage.setFocalLengthYPixels(gpuDepthImage16UC1.getFocalLengthY());
-      depthImageMessage.setPrincipalPointXPixels(gpuDepthImage16UC1.getPrincipalPointX());
-      depthImageMessage.setPrincipalPointYPixels(gpuDepthImage16UC1.getPrincipalPointY());
-      depthImageMessage.setImageWidth(gpuDepthImage16UC1.getImageWidth());
-      depthImageMessage.setImageHeight(gpuDepthImage16UC1.getImageHeight());
-      depthImageMessage.getPosition().set(leftCameraFramePose.getPosition());
-      depthImageMessage.getOrientation().set(leftCameraFramePose.getOrientation());
-      depthImageMessage.setSequenceNumber(gpuDepthImage16UC1.getSequenceNumber());
-      depthImageMessage.setDepthDiscretization(gpuDepthImage16UC1.getDepthDiscretization());
-      CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+         ros2DepthImagePublisher.publish(depthImageMessage);
 
-      ros2DepthImagePublisher.publish(depthImageMessage);
+         lastDepthSequenceNumber = gpuDepthImage16UC1.getSequenceNumber();
 
-      // Close GpuMat
-      depthPNGPointer.close();
-      cpuDepthImage16UC1.close();
-      //gpuDepthImage16UC1.destroy();
+         // Close GpuMat
+         depthPNGPointer.close();
+         gpuDepthImage16UC1.destroy();
+      }
    }
 
    public void publishColorImage(RawImage gpuColorImageBGR, RobotSide side)
    {
-      // Compress image
-      BytePointer colorJPEGPointer = new BytePointer((long) gpuColorImageBGR.getImageHeight() * gpuColorImageBGR.getImageWidth());
-      imageEncoder.encodeBGR(gpuColorImageBGR.getGpuImageMatrix().data(),
-                             colorJPEGPointer,
-                             gpuColorImageBGR.getImageWidth(),
-                             gpuColorImageBGR.getImageHeight(),
-                             gpuColorImageBGR.getGpuImageMatrix().step());
+      // Perform safety checks
+      if (gpuColorImageBGR != null &&
+          !gpuColorImageBGR.isEmpty() &&
+          gpuColorImageBGR.getSequenceNumber() != lastColorSequenceNumbers.get(side))
+      {
+         // Compress image
+         BytePointer colorJPEGPointer = new BytePointer((long) gpuColorImageBGR.getImageHeight() * gpuColorImageBGR.getImageWidth());
+         imageEncoder.encodeBGR(gpuColorImageBGR.getGpuImageMatrix().data(),
+                                colorJPEGPointer,
+                                gpuColorImageBGR.getImageWidth(),
+                                gpuColorImageBGR.getImageHeight(),
+                                gpuColorImageBGR.getGpuImageMatrix().step());
 
-      // Publish compressed image
-      ImageMessage colorImageMessage = new ImageMessage();
-      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
-      imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
-      MessageTools.toMessage(gpuColorImageBGR.getAcquisitionTime(), colorImageMessage.getAcquisitionTime());
-      colorImageMessage.setFocalLengthXPixels(gpuColorImageBGR.getFocalLengthX());
-      colorImageMessage.setFocalLengthYPixels(gpuColorImageBGR.getFocalLengthY());
-      colorImageMessage.setPrincipalPointXPixels(gpuColorImageBGR.getPrincipalPointX());
-      colorImageMessage.setPrincipalPointYPixels(gpuColorImageBGR.getPrincipalPointY());
-      colorImageMessage.setImageWidth(gpuColorImageBGR.getImageWidth());
-      colorImageMessage.setImageHeight(gpuColorImageBGR.getImageHeight());
-      colorImageMessage.getPosition().set(cameraPosesInDepthFrame.get(side).getPosition());
-      colorImageMessage.getOrientation().set(cameraPosesInDepthFrame.get(side).getOrientation());
-      colorImageMessage.setSequenceNumber(gpuColorImageBGR.getSequenceNumber());
-      colorImageMessage.setDepthDiscretization(gpuColorImageBGR.getDepthDiscretization());
-      CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-      ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
-      ros2ColorImagePublishers.get(side).publish(colorImageMessage);
+         // Publish compressed image
+         ImageMessage colorImageMessage = new ImageMessage();
+         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
+         imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
+         MessageTools.toMessage(gpuColorImageBGR.getAcquisitionTime(), colorImageMessage.getAcquisitionTime());
+         colorImageMessage.setFocalLengthXPixels(gpuColorImageBGR.getFocalLengthX());
+         colorImageMessage.setFocalLengthYPixels(gpuColorImageBGR.getFocalLengthY());
+         colorImageMessage.setPrincipalPointXPixels(gpuColorImageBGR.getPrincipalPointX());
+         colorImageMessage.setPrincipalPointYPixels(gpuColorImageBGR.getPrincipalPointY());
+         colorImageMessage.setImageWidth(gpuColorImageBGR.getImageWidth());
+         colorImageMessage.setImageHeight(gpuColorImageBGR.getImageHeight());
+         colorImageMessage.getPosition().set(cameraPosesInDepthFrame.get(side).getPosition());
+         colorImageMessage.getOrientation().set(cameraPosesInDepthFrame.get(side).getOrientation());
+         colorImageMessage.setSequenceNumber(gpuColorImageBGR.getSequenceNumber());
+         colorImageMessage.setDepthDiscretization(gpuColorImageBGR.getDepthDiscretization());
+         CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
+         ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
+         ros2ColorImagePublishers.get(side).publish(colorImageMessage);
 
-      // Close stuff
-      colorJPEGPointer.close();
-      //gpuColorImageBGR.destroy();
+         lastColorSequenceNumbers.put(side, gpuColorImageBGR.getSequenceNumber());
+
+         // Close stuff
+         colorJPEGPointer.close();
+         gpuColorImageBGR.destroy();
+      }
    }
 }
