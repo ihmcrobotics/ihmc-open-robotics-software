@@ -141,7 +141,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          terrainCostImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
-         contactMapImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
+         contactMapImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage());
       }
 
       if (rapidRegionsUI != null)

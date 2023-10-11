@@ -210,6 +210,8 @@ public class RapidHeightMapExtractor
          terrainCostImage.readOpenCLImage(openCLManager);
          contactMapImage.readOpenCLImage(openCLManager);
 
+         PerceptionDebugTools.printMat("Feasible Contact Map", getCroppedContactMapImage(), 1);
+
          sequenceNumber++;
       }
    }
@@ -310,7 +312,7 @@ public class RapidHeightMapExtractor
 
    public Mat getCroppedContactMapImage()
    {
-      return getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
+      return getCroppedImage(sensorOrigin, globalCenterIndex, contactMapImage.getBytedecoOpenCVMat());
    }
 
    public Mat getCroppedImage(Point3D origin, int globalCenterIndex, Mat imageToCrop)
