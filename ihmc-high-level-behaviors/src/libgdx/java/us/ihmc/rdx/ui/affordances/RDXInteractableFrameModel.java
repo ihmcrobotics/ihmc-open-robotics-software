@@ -170,6 +170,9 @@ public class RDXInteractableFrameModel
          panel3D.getScene().removeRenderableAdapter(renderableAdapter);
          renderableAdapter = null;
       }
+      panel3D.removeImGui3DViewInputProcessor(this);
+      panel3D.removeImGui3DViewPickCalculator(this);
+      panel3D.removeImGuiOverlayAddition(this);
    }
 
    public ReferenceFrame getReferenceFrame()
