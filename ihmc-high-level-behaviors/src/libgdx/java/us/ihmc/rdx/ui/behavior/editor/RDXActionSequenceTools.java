@@ -1,10 +1,7 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import behavior_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -12,12 +9,31 @@ import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RDXActionSequenceTools
 {
+   public static <T> T createBlankAction(Class<T> actionType,
+                                         RDXBehaviorActionSequenceEditor editor,
+                                         DRCRobotModel robotModel,
+                                         ROS2SyncedRobotModel syncedRobot,
+                                         RobotCollisionModel selectionCollisionModel,
+                                         RDXBaseUI baseUI,
+                                         RDX3DPanel panel3D,
+                                         ReferenceFrameLibrary referenceFrameLibrary,
+                                         ROS2ControllerPublishSubscribeAPI ros2)
+   {
+      return (T) createBlankAction(actionType.getSimpleName(),
+                                   editor,
+                                   robotModel,
+                                   syncedRobot,
+                                   selectionCollisionModel,
+                                   baseUI,
+                                   panel3D,
+                                   referenceFrameLibrary,
+                                   ros2);
+   }
+
    public static RDXBehaviorAction createBlankAction(String actionType,
+                                                     RDXBehaviorActionSequenceEditor editor,
                                                      DRCRobotModel robotModel,
                                                      ROS2SyncedRobotModel syncedRobot,
                                                      RobotCollisionModel selectionCollisionModel,
@@ -29,55 +45,55 @@ public class RDXActionSequenceTools
       boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       if (actionType.equals(RDXArmJointAnglesAction.class.getSimpleName()))
       {
-         return robotHasArms ? new RDXArmJointAnglesAction(robotModel) : null;
+         return robotHasArms ? new RDXArmJointAnglesAction(editor, robotModel) : null;
       }
       if (actionType.equals(RDXChestOrientationAction.class.getSimpleName()))
       {
-         return new RDXChestOrientationAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
+         return new RDXChestOrientationAction(editor,
+                                              panel3D,
+                                              robotModel,
+                                              syncedRobot.getFullRobotModel(),
+                                              selectionCollisionModel,
+                                              referenceFrameLibrary,
+                                              ros2);
       }
       if (actionType.equals(RDXFootstepPlanAction.class.getSimpleName()))
       {
-         return new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
+         return new RDXFootstepPlanAction(editor, baseUI, robotModel, syncedRobot, referenceFrameLibrary);
       }
       if (actionType.equals(RDXSakeHandCommandAction.class.getSimpleName()))
       {
-         return robotHasArms ? new RDXSakeHandCommandAction() : null;
+         return robotHasArms ? new RDXSakeHandCommandAction(editor) : null;
       }
       if (actionType.equals(RDXHandPoseAction.class.getSimpleName()))
       {
          return robotHasArms ?
-               new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2)
-               : null;
+               new RDXHandPoseAction(editor, panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2) :
+               null;
       }
       if (actionType.equals(RDXHandWrenchAction.class.getSimpleName()))
       {
-         return robotHasArms ? new RDXHandWrenchAction() : null;
+         return robotHasArms ? new RDXHandWrenchAction(editor) : null;
       }
       if (actionType.equals(RDXPelvisHeightPitchAction.class.getSimpleName()))
       {
-         return new RDXPelvisHeightPitchAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
+         return new RDXPelvisHeightPitchAction(editor,
+                                               panel3D,
+                                               robotModel,
+                                               syncedRobot.getFullRobotModel(),
+                                               selectionCollisionModel,
+                                               referenceFrameLibrary,
+                                               ros2);
       }
       if (actionType.equals(RDXWaitDurationAction.class.getSimpleName()))
       {
-         return new RDXWaitDurationAction();
+         return new RDXWaitDurationAction(editor);
       }
       if (actionType.equals(RDXWalkAction.class.getSimpleName()))
       {
-         return new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
+         return new RDXWalkAction(editor, panel3D, robotModel, referenceFrameLibrary);
       }
 
       return null;
-   }
-
-   public static void packActionSequenceUpdateMessage(List<RDXBehaviorAction> actionSequence,
-                                                      ArrayList<BehaviorActionDefinition> actionDefinitionForMessage,
-                                                      ActionSequenceUpdateMessage actionSequenceUpdateMessage)
-   {
-      actionDefinitionForMessage.clear();
-      for (RDXBehaviorAction behaviorAction : actionSequence)
-      {
-         actionDefinitionForMessage.add(behaviorAction.getActionDefinition());
-      }
-      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDefinitionForMessage, actionSequenceUpdateMessage);
    }
 }

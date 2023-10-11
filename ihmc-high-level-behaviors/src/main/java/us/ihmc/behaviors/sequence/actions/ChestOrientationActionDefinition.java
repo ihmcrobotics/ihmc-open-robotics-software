@@ -1,82 +1,89 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseActionDefinitionMessage;
+import behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDefinition
+public class ChestOrientationActionDefinition extends BehaviorActionDefinition
 {
-   private String description = "Chest orientation";
    private double trajectoryDuration = 4.0;
-   private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
+   private String parentFrameName;
+   private final RigidBodyTransform chestToParentTransform = new RigidBodyTransform();
+
+   public ChestOrientationActionDefinition()
+   {
+      super("Chest orientation");
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
+      super.saveToFile(jsonNode);
+
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      JSONTools.toJSON(jsonNode, getTransformToParent());
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
+      jsonNode.put("parentFrame", parentFrameName);
+      JSONTools.toJSON(jsonNode, chestToParentTransform);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, getTransformToParent());
-      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
+      parentFrameName = jsonNode.get("parentFrame").textValue();
+      JSONTools.toEuclid(jsonNode, chestToParentTransform);
    }
 
-   public void toMessage(BodyPartPoseActionDefinitionMessage message)
+   public void toMessage(ChestOrientationActionDefinitionMessage message)
    {
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
+      super.toMessage(message.getActionDefinition());
+
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(executeWitNextAction);
       message.setHoldPoseInWorld(holdPoseInWorldLater);
+      message.setParentFrameName(parentFrameName);
+      MessageTools.toMessage(chestToParentTransform, message.getChestTransformToParent());
    }
 
-   public void fromMessage(BodyPartPoseActionDefinitionMessage message)
+   public void fromMessage(ChestOrientationActionDefinitionMessage message)
    {
-      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
-      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
+      super.fromMessage(message.getActionDefinition());
+
       trajectoryDuration = message.getTrajectoryDuration();
-      executeWitNextAction = message.getExecuteWithNextAction();
       holdPoseInWorldLater = message.getHoldPoseInWorld();
+      parentFrameName = message.getParentFrameNameAsString();
+      MessageTools.toEuclid(message.getChestTransformToParent(), chestToParentTransform);
    }
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = getTransformToParent().getRotation();
-      getTransformToParent().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getRotation();
+      chestToParentTransform.getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = getTransformToParent().getRotation();
-      getTransformToParent().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getRotation();
+      chestToParentTransform.getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = getTransformToParent().getRotation();
-      getTransformToParent().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = chestToParentTransform.getRotation();
+      chestToParentTransform.getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public RotationMatrixBasics getRotation()
    {
-      return getTransformToParent().getRotation();
+      return chestToParentTransform.getRotation();
    }
 
    public double getTrajectoryDuration()
@@ -89,16 +96,6 @@ public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDe
       this.trajectoryDuration = trajectoryDuration;
    }
 
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction;
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction = executeWitNextAction;
-   }
-
    public boolean getHoldPoseInWorldLater()
    {
       return holdPoseInWorldLater;
@@ -109,15 +106,18 @@ public class ChestOrientationActionDefinition extends FrameBasedBehaviorActionDe
       this.holdPoseInWorldLater = holdPoseInWorldLater;
    }
 
-   @Override
-   public void setDescription(String description)
+   public String getParentFrameName()
    {
-      this.description = description;
+      return parentFrameName;
    }
 
-   @Override
-   public String getDescription()
+   public void setParentFrameName(String parentFrameName)
    {
-      return description;
+      this.parentFrameName = parentFrameName;
+   }
+
+   public RigidBodyTransform getChestToParentTransform()
+   {
+      return chestToParentTransform;
    }
 }

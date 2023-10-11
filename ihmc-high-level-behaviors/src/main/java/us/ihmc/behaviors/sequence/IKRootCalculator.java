@@ -7,11 +7,9 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * The IKRootCalculator class is responsible for computing and setting the root reference frame
@@ -65,7 +63,7 @@ public class IKRootCalculator
       if (chestPoseStatusMessage != null)
       {
          boolean isChestCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-         latestChestFrame = new ModifiableReferenceFrame(referenceFrameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrame().getString(0)));
+         latestChestFrame = new ModifiableReferenceFrame(referenceFrameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrameNameAsString()));
          latestChestFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
          if (isChestCurrentAndConcurrent)
             concurrentChestFrame = latestChestFrame;
@@ -76,7 +74,7 @@ public class IKRootCalculator
       if (pelvisPoseStatusMessage != null)
       {
          boolean isPelvisCurrentAndConcurrent = pelvisPoseStatusMessage.getCurrentAndConcurrent();
-         FramePose3D pelvisFramePoseVariation = new FramePose3D(referenceFrameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrame().getString(0)),
+         FramePose3D pelvisFramePoseVariation = new FramePose3D(referenceFrameLibrary.findFrameByName(pelvisPoseStatusMessage.getParentFrameNameAsString()),
                                                                 MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent()));
          if (concurrentChestFrame != null)
          {
