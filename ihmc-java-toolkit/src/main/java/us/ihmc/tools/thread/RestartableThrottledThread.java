@@ -5,7 +5,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
-public class PausableThrottledThread
+public class RestartableThrottledThread
 {
    private final String name;
    private final Throttler throttler;
@@ -16,17 +16,17 @@ public class PausableThrottledThread
    private Thread thread;
    private boolean running = false;
 
-   public PausableThrottledThread(String name, double runFrequency, RunnableThatThrows runnable)
+   public RestartableThrottledThread(String name, double runFrequency, RunnableThatThrows runnable)
    {
       this(name, runFrequency, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, false, runnable);
    }
 
-   public PausableThrottledThread(String name, double runFrequency, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
+   public RestartableThrottledThread(String name, double runFrequency, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
    {
       this(name, runFrequency, exceptionHandler, false, runnable);
    }
 
-   public PausableThrottledThread(String name, double runFrequency, ExceptionHandler exceptionHandler, boolean runAsDaemon, RunnableThatThrows runnable)
+   public RestartableThrottledThread(String name, double runFrequency, ExceptionHandler exceptionHandler, boolean runAsDaemon, RunnableThatThrows runnable)
    {
       this.name = name;
       this.throttler = new Throttler();

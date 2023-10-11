@@ -8,7 +8,7 @@ import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PausableThrottledThreadTest
+public class RestartableThrottledThreadTest
 {
    private static final String name = "TestPausableThrottledThread";
    private FrequencyStatisticPrinter frequencyStatisticPrinter;
@@ -22,7 +22,7 @@ public class PausableThrottledThreadTest
       frequencyStatisticPrinter = new FrequencyStatisticPrinter();
       frequencyCalculator = new FrequencyCalculator();
 
-      PausableThrottledThread thread = new PausableThrottledThread(name, hertz, () ->
+      RestartableThrottledThread thread = new RestartableThrottledThread(name, hertz, () ->
       {
          frequencyStatisticPrinter.ping();
          frequencyCalculator.ping();
@@ -50,7 +50,7 @@ public class PausableThrottledThreadTest
       frequencyStatisticPrinter = new FrequencyStatisticPrinter();
       frequencyCalculator = new FrequencyCalculator();
 
-      PausableThrottledThread thread = new PausableThrottledThread(name, hertz, () ->
+      RestartableThrottledThread thread = new RestartableThrottledThread(name, hertz, () ->
       {
          frequencyStatisticPrinter.ping();
          frequencyCalculator.ping();
@@ -76,7 +76,7 @@ public class PausableThrottledThreadTest
    {
       double hertz = 10.0;
 
-      PausableThrottledThread thread = new PausableThrottledThread(name, hertz, () ->
+      RestartableThrottledThread thread = new RestartableThrottledThread(name, hertz, () ->
       {
          for (int i = 0; i < 25; ++i)
          {
@@ -113,7 +113,7 @@ public class PausableThrottledThreadTest
    {
       double hertz = 10.0;
 
-      PausableThrottledThread thread = new PausableThrottledThread(name, hertz, DefaultExceptionHandler.RUNTIME_EXCEPTION, () ->
+      RestartableThrottledThread thread = new RestartableThrottledThread(name, hertz, DefaultExceptionHandler.RUNTIME_EXCEPTION, () ->
       {
          throw new NullPointerException("This is a test");
       });
