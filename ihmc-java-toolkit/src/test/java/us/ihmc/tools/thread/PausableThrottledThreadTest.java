@@ -108,7 +108,7 @@ public class PausableThrottledThreadTest
    }
 
    // TODO: Figure out how to test this case
-/*   @Test
+   @Test
    public void testExceptionHandling()
    {
       double hertz = 10.0;
@@ -118,8 +118,20 @@ public class PausableThrottledThreadTest
          throw new NullPointerException("This is a test");
       });
 
-      assertThrows(RuntimeException.class, thread.getThread()::run);
-      assertFalse(thread.isRunning());
-      assertFalse(thread.getThread().isAlive());
-   }*/
+      try
+      {
+         thread.start();
+         Thread.sleep(1000);
+      }
+      catch (Exception e)
+      {
+         // Got an exception. This is good!
+         assertTrue(true);
+      }
+      finally
+      {
+         assertFalse(thread.isRunning());
+         assertFalse(thread.getThread().isAlive());
+      }
+   }
 }
