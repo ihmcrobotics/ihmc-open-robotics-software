@@ -68,7 +68,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    {
       super.create();
       if (baseUI != null)
-         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
+         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       // We are just making the hands black here

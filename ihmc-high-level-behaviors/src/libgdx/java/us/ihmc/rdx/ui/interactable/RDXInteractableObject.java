@@ -36,9 +36,9 @@ public class RDXInteractableObject implements RenderableProvider
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(objectTransform.getTranslation());
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getRotation().set(objectTransform.getRotation());
 
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(selectablePose3DGizmo::calculate3DViewPick);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(selectablePose3DGizmo::process3DViewInput);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::update);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, selectablePose3DGizmo::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, selectablePose3DGizmo::process3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::update);
       baseUI.getImGuiPanelManager().addPanel(selectablePose3DGizmo.getPoseGizmo().createTunerPanel("object"));
    }
 

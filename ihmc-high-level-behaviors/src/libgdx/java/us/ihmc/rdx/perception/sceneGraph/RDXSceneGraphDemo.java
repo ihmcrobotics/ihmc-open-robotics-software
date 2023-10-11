@@ -67,8 +67,8 @@ public class RDXSceneGraphDemo
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
             sensorPoseGizmo.getTransformToParent().getTranslation().setZ(0.7);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, sensorPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             simulatedCamera = RDXSimulatedSensorFactory.createBlackflyFisheye(sensorPoseGizmo.getGizmoFrame(), System::nanoTime);

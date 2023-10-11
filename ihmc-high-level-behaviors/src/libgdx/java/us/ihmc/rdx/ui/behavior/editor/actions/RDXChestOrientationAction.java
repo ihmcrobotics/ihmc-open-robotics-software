@@ -100,7 +100,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       poseGizmo.create(panel3D);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+      panel3D.addImGuiOverlayAddition(this, this::render3DPanelImGuiOverlays);
    }
 
    @Override

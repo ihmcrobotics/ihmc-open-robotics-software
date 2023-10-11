@@ -10,11 +10,13 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
@@ -46,6 +48,7 @@ public class RDXAffordanceTemplateEditorUI
    private final RDXAffordanceTemplateEditorStatus status;
 
    private final SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands = new SideDependentList<>();
+   private RDXRenderableAdapter fingersRenderableAdapter;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
    private final RDXInteractableObjectBuilder objectBuilder;
@@ -130,12 +133,7 @@ public class RDXAffordanceTemplateEditorUI
                                                                               new Color(0x4B0082FF))));
       status.setActiveMenu(RDXActiveAffordanceMenu.NONE);
       for (RobotSide side : RobotSide.values)
-      {
-         // render fingers if any
-         if (interactableHands.get(side).getNumberOfFingers() > 0)
-            baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
          baseUI.getImGuiPanelManager().addPanel(interactableHands.get(side).getPose3DGizmo().createTunerPanel(side.getCamelCaseName() + " Hand"));
-      }
       baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
       baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceTemplateEditorUI.this::getRenderables);
       baseUI.getImGuiPanelManager().addPanel("Affordance Template Panel", RDXAffordanceTemplateEditorUI.this::renderImGuiWidgets);
@@ -206,24 +204,40 @@ public class RDXAffordanceTemplateEditorUI
       ImGui.text("Hands Menu");
       if (ImGui.radioButton(labels.get("Sake Hand"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableSakeGripper.class)))
       {
-         for (RobotSide side : RobotSide.values())
-            interactableHands.replace(side, new RDXInteractableSakeGripper(panel3D,
-                                                                           handTransformsToWorld.get(side),
-                                                                           new ColorDefinition(HAND_COLORS.get(side).getRed(),
-                                                                                               HAND_COLORS.get(side).getGreen(),
-                                                                                               HAND_COLORS.get(side).getBlue(),
-                                                                                               0.8)));
+         if (!interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableSakeGripper.class))
+         {
+            for (RobotSide side : RobotSide.values())
+            {
+               interactableHands.get(side).removeRenderables(panel3D);
+               interactableHands.get(side).removeInteractions(panel3D);
+               interactableHands.replace(side,
+                                         new RDXInteractableSakeGripper(panel3D,
+                                                                        handTransformsToWorld.get(side),
+                                                                        new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                            HAND_COLORS.get(side).getGreen(),
+                                                                                            HAND_COLORS.get(side).getBlue(),
+                                                                                            0.8)));
+            }
+         }
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Bumper"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableBumper.class)))
       {
-         for (RobotSide side : RobotSide.values())
-            interactableHands.replace(side, new RDXInteractableBumper(panel3D,
-                                                                           handTransformsToWorld.get(side),
-                                                                           new ColorDefinition(HAND_COLORS.get(side).getRed(),
-                                                                                               HAND_COLORS.get(side).getGreen(),
-                                                                                               HAND_COLORS.get(side).getBlue(),
-                                                                                               0.8)));
+         if (!interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableBumper.class))
+         {
+            for (RobotSide side : RobotSide.values())
+            {
+               interactableHands.get(side).removeRenderables(panel3D);
+               interactableHands.get(side).removeInteractions(panel3D);
+               interactableHands.replace(side,
+                                         new RDXInteractableBumper(panel3D,
+                                                                   handTransformsToWorld.get(side),
+                                                                   new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                       HAND_COLORS.get(side).getGreen(),
+                                                                                       HAND_COLORS.get(side).getBlue(),
+                                                                                       0.8)));
+            }
+         }
       }
 
       ColorDefinition handColor = HAND_COLORS.get(RobotSide.LEFT);

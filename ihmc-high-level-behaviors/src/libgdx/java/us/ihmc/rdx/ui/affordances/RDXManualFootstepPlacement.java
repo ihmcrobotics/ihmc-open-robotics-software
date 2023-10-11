@@ -61,7 +61,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       this.footstepPlan = footstepPlan;
       this.footstepPlannerParameters = footstepPlannerParameters;
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this, this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();

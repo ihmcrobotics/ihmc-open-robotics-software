@@ -21,15 +21,14 @@ import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.sceneManager.RDX3DScene;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.sceneManager.*;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -46,10 +45,10 @@ public class RDX3DPanel extends RDXPanel
    private float windowSizeX;
    private float windowSizeY;
    private ImGui3DViewInput inputCalculator;
-   private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
-   private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
+   private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new HashMap<>();
+   private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new HashMap<>();
    private final RDX3DPanelToolbar toolbar = new RDX3DPanelToolbar();
-   private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
+   private final Map<Object, Runnable> imGuiOverlayAdditions = new HashMap<>();
    private InputMultiplexer inputMultiplexer;
    private RDXFocusBasedCamera camera3D;
    private ScreenViewport viewport;
@@ -111,7 +110,7 @@ public class RDX3DPanel extends RDXPanel
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
       inputCalculator = new ImGui3DViewInput(this);
-      imgui3DViewInputProcessors.add(camera3D::processImGuiInput);
+      imgui3DViewInputProcessors.put(this, camera3D::processImGuiInput);
 
       if (addFocusSphere)
          scene.addModelInstance(camera3D.getFocusPointSphere(), RDXSceneLevel.VIRTUAL);
@@ -140,15 +139,15 @@ public class RDX3DPanel extends RDXPanel
          inputCalculator.compute();
          if (inputCalculator.isWindowHovered()) // If the window is not hovered, we should not be computing picks
          {
-            for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+            for (Map.Entry<Object, Consumer<ImGui3DViewInput>> imgui3DViewPickCalculator : imgui3DViewPickCalculators.entrySet())
             {
-               imgui3DViewPickCalculator.accept(inputCalculator);
+               imgui3DViewPickCalculator.getValue().accept(inputCalculator);
             }
             inputCalculator.calculateClosestPick();
          }
-         for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
+         for (Map.Entry<Object, Consumer<ImGui3DViewInput>> imGuiInputProcessor : imgui3DViewInputProcessors.entrySet())
          {
-            imGuiInputProcessor.accept(inputCalculator);
+            imGuiInputProcessor.getValue().accept(inputCalculator);
          }
 
          // Allows for dynamically resizing the 3D view panel. Grows by 2x when needed, but never shrinks.
@@ -212,9 +211,9 @@ public class RDX3DPanel extends RDXPanel
 
          ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
-         for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
+         for (Map.Entry<Object, Runnable> imguiOverlayAddition : imGuiOverlayAdditions.entrySet())
          {
-            imguiOverlayAddition.run();
+            imguiOverlayAddition.getValue().run();
          }
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
@@ -347,19 +346,34 @@ public class RDX3DPanel extends RDXPanel
       return windowSizeY;
    }
 
-   public void addImGui3DViewPickCalculator(Consumer<ImGui3DViewInput> calculate3DViewPick)
+   public void addImGui3DViewPickCalculator(Object object, Consumer<ImGui3DViewInput> calculate3DViewPick)
    {
-      imgui3DViewPickCalculators.add(calculate3DViewPick);
+      imgui3DViewPickCalculators.put(object, calculate3DViewPick);
    }
 
-   public void addImGui3DViewInputProcessor(Consumer<ImGui3DViewInput> processImGuiInput)
+   public void addImGui3DViewInputProcessor(Object object, Consumer<ImGui3DViewInput> processImGuiInput)
    {
-      imgui3DViewInputProcessors.add(processImGuiInput);
+      imgui3DViewInputProcessors.put(object, processImGuiInput);
    }
 
-   public void addImGuiOverlayAddition(Runnable imGuiOverlayAddition)
+   public void addImGuiOverlayAddition(Object object, Runnable imGuiOverlayAddition)
    {
-      imGuiOverlayAdditions.add(imGuiOverlayAddition);
+      imGuiOverlayAdditions.put(object, imGuiOverlayAddition);
+   }
+
+   public void removeImGui3DViewPickCalculator(Object object)
+   {
+      imgui3DViewPickCalculators.remove(object);
+   }
+
+   public void removeImGui3DViewInputProcessor(Object object)
+   {
+      imgui3DViewInputProcessors.remove(object);
+   }
+
+   public void removeImGuiOverlayAddition(Object object)
+   {
+      imGuiOverlayAdditions.remove(object);
    }
 
    public RDX3DScene getScene()

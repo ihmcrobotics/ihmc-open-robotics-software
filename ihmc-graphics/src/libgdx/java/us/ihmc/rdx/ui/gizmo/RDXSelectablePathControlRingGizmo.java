@@ -54,8 +54,8 @@ public class RDXSelectablePathControlRingGizmo
       create(baseUI.getPrimary3DPanel());
       baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
       baseUI.getVRManager().getContext().addVRPickCalculator(this::processVRInput);
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::process3DViewInput);
       baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
    }
 

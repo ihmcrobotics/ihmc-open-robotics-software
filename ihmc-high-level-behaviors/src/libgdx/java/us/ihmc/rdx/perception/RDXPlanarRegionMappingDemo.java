@@ -84,8 +84,8 @@ public class RDXPlanarRegionMappingDemo
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, mapPlanarRegionsGraphic::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, mapPlanarRegionsGraphic::process3DViewInput);
 
             baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);

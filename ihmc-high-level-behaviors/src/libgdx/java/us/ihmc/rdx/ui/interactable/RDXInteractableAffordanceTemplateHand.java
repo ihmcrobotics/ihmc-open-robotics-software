@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 
 import java.util.ArrayList;
@@ -79,4 +80,8 @@ public interface RDXInteractableAffordanceTemplateHand extends RenderableProvide
    {
 
    }
+
+   void removeRenderables(RDX3DPanel panel3D);
+
+   void removeInteractions(RDX3DPanel panel3D);
 }

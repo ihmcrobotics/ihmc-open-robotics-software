@@ -64,7 +64,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+      panel3D.addImGuiOverlayAddition(this, this::render3DPanelImGuiOverlays);
 
       for (RobotSide side : RobotSide.values)
       {

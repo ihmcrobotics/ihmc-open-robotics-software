@@ -302,9 +302,9 @@ public class RDXTeleoperationManager extends RDXPanel
 
          baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
          baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
-         baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
-         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
-         baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
+         baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::process3DViewInput);
+         baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this, this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
       }
 

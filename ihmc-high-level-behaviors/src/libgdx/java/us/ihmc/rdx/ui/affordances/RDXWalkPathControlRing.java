@@ -52,7 +52,7 @@ public class RDXWalkPathControlRing
                       FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       footstepPlannerGoalGizmo.create(panel3D);
-      panel3D.addImGuiOverlayAddition(this::renderTooltips);
+      panel3D.addImGuiOverlayAddition(this, this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();

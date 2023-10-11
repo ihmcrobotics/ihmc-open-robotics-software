@@ -80,7 +80,7 @@ public class RDXBuildingConstructor extends RDXPanel
    {
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
       pose3DGizmo.create(panel3D);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

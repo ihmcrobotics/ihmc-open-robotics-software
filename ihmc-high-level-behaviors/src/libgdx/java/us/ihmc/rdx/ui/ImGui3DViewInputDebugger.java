@@ -14,7 +14,7 @@ public class ImGui3DViewInputDebugger
 
    public void create(RDX3DPanel panel3D)
    {
-      panel3D.addImGui3DViewInputProcessor(input ->
+      panel3D.addImGui3DViewInputProcessor(this, input ->
       {
          if (input.isWindowHovered())
          {

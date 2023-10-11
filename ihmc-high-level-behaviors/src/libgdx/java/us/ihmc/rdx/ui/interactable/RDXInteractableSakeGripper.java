@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -66,12 +67,13 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
       FINGERS_TO_PALM_CRUSH[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
-   private final RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
+   private RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
    private final ReferenceFrame referenceFrameHand;
    private final RDXModelInstance[] fingersModelInstances;
    private final Model[] fingersModel;
    private final RigidBodyTransform[] fingersTransforms;
    private final ReferenceFrame[] fingersFrames;
+   private RDXRenderableAdapter fingersRenderableAdapter;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private SakeHandCommandOption sakeHandConfiguration;
 
@@ -99,7 +101,8 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
       }
       sakeHandConfiguration = SakeHandCommandOption.CLOSE;
 
-      panel3D.addImGui3DViewInputProcessor(this::updateFingers);
+      fingersRenderableAdapter = panel3D.getScene().addRenderableProvider(this::getRenderables);
+      panel3D.addImGui3DViewInputProcessor(this, this::updateFingers);
    }
 
    private void updateFingers(ImGui3DViewInput imGui3DViewInput)
@@ -260,5 +263,23 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
       if (interactableHandFrameModel.isShowing())
          for (int i = 0; i < NUMBER_OF_FINGERS; i++)
             fingersModelInstances[i].getRenderables(renderables, pool);
+   }
+
+   @Override
+   public void removeRenderables(RDX3DPanel panel3D)
+   {
+      interactableHandFrameModel.removeRenderables(panel3D);
+      if (fingersRenderableAdapter != null)
+      {
+         panel3D.getScene().removeRenderableAdapter(fingersRenderableAdapter);
+         fingersRenderableAdapter = null;
+      }
+   }
+
+   @Override
+   public void removeInteractions(RDX3DPanel panel3D)
+   {
+      interactableHandFrameModel.removeInteractions(panel3D);
+      panel3D.removeImGui3DViewInputProcessor(this);
    }
 }

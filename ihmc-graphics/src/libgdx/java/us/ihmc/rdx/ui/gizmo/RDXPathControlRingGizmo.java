@@ -180,8 +180,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       create(baseUI.getPrimary3DPanel());
       baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
       baseUI.getVRManager().getContext().addVRPickCalculator(this::processVRInput);
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::process3DViewInput);
       baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
    }
 
@@ -190,7 +190,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       camera3D = panel3D.getCamera3D();
       boolean yawOnly = true;
       frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D, yawOnly);
-      panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
+      panel3D.addImGuiOverlayAddition(this, this::renderTooltipAndContextMenu);
 
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
       highlightedMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_SELECTED_DEFAULT_COLOR.a);

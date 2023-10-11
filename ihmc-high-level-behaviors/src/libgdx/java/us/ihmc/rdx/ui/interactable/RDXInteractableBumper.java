@@ -15,7 +15,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 public class RDXInteractableBumper implements RDXInteractableAffordanceTemplateHand
 {
-   private final RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
+   private RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
    private final ReferenceFrame referenceFrameHand;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
 
@@ -32,10 +32,10 @@ public class RDXInteractableBumper implements RDXInteractableAffordanceTemplateH
    {
       RigidBodyTransform intersectionHandOrigin = new RigidBodyTransform(interactableHandFrameModel.getReferenceFrame().getTransformToWorldFrame());
       intersectionHandOrigin.getTranslation()
-                            .set(new Vector3D(intersectionHandOrigin.getTranslationX(),
+                            .set(new Vector3D(interactableHandFrameModel.getReferenceFrame().getTransformToWorldFrame().getTranslationX() - 0.02,
                                               intersectionHandOrigin.getTranslationY(),
-                                              interactableHandFrameModel.getReferenceFrame().getTransformToWorldFrame().getTranslationZ() + 0.02));
-      if (boxRayIntersection.intersect(0.06, 0.06, 0.05, intersectionHandOrigin, mousePickRay))
+                                              intersectionHandOrigin.getTranslationZ()));
+      if (boxRayIntersection.intersect(0.05, 0.06, 0.06, intersectionHandOrigin, mousePickRay))
       {
          return mousePickRay.getPoint().distance(boxRayIntersection.getFirstIntersectionToPack());
       }
@@ -73,5 +73,17 @@ public class RDXInteractableBumper implements RDXInteractableAffordanceTemplateH
    public void setShowing(boolean showing)
    {
       interactableHandFrameModel.setShowing(showing);
+   }
+
+   @Override
+   public void removeRenderables(RDX3DPanel panel3D)
+   {
+      interactableHandFrameModel.removeRenderables(panel3D);
+   }
+
+   @Override
+   public void removeInteractions(RDX3DPanel panel3D)
+   {
+      interactableHandFrameModel.removeInteractions(panel3D);
    }
 }

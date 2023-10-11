@@ -209,8 +209,8 @@ public class RDXPose3DGizmo implements RenderableProvider
    public void createAndSetupDefault(RDX3DPanel panel3D)
    {
       create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
       panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
    }
 
@@ -218,7 +218,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       camera3D = panel3D.getCamera3D();
       frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D);
-      panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
+      panel3D.addImGuiOverlayAddition(this, this::renderTooltipAndContextMenu);
 
       for (Axis3D axis : Axis3D.values)
       {
