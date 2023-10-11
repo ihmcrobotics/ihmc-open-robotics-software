@@ -1,6 +1,5 @@
 package us.ihmc.perception;
 
-import com.esotericsoftware.kryo.util.Null;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 
@@ -55,6 +54,27 @@ public class RawImage
       this.principalPointY = principalPointY;
    }
 
+   public RawImage(RawImage other)
+   {
+      this.sequenceNumber = other.sequenceNumber;
+      this.acquisitionTime = other.acquisitionTime;
+      this.imageWidth = other.imageWidth;
+      this.imageHeight = other.imageHeight;
+      this.depthDiscretization = other.depthDiscretization;
+      if (!other.isEmpty())
+      {
+         if (other.cpuImageMatrix != null)
+            this.cpuImageMatrix = other.cpuImageMatrix.clone();
+         if (other.gpuImageMatrix != null)
+            this.gpuImageMatrix = other.gpuImageMatrix.clone();
+      }
+      this.openCVType = other.openCVType;
+      this.focalLengthX = other.focalLengthX;
+      this.focalLengthY = other.focalLengthY;
+      this.principalPointX = other.principalPointX;
+      this.principalPointY = other.principalPointY;
+   }
+
    public long getSequenceNumber()
    {
       return sequenceNumber;
@@ -82,14 +102,14 @@ public class RawImage
 
    public Mat getCpuImageMatrix()
    {
-      if (cpuImageMatrix == null && gpuImageMatrix != null)
+      if (cpuImageMatrix == null && gpuImageMatrix == null)
+      {
+         throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
+      }
+      else if (cpuImageMatrix == null && gpuImageMatrix != null)
       {
          cpuImageMatrix = new Mat(imageHeight, imageWidth, openCVType);
          gpuImageMatrix.download(cpuImageMatrix);
-      }
-      else
-      {
-         throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
 
       return cpuImageMatrix;
@@ -97,14 +117,14 @@ public class RawImage
 
    public GpuMat getGpuImageMatrix()
    {
-      if (gpuImageMatrix == null && cpuImageMatrix != null)
+      if (gpuImageMatrix == null && cpuImageMatrix == null)
+      {
+         throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
+      }
+      else if (gpuImageMatrix == null && cpuImageMatrix != null)
       {
          gpuImageMatrix = new GpuMat(imageHeight, imageWidth, openCVType);
          gpuImageMatrix.upload(cpuImageMatrix);
-      }
-      else
-      {
-         throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
 
       return gpuImageMatrix;
@@ -133,6 +153,11 @@ public class RawImage
    public float getPrincipalPointY()
    {
       return principalPointY;
+   }
+
+   public boolean isEmpty()
+   {
+      return cpuImageMatrix == null && gpuImageMatrix == null;
    }
 
    public void destroy()

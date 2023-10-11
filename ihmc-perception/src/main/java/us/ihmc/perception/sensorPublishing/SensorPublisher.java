@@ -19,6 +19,7 @@ public class SensorPublisher
    private ROS2HeartbeatMonitor zedColorHeartbeat;
    private ROS2HeartbeatMonitor zedDepthHeartbeat;
    private final ZEDColorDepthImageRetriever zedImageGrabber;
+   private final ZEDColorDepthImagePublisher zedImagePublisher;
    private final Thread zedPublishThread;
    private final Throttler zedThreadThrottler = new Throttler();
 
@@ -31,27 +32,28 @@ public class SensorPublisher
       zedColorHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_COLOR);
       zedDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_DEPTH);
       this.zedImageGrabber = zedImageGrabber;
+      this.zedImagePublisher = zedImagePublisher;
       zedThreadThrottler.setFrequency(30.0); // publish at 30hz
 
       zedPublishThread = new Thread(() ->
       {
          while(running)
          {
-            zedImageGrabber.grabNextImage();
             zedThreadThrottler.waitAndRun();
             RawImage gpuDepthImage16UC11 = zedImageGrabber.getLatestRawDepthImage();
             RawImage gpuLeftColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.LEFT);
             RawImage gpuRightColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.RIGHT);
             // Do processing on image
-            zedImagePublisher.publishDepthImage(gpuDepthImage16UC11);
-            zedImagePublisher.publishColorImage(gpuLeftColorImage, RobotSide.LEFT);
-            zedImagePublisher.publishColorImage(gpuRightColorImage, RobotSide.RIGHT);
+            this.zedImagePublisher.publishDepthImage(gpuDepthImage16UC11);
+            this.zedImagePublisher.publishColorImage(gpuLeftColorImage, RobotSide.LEFT);
+            this.zedImagePublisher.publishColorImage(gpuRightColorImage, RobotSide.RIGHT);
          }
       }, "ZEDImagePublisherThread");
    }
 
    public void start()
    {
+      zedImageGrabber.start();
       zedPublishThread.start();
    }
 
