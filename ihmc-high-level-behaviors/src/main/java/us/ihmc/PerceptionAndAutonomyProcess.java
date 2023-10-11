@@ -1,5 +1,6 @@
-package us.ihmc.perception.sensorPublishing;
+package us.ihmc;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -12,22 +13,22 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.Throttler;
 
-public class SensorPublisher
+public class PerceptionAndAutonomyProcess
 {
    private ROS2HeartbeatMonitor zedColorHeartbeat;
    private ROS2HeartbeatMonitor zedDepthHeartbeat;
    private final ZEDColorDepthImageRetriever zedImageGrabber;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
-   private final Thread zedPublishThread;
    private final Throttler zedThreadThrottler = new Throttler();
 
    private boolean running = true;
 
-   SensorPublisher(ROS2PublishSubscribeAPI ros2,
-                   ZEDColorDepthImageRetriever zedImageGrabber,
-                   ZEDColorDepthImagePublisher zedImagePublisher)
+   PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
+                                ZEDColorDepthImageRetriever zedImageGrabber,
+                                ZEDColorDepthImagePublisher zedImagePublisher)
    {
       zedColorHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_COLOR);
       zedDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_DEPTH);
@@ -35,40 +36,44 @@ public class SensorPublisher
       this.zedImagePublisher = zedImagePublisher;
       zedThreadThrottler.setFrequency(30.0); // publish at 30hz
 
-      zedPublishThread = new Thread(() ->
+      // TODO: Make this PausableThrottledThread
+      MissingThreadTools.startAThread("ZEDImagePublisher", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
       {
-         while(running)
+         while (running)
          {
             zedThreadThrottler.waitAndRun();
             RawImage gpuDepthImage16UC11 = zedImageGrabber.getLatestRawDepthImage();
             RawImage gpuLeftColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.LEFT);
             RawImage gpuRightColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.RIGHT);
+
             // Do processing on image
-            this.zedImagePublisher.publishDepthImage(gpuDepthImage16UC11);
-            this.zedImagePublisher.publishColorImage(gpuLeftColorImage, RobotSide.LEFT);
-            this.zedImagePublisher.publishColorImage(gpuRightColorImage, RobotSide.RIGHT);
+
+            this.zedImagePublisher.setNextDepthImage(gpuDepthImage16UC11);
+            this.zedImagePublisher.setNextColorImage(gpuLeftColorImage, RobotSide.LEFT);
+            this.zedImagePublisher.setNextColorImage(gpuRightColorImage, RobotSide.RIGHT);
          }
-      }, "ZEDImagePublisherThread");
+      });
    }
 
    public void start()
    {
+      //zedPublishThread.start();
+      zedImagePublisher.start();
       zedImageGrabber.start();
-      zedPublishThread.start();
    }
 
    public void stop()
    {
       running = false;
 
-      try
+/*      try
       {
-         zedPublishThread.join();
+         //zedPublishThread.join();
       }
       catch (InterruptedException e)
       {
          throw new RuntimeException(e);
-      }
+      }*/
    }
 
    public static void main(String[] args)
@@ -76,12 +81,13 @@ public class SensorPublisher
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "sensor_publisher");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ZEDColorDepthImageRetriever zedImageGrabber = new ZEDColorDepthImageRetriever(0);
+      // TODO: Make variables private static final fields
       ZEDColorDepthImagePublisher zedImagePublisher = new ZEDColorDepthImagePublisher(zedImageGrabber.getZedModelData(),
                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES,
                                                                                       PerceptionAPI.ZED2_DEPTH,
                                                                                       ReferenceFrame::getWorldFrame);
 
-      SensorPublisher publisher = new SensorPublisher(ros2Helper, zedImageGrabber, zedImagePublisher);
+      PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper, zedImageGrabber, zedImagePublisher);
       publisher.start();
    }
 }
