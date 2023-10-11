@@ -1,18 +1,14 @@
-# Used for syncing action sequences
-behavior_msgs/ActionInformationMessage action_information
+# Parent definition fields
+behavior_msgs/BehaviorActionDefinitionMessage action_definition
 
-# Name of the frame the this action is expressed in
-string[<=1000] parent_frame
-
-# Transform that expresses the transform to the parent frame
-# that the footsteps are expressed in.
-controller_msgs/RigidBodyTransformMessage transform_to_parent
-
-# The footsteps, with a maximum of 50
-behavior_msgs/FootstepActionDefinitionMessage[<=50] footsteps
+# Name of the parent frame the footsteps are expressed in
+string parent_frame_name
 
 # Swing duration
 float64 swing_duration
 
 # Transfer duration
 float64 transfer_duration
+
+# The footsteps, with a maximum of 50
+behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] footsteps

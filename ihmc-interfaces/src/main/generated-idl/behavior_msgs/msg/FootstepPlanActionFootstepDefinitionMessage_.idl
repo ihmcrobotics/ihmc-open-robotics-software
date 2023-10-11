@@ -1,0 +1,32 @@
+#ifndef __behavior_msgs__msg__FootstepPlanActionFootstepDefinitionMessage__idl__
+#define __behavior_msgs__msg__FootstepPlanActionFootstepDefinitionMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A single footstep
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionFootstepDefinitionMessage_")
+      struct FootstepPlanActionFootstepDefinitionMessage
+      {
+        /**
+         * Side, left or right foot
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The footstep's sole pose
+         */
+        geometry_msgs::msg::dds::Pose sole_pose;
+      };
+    };
+  };
+};
+
+#endif
