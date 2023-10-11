@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
@@ -43,6 +44,7 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
+   private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
    public SceneGraph()
@@ -166,6 +168,11 @@ public class SceneGraph
    public TIntObjectMap<ArUcoMarkerNode> getArUcoMarkerIDToNodeMap()
    {
       return arUcoMarkerIDToNodeMap;
+   }
+
+   public TIntObjectMap<CenterposeNode> getCenterposeDetectedMarkerIDToNodeMap()
+   {
+      return centerposeDetectedMarkerIDToNodeMap;
    }
 
    public SortedSet<SceneNode> getSceneNodesByID()
