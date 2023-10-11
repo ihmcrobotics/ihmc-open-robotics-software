@@ -225,7 +225,7 @@ public class ZEDColorDepthImageRetriever
       grabImageThread.start();
    }
 
-   public void destroy()
+   public void stop()
    {
       running = false;
       try

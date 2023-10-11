@@ -1,6 +1,5 @@
 package us.ihmc;
 
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -13,8 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.thread.PausableThrottledThread;
 
 public class PerceptionAndAutonomyProcess
 {
@@ -22,7 +20,7 @@ public class PerceptionAndAutonomyProcess
    private ROS2HeartbeatMonitor zedDepthHeartbeat;
    private final ZEDColorDepthImageRetriever zedImageGrabber;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
-   private final Throttler zedThreadThrottler = new Throttler();
+   private final PausableThrottledThread zedProcessAndPublishThread;
 
    private boolean running = true;
 
@@ -34,30 +32,24 @@ public class PerceptionAndAutonomyProcess
       zedDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_DEPTH);
       this.zedImageGrabber = zedImageGrabber;
       this.zedImagePublisher = zedImagePublisher;
-      zedThreadThrottler.setFrequency(30.0); // publish at 30hz
 
-      // TODO: Make this PausableThrottledThread
-      MissingThreadTools.startAThread("ZEDImagePublisher", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+      zedProcessAndPublishThread = new PausableThrottledThread("ZEDImageProcessAndPublish", 30.0, () ->
       {
-         while (running)
-         {
-            zedThreadThrottler.waitAndRun();
-            RawImage gpuDepthImage16UC11 = zedImageGrabber.getLatestRawDepthImage();
-            RawImage gpuLeftColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.LEFT);
-            RawImage gpuRightColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.RIGHT);
+         RawImage gpuDepthImage16UC11 = zedImageGrabber.getLatestRawDepthImage();
+         RawImage gpuLeftColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.LEFT);
+         RawImage gpuRightColorImage = zedImageGrabber.getLatestRawColorImage(RobotSide.RIGHT);
 
-            // Do processing on image
+         // Do processing on image
 
-            this.zedImagePublisher.setNextDepthImage(gpuDepthImage16UC11);
-            this.zedImagePublisher.setNextColorImage(gpuLeftColorImage, RobotSide.LEFT);
-            this.zedImagePublisher.setNextColorImage(gpuRightColorImage, RobotSide.RIGHT);
-         }
+         this.zedImagePublisher.setNextDepthImage(gpuDepthImage16UC11);
+         this.zedImagePublisher.setNextColorImage(gpuLeftColorImage, RobotSide.LEFT);
+         this.zedImagePublisher.setNextColorImage(gpuRightColorImage, RobotSide.RIGHT);
       });
    }
 
    public void start()
    {
-      //zedPublishThread.start();
+      zedProcessAndPublishThread.start();
       zedImagePublisher.start();
       zedImageGrabber.start();
    }
@@ -65,15 +57,9 @@ public class PerceptionAndAutonomyProcess
    public void stop()
    {
       running = false;
-
-/*      try
-      {
-         //zedPublishThread.join();
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }*/
+      zedProcessAndPublishThread.stop();
+      zedImagePublisher.stop();
+      zedImageGrabber.stop();
    }
 
    public static void main(String[] args)
