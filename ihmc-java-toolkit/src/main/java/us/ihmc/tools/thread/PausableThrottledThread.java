@@ -76,7 +76,8 @@ public class PausableThrottledThread
       return running;
    }
 
-   public boolean isAlive()
+   // only used for testing
+   boolean isAlive()
    {
       return thread.isAlive();
    }
