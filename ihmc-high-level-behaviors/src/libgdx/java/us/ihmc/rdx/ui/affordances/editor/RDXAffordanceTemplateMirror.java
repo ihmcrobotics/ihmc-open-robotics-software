@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,7 +32,7 @@ import java.util.Map;
  */
 public class RDXAffordanceTemplateMirror
 {
-   private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
+   private final SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RDXAffordanceTemplateEditorStatus editorStatus;
@@ -47,7 +48,7 @@ public class RDXAffordanceTemplateMirror
                                                                                                                             frameNonActiveSideTransform);
    private FramePose3DReadOnly lastActivePose = new FramePose3D(frameActiveSide);
 
-   public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableSakeGripper> interactableHands,
+   public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands,
                                       SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
                                       RDXAffordanceTemplateEditorStatus editorStatus)

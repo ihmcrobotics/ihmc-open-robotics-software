@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +15,10 @@ import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
+import us.ihmc.rdx.ui.interactable.RDXInteractableBumper;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.tools.ImGuiDirectory;
@@ -39,10 +41,11 @@ public class RDXAffordanceTemplateEditorUI
       HAND_COLORS.put(RobotSide.RIGHT, ColorDefinitions.SlateBlue());
    }
 
+   private final RDX3DPanel panel3D;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXAffordanceTemplateEditorStatus status;
 
-   private final SideDependentList<RDXInteractableSakeGripper> interactableHands = new SideDependentList<>();
+   private final SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
    private final RDXInteractableObjectBuilder objectBuilder;
@@ -66,6 +69,7 @@ public class RDXAffordanceTemplateEditorUI
 
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
    {
+      panel3D = baseUI.getPrimary3DPanel();
       SceneGraph sceneGraph = new SceneGraph();
       sceneGraph.modifyTree(modificationQueue ->
       {
@@ -85,7 +89,7 @@ public class RDXAffordanceTemplateEditorUI
          handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
          handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
          interactableHands.put(side,
-                               new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(),
+                               new RDXInteractableSakeGripper(panel3D,
                                                               handTransformsToWorld.get(side),
                                                               new ColorDefinition(HAND_COLORS.get(side).getRed(),
                                                                                   HAND_COLORS.get(side).getGreen(),
@@ -127,7 +131,9 @@ public class RDXAffordanceTemplateEditorUI
       status.setActiveMenu(RDXActiveAffordanceMenu.NONE);
       for (RobotSide side : RobotSide.values)
       {
-         baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
+         // render fingers if any
+         if (interactableHands.get(side).getNumberOfFingers() > 0)
+            baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
          baseUI.getImGuiPanelManager().addPanel(interactableHands.get(side).getPose3DGizmo().createTunerPanel(side.getCamelCaseName() + " Hand"));
       }
       baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
@@ -181,9 +187,12 @@ public class RDXAffordanceTemplateEditorUI
             }
          }
       }
-      // update hand configuration
-      if (handPoses.containsKey(status.getActiveSide()))
-         gripperClosure[0] = interactableHands.get(status.getActiveSide()).getGripperClosure();
+      if (interactableHands.get(status.getActiveSide()).hasGripper())
+      {
+         // update closure of gripper
+         if (handPoses.containsKey(status.getActiveSide()))
+            gripperClosure[0] = interactableHands.get(status.getActiveSide()).getGripperClosure();
+      }
 
       mirror.update();
 
@@ -195,6 +204,28 @@ public class RDXAffordanceTemplateEditorUI
    public void renderImGuiWidgets()
    {
       ImGui.text("Hands Menu");
+      if (ImGui.radioButton(labels.get("Sake Hand"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableSakeGripper.class)))
+      {
+         for (RobotSide side : RobotSide.values())
+            interactableHands.replace(side, new RDXInteractableSakeGripper(panel3D,
+                                                                           handTransformsToWorld.get(side),
+                                                                           new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                               HAND_COLORS.get(side).getGreen(),
+                                                                                               HAND_COLORS.get(side).getBlue(),
+                                                                                               0.8)));
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Bumper"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableBumper.class)))
+      {
+         for (RobotSide side : RobotSide.values())
+            interactableHands.replace(side, new RDXInteractableBumper(panel3D,
+                                                                           handTransformsToWorld.get(side),
+                                                                           new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                               HAND_COLORS.get(side).getGreen(),
+                                                                                               HAND_COLORS.get(side).getBlue(),
+                                                                                               0.8)));
+      }
+
       ColorDefinition handColor = HAND_COLORS.get(RobotSide.LEFT);
       ImGui.pushStyleColor(ImGuiCol.CheckMark,
                            (float) handColor.getRed(),
@@ -251,22 +282,21 @@ public class RDXAffordanceTemplateEditorUI
       {
          RobotSide activeSide = status.getActiveSide();
          ImGui.text("Hand configuration: ");
-         if (ImGui.button(labels.get(SakeHandCommandOption.FULLY_OPEN.name())))
-            interactableHands.get(activeSide).openGripper();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(SakeHandCommandOption.OPEN.name())))
-            interactableHands.get(activeSide).setGripperToHalfClose();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(SakeHandCommandOption.CLOSE.name())))
-            interactableHands.get(activeSide).closeGripper();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(SakeHandCommandOption.GRIP_HARD.name())))
-            interactableHands.get(activeSide).crushGripper();
-         if (ImGui.sliderFloat("Set Closure",
-                               gripperClosure,
-                               interactableHands.get(activeSide).getMinGripperClosure(),
-                               interactableHands.get(activeSide).getMaxGripperClosure()))
-            interactableHands.get(activeSide).setGripperClosure(gripperClosure[0]);
+         for (String configuration : interactableHands.get(activeSide).getAvailableConfigurations())
+         {
+            if (ImGui.button(labels.get(configuration)))
+            {
+               interactableHands.get(activeSide).setToConfiguration(configuration);
+            }
+         }
+         if (interactableHands.get(activeSide).hasGripper())
+         {
+            if (ImGui.sliderFloat("Set Closure",
+                                  gripperClosure,
+                                  interactableHands.get(activeSide).getMinGripperClosure(),
+                                  interactableHands.get(activeSide).getMaxGripperClosure()))
+               interactableHands.get(activeSide).setGripperClosure(gripperClosure[0]);
+         }
          ImGui.separator();
       }
 
@@ -425,7 +455,7 @@ public class RDXAffordanceTemplateEditorUI
          handTransformsToWorld.get(side).setToZero();
          handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
          handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
-         interactableHands.get(side).closeGripper();
+         interactableHands.get(side).setToDefaultConfiguration();
       }
       mirror.reset();
 
