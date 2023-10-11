@@ -15,18 +15,19 @@ public interface HumanoidRobotNaturalPosture
 {
    /**
     * This is the main method of this class. An implementation of this method should contain the calculation which computes the Angular Center of Mass (ACOM).
-    * The implementation should have logic to handle when compute is called without the joint positions using the default method (such as in
-    * NaturalPostureController). See NadiaNaturalPosture for an example.
+    * Input "q" is an array of joint positions, and input "baseOrientation" is the orientation of the base body frame relative to world (frame B in the angular
+    * center of mass paper). The implementation should have logic to handle when compute() is called without the joint positions using the default method (such
+    * as in NaturalPostureController). See NadiaNaturalPosture for an example.
     */
-   void compute(double[] q, Orientation3DReadOnly Qbase);
+   void compute(double[] q, Orientation3DReadOnly baseOrientation);
 
    /**
     * NaturalPostureController needs a compute without the joint positions in order to be robot agnostic. The implementation should have logic to handle when
-    * compute is called without the joint positions (such as in NaturalPostureController). See NadiaNaturalPosture for an example.
+    * compute() is called without the joint positions (such as in NaturalPostureController). See NadiaNaturalPosture for an example.
     */
-   default void compute(Orientation3DReadOnly Qbase)
+   default void compute(Orientation3DReadOnly baseOrientation)
    {
-      compute(null, Qbase);
+      compute(null, baseOrientation);
    }
 
    /**
