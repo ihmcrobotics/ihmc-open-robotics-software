@@ -74,14 +74,10 @@ public interface RDXInteractableAffordanceTemplateHand extends RenderableProvide
 
    void setSelected(boolean selected);
 
-   void setShowing(boolean showing);
-
    default void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
    }
 
    void removeRenderables(RDX3DPanel panel3D);
-
-   void removeInteractions(RDX3DPanel panel3D);
 }

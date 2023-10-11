@@ -97,13 +97,6 @@ public class RDXInteractableFrameModel
       }
    }
 
-   public void removeInteractions(RDX3DPanel panel3D)
-   {
-      panel3D.removeImGui3DViewPickCalculator(this);
-      panel3D.removeImGui3DViewInputProcessor(this);
-      panel3D.removeImGuiOverlayAddition(this);
-   }
-
    public void removeRenderables(RDX3DPanel panel3D)
    {
       if (renderableAdapter != null)
@@ -112,6 +105,9 @@ public class RDXInteractableFrameModel
          selectablePose3DGizmo.removeRenderables(panel3D);
          renderableAdapter = null;
       }
+      panel3D.removeImGui3DViewPickCalculator(this);
+      panel3D.removeImGui3DViewInputProcessor(this);
+      panel3D.removeImGuiOverlayAddition(this);
    }
 
    public void addRemoteTuning(ROS2PublishSubscribeAPI ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)

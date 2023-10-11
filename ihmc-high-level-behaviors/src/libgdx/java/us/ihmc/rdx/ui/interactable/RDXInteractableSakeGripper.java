@@ -181,12 +181,6 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    }
 
    @Override
-   public void setShowing(boolean showing)
-   {
-      interactableHandFrameModel.setShowing(showing);
-   }
-
-   @Override
    public RDXPose3DGizmo getPose3DGizmo()
    {
       return interactableHandFrameModel.getPoseGizmo();
@@ -274,12 +268,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
          panel3D.getScene().removeRenderableAdapter(fingersRenderableAdapter);
          fingersRenderableAdapter = null;
       }
-   }
-
-   @Override
-   public void removeInteractions(RDX3DPanel panel3D)
-   {
-      interactableHandFrameModel.removeInteractions(panel3D);
       panel3D.removeImGui3DViewInputProcessor(this);
    }
+
 }

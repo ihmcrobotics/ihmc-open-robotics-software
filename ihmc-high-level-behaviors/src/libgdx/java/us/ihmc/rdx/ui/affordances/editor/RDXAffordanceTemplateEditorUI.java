@@ -4,18 +4,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.esotericsoftware.minlog.Log;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
@@ -99,7 +100,7 @@ public class RDXAffordanceTemplateEditorUI
          handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
       }
 
-      status = new RDXAffordanceTemplateEditorStatus(RobotSide.RIGHT, RDXActiveAffordanceMenu.NONE);
+      status = new RDXAffordanceTemplateEditorStatus(RobotSide.RIGHT, RDXActiveAffordanceMenu.NONE, RDXInteractableSakeGripper.class);
       status.setActiveMenu(RDXActiveAffordanceMenu.PRE_GRASP);
       preGraspFrames = new RDXAffordanceTemplateFrames(interactableHands,
                                                        handTransformsToWorld,
@@ -183,11 +184,14 @@ public class RDXAffordanceTemplateEditorUI
             }
          }
       }
-      if (interactableHands.get(status.getActiveSide()).hasGripper())
+      if (handPoses.containsKey(status.getActiveSide()))
       {
-         // update closure of gripper
-         if (handPoses.containsKey(status.getActiveSide()))
-            gripperClosure[0] = interactableHands.get(status.getActiveSide()).getGripperClosure();
+         if (interactableHands.get(status.getActiveSide()).hasGripper())
+         {
+            // update closure of gripper
+            if (handPoses.containsKey(status.getActiveSide()))
+               gripperClosure[0] = interactableHands.get(status.getActiveSide()).getGripperClosure();
+         }
       }
 
       mirror.update();
@@ -200,41 +204,35 @@ public class RDXAffordanceTemplateEditorUI
    public void renderImGuiWidgets()
    {
       ImGui.text("Hands Menu");
-      if (ImGui.radioButton(labels.get("Sake Hand"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableSakeGripper.class)))
+      if (ImGui.radioButton(labels.get("Sake Hand"), status.getActiveHandModel().equals(RDXInteractableSakeGripper.class)))
       {
-         if (!interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableSakeGripper.class))
+         status.setActiveHandModel(RDXInteractableSakeGripper.class);
+         for (RobotSide side : handPoses.keySet())
          {
-            for (RobotSide side : RobotSide.values())
-            {
-               interactableHands.get(side).removeRenderables(panel3D);
-               interactableHands.get(side).removeInteractions(panel3D);
-               interactableHands.replace(side,
-                                         new RDXInteractableSakeGripper(panel3D,
-                                                                        handTransformsToWorld.get(side),
-                                                                        new ColorDefinition(HAND_COLORS.get(side).getRed(),
-                                                                                            HAND_COLORS.get(side).getGreen(),
-                                                                                            HAND_COLORS.get(side).getBlue(),
-                                                                                            0.8)));
-            }
+            interactableHands.get(side).removeRenderables(panel3D);
+            interactableHands.replace(side,
+                                      new RDXInteractableSakeGripper(panel3D,
+                                                                     handTransformsToWorld.get(side),
+                                                                     new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                         HAND_COLORS.get(side).getGreen(),
+                                                                                         HAND_COLORS.get(side).getBlue(),
+                                                                                         0.8)));
          }
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Nub"), interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableNub.class)))
+      if (ImGui.radioButton(labels.get("Nub"), status.getActiveHandModel().equals(RDXInteractableNub.class)))
       {
-         if (!interactableHands.get(status.getActiveSide()).getClass().equals(RDXInteractableNub.class))
+         status.setActiveHandModel(RDXInteractableNub.class);
+         for (RobotSide side : handPoses.keySet())
          {
-            for (RobotSide side : RobotSide.values())
-            {
-               interactableHands.get(side).removeRenderables(panel3D);
-               interactableHands.get(side).removeInteractions(panel3D);
-               interactableHands.replace(side,
-                                         new RDXInteractableNub(panel3D,
-                                                                handTransformsToWorld.get(side),
-                                                                new ColorDefinition(HAND_COLORS.get(side).getRed(),
-                                                                                       HAND_COLORS.get(side).getGreen(),
-                                                                                       HAND_COLORS.get(side).getBlue(),
-                                                                                       0.8)));
-            }
+            interactableHands.get(side).removeRenderables(panel3D);
+            interactableHands.replace(side,
+                                      new RDXInteractableNub(panel3D,
+                                                             handTransformsToWorld.get(side),
+                                                             new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                    HAND_COLORS.get(side).getGreen(),
+                                                                                    HAND_COLORS.get(side).getBlue(),
+                                                                                    0.8)));
          }
       }
 
@@ -247,7 +245,8 @@ public class RDXAffordanceTemplateEditorUI
       if (ImGui.radioButton(labels.get("Left"), status.getActiveSide() == RobotSide.LEFT))
       {
          status.setActiveSide(RobotSide.LEFT);
-         interactableHands.get(RobotSide.LEFT).setSelected(true);
+         if (handPoses.containsKey(RobotSide.LEFT))
+            interactableHands.get(RobotSide.LEFT).setSelected(true);
          if (handPoses.containsKey(RobotSide.RIGHT))
             interactableHands.get(RobotSide.RIGHT).setSelected(false);
       }
@@ -262,7 +261,8 @@ public class RDXAffordanceTemplateEditorUI
       if (ImGui.radioButton(labels.get("Right"), status.getActiveSide() == RobotSide.RIGHT))
       {
          status.setActiveSide(RobotSide.RIGHT);
-         interactableHands.get(RobotSide.RIGHT).setSelected(true);
+         if (handPoses.containsKey(RobotSide.RIGHT))
+            interactableHands.get(RobotSide.RIGHT).setSelected(true);
          if (handPoses.containsKey(RobotSide.LEFT))
             interactableHands.get(RobotSide.LEFT).setSelected(false);
       }
@@ -274,7 +274,26 @@ public class RDXAffordanceTemplateEditorUI
          {
             if (ImGui.button(labels.get("Add") + "##side"))
             {
-               interactableHands.get(side).setShowing(true);
+               if (status.getActiveHandModel().equals(RDXInteractableSakeGripper.class))
+               {
+                  interactableHands.put(side,
+                                        new RDXInteractableSakeGripper(panel3D,
+                                                                       handTransformsToWorld.get(side),
+                                                                       new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                           HAND_COLORS.get(side).getGreen(),
+                                                                                           HAND_COLORS.get(side).getBlue(),
+                                                                                           0.8)));
+               }
+               else if (status.getActiveHandModel().equals(RDXInteractableNub.class))
+               {
+                  interactableHands.put(side,
+                                        new RDXInteractableNub(panel3D,
+                                                               handTransformsToWorld.get(side),
+                                                               new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                   HAND_COLORS.get(side).getGreen(),
+                                                                                   HAND_COLORS.get(side).getBlue(),
+                                                                                   0.8)));
+               }
                handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
                handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
                handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
@@ -284,15 +303,16 @@ public class RDXAffordanceTemplateEditorUI
          {
             if (ImGui.button(labels.get("Remove") + "##side"))
             {
-               interactableHands.get(side).setShowing(false);
+               interactableHands.get(side).removeRenderables(panel3D);
+               interactableHands.remove(side);
                handPoses.remove(side);
             }
          }
       }
 
-      if (handPoses.containsKey(status.getActiveSide()))
+      RobotSide activeSide = status.getActiveSide();
+      if (handPoses.containsKey(activeSide))
       {
-         RobotSide activeSide = status.getActiveSide();
          ImGui.text("Hand configuration: ");
          for (String configuration : interactableHands.get(activeSide).getAvailableConfigurations())
          {
