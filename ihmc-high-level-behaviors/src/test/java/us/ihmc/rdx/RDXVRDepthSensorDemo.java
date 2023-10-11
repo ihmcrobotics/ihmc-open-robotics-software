@@ -93,8 +93,8 @@ public class RDXVRDepthSensorDemo
 
             gizmo.create(baseUI.getPrimary3DPanel());
             gizmo.getTransformToParent().set(initialCameraTransform);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(gizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(gizmo::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, gizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, gizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }
 

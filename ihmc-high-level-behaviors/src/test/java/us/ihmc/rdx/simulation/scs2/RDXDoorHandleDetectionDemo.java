@@ -36,14 +36,14 @@ public class RDXDoorHandleDetectionDemo
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(input ->
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, input ->
             {
                if (cameraGizmoSelected.get())
                {
                   sensorPoseGizmo.calculate3DViewPick(input);
                }
             });
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input ->
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, input ->
             {
                if (cameraGizmoSelected.get())
                {

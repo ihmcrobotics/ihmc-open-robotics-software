@@ -76,8 +76,8 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
       pose3DGizmo.create(panel3D);
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::process3DViewInput);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

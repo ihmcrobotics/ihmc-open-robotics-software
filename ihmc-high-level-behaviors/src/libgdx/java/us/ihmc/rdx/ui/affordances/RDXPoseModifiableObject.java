@@ -22,7 +22,7 @@ public class RDXPoseModifiableObject
    {
       this.object = object;
       pose3DGizmo.create(panel3D);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
       object.setTransformToWorld(pose3DGizmo.getTransformToParent());
    }
 

@@ -104,7 +104,7 @@ public class RDXArmManager
    public void create(RDXBaseUI baseUI)
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this, () ->
       {
          if (indicateWrenchOnScreen.get())
             panelHandWrenchIndicator.renderImGuiOverlay();

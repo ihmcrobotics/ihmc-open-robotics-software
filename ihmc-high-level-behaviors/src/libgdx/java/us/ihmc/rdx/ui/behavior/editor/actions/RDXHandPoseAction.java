@@ -179,7 +179,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                                                                 definition::setPalmParentFrameName);
 
       tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+      panel3D.addImGuiOverlayAddition(this, this::render3DPanelImGuiOverlays);
 
       leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
       rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);

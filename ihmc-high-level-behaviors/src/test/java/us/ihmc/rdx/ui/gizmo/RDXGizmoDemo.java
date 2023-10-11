@@ -38,16 +38,16 @@ public class RDXGizmoDemo
             baseUI.getPrimaryScene().addModelInstance(clockCenter);
 
             poseGizmo.create(baseUI.getPrimary3DPanel());
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, poseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, poseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(RDXGizmoDemo.class.getSimpleName()));
 
             poseGizmo.getTransformToParent().getTranslation().set(-1.0, -2.0, 0.1);
 
             footstepRingGizmo.create(baseUI.getPrimary3DPanel());
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, footstepRingGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, footstepRingGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(RDXGizmoDemo.class.getSimpleName()));
 

@@ -83,8 +83,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       panel3D.getScene().addRenderableProvider(this::getRenderables);
 
       pose3DGizmo.create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

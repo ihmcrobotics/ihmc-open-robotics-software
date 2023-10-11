@@ -104,7 +104,7 @@ public class RDXInteractableSakeGripper implements RenderableProvider
       //handConfiguration = HandConfiguration.CLOSE;
       sakeHandConfiguration = SakeHandCommandOption.CLOSE;
 
-      panel3D.addImGui3DViewInputProcessor(this::updateFingers);
+      panel3D.addImGui3DViewInputProcessor(this, this::updateFingers);
    }
 
    private void updateFingers(ImGui3DViewInput imGui3DViewInput)

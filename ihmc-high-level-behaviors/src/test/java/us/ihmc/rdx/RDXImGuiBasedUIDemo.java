@@ -47,7 +47,7 @@ public class RDXImGuiBasedUIDemo
             baseUI.getImGuiPanelManager().addPanel("Window 2", RDXImGuiBasedUIDemo.this::renderWindow2);
             baseUI.getImGuiPanelManager().addPanel("Window 3", RDXImGuiBasedUIDemo.this::renderWindow3);
 
-            baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
+            baseUI.getPrimary3DPanel().addImGuiOverlayAddition(, () ->
             {
                if (ImGui.isWindowHovered() && ImGui.isMouseClicked(ImGuiMouseButton.Right))
                {

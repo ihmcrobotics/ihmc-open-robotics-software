@@ -213,7 +213,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
    public void setupTooltip(RDX3DPanel panel3D, String text)
    {
       tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(() ->
+      panel3D.addImGuiOverlayAddition(this, () ->
                                       {
                                          if (mouseHovering)
                                             tooltip.render(tooltipText);

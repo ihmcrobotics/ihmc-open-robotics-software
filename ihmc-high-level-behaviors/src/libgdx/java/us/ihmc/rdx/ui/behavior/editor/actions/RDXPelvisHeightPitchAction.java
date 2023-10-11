@@ -110,7 +110,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       }
 
       tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+      panel3D.addImGuiOverlayAddition(this, this::render3DPanelImGuiOverlays);
    }
 
    @Override

@@ -80,14 +80,14 @@ public class RDXFootstepPlannerLogViewer
       baseUI.add3DPanel(panel3D, scene3D);
       panel3D.addChild(new RDXPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
       scene3D.addRenderableProvider(this::getRenderables);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
       scene3D.addRenderableProvider(planarRegionsGraphic::getRenderables);
 
       probeSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.005f, Color.VIOLET));
       tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(this::probeTooltip);
+      panel3D.addImGuiOverlayAddition(this, this::probeTooltip);
 
       directory = new ImGuiDirectory(FootstepPlannerLogger.defaultLogsDirectory,
                                      logName -> footstepPlannerLog != null && footstepPlannerLog.getLogName().equals(logName),
@@ -106,15 +106,15 @@ public class RDXFootstepPlannerLogViewer
                                                                      goalColors.get(side));
          goalPoseGraphic.create();
          goalPoseGraphic.setupTooltip(panel3D, side.name() + " goal footstep");
-         panel3D.addImGui3DViewPickCalculator(goalPoseGraphic::calculate3DViewPick);
-         panel3D.addImGui3DViewInputProcessor(goalPoseGraphic::process3DViewInput);
+         panel3D.addImGui3DViewPickCalculator(this, goalPoseGraphic::calculate3DViewPick);
+         panel3D.addImGui3DViewInputProcessor(this, goalPoseGraphic::process3DViewInput);
          goalFootPoses.put(side, goalPoseGraphic);
          RDXFootstepGraphic startPoseGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints().get(side),
                                                                       startColors.get(side));
          startPoseGraphic.create();
          startPoseGraphic.setupTooltip(panel3D, side.name() + " start footstep");
-         panel3D.addImGui3DViewPickCalculator(startPoseGraphic::calculate3DViewPick);
-         panel3D.addImGui3DViewInputProcessor(startPoseGraphic::process3DViewInput);
+         panel3D.addImGui3DViewPickCalculator(this, startPoseGraphic::calculate3DViewPick);
+         panel3D.addImGui3DViewInputProcessor(this, startPoseGraphic::process3DViewInput);
          startFootPoses.put(side, startPoseGraphic);
       }
    }

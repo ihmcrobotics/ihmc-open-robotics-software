@@ -36,8 +36,8 @@ public class RDXInteractableRobotLinkDemo
             robotRobotCollidable = new RDXRobotCollidable(collidable, 0, Color.GRAY);
             baseUI.getVRManager().getContext().addVRPickCalculator(robotRobotCollidable::calculateVRPick);
             baseUI.getVRManager().getContext().addVRInputProcessor(robotRobotCollidable::processVRInput);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(robotRobotCollidable::calculatePick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotRobotCollidable::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, robotRobotCollidable::calculatePick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, robotRobotCollidable::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
 
             ModifiableReferenceFrame controlFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
@@ -50,8 +50,8 @@ public class RDXInteractableRobotLinkDemo
             baseUI.getPrimaryScene().addRenderableProvider(interactableRobotLink::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel("Live Robot Part Interactable", interactableRobotLink::renderImGuiWidgets);
             baseUI.getVRManager().getContext().addVRInputProcessor(interactableRobotLink::processVRInput);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableRobotLink::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableRobotLink::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, interactableRobotLink::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, interactableRobotLink::process3DViewInput);
          }
 
          @Override

@@ -282,8 +282,8 @@ public class RDXBaseUI
 
       vrManager.create();
       primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-      primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
-      primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
+      primary3DPanel.addImGui3DViewPickCalculator(this, vrManager::calculate3DViewPick);
+      primary3DPanel.addImGui3DViewInputProcessor(this, vrManager::process3DViewInput);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 

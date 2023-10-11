@@ -65,8 +65,8 @@ public class RDXOusterBlackflyProjectionTest
             userReferenceFrameGraphic.setToReferenceFrame(userReferenceFrame);
 
             ousterPointInWorldGizmo.create(baseUI.getPrimary3DPanel());
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(ousterPointInWorldGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ousterPointInWorldGizmo::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, ousterPointInWorldGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, ousterPointInWorldGizmo::process3DViewInput);
             ousterPointInWorldGizmo.setResizeAutomatically(false);
 
             pointOnCMOSGraphic = RDXModelBuilder.createSphere(0.01f, Color.RED);

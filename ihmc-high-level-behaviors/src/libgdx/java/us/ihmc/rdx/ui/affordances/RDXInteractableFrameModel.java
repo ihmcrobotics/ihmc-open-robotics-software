@@ -21,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -51,6 +52,7 @@ public class RDXInteractableFrameModel
    private ROS2TunedRigidBodyTransform syncedTransformForTuning;
    /** When interacting with the scene, sometimes the graphics will get in the way. TODO: Disable interactions too. */
    private boolean showing = true;
+   private RDXRenderableAdapter renderableAdapter;
 
    public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, ModelData modelData, RDXMousePickRayCollisionCalculator collisionCalculator)
    {
@@ -73,10 +75,10 @@ public class RDXInteractableFrameModel
       highlightModelInstance = new RDXInteractableHighlightModel(modelData);
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this::getRenderables);
-      panel3D.addImGuiOverlayAddition(this::renderTooltipsAndContextMenu);
+      panel3D.addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
+      renderableAdapter = panel3D.getScene().addRenderableProvider(this::getRenderables);
+      panel3D.addImGuiOverlayAddition(this, this::renderTooltipsAndContextMenu);
    }
 
    public void addRemoteTuning(ROS2PublishSubscribeAPI ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
@@ -158,6 +160,15 @@ public class RDXInteractableFrameModel
             highlightModelInstance.getRenderables(renderables, pool);
          }
          selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      }
+   }
+
+   public void removeRenderables(RDX3DPanel panel3D)
+   {
+      if (renderableAdapter != null)
+      {
+         panel3D.getScene().removeRenderableAdapter(renderableAdapter);
+         renderableAdapter = null;
       }
    }
 

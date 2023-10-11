@@ -48,8 +48,8 @@ public class RDXHighLevelDepthSensorDemo
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, sensorPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(, sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 //            sensorPoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
 //            sensorPoseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 4.0);
@@ -90,7 +90,7 @@ public class RDXHighLevelDepthSensorDemo
             mousePickSphere = RDXModelBuilder.createSphere(0.03f, Color.RED);
             baseUI.getPrimaryScene().addRenderableProvider(mousePickSphere, RDXSceneLevel.VIRTUAL);
 
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(input ->
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(, input ->
             {
                mousePosX = (int) input.getMousePosX();
                mousePosY = (int) input.getMousePosY();
