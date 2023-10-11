@@ -1,29 +1,26 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationActionExecutor extends WaitDurationActionDefinition implements BehaviorActionExecutor
+public class WaitDurationActionExecutor extends BehaviorActionExecutor
 {
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private int actionIndex;
+   private final WaitDurationActionState state = new WaitDurationActionState();
+   private final WaitDurationActionDefinition definition = state.getDefinition();
    private final Timer executionTimer = new Timer();
-   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public WaitDurationActionExecutor(ROS2ControllerHelper ros2ControllerHelper)
+   public WaitDurationActionExecutor(BehaviorActionSequence sequence)
    {
-      this.ros2ControllerHelper = ros2ControllerHelper;
+      super(sequence);
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
-      update();
-
-      this.actionIndex = actionIndex;
+      super.update();
    }
 
    @Override
@@ -35,10 +32,10 @@ public class WaitDurationActionExecutor extends WaitDurationActionDefinition imp
    @Override
    public void updateCurrentlyExecuting()
    {
-      isExecuting = executionTimer.isRunning(getWaitDuration());
+      state.setIsExecuting(executionTimer.isRunning(definition.getWaitDuration()));
 
-      executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
+      executionStatusMessage.setActionIndex(state.getActionIndex());
+      executionStatusMessage.setNominalExecutionDuration(definition.getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
@@ -49,8 +46,14 @@ public class WaitDurationActionExecutor extends WaitDurationActionDefinition imp
    }
 
    @Override
-   public boolean isExecuting()
+   public WaitDurationActionState getState()
    {
-      return isExecuting;
+      return state;
+   }
+
+   @Override
+   public WaitDurationActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

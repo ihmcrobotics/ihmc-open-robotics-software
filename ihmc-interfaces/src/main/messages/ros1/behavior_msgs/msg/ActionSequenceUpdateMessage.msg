@@ -2,22 +2,22 @@
 # Number of actions within the sequence
 uint16 sequence_size
 
-behavior_msgs/ArmJointAnglesActionDefinitionMessage[] arm_joint_angles_actions
+behavior_msgs/ArmJointAnglesActionStateMessage[] arm_joint_angles_actions
 
-behavior_msgs/BodyPartPoseActionDefinitionMessage[] chest_orientation_actions
+behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 
-behavior_msgs/FootstepPlanActionDefinitionMessage[] footstep_plan_actions
+behavior_msgs/FootstepPlanActionStateMessage[] footstep_plan_actions
 
-behavior_msgs/SakeHandCommandActionDefinitionMessage[] sake_hand_command_actions
+behavior_msgs/SakeHandCommandActionStateMessage[] sake_hand_command_actions
 
-behavior_msgs/SidedBodyPartPoseActionDefinitionMessage[] hand_pose_actions
+behavior_msgs/HandPoseActionStateMessage[] hand_pose_actions
 
-behavior_msgs/HandWrenchActionDefinitionMessage[] hand_wrench_actions
+behavior_msgs/HandWrenchActionStateMessage[] hand_wrench_actions
 
-behavior_msgs/BodyPartPoseActionDefinitionMessage[] pelvis_height_actions
+behavior_msgs/PelvisHeightPitchActionStateMessage[] pelvis_height_actions
 
-behavior_msgs/WaitDurationActionDefinitionMessage[] wait_duration_actions
+behavior_msgs/WaitDurationActionStateMessage[] wait_duration_actions
 
-behavior_msgs/WalkActionDefinitionMessage[] walk_actions
+behavior_msgs/WalkActionStateMessage[] walk_actions
 
 
