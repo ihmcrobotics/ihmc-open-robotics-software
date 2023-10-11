@@ -6,9 +6,9 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.sceneGraph.ImGuiSceneNodeComboBox;
-import us.ihmc.rdx.perception.sceneGraph.RDXSceneNodeInterface;
+import us.ihmc.rdx.perception.sceneGraph.RDXSceneNode;
 
-public abstract class RDXSceneNodeBuilder<T extends RDXSceneNodeInterface>
+public abstract class RDXSceneNodeBuilder<T extends RDXSceneNode>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
