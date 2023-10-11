@@ -14,12 +14,13 @@ public class CenterposeNode extends DetectableSceneNode
 {
    private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
-   private double markerSize;
+   private final int markerID;
    private double breakFrequency = 1.0;
 
-   public CenterposeNode(long id, String name)
+   public CenterposeNode(long id, String name, int markerID)
    {
       super(id, name);
+      this.markerID = markerID;
    }
 
    public void applyFilter()
@@ -29,14 +30,9 @@ public class CenterposeNode extends DetectableSceneNode
       getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
    }
 
-   public void setMarkerSize(double markerSize)
+   public int getMarkerID()
    {
-      this.markerSize = markerSize;
-   }
-
-   public double getMarkerSize()
-   {
-      return markerSize;
+      return markerID;
    }
 
    public double getBreakFrequency()
