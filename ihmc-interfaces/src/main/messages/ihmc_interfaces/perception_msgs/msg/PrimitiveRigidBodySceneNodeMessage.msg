@@ -1,0 +1,14 @@
+# A primitive rigid body scene node
+# The topic name identifies the node.
+
+# The base scene node information
+perception_msgs/SceneNodeMessage scene_node
+
+# Initial parent ID
+uint32 initial_parent_id
+
+# Initial transform to initial parent
+controller_msgs/RigidBodyTransformMessage initial_transform_to_parent
+
+# Type of primitive shape
+string shape

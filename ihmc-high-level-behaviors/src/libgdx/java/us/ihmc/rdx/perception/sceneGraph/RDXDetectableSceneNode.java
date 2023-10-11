@@ -1,40 +1,31 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.imgui.ImGuiEnumPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 
-import java.util.Set;
-
-public class RDXDetectableSceneNode extends DetectableSceneNode implements RDXSceneNodeInterface
+public abstract class RDXDetectableSceneNode extends RDXSceneNode
 {
-   private final RDXDetectableSceneNodeBasics detectableSceneNodeBasics;
+   private final DetectableSceneNode detectableSceneNode;
+   private final ImGuiEnumPlot currentlyDetectedPlot;
 
-   public RDXDetectableSceneNode(DetectableSceneNode nodeToCopy)
+   public RDXDetectableSceneNode(DetectableSceneNode detectableSceneNode)
    {
-      super(nodeToCopy.getID(), nodeToCopy.getName());
+      super(detectableSceneNode);
 
-      detectableSceneNodeBasics = new RDXDetectableSceneNodeBasics(this);
-   }
-
-   @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
-   {
-      detectableSceneNodeBasics.update();
+      this.detectableSceneNode = detectableSceneNode;
+      currentlyDetectedPlot = new ImGuiEnumPlot();
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      detectableSceneNodeBasics.renderImGuiWidgets();
-   }
+      super.renderImGuiWidgets();
+      ImGui.sameLine();
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
-   {
-      detectableSceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
+      boolean currentlyDetected = detectableSceneNode.getCurrentlyDetected();
+      currentlyDetectedPlot.setWidgetTextColor(currentlyDetected ? ImGuiTools.GREEN : ImGuiTools.RED);
+      currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");
    }
 }

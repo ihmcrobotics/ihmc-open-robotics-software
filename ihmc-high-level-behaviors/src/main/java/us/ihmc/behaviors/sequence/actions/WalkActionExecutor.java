@@ -4,9 +4,10 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -28,11 +29,13 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class WalkActionExecutor extends WalkActionDefinition implements BehaviorActionExecutor
+public class WalkActionExecutor extends BehaviorActionExecutor
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final WalkActionState state;
+   private final WalkActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -41,17 +44,15 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private int actionIndex;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
-   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
-   public WalkActionExecutor(ROS2ControllerHelper ros2ControllerHelper,
+   public WalkActionExecutor(BehaviorActionSequence sequence,
+                             ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
                              WalkingFootstepTracker footstepTracker,
                              FootstepPlanningModule footstepPlanner,
@@ -59,33 +60,38 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
                              WalkingControllerParameters walkingControllerParameters,
                              ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(sequence);
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+
+      state = new WalkActionState(referenceFrameLibrary, footstepPlannerParameters);
+      definition = state.getDefinition();
    }
 
    @Override
-   public void update(int actionIndex, int nextExecutionIndex, boolean concurrentActionIsNextForExecution)
+   public void update()
    {
-      update(referenceFrameLibrary);
+      super.update();
 
-      this.actionIndex = actionIndex;
-
-      for (RobotSide side : RobotSide.values)
+      if (state.getGoalFrame().isChildOfWorld())
       {
-         goalFeetPoses.get(side).setIncludingFrame(getConditionalReferenceFrame().get(), getGoalFootstepToParentTransforms().get(side));
-         goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         for (RobotSide side : RobotSide.values)
+         {
+            goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(), definition.getGoalFootstepToGoalTransforms().get(side));
+            goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         }
       }
    }
 
    /**
     * TODO: Footstep planning should happen on a thread so it doesn't hang up updates.
     */
-   public void plan()
+   private void plan()
    {
       FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
       FramePose3D rightFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
@@ -139,24 +145,24 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
          {
             if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
-               footstepPlan.getFootstep(i).setTransferDuration(getTransferDuration() / 2.0);
+               footstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration() / 2.0);
             else
-               footstepPlan.getFootstep(i).setTransferDuration(getTransferDuration());
+               footstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration());
 
-            footstepPlan.getFootstep(i).setSwingDuration(getSwingDuration());
+            footstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
          }
 
          footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
-                                                                                               getSwingDuration(),
-                                                                                               getTransferDuration());
+                                                                                               definition.getSwingDuration(),
+                                                                                               definition.getTransferDuration());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
 
       nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
-                                                                                         getSwingDuration(),
+                                                                                         definition.getSwingDuration(),
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                         getTransferDuration(),
+                                                                                         definition.getTransferDuration(),
                                                                                          walkingControllerParameters.getDefaultFinalTransferTime());
       for (RobotSide side : RobotSide.values)
       {
@@ -167,46 +173,58 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
    @Override
    public void triggerActionExecution()
    {
-      plan();
-      if (footstepDataListMessage != null)
+      if (state.getGoalFrame().isChildOfWorld())
       {
-         ros2ControllerHelper.publishToController(footstepDataListMessage);
-         executionTimer.reset();
+         plan();
+         if (footstepDataListMessage != null)
+         {
+            ros2ControllerHelper.publishToController(footstepDataListMessage);
+            executionTimer.reset();
+         }
+      }
+      else
+      {
+         LogTools.error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      boolean isComplete = true;
-      for (RobotSide side : RobotSide.values)
+      if (state.getGoalFrame().isChildOfWorld())
       {
-         syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+         boolean isComplete = true;
+         for (RobotSide side : RobotSide.values)
+         {
+            syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
 
-         isComplete &= completionCalculator.get(side)
-                                           .isComplete(commandedGoalFeetTransformToWorld.get(side),
-                                                       syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
-                                                       nominalExecutionDuration,
-                                                       executionTimer,
-                                                       BehaviorActionCompletionComponent.TRANSLATION,
-                                                       BehaviorActionCompletionComponent.ORIENTATION);
+            isComplete &= completionCalculator.get(side)
+                                              .isComplete(commandedGoalFeetTransformToWorld.get(side),
+                                                          syncedFeetPoses.get(side),
+                                                          POSITION_TOLERANCE,
+                                                          ORIENTATION_TOLERANCE,
+                                                          nominalExecutionDuration,
+                                                          executionTimer,
+                                                          BehaviorActionCompletionComponent.TRANSLATION,
+                                                          BehaviorActionCompletionComponent.ORIENTATION);
+         }
+         int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
+         isComplete &= incompleteFootsteps == 0;
+
+         state.setIsExecuting(!isComplete);
+
+         executionStatusMessage.setActionIndex(state.getActionIndex());
+         executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
+         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
+         executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+         executionStatusMessage.setCurrentOrientationDistanceToGoal(
+               completionCalculator.get(RobotSide.LEFT).getRotationError() + completionCalculator.get(RobotSide.RIGHT).getRotationError());
+         executionStatusMessage.setCurrentPositionDistanceToGoal(
+               completionCalculator.get(RobotSide.LEFT).getTranslationError() + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
+         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-      int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
-      isComplete &= incompleteFootsteps == 0;
-
-      isExecuting = !isComplete;
-
-      executionStatusMessage.setActionIndex(actionIndex);
-      executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
-      executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
-                                                                 + completionCalculator.get(RobotSide.RIGHT).getRotationError());
-      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
-                                                                 + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
-      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
    }
 
    @Override
@@ -216,8 +234,14 @@ public class WalkActionExecutor extends WalkActionDefinition implements Behavior
    }
 
    @Override
-   public boolean isExecuting()
+   public WalkActionState getState()
    {
-      return isExecuting;
+      return state;
+   }
+
+   @Override
+   public WalkActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

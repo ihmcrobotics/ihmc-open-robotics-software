@@ -1,0 +1,34 @@
+#ifndef __behavior_msgs__msg__FootstepPlanActionStateMessage__idl__
+#define __behavior_msgs__msg__FootstepPlanActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorActionStateMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::FootstepPlanActionStateMessage_")
+      struct FootstepPlanActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorActionStateMessage action_state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::FootstepPlanActionDefinitionMessage definition;
+        /**
+         * The footsteps, with a maximum of 50
+         */
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage, 50> footsteps;
+      };
+    };
+  };
+};
+
+#endif

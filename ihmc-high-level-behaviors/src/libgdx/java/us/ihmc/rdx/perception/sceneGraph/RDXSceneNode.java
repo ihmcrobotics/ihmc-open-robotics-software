@@ -1,56 +1,64 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 import java.util.Set;
 
-/**
- * A reference frame graphic in the virtual scene
- * to be used for debugging and know where the frame is.
- *
- * We choose to have the UI nodes extend the underlying scene nodes
- * in order to avoid complicated sync logic. This means though,
- * that we cannot have UI node types extend each other, because it
- * would require multiple inheritance. So instead we create some basics
- * classes to share common functionality and an interface.
- */
-public class RDXSceneNode extends SceneNode implements RDXSceneNodeInterface
+public class RDXSceneNode
 {
-   private final RDXSceneNodeBasics sceneNodeBasics;
+   private final SceneNode sceneNode;
+   private final RDXReferenceFrameGraphic referenceFrameGraphic;
+   private final String detailsText;
 
-   public RDXSceneNode(long id, String name)
+   public RDXSceneNode(SceneNode sceneNode)
    {
-      super(id, name);
-      sceneNodeBasics = new RDXSceneNodeBasics(this);
+      this.sceneNode = sceneNode;
+      referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
+      detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSuperclass().getSimpleName());
    }
 
-   @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
-      sceneNodeBasics.update();
+      referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
    }
 
-   @Override
    public void renderImGuiWidgets()
    {
-      sceneNodeBasics.renderImGuiWidgets();
+      ImGui.text(detailsText);
    }
 
-   @Override
-   public void renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public boolean renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      sceneNodeBasics.renderRemove(modificationQueue, sceneGraph);
+      if (ImGui.button("Remove##" + sceneNode.getID()))
+      {
+         modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
+         modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+         RDXBaseUI.getInstance().getPrimary3DPanel().getNotification().setText("Removed SceneNode [" + sceneNode.getName() + "]");
+         return true;
+      }
+      return false;
    }
 
-   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      sceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         referenceFrameGraphic.getRenderables(renderables, pool);
+   }
+
+   public SceneNode getSceneNode()
+   {
+      return sceneNode;
    }
 }

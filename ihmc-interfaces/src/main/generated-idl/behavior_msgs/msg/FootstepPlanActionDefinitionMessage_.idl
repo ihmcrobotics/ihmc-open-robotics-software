@@ -1,9 +1,8 @@
 #ifndef __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 #define __behavior_msgs__msg__FootstepPlanActionDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./ActionInformationMessage_.idl"
-#include "behavior_msgs/msg/./FootstepActionDefinitionMessage_.idl"
-#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -15,22 +14,13 @@ module behavior_msgs
       struct FootstepPlanActionDefinitionMessage
       {
         /**
-         * Used for syncing action sequences
+         * Parent definition fields
          */
-        behavior_msgs::msg::dds::ActionInformationMessage action_information;
+        behavior_msgs::msg::dds::BehaviorActionDefinitionMessage action_definition;
         /**
-         * Name of the frame the this action is expressed in
+         * Name of the parent frame the footsteps are expressed in
          */
-        sequence<string, 1000> parent_frame;
-        /**
-         * Transform that expresses the transform to the parent frame
-         * that the footsteps are expressed in.
-         */
-        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_parent;
-        /**
-         * The footsteps, with a maximum of 50
-         */
-        sequence<behavior_msgs::msg::dds::FootstepActionDefinitionMessage, 50> footsteps;
+        string parent_frame_name;
         /**
          * Swing duration
          */
@@ -39,6 +29,10 @@ module behavior_msgs
          * Transfer duration
          */
         double transfer_duration;
+        /**
+         * The footsteps, with a maximum of 50
+         */
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
       };
     };
   };
