@@ -86,7 +86,7 @@ public class PausableThrottledThreadTest
 
       thread.start();
       assertTrue(thread.isRunning());
-      assertTrue(thread.getThread().isAlive());
+      assertTrue(thread.isAlive());
 
       thread.stop();
       try
@@ -98,11 +98,11 @@ public class PausableThrottledThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isRunning());
-      assertFalse(thread.getThread().isAlive());
+      assertFalse(thread.isAlive());
 
       thread.start();
       assertTrue(thread.isRunning());
-      assertTrue(thread.getThread().isAlive());
+      assertTrue(thread.isAlive());
 
       thread.stop();
    }
@@ -131,7 +131,7 @@ public class PausableThrottledThreadTest
       finally
       {
          assertFalse(thread.isRunning());
-         assertFalse(thread.getThread().isAlive());
+         assertFalse(thread.isAlive());
       }
    }
 }
