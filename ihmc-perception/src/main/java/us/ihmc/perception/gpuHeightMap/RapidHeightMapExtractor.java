@@ -300,10 +300,25 @@ public class RapidHeightMapExtractor
 
    public Mat getCroppedGlobalHeightMapImage()
    {
-      int xIndex = HeightMapTools.coordinateToIndex(sensorOrigin.getX(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(sensorOrigin.getY(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
+      return getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
+   }
+
+   public Mat getCroppedTerrainCostImage()
+   {
+      return getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
+   }
+
+   public Mat getCroppedContactMapImage()
+   {
+      return getCroppedImage(sensorOrigin, globalCenterIndex, terrainCostImage.getBytedecoOpenCVMat());
+   }
+
+   public Mat getCroppedImage(Point3D origin, int globalCenterIndex, Mat imageToCrop)
+   {
+      int xIndex = HeightMapTools.coordinateToIndex(origin.getX(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(origin.getY(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
       cropWindowRectangle = new Rect((yIndex - CROP_WINDOW_SIZE / 2), (xIndex - CROP_WINDOW_SIZE / 2), CROP_WINDOW_SIZE, CROP_WINDOW_SIZE);
-      return globalHeightMapImage.getBytedecoOpenCVMat().apply(cropWindowRectangle);
+      return imageToCrop.apply(cropWindowRectangle);
    }
 
    public int getLocalCellsPerAxis()

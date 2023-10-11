@@ -41,8 +41,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ContinuousPlanningRemoteTask
 {
    private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 10;
-   private final static float SWING_DURATION = 0.5f;
-   private final static float TRANSFER_DURATION = 0.15f;
+   private final static float SWING_DURATION = 0.75f;
+   private final static float TRANSFER_DURATION = 0.25f;
    private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
