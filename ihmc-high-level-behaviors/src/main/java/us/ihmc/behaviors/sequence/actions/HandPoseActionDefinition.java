@@ -1,31 +1,38 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.SidedBodyPartPoseActionDefinitionMessage;
+import behavior_msgs.msg.dds.HandPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.FrameBasedBehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
+public class HandPoseActionDefinition extends BehaviorActionDefinition implements SidedObject
 {
-   private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
-   private boolean executeWitNextAction = false;
    private boolean holdPoseInWorldLater = false;
    private boolean jointSpaceControl = true;
+   private String palmParentFrameName;
+   private final RigidBodyTransform palmTransformToParent = new RigidBodyTransform();
+
+   public HandPoseActionDefinition()
+   {
+      super("Hand pose");
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("description", description);
-      jsonNode.put("parentFrame", getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      JSONTools.toJSON(jsonNode, getTransformToParent());
+      super.saveToFile(jsonNode);
+
+      jsonNode.put("parentFrame", palmParentFrameName);
+      JSONTools.toJSON(jsonNode, palmTransformToParent);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
       jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater);
       jsonNode.put("jointSpaceControl", jointSpaceControl);
    }
@@ -33,39 +40,43 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      getConditionalReferenceFrame().setParentFrameName(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, getTransformToParent());
-      executeWitNextAction = jsonNode.get("executeWithNextAction").asBoolean();
+      palmParentFrameName = jsonNode.get("parentFrame").textValue();
+      JSONTools.toEuclid(jsonNode, palmTransformToParent);
       holdPoseInWorldLater = jsonNode.get("holdPoseInWorldLater").asBoolean();
       jointSpaceControl = jsonNode.get("jointSpaceControl").asBoolean();
    }
 
-   public void toMessage(SidedBodyPartPoseActionDefinitionMessage message)
+   public void toMessage(HandPoseActionDefinitionMessage message)
    {
-      message.getParentFrame().resetQuick();
-      message.getParentFrame().add(getConditionalReferenceFrame().getConditionallyValidParentFrameName());
-      MessageTools.toMessage(getTransformToParent(), message.getTransformToParent());
+      super.toMessage(message.getActionDefinition());
+
+      message.setParentFrameName(palmParentFrameName);
+      MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
-      message.setExecuteWithNextAction(executeWitNextAction);
+      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.setHoldPoseInWorld(holdPoseInWorldLater);
       message.setJointSpaceControl(jointSpaceControl);
    }
 
-   public void fromMessage(SidedBodyPartPoseActionDefinitionMessage message)
+   public void fromMessage(HandPoseActionDefinitionMessage message)
    {
-      getConditionalReferenceFrame().setParentFrameName(message.getParentFrame().getString(0));
-      MessageTools.toEuclid(message.getTransformToParent(), getTransformToParent());
+      super.fromMessage(message.getActionDefinition());
+
+      palmParentFrameName = message.getParentFrameNameAsString();
+      MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
-      executeWitNextAction = message.getExecuteWithNextAction();
+      setExecuteWithNextAction(message.getExecuteWithNextAction());
       holdPoseInWorldLater = message.getHoldPoseInWorld();
       jointSpaceControl = message.getJointSpaceControl();
    }
 
+   @Override
    public RobotSide getSide()
    {
       return side;
@@ -84,17 +95,6 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
-   }
-
-   @Override
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction;
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction = executeWitNextAction;
    }
 
    public boolean getHoldPoseInWorldLater()
@@ -117,15 +117,18 @@ public class HandPoseActionDefinition extends FrameBasedBehaviorActionDefinition
       this.jointSpaceControl = jointSpaceControl;
    }
 
-   @Override
-   public void setDescription(String description)
+   public String getPalmParentFrameName()
    {
-      this.description = description;
+      return palmParentFrameName;
    }
 
-   @Override
-   public String getDescription()
+   public void setPalmParentFrameName(String palmParentFrameName)
    {
-      return description;
+      this.palmParentFrameName = palmParentFrameName;
+   }
+
+   public RigidBodyTransform getPalmTransformToParent()
+   {
+      return palmTransformToParent;
    }
 }
