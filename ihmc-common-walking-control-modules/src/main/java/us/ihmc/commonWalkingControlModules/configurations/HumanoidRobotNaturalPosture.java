@@ -13,14 +13,21 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  */
 public interface HumanoidRobotNaturalPosture
 {
-   double[] getJointPositionArray();
+   /**
+    * This is the main method of this class. An implementation of this method should contain the calculation which computes the Angular Center of Mass (ACOM).
+    * The implementation should have logic to handle when compute is called without the joint positions using the default method (such as in
+    * NaturalPostureController). See NadiaNaturalPosture for an example.
+    */
+   void compute(double[] q, Orientation3DReadOnly Qbase);
 
+   /**
+    * NaturalPostureController needs a compute without the joint positions in order to be robot agnostic. The implementation should have logic to handle when
+    * compute is called without the joint positions (such as in NaturalPostureController). See NadiaNaturalPosture for an example.
+    */
    default void compute(Orientation3DReadOnly Qbase)
    {
-      compute(getJointPositionArray(), Qbase);
+      compute(null, Qbase);
    }
-
-   void compute(double[] q, Orientation3DReadOnly Qbase);
 
    /**
     * This gets the center of mass orientation (angular center of mass) relative to the world frame. It is a conceptualization of the average orientation of the
