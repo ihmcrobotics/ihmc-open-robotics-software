@@ -908,7 +908,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       // Body managers:
-      if (naturalPostureManager == null || (naturalPostureManager.getUseBodyManagerCommands()))
+      if (naturalPostureManager == null || naturalPostureManager.getUseBodyManagerCommands())
       {
          for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
          {
