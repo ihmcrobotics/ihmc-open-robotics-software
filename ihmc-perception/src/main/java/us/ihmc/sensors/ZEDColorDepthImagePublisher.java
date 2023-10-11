@@ -215,6 +215,7 @@ public class ZEDColorDepthImagePublisher
       }
    }
 
+   // TODO: Use some better thread class
    private class DepthPublisherThread extends Thread
    {
       public DepthPublisherThread()

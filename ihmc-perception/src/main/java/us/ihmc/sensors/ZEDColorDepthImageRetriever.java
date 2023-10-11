@@ -8,10 +8,12 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,12 +50,9 @@ public class ZEDColorDepthImageRetriever
 
    private GpuMat depthGpuMat;
    private final SideDependentList<GpuMat> colorGpuMats = new SideDependentList<>();
-   // TODO: remove atomic reference?
-   private final SideDependentList<AtomicReference<RawImage>> atomicColorImages = new SideDependentList<>(new AtomicReference<>(null),
-                                                                                                          new AtomicReference<>(null));
-   private final AtomicReference<RawImage> atomicDepthImage = new AtomicReference<>(null);
+   private final SideDependentList<RawImage> colorImages = new SideDependentList<>(null, null);
+   private RawImage depthImage = null;
 
-   private final Thread grabImageThread;
    boolean running = true;
 
    public ZEDColorDepthImageRetriever(int cameraID)
@@ -121,7 +120,7 @@ public class ZEDColorDepthImageRetriever
       colorGpuMats.put(RobotSide.LEFT, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
       colorGpuMats.put(RobotSide.RIGHT, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
 
-      grabImageThread = new Thread(() ->
+      MissingThreadTools.startAThread("ZEDImageGrabber", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
       {
          while (running)
          {
@@ -131,7 +130,7 @@ public class ZEDColorDepthImageRetriever
             retrieveAndSaveColorImage(RobotSide.LEFT);
             retrieveAndSaveColorImage(RobotSide.RIGHT);
          }
-      }, "ZEDGrabImageThread");
+      });
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
@@ -156,19 +155,19 @@ public class ZEDColorDepthImageRetriever
       colorGpuMats.put(side, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
       opencv_cudaimgproc.cvtColor(colorImageBGRA, colorGpuMats.get(side), opencv_imgproc.COLOR_BGRA2BGR);
 
-      atomicColorImages.get(side)
-                       .set(new RawImage(colorImageSequenceNumber.get(side),
-                                      colorImageAcquisitionTime.get(),
-                                      imageWidth,
-                                      imageHeight,
-                                      MILLIMETER_TO_METERS,
-                                      null,
-                                      colorGpuMats.get(side).clone(),
-                                      opencv_core.CV_8UC3,
-                                      cameraFocalLengthX.get(side),
-                                      cameraFocalLengthY.get(side),
-                                      cameraPrincipalPointX.get(side),
-                                      cameraPrincipalPointY.get(side)));
+      colorImages.put(side,
+                      new RawImage(colorImageSequenceNumber.get(side),
+                                   colorImageAcquisitionTime.get(),
+                                   imageWidth,
+                                   imageHeight,
+                                   MILLIMETER_TO_METERS,
+                                   null,
+                                   colorGpuMats.get(side).clone(),
+                                   opencv_core.CV_8UC3,
+                                   cameraFocalLengthX.get(side),
+                                   cameraFocalLengthY.get(side),
+                                   cameraPrincipalPointX.get(side),
+                                   cameraPrincipalPointY.get(side)));
 
       colorImageSequenceNumber.set(side, colorImageSequenceNumber.get(side) + 1);
 
@@ -191,28 +190,28 @@ public class ZEDColorDepthImageRetriever
                                sl_mat_get_ptr(depthImagePointer, SL_MEM_GPU),
                                sl_mat_get_step_bytes(depthImagePointer, SL_MEM_GPU));
 
-      atomicDepthImage.set(new RawImage(grabSequenceNumber++,
-                                        depthImageAcquisitionTime.get(),
-                                        imageWidth,
-                                        imageHeight,
-                                        MILLIMETER_TO_METERS,
-                                        null,
-                                        depthGpuMat.clone(),
-                                        opencv_core.CV_16UC1,
-                                        cameraFocalLengthX.get(RobotSide.LEFT),
-                                        cameraFocalLengthY.get(RobotSide.LEFT),
-                                        cameraPrincipalPointX.get(RobotSide.LEFT),
-                                        cameraPrincipalPointY.get(RobotSide.LEFT)));
+      depthImage = new RawImage(grabSequenceNumber++,
+                                depthImageAcquisitionTime.get(),
+                                imageWidth,
+                                imageHeight,
+                                MILLIMETER_TO_METERS,
+                                null,
+                                depthGpuMat.clone(),
+                                opencv_core.CV_16UC1,
+                                cameraFocalLengthX.get(RobotSide.LEFT),
+                                cameraFocalLengthY.get(RobotSide.LEFT),
+                                cameraPrincipalPointX.get(RobotSide.LEFT),
+                                cameraPrincipalPointY.get(RobotSide.LEFT));
    }
 
    public RawImage getLatestRawDepthImage()
    {
-      return atomicDepthImage.get();
+      return depthImage;
    }
 
    public RawImage getLatestRawColorImage(RobotSide side)
    {
-      return atomicColorImages.get(side).get();
+      return colorImages.get(side);
    }
 
    public ZEDModelData getZedModelData()
@@ -220,30 +219,17 @@ public class ZEDColorDepthImageRetriever
       return zedModelData;
    }
 
-   public void start()
-   {
-      grabImageThread.start();
-   }
-
    public void stop()
    {
       running = false;
-      try
-      {
-         grabImageThread.join();
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
 
       depthImagePointer.close();
-      atomicDepthImage.get().destroy();
+      depthImage.destroy();
 
       colorImagePointer.close();
       for (RobotSide side : RobotSide.values)
       {
-         atomicColorImages.get(side).get().destroy();
+         colorImages.get(side).destroy();
       }
       sl_close_camera(cameraID);
    }
@@ -258,16 +244,16 @@ public class ZEDColorDepthImageRetriever
 
    private String getCameraModel(int cameraID)
    {
-      switch (sl_get_camera_model(cameraID))
+      return switch (sl_get_camera_model(cameraID))
       {
-         case 0: return "ZED";
-         case 1: return "ZED Mini";
-         case 2: return "ZED 2";
-         case 3: return "ZED 2i";
-         case 4: return "ZED X";
-         case 5: return "ZED XM";
-         default: return "Unknown model";
-      }
+         case 0 -> "ZED";
+         case 1 -> "ZED Mini";
+         case 2 -> "ZED 2";
+         case 3 -> "ZED 2i";
+         case 4 -> "ZED X";
+         case 5 -> "ZED XM";
+         default -> "Unknown model";
+      };
    }
 
    private void setZEDConfiguration(int cameraID)
