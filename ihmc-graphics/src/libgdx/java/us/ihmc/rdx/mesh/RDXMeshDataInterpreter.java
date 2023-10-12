@@ -27,7 +27,7 @@ public class RDXMeshDataInterpreter
          meshBuilder.vertex(position, normal, color, uvTextureCoordinates);
       }
 
-      for (int i = 0; i < meshData.getTriangleIndices().length; i += 3)
+      for (int i = 0; i + 2 < meshData.getTriangleIndices().length; i += 3)
       {
          meshBuilder.triangle((short) meshData.getTriangleIndices()[i],
                               (short) meshData.getTriangleIndices()[i + 1],

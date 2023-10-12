@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -35,6 +36,8 @@ public class WalkingFootstepTracker
    private volatile int totalStepsCompleted = 0;
    private volatile int totalIncompleteFootsteps = 0;
 
+   private final List<Notification> completedStepListeners = new ArrayList<>();
+
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
       footstepDataListSubscriber = new IHMCROS2Callback<>(ros2Node,
@@ -47,6 +50,12 @@ public class WalkingFootstepTracker
                                                              getTopic(FootstepQueueStatusMessage.class, robotName),
                                                              this::acceptFootstepQueueStatusMessage);
    }
+
+   public void registerCompletedStepListener(Notification completedStepListener)
+   {
+      completedStepListeners.add(completedStepListener);
+   }
+
 
    private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
@@ -70,6 +79,11 @@ public class WalkingFootstepTracker
                   completedIndex = i + 1;
                   break;
                }
+            }
+
+            for (Notification completedStepListener : completedStepListeners)
+            {
+               completedStepListener.set();
             }
 
             totalStepsCompleted++;
@@ -137,6 +151,11 @@ public class WalkingFootstepTracker
       previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
 
       return previousFootstepPose;
+   }
+
+   public List<QueuedFootstepStatusMessage> getQueuedFootsteps()
+   {
+      return queuedFootsteps;
    }
 
    public int getNumberOfIncompleteFootsteps()

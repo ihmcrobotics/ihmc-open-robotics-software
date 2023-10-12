@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.AbortWalkingMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
@@ -90,6 +88,7 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
+   private final Notification completedStepNotification = new Notification();
    private final Timer footstepPlanningCompleteTimer = new Timer();
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
@@ -137,9 +136,9 @@ public class RDXLocomotionManager
       });
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
-            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
-                                                                                                                "Teleoperation Panel Controller Spy")));
+      communicationHelper.subscribeToControllerViaCallback(FootstepQueueStatusMessage.class, footsteps ->
+            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepQueueMessage(footsteps,
+                                                                                                             "Teleoperation Panel Controller Spy")));
    }
 
    private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
@@ -156,6 +155,7 @@ public class RDXLocomotionManager
       this.baseUI = baseUI;
 
       controllerStatusTracker.registerAbortedListener(abortedNotification);
+      controllerStatusTracker.getFootstepTracker().registerCompletedStepListener(completedStepNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
       footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
 
@@ -193,6 +193,9 @@ public class RDXLocomotionManager
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+
+      if (completedStepNotification.poll())
+         footstepsSentToControllerGraphic.update();
 
       if (abortedNotification.poll())
       {
@@ -267,13 +270,6 @@ public class RDXLocomotionManager
       manualFootstepPlacement.update();
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
-
-      if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
-      {
-         footstepsSentToControllerGraphic.clear();
-      }
-
-      footstepsSentToControllerGraphic.update();
 
       boolean isCurrentlyPlacingFootstep =
             getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
@@ -434,7 +430,6 @@ public class RDXLocomotionManager
 
    public void deleteAll()
    {
-      footstepsSentToControllerGraphic.clear();
       ballAndArrowMidFeetPosePlacement.clear();
       manualFootstepPlacement.exitPlacement();
       interactableFootstepPlan.clear();
