@@ -37,7 +37,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.rdx.ui.tools.ImGuiDirectory;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;

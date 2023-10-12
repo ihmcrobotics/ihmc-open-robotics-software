@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.tools;
+package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.type.ImString;

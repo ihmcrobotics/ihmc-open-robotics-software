@@ -1,7 +1,6 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
-import us.ihmc.rdx.imgui.RDXPanel;
 
 import java.util.ArrayList;
 
