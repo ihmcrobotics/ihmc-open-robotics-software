@@ -8,7 +8,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 
 /**
  * This class exists to perform some operations that are like "glue" between the scene based

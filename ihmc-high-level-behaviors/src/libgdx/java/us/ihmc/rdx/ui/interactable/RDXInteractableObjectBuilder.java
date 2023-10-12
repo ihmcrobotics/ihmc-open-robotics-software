@@ -4,7 +4,7 @@ import imgui.internal.ImGui;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;

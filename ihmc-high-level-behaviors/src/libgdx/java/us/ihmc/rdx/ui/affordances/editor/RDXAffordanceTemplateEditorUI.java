@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;

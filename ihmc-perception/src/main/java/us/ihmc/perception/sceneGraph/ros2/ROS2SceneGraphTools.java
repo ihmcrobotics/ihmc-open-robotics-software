@@ -9,10 +9,9 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 public class ROS2SceneGraphTools
 {
@@ -75,7 +74,7 @@ public class ROS2SceneGraphTools
                                                      sceneGraph.getIDToNodeMap(),
                                                      primitiveRigidBodySceneNodeMessage.getInitialParentId(),
                                                      initialTransformToParent,
-                                                     PrimitiveRigidBodyShape.fromString(primitiveRigidBodySceneNodeMessage.getShapeAsString()));
+                                                     primitiveRigidBodySceneNodeMessage.getShapeAsString());
       }
       else
       {

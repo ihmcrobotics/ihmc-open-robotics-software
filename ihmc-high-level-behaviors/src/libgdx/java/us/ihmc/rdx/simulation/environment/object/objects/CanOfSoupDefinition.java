@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
