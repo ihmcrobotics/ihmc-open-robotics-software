@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.imgui;
 
 import java.text.DecimalFormat;
 
