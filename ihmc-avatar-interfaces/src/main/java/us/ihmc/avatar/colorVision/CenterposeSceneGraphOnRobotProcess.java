@@ -1,57 +1,47 @@
 package us.ihmc.avatar.colorVision;
 
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 public class CenterposeSceneGraphOnRobotProcess
 {
-   private final ROS2Node ros2Node;
-   private ROS2SceneGraph onRobotSceneGraph;
-   private ROS2SyncedRobotModel syncedRobot;
-   private volatile boolean destroyed = false;
-   private final ROS2Helper ros2Helper;
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private DetectedObjectPacket detectedObjectMessage;
    private final ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
-   private final DomainFactory.PubSubImplementation pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
+   private final ReferenceFrame sensorInZEDFrame;
+   private final FramePose3D markerPose = new FramePose3D();
 
-   public CenterposeSceneGraphOnRobotProcess(DRCRobotModel robotModel, boolean simulation)
+   public CenterposeSceneGraphOnRobotProcess(ROS2Helper ros2Helper)
    {
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "centerpose_scene_graph_node");
-
-      ros2Helper = new ROS2Helper(ros2Node);
       subscriber = ros2Helper.subscribe(topicName);
 
-      if (!simulation)
-      {
-         onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-         syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
-         while (!destroyed)
-         {
-            onRobotSceneGraph.updateSubscription();
+      RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
+      sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
+      sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+      sensorInZEDFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
+                                                                                      ReferenceFrame.getWorldFrame(),
+                                                                                      sensorInWorldTransform);
+   }
 
-            this.updateSceneGraph(onRobotSceneGraph);
-
-            syncedRobot.update();
-            onRobotSceneGraph.updateOnRobotOnly(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());      // Is it the correct frame?
-
-            onRobotSceneGraph.updatePublication();
-         }
-      }
+   public void update(ROS2SceneGraph onRobotSceneGraph, ReferenceFrame sensorFrame)
+   {
+      onRobotSceneGraph.updateSubscription();
+      this.updateSceneGraph(onRobotSceneGraph);
+      onRobotSceneGraph.updateOnRobotOnly(sensorFrame);      // Is it the correct frame?
+      onRobotSceneGraph.updatePublication();
    }
 
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)
@@ -66,11 +56,12 @@ public class CenterposeSceneGraphOnRobotProcess
                                          CenterposeNode CenterposeDetectedMarkerNode = sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedID);
                                          if (CenterposeDetectedMarkerNode == null) // Add node if it is missing
                                          {
-                                            DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
-                                            candidateFilter.registerDetection();
-                                            if (candidateFilter.isStableDetectionResult())
+//                                            DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
+//                                            candidateFilter.registerDetection();
+//                                            if (candidateFilter.isStableDetectionResult())
+                                            if (true)
                                             {
-                                               sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
+//                                               sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
                                                String nodeName = "CenterposeDetectedObject%d".formatted(detectedID);
                                                CenterposeDetectedMarkerNode = new CenterposeNode(sceneGraph.getNextID().getAndIncrement(),
@@ -83,7 +74,7 @@ public class CenterposeSceneGraphOnRobotProcess
                                          }
                                       });
 
-         // All ArUco markers are child of root
+         // All Centerpose markers are child of root
          // This must be done after the above are added to the scene graph
          for (SceneNode child : sceneGraph.getRootNode().getChildren())
          {
@@ -93,7 +84,11 @@ public class CenterposeSceneGraphOnRobotProcess
                centerposeDetectedMarkerNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
-                  centerposeDetectedMarkerNode.getNodeToParentFrameTransform().set(detectedObjectMessage.getPose().getOrientation(), detectedObjectMessage.getPose().getPosition());
+                  Pose3D objectPoseSensorFrame = detectedObjectMessage.getPose();
+                  markerPose.setIncludingFrame(sensorInZEDFrame, objectPoseSensorFrame);
+                  markerPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  centerposeDetectedMarkerNode.getNodeToParentFrameTransform().set(markerPose);
                   centerposeDetectedMarkerNode.applyFilter();
                   centerposeDetectedMarkerNode.getNodeFrame().update();
                }
@@ -104,7 +99,6 @@ public class CenterposeSceneGraphOnRobotProcess
 
    public void destroy()
    {
-      destroyed = true;
-      ros2Node.destroy();
+      subscriber.destroy();
    }
 }
