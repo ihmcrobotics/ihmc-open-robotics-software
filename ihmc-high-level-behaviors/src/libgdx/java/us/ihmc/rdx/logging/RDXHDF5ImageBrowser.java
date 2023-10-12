@@ -18,7 +18,7 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
-import us.ihmc.rdx.ui.tools.ImGuiDirectory;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;

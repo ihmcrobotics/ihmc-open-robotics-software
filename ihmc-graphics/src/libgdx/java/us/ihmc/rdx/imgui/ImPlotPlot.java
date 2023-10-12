@@ -1,12 +1,10 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.imgui;
 
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotPoint;
 import imgui.extension.implot.flag.*;
 import imgui.internal.ImGui;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.tools.ImPlotTools;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;

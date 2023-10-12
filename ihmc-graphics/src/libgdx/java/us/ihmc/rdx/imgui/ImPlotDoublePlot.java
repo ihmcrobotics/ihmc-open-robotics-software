@@ -1,7 +1,4 @@
-package us.ihmc.rdx.ui.tools;
-
-import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlot;
+package us.ihmc.rdx.imgui;
 
 public class ImPlotDoublePlot
 {

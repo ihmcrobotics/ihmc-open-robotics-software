@@ -1,7 +1,6 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
-import us.ihmc.rdx.ui.tools.ImPlotTools;
 
 public class ImPlotPlotLineIntegerSwapBuffer implements ImPlotPlotLineSwapBuffer
 {
