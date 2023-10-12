@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
+import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -40,10 +41,14 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private RDXContinuousPlanningUI continuousPlanningUI;
    private RDXRemoteHeightMapPanel heightMapUI;
 
+   private HeatMapGenerator contactHeatMapGenerator;
+
    private RDXBytedecoImagePanel localHeightMapPanel;
    private RDXBytedecoImagePanel internalHeightMapPanel;
    private RDXBytedecoImagePanel croppedHeightMapPanel;
    private RDXBytedecoImagePanel depthImagePanel;
+   private RDXBytedecoImagePanel terrainCostImagePanel;
+   private RDXBytedecoImagePanel contactMapImagePanel;
 
    private final ImBoolean rapidRegionsCollapsedHeader = new ImBoolean(true);
    private final ImBoolean sphericalRegionsCollapsedHeader = new ImBoolean(true);
@@ -135,9 +140,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          heightMapUI.update();
 
          depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
+
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
+         terrainCostImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
+         contactMapImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage());
       }
 
       if (rapidRegionsUI != null)
@@ -268,11 +276,21 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                         humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().cols(),
                                                         humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().rows(),
                                                         RDXImagePanel.FLIP_Y);
+      terrainCostImagePanel = new RDXBytedecoImagePanel("Terrain Cost Image",
+                                                          humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage().cols(),
+                                                         humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage().rows(),
+                                                         RDXImagePanel.FLIP_Y);
+      contactMapImagePanel = new RDXBytedecoImagePanel("Contact Map Image",
+                                                         humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().cols(),
+                                                         humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage().rows(),
+                                                         RDXImagePanel.FLIP_Y);
 
       addChild(localHeightMapPanel.getImagePanel());
       addChild(croppedHeightMapPanel.getImagePanel());
       addChild(depthImagePanel.getImagePanel());
       addChild(internalHeightMapPanel.getImagePanel());
+      addChild(terrainCostImagePanel.getImagePanel());
+      addChild(contactMapImagePanel.getImagePanel());
    }
 
    public RDXRapidRegionsUI getRapidRegionsUI()

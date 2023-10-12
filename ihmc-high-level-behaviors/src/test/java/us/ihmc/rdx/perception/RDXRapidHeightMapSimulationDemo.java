@@ -52,8 +52,7 @@ import java.nio.file.Paths;
 
 public class RDXRapidHeightMapSimulationDemo
 {
-   private final double MAXIMUM_DISTANCE_FROM_ORIGIN = 8.0;
-   private final double SENSOR_STEP_LENGTH = 0.01;
+   private final double MAXIMUM_NUMBER_OF_ITERATIONS = 100000;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Helper ros2Helper;
@@ -79,6 +78,8 @@ public class RDXRapidHeightMapSimulationDemo
    private HeightMapData latestHeightMapData;
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
+   private final PoseReferenceFrame randomCameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame randomCameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", randomCameraFrame);
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
@@ -88,6 +89,7 @@ public class RDXRapidHeightMapSimulationDemo
    private int autoIncrementCounter = 0;
    private boolean initialized = false;
    private boolean heightMapCaptured = false;
+   private boolean planLogged = false;
 
    public RDXRapidHeightMapSimulationDemo()
    {
@@ -320,7 +322,7 @@ public class RDXRapidHeightMapSimulationDemo
             request.setHeightMapData(latestHeightMapData);
             request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
             request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
-            request.setTimeout(2.0);
+            request.setTimeout(1.0);
             request.setPlanBodyPath(false);
             request.setSnapGoalSteps(true);
             request.setPerformAStarSearch(true);
@@ -346,12 +348,24 @@ public class RDXRapidHeightMapSimulationDemo
             return plannerOutput;
          }
 
+         public void setToRandomPose(RigidBodyTransform transformToPack)
+         {
+            transformToPack.getTranslation().set(Math.random() * 10.0, Math.random(), 1.5 + Math.random() * 0.5);
+            transformToPack.getRotation().setYawPitchRoll(Math.random() * 2.0 * Math.PI, Math.toRadians(60.0f), Math.toRadians(60.0f));
+         }
+
          public void updateFrameState(int counter)
          {
-            if (l515PoseGizmo.getTransformToParent().getTranslation().getX() < MAXIMUM_DISTANCE_FROM_ORIGIN)
+            if (counter % 10 == 0 && counter < MAXIMUM_NUMBER_OF_ITERATIONS * 10)
             {
-               l515PoseGizmo.getTransformToParent().prependTranslation(SENSOR_STEP_LENGTH, 0, 0);
-               l515PoseGizmo.update();
+               if (planLogged)
+               {
+                  humanoidPerception.getRapidHeightMapExtractor().reset();
+                  setToRandomPose(l515PoseGizmo.getTransformToParent());
+                  l515PoseGizmo.update();
+                  planLogged = false;
+                  return;
+               }
             }
 
             if (counter % 10 == 0)
@@ -364,6 +378,8 @@ public class RDXRapidHeightMapSimulationDemo
                   logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
                                PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
                }
+
+               planLogged = true;
             }
          }
 
@@ -403,6 +419,8 @@ public class RDXRapidHeightMapSimulationDemo
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_POSITION, footstepPosition);
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, footstepOrientation);
             }
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, new Point3D(l515PoseGizmo.getTransformToParent().getTranslation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, new Quaternion(l515PoseGizmo.getTransformToParent().getRotation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, new Point3D(startPose.get(RobotSide.LEFT).getTranslation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, new Quaternion(startPose.get(RobotSide.LEFT).getOrientation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, new Point3D(goalPose.get(RobotSide.LEFT).getTranslation()));
