@@ -1,50 +1,31 @@
-package us.ihmc.perception.sceneGraph.rigidBodies;
+package us.ihmc.perception.sceneGraph.rigidBody;
 
 import gnu.trove.map.TLongObjectMap;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeMove;
-import us.ihmc.perception.sceneGraph.SceneNode;
 
-/**
- * A scene object that is a rigid body whose shape and appearance is
- * known beforehand.
- *
- * Rigid bodies as in a door panel, chair, can of soup, etc.
- *
- * This class also provides support for remembering the parent frame
- * and initial transform to parent, allowing an operator to manually
- * adjust it and also reset it.
- *
- * TODO:
- *   - Add collision information
- */
-public class PredefinedRigidBodySceneNode extends SceneNode
+public class RigidBodySceneNode extends SceneNode
 {
    private final TLongObjectMap<SceneNode> sceneGraphIDToNodeMap;
    private final long initialParentNodeID;
    private final RigidBodyTransform initialTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D initialPose = new FramePose3D();
-   private final String visualModelFilePath;
-   private final RigidBodyTransform visualModelToNodeFrameTransform;
 
-   public PredefinedRigidBodySceneNode(long id,
-                                       String name,
-                                       TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
-                                       long initialParentNodeID,
-                                       RigidBodyTransformReadOnly initialTransformToParent,
-                                       String visualModelFilePath,
-                                       RigidBodyTransform visualModelToNodeFrameTransform)
+   public RigidBodySceneNode(long id,
+                             String name,
+                             TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
+                             long initialParentNodeID,
+                             RigidBodyTransformReadOnly initialTransformToParent)
    {
       super(id, name);
       this.sceneGraphIDToNodeMap = sceneGraphIDToNodeMap;
       this.initialParentNodeID = initialParentNodeID;
       this.initialTransformToParent.set(initialTransformToParent);
-      this.visualModelFilePath = visualModelFilePath;
-      this.visualModelToNodeFrameTransform = visualModelToNodeFrameTransform;
 
       getNodeToParentFrameTransform().set(initialTransformToParent);
       getNodeFrame().update();
@@ -70,7 +51,6 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       {
          return getNodeFrame().getParent() == sceneGraphIDToNodeMap.get(initialParentNodeID).getNodeFrame();
       }
-
       return false;
    }
 
@@ -83,8 +63,7 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       SceneNode initialParentNode = sceneGraphIDToNodeMap.get(initialParentNodeID);
       if (getNodeFrame().getParent() != initialParentNode.getNodeFrame())
       {
-         SceneNode originalParentNode = initialParentNode;
-         initialPose.setIncludingFrame(originalParentNode.getNodeFrame(), initialTransformToParent);
+         initialPose.setIncludingFrame(initialParentNode.getNodeFrame(), initialTransformToParent);
          initialPose.changeFrame(getNodeFrame().getParent());
          initialPose.get(getNodeToParentFrameTransform());
       }
@@ -105,18 +84,13 @@ public class PredefinedRigidBodySceneNode extends SceneNode
       return initialParentNodeID;
    }
 
+   public void setInitialTransformToParent(RigidBodyTransform initialTransformToParent)
+   {
+      this.initialTransformToParent.set(initialTransformToParent);
+   }
+
    public RigidBodyTransform getInitialTransformToParent()
    {
       return initialTransformToParent;
-   }
-
-   public String getVisualModelFilePath()
-   {
-      return visualModelFilePath;
-   }
-
-   public RigidBodyTransform getVisualModelToNodeFrameTransform()
-   {
-      return visualModelToNodeFrameTransform;
    }
 }

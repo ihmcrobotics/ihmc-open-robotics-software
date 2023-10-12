@@ -34,21 +34,24 @@ public class RDXSceneNode
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
    }
 
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       ImGui.text(detailsText);
+
+      if (sceneNode != sceneGraph.getRootNode()) // Don't allow removing root node
+      {
+         if (ImGui.button("Remove##" + sceneNode.getID()))
+         {
+            remove(modificationQueue, sceneGraph);
+         }
+      }
    }
 
-   public boolean renderRemove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      if (ImGui.button("Remove##" + sceneNode.getID()))
-      {
-         modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
-         modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
-         RDXBaseUI.getInstance().getPrimary3DPanel().getNotification().setText("Removed SceneNode [" + sceneNode.getName() + "]");
-         return true;
-      }
-      return false;
+      modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
+      modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
+      RDXBaseUI.getInstance().getPrimary3DPanel().getNotification().setText("Removed SceneNode [" + sceneNode.getName() + "]");
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
