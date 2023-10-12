@@ -318,7 +318,7 @@ void kernel terrainCostKernel(read_write image2d_t heightMap,
       {
          for (int j = -1; j < 2; j++)
          {
-            heightMapNeighborhood[(i + 1) * 3 + (j + 1)] = read_imageui(heightMap, (int2) (xIndex + i, yIndex + j)).x / params[HEIGHT_SCALING_FACTOR];
+            heightMapNeighborhood[(i + 1) * 3 + (j + 1)] = read_imageui(heightMap, (int2) (yIndex + j, xIndex + i)).x / params[HEIGHT_SCALING_FACTOR];
          }
       }
 
@@ -342,6 +342,10 @@ void kernel terrainCostKernel(read_write image2d_t heightMap,
 
    // Scale-map the dot product to [0, 255] into the cost map in that order
    uint cost = (uint) (dotProduct * 255);
+
+   if (dotProduct < 0.85)
+      cost = 0;
+
    write_imageui(costMap, (int2)(yIndex, xIndex), (uint4)(cost, 0, 0, 0));
 }
 
@@ -353,17 +357,27 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
    int yIndex = get_global_id(1);
 
    // Set the contact map at the current cell to be the sum of the 16x16 neighborhood of the terrain cost map
-   int contact = 0;
+   uint score = 0;
+   uint closestDistance = 1000000;
    for (int i = -8; i < 8; i++)
    {
       for (int j = -8; j < 8; j++)
       {
          if (xIndex + i >= 0 && xIndex + i < params[GLOBAL_CELLS_PER_AXIS] && yIndex + j >= 0 && yIndex + j < params[GLOBAL_CELLS_PER_AXIS])
          {
-            contact += read_imageui(terrainCost, (int2) (xIndex + i, yIndex + j)).x;
+            uint steppability = read_imageui(terrainCost, (int2) (yIndex + j, xIndex + i)).x;
+            if (steppability == 0)
+            {
+               uint distance = max(abs(i), abs(j));
+               if (distance < closestDistance)
+               {
+                  closestDistance = distance;
+               }
+            }
+//            score += read_imageui(terrainCost, (int2) (xIndex + i, yIndex + j)).x;
          }
       }
    }
-
-   write_imageui(contactMap, (int2)(yIndex, xIndex), (uint4)((uint) (contact / 256), 0, 0, 0));
+   score = closestDistance * 255 / 8;
+   write_imageui(contactMap, (int2)(yIndex, xIndex), (uint4)(score, 0, 0, 0));
 }

@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
+import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -39,6 +40,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private RDXRapidRegionsUI rapidRegionsUI;
    private RDXContinuousPlanningUI continuousPlanningUI;
    private RDXRemoteHeightMapPanel heightMapUI;
+
+   private HeatMapGenerator contactHeatMapGenerator;
 
    private RDXBytedecoImagePanel localHeightMapPanel;
    private RDXBytedecoImagePanel internalHeightMapPanel;
@@ -137,6 +140,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          heightMapUI.update();
 
          depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
+
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());

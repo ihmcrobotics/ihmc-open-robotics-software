@@ -210,8 +210,6 @@ public class RapidHeightMapExtractor
          terrainCostImage.readOpenCLImage(openCLManager);
          contactMapImage.readOpenCLImage(openCLManager);
 
-         PerceptionDebugTools.printMat("Feasible Contact Map", getCroppedContactMapImage(), 1);
-
          sequenceNumber++;
       }
    }
