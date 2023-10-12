@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception.sceneGraph;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
@@ -20,6 +21,10 @@ public class RDXSceneGraphTools
       if (sceneNodeToCopy instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
          return new RDXArUcoMarkerNode(arUcoMarkerNode);
+      }
+      else if (sceneNodeToCopy instanceof CenterposeNode centerposeNode)
+      {
+         return new RDXCenterposeNode(centerposeNode);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {

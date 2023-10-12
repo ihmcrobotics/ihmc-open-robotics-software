@@ -34,12 +34,12 @@ public class RDXCenterposeObjectDetectionDemo
          {
             baseUI.create();
 
-            RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
-            sensorToWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
-            sensorToWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+            RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
+            sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
+            sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
             ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
                                                                                                            ReferenceFrame.getWorldFrame(),
-                                                                                                           sensorToWorldTransform);
+                                                                                                           sensorInWorldTransform);
 
             RDXROS2BoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
                                                                                                             ros2Helper,
