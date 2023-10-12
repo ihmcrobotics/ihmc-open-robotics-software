@@ -2,6 +2,7 @@ package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
@@ -15,6 +16,7 @@ public class HeatMapGenerator
    private final OpenCLFloatParameters parametersBuffer;
    private final _cl_kernel heatMapKernel;
 
+   private BytedecoImage inputImage;
    private BytedecoImage heatMapImage;
 
    public HeatMapGenerator()
@@ -25,27 +27,36 @@ public class HeatMapGenerator
       this.heatMapKernel = openCLManager.createKernel(program, "heatMapKernel");
    }
 
-   public Mat generateHeatMap(BytedecoImage inputValueImage)
+   public Mat generateHeatMap(Mat inputValueImage)
    {
       if (heatMapImage == null)
       {
-         heatMapImage = new BytedecoImage(inputValueImage.getImageWidth(), inputValueImage.getImageHeight(), opencv_core.CV_8UC3);
+         heatMapImage = new BytedecoImage(inputValueImage.cols(), inputValueImage.rows(), opencv_core.CV_8UC4);
+         heatMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
+         inputImage = new BytedecoImage(inputValueImage.cols(), inputValueImage.rows(), opencv_core.CV_8UC1);
+         inputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       }
 
-      if (heatMapImage.getImageWidth() != inputValueImage.getImageWidth() || heatMapImage.getImageHeight() != inputValueImage.getImageHeight())
-      {
-         heatMapImage.destroy(openCLManager);
-         heatMapImage = new BytedecoImage(inputValueImage.getImageWidth(), inputValueImage.getImageHeight(), opencv_core.CV_8UC3);
-      }
+      inputImage.getBytedecoOpenCVMat().put(inputValueImage);
 
-      parametersBuffer.setParameter(inputValueImage.getImageWidth());
-      parametersBuffer.setParameter(inputValueImage.getImageHeight());
+//      if (heatMapImage.getImageWidth() != inputValueImage.getImageWidth() || heatMapImage.getImageHeight() != inputValueImage.getImageHeight())
+//      {
+//         heatMapImage.destroy(openCLManager);
+//         heatMapImage = new BytedecoImage(inputValueImage.getImageWidth(), inputValueImage.getImageHeight(), opencv_core.CV_8UC4);
+//         heatMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+//      }
 
-      openCLManager.setKernelArgument(heatMapKernel, 0, inputValueImage.getOpenCLImageObject());
+      parametersBuffer.setParameter(inputValueImage.cols());
+      parametersBuffer.setParameter(inputValueImage.rows());
+
+      parametersBuffer.writeOpenCLBufferObject(openCLManager);
+
+      openCLManager.setKernelArgument(heatMapKernel, 0, inputImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(heatMapKernel, 1, heatMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(heatMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute2D(heatMapKernel, inputValueImage.getImageHeight(), inputValueImage.getImageWidth());
+      openCLManager.execute2D(heatMapKernel, inputValueImage.rows(), inputValueImage.cols());
 
       heatMapImage.readOpenCLImage(openCLManager);
 
