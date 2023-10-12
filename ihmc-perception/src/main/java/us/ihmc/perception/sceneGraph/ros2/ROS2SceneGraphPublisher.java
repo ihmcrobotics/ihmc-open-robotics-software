@@ -118,6 +118,7 @@ public class ROS2SceneGraphPublisher
          PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().add();
 
          primitiveRigidBodySceneNodeMessage.setInitialParentId(reshapableRigidBodySceneNode.getInitialParentNodeID());
+         primitiveRigidBodySceneNodeMessage.setShape(reshapableRigidBodySceneNode.getShape().name());
          MessageTools.toMessage(reshapableRigidBodySceneNode.getInitialTransformToParent(),
                                 primitiveRigidBodySceneNodeMessage.getInitialTransformToParent());
          sceneNodeMessage = primitiveRigidBodySceneNodeMessage.getSceneNode();
