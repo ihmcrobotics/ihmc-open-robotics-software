@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.imgui;
 
 import imgui.internal.ImGui;
 import imgui.type.ImInt;

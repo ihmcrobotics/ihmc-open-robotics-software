@@ -1,8 +1,6 @@
-package us.ihmc.rdx.ui.tools;
+package us.ihmc.rdx.imgui;
 
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlot;
 
 public class ImPlotStopwatchPlot
 {

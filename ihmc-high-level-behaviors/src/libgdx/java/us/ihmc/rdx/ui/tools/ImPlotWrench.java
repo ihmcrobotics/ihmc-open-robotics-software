@@ -1,10 +1,10 @@
-package us.ihmc.rdx.ui.affordances;
+package us.ihmc.rdx.ui.tools;
 
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlot;
-import us.ihmc.rdx.ui.yo.ImPlotPlotPanel;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
+import us.ihmc.rdx.imgui.ImPlotPlotPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

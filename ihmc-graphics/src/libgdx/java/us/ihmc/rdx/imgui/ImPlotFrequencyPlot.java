@@ -1,7 +1,5 @@
-package us.ihmc.rdx.ui.tools;
+package us.ihmc.rdx.imgui;
 
-import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
-import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 public class ImPlotFrequencyPlot
