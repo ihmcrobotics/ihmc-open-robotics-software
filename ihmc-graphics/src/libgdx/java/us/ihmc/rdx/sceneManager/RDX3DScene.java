@@ -202,13 +202,6 @@ public class RDX3DScene
       return addRenderableProvider(renderableProvider, RDXSceneLevel.MODEL);
    }
 
-   public RDXRenderableAdapter addRenderableProvider(RDXRenderableProvider renderableProvider)
-   {
-      RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
-      renderables.add(renderableAdapter);
-      return renderableAdapter;
-   }
-
    public RDXRenderableAdapter addRenderableProvider(RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
