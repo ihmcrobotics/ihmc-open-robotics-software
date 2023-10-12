@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -34,9 +33,6 @@ public class ContinuousPlanner
 
    private final Mat gridColor = new Mat();
 
-   private DecisionLayer decisionLayer;
-
-   private final FootstepPlannerLogger footstepPlannerLogger;
    private final FootstepPlanningModule footstepPlanner;
    private final HumanoidReferenceFrames referenceFrames;
    private MonteCarloPlanner monteCarloPlanner;
@@ -68,7 +64,6 @@ public class ContinuousPlanner
    {
       this.referenceFrames = humanoidReferenceFrames;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       active = true;
 
       switch (mode)
@@ -219,14 +214,15 @@ public class ContinuousPlanner
       return footstepDataListMessage;
    }
 
-   public SideDependentList<FramePose3D> updateStanceAndSwitchSides(FramePose3D lastSentFootstepPose, RobotSide lastSentFootstepSide)
+   public SideDependentList<FramePose3D> updateimminentStance(FramePose3D firstImminentFootstep,
+                                                              FramePose3D secondImminentFootstep,
+                                                              RobotSide secondImminentFootstepSide)
    {
       SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      startPose.get(secondImminentFootstepSide.getOppositeSide()).set(firstImminentFootstep);
+      startPose.get(secondImminentFootstepSide).set(secondImminentFootstep);
 
-      startPose.get(lastSentFootstepSide.getOppositeSide()).setFromReferenceFrame(referenceFrames.getSoleFrame(lastSentFootstepSide.getOppositeSide()));
-      startPose.get(lastSentFootstepSide).set(lastSentFootstepPose);
-
-      LogTools.info("New Stance for Planning: {}", lastSentFootstepSide);
+      LogTools.info("New Stance for Planning: {}", secondImminentFootstepSide);
 
       return startPose;
    }
