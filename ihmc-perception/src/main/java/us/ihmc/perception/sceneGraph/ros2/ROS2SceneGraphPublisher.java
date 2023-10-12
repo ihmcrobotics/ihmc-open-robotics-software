@@ -12,9 +12,9 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 
 /**
  * Publishes the current state of the complete scene graph.

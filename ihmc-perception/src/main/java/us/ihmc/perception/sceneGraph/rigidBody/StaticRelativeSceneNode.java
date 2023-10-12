@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.rigidBodies;
+package us.ihmc.perception.sceneGraph.rigidBody;
 
 import gnu.trove.map.TLongObjectMap;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -12,7 +12,7 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 /**
  * This node stays in the same spot relative to where a parent scene node
  * at the time it is seen up close.
- *
+ * <p>
  * The whole point of this is so we don't have to put markers on everything,
  * especially things that don't move.
  */
@@ -40,7 +40,9 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       this.distanceToDisableTracking = distanceToDisableTracking;
    }
 
-   /** Should only happen on the robot, not the UI. */
+   /**
+    * Should only happen on the robot, not the UI.
+    */
    public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
       staticRelativeSceneNodePose.setToZero(getNodeFrame());
