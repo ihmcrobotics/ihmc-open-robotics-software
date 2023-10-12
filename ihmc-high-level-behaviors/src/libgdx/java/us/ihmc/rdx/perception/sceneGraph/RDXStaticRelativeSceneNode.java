@@ -1,7 +1,9 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import imgui.ImGui;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
@@ -26,9 +28,9 @@ public class RDXStaticRelativeSceneNode extends RDXPredefinedRigidBodySceneNode
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      super.renderImGuiWidgets();
+      super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
       ImGui.text("Current distance: %.2f".formatted(staticRelativeSceneNode.getCurrentDistance()));
       ImGui.sameLine();
