@@ -465,12 +465,12 @@ public class RDXAffordanceTemplateFileManager
                ObjectNode frameArray = framesArrayNode.addObject();
                JSONTools.toJSON(frameArray, preGraspObjectTransforms.get(i));
 
-               ArrayNode gripArrayNode = frameArray.putArray("configuration");
+               ArrayNode handConfigurationArrayNode = frameArray.putArray("configuration");
                for (RobotSide side : activeSides)
                {
-                  ObjectNode gripArray = gripArrayNode.addObject();
+                  ObjectNode gripArray = handConfigurationArrayNode.addObject();
                   gripArray.put("side", side.getLowerCaseName());
-                  gripArray.put("config", preGraspHandConfigurations.get(side).get(i) == null ? "" : preGraspHandConfigurations.get(side).get(i).toString());
+                  gripArray.put("type", preGraspHandConfigurations.get(side).get(i) == null ? "" : preGraspHandConfigurations.get(side).get(i).toString());
                }
             }
 
@@ -478,12 +478,12 @@ public class RDXAffordanceTemplateFileManager
             {
                ObjectNode frameArray = framesArrayNode.addObject();
                JSONTools.toJSON(frameArray, graspFrame.getObjectTransform());
-               ArrayNode gripArrayNode = frameArray.putArray("configuration");
+               ArrayNode handConfigurationArrayNode = frameArray.putArray("configuration");
                for (RobotSide side : activeSides)
                {
-                  ObjectNode gripArray = gripArrayNode.addObject();
+                  ObjectNode gripArray = handConfigurationArrayNode.addObject();
                   gripArray.put("side", side.getLowerCaseName());
-                  gripArray.put("config", graspFrame.getHandConfiguration(side) == null ? "" : graspFrame.getHandConfiguration(side).toString());
+                  gripArray.put("type", graspFrame.getHandConfiguration(side) == null ? "" : graspFrame.getHandConfiguration(side).toString());
                }
             }
 
@@ -494,12 +494,12 @@ public class RDXAffordanceTemplateFileManager
             {
                ObjectNode frameArray = framesArrayNode.addObject();
                JSONTools.toJSON(frameArray, postGraspObjectTransforms.get(i));
-               ArrayNode gripArrayNode = frameArray.putArray("configuration");
+               ArrayNode handConfigurationArrayNode = frameArray.putArray("configuration");
                for (RobotSide side : activeSides)
                {
-                  ObjectNode gripArray = gripArrayNode.addObject();
+                  ObjectNode gripArray = handConfigurationArrayNode.addObject();
                   gripArray.put("side", side.getLowerCaseName());
-                  gripArray.put("config", postGraspHandConfigurations.get(side).get(i) == null ? "" : postGraspHandConfigurations.get(side).get(i).toString());
+                  gripArray.put("type", postGraspHandConfigurations.get(side).get(i) == null ? "" : postGraspHandConfigurations.get(side).get(i).toString());
                }
             }
          });
@@ -518,6 +518,12 @@ public class RDXAffordanceTemplateFileManager
          loadingFileName = fileName.substring(0, fileName.length() - suffixToRemove.length());
       else
          loadingFileName = fileName;
+   }
+
+   public String getLoadingFile()
+   {
+      String suffixToAdd = ".json";
+      return (loadingFileName + suffixToAdd);
    }
 
    public void load()
@@ -557,11 +563,11 @@ public class RDXAffordanceTemplateFileManager
                JSONTools.toEuclid(framesArrayNode.get(i), preGraspObjectTransform);
                preGraspFrames.addObjectTransform(preGraspObjectTransform);
 
-               JsonNode gripArrayNode = framesArrayNode.get(i).get("configuration");
+               JsonNode handConfigurationArrayNode = framesArrayNode.get(i).get("configuration");
                for (int sideIndex = 0; sideIndex < numberActiveSides[0]; sideIndex++)
                {
-                  RobotSide side = getSideFromString((gripArrayNode.get(sideIndex).get("side").asText()));
-                  String configuration = gripArrayNode.get(sideIndex).get("config").asText();
+                  RobotSide side = getSideFromString((handConfigurationArrayNode.get(sideIndex).get("side").asText()));
+                  String configuration = handConfigurationArrayNode.get(sideIndex).get("type").asText();
                   preGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : configuration, side);
                }
             }
@@ -569,11 +575,11 @@ public class RDXAffordanceTemplateFileManager
             RigidBodyTransform graspObjectTransform = new RigidBodyTransform();
             JSONTools.toEuclid(framesArrayNode.get(preGraspFramesSize), graspObjectTransform);
             graspFrame.setObjectTransform(graspObjectTransform);
-            JsonNode gripArrayNode = framesArrayNode.get(preGraspFramesSize).get("configuration");
+            JsonNode handConfigurationArrayNode = framesArrayNode.get(preGraspFramesSize).get("configuration");
             for (int sideIndex = 0; sideIndex < numberActiveSides[0]; sideIndex++)
             {
-               RobotSide side = getSideFromString((gripArrayNode.get(sideIndex).get("side").asText()));
-               String configuration = gripArrayNode.get(sideIndex).get("config").asText();
+               RobotSide side = getSideFromString((handConfigurationArrayNode.get(sideIndex).get("side").asText()));
+               String configuration = handConfigurationArrayNode.get(sideIndex).get("type").asText();
                graspFrame.setHandConfiguration(configuration.isEmpty() ? null : configuration, side);
             }
 
@@ -583,11 +589,11 @@ public class RDXAffordanceTemplateFileManager
                JSONTools.toEuclid(framesArrayNode.get(i + preGraspFramesSize + 1), postGraspObjectTransform);
                postGraspFrames.addObjectTransform(postGraspObjectTransform);
 
-               gripArrayNode = framesArrayNode.get(i + preGraspFramesSize + 1).get("configuration");
+               handConfigurationArrayNode = framesArrayNode.get(i + preGraspFramesSize + 1).get("configuration");
                for (int sideIndex = 0; sideIndex < numberActiveSides[0]; sideIndex++)
                {
-                  RobotSide side = getSideFromString((gripArrayNode.get(sideIndex).get("side").asText()));
-                  String configuration = gripArrayNode.get(sideIndex).get("config").asText();
+                  RobotSide side = getSideFromString((handConfigurationArrayNode.get(sideIndex).get("side").asText()));
+                  String configuration = handConfigurationArrayNode.get(sideIndex).get("type").asText();
                   postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : configuration, side);
                }
             }

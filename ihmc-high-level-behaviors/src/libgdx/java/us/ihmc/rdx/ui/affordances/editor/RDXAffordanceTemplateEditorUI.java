@@ -140,7 +140,7 @@ public class RDXAffordanceTemplateEditorUI
 
       fileManager = new RDXAffordanceTemplateFileManager(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
       fileManagerDirectory = new ImGuiDirectory(fileManager.getConfigurationDirectory(),
-                                                fileName -> !currentObjectName.isEmpty() && fileName.contains(currentObjectName),
+                                                fileName -> !currentObjectName.isEmpty() && fileName.contains(currentObjectName) && fileName.equals(fileManager.getLoadingFile()),
                                                 pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
                                                              && pathEntry.path().getFileName().toString().contains(currentObjectName)
                                                              && pathEntry.path().getFileName().toString().endsWith(".json")

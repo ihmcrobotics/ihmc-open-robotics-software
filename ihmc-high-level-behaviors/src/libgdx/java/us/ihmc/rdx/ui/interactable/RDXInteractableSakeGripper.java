@@ -262,7 +262,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    @Override
    public void removeRenderables(RDX3DPanel panel3D)
    {
-      interactableHandFrameModel.removeRenderables(panel3D);
+      interactableHandFrameModel.destroy(panel3D);
       if (fingersRenderableAdapter != null)
       {
          panel3D.getScene().removeRenderableAdapter(fingersRenderableAdapter);
