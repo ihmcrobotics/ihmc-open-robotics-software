@@ -216,6 +216,13 @@ public class RDX3DScene
       return renderableAdapter;
    }
 
+   public RDXRenderableAdapter addRenderableProvider(RDXRenderableProvider renderableProvider)
+   {
+      RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
+      renderables.add(renderableAdapter);
+      return renderableAdapter;
+   }
+
    public void addRenderableProvider(Object supplier, RDXRenderableProvider renderableProvider)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
