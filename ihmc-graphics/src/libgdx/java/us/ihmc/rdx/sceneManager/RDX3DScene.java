@@ -223,6 +223,11 @@ public class RDX3DScene
       renderables.add(renderableAdapter);
    }
 
+   public void addRenderableProvider(Object supplier, RenderableProvider renderableProvider)
+   {
+      addRenderableProvider(supplier, renderableProvider, RDXSceneLevel.MODEL);
+   }
+
    public void addRenderableProvider(Object supplier, RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
