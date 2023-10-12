@@ -161,7 +161,7 @@ public class RDXInteractableFrameModel
       }
    }
 
-   public void removeRenderables(RDX3DPanel panel3D)
+   public void destroy(RDX3DPanel panel3D)
    {
       panel3D.getScene().removeRenderable(this);
       panel3D.removeImGui3DViewInputProcessor(this);
