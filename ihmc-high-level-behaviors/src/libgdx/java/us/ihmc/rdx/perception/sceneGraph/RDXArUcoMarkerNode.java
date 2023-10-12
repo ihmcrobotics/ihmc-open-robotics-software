@@ -1,9 +1,7 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import imgui.ImGui;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
 
 public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
@@ -28,9 +26,9 @@ public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
    }
 
    @Override
-   public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets(modificationQueue, sceneGraph);
+      super.renderImGuiWidgets();
       ImGui.text("Marker ID: %d   Size: %.2f m".formatted(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode.getMarkerSize()));
       ImGui.sameLine();
       alphaFilterValueSlider.render();

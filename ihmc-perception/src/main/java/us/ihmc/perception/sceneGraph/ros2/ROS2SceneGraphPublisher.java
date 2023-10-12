@@ -12,9 +12,9 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 /**
  * Publishes the current state of the complete scene graph.
@@ -118,7 +118,6 @@ public class ROS2SceneGraphPublisher
          PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().add();
 
          primitiveRigidBodySceneNodeMessage.setInitialParentId(reshapableRigidBodySceneNode.getInitialParentNodeID());
-         primitiveRigidBodySceneNodeMessage.setShape(reshapableRigidBodySceneNode.getShape().name());
          MessageTools.toMessage(reshapableRigidBodySceneNode.getInitialTransformToParent(),
                                 primitiveRigidBodySceneNodeMessage.getInitialTransformToParent());
          sceneNodeMessage = primitiveRigidBodySceneNodeMessage.getSceneNode();

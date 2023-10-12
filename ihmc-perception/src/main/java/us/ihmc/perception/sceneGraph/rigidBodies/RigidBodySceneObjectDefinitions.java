@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.rigidBody;
+package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
@@ -9,6 +9,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
