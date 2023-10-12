@@ -11,7 +11,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.*;
