@@ -21,7 +21,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
-import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -161,7 +160,7 @@ public class RDXInteractableFrameModel
       }
    }
 
-   public void removeRenderables(RDX3DPanel panel3D)
+   public void destroy(RDX3DPanel panel3D)
    {
       panel3D.getScene().removeRenderable(this);
       panel3D.removeImGui3DViewInputProcessor(this);

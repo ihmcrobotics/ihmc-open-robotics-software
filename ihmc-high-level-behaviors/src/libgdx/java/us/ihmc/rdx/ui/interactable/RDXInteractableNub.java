@@ -72,6 +72,6 @@ public class RDXInteractableNub implements RDXInteractableAffordanceTemplateHand
    @Override
    public void removeRenderables(RDX3DPanel panel3D)
    {
-      interactableHandFrameModel.removeRenderables(panel3D);
+      interactableHandFrameModel.destroy(panel3D);
    }
 }
