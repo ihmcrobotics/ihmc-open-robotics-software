@@ -20,8 +20,8 @@ import us.ihmc.ros2.ROS2Topic;
 public class CenterposeSceneGraphOnRobotProcess
 {
    private final ROS2Node ros2Node;
-   private final ROS2SceneGraph onRobotSceneGraph;
-   private final ROS2SyncedRobotModel syncedRobot;
+   private ROS2SceneGraph onRobotSceneGraph;
+   private ROS2SyncedRobotModel syncedRobot;
    private volatile boolean destroyed = false;
    private final ROS2Helper ros2Helper;
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
@@ -29,61 +29,63 @@ public class CenterposeSceneGraphOnRobotProcess
    private final ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
    private final DomainFactory.PubSubImplementation pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
 
-   public CenterposeSceneGraphOnRobotProcess(DRCRobotModel robotModel)
+   public CenterposeSceneGraphOnRobotProcess(DRCRobotModel robotModel, boolean simulation)
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "centerpose_scene_graph_node");
 
       ros2Helper = new ROS2Helper(ros2Node);
       subscriber = ros2Helper.subscribe(topicName);
 
-      onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
-
-      while (!destroyed)
+      if (!simulation)
       {
-         onRobotSceneGraph.updateSubscription();
+         onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
+         syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+         while (!destroyed)
+         {
+            onRobotSceneGraph.updateSubscription();
 
-         this.updateSceneGraph();
+            this.updateSceneGraph(onRobotSceneGraph);
 
-         syncedRobot.update();
-         onRobotSceneGraph.updateOnRobotOnly(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());      // Is it the correct frame?
+            syncedRobot.update();
+            onRobotSceneGraph.updateOnRobotOnly(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());      // Is it the correct frame?
 
-         onRobotSceneGraph.updatePublication();
+            onRobotSceneGraph.updatePublication();
+         }
       }
    }
 
-   public void updateSceneGraph()
+   public void updateSceneGraph(ROS2SceneGraph sceneGraph)
    {
       if (subscriber.getMessageNotification().poll())
       {
          detectedObjectMessage = subscriber.getMessageNotification().read();
 
-         onRobotSceneGraph.modifyTree(modificationQueue ->
+         sceneGraph.modifyTree(modificationQueue ->
                                       {
                                          int detectedID = detectedObjectMessage.getId();
-                                         CenterposeNode CenterposeDetectedMarkerNode = onRobotSceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedID);
+                                         CenterposeNode CenterposeDetectedMarkerNode = sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedID);
                                          if (CenterposeDetectedMarkerNode == null) // Add node if it is missing
                                          {
-                                            DetectionFilter candidateFilter = onRobotSceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
+                                            DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
                                             candidateFilter.registerDetection();
                                             if (candidateFilter.isStableDetectionResult())
                                             {
-                                               onRobotSceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
+                                               sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
                                                String nodeName = "CenterposeDetectedObject%d".formatted(detectedID);
-                                               CenterposeDetectedMarkerNode = new CenterposeNode(onRobotSceneGraph.getNextID().getAndIncrement(),
+                                               CenterposeDetectedMarkerNode = new CenterposeNode(sceneGraph.getNextID().getAndIncrement(),
                                                                                                  nodeName,
                                                                                                  detectedID);
                                                LogTools.info("Adding detected Centerpose Detected marker {} to scene graph as {}", detectedID, nodeName);
-                                               modificationQueue.accept(new SceneGraphNodeAddition(CenterposeDetectedMarkerNode, onRobotSceneGraph.getRootNode()));
-                                               onRobotSceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(detectedID, CenterposeDetectedMarkerNode); // Prevent it getting added twice
+                                               modificationQueue.accept(new SceneGraphNodeAddition(CenterposeDetectedMarkerNode, sceneGraph.getRootNode()));
+                                               sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(detectedID, CenterposeDetectedMarkerNode); // Prevent it getting added twice
                                             }
                                          }
                                       });
 
          // All ArUco markers are child of root
          // This must be done after the above are added to the scene graph
-         for (SceneNode child : onRobotSceneGraph.getRootNode().getChildren())
+         for (SceneNode child : sceneGraph.getRootNode().getChildren())
          {
             if (child instanceof CenterposeNode centerposeDetectedMarkerNode)
             {

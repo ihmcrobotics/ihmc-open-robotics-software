@@ -1,36 +1,23 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
-import java.util.Set;
-
-public class RDXCenterposeNode extends CenterposeNode implements RDXSceneNodeInterface
+public class RDXCenterposeNode extends RDXDetectableSceneNode
 {
-   public RDXCenterposeNode(long id, String name)
-   {
-      super(id, name);
-   }
+   private final CenterposeNode centerposeNode;
 
-   @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public RDXCenterposeNode(CenterposeNode centerposeNode)
    {
-//      RDXSceneNodeInterface.super.update(modificationQueue);
+      super(centerposeNode);
+      this.centerposeNode = centerposeNode;
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-//      RDXSceneNodeInterface.super.renderImGuiWidgets();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
-   {
-//      RDXSceneNodeInterface.super.getRenderables(renderables, pool, sceneLevels);
+      super.renderImGuiWidgets();
+      ImGui.text("Marker ID: %d".formatted(centerposeNode.getMarkerID()));
+      ImGui.sameLine();
    }
 }
