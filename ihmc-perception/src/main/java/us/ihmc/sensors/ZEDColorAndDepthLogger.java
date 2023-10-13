@@ -10,21 +10,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
-import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.session.tools.RobotModelLoader;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Throttler;
 
@@ -47,27 +40,19 @@ public class ZEDColorAndDepthLogger
 
    private final int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
    private final int imageHeight; // Height of rectified image in pixels (color image height ==  depth image height)
-   private final SideDependentList<Float> cameraFocalLengthX;
-   private final SideDependentList<Float> cameraFocalLengthY;
-   private final SideDependentList<Float> cameraPrincipalPointX;
-   private final SideDependentList<Float> cameraPrincipalPointY;
 
    private final SideDependentList<Pointer> colorImagePointers;
    private final Pointer depthImagePointer;
-   private long depthImageSequenceNumber = 0L;
    private final SideDependentList<Long> colorImageSequenceNumber = new SideDependentList<>(0L, 0L);
 
-   private final ImageMessage colorImageMessage = new ImageMessage();
-   private final ImageMessage depthImageMessage = new ImageMessage();
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
    private final AtomicReference<Instant> depthImageAcquisitionTime = new AtomicReference<>();
-   private final CUDAImageEncoder imageEncoder;
    private final Throttler throttler = new Throttler();
    private boolean running = true;
 
    private final String depthChannelName;
    private final SideDependentList<String> colorChannelNames;
-   private final String timeChannelName;
+   private final String timeChannelName; // TODO: Add time logging
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
 
    public ZEDColorAndDepthLogger(int cameraID,String depthChannelName, SideDependentList<String> colorChannelNames, String timeChannelName)
@@ -124,10 +109,6 @@ public class ZEDColorAndDepthLogger
 
       // Get camera's parameters
       SL_CalibrationParameters zedCalibrationParameters = sl_get_calibration_parameters(cameraID, false);
-      cameraFocalLengthX = new SideDependentList<>(zedCalibrationParameters.left_cam().fx(), zedCalibrationParameters.right_cam().fx());
-      cameraFocalLengthY = new SideDependentList<>(zedCalibrationParameters.left_cam().fy(), zedCalibrationParameters.right_cam().fy());
-      cameraPrincipalPointX = new SideDependentList<>(zedCalibrationParameters.left_cam().cx(), zedCalibrationParameters.right_cam().cx());
-      cameraPrincipalPointY = new SideDependentList<>(zedCalibrationParameters.left_cam().cy(), zedCalibrationParameters.right_cam().cy());
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
@@ -136,9 +117,7 @@ public class ZEDColorAndDepthLogger
                                                    new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU)));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
 
-      // Setup other things
-      imageEncoder = new CUDAImageEncoder();
-
+      // Setup logger
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
@@ -180,19 +159,25 @@ public class ZEDColorAndDepthLogger
                                             sl_mat_get_ptr(colorImagePointers.get(side), SL_MEM_GPU),
                                             sl_mat_get_step_bytes(colorImagePointers.get(side), SL_MEM_GPU));
 
-         GpuMat colorImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-         opencv_cudaimgproc.cvtColor(colorImageBGRA, colorImageBGR, opencv_imgproc.COLOR_BGRA2BGR);
+         GpuMat colorImageRGB = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+         opencv_cudaimgproc.cvtColor(colorImageBGRA, colorImageRGB, opencv_imgproc.COLOR_BGRA2RGB);
 
-         Mat cpuColorImageBGR = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-         colorImageBGR.download(cpuColorImageBGR);
+         Mat cpuImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+         colorImageRGB.download(cpuImageMat);
 
-         perceptionDataLogger.storeBytesFromPointer(colorChannelNames.get(side), cpuColorImageBGR.data());
+         Mat yuvColorImage = new Mat(imageHeight * 1.5, imageWidth, opencv_core.CV_8UC1); // deallocate later
+
+         BytePointer compressedColorPointer = new BytePointer();
+         OpenCVTools.compressRGBImageJPG(cpuImageMat, yuvColorImage, compressedColorPointer);
+
+         perceptionDataLogger.storeBytesFromPointer(colorChannelNames.get(side), compressedColorPointer);
 
          colorImageSequenceNumber.set(side, colorImageSequenceNumber.get(side) + 1L);
 
          // Close stuff
-         cpuColorImageBGR.close();
-         colorImageBGR.close();
+         colorImageRGB.close();
+         cpuImageMat.close();
+         yuvColorImage.close();
          colorImageBGRA.close();
       }
 
@@ -210,7 +195,9 @@ public class ZEDColorAndDepthLogger
       Mat cpuDepthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
       gpuDepthImage16UC1.download(cpuDepthImage16UC1);
 
-      perceptionDataLogger.storeBytesFromPointer(depthChannelName, cpuDepthImage16UC1.data());
+      BytePointer compressedDepthPointer = new BytePointer();
+      OpenCVTools.compressImagePNG(cpuDepthImage16UC1, compressedDepthPointer);
+      perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthPointer);
 
       // Close stuff
       cpuDepthImage16UC1.close();
