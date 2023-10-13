@@ -95,7 +95,7 @@ public class RDXSceneGraphDemo
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
 
-            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel(), referenceFrameLibrary);
+            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
