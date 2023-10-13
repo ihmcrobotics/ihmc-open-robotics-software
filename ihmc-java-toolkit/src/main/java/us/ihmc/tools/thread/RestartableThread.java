@@ -3,6 +3,7 @@ package us.ihmc.tools.thread;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 
 public class RestartableThread
 {
@@ -35,8 +36,12 @@ public class RestartableThread
       this.exceptionHandler = exceptionHandler;
       this.runAsDaemon = runAsDaemon;
       this.runnable = runnable;
+      this.thread = new Thread(); // initialize thread so stopping without starting doesn't throw exception
    }
 
+   /**
+    * Creates a new thread with the parameters used to initialize this class, and starts the new thread
+    */
    public void start()
    {
       running = true;
@@ -44,14 +49,13 @@ public class RestartableThread
       {
          try
          {
-            runnable.run();
+            while (running)
+            {
+               ExceptionTools.handle(runnable, exceptionHandler);
+            }
          }
-         catch (Throwable throwable)
+         finally
          {
-            // Interrupt used to stop thread. Don't handle interrupted exceptions
-            if (!(throwable instanceof InterruptedException))
-               exceptionHandler.handleException(throwable);
-
             running = false;
          }
       }, name);
@@ -60,9 +64,12 @@ public class RestartableThread
       thread.start();
    }
 
+   /**
+    * Interrupts the thread, thus stopping it
+    */
    public void stop()
    {
-      thread.interrupt();
+      running = false;
    }
 
    public boolean isRunning()

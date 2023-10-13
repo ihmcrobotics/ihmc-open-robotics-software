@@ -34,6 +34,7 @@ public class RestartableThrottledThread
       this.exceptionHandler = exceptionHandler;
       this.runAsDaemon = runAsDaemon;
       this.runnable = runnable;
+      this.thread = new Thread();
    }
 
    /**
