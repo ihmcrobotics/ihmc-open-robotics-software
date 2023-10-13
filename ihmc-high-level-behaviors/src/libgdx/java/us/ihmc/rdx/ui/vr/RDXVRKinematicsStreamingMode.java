@@ -79,6 +79,7 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsRecordReplay kinematicsRecorder;
    private RDXVRSharedControl sharedControlAssistant;
 
+
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;

@@ -27,7 +27,7 @@ public class RDXVRAssistanceMenu
    private final ArrayList<RDXIconTexture> iconsJoysticksHighlighted = new ArrayList<>();
    private boolean isHighlighted = false;
    private long lastRenderTime = System.currentTimeMillis();
-   private final RDXVRMenuGuideMode[] mode;
+   private final RDXVRAssistanceStatus status;
 
    private int proMPSamples = -1;
    private int currentProMPSample = -1;
@@ -36,8 +36,9 @@ public class RDXVRAssistanceMenu
    private int currentAffordanceSample = -1;
    private boolean hasAffordance = false;
 
-   public RDXVRAssistanceMenu(RDXImGuiWindowAndDockSystem window, RDXVRMenuGuideMode[] mode)
+   public RDXVRAssistanceMenu(RDXImGuiWindowAndDockSystem window, RDXVRAssistanceStatus status)
    {
+      this.status = status;
       menuPanel = new RDX3DSituatedImGuiTransparentPanel("Menu VR", this::renderMenu);
       menuPanel.create(window.getImGuiGl3(), 0.083, 0.072, 50);
 
@@ -58,8 +59,6 @@ public class RDXVRAssistanceMenu
 
       for (int i = 0; i <= 100; i += 5)
          iconsAssistanceProgress.add(new RDXIconTexture("icons/vrAssistance/progressBar/" + i + ".png"));
-
-      this.mode = mode;
    }
 
    public void update(ReferenceFrame placementFrame)
@@ -87,9 +86,9 @@ public class RDXVRAssistanceMenu
          lastRenderTime = currentTime;
       }
 
-      if (!(mode[0] == RDXVRMenuGuideMode.OFF || mode[0] == RDXVRMenuGuideMode.ACTIVATE)) // assistance on
+      if (!(status.getActiveMenu() == RDXVRAssistanceMenuMode.OFF || status.getActiveMenu() == RDXVRAssistanceMenuMode.ACTIVATE)) // assistance on
       {
-         if (mode[0] == RDXVRMenuGuideMode.DIRECT_WITH_JOYSTICK)
+         if (status.getActiveMenu() == RDXVRAssistanceMenuMode.DIRECT_WITH_JOYSTICK)
          {
             if (hasProMPSamples())
             {
@@ -120,21 +119,21 @@ public class RDXVRAssistanceMenu
       }
       ImGui.newLine();
       ImGui.newLine();
-      if (mode[0] == RDXVRMenuGuideMode.IDLE)
+      if (status.getActiveMenu() == RDXVRAssistanceMenuMode.IDLE)
          ImGui.image(iconsJoysticks.get(0).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);
-      else if (mode[0] == RDXVRMenuGuideMode.ACTIVATE)
+      else if (status.getActiveMenu() == RDXVRAssistanceMenuMode.ACTIVATE)
          ImGui.image(isHighlighted ?
                            iconsJoysticksHighlighted.get(1).getTexture().getTextureObjectHandle() :
                            iconsJoysticks.get(1).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);
-      else if (mode[0] == RDXVRMenuGuideMode.MOVE)
+      else if (status.getActiveMenu() == RDXVRAssistanceMenuMode.MOVE)
          ImGui.image(isHighlighted ?
                            iconsJoysticksHighlighted.get(2).getTexture().getTextureObjectHandle() :
                            iconsJoysticks.get(2).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);
-      else if (mode[0] == RDXVRMenuGuideMode.DIRECT_WITH_JOYSTICK)
+      else if (status.getActiveMenu() == RDXVRAssistanceMenuMode.DIRECT_WITH_JOYSTICK)
          ImGui.image(isHighlighted ?
                            iconsJoysticksHighlighted.get(3).getTexture().getTextureObjectHandle() :
                            iconsJoysticks.get(3).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);
-      else if (mode[0] == RDXVRMenuGuideMode.VALIDATE)
+      else if (status.getActiveMenu() == RDXVRAssistanceMenuMode.VALIDATE)
          ImGui.image(isHighlighted ?
                            iconsJoysticksHighlighted.get(4).getTexture().getTextureObjectHandle() :
                            iconsJoysticks.get(4).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);

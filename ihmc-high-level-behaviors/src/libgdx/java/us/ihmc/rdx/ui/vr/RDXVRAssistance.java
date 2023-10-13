@@ -51,7 +51,7 @@ import java.util.*;
  */
 public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 {
-   private AssistancePhase assistancePhase = AssistancePhase.DISABLED;
+   private final RDXVRAssistanceStatus status;
    private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
@@ -73,7 +73,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    private HashMap<String, Pose3DReadOnly> bodyPartInitialAffordancePoseMap;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = false; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
-   private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
+   private final ArrayList<KinematicsToolboxOutputStatus> kinematicsToolboxOutputStatusList = new ArrayList<>();
    private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
@@ -81,7 +81,6 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    private double joystickValue;
    private int blendingCounter = 0;
    private RDXVRAssistanceMenu menu;
-   private final RDXVRMenuGuideMode[] menuMode;
    boolean sentInitialHandConfiguration = false;
    private final ImBoolean sportMode =  new ImBoolean(false);
 
@@ -105,8 +104,8 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       ghostRobotGraphic.create();
 
       detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
-      menuMode = new RDXVRMenuGuideMode[1];
-      menuMode[0] = RDXVRMenuGuideMode.OFF;
+
+      status = new RDXVRAssistanceStatus(AssistancePhase.DISABLED, RDXVRAssistanceMenuMode.OFF);
 
       for (RobotSide side: RobotSide.values)
       {
@@ -118,7 +117,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
    {
-      menu = new RDXVRAssistanceMenu(window, menuMode);
+      menu = new RDXVRAssistanceMenu(window, status);
    }
 
    /**
@@ -154,13 +153,13 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    /**
     * 1. ghost robot graphics
     */
-   public void updatePreviewModel(KinematicsToolboxOutputStatus status)
+   public void updatePreviewModel(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus)
    {
-      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
-      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
+      ghostRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootPosition());
+      ghostRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
       {
-         ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
+         ghostOneDoFJointsExcludingHands[i].setQ(kinematicsToolboxOutputStatus.getDesiredJointAngles().get(i));
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
    }
@@ -170,18 +169,18 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
     */
    public void replayPreviewModel()
    {
-      KinematicsToolboxOutputStatus status = getPreviewStatus();
-      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
-      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
+      KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = getPreviewStatus();
+      ghostRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootPosition());
+      ghostRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
       {
-         ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
+         ghostOneDoFJointsExcludingHands[i].setQ(kinematicsToolboxOutputStatus.getDesiredJointAngles().get(i));
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
       replaySplinesPreview();
 
       replayPreviewCounter++;
-      if (replayPreviewCounter >= assistanceStatusList.size())
+      if (replayPreviewCounter >= kinematicsToolboxOutputStatusList.size())
          replayPreviewCounter = 0;
    }
 
@@ -200,7 +199,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
             splineGraphics.put(entryPartMotion.getKey(), new RDXSplineGraphic());
             // restart creating the spline from beginning
             splineGraphics.get(entryPartMotion.getKey()).createStart(entryPartMotion.getValue().get(0).getPosition(), Color.BLUE);
-            speedSplineAdjustmentFactor = (int) Math.floor((1.0 * assistanceStatusList.size()) / (1.0 * entryPartMotion.getValue().size()));
+            speedSplineAdjustmentFactor = (int) Math.floor((1.0 * kinematicsToolboxOutputStatusList.size()) / (1.0 * entryPartMotion.getValue().size()));
          }
       }
       else
@@ -329,7 +328,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      if (assistancePhase.equals(AssistancePhase.PROMP))
+      if (status.getAssistancePhase() == AssistancePhase.PROMP)
       {
          proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
          if (containsBodyPart(bodyPart))
@@ -367,12 +366,12 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
                if (proMPAssistant.inEndZone())
                {
                   if (affordanceAssistant.hasAffordance(objectName))
-                     assistancePhase = AssistancePhase.BLENDING;
+                     status.setAssistancePhase(AssistancePhase.BLENDING);
                }
             }
          }
       }
-      else if (assistancePhase.equals(AssistancePhase.BLENDING))
+      else if (status.getAssistancePhase() == AssistancePhase.BLENDING)
       {
          if (!affordanceAssistant.isActive())
          {
@@ -404,12 +403,12 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
             else
             {
                framePose.set(bodyPartInitialAffordancePoseMap.get(bodyPart));
-               assistancePhase = AssistancePhase.AFFORDANCE;
+               status.setAssistancePhase(AssistancePhase.AFFORDANCE);
             }
          }
 
       }
-      else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
+      else if (status.getAssistancePhase() == AssistancePhase.AFFORDANCE)
       {
          if(!affordanceAssistant.isAffordanceOver())
          {
@@ -435,9 +434,9 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 
    public void checkForHandConfigurationUpdates(HandConfigurationListener listener)
    {
-      if (!assistancePhase.equals(AssistancePhase.PROMP))
+      if (status.getAssistancePhase() != AssistancePhase.PROMP)
          affordanceAssistant.checkForHandConfigurationUpdates(listener);
-      else if (assistancePhase.equals(AssistancePhase.PROMP) && !sentInitialHandConfiguration)
+      else if (status.getAssistancePhase() == AssistancePhase.PROMP && !sentInitialHandConfiguration)
       {
          if (listener != null)
             listener.onNotification();
@@ -463,36 +462,36 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       //update menu
       if (!enabled.get() && !objectName.isEmpty()) // if assistance not enabled and objects in the scene
       { // Press left B button to activate
-         if(menuMode[0] != RDXVRMenuGuideMode.ACTIVATE)
+         if(status.getActiveMenu() != RDXVRAssistanceMenuMode.ACTIVATE)
             menu.resetTimer();
-         menuMode[0] = RDXVRMenuGuideMode.ACTIVATE;
+         status.setActiveMenu(RDXVRAssistanceMenuMode.ACTIVATE);
       }
       else if (!enabled.get()) // if assistance is off and no object in the scene
-         menuMode[0] = RDXVRMenuGuideMode.OFF; // OFF
+         status.setActiveMenu(RDXVRAssistanceMenuMode.OFF);
       else if (enabled.get() && proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack()) // if assistance is on and promp ready
       { // move joysticks
-         if(menuMode[0] != RDXVRMenuGuideMode.MOVE)
+         if(status.getActiveMenu() != RDXVRAssistanceMenuMode.MOVE)
             menu.resetTimer();
-         menuMode[0] = RDXVRMenuGuideMode.MOVE;
+         status.setActiveMenu(RDXVRAssistanceMenuMode.MOVE);
       }
       else if ((!previewSetToActive && proMPAssistant.readyToPack()) || (previewSetToActive && previewValidated)) // if assistance is on and no preview, or preview is validated
       {
-         if(menuMode[0] != RDXVRMenuGuideMode.DIRECT_WITH_JOYSTICK)
+         if(status.getActiveMenu() != RDXVRAssistanceMenuMode.DIRECT_WITH_JOYSTICK)
             menu.resetTimer();
-         menuMode[0] = RDXVRMenuGuideMode.DIRECT_WITH_JOYSTICK;
+         status.setActiveMenu(RDXVRAssistanceMenuMode.DIRECT_WITH_JOYSTICK);
          menu.setJoystickPressed(play);
 
       }
       else if (previewSetToActive && proMPAssistant.readyToPack() && !previewValidated) // if assistance is on and preview
       {
-         if(menuMode[0] != RDXVRMenuGuideMode.VALIDATE)
+         if(status.getActiveMenu() != RDXVRAssistanceMenuMode.VALIDATE)
             menu.resetTimer();
-         menuMode[0] = RDXVRMenuGuideMode.VALIDATE;
+         status.setActiveMenu(RDXVRAssistanceMenuMode.VALIDATE);
       }
       else
-         menuMode[0] = RDXVRMenuGuideMode.IDLE;
+         status.setActiveMenu(RDXVRAssistanceMenuMode.IDLE);
 
-      if (assistancePhase.equals(AssistancePhase.PROMP) || assistancePhase.equals(AssistancePhase.BLENDING) )
+      if (status.getAssistancePhase() == AssistancePhase.PROMP || status.getAssistancePhase() == AssistancePhase.BLENDING)
       {
          if(proMPAssistant.getNumberOfSamples()>0 && !menu.hasProMPSamples())
          {
@@ -504,7 +503,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
          }
          menu.setCurrentProMPSample(proMPAssistant.getCurrentSample());
       }
-      else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
+      else if (status.getAssistancePhase() == AssistancePhase.AFFORDANCE)
       {
          if(!menu.hasAffordanceSamples())
          {
@@ -537,7 +536,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
          if (enabled)
          {
             firstPreview = true;
-            assistancePhase = AssistancePhase.PROMP;
+            status.setAssistancePhase(AssistancePhase.PROMP);
 
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
@@ -558,11 +557,11 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
             previewValidated = false;
             replayPreviewCounter = 0;
             bodyPartReplayMotionMap.clear();
-            assistanceStatusList.clear();
+            kinematicsToolboxOutputStatusList.clear();
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
             splineGraphics.clear();
             stdDeviationGraphics.clear();
-            assistancePhase = AssistancePhase.DISABLED;
+            status.setAssistancePhase(AssistancePhase.DISABLED);
             blendingCounter = 0;
             affordanceAssistant.reset();
             this.enabledIKStreaming.set(false);
@@ -621,12 +620,12 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
    {
-      assistanceStatusList.add(new KinematicsToolboxOutputStatus(status));
+      kinematicsToolboxOutputStatusList.add(new KinematicsToolboxOutputStatus(status));
    }
 
    public KinematicsToolboxOutputStatus getPreviewStatus()
    {
-      return assistanceStatusList.get(replayPreviewCounter);
+      return kinematicsToolboxOutputStatusList.get(replayPreviewCounter);
    }
 
    public boolean isFirstPreview()
@@ -650,7 +649,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    {
       // avoid last frame when affordance is over and do not stream to controller value before deactivating
       // we're safe when we're either not in affordance phase or in affordance phase and affordance is not over yet
-      return (!assistancePhase.equals(AssistancePhase.AFFORDANCE) || (affordanceAssistant.hasAffordanceStarted() && !affordanceAssistant.isAffordanceOver()));
+      return (status.getAssistancePhase() != AssistancePhase.AFFORDANCE || (affordanceAssistant.hasAffordanceStarted() && !affordanceAssistant.isAffordanceOver()));
    }
 
    public RDX3DSituatedImGuiTransparentPanel getMenuPanel()

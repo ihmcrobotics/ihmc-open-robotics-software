@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.vr;
 
-public enum RDXVRMenuGuideMode
+public enum RDXVRAssistanceMenuMode
 {
    OFF, IDLE, ACTIVATE, VALIDATE, DIRECT_WITH_JOYSTICK, MOVE;
 }
