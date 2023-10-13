@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * or currently executing it. This is only the information that gets
  * saved to/from JSON.
  */
-public class BehaviorActionDefinition
+public abstract class BehaviorActionDefinition
 {
    /** Human readable description of what the action does */
    private String description;
