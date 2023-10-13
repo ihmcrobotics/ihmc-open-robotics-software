@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.behaviors.BehaviorInterface;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.packets.MessageTools;
@@ -18,7 +19,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
 
 /**
  * An attempt mostly in simulation to explore a building.
