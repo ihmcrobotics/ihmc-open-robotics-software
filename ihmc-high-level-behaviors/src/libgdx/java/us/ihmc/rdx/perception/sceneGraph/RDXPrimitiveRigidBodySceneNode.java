@@ -85,6 +85,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                reshaped = true;
             if (reshaped)
             {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
                modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
@@ -100,6 +102,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                reshaped = true;
             if (reshaped)
             {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
                modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
@@ -113,6 +117,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                reshaped = true;
             if (reshaped)
             {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
                modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
@@ -128,6 +134,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                reshaped = true;
             if (reshaped)
             {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
                modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
@@ -141,6 +149,8 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                reshaped = true;
             if (reshaped)
             {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
                modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
                modelInstance.setColor(GHOST_COLOR);
             }
