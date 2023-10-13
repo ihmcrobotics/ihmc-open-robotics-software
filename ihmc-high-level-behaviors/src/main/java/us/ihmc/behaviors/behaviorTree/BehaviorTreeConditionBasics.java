@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 /**
  * A behavior tree action that draws from a boolean supplier.
  */
-public interface BehaviorTreeConditionBasics extends BehaviorTreeActionBasics
+public interface BehaviorTreeConditionBasics extends BehaviorTreeNodeBasics
 {
    public abstract boolean checkCondition();
 
