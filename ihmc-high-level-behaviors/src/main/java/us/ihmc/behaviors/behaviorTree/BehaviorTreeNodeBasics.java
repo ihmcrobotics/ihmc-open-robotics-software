@@ -59,7 +59,7 @@ public interface BehaviorTreeNodeBasics
 
    void setType(Class<?> type);
 
-   static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
+   static void checkStatusIsNotNull(BehaviorTreeNodeStatus status)
    {
       if (status == null)
       {
