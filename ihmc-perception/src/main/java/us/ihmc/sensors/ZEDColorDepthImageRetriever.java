@@ -8,12 +8,11 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.RestartableThread;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +52,7 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<RawImage> colorImages = new SideDependentList<>(null, null);
    private RawImage depthImage = null;
 
-   boolean running = true;
+   private final RestartableThread zedGrabThread;
 
    public ZEDColorDepthImageRetriever(int cameraID)
    {
@@ -120,18 +119,16 @@ public class ZEDColorDepthImageRetriever
       colorGpuMats.put(RobotSide.LEFT, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
       colorGpuMats.put(RobotSide.RIGHT, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
 
-      MissingThreadTools.startAThread("ZEDImageGrabber", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+      zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
-         while (running)
-         {
-            // sl_grab is blocking, and will wait for next frame available. No need to use throttler
-            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
-            retrieveAndSaveDepthImage();
-            retrieveAndSaveColorImage(RobotSide.LEFT);
-            retrieveAndSaveColorImage(RobotSide.RIGHT);
-         }
+         // sl_grab is blocking, and will wait for next frame available. No need to use throttler
+         checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+         retrieveAndSaveDepthImage();
+         retrieveAndSaveColorImage(RobotSide.LEFT);
+         retrieveAndSaveColorImage(RobotSide.RIGHT);
       });
 
+      // TODO: Should this go in "start()" method?
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
       LogTools.info("Image resolution: {} x {}", imageWidth, imageHeight);
@@ -219,9 +216,19 @@ public class ZEDColorDepthImageRetriever
       return zedModelData;
    }
 
+   public void start()
+   {
+      zedGrabThread.start();
+   }
+
    public void stop()
    {
-      running = false;
+      zedGrabThread.stop();
+   }
+
+   public void destroy()
+   {
+      stop();
 
       depthImagePointer.close();
       depthImage.destroy();
