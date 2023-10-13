@@ -42,8 +42,9 @@ public class PerceptionLoggerConstants
 
    public static final String ZED2_SENSOR_TIME = "/zed2/sensor/time";
    public static final String ZED2_COLOR_NAME = "/zed2/color/";
-   public static final SideDependentList<String> ZED_COLOR_NAMES = new SideDependentList<>(ZED2_COLOR_NAME + "left/", ZED2_COLOR_NAME + "right/");
+   public static final SideDependentList<String> ZED_COLOR_NAMES = new SideDependentList<>("/zed2/left_color/", "/zed2/right_color/");
    public static final String ZED_DEPTH_NAME = "/zed2/depth/";
+   public static final String ZED_TIME_NAME = "/zed2/time/";
 
    public static final String L515_SENSOR_TIME = "/l515/sensor/time";
    public static final String L515_DEPTH_NAME = "/l515/depth/";

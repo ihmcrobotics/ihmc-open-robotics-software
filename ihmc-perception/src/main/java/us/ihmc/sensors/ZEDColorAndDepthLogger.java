@@ -24,6 +24,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.session.tools.RobotModelLoader;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Throttler;
 
@@ -66,13 +67,15 @@ public class ZEDColorAndDepthLogger
 
    private final String depthChannelName;
    private final SideDependentList<String> colorChannelNames;
+   private final String timeChannelName;
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
 
-   public ZEDColorAndDepthLogger(int cameraID,String depthChannelName, SideDependentList<String> colorChannelNames)
+   public ZEDColorAndDepthLogger(int cameraID,String depthChannelName, SideDependentList<String> colorChannelNames, String timeChannelName)
    {
       this.cameraID = cameraID;
       this.depthChannelName = depthChannelName;
       this.colorChannelNames = colorChannelNames;
+      this.timeChannelName = timeChannelName;
 
       LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
@@ -83,7 +86,7 @@ public class ZEDColorAndDepthLogger
 
       // Open camera with default parameters to find model
       // Can't get the model number without opening the camera first
-      sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", "");
+      checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
       setZEDConfiguration(cameraID);
       sl_close_camera(cameraID);
 
@@ -110,7 +113,7 @@ public class ZEDColorAndDepthLogger
       zedInitializationParameters.async_grab_camera_recovery(false);
 
       // Reopen camera with specific parameters set
-      sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", "");
+      checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
 
       zedRuntimeParameters.enable_depth(true);
       zedRuntimeParameters.confidence_threshold(100);
@@ -139,8 +142,10 @@ public class ZEDColorAndDepthLogger
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-      perceptionDataLogger.addImageChannel(depthChannelName);
+      perceptionDataLogger.addIntChannel(depthChannelName, imageWidth * imageHeight, 16);
       perceptionDataLogger.setChannelEnabled(depthChannelName, true);
+      perceptionDataLogger.addLongChannel(timeChannelName, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.setChannelEnabled(timeChannelName, true);
       for (RobotSide side : RobotSide.values)
       {
          perceptionDataLogger.addImageChannel(colorChannelNames.get(side));
@@ -164,7 +169,7 @@ public class ZEDColorAndDepthLogger
       {
          int slViewSide = side == RobotSide.LEFT ? SL_VIEW_LEFT : SL_VIEW_RIGHT;
          // Retrieve color image
-         sl_retrieve_image(cameraID, colorImagePointers.get(side), slViewSide, SL_MEM_GPU, imageWidth, imageHeight);
+         checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointers.get(side), slViewSide, SL_MEM_GPU, imageWidth, imageHeight));
          colorImageAcquisitionTime.set(Instant.now());
 
          // Convert to BGR and encode to jpeg
@@ -178,32 +183,15 @@ public class ZEDColorAndDepthLogger
          GpuMat colorImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
          opencv_cudaimgproc.cvtColor(colorImageBGRA, colorImageBGR, opencv_imgproc.COLOR_BGRA2BGR);
 
-         BytePointer colorJPEGPointer = new BytePointer((long) imageHeight * imageWidth);
-         imageEncoder.encodeBGR(colorImageBGR.data(), colorJPEGPointer, imageWidth, imageHeight, colorImageBGR.step());
+         Mat cpuColorImageBGR = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+         colorImageBGR.download(cpuColorImageBGR);
 
-         // Publish image
-         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
-         imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
-         MessageTools.toMessage(colorImageAcquisitionTime.get(), colorImageMessage.getAcquisitionTime());
-         colorImageMessage.setFocalLengthXPixels(cameraFocalLengthX.get(side));
-         colorImageMessage.setFocalLengthYPixels(cameraFocalLengthY.get(side));
-         colorImageMessage.setPrincipalPointXPixels(cameraPrincipalPointX.get(side));
-         colorImageMessage.setPrincipalPointYPixels(cameraPrincipalPointY.get(side));
-         colorImageMessage.setImageWidth(imageWidth);
-         colorImageMessage.setImageHeight(imageHeight);
-         colorImageMessage.getPosition().set(DEFAULT_FRAME_POSE.getPosition());
-         colorImageMessage.getOrientation().set(DEFAULT_FRAME_POSE.getOrientation());
-         colorImageMessage.setSequenceNumber(colorImageSequenceNumber.get(side));
-         colorImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
-         CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-         ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
-
-         perceptionDataLogger.storeCompressedImage(colorChannelNames.get(side), colorImageMessage);
+         perceptionDataLogger.storeBytesFromPointer(colorChannelNames.get(side), cpuColorImageBGR.data());
 
          colorImageSequenceNumber.set(side, colorImageSequenceNumber.get(side) + 1L);
 
          // Close stuff
-         colorJPEGPointer.close();
+         cpuColorImageBGR.close();
          colorImageBGR.close();
          colorImageBGRA.close();
       }
@@ -211,7 +199,7 @@ public class ZEDColorAndDepthLogger
       // Retrieve depth image
       // There is a bug where retrieving the depth image using SL_MEM_CPU causes the depth image to be misaligned and very dark.
       // Thus, the image is retrieved onto a GpuMat then downloaded onto the CPU for further processing.
-      sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight);
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight));
       depthImageAcquisitionTime.set(Instant.now());
 
       GpuMat gpuDepthImage16UC1 = new GpuMat(imageHeight,
@@ -222,31 +210,9 @@ public class ZEDColorAndDepthLogger
       Mat cpuDepthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
       gpuDepthImage16UC1.download(cpuDepthImage16UC1);
 
-      // Encode depth image to png
-      BytePointer depthPNGPointer = new BytePointer();
-      OpenCVTools.compressImagePNG(cpuDepthImage16UC1, depthPNGPointer);
-
-      // Publish image
-      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
-      imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
-      MessageTools.toMessage(depthImageAcquisitionTime.get(), depthImageMessage.getAcquisitionTime());
-      depthImageMessage.setFocalLengthXPixels(cameraFocalLengthX.get(RobotSide.LEFT));
-      depthImageMessage.setFocalLengthYPixels(cameraFocalLengthY.get(RobotSide.LEFT));
-      depthImageMessage.setPrincipalPointXPixels(cameraPrincipalPointX.get(RobotSide.LEFT));
-      depthImageMessage.setPrincipalPointYPixels(cameraPrincipalPointY.get(RobotSide.LEFT));
-      depthImageMessage.setImageWidth(imageWidth);
-      depthImageMessage.setImageHeight(imageHeight);
-      depthImageMessage.getPosition().set(DEFAULT_FRAME_POSE.getPosition());
-      depthImageMessage.getOrientation().set(DEFAULT_FRAME_POSE.getOrientation());
-      depthImageMessage.setSequenceNumber(depthImageSequenceNumber++);
-      depthImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
-      CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
-
-      perceptionDataLogger.storeCompressedImage(depthChannelName, depthImageMessage);
+      perceptionDataLogger.storeBytesFromPointer(depthChannelName, cpuDepthImage16UC1.data());
 
       // Close stuff
-      depthPNGPointer.close();
       cpuDepthImage16UC1.close();
       gpuDepthImage16UC1.close();
    }
@@ -269,6 +235,14 @@ public class ZEDColorAndDepthLogger
       }
    }
 
+   private void checkError(String functionName, int returnedState)
+   {
+      if (returnedState != SL_ERROR_CODE_SUCCESS)
+      {
+         LogTools.error(String.format("%s returned '%d'", functionName, returnedState));
+      }
+   }
+
    private void destroy()
    {
       ThreadTools.sleepSeconds(0.5);
@@ -279,6 +253,6 @@ public class ZEDColorAndDepthLogger
 
    public static void main(String[] args)
    {
-      new ZEDColorAndDepthLogger(0, PerceptionLoggerConstants.ZED_DEPTH_NAME, PerceptionLoggerConstants.ZED_COLOR_NAMES);
+      new ZEDColorAndDepthLogger(0, PerceptionLoggerConstants.ZED_DEPTH_NAME, PerceptionLoggerConstants.ZED_COLOR_NAMES, PerceptionLoggerConstants.ZED_TIME_NAME);
    }
 }
