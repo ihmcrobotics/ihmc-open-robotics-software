@@ -10,8 +10,8 @@ public class ImGuiSceneNodeComboBox
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private SceneGraph sceneGraph;
-   private ImInt currentSelectedNodeIndex = new ImInt();
+   private final SceneGraph sceneGraph;
+   private final ImInt currentSelectedNodeIndex = new ImInt();
    private SceneNode selectedNode;
 
    public ImGuiSceneNodeComboBox(SceneGraph sceneGraph)
