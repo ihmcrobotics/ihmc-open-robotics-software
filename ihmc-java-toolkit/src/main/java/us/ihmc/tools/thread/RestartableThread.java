@@ -36,7 +36,6 @@ public class RestartableThread
       this.exceptionHandler = exceptionHandler;
       this.runAsDaemon = runAsDaemon;
       this.runnable = runnable;
-      this.thread = new Thread(); // initialize thread so stopping without starting doesn't throw exception
    }
 
    /**
@@ -79,6 +78,6 @@ public class RestartableThread
 
    boolean isAlive()
    {
-      return thread.isAlive();
+      return thread == null ? false : thread.isAlive();
    }
 }
