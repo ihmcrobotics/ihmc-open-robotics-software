@@ -4,7 +4,7 @@ public class UtilitySelectorNode extends BehaviorTreeControlFlowNode
 {
    public UtilitySelectorNode()
    {
-      setType(UtilitySelectorNode.class);
+
    }
 
    @Override

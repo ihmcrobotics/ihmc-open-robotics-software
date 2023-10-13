@@ -7,6 +7,6 @@ public class FallbackNode extends BehaviorTreeControlFlowNode implements Fallbac
 {
    public FallbackNode()
    {
-      setType(FallbackNode.class);
+
    }
 }

@@ -11,7 +11,7 @@ public class LoopSequenceNode extends SequenceNode
 
    public LoopSequenceNode()
    {
-      setType(LoopSequenceNode.class);
+
    }
 
    @Override
