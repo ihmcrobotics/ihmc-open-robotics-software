@@ -7,8 +7,8 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.Axis3D;
