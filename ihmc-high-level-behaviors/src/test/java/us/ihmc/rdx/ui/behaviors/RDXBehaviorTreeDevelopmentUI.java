@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.behaviorTree.*;
-import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;

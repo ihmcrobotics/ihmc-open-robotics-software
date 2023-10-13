@@ -14,7 +14,7 @@ public interface SequenceNodeBasics extends BehaviorTreeControlFlowNodeBasics
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         checkStatusInNotNull(childStatus);
+         BehaviorTreeNodeBasics.checkStatusInNotNull(childStatus);
 
          if (childStatus == RUNNING)
          {

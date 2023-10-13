@@ -1,8 +1,5 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeAction;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
-
 public class BehaviorTreeConstantInstantTestAction extends BehaviorTreeAction
 {
    private final Runnable action;

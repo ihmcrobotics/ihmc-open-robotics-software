@@ -2,7 +2,6 @@ package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.behaviorTree.*;
-import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
