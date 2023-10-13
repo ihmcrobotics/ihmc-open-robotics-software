@@ -40,7 +40,7 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -66,9 +66,9 @@ public class RDXFootstepPlannerLogViewer
    private final ImBoolean probeMode = new ImBoolean(false);
    private final RDXModelInstance probeSphere;
    private RDX3DPanelTooltip tooltip;
-   private final SideDependentList<ModifiableReferenceFrame> probedFootFrames
-         = new SideDependentList<>(new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame()),
-                                   new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame()));
+   private final SideDependentList<MutableReferenceFrame> probedFootFrames
+         = new SideDependentList<>(new MutableReferenceFrame(ReferenceFrame.getWorldFrame()),
+                                   new MutableReferenceFrame(ReferenceFrame.getWorldFrame()));
    private final FramePose3D probePose = new FramePose3D();
 
    public RDXFootstepPlannerLogViewer(RDXBaseUI baseUI, DRCRobotModel robotModel)
