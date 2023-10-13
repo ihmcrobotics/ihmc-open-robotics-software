@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.patrol;
 
 import static us.ihmc.behaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
-import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,7 +21,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -48,8 +46,6 @@ import us.ihmc.commons.thread.TypedNotification;
  */
 public class PatrolBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Patrol", PatrolBehavior::new);
-
    public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
