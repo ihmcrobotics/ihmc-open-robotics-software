@@ -1,7 +1,7 @@
 {
   "name" : "PickUpBox",
   "actions" : [ {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -14,7 +14,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -27,7 +27,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -40,7 +40,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -53,7 +53,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -66,7 +66,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -79,7 +79,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -92,7 +92,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -105,7 +105,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -118,7 +118,7 @@
     "yawInDegrees" : 0.0,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
