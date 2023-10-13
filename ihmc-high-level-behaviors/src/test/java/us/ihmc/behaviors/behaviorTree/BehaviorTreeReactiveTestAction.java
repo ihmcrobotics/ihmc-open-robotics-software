@@ -2,8 +2,6 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeAction;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 
 import java.util.concurrent.atomic.AtomicReference;
 
