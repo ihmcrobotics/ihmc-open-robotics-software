@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  * - Being able to change the parent frame of this reference frame, which
  *   is complicated and has constraints.
  */
-public class ModifiableReferenceFrame
+public class MutableReferenceFrame
 {
    /**
     * This reference is final, meaning even when this class's ReferenceFrame
@@ -25,17 +25,17 @@ public class ModifiableReferenceFrame
    private final String frameName;
    private ReferenceFrame referenceFrame;
 
-   public ModifiableReferenceFrame()
+   public MutableReferenceFrame()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
-   public ModifiableReferenceFrame(ReferenceFrame parentFrame)
+   public MutableReferenceFrame(ReferenceFrame parentFrame)
    {
       this(ReferenceFrameMissingTools.computeFrameName(), parentFrame);
    }
 
-   public ModifiableReferenceFrame(String frameName, ReferenceFrame parentFrame)
+   public MutableReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       this.frameName = frameName;
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);

@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -37,7 +37,7 @@ public class RDXAffordanceTemplateFileManager
    private static final double ANGULAR_VELOCITY = 1.0; // for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
 
    private ReferenceFrame initialObjectFrame;
-   private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
+   private MutableReferenceFrame affordanceFrame = new MutableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final RDXAffordanceTemplateFrame graspFrame;
    private final RDXAffordanceTemplateFrames preGraspFrames;
    private final RDXAffordanceTemplateFrames postGraspFrames;

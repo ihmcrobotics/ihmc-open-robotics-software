@@ -2,7 +2,7 @@ package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class SceneNode
    /** The node's unique ID. */
    private final long id;
    private final String name;
-   private final ModifiableReferenceFrame nodeFrame;
+   private final MutableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
    /**
     * Certain changes to this node will cause a freeze of that data
@@ -40,7 +40,7 @@ public class SceneNode
    {
       this.id = id;
       this.name = name;
-      this.nodeFrame = new ModifiableReferenceFrame(name, ReferenceFrame.getWorldFrame());
+      this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
    public long getID()
@@ -58,7 +58,7 @@ public class SceneNode
       return nodeFrame.getReferenceFrame();
    }
 
-   public ModifiableReferenceFrame getModifiableNodeFrame()
+   public MutableReferenceFrame getModifiableNodeFrame()
    {
       return nodeFrame;
    }
@@ -83,7 +83,7 @@ public class SceneNode
          nodeFrame.setParentFrame(desiredParentFrame);
    }
 
-   /** See {@link ModifiableReferenceFrame#changeFrame} */
+   /** See {@link MutableReferenceFrame#changeFrame} */
    public void changeFrame(ReferenceFrame newParentFrame)
    {
       nodeFrame.changeFrame(newParentFrame);
