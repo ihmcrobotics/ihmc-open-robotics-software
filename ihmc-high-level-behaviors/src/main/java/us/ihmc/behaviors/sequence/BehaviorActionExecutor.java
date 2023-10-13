@@ -5,7 +5,7 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public abstract class BehaviorActionExecutor implements BehaviorActionStateSupplier, BehaviorActionDefinitionSupplier
+public abstract class BehaviorActionExecutor implements BehaviorActionStateSupplier
 {
    private final BehaviorActionSequence sequence;
 
