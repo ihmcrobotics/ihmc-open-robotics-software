@@ -233,8 +233,8 @@ public class RDXVRKinematicsStreamingMode
                                           .append(segmentType.getTrackerToRigidBodyRotation());
              }
              trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
-                                       .changeParentFrame(vrContext.getTracker(segmentType.getSegmentName())
-                                                                   .getXForwardZUpTrackerFrame());
+                                       .setParentFrame(vrContext.getTracker(segmentType.getSegmentName())
+                                                                .getXForwardZUpTrackerFrame());
              trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame().update();
              trackerFrameGraphics.get(segmentType.getSegmentName())
                                  .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName())

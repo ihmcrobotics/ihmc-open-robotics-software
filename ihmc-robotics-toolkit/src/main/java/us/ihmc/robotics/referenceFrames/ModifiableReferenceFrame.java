@@ -48,14 +48,16 @@ public class ModifiableReferenceFrame
    }
 
    /**
+    * Set the parent frame without changing the transform to parent.
+    *
+    * Note that this method can cause the reference frame to move w.r.t
+    * common ancestors because it doesn't update transformToParent.
+    *
     * Warning! Frames that declared this one as the parent or
     * have this above them in the frame tree are going to be
     * broken after this change!
-    *
-    * Also note that this method will move the reference frame.
-    * It doesn't update transformToParent.
     */
-   public void changeParentFrame(ReferenceFrame parentFrame)
+   public void setParentFrame(ReferenceFrame parentFrame)
    {
       // I'm getting a rare bug here, need to leave this printing for a while so I can see which frame is having the issue. - @dcalvert
       if (EuclidCoreMissingTools.hasBeenRemoved(parentFrame))
@@ -75,13 +77,18 @@ public class ModifiableReferenceFrame
    }
 
    /**
+    * Change the frame that this reference frame is expressed in,
+    * keeping it in the same place w.r.t common ancestors.
+    *
+    * This is called "changeFrame" to match the language of the rest
+    * of the Euclid frame API, treating this ReferenceFrame kind of
+    * like a FramePose3D.
+    *
     * Warning! Frames that declared this one as the parent or
     * have this above them in the frame tree are going to be
     * broken after this change!
-    *
-    * This method will keep the frame in the same spot.
     */
-   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
+   public void changeFrame(ReferenceFrame parentFrame)
    {
       RigidBodyTransform newTransformToParent = new RigidBodyTransform();
       referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);

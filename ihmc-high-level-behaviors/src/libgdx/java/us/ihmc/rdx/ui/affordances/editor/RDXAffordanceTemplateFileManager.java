@@ -7,7 +7,6 @@ import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -29,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
 
 public class RDXAffordanceTemplateFileManager
@@ -79,7 +77,7 @@ public class RDXAffordanceTemplateFileManager
       // world to initial object frame
       RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
       initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
-      affordanceFrame.changeParentFrame(initialObjectFrame);
+      affordanceFrame.setParentFrame(initialObjectFrame);
 
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, fileName + ".json");
       if (file.isFileAccessAvailable())
@@ -605,7 +603,7 @@ public class RDXAffordanceTemplateFileManager
       // change affordance reference from whatever it is now to loaded initial object pose
       RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
       initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
-      affordanceFrame.changeParentFrame(initialObjectFrame);
+      affordanceFrame.setParentFrame(initialObjectFrame);
 
       filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), loadingFileName + "Frames.json");
       if (Files.exists(filePath))

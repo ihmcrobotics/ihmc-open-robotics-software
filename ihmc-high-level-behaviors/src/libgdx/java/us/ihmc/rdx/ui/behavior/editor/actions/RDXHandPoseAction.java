@@ -196,8 +196,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getPalmFrame().getReferenceFrame());
-            graphicFrame.changeParentFrame(state.getPalmFrame().getReferenceFrame());
-            collisionShapeFrame.changeParentFrame(state.getPalmFrame().getReferenceFrame());
+            graphicFrame.setParentFrame(state.getPalmFrame().getReferenceFrame());
+            collisionShapeFrame.setParentFrame(state.getPalmFrame().getReferenceFrame());
          }
 
          poseGizmo.getPoseGizmo().update();

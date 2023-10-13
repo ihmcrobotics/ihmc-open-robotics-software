@@ -252,7 +252,7 @@ public class RDXInteractableFootstep
       }
 
       if (collisionBoxFrame.getReferenceFrame().getParent() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
-         collisionBoxFrame.changeParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+         collisionBoxFrame.setParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       if (selectionCollisionBox.getReferenceFrame() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
          selectionCollisionBox.setReferenceFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
 

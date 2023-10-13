@@ -144,7 +144,7 @@ public class RDXVRDragData
    {
       updateZUpDrag(interactableFrame);
 
-      zUpDragParentFrame.changeParentFrame(pickPlaneYawCalculator.getYawReferenceFrame());
+      zUpDragParentFrame.setParentFrame(pickPlaneYawCalculator.getYawReferenceFrame());
       interactableFrame.getTransformToDesiredFrame(zUpDragParentFrame.getTransformToParent(), pickPlaneYawCalculator.getYawReferenceFrame());
       // This is a rotation only thing
       zUpDragParentFrame.getTransformToParent().getTranslation().setToZero();
