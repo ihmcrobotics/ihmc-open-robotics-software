@@ -32,8 +32,6 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
  */
 public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new);
-
    private final BehaviorHelper helper;
 
    private final IHMCROS2Input<Bool> stepping;

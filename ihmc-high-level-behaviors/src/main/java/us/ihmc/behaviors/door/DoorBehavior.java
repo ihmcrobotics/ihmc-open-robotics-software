@@ -4,7 +4,6 @@ import perception_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
@@ -31,7 +30,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class DoorBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new);
    private BehaviorHelper helper;
    private ROS2SyncedRobotModel syncedRobot;
    private AtomicReference<Boolean> reviewEnabled;
@@ -171,6 +169,6 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Door";
    }
 }
