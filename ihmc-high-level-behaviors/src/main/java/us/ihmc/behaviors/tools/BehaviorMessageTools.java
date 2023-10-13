@@ -84,8 +84,8 @@ public class BehaviorMessageTools
 //         behaviorTreeStatusNode.setType(FallbackNode.class);
 //      else if (typeName.equals(AsynchronousActionNode.class.getSimpleName()))
 //         behaviorTreeStatusNode.setType(AsynchronousActionNode.class);
-//      else if (typeName.equals(BehaviorTreeAction.class.getSimpleName()))
-//         behaviorTreeStatusNode.setType(BehaviorTreeAction.class);
+//      else if (typeName.equals(BehaviorTreeNode.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
 //      else if (typeName.equals(BehaviorTreeCondition.class.getSimpleName()))
 //         behaviorTreeStatusNode.setType(BehaviorTreeCondition.class);
 //      else if (typeName.equals(OneShotAction.class.getSimpleName()))
