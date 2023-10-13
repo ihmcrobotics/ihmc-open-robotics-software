@@ -80,12 +80,13 @@ public class SceneNode
    public void ensureParentFrameIsConsistent(ReferenceFrame desiredParentFrame)
    {
       if (desiredParentFrame != nodeFrame.getReferenceFrame().getParent())
-         nodeFrame.changeParentFrame(desiredParentFrame);
+         nodeFrame.setParentFrame(desiredParentFrame);
    }
 
-   public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
+   /** See {@link ModifiableReferenceFrame#changeFrame} */
+   public void changeFrame(ReferenceFrame newParentFrame)
    {
-      nodeFrame.changeParentFrameWithoutMoving(newParentFrame);
+      nodeFrame.changeFrame(newParentFrame);
    }
 
    /**

@@ -127,8 +127,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getChestFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getChestFrame().getReferenceFrame());
-            graphicFrame.changeParentFrame(state.getChestFrame().getReferenceFrame());
-            collisionShapeFrame.changeParentFrame(state.getChestFrame().getReferenceFrame());
+            graphicFrame.setParentFrame(state.getChestFrame().getReferenceFrame());
+            collisionShapeFrame.setParentFrame(state.getChestFrame().getReferenceFrame());
          }
 
          poseGizmo.getPoseGizmo().update();

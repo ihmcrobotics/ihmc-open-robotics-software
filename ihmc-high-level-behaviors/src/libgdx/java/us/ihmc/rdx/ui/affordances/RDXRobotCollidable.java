@@ -173,7 +173,7 @@ public class RDXRobotCollidable implements RenderableProvider
    {
       if (collisionShapeFrame.getReferenceFrame().getParent() != linkFrame)
       {
-         collisionShapeFrame.changeParentFrame(linkFrame);
+         collisionShapeFrame.setParentFrame(linkFrame);
       }
 
       collisionModelInstance.setOpacity(isHoveredByAnything ? 1.0f : 0.4f);

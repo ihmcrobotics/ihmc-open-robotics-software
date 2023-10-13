@@ -123,8 +123,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPelvisFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getPelvisFrame().getReferenceFrame());
-            graphicFrame.changeParentFrame(state.getPelvisFrame().getReferenceFrame());
-            collisionShapeFrame.changeParentFrame(state.getPelvisFrame().getReferenceFrame());
+            graphicFrame.setParentFrame(state.getPelvisFrame().getReferenceFrame());
+            collisionShapeFrame.setParentFrame(state.getPelvisFrame().getReferenceFrame());
          }
 
          poseGizmo.getPoseGizmo().update();
