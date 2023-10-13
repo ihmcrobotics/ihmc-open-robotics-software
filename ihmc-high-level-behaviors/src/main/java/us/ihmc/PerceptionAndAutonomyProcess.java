@@ -40,6 +40,34 @@ public class PerceptionAndAutonomyProcess
       zedDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_DEPTH);
       this.zedImageGrabber = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID);
       this.zedImagePublisher = new ZEDColorDepthImagePublisher(zedImageGrabber.getZedModelData(), ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, zedFrameSupplier);
+      zedDepthHeartbeat.setAlivenessChangedCallback(isAlive ->
+      {
+         if (isAlive)
+         {
+            zedImageGrabber.start();
+            zedImagePublisher.startDepth();
+         }
+         else
+         {
+            zedImagePublisher.stopDepth();
+            if (!zedDepthHeartbeat.isAlive())
+               zedImageGrabber.stop();
+         }
+      });
+      zedColorHeartbeat.setAlivenessChangedCallback(isAlive ->
+      {
+         if (isAlive)
+         {
+            zedImageGrabber.start();
+            zedImagePublisher.startColor();
+         }
+         else
+         {
+            zedImagePublisher.stopColor();
+            if (!zedColorHeartbeat.isAlive())
+               zedImageGrabber.stop();
+         }
+      });
 
       zedProcessAndPublishThread = new RestartableThrottledThread("ZEDImageProcessAndPublish", 30.0, () ->
       {
@@ -62,19 +90,20 @@ public class PerceptionAndAutonomyProcess
    public void start()
    {
       zedProcessAndPublishThread.start();
-      zedImagePublisher.start();
+      zedImageGrabber.start();
+      zedImagePublisher.startAll();
    }
 
-   public void stop()
+   public void destroy()
    {
       zedProcessAndPublishThread.stop();
-      zedImagePublisher.stop();
-      zedImageGrabber.stop();
+      zedImagePublisher.destroy();
+      zedImageGrabber.destroy();
    }
 
    public static void main(String[] args)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "sensor_publisher");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper, ReferenceFrame::getWorldFrame);
