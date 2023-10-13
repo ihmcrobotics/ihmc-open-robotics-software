@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -112,7 +114,7 @@ public class RDXAffordanceTemplateFileManager
                   if (arePreGraspPosesSet.get(side).get(i))
                   {
                      ObjectNode actionNode = actionsArrayNode.addObject();
-                     actionNode.put("type", "RDXHandPoseAction");
+                     actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                      actionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Pose");
                      actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                      actionNode.put("side", side.getLowerCaseName());
@@ -156,7 +158,7 @@ public class RDXAffordanceTemplateFileManager
                         csvDataMatrices.get(side).add(dataTrajectories);
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
-                        configurationActionNode.put("type", "RDXSakeHandCommandAction");
+                        configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                         configurationActionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("configuration", preGraspHandConfigurations.get(side).get(i).toString());
@@ -172,7 +174,7 @@ public class RDXAffordanceTemplateFileManager
                if (graspFrame.isSet(side))
                {
                   ObjectNode actionNode = actionsArrayNode.addObject();
-                  actionNode.put("type", "RDXHandPoseAction");
+                  actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                   actionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Pose");
                   actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                   actionNode.put("side", side.getLowerCaseName());
@@ -209,7 +211,7 @@ public class RDXAffordanceTemplateFileManager
                   if (graspFrame.getHandConfiguration(side) != null)
                   {
                      ObjectNode configurationActionNode = actionsArrayNode.addObject();
-                     configurationActionNode.put("type", "RDXSakeHandCommandAction");
+                     configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                      configurationActionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Configuration");
                      configurationActionNode.put("side", side.getLowerCaseName());
                      configurationActionNode.put("configuration", graspFrame.getHandConfiguration(side).toString());
@@ -237,7 +239,7 @@ public class RDXAffordanceTemplateFileManager
                   if (arePostGraspPosesSet.get(side).get(i))
                   {
                      ObjectNode actionNode = actionsArrayNode.addObject();
-                     actionNode.put("type", "RDXHandPoseAction");
+                     actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                      actionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Pose");
                      actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                      actionNode.put("side", side.getLowerCaseName());
@@ -281,7 +283,7 @@ public class RDXAffordanceTemplateFileManager
                         csvDataMatrices.get(side).add(dataTrajectories);
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
-                        configurationActionNode.put("type", "RDXSakeHandCommandAction");
+                        configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                         configurationActionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("configuration", postGraspHandConfigurations.get(side).get(i).toString());
