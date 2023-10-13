@@ -126,6 +126,16 @@ public enum RobotSide implements RobotSegment<RobotSide>
          return "left_leg";
    }
 
+   public static RobotSide getSideFromName(String name)
+   {
+      if (name.contains("left"))
+         return RobotSide.LEFT;
+      else if (name.contains("right"))
+         return RobotSide.RIGHT;
+      else
+         return null;
+   }
+
    public double negateIfLeftSide(double value)
    {
       if (this == LEFT)

@@ -2,13 +2,16 @@ package us.ihmc.behaviors.sharedControl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 
@@ -27,15 +30,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 10;
+   private static final int INTERPOLATION_SAMPLES = 5;
+   public static final int AFFORDANCE_BLENDING_SAMPLES = 25; // TODO make this a fraction of the estimated timesteps 1/3 or 1/4
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private final List<Double> distanceCandidateTasks = new ArrayList<>();
    private boolean firstObservedBodyPart = true;
    private String currentTask = ""; // detected task
    private int numberObservations = 0; // number of observations used to update the prediction
-   private final HashMap<String, Point3D[]> initialStdDeviations = new HashMap<>(); // std deviations of position used for visualization
-   private final HashMap<String, Point3D[]> initialMeans = new HashMap<>(); // mean trajectories of position used for visualization
+   private final HashMap<String, Point3D[]> priorStdDeviations = new HashMap<>(); // std deviations of position used for visualization
+   private final HashMap<String, Point3D[]> priorMeans = new HashMap<>(); // mean trajectories of position used for visualization
    private String bodyPartInference = "";
    private String bodyPartGoal = "";
    private final HashMap<String, String> taskBodyPartInferenceMap = new HashMap<>();
@@ -47,7 +51,9 @@ public class ProMPAssistant
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); // to track the last used sample of a generated trajectory
    private boolean doneInitialProcessingTask = false;
    private boolean doneCurrentTask = false; // used to communicate to higher level classes that the task has been completed
+   private boolean inEndZone = false; // used for blending with affordance
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
+   private int conditioningStep = 1;
    private int testNumber = 0;
    private int numberOfInferredSpeeds = 0;
    private boolean conditionOnlyLastObservation = true;
@@ -55,6 +61,9 @@ public class ProMPAssistant
    private boolean isMoving = false;
    private ReferenceFrame objectFrame;
    private double isMovingThreshold = -1;
+   private final HashMap<String, FramePose3D> previousObservedPose = new HashMap<>();
+   private boolean useCustomSpeed;
+   private boolean sportMode = false;
 
    public ProMPAssistant()
    {
@@ -73,7 +82,9 @@ public class ProMPAssistant
          boolean logEnabled = jsonNode.get("logging").asBoolean();
          numberObservations = jsonNode.get("numberObservations").asInt();
          conditionOnlyLastObservation = jsonNode.get("conditionOnlyLastObservation").asBoolean();
+         conditioningStep = jsonNode.get("conditioningStep").asInt();
          int numberBasisFunctions = jsonNode.get("numberBasisFunctions").asInt();
+         useCustomSpeed = jsonNode.get("useCustomSpeed").asBoolean();
          long speedFactor = jsonNode.get("allowedIncreaseDecreaseSpeedFactor").asLong();
          numberOfInferredSpeeds = jsonNode.get("numberOfInferredSpeeds").asInt();
          // getting tasks
@@ -85,6 +96,7 @@ public class ProMPAssistant
          HashMap<String, String>[] bodyPartsGeometries = new HashMap[numberOfTasks];
          Point3D[] goalToEETranslations = new Point3D[numberOfTasks];
          Quaternion[] goalToEERotations = new Quaternion[numberOfTasks];
+         LogTools.info("Loading ProMPs for tasks:");
          for (int i = 0; i < numberOfTasks; i++)
          {
             JsonNode taskNode = tasksArrayNode.get(i);
@@ -106,6 +118,7 @@ public class ProMPAssistant
                                                   rotationArrayNode.get(1).asDouble(),
                                                   rotationArrayNode.get(2).asDouble(),
                                                   rotationArrayNode.get(3).asDouble());
+            int customSpeed = taskNode.get("customSpeed").asInt();
             JsonNode bodyPartsArrayNode = taskNode.get("bodyParts");
             HashMap<String, String> bodyPartsGeometry = new HashMap<>();
             for (JsonNode bodyPartObject : bodyPartsArrayNode)
@@ -121,16 +134,16 @@ public class ProMPAssistant
                                                isLastViaPoint,
                                                numberBasisFunctions,
                                                speedFactor,
-                                               numberOfInferredSpeeds));
+                                               numberOfInferredSpeeds,
+                                               useCustomSpeed,
+                                               customSpeed));
             // initialize maps
             taskBodyPartInferenceMap.put(taskNames[i], bodyPartsInference[i]);
             taskBodyPartGoalMap.put(taskNames[i], bodyPartsGoal[i]);
             taskTransformGoalMap.put(taskNames[i], new RigidBodyTransform(goalToEERotations[i], goalToEETranslations[i]));
-            LogTools.info("Loading ProMPs for tasks:");
             LogTools.info("{}", taskNames[i]);
-            for (HashMap<String, String> partsGeometry : bodyPartsGeometries)
-               for (String key : partsGeometry.keySet())
-                  LogTools.info("     {} {}", key, partsGeometry.get(key));
+            for (String key : bodyPartsGeometries[i].keySet())
+               LogTools.info("     {} {}", key, bodyPartsGeometries[i].get(key));
          }
 
          for (ProMPManager prompManager : proMPManagers.values())
@@ -149,28 +162,35 @@ public class ProMPAssistant
       }
    }
 
-   public void framePoseToPack(FramePose3D framePose, String bodyPart)
+   public void framePoseToPack(FramePose3D framePose, String bodyPart, boolean play)
    {
-      if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
+      if (containsBodyPart(bodyPart))
       { // if bodyPart is used in current task
          List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
 
          int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
+         if (sampleCounter >= generatedFramePoseTrajectory.size() - AFFORDANCE_BLENDING_SAMPLES)
+            inEndZone = true;
+         else
+            inEndZone = false;
+         // -- Observing
          if (sampleCounter < numberObservations)
          {
-            FramePose3D observedFramePose = bodyPartObservedTrajectoryMap.get(bodyPart).get(sampleCounter);
+            FramePose3D observedFramePose = new FramePose3D(bodyPartObservedTrajectoryMap.get(bodyPart).get(sampleCounter));
             if (objectFrame != null)
                observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             framePose.getPosition().set(observedFramePose.getPosition());
             framePose.getOrientation().set(observedFramePose.getOrientation());
-            // take the next sample from the trajectory next time
-            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+
+            // update sample from the trajectory to take next time
+            if (play)
+               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
          }
+         // -- Get trajectory from ProMP
          else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
          {
             // pack the frame using the trajectory generated from prediction
-            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(
-                  sampleCounter + 1); // +1 to avoid discontinuity due to imprecision in conditioning
+            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter + 1);
             List<FramePose3D> observations = bodyPartObservedTrajectoryMap.get(bodyPart);
             FramePose3D lastObservedFramePose = observations.get(observations.size() - 1);
             if (objectFrame != null) // change back to world frame if before it was changed to object frame
@@ -178,7 +198,6 @@ public class ProMPAssistant
                generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             }
-
             double alpha = (double) (sampleCounter - numberObservations) / (INTERPOLATION_SAMPLES);
             if (alpha > 1.0)
             {
@@ -187,23 +206,22 @@ public class ProMPAssistant
             }
             else
             { // gradually interpolate last observation to prediction
-               FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-               arbitratedFrameOrientation.set((1 - alpha) * lastObservedFramePose.getOrientation().getX() + alpha * generatedFramePose.getOrientation().getX(),
-                                              (1 - alpha) * lastObservedFramePose.getOrientation().getY() + alpha * generatedFramePose.getOrientation().getY(),
-                                              (1 - alpha) * lastObservedFramePose.getOrientation().getZ() + alpha * generatedFramePose.getOrientation().getZ(),
-                                              (1 - alpha) * lastObservedFramePose.getOrientation().getS() + alpha * generatedFramePose.getOrientation().getS());
-               FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-               arbitratedFramePosition.setX((1 - alpha) * lastObservedFramePose.getPosition().getX() + alpha * generatedFramePose.getPosition().getX());
-               arbitratedFramePosition.setY((1 - alpha) * lastObservedFramePose.getPosition().getY() + alpha * generatedFramePose.getPosition().getY());
-               arbitratedFramePosition.setZ((1 - alpha) * lastObservedFramePose.getPosition().getZ() + alpha * generatedFramePose.getPosition().getZ());
+               FixedFrameQuaternionBasics arbitratedFrameOrientation = new FrameQuaternion(lastObservedFramePose.getOrientation());
+               // Perform slerp for quaternion blending
+               arbitratedFrameOrientation.interpolate(generatedFramePose.getOrientation(), alpha);
+               FixedFramePoint3DBasics arbitratedFramePosition = new FramePoint3D(lastObservedFramePose.getPosition());
+               arbitratedFramePosition.interpolate(generatedFramePose.getPosition(), alpha);
                framePose.getPosition().set(arbitratedFramePosition);
                framePose.getOrientation().set(arbitratedFrameOrientation);
             }
-            // take the next sample from the trajectory next time
-            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+
+            // update sample from the trajectory to take next time
+            if (play)
+               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
          }
+         // -- Motion is over
          else
-         { // motion is over
+         {
             // check that inferred timesteps are not lower than the observed setpoints.
             if (generatedFramePoseTrajectory.size() < numberObservations)
             {
@@ -222,27 +240,19 @@ public class ProMPAssistant
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
-            LogTools.info("Assistance completed");
             // exit assistance mode
             doneCurrentTask = true;
          }
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame, ControlStreamer controlStreamer)
    {
       if (taskDetected(observedPose, bodyPart, objectName, objectFrame))
       {
-         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
+         if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
-            FramePose3D lastObservedPose = new FramePose3D();
-            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
-            lastObservedPose.getOrientation()
-                            .set(observedPose.getOrientation().getX(),
-                                 observedPose.getOrientation().getY(),
-                                 observedPose.getOrientation().getZ(),
-                                 observedPose.getOrientation().getS());
-
+            FramePose3D lastObservedPose = new FramePose3D(observedPose);
             if (!bodyPartGoal.isEmpty()) // if there is an observable object and goal
             {
                // change observed pose in object frame
@@ -251,14 +261,19 @@ public class ProMPAssistant
             }
             if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (after pressing the button)
             {
+               ensureOrientationContinuity(bodyPart, lastObservedPose);
                // store observed pose
-               bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
+               bodyPartObservedTrajectoryMap.get(bodyPart).add(new FramePose3D(lastObservedPose));
+
                // update the proMP prediction according to observations and generate mean trajectory
                if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
                {
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
+                  if(sportMode && controlStreamer != null)
+                     controlStreamer.streamOnNotification();
+
                   LogTools.info("Generated prediction");
                }
             }
@@ -266,19 +281,38 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, FramePose3D objectPose)
+   private void ensureOrientationContinuity(String bodyPart, FramePose3D lastObservedPose)
+   {
+      QuaternionReadOnly quaternionToCheck = lastObservedPose.getOrientation();
+      if (previousObservedPose.containsKey(bodyPart))
+      {
+         if (!bodyPartGoal.isEmpty())
+            previousObservedPose.get(bodyPart).changeFrame(objectFrame);
+
+         QuaternionReadOnly previousQuaternion = previousObservedPose.get(bodyPart).getOrientation();
+         // Check that quaternion is not changing 2pi range. Even if q = -q, the observed motion has to be continuous
+         lastObservedPose.getOrientation().interpolate(previousQuaternion,quaternionToCheck, 1.0);
+
+         previousObservedPose.get(bodyPart).set(lastObservedPose);
+      }
+      else
+      {
+         if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * quaternionToCheck.getS()) == -1)
+         {
+            lastObservedPose.getOrientation().negate();
+         }
+
+         previousObservedPose.put(bodyPart,new FramePose3D(lastObservedPose));
+      }
+   }
+
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, FramePose3D objectPose, ControlStreamer controlStreamer)
    {
       if (taskDetected(observedPose, bodyPart, objectName, null))
       {
-         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
+         if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
-            FramePose3D lastObservedPose = new FramePose3D();
-            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
-            lastObservedPose.getOrientation()
-                            .set(observedPose.getOrientation().getX(),
-                                 observedPose.getOrientation().getY(),
-                                 observedPose.getOrientation().getZ(),
-                                 observedPose.getOrientation().getS());
+            FramePose3D lastObservedPose = new FramePose3D(observedPose);
             if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (pressed the button)
             {
                // store observed pose
@@ -297,6 +331,9 @@ public class ProMPAssistant
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
+                  if(sportMode && controlStreamer != null)
+                     controlStreamer.streamOnNotification();
+
                   LogTools.info("Generated prediction");
                }
             }
@@ -304,8 +341,7 @@ public class ProMPAssistant
       }
    }
 
-   // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
-   //  Learn task for both hands and call them ...L and ...R, check initial pose of hands to determine which one is being used
+   // TODO learn mirrored version for left handed and distinguish between R and L version of that task
    private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
       if (currentTask.isEmpty())
@@ -362,10 +398,14 @@ public class ProMPAssistant
                for (Map.Entry<String, String> entryPart : proMPManagers.get(currentTask).getBodyPartsGeometry().entrySet())
                {
                   // store stdDeviation trajectories for informing user through graphics
-                  initialStdDeviations.put(entryPart.getKey(),
-                                           proMPManagers.get(currentTask).generateStdDeviationTrajectory(entryPart.getKey()));
-                  initialMeans.put(entryPart.getKey(),
-                                   proMPManagers.get(currentTask).generateMeanTrajectory(entryPart.getKey(), objectFrame));
+                  priorStdDeviations.put(entryPart.getKey(),
+                                         proMPManagers.get(currentTask).generateStdDeviationTrajectory(entryPart.getKey()));
+                  priorMeans.put(entryPart.getKey(),
+                                 proMPManagers.get(currentTask).generateMeanTrajectory(entryPart.getKey(), objectFrame));
+               }
+               if (useCustomSpeed)
+               {
+                  proMPManagers.get(currentTask).setTaskCustomSpeed();
                }
             }
          }
@@ -442,9 +482,9 @@ public class ProMPAssistant
          }
          else
          {
-            for (int i = 0; i < observedTrajectory.size(); i++)
+            for (int i = 0; i < observedTrajectory.size(); i+=conditioningStep)
             {
-               if (i == observedTrajectory.size() - 1)
+               if (i >= observedTrajectory.size() - conditioningStep)
                   isLastViaPoint.set(true);
                proMPManagers.get(currentTask).updateTaskTrajectory(entryPartObservation.getKey(), observedTrajectory.get(i), i);
             }
@@ -464,8 +504,10 @@ public class ProMPAssistant
       for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, frame));
-         // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-         setStartTrajectories(numberObservations + 1);
+         if(sportMode)
+            setStartTrajectories(0);
+         else // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
+            setStartTrajectories(numberObservations + 1);
       }
    }
 
@@ -490,19 +532,25 @@ public class ProMPAssistant
          currentTask = "";
       }
       doneCurrentTask = false;
+      inEndZone = false;
       taskGoalPose = null;
       objectFrame = null;
       bodyPartObservedTrajectoryMap.clear();
       bodyPartGeneratedTrajectoryMap.clear();
       bodyPartTrajectorySampleCounter.clear();
-      initialStdDeviations.clear();
-      initialMeans.clear();
+      priorStdDeviations.clear();
+      priorMeans.clear();
       observationRecognition.clear();
       doneInitialProcessingTask = false;
       isLastViaPoint.set(false);
       isMoving = false;
       firstObservedBodyPart = true;
       distanceCandidateTasks.clear();
+   }
+
+   public void setCustomSpeed(double speed)
+   {
+      proMPManagers.get(currentTask).setTaskCustomSpeed(speed);
    }
 
    public int getTestNumber()
@@ -515,9 +563,40 @@ public class ProMPAssistant
       isMovingThreshold = distance;
    }
 
+   public boolean containsBodyPart(String bodyPart)
+   {
+      return (proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart);
+   }
+
+   public boolean hasPosition(String bodyPart)
+   {
+      return !((proMPManagers.get(currentTask).getBodyPartsGeometry()).get(bodyPart).equals("Orientation"));
+   }
+
    public boolean isCurrentTaskDone()
    {
       return this.doneCurrentTask;
+   }
+
+   public boolean inEndZone()
+   {
+      return inEndZone;
+   }
+
+   public int getNumberOfSamples()
+   {
+      if(bodyPartGeneratedTrajectoryMap.containsKey(bodyPartGoal))
+         return bodyPartGeneratedTrajectoryMap.get(bodyPartGoal).size();
+      else
+         return -1;
+   }
+
+   public int getCurrentSample()
+   {
+      if(bodyPartTrajectorySampleCounter.containsKey(bodyPartGoal))
+         return bodyPartTrajectorySampleCounter.get(bodyPartGoal);
+      else
+         return -1;
    }
 
    public ProMPManager getProMPManager(String task)
@@ -525,14 +604,14 @@ public class ProMPAssistant
       return proMPManagers.get(task);
    }
 
-   public Point3D[] getInitialStdDeviation(String bodyPart)
+   public Point3D[] getPriorStdDeviation(String bodyPart)
    {
-      return initialStdDeviations.get(bodyPart);
+      return priorStdDeviations.get(bodyPart);
    }
 
-   public Point3D[] getInitialMean(String bodyPart)
+   public Point3D[] getPriorMean(String bodyPart)
    {
-      return initialMeans.get(bodyPart);
+      return priorMeans.get(bodyPart);
    }
 
    public Set<String> getTaskNames()
@@ -543,5 +622,10 @@ public class ProMPAssistant
    public boolean startedProcessing()
    {
       return !currentTask.isEmpty();
+   }
+
+   public void setSportMode(boolean activate)
+   {
+      sportMode = activate;
    }
 }

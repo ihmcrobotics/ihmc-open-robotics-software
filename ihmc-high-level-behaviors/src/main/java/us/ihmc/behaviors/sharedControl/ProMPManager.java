@@ -50,6 +50,8 @@ public class ProMPManager
    private final long speedFactor;
    private final int numberOfInferredSpeeds;
    private double meanEndValueQS;
+   private final boolean useCustomSpeed;
+   private final int customSpeed;
 
    /**
     * Class constructor
@@ -63,7 +65,9 @@ public class ProMPManager
                        AtomicBoolean isLastViaPoint,
                        int numberBasisFunctions,
                        long speedFactor,
-                       int numberOfInferredSpeeds)
+                       int numberOfInferredSpeeds,
+                       boolean useCustomSpeed,
+                       int customSpeed)
    {
       this.taskName = taskName;
       this.bodyPartsGeometry = bodyPartsGeometry;
@@ -72,6 +76,8 @@ public class ProMPManager
       this.numberBasisFunctions = numberBasisFunctions; // 20 rbf functions seems to generalize well
       this.speedFactor = speedFactor;
       this.numberOfInferredSpeeds = numberOfInferredSpeeds;
+      this.useCustomSpeed = useCustomSpeed;
+      this.customSpeed = customSpeed;
 
       ProMPNativeLibrary.load();
    }
@@ -92,9 +98,8 @@ public class ProMPManager
       for (int i = 0; i < listOfFiles.length; i++) //get training files
          fileListTraining.add(demoTrainingDirAbs + "/" + (i + 1) + ".csv");
 
-      // This is how the dofs are stored in the csv training files (generated using KinematicsRecordReplay in GDXVRKinematicsStreaming)
-      // 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z;
-      // 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z;
+      // This is how the dofs are stored in the csv files (generated RDX framework, see RDXVRKinematicsStreaming, RDXAffordanceEditorUI)
+      // e.g., 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z; - 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z; ...
       for (Map.Entry<String, String> entry : bodyPartsGeometry.entrySet())
       {
          List<Long> dofs = new ArrayList<>();
@@ -127,6 +132,18 @@ public class ProMPManager
          if (entry.getKey().equals("rightHand"))
          {
             dofs.replaceAll(dof -> dof + 7L);
+         }
+         if (entry.getKey().equals("leftForeArm"))
+         {
+            dofs.replaceAll(dof -> dof + 14L);
+         }
+         if (entry.getKey().equals("rightForeArm"))
+         {
+            dofs.replaceAll(dof -> dof + 21L);
+         }
+         if (entry.getKey().equals("chest"))
+         {
+            dofs.replaceAll(dof -> dof + 28L);
          }
          TrajectoryGroup trainingTrajectory = new TrajectoryGroup();
          // training filelist
@@ -263,6 +280,26 @@ public class ProMPManager
          (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / inferredTimesteps);
          if (logEnabled)
             logger.saveUpdatedTrajectories(partProMP.getKey(), partProMP.getValue(), "Modulated");
+      }
+   }
+
+   public void setTaskCustomSpeed()
+   {
+      // update the time modulation of the learned ProMPs with estimated value
+      for (Map.Entry<String, ProMP> partProMP : learnedProMPs.entrySet())
+      {
+         (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / customSpeed);
+         if (logEnabled)
+            logger.saveUpdatedTrajectories(partProMP.getKey(), partProMP.getValue(), "Modulated");
+      }
+   }
+
+   public void setTaskCustomSpeed(double speed)
+   {
+      // update the time modulation of the learned ProMPs with estimated value
+      for (Map.Entry<String, ProMP> partProMP : learnedProMPs.entrySet())
+      {
+         (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / speed);
       }
    }
 
@@ -588,11 +625,14 @@ public class ProMPManager
       Point3D[] pointArray = new Point3D[(int) matrix.rows()];
       for (int i = 0; i < matrix.rows(); i++)
       {
-         FramePoint3D setPoint = new FramePoint3D(frame);
+         FramePoint3D setPoint;
+         if (frame != null)
+            setPoint = new FramePoint3D(frame);
+         else
+            setPoint = new FramePoint3D();
          switch (bodyPartsGeometry.get(bodyPart))
          {
             case "Position" -> setPoint.set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
-            case "Orientation" -> LogTools.error("Cannot convert matrix to FramePoint3D List. Matrix contains only orientations");
             case "Pose" -> setPoint.set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
          }
          if(frame != ReferenceFrame.getWorldFrame())
@@ -611,7 +651,6 @@ public class ProMPManager
          switch (bodyPartsGeometry.get(bodyPart))
          {
             case "Position" -> setPoint.set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
-            case "Orientation" -> LogTools.error("Cannot convert matrix to FramePoint3D List. Matrix contains only orientations");
             case "Pose" -> setPoint.set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
          }
          pointArray[i] = setPoint;

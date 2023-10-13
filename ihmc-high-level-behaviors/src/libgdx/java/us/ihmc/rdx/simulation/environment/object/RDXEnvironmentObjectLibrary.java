@@ -27,6 +27,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXMultiBodySnakeObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
+      objectFactories.add(RDXPunchingBagObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()
