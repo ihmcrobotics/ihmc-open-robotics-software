@@ -24,8 +24,8 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.nio.ByteOrder;

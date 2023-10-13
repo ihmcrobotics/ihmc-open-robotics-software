@@ -131,8 +131,6 @@ public class BehaviorActionSequence
    {
       if (updateSubscription.getMessageNotification().poll()) // Do the update
       {
-         automaticExecution = false;
-
          ActionSequenceUpdateMessage latestUpdateMessage = updateSubscription.getMessageNotification().read();
 
          BehaviorActionExecutor[] actionArray = new BehaviorActionExecutor[latestUpdateMessage.getSequenceSize()];

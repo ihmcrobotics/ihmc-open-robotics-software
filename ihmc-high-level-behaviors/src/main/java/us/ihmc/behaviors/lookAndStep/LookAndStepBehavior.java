@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
@@ -36,10 +35,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new);
-
    final BehaviorHelper helper;
-   final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    final StatusLogger statusLogger;
    final RemoteHumanoidRobotInterface robotInterface;
 
@@ -211,6 +207,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Look and Step";
    }
 }

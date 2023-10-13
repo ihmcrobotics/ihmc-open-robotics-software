@@ -9,7 +9,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;

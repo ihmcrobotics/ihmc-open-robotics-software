@@ -15,9 +15,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
-import us.ihmc.tools.thread.PausableThrottledThread;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 
-import java.awt.*;
 import java.util.function.Supplier;
 
 public class PerceptionAndAutonomyProcess
@@ -32,7 +31,7 @@ public class PerceptionAndAutonomyProcess
    private ROS2HeartbeatMonitor zedDepthHeartbeat;
    private final ZEDColorDepthImageRetriever zedImageGrabber;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
-   private final PausableThrottledThread zedProcessAndPublishThread;
+   private final RestartableThrottledThread zedProcessAndPublishThread;
 
    PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                 Supplier<ReferenceFrame> zedFrameSupplier)
@@ -42,7 +41,7 @@ public class PerceptionAndAutonomyProcess
       this.zedImageGrabber = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID);
       this.zedImagePublisher = new ZEDColorDepthImagePublisher(zedImageGrabber.getZedModelData(), ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, zedFrameSupplier);
 
-      zedProcessAndPublishThread = new PausableThrottledThread("ZEDImageProcessAndPublish", 30.0, () ->
+      zedProcessAndPublishThread = new RestartableThrottledThread("ZEDImageProcessAndPublish", 30.0, () ->
       {
          zedDepthImage = zedImageGrabber.getLatestRawDepthImage();
          for (RobotSide side : RobotSide.values)
