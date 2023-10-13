@@ -65,7 +65,7 @@ public class RestartableThread
    }
 
    /**
-    * Interrupts the thread, thus stopping it
+    * Stops the running thread once it completes the current execution of the runnable
     */
    public void stop()
    {
