@@ -14,11 +14,8 @@ public class RestartableThreadTest
    {
       RestartableThread thread = new RestartableThread(name, () ->
       {
-         while (true)
-         {
-            System.out.println("Test Thread Running");
-            Thread.sleep(500);
-         }
+         System.out.println("Test Thread Running");
+         Thread.sleep(500);
       });
 
       thread.start();
@@ -43,11 +40,8 @@ public class RestartableThreadTest
    {
       RestartableThread thread = new RestartableThread(name, () ->
       {
-         while (true)
-         {
-            System.out.println("Test Thread Running");
-            Thread.sleep(500);
-         }
+         System.out.println("Test Thread Running");
+         Thread.sleep(500);
       });
 
       thread.start();
@@ -88,11 +82,8 @@ public class RestartableThreadTest
    {
       RestartableThread thread = new RestartableThread(name, () ->
       {
-         while (true)
-         {
-            System.out.println("Test Thread Running");
-            Thread.sleep(500);
-         }
+         System.out.println("Test Thread Running");
+         Thread.sleep(500);
       });
 
       thread.start();
@@ -121,11 +112,8 @@ public class RestartableThreadTest
    {
       RestartableThread thread = new RestartableThread(name, () ->
       {
-         while (true)
-         {
-            System.out.println("Test Thread Running");
-            Thread.sleep(500);
-         }
+         System.out.println("Test Thread Running");
+         Thread.sleep(500);
       });
 
       thread.start();
@@ -158,9 +146,23 @@ public class RestartableThreadTest
    }
 
    @Test
-   public void testExceptionHandling()
+   public void testStopWithoutStart()
    {
       RestartableThread thread = new RestartableThread(name, () ->
+      {
+         System.out.println("Test Thread Running");
+         Thread.sleep(500);
+      });
+
+      thread.stop();
+      assertFalse(thread.isRunning());
+      assertFalse(thread.isAlive());
+   }
+
+   @Test
+   public void testExceptionHandling()
+   {
+      RestartableThread thread = new RestartableThread(name, DefaultExceptionHandler.RUNTIME_EXCEPTION, () ->
       {
          throw new NullPointerException("This is a test");
       });
