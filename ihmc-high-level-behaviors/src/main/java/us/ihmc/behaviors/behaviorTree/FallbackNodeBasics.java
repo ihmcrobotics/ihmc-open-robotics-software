@@ -14,7 +14,7 @@ public interface FallbackNodeBasics extends BehaviorTreeControlFlowNodeBasics
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         BehaviorTreeNodeBasics.checkStatusInNotNull(childStatus);
+         BehaviorTreeNodeBasics.checkStatusIsNotNull(childStatus);
 
          if (childStatus == RUNNING)
          {
