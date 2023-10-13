@@ -43,11 +43,11 @@ public class RDXImNodesTreeNode
       boolean isTickRecent = behaviorNodeUI.hasBeenTicked() && timeSinceLastTick < 5.0;
 
       int color;
-      if (behaviorNodeUI.getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
+      if (behaviorNodeUI.getStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
       {
          color = ImColor.floatToColor(0.19607843f, 0.658823529412f, 0.321568627451f);
       }
-      else if (behaviorNodeUI.getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
+      else if (behaviorNodeUI.getStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
       {
          color = ImColor.floatToColor(0.658823529412f, 0.19607843f, 0.19607843f);
       }
@@ -64,42 +64,43 @@ public class RDXImNodesTreeNode
       String nodeType;
 
       String name = behaviorNodeUI.getName();
-      if (behaviorNodeUI.getType().equals(SequenceNode.class))
-      {
-         nodeName = (name != null ? name : "Sequence Node");
-         nodeType = "[->]";
-      }
-      else if (behaviorNodeUI.getType().equals(FallbackNode.class))
-      {
-         nodeName = (name != null ? name : "Fallback Node");
-         nodeType = "[?]";
-      }
-      else if (behaviorNodeUI.getType().equals(AsynchronousActionNode.class))
-      {
-         nodeName = (name != null ? name : "Asynchronous Node");
-         nodeType = "[Async]";
-      }
-      else if (behaviorNodeUI.getType().equals(BehaviorTreeAction.class))
-      {
-         nodeName = (name != null ? name : "Action");
-         nodeType = "[Action]";
-      }
-      else if (behaviorNodeUI.getType().equals(BehaviorTreeCondition.class))
-      {
-         nodeName = (name != null ? name : "Condition");
-         nodeType = "[Condition]";
-      }
-      else if (behaviorNodeUI.getType().equals(OneShotAction.class))
-      {
-         nodeName = (name != null ? name : "One Shot Action");
-         nodeType = "[OneShot]";
-      }
-      else if (behaviorNodeUI.getType().equals(AlwaysSuccessfulAction.class))
-      {
-         nodeName = (name != null ? name : "Always Successful Action");
-         nodeType = "[Success]";
-      }
-      else
+      // TODO: Fix or delete
+//      if (behaviorNodeUI instanceof SequenceNode)
+//      {
+//         nodeName = (name != null ? name : "Sequence Node");
+//         nodeType = "[->]";
+//      }
+//      else if (behaviorNodeUI instanceof FallbackNode)
+//      {
+//         nodeName = (name != null ? name : "Fallback Node");
+//         nodeType = "[?]";
+//      }
+//      else if (behaviorNodeUI instanceof AsynchronousActionNode)
+//      {
+//         nodeName = (name != null ? name : "Asynchronous Node");
+//         nodeType = "[Async]";
+//      }
+//      else if (behaviorNodeUI instanceof BehaviorTreeAction)
+//      {
+//         nodeName = (name != null ? name : "Action");
+//         nodeType = "[Action]";
+//      }
+//      else if (behaviorNodeUI instanceof BehaviorTreeCondition)
+//      {
+//         nodeName = (name != null ? name : "Condition");
+//         nodeType = "[Condition]";
+//      }
+//      else if (behaviorNodeUI instanceof OneShotAction)
+//      {
+//         nodeName = (name != null ? name : "One Shot Action");
+//         nodeType = "[OneShot]";
+//      }
+//      else if (behaviorNodeUI instanceof AlwaysSuccessfulAction)
+//      {
+//         nodeName = (name != null ? name : "Always Successful Action");
+//         nodeType = "[Success]";
+//      }
+//      else
       {
          nodeName = (name != null ? name : "Behavior " + nodeID);
          nodeType = "[*]";
@@ -132,7 +133,7 @@ public class RDXImNodesTreeNode
       double recentTickWindow = tickPeriod * 0.75;
       boolean tickedThisFrame = behaviorNodeUI.hasBeenTicked() && timeSinceLastTick < recentTickWindow;
       boolean tickedRecently = behaviorNodeUI.hasBeenTicked() && timeSinceLastTick < 1.0;
-      BehaviorTreeNodeStatus status = behaviorNodeUI.getPreviousStatus();
+      BehaviorTreeNodeStatus status = behaviorNodeUI.getStatus();
       tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
       tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);
 

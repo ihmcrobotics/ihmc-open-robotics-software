@@ -7,6 +7,6 @@ public class SequenceNode extends BehaviorTreeControlFlowNode implements Sequenc
 {
    public SequenceNode()
    {
-      setType(SequenceNode.class);
+
    }
 }

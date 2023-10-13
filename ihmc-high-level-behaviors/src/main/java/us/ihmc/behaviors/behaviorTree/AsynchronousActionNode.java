@@ -11,7 +11,7 @@ public abstract class AsynchronousActionNode extends ResettingNode implements As
 
    public AsynchronousActionNode()
    {
-      setType(AsynchronousActionNode.class);
+
    }
 
    @Override

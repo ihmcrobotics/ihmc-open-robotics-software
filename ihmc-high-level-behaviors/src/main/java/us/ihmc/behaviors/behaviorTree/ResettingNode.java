@@ -7,7 +7,7 @@ public abstract class ResettingNode extends BehaviorTreeControlFlowNode implemen
 
    public ResettingNode()
    {
-      setType(ResettingNode.class);
+
    }
 
    @Override

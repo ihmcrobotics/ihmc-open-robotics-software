@@ -82,10 +82,9 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    public void syncTree(BehaviorTreeNodeBasics externalNode)
    {
-      setPreviousStatus(externalNode.getPreviousStatus());
+      setPreviousStatus(externalNode.getStatus());
       setName(externalNode.getName());
       setLastTickInstant(externalNode.getLastTickInstant());
-      setType(externalNode.getType());
 
       if (externalNode instanceof BehaviorTreeControlFlowNodeBasics)
       {
@@ -130,7 +129,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
    {
       StringBuilder out = new StringBuilder();
 
-      out.append(this.getType());
+      out.append(getClass().getSimpleName());
       out.append("(");
       for (RDXBehaviorUIInterface child : this.getUIChildren()) {
          out.append(child.toString()).append(",");

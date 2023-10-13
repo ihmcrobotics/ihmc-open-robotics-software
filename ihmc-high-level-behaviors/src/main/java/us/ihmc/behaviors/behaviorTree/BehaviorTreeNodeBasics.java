@@ -25,7 +25,7 @@ public interface BehaviorTreeNodeBasics
    {
       setPreviousStatus(tickInternal());
       setLastTickInstant(Instant.now());
-      return getPreviousStatus();
+      return getStatus();
    }
 
    BehaviorTreeNodeStatus tickInternal();
@@ -34,7 +34,7 @@ public interface BehaviorTreeNodeBasics
     * @return The node's status from the last time it was ticked.
     *         This will be null if the node hasn't been ticked yet.
     */
-   BehaviorTreeNodeStatus getPreviousStatus();
+   BehaviorTreeNodeStatus getStatus();
 
    void setPreviousStatus(BehaviorTreeNodeStatus status);
 
@@ -54,10 +54,6 @@ public interface BehaviorTreeNodeBasics
    String getName();
 
    void setName(String name);
-
-   Class<?> getType();
-
-   void setType(Class<?> type);
 
    static void checkStatusIsNotNull(BehaviorTreeNodeStatus status)
    {

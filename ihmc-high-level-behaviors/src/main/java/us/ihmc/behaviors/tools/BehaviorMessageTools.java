@@ -11,6 +11,9 @@ public class BehaviorMessageTools
    /**
     * Pack a behavior tree into a ROS 2 message. We can have recursive fields in our
     * messages, so we pack the tree in depth-first order.
+    *
+    * TODO: This is going to have to be fixed to pack different node types in
+    *   appropriate fields in the ROS 2 message.
     */
    public static void packBehaviorTreeMessage(BehaviorTreeNodeBasics treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
@@ -18,9 +21,8 @@ public class BehaviorMessageTools
       if (treeNode.getLastTickInstant()  != null)
          MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
       nodeMessage.setNodeName(treeNode.getName());
-      nodeMessage.setNodeType(treeNode.getType().getSimpleName());
-      if (treeNode.getPreviousStatus() != null)
-         nodeMessage.setPreviousStatus((byte) treeNode.getPreviousStatus().ordinal());
+      if (treeNode.getStatus() != null)
+         nodeMessage.setPreviousStatus((byte) treeNode.getStatus().ordinal());
       else
          nodeMessage.setPreviousStatus((byte) -1);
 
@@ -74,22 +76,24 @@ public class BehaviorMessageTools
    private static BehaviorTreeStatusNode createBehaviorTreeNode(String typeName)
    {
       BehaviorTreeStatusNode behaviorTreeStatusNode = new BehaviorTreeStatusNode();
-      if (typeName.equals(SequenceNode.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(SequenceNode.class);
-      else if (typeName.equals(FallbackNode.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(FallbackNode.class);
-      else if (typeName.equals(AsynchronousActionNode.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(AsynchronousActionNode.class);
-      else if (typeName.equals(BehaviorTreeAction.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(BehaviorTreeAction.class);
-      else if (typeName.equals(BehaviorTreeCondition.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(BehaviorTreeCondition.class);
-      else if (typeName.equals(OneShotAction.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(OneShotAction.class);
-      else if (typeName.equals(AlwaysSuccessfulAction.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(AlwaysSuccessfulAction.class);
-      else
-         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
+      // TODO: We need to instantiate certain types of status nodes instead.
+      //  They will need different functionality depending on their type.
+//      if (typeName.equals(SequenceNode.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(SequenceNode.class);
+//      else if (typeName.equals(FallbackNode.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(FallbackNode.class);
+//      else if (typeName.equals(AsynchronousActionNode.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(AsynchronousActionNode.class);
+//      else if (typeName.equals(BehaviorTreeAction.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(BehaviorTreeAction.class);
+//      else if (typeName.equals(BehaviorTreeCondition.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(BehaviorTreeCondition.class);
+//      else if (typeName.equals(OneShotAction.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(OneShotAction.class);
+//      else if (typeName.equals(AlwaysSuccessfulAction.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(AlwaysSuccessfulAction.class);
+//      else
+//         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
       return behaviorTreeStatusNode;
    }
 }
