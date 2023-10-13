@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 /**
  * Experimental action. Not sure about this one.
  */
-public class AlwaysSuccessfulAction extends BehaviorTreeAction
+public class AlwaysSuccessfulAction extends BehaviorTreeNode
 {
    private final Runnable action;
 

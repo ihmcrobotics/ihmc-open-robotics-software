@@ -14,7 +14,7 @@ class BehaviorTreeSimpleCasesTest
       MutableObject<String> output = new MutableObject<>("");
       SequenceNode tree = new SequenceNode();
 
-      BehaviorTreeAction findBall = new BehaviorTreeAction()
+      BehaviorTreeNode findBall = new BehaviorTreeNode()
       {
          private int attempt = 0;
          private int numberOfAttempts = 3;
@@ -31,7 +31,7 @@ class BehaviorTreeSimpleCasesTest
          }
       };
 
-      BehaviorTreeAction pickBall = new BehaviorTreeAction()
+      BehaviorTreeNode pickBall = new BehaviorTreeNode()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -42,7 +42,7 @@ class BehaviorTreeSimpleCasesTest
          }
       };
 
-      BehaviorTreeAction dropBall = new BehaviorTreeAction()
+      BehaviorTreeNode dropBall = new BehaviorTreeNode()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
