@@ -2,7 +2,6 @@ package us.ihmc.behaviors.buildingExploration;
 
 import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
@@ -28,7 +27,6 @@ import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorM
  */
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehavior::new);
    private final BehaviorHelper helper;
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;
@@ -156,7 +154,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Building Exploration";
    }
 
    @Override
