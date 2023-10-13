@@ -4,9 +4,12 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -14,9 +17,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class KinematicsRecordReplay
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
    private final ROS2PublishSubscribeAPI ros2;
-//   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
+   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private boolean objectLocked = false;
    private ReferenceFrame objectFrame;
 
@@ -49,7 +51,7 @@ public class KinematicsRecordReplay
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
-      // sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
+       sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -58,16 +60,27 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
-//         if (sceneGraphSubscription.getMessageNotification().poll() && !objectLocked)
-//         {
-//            SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
-//            DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-//            RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-//            MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-//            ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-//                                                                                   objectTransformToWorld);
-//            objectLocked = true;
-//         }
+
+         if (sceneGraphSubscription.getMessageNotification().poll() && !objectLocked)
+         {
+            SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
+            var detectedObjectsMessage = sceneGraphMessage.getPredefinedRigidBodySceneNodes();
+            // iterate over the detectable scene nodes
+            for (PredefinedRigidBodySceneNodeMessage detectedObjectMessage : detectedObjectsMessage)
+            {
+               // if currently detected
+               if (detectedSceneNodeMessage.getCurrentlyDetected())
+               {
+                  // get name
+                  String detectedObjectName = detectedSceneNodeMessage.getSceneNode().get`;
+               }
+            }
+            RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
+            MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
+            ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                   objectTransformToWorld);
+            objectLocked = true;
+         }
 
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))

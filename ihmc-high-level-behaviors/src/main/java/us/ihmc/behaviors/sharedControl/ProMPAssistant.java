@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ProMPAssistant
 {
    private static final int INTERPOLATION_SAMPLES = 5;
-   public static final int AFFORDANCE_BLENDING_SAMPLES = 25; // TODO make this a fraction of the estimated timesteps 1/3 or 1/4
+   public static final int AFFORDANCE_BLENDING_SAMPLES = 25; // TODO make this a fraction of the estimated timesteps (1/3 or 1/4 could be good values)
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private final List<Double> distanceCandidateTasks = new ArrayList<>();
@@ -341,7 +341,6 @@ public class ProMPAssistant
       }
    }
 
-   // TODO learn mirrored version for left handed and distinguish between R and L version of that task
    private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
       if (currentTask.isEmpty())
@@ -412,7 +411,7 @@ public class ProMPAssistant
          else // no tasks in this context
          {
             firstObservedBodyPart = true;
-            LogTools.info("Detected object ({}) does not have any associated learned policy for assistance", objectName);
+            LogTools.info("Detected object ({}) does not have any associated learned model for assistance", objectName);
             return false;
          }
       }

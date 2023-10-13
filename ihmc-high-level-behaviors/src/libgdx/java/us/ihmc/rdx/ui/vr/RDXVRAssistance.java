@@ -5,9 +5,12 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.openvr.InputDigitalActionData;
+import perception_msgs.msg.dds.SceneGraphMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.*;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -54,7 +57,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    private final RDXVRAssistanceStatus status;
    private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
+   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -103,7 +106,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       ghostRobotGraphic.setActive(false);
       ghostRobotGraphic.create();
 
-      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+      sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
 
       status = new RDXVRAssistanceStatus(AssistancePhase.DISABLED, RDXVRAssistanceMenuMode.OFF);
 
@@ -116,6 +119,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
+
    {
       menu = new RDXVRAssistanceMenu(window, status);
    }
@@ -293,10 +297,10 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      //      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
-      //      {
-      //         enableStdDeviationVisualization(bodyPart);
-      //      }
+      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
+      {
+         enableStdDeviationVisualization(bodyPart);
+      }
 
       if (!objectName.isEmpty())
       {
@@ -445,20 +449,20 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 
    public void update()
    {
-      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
-      {
-         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
-         {
-            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
-            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
-            {
-               objectName = sceneNodeMessage.getNameAsString();
-               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
-               objectFrame.update();
-            }
-         }
-      }
+//      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
+//      {
+//         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+//         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
+//         {
+//            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
+//            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
+//            {
+//               objectName = sceneNodeMessage.getNameAsString();
+//               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
+//               objectFrame.update();
+//            }
+//         }
+//      }
       //update menu
       if (!enabled.get() && !objectName.isEmpty()) // if assistance not enabled and objects in the scene
       { // Press left B button to activate

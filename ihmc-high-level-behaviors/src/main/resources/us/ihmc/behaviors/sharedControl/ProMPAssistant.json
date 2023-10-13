@@ -24,7 +24,7 @@
       ]
     },
     {
-      "context": "PushDoorLeverHandle",
+      "context": "RightDoorLeverHandle",
       "name": "ReachHandle",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
