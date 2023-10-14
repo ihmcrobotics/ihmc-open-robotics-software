@@ -22,7 +22,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;

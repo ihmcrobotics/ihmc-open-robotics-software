@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
