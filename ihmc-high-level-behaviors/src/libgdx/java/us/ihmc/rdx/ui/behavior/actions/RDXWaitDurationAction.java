@@ -1,12 +1,12 @@
-package us.ihmc.rdx.ui.behavior.editor.actions;
+package us.ihmc.rdx.ui.behavior.actions;
 
 import imgui.ImGui;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
+import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 public class RDXWaitDurationAction extends RDXBehaviorAction
 {

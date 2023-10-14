@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor.actions;
+package us.ihmc.rdx.ui.behavior.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -15,8 +15,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
+import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.sequence;
 
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
