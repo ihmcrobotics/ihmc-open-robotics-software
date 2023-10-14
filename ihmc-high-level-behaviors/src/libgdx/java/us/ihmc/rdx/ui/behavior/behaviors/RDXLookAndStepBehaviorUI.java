@@ -36,7 +36,7 @@ import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.rdx.ui.yo.ImPlotYoHelperDoublePlotLine;
-import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
