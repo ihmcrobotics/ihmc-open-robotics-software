@@ -10,7 +10,7 @@ import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.ros2.ROS2Node;
