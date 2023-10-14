@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.visualizers;
+package us.ihmc.rdx.ui.graphics;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
