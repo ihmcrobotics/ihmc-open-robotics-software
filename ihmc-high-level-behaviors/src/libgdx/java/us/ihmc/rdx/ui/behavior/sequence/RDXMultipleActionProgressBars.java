@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.internal.ImGui;
 import us.ihmc.commons.lists.RecyclingArrayList;
