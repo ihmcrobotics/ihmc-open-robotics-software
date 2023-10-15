@@ -6,9 +6,9 @@ import java.util.ArrayList;
  * A behavior tree control flow node can have children.
  * Add default ArrayList storage of children nodes for a control flow node.
  */
-public abstract class BehaviorTreeControlFlowNode extends BehaviorTreeNode
+public abstract class BehaviorTreeControlFlowNode extends BehaviorTreeNodeState
 {
-   private final ArrayList<BehaviorTreeNode> children = new ArrayList<>();
+   private final ArrayList<BehaviorTreeNodeState> children = new ArrayList<>();
    private boolean hasBeenClocked = false;
 
    public BehaviorTreeNodeStatus tick()
@@ -26,19 +26,19 @@ public abstract class BehaviorTreeControlFlowNode extends BehaviorTreeNode
    public void clock()
    {
       setHasBeenClocked(true);
-      for (BehaviorTreeNode child : getChildren())
+      for (BehaviorTreeNodeState child : getChildren())
       {
          child.clock();
       }
       super.clock();
    }
 
-   public ArrayList<BehaviorTreeNode> getChildren()
+   public ArrayList<BehaviorTreeNodeState> getChildren()
    {
       return children;
    }
 
-   public <T extends BehaviorTreeNode> T addChild(T child)
+   public <T extends BehaviorTreeNodeState> T addChild(T child)
    {
       children.add(child);
       return child;

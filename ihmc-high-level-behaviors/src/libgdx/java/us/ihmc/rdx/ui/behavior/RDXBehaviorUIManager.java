@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -38,7 +38,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.*;
  */
 public class RDXBehaviorUIManager
 {
-   private final AtomicReference<BehaviorTreeNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
+   private final AtomicReference<BehaviorTreeNodeState> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);

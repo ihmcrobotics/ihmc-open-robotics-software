@@ -15,7 +15,7 @@ public class BehaviorMessageTools
     * TODO: This is going to have to be fixed to pack different node types in
     *   appropriate fields in the ROS 2 message.
     */
-   public static void packBehaviorTreeMessage(BehaviorTreeNode treeNode, BehaviorTreeMessage behaviorTreeMessage)
+   public static void packBehaviorTreeMessage(BehaviorTreeNodeState treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
       if (treeNode.getLastTickInstant()  != null)
@@ -31,7 +31,7 @@ public class BehaviorMessageTools
          nodeMessage.setNumberOfChildren(controlFlowTreeNode.getChildren().size());
          nodeMessage.setHasBeenClocked(controlFlowTreeNode.getHasBeenClocked());
 
-         for (BehaviorTreeNode child : controlFlowTreeNode.getChildren())
+         for (BehaviorTreeNodeState child : controlFlowTreeNode.getChildren())
          {
             packBehaviorTreeMessage(child, behaviorTreeMessage);
          }
@@ -46,12 +46,12 @@ public class BehaviorMessageTools
     * We unpack a tree from a list of nodes using recursion and the number of
     * children of that node. We assume the ordering as packed in {@link #packBehaviorTreeMessage}.
     */
-   public static BehaviorTreeNode unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
+   public static BehaviorTreeNodeState unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
    {
       return unpackBehaviorTreeMessage(behaviorTreeMessage, new MutableInt());
    }
 
-   private static BehaviorTreeNode unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
+   private static BehaviorTreeNodeState unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
    {
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 
@@ -84,8 +84,8 @@ public class BehaviorMessageTools
 //         behaviorTreeStatusNode.setType(FallbackNode.class);
 //      else if (typeName.equals(AsynchronousActionNode.class.getSimpleName()))
 //         behaviorTreeStatusNode.setType(AsynchronousActionNode.class);
-//      else if (typeName.equals(BehaviorTreeNode.class.getSimpleName()))
-//         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
+//      else if (typeName.equals(BehaviorTreeNodeState.class.getSimpleName()))
+//         behaviorTreeStatusNode.setType(BehaviorTreeNodeState.class);
 //      else if (typeName.equals(BehaviorTreeCondition.class.getSimpleName()))
 //         behaviorTreeStatusNode.setType(BehaviorTreeCondition.class);
 //      else if (typeName.equals(OneShotAction.class.getSimpleName()))
@@ -93,7 +93,7 @@ public class BehaviorMessageTools
 //      else if (typeName.equals(AlwaysSuccessfulAction.class.getSimpleName()))
 //         behaviorTreeStatusNode.setType(AlwaysSuccessfulAction.class);
 //      else
-//         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
+//         behaviorTreeStatusNode.setType(BehaviorTreeNodeState.class);
       return behaviorTreeStatusNode;
    }
 }

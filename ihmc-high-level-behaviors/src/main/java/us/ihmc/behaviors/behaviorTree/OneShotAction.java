@@ -5,7 +5,7 @@ package us.ihmc.behaviors.behaviorTree;
  * No feedback. Task always considered successful.
  * Resettable to run the task again.
  */
-public class OneShotAction extends BehaviorTreeNode
+public class OneShotAction extends BehaviorTreeNodeState
 {
    private final Runnable action;
    private boolean hasRunOnce = false;

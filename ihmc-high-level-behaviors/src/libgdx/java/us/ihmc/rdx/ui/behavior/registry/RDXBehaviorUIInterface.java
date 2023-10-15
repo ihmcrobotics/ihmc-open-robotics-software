@@ -4,8 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -20,7 +19,7 @@ import java.util.Set;
  * The UI has a tree structure, but not a decision or search one.
  * Currently calls propagate down to all the nodes so they can decide to take action.
  */
-public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements RDXRenderableProvider
+public abstract class RDXBehaviorUIInterface extends BehaviorTreeNodeState implements RDXRenderableProvider
 {
    private final ArrayList<RDXBehaviorUIInterface> children = new ArrayList<>();
 
@@ -80,7 +79,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
       }
    }
 
-   public void syncTree(BehaviorTreeNode externalNode)
+   public void syncTree(BehaviorTreeNodeState externalNode)
    {
       setPreviousStatus(externalNode.getStatus());
       setName(externalNode.getName());
@@ -89,7 +88,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
       if (externalNode instanceof BehaviorTreeControlFlowNode)
       {
          BehaviorTreeControlFlowNode externalControlFlowNode = (BehaviorTreeControlFlowNode) externalNode;
-         for (BehaviorTreeNode externalChild : externalControlFlowNode.getChildren())
+         for (BehaviorTreeNodeState externalChild : externalControlFlowNode.getChildren())
          {
             for (RDXBehaviorUIInterface child : children)
             {
