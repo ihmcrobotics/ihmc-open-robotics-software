@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.time.Instant;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
+public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
 {
    private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
 
@@ -15,13 +16,10 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.NOT_TICKED;
    private Instant lastTickInstant = null;
 
+   private final RecyclingArrayList<BehaviorTreeNodeState> children = new RecyclingArrayList<>(BehaviorTreeNodeState::new);
+
    public BehaviorTreeNodeState()
    {
-   }
-
-   public BehaviorTreeNodeState(String description)
-   {
-      definition.setDescription(description);
    }
 
    public BehaviorTreeNodeStatus tick()
@@ -33,7 +31,10 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 
    // TODO: Is this a good convention doing the *Internal thing?
    //   or would it be better to call super.tick or something somehow
-   public abstract BehaviorTreeNodeStatus tickInternal();
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+
+   }
 
    /**
     * A method that can be called on every node in the tree every time the root gets ticked
