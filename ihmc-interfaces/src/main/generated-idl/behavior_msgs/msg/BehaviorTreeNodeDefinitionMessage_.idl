@@ -1,0 +1,23 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeNodeDefinitionMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeNodeDefinitionMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeDefinitionMessage_")
+      struct BehaviorTreeNodeDefinitionMessage
+      {
+        /**
+         * A human readable description of what the node does
+         */
+        string description;
+      };
+    };
+  };
+};
+
+#endif
