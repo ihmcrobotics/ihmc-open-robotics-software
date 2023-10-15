@@ -36,7 +36,6 @@ public class RDXRootBehaviorUI extends RDXBehaviorUIInterface
 
    }
 
-   @Override
    public String getName()
    {
       return "Behavior Module";

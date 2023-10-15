@@ -102,7 +102,6 @@ public class TargetFollowingBehavior extends ResettingNode implements Destroyabl
 
    }
 
-   @Override
    public String getName()
    {
       return "Target Following";

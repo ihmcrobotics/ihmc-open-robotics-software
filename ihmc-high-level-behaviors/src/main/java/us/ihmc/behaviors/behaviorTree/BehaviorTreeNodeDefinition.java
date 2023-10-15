@@ -13,16 +13,14 @@ import us.ihmc.tools.io.JSONTools;
  */
 public class BehaviorTreeNodeDefinition
 {
-   public static final String DEFAULT_DESCRIPTION = "Node";
-
    /** A human readable description of what the node does */
-   private String description;
+   private String description = "";
    /** Behavior tree children node definitions. */
    private final RecyclingArrayList<BehaviorTreeNodeDefinition> children = new RecyclingArrayList<>(BehaviorTreeNodeDefinition::new);
 
    public BehaviorTreeNodeDefinition()
    {
-      this(DEFAULT_DESCRIPTION);
+
    }
 
    public BehaviorTreeNodeDefinition(String description)
@@ -33,7 +31,9 @@ public class BehaviorTreeNodeDefinition
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("type", getClass().getSimpleName());
-      jsonNode.put("description", description);
+
+      if (!description.isEmpty()) // No reason to write default description
+         jsonNode.put("description", description);
 
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
       for (BehaviorTreeNodeDefinition child : children)

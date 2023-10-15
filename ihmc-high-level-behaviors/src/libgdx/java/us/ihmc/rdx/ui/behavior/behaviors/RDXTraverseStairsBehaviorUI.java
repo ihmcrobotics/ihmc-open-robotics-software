@@ -65,7 +65,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, getName()));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, getDefinition().getDescription()));
       });
       footstepPlanGraphic.setOpacity(0.5);
 //      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
@@ -232,7 +232,6 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       }
    }
 
-   @Override
    public String getName()
    {
       return "Traverse Stairs";

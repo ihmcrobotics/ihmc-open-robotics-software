@@ -120,7 +120,7 @@ public class RDXBehaviorUIManager
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
       statusReceivedPlot.calculate("");
 
-      ImGui.text("Root node: %s".formatted(highestLevelUI == null ? "None." : highestLevelUI.getName()));
+      ImGui.text("Root node: %s".formatted(highestLevelUI == null ? "None." : highestLevelUI.getDefinition().getDescription()));
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

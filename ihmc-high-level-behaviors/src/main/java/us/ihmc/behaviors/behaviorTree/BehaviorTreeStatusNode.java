@@ -21,7 +21,7 @@ public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
    public BehaviorTreeStatusNode(BehaviorTreeNodeState node)
    {
       setPreviousStatus(node.getStatus());
-      setName(node.getName());
+      getDefinition().setDescription(node.getDefinition().getDescription());
       setLastTickInstant(node.getLastTickInstant());
 
       if (node instanceof BehaviorTreeControlFlowNode controlFlowNode)

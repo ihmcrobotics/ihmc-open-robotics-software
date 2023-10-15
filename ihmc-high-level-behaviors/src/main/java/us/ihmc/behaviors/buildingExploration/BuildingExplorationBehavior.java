@@ -151,7 +151,6 @@ public class BuildingExplorationBehavior extends ResettingNode implements Destro
 
    }
 
-   @Override
    public String getName()
    {
       return "Building Exploration";

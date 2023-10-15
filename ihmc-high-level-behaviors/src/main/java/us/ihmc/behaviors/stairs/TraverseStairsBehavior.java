@@ -286,7 +286,6 @@ public class TraverseStairsBehavior extends ResettingNode
       return currentLifeCycleState == TraverseStairsLifecycleStateName.RUNNING || currentLifeCycleState == TraverseStairsLifecycleStateName.AWAITING_APPROVAL;
    }
 
-   @Override
    public String getName()
    {
       return "Traverse Stairs";

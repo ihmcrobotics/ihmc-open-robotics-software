@@ -82,17 +82,16 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNodeState imple
    public void syncTree(BehaviorTreeNodeState externalNode)
    {
       setPreviousStatus(externalNode.getStatus());
-      setName(externalNode.getName());
+      getDefinition().setDescription(externalNode.getDefinition().getDescription());
       setLastTickInstant(externalNode.getLastTickInstant());
 
-      if (externalNode instanceof BehaviorTreeControlFlowNode)
+      if (externalNode instanceof BehaviorTreeControlFlowNode externalControlFlowNode)
       {
-         BehaviorTreeControlFlowNode externalControlFlowNode = (BehaviorTreeControlFlowNode) externalNode;
          for (BehaviorTreeNodeState externalChild : externalControlFlowNode.getChildren())
          {
             for (RDXBehaviorUIInterface child : children)
             {
-               if (externalChild.getName().equals(child.getName()))
+               if (externalChild.getDefinition().getDescription().equals(child.getDefinition().getDescription()))
                {
                   child.syncTree(externalChild);
                }
