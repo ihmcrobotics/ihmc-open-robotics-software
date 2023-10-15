@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorActionDefinitionMessage__idl__
 #define __behavior_msgs__msg__BehaviorActionDefinitionMessage__idl__
 
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -12,9 +13,9 @@ module behavior_msgs
       struct BehaviorActionDefinitionMessage
       {
         /**
-         * Human readable description of what the action does
+         * Parent definition fields
          */
-        string description;
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage node_definition;
         /**
          * Execute with next action
          */

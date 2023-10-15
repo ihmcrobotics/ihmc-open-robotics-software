@@ -1,6 +1,6 @@
 
-# Human readable description of what the action does
-string description
+# Parent definition fields
+behavior_msgs/BehaviorTreeNodeDefinitionMessage node_definition
 
 # Execute with next action
 bool execute_with_next_action

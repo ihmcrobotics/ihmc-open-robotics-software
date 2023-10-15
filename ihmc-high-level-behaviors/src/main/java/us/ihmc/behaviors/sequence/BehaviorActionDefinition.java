@@ -3,6 +3,7 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.BehaviorActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 
 /**
  * Interface for a definition of an action with
@@ -13,28 +14,27 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * or currently executing it. This is only the information that gets
  * saved to/from JSON.
  */
-public abstract class BehaviorActionDefinition
+public abstract class BehaviorActionDefinition extends BehaviorTreeNodeDefinition
 {
-   /** Human readable description of what the action does */
-   private String description;
    // TODO: Is every action concurrent-able?
    private boolean executeWitNextAction = false;
 
    public BehaviorActionDefinition(String description)
    {
-      this.description = description;
+      super(description);
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("type", getClass().getSimpleName());
-      jsonNode.put("description", description);
+      super.saveToFile(jsonNode);
+
       jsonNode.put("executeWithNextAction", executeWitNextAction);
    }
 
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      super.loadFromFile(jsonNode);
+
       JsonNode executeWithNextActionNode = jsonNode.get("executeWithNextAction");
       if (executeWithNextActionNode != null)
          executeWitNextAction = executeWithNextActionNode.asBoolean();
@@ -44,28 +44,16 @@ public abstract class BehaviorActionDefinition
 
    public void toMessage(BehaviorActionDefinitionMessage message)
    {
-      message.setDescription(description);
+      super.toMessage(message.getNodeDefinition());
+
       message.setExecuteWithNextAction(getExecuteWithNextAction());
    }
 
    public void fromMessage(BehaviorActionDefinitionMessage message)
    {
-      description = message.getDescriptionAsString();
+      super.fromMessage(message.getNodeDefinition());
+
       executeWitNextAction = message.getExecuteWithNextAction();
-   }
-
-   /**
-    * A description of the action to help the operator in understanding
-    * the purpose and context of the action.
-    */
-   public void setDescription(String description)
-   {
-      this.description = description;
-   }
-
-   public String getDescription()
-   {
-      return description;
    }
 
    public void setExecuteWithNextAction(boolean executeWitNextAction)
