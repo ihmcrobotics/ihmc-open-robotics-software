@@ -11,7 +11,8 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 {
    private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
 
-   private BehaviorTreeNodeStatus previousStatus = null;
+   /** The current status of the behavior tree node. */
+   private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.NOT_TICKED;
    private Instant lastTickInstant = null;
 
    public BehaviorTreeNodeState()
@@ -25,20 +26,29 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 
    public BehaviorTreeNodeStatus tick()
    {
-      setPreviousStatus(tickInternal());
+      status = tickInternal();
       setLastTickInstant(Instant.now());
       return getStatus();
    }
 
+   // TODO: Is this a good convention doing the *Internal thing?
+   //   or would it be better to call super.tick or something somehow
    public abstract BehaviorTreeNodeStatus tickInternal();
 
    /**
     * A method that can be called on every node in the tree every time the root gets ticked
     * in order for parallel nodes to figure out when they are no longer being selected.
+    *
+    * TODO: Perhaps this should just be update?
     */
    public void clock()
    {
 
+   }
+
+   public void setStatus(BehaviorTreeNodeStatus status)
+   {
+      this.status = status;
    }
 
    /**
@@ -47,12 +57,12 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
     */
    public BehaviorTreeNodeStatus getStatus()
    {
-      return previousStatus;
+      return status;
    }
 
-   public void setPreviousStatus(BehaviorTreeNodeStatus previousStatus)
+   public void setLastTickInstant(Instant lastTickInstant)
    {
-      this.previousStatus = previousStatus;
+      this.lastTickInstant = lastTickInstant;
    }
 
    /**
@@ -74,17 +84,12 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 
    public boolean hasBeenTicked()
    {
-      return getLastTickInstant() != null;
+      return lastTickInstant != null;
    }
 
    public boolean wasTickedRecently(double maxTimeSince)
    {
       return hasBeenTicked() && TimeTools.calculateDelay(lastTickInstant) < maxTimeSince;
-   }
-
-   public void setLastTickInstant(Instant lastTickInstant)
-   {
-      this.lastTickInstant = lastTickInstant;
    }
 
    public double evaluateUtility()
