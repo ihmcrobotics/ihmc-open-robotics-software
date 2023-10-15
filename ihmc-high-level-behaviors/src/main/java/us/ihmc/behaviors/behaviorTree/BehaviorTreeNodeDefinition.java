@@ -32,6 +32,7 @@ public class BehaviorTreeNodeDefinition
 
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("type", getClass().getSimpleName());
       jsonNode.put("description", description);
 
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
@@ -58,6 +59,20 @@ public class BehaviorTreeNodeDefinition
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
       description = message.getDescriptionAsString();
+   }
+
+   /**
+    * A description of the action to help the operator in understanding
+    * the purpose and context of the action.
+    */
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   public String getDescription()
+   {
+      return description;
    }
 
    public RecyclingArrayList<BehaviorTreeNodeDefinition> getChildren()

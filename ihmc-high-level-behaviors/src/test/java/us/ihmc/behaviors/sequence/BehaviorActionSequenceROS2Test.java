@@ -40,13 +40,19 @@ public class BehaviorActionSequenceROS2Test
       message.setSequenceSize(1);
       WaitDurationActionStateMessage waitAction = message.getWaitDurationActions().add();
       String description = "Wait for something";
-      waitAction.getDefinition().getActionDefinition().setDescription(description);
+      waitAction.getDefinition().getActionDefinition().getNodeDefinition().setDescription(description);
       ros2Helper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, message);
 
       Assertions.assertTrue(subscription.hasReceivedFirstMessage());
 
       Assertions.assertEquals(description,
-                              subscription.getLatest().getWaitDurationActions().get(0).getDefinition().getActionDefinition().getDescriptionAsString());
+                              subscription.getLatest()
+                                          .getWaitDurationActions()
+                                          .get(0)
+                                          .getDefinition()
+                                          .getActionDefinition()
+                                          .getNodeDefinition()
+                                          .getDescriptionAsString());
 
       subscription.destroy();
       ros2Node.destroy();
