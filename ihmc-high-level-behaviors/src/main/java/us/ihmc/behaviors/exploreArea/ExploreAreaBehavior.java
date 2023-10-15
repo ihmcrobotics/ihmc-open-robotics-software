@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.exploreArea;
 
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.packets.MessageTools;
@@ -10,6 +9,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -24,7 +24,7 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
  * An attempt mostly in simulation to explore a building.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
+public class ExploreAreaBehavior extends FallbackNode implements Destroyable
 {
    public static final double TICK_PERIOD = UnitConversions.hertzToSeconds(2);
 

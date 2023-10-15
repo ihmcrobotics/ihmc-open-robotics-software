@@ -2,7 +2,6 @@ package us.ihmc.behaviors.buildingExploration;
 
 import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
@@ -13,6 +12,7 @@ import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -25,7 +25,7 @@ import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorM
  * This was intended to be an upgrade for the 2019 Atlas building exploration demo but never got used.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
+public class BuildingExplorationBehavior extends ResettingNode implements Destroyable
 {
    private final BehaviorHelper helper;
    private final LookAndStepBehavior lookAndStepBehavior;

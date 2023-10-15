@@ -25,12 +25,13 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 /**
  * A simple example behavior.
  */
-public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements Destroyable
 {
    private final BehaviorHelper helper;
 
