@@ -20,7 +20,7 @@ public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
     */
    public BehaviorTreeStatusNode(BehaviorTreeNodeState node)
    {
-      setPreviousStatus(node.getStatus());
+      setStatus(node.getStatus());
       getDefinition().setDescription(node.getDefinition().getDescription());
       setLastTickInstant(node.getLastTickInstant());
 

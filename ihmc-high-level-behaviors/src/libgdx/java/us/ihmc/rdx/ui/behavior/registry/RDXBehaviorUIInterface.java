@@ -81,7 +81,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNodeState imple
 
    public void syncTree(BehaviorTreeNodeState externalNode)
    {
-      setPreviousStatus(externalNode.getStatus());
+      setStatus(externalNode.getStatus());
       getDefinition().setDescription(externalNode.getDefinition().getDescription());
       setLastTickInstant(externalNode.getLastTickInstant());
 
