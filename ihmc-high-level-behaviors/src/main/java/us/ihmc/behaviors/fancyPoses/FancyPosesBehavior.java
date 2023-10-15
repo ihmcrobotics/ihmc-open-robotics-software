@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -26,13 +25,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 /**
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements Destroyable
 {
    private final BehaviorHelper helper;
 

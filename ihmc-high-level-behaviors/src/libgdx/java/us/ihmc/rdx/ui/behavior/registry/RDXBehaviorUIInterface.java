@@ -3,9 +3,9 @@ package us.ihmc.rdx.ui.behavior.registry;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNodeBasics;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBasics;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -80,16 +80,16 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
       }
    }
 
-   public void syncTree(BehaviorTreeNodeBasics externalNode)
+   public void syncTree(BehaviorTreeNode externalNode)
    {
       setPreviousStatus(externalNode.getStatus());
       setName(externalNode.getName());
       setLastTickInstant(externalNode.getLastTickInstant());
 
-      if (externalNode instanceof BehaviorTreeControlFlowNodeBasics)
+      if (externalNode instanceof BehaviorTreeControlFlowNode)
       {
-         BehaviorTreeControlFlowNodeBasics externalControlFlowNode = (BehaviorTreeControlFlowNodeBasics) externalNode;
-         for (BehaviorTreeNodeBasics externalChild : externalControlFlowNode.getChildren())
+         BehaviorTreeControlFlowNode externalControlFlowNode = (BehaviorTreeControlFlowNode) externalNode;
+         for (BehaviorTreeNode externalChild : externalControlFlowNode.getChildren())
          {
             for (RDXBehaviorUIInterface child : children)
             {

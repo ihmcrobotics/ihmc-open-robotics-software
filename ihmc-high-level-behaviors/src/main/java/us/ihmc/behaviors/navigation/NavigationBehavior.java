@@ -27,7 +27,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -44,6 +43,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -57,7 +57,7 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
  * Used visibility graphs to walk through a maze.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class NavigationBehavior extends BehaviorTreeControlFlowNode implements Destroyable
 {
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 

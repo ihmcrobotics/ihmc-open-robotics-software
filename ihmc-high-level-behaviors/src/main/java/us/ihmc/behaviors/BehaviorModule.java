@@ -4,12 +4,14 @@ import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import behavior_msgs.msg.dds.StatusLogMessage;
 
 import std_msgs.msg.dds.Empty;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.Destroyable;
 
 /**
  * Manages a behavior tree based process on the real robot and syncs it
@@ -19,10 +21,10 @@ public class BehaviorModule
 {
    private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();
    private final StatusLogger statusLogger;
-   private final BehaviorInterface rootNode;
+   private final BehaviorTreeControlFlowNode rootNode;
    private final BehaviorHelper behaviorHelper;
 
-   public BehaviorModule(BehaviorInterface rootNode, BehaviorHelper behaviorHelper)
+   public BehaviorModule(BehaviorTreeControlFlowNode rootNode, BehaviorHelper behaviorHelper)
    {
       this.rootNode = rootNode;
       this.behaviorHelper = behaviorHelper;
@@ -48,7 +50,8 @@ public class BehaviorModule
    {
       statusLogger.info("Shutting down...");
       behaviorHelper.destroy();
-      rootNode.destroy();
+      if (rootNode instanceof Destroyable destroyable)
+         destroyable.destroy();
    }
 
    // API created here from build

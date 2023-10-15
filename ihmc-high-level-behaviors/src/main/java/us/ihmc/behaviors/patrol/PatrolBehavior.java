@@ -19,7 +19,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
@@ -44,7 +43,7 @@ import us.ihmc.commons.thread.TypedNotification;
  * This also was used to walk to high and low big planar regions autonomously.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class PatrolBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class PatrolBehavior extends BehaviorTreeControlFlowNode
 {
    public enum PatrolBehaviorState
    {

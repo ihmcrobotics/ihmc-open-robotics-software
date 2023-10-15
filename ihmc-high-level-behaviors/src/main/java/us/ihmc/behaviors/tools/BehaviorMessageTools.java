@@ -15,7 +15,7 @@ public class BehaviorMessageTools
     * TODO: This is going to have to be fixed to pack different node types in
     *   appropriate fields in the ROS 2 message.
     */
-   public static void packBehaviorTreeMessage(BehaviorTreeNodeBasics treeNode, BehaviorTreeMessage behaviorTreeMessage)
+   public static void packBehaviorTreeMessage(BehaviorTreeNode treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
       if (treeNode.getLastTickInstant()  != null)
@@ -26,12 +26,12 @@ public class BehaviorMessageTools
       else
          nodeMessage.setPreviousStatus((byte) -1);
 
-      if (treeNode instanceof BehaviorTreeControlFlowNodeBasics controlFlowTreeNode)
+      if (treeNode instanceof BehaviorTreeControlFlowNode controlFlowTreeNode)
       {
          nodeMessage.setNumberOfChildren(controlFlowTreeNode.getChildren().size());
          nodeMessage.setHasBeenClocked(controlFlowTreeNode.getHasBeenClocked());
 
-         for (BehaviorTreeNodeBasics child : controlFlowTreeNode.getChildren())
+         for (BehaviorTreeNode child : controlFlowTreeNode.getChildren())
          {
             packBehaviorTreeMessage(child, behaviorTreeMessage);
          }
@@ -46,12 +46,12 @@ public class BehaviorMessageTools
     * We unpack a tree from a list of nodes using recursion and the number of
     * children of that node. We assume the ordering as packed in {@link #packBehaviorTreeMessage}.
     */
-   public static BehaviorTreeNodeBasics unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
+   public static BehaviorTreeNode unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
    {
       return unpackBehaviorTreeMessage(behaviorTreeMessage, new MutableInt());
    }
 
-   private static BehaviorTreeNodeBasics unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
+   private static BehaviorTreeNode unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
    {
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 

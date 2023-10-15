@@ -9,7 +9,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -35,7 +34,7 @@ import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
  * stairs autonomously, I think we might be able to simplify it on Nadia.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
+public class TraverseStairsBehavior extends ResettingNode
 {
    private static final int UPDATE_RATE_MILLIS = 100;
    public static final int STAIRS_FIDUCIAL_ID = 350;
