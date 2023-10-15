@@ -18,7 +18,7 @@ public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
    /**
     * Deep copy constuctor.
     */
-   public BehaviorTreeStatusNode(BehaviorTreeNode node)
+   public BehaviorTreeStatusNode(BehaviorTreeNodeState node)
    {
       setPreviousStatus(node.getStatus());
       setName(node.getName());
@@ -28,7 +28,7 @@ public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
       {
          setHasBeenClocked(controlFlowNode.getHasBeenClocked());
 
-         for (BehaviorTreeNode child : controlFlowNode.getChildren())
+         for (BehaviorTreeNodeState child : controlFlowNode.getChildren())
          {
             addChild(new BehaviorTreeStatusNode(child));
          }

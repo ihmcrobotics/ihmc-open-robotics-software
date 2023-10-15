@@ -80,7 +80,7 @@ public class RDXImNodesTreeNode
 //         nodeName = (name != null ? name : "Asynchronous Node");
 //         nodeType = "[Async]";
 //      }
-//      else if (behaviorNodeUI instanceof BehaviorTreeNode)
+//      else if (behaviorNodeUI instanceof BehaviorTreeNodeState)
 //      {
 //         nodeName = (name != null ? name : "Node");
 //         nodeType = "[Action]";

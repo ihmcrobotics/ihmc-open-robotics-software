@@ -72,7 +72,7 @@ public class ExploreAreaBehavior extends FallbackNode implements Destroyable
       mainThread.setRunning(enabled);
    }
 
-   class StopNode extends BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
+   class StopNode extends BehaviorTreeNodeState // TODO: Is there a more general reusable robot stop node?
    {
       @Override
       public BehaviorTreeNodeStatus tickInternal()

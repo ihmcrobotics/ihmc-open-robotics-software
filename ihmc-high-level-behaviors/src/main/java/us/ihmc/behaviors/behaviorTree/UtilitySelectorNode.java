@@ -11,8 +11,8 @@ public class UtilitySelectorNode extends BehaviorTreeControlFlowNode
    public BehaviorTreeNodeStatus tickInternal()
    {
       double highestUtility = 0.0;
-      BehaviorTreeNode nodeOfHighestUtility = null;
-      for (BehaviorTreeNode child : getChildren())
+      BehaviorTreeNodeState nodeOfHighestUtility = null;
+      for (BehaviorTreeNodeState child : getChildren())
       {
          double utility = child.evaluateUtility();
          if (utility > highestUtility)

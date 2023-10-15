@@ -7,7 +7,7 @@ import java.time.Instant;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public abstract class BehaviorTreeNode
+public abstract class BehaviorTreeNodeState
 {
    private BehaviorTreeNodeStatus previousStatus = null;
    private Instant lastTickInstant = null;

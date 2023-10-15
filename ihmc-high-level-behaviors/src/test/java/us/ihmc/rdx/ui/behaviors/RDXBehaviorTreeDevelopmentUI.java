@@ -40,7 +40,7 @@ public class RDXBehaviorTreeDevelopmentUI
 
       tree = new SequenceNode();
       BehaviorTreeControlFlowNode node = new FallbackNode();
-      node.addChild(new BehaviorTreeNode()
+      node.addChild(new BehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -56,7 +56,7 @@ public class RDXBehaviorTreeDevelopmentUI
             return "Primary";
          }
       });
-      node.addChild(new BehaviorTreeNode()
+      node.addChild(new BehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -72,7 +72,7 @@ public class RDXBehaviorTreeDevelopmentUI
             return "Secondary";
          }
       });
-      node.addChild(new BehaviorTreeNode()
+      node.addChild(new BehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -91,7 +91,7 @@ public class RDXBehaviorTreeDevelopmentUI
 
       tree.addChild(node);
 
-      tree.addChild(new BehaviorTreeNode()
+      tree.addChild(new BehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()

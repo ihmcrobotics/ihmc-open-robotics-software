@@ -14,11 +14,11 @@ public class SequenceNode extends BehaviorTreeControlFlowNode
 
    public BehaviorTreeNodeStatus tickInternal()
    {
-      for (BehaviorTreeNode child : getChildren())
+      for (BehaviorTreeNodeState child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         BehaviorTreeNode.checkStatusIsNotNull(childStatus);
+         BehaviorTreeNodeState.checkStatusIsNotNull(childStatus);
 
          if (childStatus == RUNNING)
          {
