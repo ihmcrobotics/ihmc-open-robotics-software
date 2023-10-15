@@ -7,12 +7,21 @@ import java.time.Instant;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public abstract class BehaviorTreeNodeState
+public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
 {
+   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
+
    private BehaviorTreeNodeStatus previousStatus = null;
    private Instant lastTickInstant = null;
-   private String name = getClass().getSimpleName();
 
+   public BehaviorTreeNodeState()
+   {
+   }
+
+   public BehaviorTreeNodeState(String description)
+   {
+      definition.setDescription(description);
+   }
 
    public BehaviorTreeNodeStatus tick()
    {
@@ -20,7 +29,6 @@ public abstract class BehaviorTreeNodeState
       setLastTickInstant(Instant.now());
       return getStatus();
    }
-
 
    public abstract BehaviorTreeNodeStatus tickInternal();
 
@@ -74,16 +82,6 @@ public abstract class BehaviorTreeNodeState
       return hasBeenTicked() && TimeTools.calculateDelay(lastTickInstant) < maxTimeSince;
    }
 
-   public String getName()
-   {
-      return name;
-   }
-
-   public void setName(String name)
-   {
-      this.name = name;
-   }
-
    public void setLastTickInstant(Instant lastTickInstant)
    {
       this.lastTickInstant = lastTickInstant;
@@ -100,5 +98,11 @@ public abstract class BehaviorTreeNodeState
       {
          throw new RuntimeException("Behavior tree node status must not be null.");
       }
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return definition;
    }
 }

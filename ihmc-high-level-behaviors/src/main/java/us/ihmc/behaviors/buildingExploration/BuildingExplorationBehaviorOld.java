@@ -172,7 +172,6 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
 
    }
 
-   @Override
    public String getName()
    {
       return "Building Exploration";

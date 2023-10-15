@@ -166,7 +166,6 @@ public class DoorBehavior extends ResettingNode implements Destroyable
       return distanceToDoor;
    }
 
-   @Override
    public String getName()
    {
       return "Door";

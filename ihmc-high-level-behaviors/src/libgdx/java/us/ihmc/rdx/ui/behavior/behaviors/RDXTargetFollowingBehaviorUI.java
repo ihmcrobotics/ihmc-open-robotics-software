@@ -163,7 +163,6 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
       periodicThread.destroy();
    }
 
-   @Override
    public String getName()
    {
       return "Target Following";

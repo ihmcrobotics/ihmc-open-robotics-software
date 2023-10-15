@@ -416,7 +416,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       return "Look and Step";
    }
 
-   @Override
    public String getName()
    {
       return "Look and Step";

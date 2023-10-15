@@ -185,7 +185,6 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
          door.getCollisionMeshRenderables(renderables, pool);
    }
 
-   @Override
    public String getName()
    {
       return getClass().getSimpleName();

@@ -203,7 +203,6 @@ public class LookAndStepBehavior extends ResettingNode implements Destroyable
       reset.destroy();
    }
 
-   @Override
    public String getName()
    {
       return "Look and Step";

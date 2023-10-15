@@ -51,7 +51,6 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
          public String getName() {
             return "Primary";
          }
@@ -67,7 +66,6 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
          public String getName() {
             return "Secondary";
          }
@@ -83,7 +81,6 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
          public String getName() {
             return "Tertiary";
          }
@@ -102,7 +99,6 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         @Override
          public String getName() {
             return "Other thing";
          }
