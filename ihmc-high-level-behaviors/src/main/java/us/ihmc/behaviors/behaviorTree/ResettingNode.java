@@ -2,10 +2,8 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.log.LogTools;
 
-public abstract class ResettingNode extends BehaviorTreeNodeState
+public abstract class ResettingNode extends LegacyBehaviorTreeNodeState
 {
-   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
-
    private boolean lastWasClock = false;
    private boolean isReset = true;
 
@@ -53,11 +51,5 @@ public abstract class ResettingNode extends BehaviorTreeNodeState
    public void setIsReset(boolean isReset)
    {
       this.isReset = isReset;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return definition;
    }
 }

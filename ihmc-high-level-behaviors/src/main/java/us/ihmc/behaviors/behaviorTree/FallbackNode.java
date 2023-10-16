@@ -5,10 +5,8 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A fallback node proceeds through children left to right until they return SUCCESS.
  */
-public class FallbackNode extends BehaviorTreeNodeState
+public class FallbackNode extends LegacyBehaviorTreeNodeState
 {
-   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
-
    public FallbackNode()
    {
 
@@ -35,11 +33,5 @@ public class FallbackNode extends BehaviorTreeNodeState
       }
 
       return FAILURE;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return definition;
    }
 }

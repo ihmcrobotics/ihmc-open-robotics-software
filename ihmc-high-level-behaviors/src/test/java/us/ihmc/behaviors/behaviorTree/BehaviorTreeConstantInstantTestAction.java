@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-public class BehaviorTreeConstantInstantTestAction extends BehaviorTreeNodeState
+public class BehaviorTreeConstantInstantTestAction extends LegacyBehaviorTreeNodeState
 {
    private final Runnable action;
    private BehaviorTreeNodeStatus status;

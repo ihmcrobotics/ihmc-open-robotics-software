@@ -40,7 +40,7 @@ public class RDXBehaviorTreeDevelopmentUI
 
       tree = new SequenceNode();
       BehaviorTreeNodeState node = new FallbackNode();
-      node.addChild(new BehaviorTreeNodeState()
+      node.addChild(new LegacyBehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -55,7 +55,7 @@ public class RDXBehaviorTreeDevelopmentUI
             return "Primary";
          }
       });
-      node.addChild(new BehaviorTreeNodeState()
+      node.addChild(new LegacyBehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -70,7 +70,7 @@ public class RDXBehaviorTreeDevelopmentUI
             return "Secondary";
          }
       });
-      node.addChild(new BehaviorTreeNodeState()
+      node.addChild(new LegacyBehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -88,7 +88,7 @@ public class RDXBehaviorTreeDevelopmentUI
 
       tree.addChild(node);
 
-      tree.addChild(new BehaviorTreeNodeState()
+      tree.addChild(new LegacyBehaviorTreeNodeState()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
