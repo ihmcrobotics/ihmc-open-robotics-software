@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.editor;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -12,15 +13,15 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class RDXActionSequenceTools
 {
-   public static <T> RDXBehaviorAction createBlankAction(Class<T> actionDefinitionType,
-                                         RDXBehaviorActionSequenceEditor editor,
-                                         DRCRobotModel robotModel,
-                                         ROS2SyncedRobotModel syncedRobot,
-                                         RobotCollisionModel selectionCollisionModel,
-                                         RDXBaseUI baseUI,
-                                         RDX3DPanel panel3D,
-                                         ReferenceFrameLibrary referenceFrameLibrary,
-                                         ROS2ControllerPublishSubscribeAPI ros2)
+   public static <T extends BehaviorActionDefinition> RDXBehaviorAction createBlankAction(Class<T> actionDefinitionType,
+                                                                                          RDXBehaviorActionSequenceEditor editor,
+                                                                                          DRCRobotModel robotModel,
+                                                                                          ROS2SyncedRobotModel syncedRobot,
+                                                                                          RobotCollisionModel selectionCollisionModel,
+                                                                                          RDXBaseUI baseUI,
+                                                                                          RDX3DPanel panel3D,
+                                                                                          ReferenceFrameLibrary referenceFrameLibrary,
+                                                                                          ROS2ControllerPublishSubscribeAPI ros2)
    {
       return createBlankAction(actionDefinitionType.getSimpleName(),
                                    editor,
