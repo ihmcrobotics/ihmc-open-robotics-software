@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorActionStateMessage__idl__
 #define __behavior_msgs__msg__BehaviorActionStateMessage__idl__
 
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -11,6 +12,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorActionStateMessage_")
       struct BehaviorActionStateMessage
       {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage node_state;
         /**
          * The action's unique ID
          */

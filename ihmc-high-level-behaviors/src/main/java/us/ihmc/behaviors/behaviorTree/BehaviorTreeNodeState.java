@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Instant;
@@ -13,6 +15,7 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 {
    /** The current status of the behavior tree node. */
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.NOT_TICKED;
+   /** TODO: What is this used for and do we need this? */
    private Instant lastTickInstant = null;
 
    private final List<BehaviorTreeNodeState> children = new ArrayList<>();
@@ -43,6 +46,18 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
       {
          child.clock();
       }
+   }
+
+   public void toMessage(BehaviorTreeNodeStateMessage message)
+   {
+      message.setStatus(status.toByte());
+      MessageTools.toMessage(lastTickInstant, message.getLastTickInstant());
+   }
+
+   public void fromMessage(BehaviorTreeNodeStateMessage message)
+   {
+      status = BehaviorTreeNodeStatus.fromByte(message.getStatus());
+      lastTickInstant = MessageTools.toInstant(message.getLastTickInstant());
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)

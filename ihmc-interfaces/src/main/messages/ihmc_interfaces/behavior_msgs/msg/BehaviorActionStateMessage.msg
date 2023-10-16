@@ -1,3 +1,6 @@
+# Parent state fields
+behavior_msgs/BehaviorTreeNodeStateMessage node_state
+
 # The action's unique ID
 uint32 id
 

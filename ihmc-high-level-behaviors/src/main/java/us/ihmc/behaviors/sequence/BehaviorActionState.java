@@ -26,6 +26,8 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
 
    public void toMessage(BehaviorActionStateMessage message)
    {
+      super.toMessage(message.getNodeState());
+
       message.setId(id);
       message.setActionIndex(actionIndex);
       message.setIsNextForExecution(isNextForExecution);
@@ -34,8 +36,7 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
 
    public void fromMessage(BehaviorActionStateMessage message)
    {
-//      if (id != message.getId())
-//         LogTools.error("IDs should match!");
+      super.fromMessage(message.getNodeState());
 
       id = message.getId();
       actionIndex = message.getActionIndex();
