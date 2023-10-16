@@ -53,6 +53,7 @@ public class ContinuousPlanner
    private final Point2D robotLocation = new Point2D();
    private final Point2D robotLocationIndices = new Point2D();
 
+   private FootstepPlanningResult footstepPlanningResult;
    private boolean initialized = false;
    private boolean planAvailable = false;
    private boolean active;
@@ -166,7 +167,7 @@ public class ContinuousPlanner
 
       if (plannerOutput != null)
       {
-         FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+         footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
          planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
 
          LogTools.info(String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s", footstepPlanningResult,
@@ -202,13 +203,17 @@ public class ContinuousPlanner
       footstepDataListMessage.setDefaultSwingDuration(swingDuration);
       footstepDataListMessage.setDefaultTransferDuration(transferDuration);
 
+      // The planner may time out before getting the recommended number of steps, this makes sure we take the smaller of the values
+      if (count > plannerOutput.getFootstepPlan().getNumberOfSteps())
+         count = plannerOutput.getFootstepPlan().getNumberOfSteps();
+
       for (int i = 0; i < count; i++)
       {
          PlannedFootstep footstep = plannerOutput.getFootstepPlan().getFootstep(i);
          footstep.limitFootholdVertices();
          footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
 
-         LogTools.info("Footstep Side: {}", footstep.getRobotSide());
+         LogTools.info("First Footstep Side: {}", footstep.getRobotSide());
       }
 
       return footstepDataListMessage;
@@ -225,6 +230,11 @@ public class ContinuousPlanner
       LogTools.info("New Stance for Planning: {}", secondImminentFootstepSide);
 
       return startPose;
+   }
+
+   public FootstepPlanningResult getFootstepPlanningResult()
+   {
+      return footstepPlanningResult;
    }
 
    public FootstepPlan getFootstepPlan()
