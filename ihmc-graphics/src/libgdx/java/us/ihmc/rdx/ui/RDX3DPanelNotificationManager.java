@@ -9,7 +9,7 @@ public class RDX3DPanelNotificationManager
    private final List<RDX3DPanelNotification> addQueue = new LinkedList<>();
    private final List<RDX3DPanelNotification> notificationQueue = new LinkedList<>();
 
-   private RDX3DPanel panel3D;
+   private final RDX3DPanel panel3D;
 
    public RDX3DPanelNotificationManager(RDX3DPanel panel3)
    {
