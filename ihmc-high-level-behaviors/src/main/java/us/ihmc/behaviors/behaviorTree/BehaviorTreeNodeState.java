@@ -20,20 +20,6 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 
    private final List<BehaviorTreeNodeState> children = new ArrayList<>();
 
-   public BehaviorTreeNodeStatus tick()
-   {
-      status = tickInternal();
-      setLastTickInstant(Instant.now());
-      return getStatus();
-   }
-
-   // TODO: Is this a good convention doing the *Internal thing?
-   //   or would it be better to call super.tick or something somehow
-   public BehaviorTreeNodeStatus tickInternal()
-   {
-      return status;
-   }
-
    /**
     * A method that can be called on every node in the tree every time the root gets ticked
     * in order for parallel nodes to figure out when they are no longer being selected.
@@ -124,13 +110,5 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
    public List<BehaviorTreeNodeState> getChildren()
    {
       return children;
-   }
-
-   /**
-    * @deprecated FIXME Need to use recycling array list instead
-    */
-   public <T extends BehaviorTreeNodeState> T addChild(T child)
-   {
-      return child;
    }
 }
