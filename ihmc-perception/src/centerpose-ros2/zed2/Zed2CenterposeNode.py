@@ -108,6 +108,7 @@ class Zed2CenterposeNode():
         
         if (self.experiment==experiment_type.LIVE):
             self.ros2_node = Node('zed2_centerpose_node')
+            
             qos_profile = QoSProfile(
                 reliability=QoSReliabilityPolicy.BEST_EFFORT,
                 history=QoSHistoryPolicy.KEEP_LAST,

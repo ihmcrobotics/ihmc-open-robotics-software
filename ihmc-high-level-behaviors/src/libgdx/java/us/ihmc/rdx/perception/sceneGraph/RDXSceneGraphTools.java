@@ -24,7 +24,7 @@ public class RDXSceneGraphTools
       }
       else if (sceneNodeToCopy instanceof CenterposeNode centerposeNode)
       {
-         return new RDXCenterposeNode(centerposeNode);
+         return new RDXCenterposeNode(centerposeNode, panel3D);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
