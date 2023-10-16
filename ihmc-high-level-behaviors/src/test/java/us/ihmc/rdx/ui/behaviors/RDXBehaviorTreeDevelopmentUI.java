@@ -21,7 +21,7 @@ public class RDXBehaviorTreeDevelopmentUI
    private final RDXBaseUI baseUI;
 
    private final RDXImNodesBehaviorTreeUI treePanel;
-   private final BehaviorTreeControlFlowNode tree;
+   private final BehaviorTreeNodeState tree;
    private final RDXBehaviorUIInterface treeGui;
 
    private final Timer timer;
@@ -39,7 +39,7 @@ public class RDXBehaviorTreeDevelopmentUI
       timer = new Timer();
 
       tree = new SequenceNode();
-      BehaviorTreeControlFlowNode node = new FallbackNode();
+      BehaviorTreeNodeState node = new FallbackNode();
       node.addChild(new BehaviorTreeNodeState()
       {
          @Override

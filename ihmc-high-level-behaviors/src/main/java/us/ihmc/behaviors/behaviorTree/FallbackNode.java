@@ -5,7 +5,7 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A fallback node proceeds through children left to right until they return SUCCESS.
  */
-public class FallbackNode extends BehaviorTreeControlFlowNode
+public class FallbackNode extends BehaviorTreeNodeState
 {
    public FallbackNode()
    {

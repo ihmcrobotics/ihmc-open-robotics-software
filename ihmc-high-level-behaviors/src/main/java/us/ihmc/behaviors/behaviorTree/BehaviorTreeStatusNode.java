@@ -6,7 +6,7 @@ package us.ihmc.behaviors.behaviorTree;
  * of the tree's state and NOT to perform any computation.
  * All nodes in the UI side tree are instances of this class.
  */
-public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
+public class BehaviorTreeStatusNode extends BehaviorTreeNodeState
 {
    /**
     * Normal use.
@@ -24,14 +24,9 @@ public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
       getDefinition().setDescription(node.getDefinition().getDescription());
       setLastTickInstant(node.getLastTickInstant());
 
-      if (node instanceof BehaviorTreeControlFlowNode controlFlowNode)
+      for (BehaviorTreeNodeState child : node.getChildren())
       {
-         setHasBeenClocked(controlFlowNode.getHasBeenClocked());
-
-         for (BehaviorTreeNodeState child : controlFlowNode.getChildren())
-         {
-            addChild(new BehaviorTreeStatusNode(child));
-         }
+         addChild(new BehaviorTreeStatusNode(child));
       }
    }
 

@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.behavior.registry;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -85,16 +84,13 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNodeState imple
       getDefinition().setDescription(externalNode.getDefinition().getDescription());
       setLastTickInstant(externalNode.getLastTickInstant());
 
-      if (externalNode instanceof BehaviorTreeControlFlowNode externalControlFlowNode)
+      for (BehaviorTreeNodeState externalChild : externalNode.getChildren())
       {
-         for (BehaviorTreeNodeState externalChild : externalControlFlowNode.getChildren())
+         for (RDXBehaviorUIInterface child : children)
          {
-            for (RDXBehaviorUIInterface child : children)
+            if (externalChild.getDefinition().getDescription().equals(child.getDefinition().getDescription()))
             {
-               if (externalChild.getDefinition().getDescription().equals(child.getDefinition().getDescription()))
-               {
-                  child.syncTree(externalChild);
-               }
+               child.syncTree(externalChild);
             }
          }
       }

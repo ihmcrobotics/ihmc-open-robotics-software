@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Instant;
@@ -33,7 +34,7 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
    //   or would it be better to call super.tick or something somehow
    public BehaviorTreeNodeStatus tickInternal()
    {
-
+      return status;
    }
 
    /**
@@ -44,7 +45,12 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
     */
    public void clock()
    {
+      RecyclingArrayListTools.synchronizeSize(children, definition.getChildren());
 
+      for (BehaviorTreeNodeState child : children)
+      {
+         child.clock();
+      }
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)
@@ -104,6 +110,19 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
       {
          throw new RuntimeException("Behavior tree node status must not be null.");
       }
+   }
+
+   public RecyclingArrayList<BehaviorTreeNodeState> getChildren()
+   {
+      return children;
+   }
+
+   /**
+    * @deprecated FIXME Need to use recycling array list instead
+    */
+   public <T extends BehaviorTreeNodeState> T addChild(T child)
+   {
+      return child;
    }
 
    @Override
