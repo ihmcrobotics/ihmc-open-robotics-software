@@ -32,7 +32,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.PointCollidable;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -67,7 +67,7 @@ public class RDX3DSituatedImagePanel
 
    @Nullable
    private final RDXVRModeManager vrModeManager;
-   private final ModifiableReferenceFrame floatingPanelFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final MutableReferenceFrame floatingPanelFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final FramePose3D floatingPanelFramePose = new FramePose3D();
    private double panelDistanceFromHeadset = 0.5;
    private boolean isShowing = false;

@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 public class EllipsoidRayIntersection
 {
@@ -17,7 +17,7 @@ public class EllipsoidRayIntersection
    private final FramePoint3D firstIntersectionToPack = new FramePoint3D();
    private final FramePoint3D secondIntersectionToPack = new FramePoint3D();
    private final FramePose3D tempFramePose = new FramePose3D();
-   private final ModifiableReferenceFrame ellipsoidFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final MutableReferenceFrame ellipsoidFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final FramePoint3D pickRayFrameOrigin = new FramePoint3D();
    private final FrameVector3D pickRayFrameDirection = new FrameVector3D();
    private boolean intersects = false;

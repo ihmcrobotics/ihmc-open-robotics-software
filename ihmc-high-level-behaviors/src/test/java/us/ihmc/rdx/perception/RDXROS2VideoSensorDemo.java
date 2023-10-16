@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -10,7 +9,7 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
-import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class RDXROS2VideoSensorDemo
