@@ -1,9 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
+import controller_msgs.msg.dds.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -22,7 +19,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
@@ -71,8 +67,7 @@ public class ContinuousPlanningRemoteTask
    private Mat compressedBytesMat;
    private ByteBuffer incomingCompressedImageBuffer;
    private BytePointer incomingCompressedImageBytePointer;
-   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
-
+   private final ContinuousPlanningParameters continuousPlanningParameters;
    private final HumanoidReferenceFrames referenceFrames;
 
    private final ContinuousPlanner continuousPlanner;
@@ -97,10 +92,10 @@ public class ContinuousPlanningRemoteTask
    public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
                                        ROS2Node ros2Node,
                                        HumanoidReferenceFrames referenceFrames,
-                                       PerceptionConfigurationParameters perceptionConfigurationParameters)
+                                       ContinuousPlanningParameters continuousPlanningParameters)
    {
       this.referenceFrames = referenceFrames;
-      this.perceptionConfigurationParameters = perceptionConfigurationParameters;
+      this.continuousPlanningParameters = continuousPlanningParameters;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.MAX_COVERAGE);
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -137,7 +132,7 @@ public class ContinuousPlanningRemoteTask
    private void updateContinuousPlanner()
    {
       // Reset the continuous planner, so when its enabled again it starts normally
-      if (!perceptionConfigurationParameters.getActiveMapping())
+      if (!continuousPlanningParameters.getActiveMapping())
       {
          continuousPlanner.setInitialized(false);
          segment = 1;
@@ -153,7 +148,7 @@ public class ContinuousPlanningRemoteTask
          plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, secondImminentFootstepSide);
          continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
       }
-      else
+      else if (!continuousPlanningParameters.getPauseContinuousWalking())
       {
          // The state machine will always run this method if the continuous planner is initialized
          planAndSendFootsteps();

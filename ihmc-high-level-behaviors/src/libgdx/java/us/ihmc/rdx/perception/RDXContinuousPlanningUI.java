@@ -8,10 +8,10 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningRemoteTask;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -25,21 +25,22 @@ public class RDXContinuousPlanningUI implements RenderableProvider
 {
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
+   private final ImBoolean pauseContinuousWalking = new ImBoolean(false);
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ContinuousPlanningRemoteTask continuousPlanningRemoteTask;
-   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private final ContinuousPlanningParameters continuousPlanningParameters;
    private final RDXPanel panel;
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
    public RDXContinuousPlanningUI(String name,
                                   ContinuousPlanningRemoteTask continuousPlanningRemoteTask,
-                                  PerceptionConfigurationParameters perceptionConfigurationParameters,
+                                  ContinuousPlanningParameters continuousPlanningParameters,
                                   ROS2SyncedRobotModel syncedRobot)
    {
       panel = new RDXPanel(name, this::renderImGuiWidgets);
       this.continuousPlanningRemoteTask = continuousPlanningRemoteTask;
-      this.perceptionConfigurationParameters = perceptionConfigurationParameters;
+      this.continuousPlanningParameters = continuousPlanningParameters;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
                                                                                      .getContactPointParameters()
@@ -63,9 +64,13 @@ public class RDXContinuousPlanningUI implements RenderableProvider
    public void renderImGuiWidgets()
    {
       ImGui.checkbox("Enable Continuous Planner", enableContinuousPlanner);
-      if (perceptionConfigurationParameters != null)
+
+      ImGui.checkbox("Pause Cintinuous Walking", pauseContinuousWalking);
+
+      if (continuousPlanningParameters != null)
       {
-         perceptionConfigurationParameters.setActiveMapping(enableContinuousPlanner.get());
+         continuousPlanningParameters.setPauseContinuousWalking(pauseContinuousWalking.get());
+         continuousPlanningParameters.setActiveMapping(enableContinuousPlanner.get());
       }
    }
 
