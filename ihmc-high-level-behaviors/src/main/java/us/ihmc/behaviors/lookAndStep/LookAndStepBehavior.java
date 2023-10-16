@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
@@ -207,11 +206,5 @@ public class LookAndStepBehavior extends ResettingNode implements Destroyable
    public String getName()
    {
       return "Look and Step";
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
    }
 }
