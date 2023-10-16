@@ -16,7 +16,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : "HALF_CLOSE"
+      "type": "HALF_CLOSE"
     } ]
   }, {
     "x" : 0.0,
@@ -27,7 +27,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -38,7 +38,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : "CRUSH"
+      "type": "CRUSH"
     } ]
   }, {
     "x" : 0.0,
@@ -49,7 +49,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -60,7 +60,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -71,7 +71,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -82,7 +82,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -93,7 +93,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -104,7 +104,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -115,7 +115,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.172,
@@ -126,7 +126,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : "CLOSE"
+      "type": "CLOSE"
     } ]
   }, {
     "x" : 0.172,
@@ -137,7 +137,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   } ],
   "activeSides" : 1,
