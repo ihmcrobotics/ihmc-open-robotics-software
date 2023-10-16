@@ -1,15 +1,22 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import us.ihmc.avatar.colorVision.CenterposeSceneGraphOnRobotProcess;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BoundingBoxVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
@@ -40,6 +47,31 @@ public class RDXCenterposeSceneGraphDemo
             globalVisualizersPanel = new RDXGlobalVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
+
+            RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
+                                                                                                           DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                                                           PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+            zed2LeftColorImageVisualizer.setSubscribed(true);
+            zed2LeftColorImageVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
+
+            RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
+            sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
+            sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+            ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
+                                                                                                           ReferenceFrame.getWorldFrame(),
+                                                                                                           sensorInWorldTransform);
+
+            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
+
+            RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
+                                                                                                                        DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                                                                        PerceptionAPI.ZED2_DEPTH,
+                                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES
+                                                                                                                              .get(RobotSide.LEFT));
+            zed2ColoredPointCloudVisualizer.setSubscribed(true);
+            zed2ColoredPointCloudVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
             centerposeProcess = new CenterposeSceneGraphOnRobotProcess(ros2Helper);
