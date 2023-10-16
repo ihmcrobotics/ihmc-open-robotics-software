@@ -174,7 +174,7 @@ public class BytedecoRealsense
       this.colorWidth = colorWidth;
       this.colorHeight = colorHeight;
 
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_RGB8, fps, error);
+      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_BGR8, fps, error);
       checkError(true, "Failed to enable stream.");
 
       colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
