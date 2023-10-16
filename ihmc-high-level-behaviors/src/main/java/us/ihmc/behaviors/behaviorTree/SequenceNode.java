@@ -5,7 +5,7 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A sequence node proceeds through children left to right while they are SUCCESSful.
  */
-public class SequenceNode extends LegacyBehaviorTreeNodeState
+public class SequenceNode extends LocalOnlyBehaviorTreeNodeExecutor
 {
    public SequenceNode()
    {

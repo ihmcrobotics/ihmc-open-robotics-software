@@ -40,7 +40,7 @@ public class RDXBehaviorTreeDevelopmentUI
 
       tree = new SequenceNode();
       BehaviorTreeNodeState node = new FallbackNode();
-      node.addChild(new LegacyBehaviorTreeNodeState()
+      node.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -51,11 +51,12 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         public String getName() {
+         public String getName()
+         {
             return "Primary";
          }
       });
-      node.addChild(new LegacyBehaviorTreeNodeState()
+      node.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -66,11 +67,12 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         public String getName() {
+         public String getName()
+         {
             return "Secondary";
          }
       });
-      node.addChild(new LegacyBehaviorTreeNodeState()
+      node.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -81,14 +83,15 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         public String getName() {
+         public String getName()
+         {
             return "Tertiary";
          }
       });
 
-      tree.addChild(node);
+      tree.getChildren().add(node);
 
-      tree.addChild(new LegacyBehaviorTreeNodeState()
+      tree.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -99,11 +102,11 @@ public class RDXBehaviorTreeDevelopmentUI
                return BehaviorTreeNodeStatus.FAILURE;
          }
 
-         public String getName() {
+         public String getName()
+         {
             return "Other thing";
          }
       });
-
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
       treePanel = new RDXImNodesBehaviorTreeUI();

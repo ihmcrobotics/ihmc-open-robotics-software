@@ -54,7 +54,7 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
  * Used visibility graphs to walk through a maze.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class NavigationBehavior extends LegacyBehaviorTreeNodeState implements Destroyable
+public class NavigationBehavior extends LocalOnlyBehaviorTreeNodeExecutor implements Destroyable
 {
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 
@@ -100,14 +100,14 @@ public class NavigationBehavior extends LegacyBehaviorTreeNodeState implements D
 //      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
 
       sequence = new LoopSequenceNode();
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::aquireMap));
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::planBodyPath));
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
-      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
-      sequence.addChild(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::aquireMap));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::planBodyPath));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
+      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
    }
