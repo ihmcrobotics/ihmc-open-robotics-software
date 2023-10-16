@@ -21,7 +21,7 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
-import us.ihmc.rdx.ui.tools.ImGuiDirectory;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
