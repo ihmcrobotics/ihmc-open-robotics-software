@@ -24,6 +24,7 @@ public class BehaviorActionDefinition extends BehaviorTreeNodeDefinition
 
    }
 
+   @Deprecated // TODO Remove
    public BehaviorActionDefinition(String description)
    {
       super(description);

@@ -23,6 +23,7 @@ public class BehaviorTreeNodeDefinition
 
    }
 
+   @Deprecated // TODO Remove
    public BehaviorTreeNodeDefinition(String description)
    {
       this.description = description;
