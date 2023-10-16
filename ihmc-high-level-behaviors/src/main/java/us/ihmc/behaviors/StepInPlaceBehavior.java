@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import std_msgs.msg.dds.Bool;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
@@ -31,7 +31,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 /**
  * A simple example behavior.
  */
-public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements Destroyable
+public class StepInPlaceBehavior extends BehaviorTreeNodeState implements Destroyable
 {
    private final BehaviorHelper helper;
 

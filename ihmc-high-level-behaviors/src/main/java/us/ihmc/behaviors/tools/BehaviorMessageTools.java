@@ -26,19 +26,12 @@ public class BehaviorMessageTools
       else
          nodeMessage.setPreviousStatus((byte) -1);
 
-      if (treeNode instanceof BehaviorTreeControlFlowNode controlFlowTreeNode)
-      {
-         nodeMessage.setNumberOfChildren(controlFlowTreeNode.getChildren().size());
-         nodeMessage.setHasBeenClocked(controlFlowTreeNode.getHasBeenClocked());
+      nodeMessage.setNumberOfChildren(treeNode.getChildren().size());
+      // TODO: Pack status
 
-         for (BehaviorTreeNodeState child : controlFlowTreeNode.getChildren())
-         {
-            packBehaviorTreeMessage(child, behaviorTreeMessage);
-         }
-      }
-      else
+      for (BehaviorTreeNodeState child : treeNode.getChildren())
       {
-         nodeMessage.setNumberOfChildren(0);
+         packBehaviorTreeMessage(child, behaviorTreeMessage);
       }
    }
 
@@ -64,7 +57,6 @@ public class BehaviorMessageTools
       // Previous status will be -1 if the node has not been ticked yet
       if (treeNodeMessage.getPreviousStatus() >= 0)
          behaviorTreeStatusNode.setStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
-      behaviorTreeStatusNode.setHasBeenClocked(treeNodeMessage.getHasBeenClocked());
 
       for (int i = 0; i < treeNodeMessage.getNumberOfChildren(); i++)
       {

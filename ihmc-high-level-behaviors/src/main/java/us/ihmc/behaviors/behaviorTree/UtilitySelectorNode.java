@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-public class UtilitySelectorNode extends BehaviorTreeControlFlowNode
+public class UtilitySelectorNode extends BehaviorTreeNodeState
 {
    public UtilitySelectorNode()
    {

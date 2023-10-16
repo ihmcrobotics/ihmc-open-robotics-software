@@ -10,7 +10,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
@@ -43,7 +43,7 @@ import us.ihmc.commons.thread.TypedNotification;
  * This also was used to walk to high and low big planar regions autonomously.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class PatrolBehavior extends BehaviorTreeControlFlowNode
+public class PatrolBehavior extends BehaviorTreeNodeState
 {
    public enum PatrolBehaviorState
    {

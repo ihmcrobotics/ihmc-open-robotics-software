@@ -2,7 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.log.LogTools;
 
-public abstract class ResettingNode extends BehaviorTreeControlFlowNode
+public abstract class ResettingNode extends BehaviorTreeNodeState
 {
    private boolean lastWasClock = false;
    private boolean isReset = true;

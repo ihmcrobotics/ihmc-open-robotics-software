@@ -2,8 +2,7 @@ package us.ihmc.behaviors.navigation;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -30,8 +29,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.AlwaysSuccessfulAction;
-import us.ihmc.behaviors.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
@@ -57,7 +54,7 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
  * Used visibility graphs to walk through a maze.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class NavigationBehavior extends BehaviorTreeControlFlowNode implements Destroyable
+public class NavigationBehavior extends BehaviorTreeNodeState implements Destroyable
 {
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 
