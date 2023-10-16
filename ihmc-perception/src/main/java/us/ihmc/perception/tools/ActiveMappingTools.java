@@ -1,21 +1,16 @@
 package us.ihmc.perception.tools;
 
-import org.bytedeco.javacv.Frame;
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
-import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ActiveMappingTools
@@ -26,7 +21,6 @@ public class ActiveMappingTools
 
       for (RobotSide side : RobotSide.values)
       {
-
          tempPose.get(side).getPosition().set(originalPoseToPlanFrom.get(side).getPosition());
          tempPose.get(side).getOrientation().set(originalPoseToPlanFrom.get(side).getOrientation());
          tempPose.get(side).changeFrame(originalReferenceFrame);

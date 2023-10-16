@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,14 +43,13 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ContinuousPlanningRemoteTask
 {
    private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 200;
-   private final static float SWING_DURATION = 0.7f;
+   private final static float SWING_DURATION = 0.8f;
    private final static float TRANSFER_DURATION = 0.4f;
    private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
 
    private enum ContinuousWalkingState
    {
       NOT_STARTED,
-      INITIALIZED,
       FOOTSTEP_STARTED,
       PLANNING_FAILED
    }
@@ -82,10 +80,10 @@ public class ContinuousPlanningRemoteTask
 
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<FramePose3D> originalPoseToPlanFrom = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final FramePose3D firstImminentFootstep = new FramePose3D();
    private final FramePose3D secondImminentFootstep = new FramePose3D();
    private RobotSide secondImminentFootstepSide = RobotSide.LEFT;
-   private final SideDependentList<FramePose3D> originalPoseToPlanFrom = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private int queuedFootstepSize = 0;
    private List<QueuedFootstepStatusMessage> queuedFootstepList;
