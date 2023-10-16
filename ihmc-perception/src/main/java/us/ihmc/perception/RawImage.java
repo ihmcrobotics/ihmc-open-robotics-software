@@ -2,6 +2,8 @@ package us.ihmc.perception;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -26,6 +28,8 @@ public class RawImage
    private final float focalLengthY;
    private final float principalPointX;
    private final float principalPointY;
+   private final FixedFramePoint3DBasics position;
+   private final FixedFrameQuaternionBasics orientation;
 
    public RawImage(long sequenceNumber,
                    Instant acquisitionTime,
@@ -38,7 +42,9 @@ public class RawImage
                    float focalLengthX,
                    float focalLengthY,
                    float principalPointX,
-                   float principalPointY)
+                   float principalPointY,
+                   FixedFramePoint3DBasics position,
+                   FixedFrameQuaternionBasics orientation)
    {
       this.sequenceNumber = sequenceNumber;
       this.acquisitionTime = acquisitionTime;
@@ -52,6 +58,8 @@ public class RawImage
       this.focalLengthY = focalLengthY;
       this.principalPointX = principalPointX;
       this.principalPointY = principalPointY;
+      this.position = position;
+      this.orientation = orientation;
    }
 
    public RawImage(RawImage other)
@@ -73,6 +81,8 @@ public class RawImage
       this.focalLengthY = other.focalLengthY;
       this.principalPointX = other.principalPointX;
       this.principalPointY = other.principalPointY;
+      this.position = other.position;
+      this.orientation = other.orientation;
    }
 
    public long getSequenceNumber()
@@ -153,6 +163,16 @@ public class RawImage
    public float getPrincipalPointY()
    {
       return principalPointY;
+   }
+
+   public FixedFramePoint3DBasics getPosition()
+   {
+      return position;
+   }
+
+   public FixedFrameQuaternionBasics getOrientation()
+   {
+      return orientation;
    }
 
    public boolean isEmpty()
