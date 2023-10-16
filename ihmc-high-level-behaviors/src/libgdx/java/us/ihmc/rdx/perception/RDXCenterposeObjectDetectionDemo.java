@@ -34,6 +34,13 @@ public class RDXCenterposeObjectDetectionDemo
          {
             baseUI.create();
 
+            RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
+                                                                                                           PubSubImplementation.FAST_RTPS,
+                                                                                                           PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+            zed2LeftColorImageVisualizer.setSubscribed(true);
+            zed2LeftColorImageVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
+
             RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
             sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
             sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
@@ -48,14 +55,7 @@ public class RDXCenterposeObjectDetectionDemo
                                                                                                             baseUI.getPrimary3DPanel().getCamera3D());
             centerPoseBoundingBoxVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
-
-            RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
-                                                                                                           PubSubImplementation.FAST_RTPS,
-                                                                                                           PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2LeftColorImageVisualizer.setSubscribed(true);
-            zed2LeftColorImageVisualizer.setActive(true);
             zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
-            globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                             PubSubImplementation.FAST_RTPS,
