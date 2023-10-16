@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor.actions;
+package us.ihmc.rdx.ui.behavior.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
