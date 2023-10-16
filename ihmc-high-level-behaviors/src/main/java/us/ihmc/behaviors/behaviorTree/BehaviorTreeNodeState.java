@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
 {
-   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
+   private final BehaviorTreeNodeDefinition definition;
 
    /** The current status of the behavior tree node. */
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.NOT_TICKED;
@@ -19,8 +19,20 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
 
    private final RecyclingArrayList<BehaviorTreeNodeState> children = new RecyclingArrayList<>(BehaviorTreeNodeState::new);
 
+   /**
+    * For use when nothing extending this node type.
+    *
+    * @deprecated TODO: Not sure if it makes sense that this would be a node with nothing extending it.
+    *               Undeprecate if we are keeping it. - @dcalvert
+    */
    public BehaviorTreeNodeState()
    {
+      this(new BehaviorTreeNodeDefinition());
+   }
+
+   public BehaviorTreeNodeState(BehaviorTreeNodeDefinition definition)
+   {
+      this.definition = new BehaviorTreeNodeDefinition();
    }
 
    public BehaviorTreeNodeStatus tick()
