@@ -18,4 +18,10 @@ public class AlwaysSuccessfulAction extends BehaviorTreeNodeState
       action.run();
       return BehaviorTreeNodeStatus.SUCCESS;
    }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
+   }
 }

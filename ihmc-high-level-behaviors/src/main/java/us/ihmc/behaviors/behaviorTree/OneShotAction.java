@@ -34,4 +34,10 @@ public class OneShotAction extends BehaviorTreeNodeState
    {
       hasRunOnce = false;
    }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
+   }
 }

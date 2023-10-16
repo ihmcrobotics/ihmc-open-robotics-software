@@ -31,4 +31,10 @@ public class UtilitySelectorNode extends BehaviorTreeNodeState
          return BehaviorTreeNodeStatus.FAILURE;
       }
    }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
+   }
 }

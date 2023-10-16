@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import perception_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.ResettingNode;
@@ -294,5 +295,11 @@ public class TraverseStairsBehavior extends ResettingNode
    public void destroy()
    {
       planStepsState.destroy();
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 }

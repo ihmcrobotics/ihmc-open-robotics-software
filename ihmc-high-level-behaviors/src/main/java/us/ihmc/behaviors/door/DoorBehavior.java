@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
@@ -169,5 +170,11 @@ public class DoorBehavior extends ResettingNode implements Destroyable
    public String getName()
    {
       return "Door";
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 }

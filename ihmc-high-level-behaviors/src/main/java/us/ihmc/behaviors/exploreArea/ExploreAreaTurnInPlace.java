@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.behaviorTree.AsynchronousActionNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -165,4 +166,9 @@ public class ExploreAreaTurnInPlace extends AsynchronousActionNode
       footstepPlannerLogger.logSession();
    }
 
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
+   }
 }
