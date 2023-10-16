@@ -5,10 +5,8 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A sequence node proceeds through children left to right while they are SUCCESSful.
  */
-public class SequenceNode extends BehaviorTreeNodeState
+public class SequenceNode extends LegacyBehaviorTreeNodeState
 {
-   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
-
    public SequenceNode()
    {
 
@@ -35,11 +33,5 @@ public class SequenceNode extends BehaviorTreeNodeState
       }
 
       return SUCCESS;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return definition;
    }
 }

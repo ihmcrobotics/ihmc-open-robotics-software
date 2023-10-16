@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 /**
  * Experimental action. Not sure about this one.
  */
-public class AlwaysSuccessfulAction extends BehaviorTreeNodeState
+public class AlwaysSuccessfulAction extends LegacyBehaviorTreeNodeState
 {
    private final Runnable action;
 
@@ -17,11 +17,5 @@ public class AlwaysSuccessfulAction extends BehaviorTreeNodeState
    {
       action.run();
       return BehaviorTreeNodeStatus.SUCCESS;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
    }
 }

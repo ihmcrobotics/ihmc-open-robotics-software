@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.LegacyBehaviorTreeNodeState;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -18,7 +19,7 @@ import java.util.Set;
  * The UI has a tree structure, but not a decision or search one.
  * Currently calls propagate down to all the nodes so they can decide to take action.
  */
-public abstract class RDXBehaviorUIInterface extends BehaviorTreeNodeState implements RDXRenderableProvider
+public abstract class RDXBehaviorUIInterface extends LegacyBehaviorTreeNodeState implements RDXRenderableProvider
 {
    private final ArrayList<RDXBehaviorUIInterface> children = new ArrayList<>();
 

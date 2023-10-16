@@ -54,7 +54,7 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
  * Used visibility graphs to walk through a maze.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
-public class NavigationBehavior extends BehaviorTreeNodeState implements Destroyable
+public class NavigationBehavior extends LegacyBehaviorTreeNodeState implements Destroyable
 {
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 
