@@ -1,14 +1,11 @@
 package us.ihmc.rdx.ui;
 
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
 public class RDX3DPanelNotificationManager
 {
-   private final List<RDX3DPanelNotification> removeQueue = new LinkedList<>();
-   private final List<RDX3DPanelNotification> addQueue = new LinkedList<>();
-   private final List<RDX3DPanelNotification> notificationQueue = new LinkedList<>();
-
+   private final Deque<RDX3DPanelNotification> notificationDeque = new LinkedList<>();
    private final RDX3DPanel panel3D;
 
    public RDX3DPanelNotificationManager(RDX3DPanel panel3)
@@ -18,33 +15,19 @@ public class RDX3DPanelNotificationManager
 
    public void pushNotification(String text)
    {
-      addQueue.add(new RDX3DPanelNotification(panel3D, text));
+      notificationDeque.addLast(new RDX3DPanelNotification(panel3D, text));
    }
 
    public void render()
    {
-      // Handle removes
-      for (RDX3DPanelNotification remove : removeQueue)
-         notificationQueue.remove(remove);
-      removeQueue.clear();
+      // Handle expiry
+      if (!notificationDeque.isEmpty())
+         if (notificationDeque.getFirst().getTimer().getElapsedTime() > RDX3DPanelNotification.NOTIFICATION_DURATION)
+            notificationDeque.removeFirst();
 
-      // Handle adds
-      notificationQueue.addAll(addQueue);
-      addQueue.clear();
-
-      for (int i = 0; i < notificationQueue.size(); i++)
-      {
-         RDX3DPanelNotification notification = notificationQueue.get(i);
-
-         if (notification.getTimer().getElapsedTime() > RDX3DPanelNotification.NOTIFICATION_DURATION)
-         {
-            // Add to remove queue
-            removeQueue.add(notification);
-         }
-         else
-         {
-            notification.render(i);
-         }
-      }
+      // Render remaining notifications
+      int index = 0;
+      for (RDX3DPanelNotification notification : notificationDeque)
+         notification.render(index++);
    }
 }
