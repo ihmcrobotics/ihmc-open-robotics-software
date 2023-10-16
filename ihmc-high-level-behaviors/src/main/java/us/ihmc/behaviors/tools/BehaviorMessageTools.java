@@ -48,7 +48,7 @@ public class BehaviorMessageTools
    {
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 
-      BehaviorTreeStatusNode behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
+      BehaviorTreeNodeState behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
       // The message will have 0s for a node that has not yet been ticked
       if (treeNodeMessage.getLastTickInstant().getSecondsSinceEpoch() != 0)
          behaviorTreeStatusNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
@@ -66,9 +66,9 @@ public class BehaviorMessageTools
       return behaviorTreeStatusNode;
    }
 
-   private static BehaviorTreeStatusNode createBehaviorTreeNode(String typeName)
+   private static BehaviorTreeNodeState createBehaviorTreeNode(String typeName)
    {
-      BehaviorTreeStatusNode behaviorTreeStatusNode = new BehaviorTreeStatusNode();
+      BehaviorTreeNodeState behaviorTreeStatusNode = null;
       // TODO: We need to instantiate certain types of status nodes instead.
       //  They will need different functionality depending on their type.
 //      if (typeName.equals(SequenceNode.class.getSimpleName()))

@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -391,6 +392,12 @@ public class FancyPosesBehavior extends BehaviorTreeNodeState implements Destroy
       }
       footstepList.setAreFootstepsAdjustable(true);
       return footstepList;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 
    public static final double[] leftHandWiderHomeJointAngles = new double[] {0.785398, -0.5237988813979918, 2.377081269248866, 2.35619, -0.33780669067363706,

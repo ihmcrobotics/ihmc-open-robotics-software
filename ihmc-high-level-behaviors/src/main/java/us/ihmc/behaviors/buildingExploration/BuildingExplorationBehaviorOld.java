@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
@@ -360,5 +361,11 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
    public LookAndStepBehavior getLookAndStepBehavior()
    {
       return lookAndStepBehavior;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 }

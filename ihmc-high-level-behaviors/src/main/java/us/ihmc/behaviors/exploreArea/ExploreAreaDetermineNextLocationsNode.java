@@ -2,6 +2,7 @@ package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.AsynchronousActionNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -404,5 +405,11 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
    public ArrayList<Pose3D> getExploredGoalPosesSoFar()
    {
       return exploredGoalPosesSoFar;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 }

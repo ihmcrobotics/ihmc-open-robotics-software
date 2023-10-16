@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import std_msgs.msg.dds.Bool;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -137,6 +138,12 @@ public class StepInPlaceBehavior extends BehaviorTreeNodeState implements Destro
       }
       footstepList.setAreFootstepsAdjustable(true);
       return footstepList;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 
    public static class API

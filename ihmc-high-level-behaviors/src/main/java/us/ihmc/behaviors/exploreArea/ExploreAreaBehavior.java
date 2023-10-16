@@ -88,6 +88,12 @@ public class ExploreAreaBehavior extends FallbackNode implements Destroyable
             return SUCCESS;
          }
       }
+
+      @Override
+      public BehaviorTreeNodeDefinition getDefinition()
+      {
+         return null; // FIXME
+      }
    }
 
    class RestOfStatesNode extends SequenceNode
@@ -163,6 +169,18 @@ public class ExploreAreaBehavior extends FallbackNode implements Destroyable
          {
 
          }
+
+         @Override
+         public BehaviorTreeNodeDefinition getDefinition()
+         {
+            return null; // FIXME
+         }
       }
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return null; // FIXME
    }
 }
