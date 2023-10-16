@@ -1,7 +1,9 @@
 package us.ihmc.perception.tools;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,12 +15,20 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ActiveMappingTools
 {
-   public static void setStraightGoalPoses(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, float distance)
+   public static void setStraightGoalPoses(FixedReferenceFrame originalReferenceFrame, int segment, SideDependentList<FramePose3D> originalPoseToPlanFrom, SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, float distance)
    {
+      SideDependentList<FramePose3D> tempPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
       for (RobotSide side : RobotSide.values)
       {
-         goalPose.get(side).set(startPose.get(side));
-         goalPose.get(side).appendTranslation(distance, 0.0, 0.0);
+         tempPose.get(side).getPosition().set(originalPoseToPlanFrom.get(side).getPosition());
+         tempPose.get(side).getOrientation().set(originalPoseToPlanFrom.get(side).getOrientation());
+         tempPose.get(side).changeFrame(originalReferenceFrame);
+         tempPose.get(side).getTranslation().addX(distance * segment);
+         tempPose.get(side).getTranslation().addZ(startPose.get(side).getPosition().getZ() + 0.1);
+         tempPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+
+         goalPose.get(side).set(tempPose.get(side));
       }
    }
 

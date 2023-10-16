@@ -27,11 +27,10 @@ public class RDXContinuousPlanningUI implements RenderableProvider
    private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ContinuousPlanningRemoteTask continuousPlanningRemoteTask;
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
-   private RDXPanel panel;
-   private ROS2SyncedRobotModel syncedRobot;
-   private SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
-   private SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private final RDXPanel panel;
+   private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
+   private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
    public RDXContinuousPlanningUI(String name,
                                   ContinuousPlanningRemoteTask continuousPlanningRemoteTask,
@@ -41,7 +40,6 @@ public class RDXContinuousPlanningUI implements RenderableProvider
       panel = new RDXPanel(name, this::renderImGuiWidgets);
       this.continuousPlanningRemoteTask = continuousPlanningRemoteTask;
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
-      this.syncedRobot = syncedRobot;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
                                                                                      .getContactPointParameters()
@@ -52,13 +50,13 @@ public class RDXContinuousPlanningUI implements RenderableProvider
       goalFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
       goalFootstepGraphics.get(RobotSide.RIGHT).create();
 
-      goalFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.8f, 0.8f, 0.8f, 0.5f));
+      goalFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
       goalFootstepGraphics.get(RobotSide.LEFT).create();
 
-      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.6f, 0.6f, 0.6f, 0.5f));
+      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f));
       startFootstepGraphics.get(RobotSide.RIGHT).create();
 
-      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f));
       startFootstepGraphics.get(RobotSide.LEFT).create();
    }
 
@@ -78,11 +76,6 @@ public class RDXContinuousPlanningUI implements RenderableProvider
          startFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getStartPose().get(side));
          goalFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getGoalPose().get(side));
       }
-   }
-
-   public RDXPanel getImGuiPanel()
-   {
-      return panel;
    }
 
    @Override

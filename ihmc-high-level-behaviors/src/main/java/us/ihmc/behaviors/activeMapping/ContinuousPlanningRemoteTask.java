@@ -3,6 +3,7 @@ package us.ihmc.behaviors.activeMapping;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -12,10 +13,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -32,13 +35,14 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanningRemoteTask
 {
-   private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 20;
+   private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 200;
    private final static float SWING_DURATION = 0.8f;
    private final static float TRANSFER_DURATION = 0.4f;
    private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
@@ -46,8 +50,8 @@ public class ContinuousPlanningRemoteTask
    private enum ContinuousWalkingState
    {
       NOT_STARTED,
-      INITIALIZED,
-      FOOTSTEP_STARTED
+      FOOTSTEP_STARTED,
+      PLANNING_FAILED
    }
 
    private ContinuousWalkingState continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
@@ -57,8 +61,6 @@ public class ContinuousPlanningRemoteTask
                                                                    ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
-
-   private int queuedFootstepSize;
 
    private final ROS2PublisherMap publisherMap;
    private final ROS2Topic controllerFootstepDataTopic;
@@ -71,18 +73,26 @@ public class ContinuousPlanningRemoteTask
    private BytePointer incomingCompressedImageBytePointer;
    private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
-   private int compressedBufferDefaultSize = 100000;
-
    private final HumanoidReferenceFrames referenceFrames;
 
    private final ContinuousPlanner continuousPlanner;
    private FootstepPlannerOutput plannerOutput;
+
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private RobotSide initialStanceSide = RobotSide.LEFT;
+   private final SideDependentList<FramePose3D> originalPoseToPlanFrom = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final FramePose3D firstImminentFootstep = new FramePose3D();
+   private final FramePose3D secondImminentFootstep = new FramePose3D();
+   private RobotSide secondImminentFootstepSide = RobotSide.LEFT;
+
+   private int queuedFootstepSize = 0;
+   private List<QueuedFootstepStatusMessage> queuedFootstepList;
 
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private long originalFootstepDataListId = -1;
+
+   private int segment;
+   private FixedReferenceFrame originalReferenceFrame;
 
    public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
                                        ROS2Node ros2Node,
@@ -103,64 +113,131 @@ public class ContinuousPlanningRemoteTask
       executorService.scheduleAtFixedRate(this::updateContinuousPlanner, 0, CONTINUOUS_PLANNING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
    }
 
+   public void initializeContinuousPlanner()
+   {
+      LogTools.info("Initializing original pose to plan from in the direction the robot is facing");
+
+      originalReferenceFrame = new FixedReferenceFrame("Original Reference Frame", ReferenceFrame.getWorldFrame(), referenceFrames.getMidFeetZUpFrame().getTransformToParent());
+
+      for (RobotSide side : RobotSide.values)
+      {
+         startPose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side)) ;
+
+         originalPoseToPlanFrom.get(side).getPosition().setX(startPose.get(side).getPosition().getX());
+         originalPoseToPlanFrom.get(side).getPosition().setY(startPose.get(side).getPosition().getY());
+         originalPoseToPlanFrom.get(side).getPosition().setZ(startPose.get(side).getPosition().getZ());
+         originalPoseToPlanFrom.get(side).getOrientation().setToYawOrientation(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getRotation().getYaw());
+      }
+      continuousPlanner.setInitialized(true);
+   }
+
    /**
     * Runs the continuous mapper state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The status messages decide the state of the machine.
     */
    private void updateContinuousPlanner()
    {
-      if (perceptionConfigurationParameters.getActiveMapping())
+      // Reset the continuous planner, so when its enabled again it starts normally
+      if (!perceptionConfigurationParameters.getActiveMapping())
       {
-         if (!continuousPlanner.isInitialized()) // Initialize the active mapper footstep plan so that the state machine starts in the correct configuration
-         {
-            continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
+         continuousPlanner.setInitialized(false);
+         segment = 1;
+         return;
+      }
 
-            initialize();
-            ActiveMappingTools.setStraightGoalPoses(startPose, goalPose, 0.5f);
-            plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, initialStanceSide); // Returns if planning in progress, sets planAvailable if plan was found
-            continuousPlanner.setInitialized(true);
-         }
-         else // Initialized, so we can run the state machine in normal mode to eternity
-         {
-            if (footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED
-                && continuousPlannerState != ContinuousWalkingState.FOOTSTEP_STARTED) // start planning, swing has started
-            {
-               continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
-
-               ActiveMappingTools.setStraightGoalPoses(startPose, goalPose, 0.5f);
-               plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, initialStanceSide);
-            }
-            // Only send the next footstep if a plan is available
-            else if (continuousPlanner.isPlanAvailable() && continuousPlannerState == ContinuousWalkingState.FOOTSTEP_STARTED && queuedFootstepSize < 1)
-            {
-               continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
-
-               FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
-                                                                                                              MAXIMUM_FOOTSTEPS_TO_SEND,
-                                                                                                              SWING_DURATION,
-                                                                                                              TRANSFER_DURATION);
-               footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
-
-               if (originalFootstepDataListId == -1)
-                  originalFootstepDataListId = footstepDataList.getUniqueId();
-
-               footstepDataList.setUniqueId(originalFootstepDataListId);
-               publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
-               initialStanceSide = RobotSide.fromByte(footstepDataList.getFootstepDataList().get(0).getRobotSide());
-               startPose = continuousPlanner.updateStanceAndSwitchSides(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                                        footstepDataList.getFootstepDataList().get(0).getLocation(),
-                                                                                        footstepDataList.getFootstepDataList().get(0).getOrientation()),
-                                                                        initialStanceSide);
-               continuousPlanner.setPlanAvailable(false);
-               executionMode = ExecutionMode.QUEUE;
-            }
-         }
+      // Initialize the continuous planner so that the state machine starts in the correct configuration
+      if (!continuousPlanner.isInitialized())
+      {
+         initializeContinuousPlanner();
+         getImminentStanceFromLatestStatus();
+         ActiveMappingTools.setStraightGoalPoses(originalReferenceFrame, segment, originalPoseToPlanFrom, startPose, goalPose, 0.8f);
+         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, secondImminentFootstepSide);
+         continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
+      }
+      else
+      {
+         // The state machine will always run this method if the continuous planner is initialized
+         planAndSendFootsteps();
       }
    }
 
-   public void initialize()
+   public void planAndSendFootsteps()
    {
-      startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
-      startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+      // A foot is in swing, plan another step
+      if ((footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED
+          && continuousPlannerState != ContinuousWalkingState.FOOTSTEP_STARTED) || continuousPlannerState == ContinuousWalkingState.PLANNING_FAILED)
+      {
+         getImminentStanceFromLatestStatus();
+         startPose = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
+
+         double distance = secondImminentFootstep.getPositionDistance(goalPose.get(secondImminentFootstepSide));
+
+         System.out.println("Distance: " + distance);
+         System.out.println("Segment: " + segment);
+
+         if (distance < 0.6)
+         {
+            segment += 1;
+            ActiveMappingTools.setStraightGoalPoses(originalReferenceFrame, segment, originalPoseToPlanFrom, startPose, goalPose, 0.8f);
+         }
+
+         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPose, goalPose, secondImminentFootstepSide);
+
+         if (continuousPlanner.getFootstepPlanningResult() != FootstepPlanningResult.INVALID_GOAL)
+            continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
+         else
+            continuousPlannerState = ContinuousWalkingState.PLANNING_FAILED;
+      }
+      // If we got a plan from the last time the planner ran, and we are running low on footsteps in the queue, send this plan
+      else if (continuousPlanner.isPlanAvailable() && continuousPlannerState == ContinuousWalkingState.FOOTSTEP_STARTED && queuedFootstepSize < 4)
+      {
+         continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
+
+         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
+                                                                                                        MAXIMUM_FOOTSTEPS_TO_SEND,
+                                                                                                        SWING_DURATION,
+                                                                                                        TRANSFER_DURATION);
+         footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
+
+         if (originalFootstepDataListId == -1)
+            originalFootstepDataListId = footstepDataList.getUniqueId();
+
+         footstepDataList.setUniqueId(originalFootstepDataListId);
+         publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
+         continuousPlanner.setPlanAvailable(false);
+         executionMode = ExecutionMode.QUEUE;
+      }
+   }
+
+   /** Call this method when we want to get a new plan, so we get the latest information from the queue */
+   public void getImminentStanceFromLatestStatus()
+   {
+      // Both imminent footsteps will be from the queue
+      if (queuedFootstepSize > 1)
+      {
+         secondImminentFootstepSide = RobotSide.fromByte(queuedFootstepList.get(queuedFootstepSize - 1).getRobotSide());
+
+         firstImminentFootstep.getTranslation().set(queuedFootstepList.get(queuedFootstepSize - 2).getLocation());
+         firstImminentFootstep.getOrientation().set(queuedFootstepList.get(queuedFootstepSize - 2).getOrientation());
+
+         secondImminentFootstep.getTranslation().set(queuedFootstepList.get(queuedFootstepSize - 1).getLocation());
+         secondImminentFootstep.getOrientation().set(queuedFootstepList.get(queuedFootstepSize - 1).getOrientation());
+      }
+      // One imminent footstep will be from the queue, the other one will be the robot's real foot
+      else if (queuedFootstepSize == 1)
+      {
+         secondImminentFootstepSide = RobotSide.fromByte(queuedFootstepList.get(0).getRobotSide());
+         firstImminentFootstep.setFromReferenceFrame(referenceFrames.getSoleFrame(secondImminentFootstepSide.getOppositeSide()));
+
+         secondImminentFootstep.getTranslation().set(queuedFootstepList.get(0).getLocation());
+         secondImminentFootstep.getOrientation().set(queuedFootstepList.get(0).getOrientation());
+      }
+      // Both imminent footsteps will be the robot's real feet
+      else if (queuedFootstepSize == 0)
+      {
+         secondImminentFootstepSide = RobotSide.RIGHT;
+         firstImminentFootstep.setFromReferenceFrame(referenceFrames.getSoleFrame(secondImminentFootstepSide.getOppositeSide()));
+         secondImminentFootstep.setFromReferenceFrame(referenceFrames.getSoleFrame(secondImminentFootstepSide));
+      }
    }
 
    public SideDependentList<FramePose3D> getGoalPose()
@@ -182,12 +259,14 @@ public class ContinuousPlanningRemoteTask
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
       queuedFootstepSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
+      queuedFootstepList = footstepQueueStatusMessage.getQueuedFootstepList();
    }
 
    public void onHeightMapReceived(ImageMessage imageMessage)
    {
         if (heightMapImage == null)
         {
+           int compressedBufferDefaultSize = 100000;
            heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
            compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
            incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
