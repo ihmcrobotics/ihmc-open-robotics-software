@@ -2,13 +2,17 @@ package us.ihmc.sensors;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.time.Instant;
+import java.util.function.Supplier;
 
 public class RealsenseColorDepthImageRetriever
 {
@@ -25,12 +29,19 @@ public class RealsenseColorDepthImageRetriever
    private Mat depthMat16UC1;
    private Mat colorMatRGB;
 
+   private final FramePose3D cameraFramePose = new FramePose3D();
+   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
+   private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final RestartableThrottledThread realsenseGrabThread;
 
-   public RealsenseColorDepthImageRetriever(String serialNumber, RealsenseConfiguration realsenseConfiguration)
+   public RealsenseColorDepthImageRetriever(String serialNumber, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
+      this.sensorFrameSupplier = sensorFrameSupplier;
+
       realSenseHardwareManager = new RealSenseHardwareManager();
       realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+
+      colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
       if (realsense.getDevice() == null)
       {
@@ -50,7 +61,11 @@ public class RealsenseColorDepthImageRetriever
          realsense.updateDataBytePointers();
          Instant acquisitionTime = Instant.now();
 
-         depthMat16UC1.close();
+         cameraFramePose.setToZero(sensorFrameSupplier.get());
+         cameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         if (depthMat16UC1 != null)
+            depthMat16UC1.close();
          depthMat16UC1 = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, realsense.getDepthFrameData());
          depthImage = new RawImage(grabSequenceNumber,
                                    acquisitionTime,
@@ -63,9 +78,12 @@ public class RealsenseColorDepthImageRetriever
                                    (float) realsense.getDepthFocalLengthPixelsX(),
                                    (float) realsense.getDepthFocalLengthPixelsY(),
                                    (float) realsense.getDepthPrincipalOffsetXPixels(),
-                                   (float) realsense.getDepthPrincipalOffsetYPixels());
+                                   (float) realsense.getDepthPrincipalOffsetYPixels(),
+                                   cameraFramePose.getPosition(),
+                                   cameraFramePose.getOrientation());
 
-         colorMatRGB.close();
+         if (colorMatRGB != null)
+            colorMatRGB.close();
          colorMatRGB = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, realsense.getColorFrameData());
          colorImage = new RawImage(grabSequenceNumber,
                                    acquisitionTime,
@@ -78,7 +96,9 @@ public class RealsenseColorDepthImageRetriever
                                    (float) realsense.getColorFocalLengthPixelsX(),
                                    (float) realsense.getColorFocalLengthPixelsY(),
                                    (float) realsense.getColorPrincipalOffsetXPixels(),
-                                   (float) realsense.getColorPrincipalOffsetYPixels());
+                                   (float) realsense.getColorPrincipalOffsetYPixels(),
+                                   colorPoseInDepthFrame.getPosition(),
+                                   colorPoseInDepthFrame.getOrientation());
 
          grabSequenceNumber++;
       }
@@ -106,6 +126,9 @@ public class RealsenseColorDepthImageRetriever
 
    public void destroy()
    {
-
+      stop();
+      depthImage.destroy();
+      colorImage.destroy();
+      realsense.deleteDevice();
    }
 }

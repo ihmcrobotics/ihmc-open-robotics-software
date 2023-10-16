@@ -197,6 +197,62 @@ public class CUDAImageEncoder
       jpegBytePointer.close();
    }
 
+   /**
+    * Despite encoding an RGB image, the returned JPEG seems to be in BGR format.
+    *
+    * @param sourceImage the RGB image
+    * @param outputImagePointer pointer to the jpeg image output
+    * @param imageWidth width (in bytes) of the source image
+    * @param imageHeight height (in bytes) of the source image
+    * @param sourceImagePitch number of bytes (including padding) in a row of the image
+    */
+   @Deprecated
+   public void encodeRGB(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight, long sourceImagePitch)
+   {
+      long rowSize = 3L * imageWidth;
+      long frameSize = 3L * imageWidth * imageHeight;
+
+      checkCUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
+
+      // Set params to correct sampling factor
+      checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
+
+      // Get B plane data
+      BytePointer devicePointer = new BytePointer();
+      checkCUDA("cudaMalloc", cudaMalloc(devicePointer, frameSize)); // allocate GPU memory
+      checkCUDA("cudaMemcpy2D", cudaMemcpy2D(devicePointer, rowSize, sourceImage, sourceImagePitch, rowSize, imageHeight, cudaMemcpyDeviceToDevice));
+      nvjpegImage.pitch(0, rowSize);
+      nvjpegImage.channel(0, devicePointer);
+
+      // Encode the image
+      checkNVJPEG("nvjpegEncodeImage",
+                  nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_RGBI, imageWidth, imageHeight, cudaStream));
+
+      // Get compressed size
+      SizeTPointer jpegSize = new SizeTPointer(1);
+      checkNVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+
+      // Retrieve bitstream
+      BytePointer jpegBytePointer = new BytePointer(jpegSize.get());
+      checkNVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, jpegBytePointer, jpegSize, cudaStream));
+
+      // Synchronize cuda stream
+      checkCUDA("cudaStreamSynchronize", cudaStreamSynchronize(cudaStream));
+
+      //copy data into output pointer
+      byte[] bytes = new byte[(int) jpegBytePointer.limit()];
+      jpegBytePointer.get(bytes, 0, (int) jpegBytePointer.limit());
+      outputImagePointer.put(bytes, 0, (int) jpegBytePointer.limit());
+      outputImagePointer.limit(jpegBytePointer.limit());
+
+      // Free GPU memory
+      checkCUDA("cudaFree", cudaFree(devicePointer));
+
+      // Close pointers
+      jpegSize.close();
+      jpegBytePointer.close();
+   }
+
    public void destroy()
    {
       checkNVJPEG("nvjpegEncoderParamsDestroy", nvjpegEncoderParamsDestroy(encoderParameters));
