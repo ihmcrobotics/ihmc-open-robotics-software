@@ -3,10 +3,8 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.BehaviorActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
-public class BehaviorActionState extends BehaviorTreeNodeState implements BehaviorActionDefinitionSupplier
+public abstract class BehaviorActionState extends BehaviorTreeNodeState implements BehaviorActionDefinitionSupplier
 {
-   private final BehaviorActionDefinition definition;
-
    /** The action's unique ID. */
    private long id;
    private int actionIndex = -1;
@@ -15,24 +13,8 @@ public class BehaviorActionState extends BehaviorTreeNodeState implements Behavi
    private boolean canExecute = true;
    private boolean isExecuting = false;
 
-   /**
-    * For when nothing extends this node type.
-    */
    public BehaviorActionState()
    {
-      this(new BehaviorActionDefinition());
-   }
-
-   /**
-    * For use by a node extending this one.
-    */
-   public BehaviorActionState(BehaviorActionDefinition definition)
-   {
-      // The definition in this class extends the definition in the superclass
-      // and is the same instance.
-      super(definition);
-      this.definition = definition;
-
       // TODO: Re-enable when we do the CRDT
 //      id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
    }
@@ -44,9 +26,6 @@ public class BehaviorActionState extends BehaviorTreeNodeState implements Behavi
 
    public void toMessage(BehaviorActionStateMessage message)
    {
-      if (definition.getClass() == BehaviorActionDefinition.class)
-         definition.toMessage(message.getDefinition());
-
       message.setId(id);
       message.setActionIndex(actionIndex);
       message.setIsNextForExecution(isNextForExecution);
@@ -119,11 +98,5 @@ public class BehaviorActionState extends BehaviorTreeNodeState implements Behavi
    public boolean getIsExecuting()
    {
       return isExecuting;
-   }
-
-   @Override
-   public BehaviorActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

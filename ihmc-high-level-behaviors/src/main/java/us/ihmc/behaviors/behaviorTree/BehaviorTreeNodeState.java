@@ -1,39 +1,21 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
+public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
 {
-   private final BehaviorTreeNodeDefinition definition;
-
    /** The current status of the behavior tree node. */
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.NOT_TICKED;
    private Instant lastTickInstant = null;
 
-   private final RecyclingArrayList<BehaviorTreeNodeState> children = new RecyclingArrayList<>(BehaviorTreeNodeState::new);
-
-   /**
-    * For use when nothing extending this node type.
-    *
-    * @deprecated TODO: Not sure if it makes sense that this would be a node with nothing extending it.
-    *               Undeprecate if we are keeping it. - @dcalvert
-    */
-   public BehaviorTreeNodeState()
-   {
-      this(new BehaviorTreeNodeDefinition());
-   }
-
-   public BehaviorTreeNodeState(BehaviorTreeNodeDefinition definition)
-   {
-      this.definition = new BehaviorTreeNodeDefinition();
-   }
+   private final List<BehaviorTreeNodeState> children = new ArrayList<>();
 
    public BehaviorTreeNodeStatus tick()
    {
@@ -57,8 +39,6 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
     */
    public void clock()
    {
-      RecyclingArrayListTools.synchronizeSize(children, definition.getChildren());
-
       for (BehaviorTreeNodeState child : children)
       {
          child.clock();
@@ -124,7 +104,7 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
       }
    }
 
-   public RecyclingArrayList<BehaviorTreeNodeState> getChildren()
+   public List<BehaviorTreeNodeState> getChildren()
    {
       return children;
    }
@@ -135,11 +115,5 @@ public class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitionSupplier
    public <T extends BehaviorTreeNodeState> T addChild(T child)
    {
       return child;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return definition;
    }
 }
