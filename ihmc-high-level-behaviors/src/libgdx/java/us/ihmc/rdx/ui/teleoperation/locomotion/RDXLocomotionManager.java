@@ -498,11 +498,11 @@ public class RDXLocomotionManager
          if (isPlanning)
          {
             footstepPlanningCompleteTimer.reset();
-            panel3D.getNotification().setText("Planning footsteps...");
+            panel3D.getNotificationManager().pushNotification("Planning footsteps...");
          }
          else
          {
-            panel3D.getNotification().setText("Footstep planning completed.");
+            panel3D.getNotificationManager().pushNotification("Footstep planning completed.");
          }
       }
    }
