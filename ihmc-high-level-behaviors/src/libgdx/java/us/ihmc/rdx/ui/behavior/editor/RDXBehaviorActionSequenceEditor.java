@@ -9,10 +9,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
-import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -23,9 +23,11 @@ import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutionStatusCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
@@ -91,7 +93,7 @@ public class RDXBehaviorActionSequenceEditor
    private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private final TypedNotification<Class<? extends RDXBehaviorAction>> actionToCreate = new TypedNotification<>();
+   private final TypedNotification<Class<? extends BehaviorActionDefinition>> actionToCreate = new TypedNotification<>();
    private RobotSide sideOfNewAction;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private volatile long receivedSequenceStatusMessageCount = 0;
@@ -279,16 +281,16 @@ public class RDXBehaviorActionSequenceEditor
    {
       if (actionToCreate.poll())
       {
-         Class<? extends RDXBehaviorAction> actionType = actionToCreate.read();
+         Class<? extends BehaviorActionDefinition> actionType = actionToCreate.read();
          RDXBehaviorAction newAction = RDXActionSequenceTools.createBlankAction(actionType,
-                                                                                this,
-                                                                                robotModel,
-                                                                                syncedRobot,
-                                                                                selectionCollisionModel,
-                                                                                baseUI,
-                                                                                panel3D,
-                                                                                referenceFrameLibrary,
-                                                                                ros2ControllerHelper);
+                                                                                  this,
+                                                                                  robotModel,
+                                                                                  syncedRobot,
+                                                                                  selectionCollisionModel,
+                                                                                  baseUI,
+                                                                                  panel3D,
+                                                                                  referenceFrameLibrary,
+                                                                                  ros2ControllerHelper);
 
          if (newAction instanceof RDXWalkAction walkAction)
          {
@@ -710,7 +712,7 @@ public class RDXBehaviorActionSequenceEditor
 
       if (ImGui.button(labels.get("Add Walk")))
       {
-         actionToCreate.set(RDXWalkAction.class);
+         actionToCreate.set(WalkActionDefinition.class);
       }
       ImGui.text("Add Hand Pose:");
       ImGui.sameLine();
@@ -718,7 +720,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandPose")))
          {
-            actionToCreate.set(RDXHandPoseAction.class);
+            actionToCreate.set(HandPoseActionDefinition.class);
             sideOfNewAction = side;
          }
          if (side.ordinal() < 1)
@@ -730,7 +732,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandWrench")))
          {
-            actionToCreate.set(RDXHandWrenchAction.class);
+            actionToCreate.set(HandWrenchActionDefinition.class);
             sideOfNewAction = side;
          }
          if (side.ordinal() < 1)
@@ -738,27 +740,27 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Hand Configuration")))
       {
-         actionToCreate.set(RDXSakeHandCommandAction.class);
+         actionToCreate.set(SakeHandCommandActionDefinition.class);
       }
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
-         actionToCreate.set(RDXChestOrientationAction.class);
+         actionToCreate.set(ChestOrientationActionDefinition.class);
       }
       if (ImGui.button(labels.get("Add Pelvis Height and Pitch")))
       {
-         actionToCreate.set(RDXPelvisHeightPitchAction.class);
+         actionToCreate.set(PelvisHeightPitchActionDefinition.class);
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
-         actionToCreate.set(RDXArmJointAnglesAction.class);
+         actionToCreate.set(ArmJointAnglesActionDefinition.class);
       }
       if (ImGui.button(labels.get("Add Footstep Plan")))
       {
-         actionToCreate.set(RDXFootstepPlanAction.class);
+         actionToCreate.set(FootstepPlanActionDefinition.class);
       }
       if (ImGui.button(labels.get("Add Wait")))
       {
-         actionToCreate.set(RDXWaitDurationAction.class);
+         actionToCreate.set(WaitDurationActionDefinition.class);
       }
 
       if (workspaceFile == null)
