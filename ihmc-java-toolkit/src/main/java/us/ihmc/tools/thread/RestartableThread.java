@@ -5,10 +5,9 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
-public class RestartableThrottledThread
+public class RestartableThread
 {
    private final String name;
-   private final Throttler throttler;
    private final ExceptionHandler exceptionHandler;
    private final boolean runAsDaemon;
    private final RunnableThatThrows runnable;
@@ -16,28 +15,31 @@ public class RestartableThrottledThread
    private Thread thread;
    private boolean running = false;
 
-   public RestartableThrottledThread(String name, double runFrequency, RunnableThatThrows runnable)
+   public RestartableThread(String name, RunnableThatThrows runnable)
    {
-      this(name, runFrequency, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, false, runnable);
+      this(name, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, false, runnable);
    }
 
-   public RestartableThrottledThread(String name, double runFrequency, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
+   public RestartableThread(String name, boolean runAsDaemon, RunnableThatThrows runnable)
    {
-      this(name, runFrequency, exceptionHandler, false, runnable);
+      this(name, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, runAsDaemon, runnable);
    }
 
-   public RestartableThrottledThread(String name, double runFrequency, ExceptionHandler exceptionHandler, boolean runAsDaemon, RunnableThatThrows runnable)
+   public RestartableThread(String name, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
+   {
+      this(name, exceptionHandler, false, runnable);
+   }
+
+   public RestartableThread(String name, ExceptionHandler exceptionHandler, boolean runAsDaemon, RunnableThatThrows runnable)
    {
       this.name = name;
-      this.throttler = new Throttler();
-      this.throttler.setFrequency(runFrequency);
       this.exceptionHandler = exceptionHandler;
       this.runAsDaemon = runAsDaemon;
       this.runnable = runnable;
    }
 
    /**
-    * Starts a new thread which runs the passed in Runnable
+    * Creates a new thread with the parameters used to initialize this class, and starts the new thread
     */
    public void start()
    {
@@ -48,8 +50,6 @@ public class RestartableThrottledThread
          {
             while (running)
             {
-               throttler.waitAndRun();
-
                ExceptionTools.handle(runnable, exceptionHandler);
             }
          }
@@ -76,7 +76,6 @@ public class RestartableThrottledThread
       return running;
    }
 
-   // only used for testing
    boolean isAlive()
    {
       return thread == null ? false : thread.isAlive();
