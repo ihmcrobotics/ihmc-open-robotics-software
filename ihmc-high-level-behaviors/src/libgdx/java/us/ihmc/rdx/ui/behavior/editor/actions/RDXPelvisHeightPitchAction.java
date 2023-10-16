@@ -31,7 +31,7 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.thread.Throttler;
 
@@ -49,8 +49,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final ImBooleanWrapper executeWithNextActionWrapper;
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
+   private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
+   private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -123,8 +123,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPelvisFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getPelvisFrame().getReferenceFrame());
-            graphicFrame.changeParentFrame(state.getPelvisFrame().getReferenceFrame());
-            collisionShapeFrame.changeParentFrame(state.getPelvisFrame().getReferenceFrame());
+            graphicFrame.setParentFrame(state.getPelvisFrame().getReferenceFrame());
+            collisionShapeFrame.setParentFrame(state.getPelvisFrame().getReferenceFrame());
          }
 
          poseGizmo.getPoseGizmo().update();

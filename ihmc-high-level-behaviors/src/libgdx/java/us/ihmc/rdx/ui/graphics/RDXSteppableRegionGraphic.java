@@ -1,4 +1,4 @@
-package us.ihmc.rdx.visualizers;
+package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.utils.Array;
@@ -9,6 +9,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.perception.steppableRegions.SteppableRegion;
 import us.ihmc.perception.steppableRegions.SteppableRegionMessageConverter;
 import us.ihmc.perception.steppableRegions.SteppableRegionsListCollection;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
