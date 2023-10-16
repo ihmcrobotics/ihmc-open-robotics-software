@@ -44,7 +44,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -68,8 +68,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame();
-   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame();
+   private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
+   private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
    private final Color goodQualityColor;
    private final Color badQualityColor;
    private boolean isMouseHovering = false;
@@ -196,8 +196,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getPalmFrame().getReferenceFrame());
-            graphicFrame.changeParentFrame(state.getPalmFrame().getReferenceFrame());
-            collisionShapeFrame.changeParentFrame(state.getPalmFrame().getReferenceFrame());
+            graphicFrame.setParentFrame(state.getPalmFrame().getReferenceFrame());
+            collisionShapeFrame.setParentFrame(state.getPalmFrame().getReferenceFrame());
          }
 
          poseGizmo.getPoseGizmo().update();
