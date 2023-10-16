@@ -18,7 +18,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
@@ -28,9 +27,6 @@ import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorA
 
 public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
 {
-   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
-                                                                                        RDXBuildingExplorationBehaviorUI::new);
-
    private final BehaviorHelper helper;
    private BuildingExplorationBehaviorParameters parameters;
    private final RDXStoredPropertySetTuner parameterTuner = new RDXStoredPropertySetTuner("Building Exploration Parameters");
@@ -144,6 +140,6 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Building Exploration";
    }
 }

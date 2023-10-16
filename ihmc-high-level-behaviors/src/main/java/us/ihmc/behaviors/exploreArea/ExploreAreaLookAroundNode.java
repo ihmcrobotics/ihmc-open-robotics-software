@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.SequenceNode;
+import us.ihmc.behaviors.behaviorTree.AsynchronousActionNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.SequenceNode;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 
 public class ExploreAreaLookAroundNode extends SequenceNode
 {

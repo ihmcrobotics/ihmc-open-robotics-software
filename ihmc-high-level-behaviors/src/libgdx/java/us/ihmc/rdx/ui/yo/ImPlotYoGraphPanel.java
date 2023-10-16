@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.yo;
 
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
-import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
@@ -15,7 +14,7 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.tools.ImPlotTools;
+import us.ihmc.rdx.imgui.ImPlotTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.yoVariables.registry.YoRegistry;

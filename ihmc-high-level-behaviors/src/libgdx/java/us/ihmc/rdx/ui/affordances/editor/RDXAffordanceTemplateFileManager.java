@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
 
 public class RDXAffordanceTemplateFileManager
@@ -39,7 +39,7 @@ public class RDXAffordanceTemplateFileManager
    private static final double ANGULAR_VELOCITY = 1.0; // for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
 
    private ReferenceFrame initialObjectFrame;
-   private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
+   private MutableReferenceFrame affordanceFrame = new MutableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final RDXAffordanceTemplateFrame graspFrame;
    private final RDXAffordanceTemplateFrames preGraspFrames;
    private final RDXAffordanceTemplateFrames postGraspFrames;
@@ -79,7 +79,7 @@ public class RDXAffordanceTemplateFileManager
       // world to initial object frame
       RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
       initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
-      affordanceFrame.changeParentFrame(initialObjectFrame);
+      affordanceFrame.setParentFrame(initialObjectFrame);
 
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, fileName + ".json");
       if (file.isFileAccessAvailable())
@@ -112,7 +112,7 @@ public class RDXAffordanceTemplateFileManager
                   if (arePreGraspPosesSet.get(side).get(i))
                   {
                      ObjectNode actionNode = actionsArrayNode.addObject();
-                     actionNode.put("type", "RDXHandPoseAction");
+                     actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                      actionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Pose");
                      actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                      actionNode.put("side", side.getLowerCaseName());
@@ -156,7 +156,7 @@ public class RDXAffordanceTemplateFileManager
                         csvDataMatrices.get(side).add(dataTrajectories);
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
-                        configurationActionNode.put("type", "RDXSakeHandCommandAction");
+                        configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                         configurationActionNode.put("description", "Pre-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("configuration", preGraspHandConfigurations.get(side).get(i).toString());
@@ -172,7 +172,7 @@ public class RDXAffordanceTemplateFileManager
                if (graspFrame.isSet(side))
                {
                   ObjectNode actionNode = actionsArrayNode.addObject();
-                  actionNode.put("type", "RDXHandPoseAction");
+                  actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                   actionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Pose");
                   actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                   actionNode.put("side", side.getLowerCaseName());
@@ -209,7 +209,7 @@ public class RDXAffordanceTemplateFileManager
                   if (graspFrame.getHandConfiguration(side) != null)
                   {
                      ObjectNode configurationActionNode = actionsArrayNode.addObject();
-                     configurationActionNode.put("type", "RDXSakeHandCommandAction");
+                     configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                      configurationActionNode.put("description", "Grasp " + side.getPascalCaseName() + " Hand Configuration");
                      configurationActionNode.put("side", side.getLowerCaseName());
                      configurationActionNode.put("configuration", graspFrame.getHandConfiguration(side).toString());
@@ -237,7 +237,7 @@ public class RDXAffordanceTemplateFileManager
                   if (arePostGraspPosesSet.get(side).get(i))
                   {
                      ObjectNode actionNode = actionsArrayNode.addObject();
-                     actionNode.put("type", "RDXHandPoseAction");
+                     actionNode.put("type", HandPoseActionDefinition.class.getSimpleName());
                      actionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Pose");
                      actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                      actionNode.put("side", side.getLowerCaseName());
@@ -281,7 +281,7 @@ public class RDXAffordanceTemplateFileManager
                         csvDataMatrices.get(side).add(dataTrajectories);
 
                         ObjectNode configurationActionNode = actionsArrayNode.addObject();
-                        configurationActionNode.put("type", "RDXSakeHandCommandAction");
+                        configurationActionNode.put("type", SakeHandCommandActionDefinition.class.getSimpleName());
                         configurationActionNode.put("description", "Post-grasp " + side.getPascalCaseName() + " Hand Configuration");
                         configurationActionNode.put("side", side.getLowerCaseName());
                         configurationActionNode.put("configuration", postGraspHandConfigurations.get(side).get(i).toString());
@@ -611,7 +611,7 @@ public class RDXAffordanceTemplateFileManager
       // change affordance reference from whatever it is now to loaded initial object pose
       RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
       initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
-      affordanceFrame.changeParentFrame(initialObjectFrame);
+      affordanceFrame.setParentFrame(initialObjectFrame);
 
       filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), loadingFileName + "Frames.json");
       if (Files.exists(filePath))
