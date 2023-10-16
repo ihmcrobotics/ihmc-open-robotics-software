@@ -15,7 +15,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b8a4a8f4e981c951ef8631d79229f942d69aa431800e23c65d1a470b0051be36";
+   		return "0e7e0d7d38734434db33d9d7f6cf34916560fae9bcd7eaa92ec19a177d5648e4";
    }
    
    @Override
@@ -54,9 +54,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -83,10 +83,10 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -109,9 +109,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       cdr.write_type_4(data.getSequenceId());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
       cdr.write_type_2(data.getId());
 
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
       cdr.write_type_6(data.getConfidence());
 
       if(data.getObjectType().length() <= 255)
@@ -134,9 +134,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setId(cdr.read_type_2());
       	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setConfidence(cdr.read_type_6());
       	
       cdr.read_type_d(data.getObjectType());	
@@ -157,9 +157,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    public final void serialize(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_2("id", data.getId());
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
-      ser.write_type_2("id", data.getId());
       ser.write_type_6("confidence", data.getConfidence());
       ser.write_type_d("object_type", data.getObjectType());
       ser.write_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
@@ -170,9 +170,9 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedObjectPacket data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setId(ser.read_type_2("id"));
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
-      data.setId(ser.read_type_2("id"));
       data.setConfidence(ser.read_type_6("confidence"));
       ser.read_type_d("object_type", data.getObjectType());
       ser.read_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());

@@ -15,11 +15,29 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public us.ihmc.euclid.geometry.Pose3D pose_;
+   /**
+            * Object ID
+            */
    public int id_;
+   /**
+            * Position and Orientation of the object
+            */
+   public us.ihmc.euclid.geometry.Pose3D pose_;
+   /**
+            * How confident are we about what object it is. Mostly used to NN based detections
+            */
    public double confidence_;
+   /**
+            * Object Category
+            */
    public java.lang.StringBuilder object_type_;
+   /**
+            * 2D Vertices of the 3d object bounding box projected onto image plane
+            */
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_2d_vertices_;
+   /**
+            * 3d Vertices of the 3d object Bounding box
+            */
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_vertices_;
 
    public DetectedObjectPacket()
@@ -50,9 +68,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    {
       sequence_id_ = other.sequence_id_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       id_ = other.id_;
 
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       confidence_ = other.confidence_;
 
       object_type_.setLength(0);
@@ -83,52 +101,82 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       return sequence_id_;
    }
 
-
-   public us.ihmc.euclid.geometry.Pose3D getPose()
-   {
-      return pose_;
-   }
-
+   /**
+            * Object ID
+            */
    public void setId(int id)
    {
       id_ = id;
    }
+   /**
+            * Object ID
+            */
    public int getId()
    {
       return id_;
    }
 
+
+   /**
+            * Position and Orientation of the object
+            */
+   public us.ihmc.euclid.geometry.Pose3D getPose()
+   {
+      return pose_;
+   }
+
+   /**
+            * How confident are we about what object it is. Mostly used to NN based detections
+            */
    public void setConfidence(double confidence)
    {
       confidence_ = confidence;
    }
+   /**
+            * How confident are we about what object it is. Mostly used to NN based detections
+            */
    public double getConfidence()
    {
       return confidence_;
    }
 
+   /**
+            * Object Category
+            */
    public void setObjectType(java.lang.String object_type)
    {
       object_type_.setLength(0);
       object_type_.append(object_type);
    }
 
+   /**
+            * Object Category
+            */
    public java.lang.String getObjectTypeAsString()
    {
       return getObjectType().toString();
    }
+   /**
+            * Object Category
+            */
    public java.lang.StringBuilder getObjectType()
    {
       return object_type_;
    }
 
 
+   /**
+            * 2D Vertices of the 3d object bounding box projected onto image plane
+            */
    public us.ihmc.euclid.tuple3D.Point3D[] getBoundingBox2dVertices()
    {
       return bounding_box_2d_vertices_;
    }
 
 
+   /**
+            * 3d Vertices of the 3d object Bounding box
+            */
    public us.ihmc.euclid.tuple3D.Point3D[] getBoundingBoxVertices()
    {
       return bounding_box_vertices_;
@@ -154,9 +202,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
+      if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_type_, other.object_type_, epsilon)) return false;
@@ -186,9 +234,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.pose_.equals(otherMyClass.pose_)) return false;
       if(this.id_ != otherMyClass.id_) return false;
 
+      if (!this.pose_.equals(otherMyClass.pose_)) return false;
       if(this.confidence_ != otherMyClass.confidence_) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.object_type_, otherMyClass.object_type_)) return false;
@@ -213,10 +261,10 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       builder.append("DetectedObjectPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("pose=");
-      builder.append(this.pose_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
+      builder.append("pose=");
+      builder.append(this.pose_);      builder.append(", ");
       builder.append("confidence=");
       builder.append(this.confidence_);      builder.append(", ");
       builder.append("object_type=");
