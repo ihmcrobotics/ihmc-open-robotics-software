@@ -9,22 +9,21 @@ import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.BehaviorActionStateSupplier;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.vr.RDXVRContext;
 
 /**
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
  */
-public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier
+public abstract class RDXBehaviorAction extends RDXBehaviorTreeNode implements BehaviorActionStateSupplier
 {
    private transient final RDXBehaviorActionSequenceEditor editor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
-   private ImStringWrapper descriptionWrapper;
 
    public RDXBehaviorAction(RDXBehaviorActionSequenceEditor editor)
    {
@@ -33,12 +32,7 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier
 
    public void update()
    {
-      if (descriptionWrapper == null)
-      {
-         descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
-                                                  getDefinition()::setDescription,
-                                                  imString -> ImGuiTools.inputText(labels.getHidden("description"), imString));
-      }
+      super.update();
 
       getState().update();
    }
@@ -101,11 +95,6 @@ public abstract class RDXBehaviorAction implements BehaviorActionStateSupplier
    public ImBoolean getExpanded()
    {
       return expanded;
-   }
-
-   public ImStringWrapper getDescriptionWrapper()
-   {
-      return descriptionWrapper;
    }
 
    public ImString getRejectionTooltip()
