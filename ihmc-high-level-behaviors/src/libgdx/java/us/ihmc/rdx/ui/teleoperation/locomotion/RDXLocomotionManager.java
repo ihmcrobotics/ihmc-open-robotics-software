@@ -92,6 +92,9 @@ public class RDXLocomotionManager
    private final Notification abortedNotification = new Notification();
    private final Timer footstepPlanningCompleteTimer = new Timer();
 
+   // Used for UI logic
+   private boolean wasPlanning = false;
+
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
@@ -497,12 +500,20 @@ public class RDXLocomotionManager
       {
          if (isPlanning)
          {
+            if (!wasPlanning)
+            {
+               wasPlanning = true;
+               panel3D.getNotificationManager().pushNotification("Planning footsteps...");
+            }
             footstepPlanningCompleteTimer.reset();
-            panel3D.getNotificationManager().pushNotification("Planning footsteps...");
          }
          else
          {
-            panel3D.getNotificationManager().pushNotification("Footstep planning completed.");
+            if (wasPlanning)
+            {
+               wasPlanning = false;
+               panel3D.getNotificationManager().pushNotification("Footstep planning completed.");
+            }
          }
       }
    }
