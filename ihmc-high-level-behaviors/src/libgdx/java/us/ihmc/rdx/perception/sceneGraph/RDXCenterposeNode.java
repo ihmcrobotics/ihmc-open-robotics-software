@@ -50,7 +50,6 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
-      System.out.println("in overriden" + super.getSceneNode().getName());
       super.update(modificationQueue);
 
       vertices = centerposeNode.getVertices3D();
