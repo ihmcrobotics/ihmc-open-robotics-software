@@ -2,7 +2,6 @@ package us.ihmc.behaviors.buildingExploration;
 
 import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
@@ -163,11 +162,5 @@ public class BuildingExplorationBehavior extends ResettingNode implements Destro
       traverseStairsBehavior.destroy();
       lookAndStepBehavior.destroy();
       doorBehavior.destroy();
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
    }
 }

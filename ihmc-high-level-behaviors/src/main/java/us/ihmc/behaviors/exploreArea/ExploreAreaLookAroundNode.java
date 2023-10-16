@@ -2,7 +2,6 @@ package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.AsynchronousActionNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.SequenceNode;
 import us.ihmc.commons.thread.ThreadTools;
@@ -219,12 +218,6 @@ public class ExploreAreaLookAroundNode extends SequenceNode
          headOrientation.setYawPitchRoll(yaw, 0.75 * pitch, 0.0);
          helper.getOrCreateRobotInterface().requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, worldFrame);
       }
-
-      @Override
-      public BehaviorTreeNodeDefinition getDefinition()
-      {
-         return null; // FIXME
-      }
    }
 
    void rememberObservationPoint()
@@ -433,11 +426,5 @@ public class ExploreAreaLookAroundNode extends SequenceNode
    public List<Point3D> getPointsObservedFrom()
    {
       return pointsObservedFrom;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
    }
 }

@@ -2,7 +2,6 @@ package us.ihmc.behaviors.targetFollowing;
 
 import geometry_msgs.PoseStamped;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
@@ -112,12 +111,6 @@ public class TargetFollowingBehavior extends ResettingNode implements Destroyabl
    public void destroy()
    {
       lookAndStepBehavior.destroy();
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
    }
 }
 

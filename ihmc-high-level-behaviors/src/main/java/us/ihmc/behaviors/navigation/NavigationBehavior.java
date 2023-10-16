@@ -333,12 +333,6 @@ public class NavigationBehavior extends BehaviorTreeNodeState implements Destroy
       LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
    }
 
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
-   }
-
    public static class NavigationBehaviorAPI
    {
 
