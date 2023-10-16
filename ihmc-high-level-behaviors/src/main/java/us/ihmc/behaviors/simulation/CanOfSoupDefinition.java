@@ -1,4 +1,4 @@
-package us.ihmc.rdx.simulation.environment.object.objects;
+package us.ihmc.behaviors.simulation;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;

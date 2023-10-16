@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class SCS2YoImPlotManager
+public class RDXSCS2YoImPlotManager
 {
    private RDXImGuiLayoutManager layoutManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
