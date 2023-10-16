@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RestartableThrottledThreadTest
 {
-   private static final String name = "TestPausableThrottledThread";
+   private static final String name = "TestRestartableThrottledThread";
    private FrequencyStatisticPrinter frequencyStatisticPrinter;
    private FrequencyCalculator frequencyCalculator;
 
@@ -107,7 +107,6 @@ public class RestartableThrottledThreadTest
       thread.stop();
    }
 
-   // TODO: Figure out how to test this case
    @Test
    public void testExceptionHandling()
    {
