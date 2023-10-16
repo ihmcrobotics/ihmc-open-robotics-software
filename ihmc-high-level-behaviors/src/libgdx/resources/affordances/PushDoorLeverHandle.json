@@ -1,7 +1,7 @@
 {
   "name" : "PushDoorLeverHandle",
   "actions" : [ {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -15,7 +15,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXSakeHandCommandAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Pre-grasp Right Hand Configuration",
     "side" : "right",
     "configuration" : "OPEN",
@@ -23,7 +23,7 @@
     "torque" : 0.30000001192092896,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -37,7 +37,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -51,7 +51,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXSakeHandCommandAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Grasp Right Hand Configuration",
     "side" : "right",
     "configuration" : "GRIP_HARD",
@@ -59,7 +59,7 @@
     "torque" : 1.0,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -73,7 +73,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -87,7 +87,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -101,7 +101,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -115,7 +115,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -129,7 +129,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -143,7 +143,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -157,7 +157,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",
@@ -171,7 +171,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXSakeHandCommandAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Post-grasp Right Hand Configuration",
     "side" : "right",
     "configuration" : "CLOSE",
@@ -179,7 +179,7 @@
     "torque" : 0.30000001192092896,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "PushDoorLeverHandle",
     "side" : "right",

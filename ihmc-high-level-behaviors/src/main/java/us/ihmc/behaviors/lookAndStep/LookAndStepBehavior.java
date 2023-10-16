@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -25,7 +25,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -10,8 +10,8 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
