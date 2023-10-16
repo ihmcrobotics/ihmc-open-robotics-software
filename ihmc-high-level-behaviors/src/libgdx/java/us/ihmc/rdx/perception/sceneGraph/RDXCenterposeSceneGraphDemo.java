@@ -62,7 +62,7 @@ public class RDXCenterposeSceneGraphDemo
                                                                                                            ReferenceFrame.getWorldFrame(),
                                                                                                            sensorInWorldTransform);
 
-            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
+//            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         DomainFactory.PubSubImplementation.FAST_RTPS,
