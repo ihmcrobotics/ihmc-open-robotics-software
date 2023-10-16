@@ -55,6 +55,13 @@ public class RDXCenterposeSceneGraphDemo
             zed2LeftColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
+            RDXROS2BoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2BoundingBoxVisualizer("CenterPose Bounding Box",
+                                                                                                            ros2Helper,
+                                                                                                            ReferenceFrame.getWorldFrame(),
+                                                                                                            PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
+                                                                                                            baseUI.getPrimary3DPanel().getCamera3D());
+            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
+
             RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
             sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
             sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
