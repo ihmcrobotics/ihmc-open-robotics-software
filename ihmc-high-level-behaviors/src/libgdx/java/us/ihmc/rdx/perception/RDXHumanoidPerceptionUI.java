@@ -7,9 +7,11 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
@@ -41,7 +43,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private RDXContinuousPlanningUI continuousPlanningUI;
    private RDXRemoteHeightMapPanel heightMapUI;
 
-   private HeatMapGenerator contactHeatMapGenerator;
+   private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
 
    private RDXBytedecoImagePanel localHeightMapPanel;
    private RDXBytedecoImagePanel internalHeightMapPanel;
@@ -139,13 +141,16 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       {
          heightMapUI.update();
 
+         Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage());
+
          depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
 
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          terrainCostImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
-         contactMapImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage());
+
+         contactMapImagePanel.drawColorImage(contactHeatMapImage);
       }
 
       if (rapidRegionsUI != null)
