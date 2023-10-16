@@ -1,6 +1,6 @@
 {
-  "name" : "PushDoorLeverHandle",
-  "object" : "PushDoorLeverHandle",
+  "name" : "RightDoorLeverHandle",
+  "object" : "RightDoorLeverHandle",
   "x" : 0.0,
   "y" : 0.0,
   "z" : 0.0,
@@ -16,7 +16,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "type": "HALF_CLOSE"
+      "type": "OPEN"
     } ]
   }, {
     "x" : 0.0,
@@ -38,7 +38,7 @@
     "yawInDegrees" : 180.0,
     "configuration": [ {
       "side" : "right",
-      "type": "CRUSH"
+      "type": "GRIP_HARD"
     } ]
   }, {
     "x" : 0.0,
