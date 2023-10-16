@@ -22,7 +22,7 @@ public class RDX3DPanelNotification extends RDX3DPanelTooltip
 
    public void render(int notificationIndex)
    {
-      super.render(text, (float) notificationIndex);
+      super.render(text, notificationIndex);
    }
 
    public Timer getTimer()
