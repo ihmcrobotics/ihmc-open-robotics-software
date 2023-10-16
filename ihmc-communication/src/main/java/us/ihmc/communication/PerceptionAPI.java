@@ -96,6 +96,8 @@ public class PerceptionAPI
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
                                                                                   .withType(BigVideoPacket.class)
                                                                                   .withSuffix("debug_extraction");
+   public static final ROS2Topic<Empty> PUBLISH_REALSENSE_COLOR = PERCEPTION_MODULE.withSuffix("publish_realsense_color").withType(Empty.class);
+   public static final ROS2Topic<Empty> PUBLISH_REALSENSE_DEPTH = PERCEPTION_MODULE.withSuffix("publish_realsense_depth").withType(Empty.class);
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left")
                                                                                                                       .withType(BigVideoPacket.class)
                                                                                                                       .withSuffix("video"),

@@ -42,7 +42,6 @@ public class ZEDColorDepthImageRetriever
    private final Pointer colorImagePointer;
    private final Pointer depthImagePointer;
    private long grabSequenceNumber = 0L;
-   private final SideDependentList<Long> colorImageSequenceNumber = new SideDependentList<>(0L, 0L);
 
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
    private final AtomicReference<Instant> depthImageAcquisitionTime = new AtomicReference<>();
@@ -126,6 +125,7 @@ public class ZEDColorDepthImageRetriever
          retrieveAndSaveDepthImage();
          retrieveAndSaveColorImage(RobotSide.LEFT);
          retrieveAndSaveColorImage(RobotSide.RIGHT);
+         grabSequenceNumber++;
       });
 
       // TODO: Should this go in "start()" method?
@@ -153,7 +153,7 @@ public class ZEDColorDepthImageRetriever
       opencv_cudaimgproc.cvtColor(colorImageBGRA, colorGpuMats.get(side), opencv_imgproc.COLOR_BGRA2BGR);
 
       colorImages.put(side,
-                      new RawImage(colorImageSequenceNumber.get(side),
+                      new RawImage(grabSequenceNumber,
                                    colorImageAcquisitionTime.get(),
                                    imageWidth,
                                    imageHeight,
@@ -165,8 +165,6 @@ public class ZEDColorDepthImageRetriever
                                    cameraFocalLengthY.get(side),
                                    cameraPrincipalPointX.get(side),
                                    cameraPrincipalPointY.get(side)));
-
-      colorImageSequenceNumber.set(side, colorImageSequenceNumber.get(side) + 1);
 
       // Close stuff
       colorImageBGRA.close();
@@ -187,7 +185,7 @@ public class ZEDColorDepthImageRetriever
                                sl_mat_get_ptr(depthImagePointer, SL_MEM_GPU),
                                sl_mat_get_step_bytes(depthImagePointer, SL_MEM_GPU));
 
-      depthImage = new RawImage(grabSequenceNumber++,
+      depthImage = new RawImage(grabSequenceNumber,
                                 depthImageAcquisitionTime.get(),
                                 imageWidth,
                                 imageHeight,
