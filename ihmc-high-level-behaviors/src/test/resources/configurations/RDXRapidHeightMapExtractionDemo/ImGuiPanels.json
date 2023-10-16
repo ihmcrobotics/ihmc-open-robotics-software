@@ -9,6 +9,7 @@
     "Depth Image" : true,
     "Internal Height Map" : true,
     "Local Height Map" : true,
+    "Sensor Cropped Height Map" : true,
     "Terrain Cost Image" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false

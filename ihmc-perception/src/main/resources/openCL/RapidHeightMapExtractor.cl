@@ -23,6 +23,7 @@
 #define MAX_HEIGHT_DIFFERENCE 22
 #define SEARCH_WINDOW_HEIGHT 23
 #define SEARCH_WINDOW_WIDTH 24
+#define CROPPED_WINDOW_CENTER_INDEX 25
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -290,6 +291,50 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
 
    // Put the height value in the global map at the global cell index
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+}
+
+void kernel croppingKernel(read_write image2d_t heightMap,
+                              read_write image2d_t croppedMap,
+                              global float *params,
+                              global float *zUpToWorldFrameTf)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   int2 globalMapSize = (int2) (params[GLOBAL_CELLS_PER_AXIS], params[GLOBAL_CELLS_PER_AXIS]);
+
+   // cell center in world frame
+   float3 cellCenterInZUp = (float3)(0, 0, 0);
+   cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                               (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+                                               params[GLOBAL_CELL_SIZE],
+                                               params[CROPPED_WINDOW_CENTER_INDEX]);
+
+   // transform the point to the ZUp frame
+   float3 cellCenterInWorld = transformPoint3D32_2(
+      cellCenterInZUp,
+      (float3)(zUpToWorldFrameTf[0], zUpToWorldFrameTf[1], zUpToWorldFrameTf[2]),
+      (float3)(zUpToWorldFrameTf[4], zUpToWorldFrameTf[5], zUpToWorldFrameTf[6]),
+      (float3)(zUpToWorldFrameTf[8], zUpToWorldFrameTf[9], zUpToWorldFrameTf[10]),
+      (float3)(zUpToWorldFrameTf[3], zUpToWorldFrameTf[7], zUpToWorldFrameTf[11]));
+
+   // get indices from these coordinates for global map
+   int2 globalCellIndex = coordinate_to_indices(
+      (float2)(cellCenterInWorld.x, cellCenterInWorld.y),
+      (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+      params[GLOBAL_CELL_SIZE],
+      params[GLOBAL_CENTER_INDEX]);
+
+   // check if global cell index is within bounds
+   if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
+   {
+      uint height = read_imageui(heightMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
+   }
+   else
+   {
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
+   }
 }
 
 void kernel terrainCostKernel(read_write image2d_t heightMap,
