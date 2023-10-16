@@ -7,6 +7,8 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
  */
 public class SequenceNode extends BehaviorTreeNodeState
 {
+   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
+
    public SequenceNode()
    {
 
@@ -33,5 +35,11 @@ public class SequenceNode extends BehaviorTreeNodeState
       }
 
       return SUCCESS;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return definition;
    }
 }

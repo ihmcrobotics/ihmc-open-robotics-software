@@ -7,6 +7,8 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
  */
 public class FallbackNode extends BehaviorTreeNodeState
 {
+   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
+
    public FallbackNode()
    {
 
@@ -33,5 +35,11 @@ public class FallbackNode extends BehaviorTreeNodeState
       }
 
       return FAILURE;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return definition;
    }
 }
