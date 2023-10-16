@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor.actions;
+package us.ihmc.rdx.ui.behavior.actions;
 
 import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
@@ -9,8 +9,8 @@ import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
+import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;

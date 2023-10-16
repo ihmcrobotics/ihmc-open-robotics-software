@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.sequence;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 
