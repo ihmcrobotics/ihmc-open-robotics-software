@@ -1,4 +1,4 @@
-package us.ihmc.rdx.visualizers;
+package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;

@@ -12,7 +12,7 @@ import us.ihmc.perception.steppableRegions.RemoteSteppableRegionsUpdater;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -37,7 +37,7 @@ public class OusterDriverAndDepthPublisher
    private OpenCLManager openCLManager;
    private OusterDepthExtractionKernel depthExtractionKernel;
    private volatile HumanoidReferenceFrames humanoidReferenceFrames;
-   private final ModifiableReferenceFrame ousterSensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final MutableReferenceFrame ousterSensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
 
    public OusterDriverAndDepthPublisher(ROS2ControllerPublishSubscribeAPI ros2,
                                         Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier,

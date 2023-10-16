@@ -20,7 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
