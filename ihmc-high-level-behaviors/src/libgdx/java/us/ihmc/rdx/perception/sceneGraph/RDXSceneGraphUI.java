@@ -37,12 +37,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RDXSceneGraphUI
 {
    private final ROS2SceneGraph sceneGraph;
+   private final RDX3DPanel panel3D;
    private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
-   private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new ConcurrentHashMap<>();
+   private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new ConcurrentHashMap<>(); // Use addUISceneNode() and removeUISceneNode() to modify
 
    private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
@@ -52,16 +53,34 @@ public class RDXSceneGraphUI
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
       {
          RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, sceneGraph);
-         uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
+         addUISceneNode(uiSceneNode);
          return uiSceneNode.getSceneNode();
       }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR);
 
-      uiSceneNodes.put(sceneGraph.getRootNode(), new RDXSceneNode(sceneGraph.getRootNode()));
+      this.panel3D = panel3D;
+
+      RDXSceneNode rootNode = new RDXSceneNode(sceneGraph.getRootNode());
+      addUISceneNode(rootNode);
 
       sceneGraph.getSceneGraphSubscription().getSceneGraphSubscription().addCallback(message -> subscriptionFrequencyText.ping());
 
       predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
       primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
+   }
+
+   public void addUISceneNode(RDXSceneNode uiSceneNode)
+   {
+      uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
+
+      panel3D.getNotificationManager().pushNotification("Added SceneNode [" + uiSceneNode.getSceneNode().getName() + "]");
+   }
+
+   public void removeUISceneNode(SceneNode correspondingSceneNode)
+   {
+      if (uiSceneNodes.remove(correspondingSceneNode) != null)
+      {
+         panel3D.getNotificationManager().pushNotification("Removed SceneNode [" + correspondingSceneNode.getName() + "]");
+      }
    }
 
    public void update()
@@ -71,8 +90,14 @@ public class RDXSceneGraphUI
       sceneGraph.updatePublication();
 
       for (SceneNode sceneNode : uiSceneNodes.keySet())
+      {
+         // If there exists a UI scene node which doesn't exist in the scene graph,
+         // remove it from the UI scene nodes
          if (!sceneGraph.getSceneNodesByID().contains(sceneNode))
-            uiSceneNodes.remove(sceneNode);
+         {
+            removeUISceneNode(sceneNode);
+         }
+      }
    }
 
    private void renderMenuBar(SceneGraphModificationQueue modificationQueue)
@@ -103,26 +128,20 @@ public class RDXSceneGraphUI
                   if (ImGui.button(labels.get("Add Box")))
                   {
                      RDXPredefinedRigidBodySceneNode box = predefinedRigidBodySceneNodeBuilder.build("Box");
-
-                     uiSceneNodes.put(box.getSceneNode(), box);
-
                      modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(box);
                   }
                   if (ImGui.button(labels.get("Add Can")))
                   {
                      RDXPredefinedRigidBodySceneNode canOfSoup = predefinedRigidBodySceneNodeBuilder.build("CanOfSoup");
-
-                     uiSceneNodes.put(canOfSoup.getSceneNode(), canOfSoup);
-
                      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(canOfSoup);
                   }
                   if (ImGui.button(labels.get("Add 2x4")))
                   {
                      RDXPredefinedRigidBodySceneNode twoByFour = predefinedRigidBodySceneNodeBuilder.build("2X4");
-
-                     uiSceneNodes.put(twoByFour.getSceneNode(), twoByFour);
-
                      modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(twoByFour);
                   }
                   ImGui.endTable();
                }
@@ -163,12 +182,9 @@ public class RDXSceneGraphUI
                   {
                      if (ImGui.button(labels.get("Add " + shape.toString().toLowerCase())))
                      {
-                        RDXPrimitiveRigidBodySceneNode rdxPrimitiveRigidBodySceneNode = primitiveRigidBodySceneNodeBuilder.build(shape);
-
-                        uiSceneNodes.put(rdxPrimitiveRigidBodySceneNode.getSceneNode(), rdxPrimitiveRigidBodySceneNode);
-
-                        modificationQueue.accept(new SceneGraphNodeAddition(rdxPrimitiveRigidBodySceneNode.getSceneNode(),
-                                                                            primitiveRigidBodySceneNodeBuilder.getParent()));
+                        RDXPrimitiveRigidBodySceneNode primitiveRigidBodySceneNode = primitiveRigidBodySceneNodeBuilder.build(shape);
+                        modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNode.getSceneNode(), primitiveRigidBodySceneNodeBuilder.getParent()));
+                        addUISceneNode(primitiveRigidBodySceneNode);
                      }
                   }
                   ImGui.endTable();

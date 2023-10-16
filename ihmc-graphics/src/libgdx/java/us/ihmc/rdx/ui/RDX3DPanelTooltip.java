@@ -34,7 +34,7 @@ public class RDX3DPanelTooltip
     *                                above this one. This is the number of lines of text being
     *                                displayed in that one.
     */
-   public void render(String text, int linesOfSpaceToGiveAbove)
+   public void render(String text, float linesOfSpaceToGiveAbove)
    {
       if (latestInput != null)
       {
