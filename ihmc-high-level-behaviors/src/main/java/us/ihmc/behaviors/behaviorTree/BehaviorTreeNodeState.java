@@ -51,13 +51,15 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
       message.setStatus(status.toByte());
-      MessageTools.toMessage(lastTickInstant, message.getLastTickInstant());
+      if (lastTickInstant != null)
+         MessageTools.toMessage(lastTickInstant, message.getLastTickInstant());
    }
 
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
       status = BehaviorTreeNodeStatus.fromByte(message.getStatus());
-      lastTickInstant = MessageTools.toInstant(message.getLastTickInstant());
+      if (message.getLastTickInstant().getSecondsSinceEpoch() != 0L || message.getLastTickInstant().getAdditionalNanos() != 0L)
+         lastTickInstant = MessageTools.toInstant(message.getLastTickInstant());
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)
