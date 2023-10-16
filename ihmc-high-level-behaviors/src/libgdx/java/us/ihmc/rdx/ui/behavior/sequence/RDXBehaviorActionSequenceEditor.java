@@ -1,8 +1,6 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import behavior_msgs.msg.dds.ActionSequenceUpdateMessage;
-import behavior_msgs.msg.dds.ActionsExecutionStatusMessage;
+import behavior_msgs.msg.dds.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -479,7 +477,7 @@ public class RDXBehaviorActionSequenceEditor
       if (sequenceStatusSubscription.getMessageNotification().poll())
       {
          BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionSequenceUpdateMessage);
-         outOfSync = !sequenceStatusSubscription.getMessageNotification().read().equals(actionSequenceUpdateMessage);
+         outOfSync = !sequenceStatusSubscription.getMessageNotification().read().epsilonEquals(actionSequenceUpdateMessage, 1e-8);
 
          if (outOfSync)
          {
