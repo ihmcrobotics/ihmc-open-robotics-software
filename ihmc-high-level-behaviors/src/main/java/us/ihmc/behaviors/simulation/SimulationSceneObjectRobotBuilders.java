@@ -1,12 +1,10 @@
-package us.ihmc.rdx.simulation.scs2;
+package us.ihmc.behaviors.simulation;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
-import us.ihmc.rdx.simulation.environment.object.objects.CanOfSoupDefinition;
-import us.ihmc.rdx.simulation.environment.object.objects.TableDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 
 import java.util.function.Function;

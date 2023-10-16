@@ -33,7 +33,7 @@ import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.visualizers;
+package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;

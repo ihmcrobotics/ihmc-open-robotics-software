@@ -1,8 +1,7 @@
-package us.ihmc.rdx.ui.visualizers;
+package us.ihmc.rdx.imgui;
 
 import imgui.internal.ImGui;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.tools.UnitConversions;
 
 public class ImGuiFrequencyPlot
