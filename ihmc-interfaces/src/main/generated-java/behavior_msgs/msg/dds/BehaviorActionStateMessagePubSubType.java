@@ -15,7 +15,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "73473abcbe31613ec2e901ffbc6c890ec32d156f9204744153bd0a808eeb7f0a";
+   		return "b144cd68e77fb32be99dc912ad3b94e0f3d3bf67ca34ca507c3679cdb020dcbd";
    }
    
    @Override
@@ -52,6 +52,8 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -73,6 +75,8 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getCdrSerializedSize(data.getNodeState(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -91,6 +95,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(behavior_msgs.msg.dds.BehaviorActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getNodeState(), cdr);
       cdr.write_type_4(data.getId());
 
       cdr.write_type_2(data.getActionIndex());
@@ -103,6 +108,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(behavior_msgs.msg.dds.BehaviorActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getNodeState(), cdr);	
       data.setId(cdr.read_type_4());
       	
       data.setActionIndex(cdr.read_type_2());
@@ -117,6 +123,8 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("node_state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getNodeState());
+
       ser.write_type_4("id", data.getId());
       ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
@@ -126,6 +134,8 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorActionStateMessage data)
    {
+      ser.read_type_a("node_state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getNodeState());
+
       data.setId(ser.read_type_4("id"));
       data.setActionIndex(ser.read_type_2("action_index"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));

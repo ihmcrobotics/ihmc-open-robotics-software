@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessage> implements Settable<BehaviorActionStateMessage>, EpsilonComparable<BehaviorActionStateMessage>
 {
    /**
+            * Parent state fields
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage node_state_;
+   /**
             * The action's unique ID
             */
    public long id_;
@@ -27,6 +31,7 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
 
    public BehaviorActionStateMessage()
    {
+      node_state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
    }
 
    public BehaviorActionStateMessage(BehaviorActionStateMessage other)
@@ -37,6 +42,7 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
 
    public void set(BehaviorActionStateMessage other)
    {
+      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.node_state_, node_state_);
       id_ = other.id_;
 
       action_index_ = other.action_index_;
@@ -45,6 +51,15 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
 
       is_to_be_executed_concurrently_ = other.is_to_be_executed_concurrently_;
 
+   }
+
+
+   /**
+            * Parent state fields
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getNodeState()
+   {
+      return node_state_;
    }
 
    /**
@@ -125,6 +140,7 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.node_state_.epsilonEquals(other.node_state_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
@@ -146,6 +162,7 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
 
       BehaviorActionStateMessage otherMyClass = (BehaviorActionStateMessage) other;
 
+      if (!this.node_state_.equals(otherMyClass.node_state_)) return false;
       if(this.id_ != otherMyClass.id_) return false;
 
       if(this.action_index_ != otherMyClass.action_index_) return false;
@@ -164,6 +181,8 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorActionStateMessage {");
+      builder.append("node_state=");
+      builder.append(this.node_state_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
       builder.append("action_index=");
