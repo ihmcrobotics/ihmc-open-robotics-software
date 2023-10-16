@@ -387,6 +387,8 @@ if __name__ == '__main__':
 
     # list of good files
     # 20231005_001313_PerceptionLog.hdf5
+    # 20231015_183228_PerceptionLog.hdf5
+    # 20231010_161751_PerceptionLog.hdf5
 
-    data = h5py.File(path + '20231010_161751_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20231015_183228_PerceptionLog.hdf5', 'r')
     plan_view_main(data)

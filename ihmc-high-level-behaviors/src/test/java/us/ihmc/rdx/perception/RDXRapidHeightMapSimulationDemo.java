@@ -127,7 +127,7 @@ public class RDXRapidHeightMapSimulationDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("LookAndStepHard.json");
+            environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated_2.json");
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
@@ -331,8 +331,6 @@ public class RDXRapidHeightMapSimulationDemo
             request.setAbortIfGoalStepSnappingFails(true);
 
             FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
-            footstepPlannerLogger.logSession();
-            FootstepPlannerLogger.deleteOldLogs();
 
             if (plannerOutput != null)
             {
@@ -350,8 +348,8 @@ public class RDXRapidHeightMapSimulationDemo
 
          public void setToRandomPose(RigidBodyTransform transformToPack)
          {
-            transformToPack.getTranslation().set(Math.random() * 10.0, Math.random(), 1.5 + Math.random() * 0.5);
-            transformToPack.getRotation().setYawPitchRoll(Math.random() * 2.0 * Math.PI, Math.toRadians(60.0f), Math.toRadians(60.0f));
+            transformToPack.getTranslation().set(1.2 + Math.random() * 6.0, Math.random() * 8.0, 1.5 + Math.random() * 0.75);
+            transformToPack.getRotation().setYawPitchRoll(Math.random() * 2.0 * Math.PI, Math.toRadians(60.0f), 0.0f);
          }
 
          public void updateFrameState(int counter)

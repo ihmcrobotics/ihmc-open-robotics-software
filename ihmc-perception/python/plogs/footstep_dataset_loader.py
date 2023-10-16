@@ -131,8 +131,13 @@ if __name__ == '__main__':
 
     # list of good files
     # 20231005_001313_PerceptionLog.hdf5
+    # 20231015_183228_PerceptionLog.hdf5
+    # 20231010_161751_PerceptionLog.hdf5
+    # 20231015_234600_PerceptionLog.hdf5
+    # 20231016_025456_PerceptionLog.hdf5
 
-    path = '/home/bmishra/.ihmc/logs/perception/'
+    home = os.path.expanduser('~')
+    path = home + '/.ihmc/logs/perception/'
 
-    data = h5py.File(path + '20231010_165704_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20231005_001313_PerceptionLog.hdf5', 'r')
     plan_view_main(data)
