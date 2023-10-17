@@ -370,10 +370,18 @@ public class RDXLocomotionManager
          }
          else if (pauseAvailable)
          {
+            if (!pauseWalkingMessage.getPause())
+            {
+               baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Paused walking");
+            }
             setPauseWalkingAndPublish(true);
          }
          else if (continueAvailable)
          {
+            if (pauseWalkingMessage.getPause())
+            {
+               baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Resumed walking");
+            }
             setPauseWalkingAndPublish(false);
          }
       }
