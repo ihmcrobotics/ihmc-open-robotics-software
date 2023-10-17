@@ -92,13 +92,13 @@ public class BehaviorActionSequence
    private ActionExecutionStatusMessage nothingExecutingStatusMessage = new ActionExecutionStatusMessage();
    private final ActionsExecutionStatusMessage actionsExecutionStatusMessage = new ActionsExecutionStatusMessage();
 
-   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
+   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
       this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       footstepTracker = new WalkingFootstepTracker(ros2.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       for (RobotSide side : RobotSide.values)
          handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
