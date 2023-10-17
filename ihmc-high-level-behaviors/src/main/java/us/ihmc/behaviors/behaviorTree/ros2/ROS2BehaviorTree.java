@@ -3,8 +3,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.function.BiFunction;
@@ -33,14 +31,13 @@ public class ROS2BehaviorTree extends BehaviorTreeState
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTree(BiFunction<SceneGraph, ROS2BehaviorTreeSubscriptionNode, SceneNode> newNodeSupplier,
-                           ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+   public ROS2BehaviorTree(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                            ROS2ActorDesignation ros2ActorDesignation)
    {
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.ros2ActorDesignation = ros2ActorDesignation;
 
-      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getIncomingQualifier(), newNodeSupplier);
+      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getIncomingQualifier());
    }
 
    /**
