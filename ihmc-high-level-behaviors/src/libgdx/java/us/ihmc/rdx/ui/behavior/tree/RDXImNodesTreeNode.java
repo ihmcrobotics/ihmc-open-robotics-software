@@ -135,8 +135,8 @@ public class RDXImNodesTreeNode
       double recentTickWindow = tickPeriod * 0.75;
 //      boolean tickedThisFrame = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < recentTickWindow;
 //      boolean tickedRecently = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 1.0;
-      boolean tickedThisFrame = false;
-      boolean tickedRecently = false;
+      boolean tickedThisFrame = behaviorNodeUI.getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
+      boolean tickedRecently = behaviorNodeUI.getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
       BehaviorTreeNodeStatus status = behaviorNodeUI.getState().getStatus();
       tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
       tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);
