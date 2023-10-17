@@ -29,7 +29,6 @@ public class ReferenceFrameLibrary
       // Here so it's easier to track instances in the IDE
    }
 
-   // TODO: Add robot frames in constructor?
    public void addAll(Collection<ReferenceFrame> referenceFrames)
    {
       alwaysPresentFrames.addAll(referenceFrames);
