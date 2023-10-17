@@ -75,7 +75,7 @@ public class RDX3DPanel extends RDXPanel
    private float windowDrawMaxY;
    private float windowPositionX;
    private float windowPositionY;
-   private final RDX3DPanelNotification notification = new RDX3DPanelNotification(this);
+   private final RDX3DPanelNotificationManager notificationManager = new RDX3DPanelNotificationManager(this);
 
    public RDX3DPanel(String panelName)
    {
@@ -124,7 +124,7 @@ public class RDX3DPanel extends RDXPanel
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      addImGuiOverlayAddition(notification::render);
+      addImGuiOverlayAddition(notificationManager::render);
    }
 
    public void render()
@@ -491,8 +491,8 @@ public class RDX3DPanel extends RDXPanel
       return panelName;
    }
 
-   public RDX3DPanelNotification getNotification()
+   public RDX3DPanelNotificationManager getNotificationManager()
    {
-      return notification;
+      return notificationManager;
    }
 }
