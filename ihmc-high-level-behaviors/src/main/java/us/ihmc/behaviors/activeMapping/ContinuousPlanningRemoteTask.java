@@ -37,11 +37,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanningRemoteTask
 {
-   private final static long CONTINUOUS_PLANNING_UPDATE_TICK_MS = 200;
+   private final static long CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS = 50;
    private final static float SWING_DURATION = 0.8f;
    private final static float TRANSFER_DURATION = 0.4f;
    private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
-   private final static int MAXIMUM_FOOTSTEPS_HELD_IN_CONTROLLER_QUEUE = 4;
+   private final static int MAXIMUM_FOOTSTEPS_HELD_IN_CONTROLLER_QUEUE = 2;
 
    private enum ContinuousWalkingState
    {
@@ -99,10 +99,13 @@ public class ContinuousPlanningRemoteTask
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
+      robotModel.getLookAndStepParameters();
+
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepStatusReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepQueueStatusReceived);
 
-      executorService.scheduleAtFixedRate(this::updateContinuousPlanner, 0, CONTINUOUS_PLANNING_UPDATE_TICK_MS, TimeUnit.MILLISECONDS);
+      executorService.scheduleWithFixedDelay(this::updateContinuousPlanner, CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS,
+                                             CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -137,6 +140,7 @@ public class ContinuousPlanningRemoteTask
          return;
       }
 
+      System.out.println("----- Do Continuous Planning Loop -----");
       // Initialize the continuous planner so that the state machine starts in the correct configuration
       if (!continuousPlanner.isInitialized())
       {
@@ -168,8 +172,9 @@ public class ContinuousPlanningRemoteTask
          getImminentStanceFromLatestStatus();
          startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
 
+         // TODO adjust this so that it doesn't consider the Z of the poses at all, otherwise there will be bugs in the future
          // Only update the goal poses if the robot gets within some distance of them
-         double distance = secondImminentFootstep.getPositionDistance(goalPoseForFootstepPlanner.get(secondImminentFootstepSide));
+         double distance = firstImminentFootstep.getPositionDistance(goalPoseForFootstepPlanner.get(secondImminentFootstepSide.getOppositeSide()));
          if (distance < 0.5)
          {
             multiplierForGoalPoseDistance += 1;
@@ -189,8 +194,6 @@ public class ContinuousPlanningRemoteTask
       else if (continuousPlanner.isPlanAvailable() && continuousPlannerState == ContinuousWalkingState.FOOTSTEP_STARTED
                && queuedFootstepSize < MAXIMUM_FOOTSTEPS_HELD_IN_CONTROLLER_QUEUE)
       {
-         continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
-
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
                                                                                                         MAXIMUM_FOOTSTEPS_TO_SEND,
                                                                                                         SWING_DURATION,
@@ -199,9 +202,12 @@ public class ContinuousPlanningRemoteTask
 
          if (originalFootstepDataListId == -1)
             originalFootstepDataListId = footstepDataList.getUniqueId();
-
          footstepDataList.setUniqueId(originalFootstepDataListId);
-         publisherMap.publish(controllerFootstepDataTopic, footstepDataList); // send it to the controller
+
+         LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
+         publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+
+         continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
          continuousPlanner.setPlanAvailable(false);
          executionMode = ExecutionMode.QUEUE;
       }
@@ -212,6 +218,8 @@ public class ContinuousPlanningRemoteTask
     */
    public void getImminentStanceFromLatestStatus()
    {
+      LogTools.info("Controller Queue Size used for planning: " + queuedFootstepSize);
+
       // Both imminent footsteps will be from the queue
       if (queuedFootstepSize > 1)
       {
@@ -253,12 +261,13 @@ public class ContinuousPlanningRemoteTask
 
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
-      LogTools.warn("Received Footstep Status Message: {}", footstepStatusMessage);
       this.footstepStatusMessage.set(footstepStatusMessage);
    }
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
+      if (queuedFootstepSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
+         LogTools.warn("Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
       queuedFootstepSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
       queuedFootstepList = footstepQueueStatusMessage.getQueuedFootstepList();
    }
