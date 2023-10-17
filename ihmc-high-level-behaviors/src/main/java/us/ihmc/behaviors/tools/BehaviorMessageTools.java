@@ -54,8 +54,8 @@ public class BehaviorMessageTools
       String name = treeNodeMessage.getNodeNameAsString();
       behaviorTreeStatusNode.getDefinition().setDescription(name);
       // Previous status will be -1 if the node has not been ticked yet
-      if (treeNodeMessage.getPreviousStatus() >= 0)
-         behaviorTreeStatusNode.getState().setStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
+//      if (treeNodeMessage.getPreviousStatus() >= 0)
+//         behaviorTreeStatusNode.getState().setStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
 
       for (int i = 0; i < treeNodeMessage.getNumberOfChildren(); i++)
       {

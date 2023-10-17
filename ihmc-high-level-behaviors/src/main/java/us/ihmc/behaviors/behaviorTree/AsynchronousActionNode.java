@@ -26,7 +26,7 @@ public abstract class AsynchronousActionNode extends ResettingNode
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       if (!getHasStarted())
       {

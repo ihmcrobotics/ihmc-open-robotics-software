@@ -13,7 +13,7 @@ public class AlwaysSuccessfulAction extends LocalOnlyBehaviorTreeNodeExecutor
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       action.run();
       return BehaviorTreeNodeStatus.SUCCESS;

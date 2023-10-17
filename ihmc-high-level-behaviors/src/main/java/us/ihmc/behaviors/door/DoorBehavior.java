@@ -106,7 +106,7 @@ public class DoorBehavior extends ResettingNode implements Destroyable
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       if (firstTick)
       {

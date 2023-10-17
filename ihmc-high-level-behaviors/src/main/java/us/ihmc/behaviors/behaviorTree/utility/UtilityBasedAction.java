@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.utility;
 import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Based on Dave Mark Architecture Tricks: Managing Behaviors in Time, Space, and Depth
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 public abstract class UtilityBasedAction extends LocalOnlyBehaviorTreeNodeExecutor
 {
    private final ArrayList<UtilityAxis> axes = new ArrayList<>();
+
+   private final List<UtilityBasedAction> children = new ArrayList<>();
 
    public double evaluateUtility()
    {
@@ -31,5 +34,11 @@ public abstract class UtilityBasedAction extends LocalOnlyBehaviorTreeNodeExecut
    public void addUtilityAxis(UtilityAxis axis)
    {
       axes.add(axis);
+   }
+
+   // TODO: Fix
+   public List<UtilityBasedAction> getUtilityChildren()
+   {
+      return children;
    }
 }

@@ -166,7 +166,7 @@ public class TraverseStairsBehavior extends ResettingNode
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       start();
 

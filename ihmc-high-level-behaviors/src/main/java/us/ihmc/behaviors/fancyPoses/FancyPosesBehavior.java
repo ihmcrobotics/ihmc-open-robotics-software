@@ -81,7 +81,7 @@ public class FancyPosesBehavior extends LocalOnlyBehaviorTreeNodeExecutor implem
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

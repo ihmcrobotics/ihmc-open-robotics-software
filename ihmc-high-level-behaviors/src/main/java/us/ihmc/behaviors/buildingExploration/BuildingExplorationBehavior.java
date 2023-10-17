@@ -80,7 +80,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Destro
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       syncedRobot.update();
 
@@ -130,19 +130,19 @@ public class BuildingExplorationBehavior extends ResettingNode implements Destro
       if (lookAndStepBehavior.isReset())
          lookAndStepBehavior.acceptGoal(goal.get());
       lastTickedNode = "LOOK_AND_STEP";
-      return lookAndStepBehavior.tick();
+      return lookAndStepBehavior.tickAndGetStatus();
    }
 
    private BehaviorTreeNodeStatus tickDoor()
    {
       lastTickedNode = "DOOR";
-      return doorBehavior.tick();
+      return doorBehavior.tickAndGetStatus();
    }
 
    private BehaviorTreeNodeStatus tickStairs()
    {
       lastTickedNode = "STAIRS";
-      return traverseStairsBehavior.tick();
+      return traverseStairsBehavior.tickAndGetStatus();
    }
 
    @Override

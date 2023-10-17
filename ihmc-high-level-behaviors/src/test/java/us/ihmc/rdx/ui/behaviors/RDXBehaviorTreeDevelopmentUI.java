@@ -43,7 +43,7 @@ public class RDXBehaviorTreeDevelopmentUI
       node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (FALLBACK_PRIMARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -59,7 +59,7 @@ public class RDXBehaviorTreeDevelopmentUI
       node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (FALLBACK_SECONDARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -75,7 +75,7 @@ public class RDXBehaviorTreeDevelopmentUI
       node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (FALLBACK_TERTIARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;
@@ -94,7 +94,7 @@ public class RDXBehaviorTreeDevelopmentUI
       tree.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             if (SEQUENCE_SECONDARY.get())
                return BehaviorTreeNodeStatus.SUCCESS;

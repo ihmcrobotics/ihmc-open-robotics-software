@@ -9,7 +9,7 @@ public abstract class BehaviorTreeCondition extends LocalOnlyBehaviorTreeNodeExe
 {
    private final BooleanSupplier conditionSupplier;
 
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       boolean success = checkCondition();
 

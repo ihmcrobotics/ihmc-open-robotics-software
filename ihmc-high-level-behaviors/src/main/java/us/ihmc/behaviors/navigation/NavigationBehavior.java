@@ -113,7 +113,7 @@ public class NavigationBehavior extends LocalOnlyBehaviorTreeNodeExecutor implem
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

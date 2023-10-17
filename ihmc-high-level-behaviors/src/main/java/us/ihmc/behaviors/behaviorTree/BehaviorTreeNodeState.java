@@ -22,7 +22,6 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 
    private final List<BehaviorTreeNodeState> children = new ArrayList<>();
 
-
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
       message.setIsActive(isActive);

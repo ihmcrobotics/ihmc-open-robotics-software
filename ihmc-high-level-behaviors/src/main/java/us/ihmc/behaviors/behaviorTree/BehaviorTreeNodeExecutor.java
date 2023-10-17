@@ -21,18 +21,9 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
       }
    }
 
-   public BehaviorTreeNodeStatus tick()
+   public void tick()
    {
       getState().setIsActive(true);
-      getState().setStatus(tickInternal());
-      return getState().getStatus();
-   }
-
-   // TODO: Is this a good convention doing the *Internal thing?
-   //   or would it be better to call super.tick or something somehow
-   protected BehaviorTreeNodeStatus tickInternal()
-   {
-      return getState().getStatus();
    }
 
    public List<BehaviorTreeNodeExecutor> getChildren()

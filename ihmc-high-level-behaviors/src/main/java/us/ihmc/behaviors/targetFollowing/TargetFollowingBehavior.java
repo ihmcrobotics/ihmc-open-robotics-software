@@ -55,7 +55,7 @@ public class TargetFollowingBehavior extends ResettingNode implements Destroyabl
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       PoseStamped latestSemanticTargetPose = latestSemanticTargetPoseReference.getAndSet(null);
       if (latestSemanticTargetPose != null)
@@ -93,7 +93,7 @@ public class TargetFollowingBehavior extends ResettingNode implements Destroyabl
          }
       }
 
-      return lookAndStepBehavior.tick();
+      return lookAndStepBehavior.tickAndGetStatus();
    }
 
    @Override

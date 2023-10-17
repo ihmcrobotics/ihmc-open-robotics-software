@@ -184,7 +184,7 @@ public class LookAndStepBehavior extends ResettingNode implements Destroyable
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.RUNNING;
    }

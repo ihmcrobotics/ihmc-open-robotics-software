@@ -23,18 +23,18 @@ public class BehaviorTreeNonReactiveTest
 
       assertEquals("0", output.getValue());
 
-      assertEquals(RUNNING, loopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tickAndGetStatus());
       assertEquals("01", output.getValue());
-      assertEquals(RUNNING, loopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tickAndGetStatus());
       assertEquals("012", output.getValue());
-      assertEquals(RUNNING, loopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tickAndGetStatus());
       assertEquals("0123", output.getValue());
 
-      assertEquals(RUNNING, loopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tickAndGetStatus());
       assertEquals("01231", output.getValue());
-      assertEquals(RUNNING, loopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tickAndGetStatus());
       assertEquals("012312", output.getValue());
-      assertEquals(RUNNING, loopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tickAndGetStatus());
       assertEquals("0123123", output.getValue());
    }
 
@@ -57,28 +57,28 @@ public class BehaviorTreeNonReactiveTest
       testAction2.setStatus(SUCCESS);
       testAction3.setStatus(SUCCESS);
 
-      assertEquals(SUCCESS, fallbackNode.tick());
+      assertEquals(SUCCESS, fallbackNode.tickAndGetStatus());
       assertEquals("01", output.getValue());
 
       testAction1.setStatus(FAILURE);
       testAction2.setStatus(SUCCESS);
       testAction3.setStatus(SUCCESS);
 
-      assertEquals(SUCCESS, fallbackNode.tick());
+      assertEquals(SUCCESS, fallbackNode.tickAndGetStatus());
       assertEquals("0112", output.getValue());
 
       testAction1.setStatus(FAILURE);
       testAction2.setStatus(FAILURE);
       testAction3.setStatus(SUCCESS);
 
-      assertEquals(SUCCESS, fallbackNode.tick());
+      assertEquals(SUCCESS, fallbackNode.tickAndGetStatus());
       assertEquals("0112123", output.getValue());
 
       testAction1.setStatus(FAILURE);
       testAction2.setStatus(FAILURE);
       testAction3.setStatus(FAILURE);
 
-      assertEquals(FAILURE, fallbackNode.tick());
+      assertEquals(FAILURE, fallbackNode.tickAndGetStatus());
       assertEquals("0112123123", output.getValue());
    }
 
