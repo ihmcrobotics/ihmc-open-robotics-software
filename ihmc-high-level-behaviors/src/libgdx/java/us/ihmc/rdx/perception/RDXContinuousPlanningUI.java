@@ -78,8 +78,8 @@ public class RDXContinuousPlanningUI implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         startFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getStartPose().get(side));
-         goalFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getGoalPose().get(side));
+         startFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getStartPoseForFootstepPlanner().get(side));
+         goalFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getGoalPoseForFootstepPlanner().get(side));
       }
    }
 
