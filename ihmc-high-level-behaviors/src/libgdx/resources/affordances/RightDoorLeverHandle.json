@@ -1,9 +1,9 @@
 {
-  "name" : "PushDoorLeverHandle",
+  "name" : "RightDoorLeverHandle",
   "actions" : [ {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 1.0,
     "x" : 0.2175,
@@ -25,7 +25,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 1.6083946347424367,
     "x" : 0.136,
@@ -39,7 +39,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 1.1376400672568723E-15,
     "x" : 0.136,
@@ -61,7 +61,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.20943951023932017,
     "x" : 0.136,
@@ -75,7 +75,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.20943951023931892,
     "x" : 0.136,
@@ -89,7 +89,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.20943951023931912,
     "x" : 0.136,
@@ -103,7 +103,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.20943951023931973,
     "x" : 0.136,
@@ -117,7 +117,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.2094395102393194,
     "x" : 0.136,
@@ -131,7 +131,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.20943951023932,
     "x" : 0.136,
@@ -145,7 +145,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 0.20943951023931964,
     "x" : 0.136,
@@ -159,7 +159,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 1.7221232032475742,
     "x" : -0.0365,
@@ -181,7 +181,7 @@
   }, {
     "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
-    "parentFrame" : "PushDoorLeverHandle",
+    "parentFrame" : "RightDoorLeverHandle",
     "side" : "right",
     "trajectoryDuration" : 1.7056833519365555,
     "x" : 0.1345,
