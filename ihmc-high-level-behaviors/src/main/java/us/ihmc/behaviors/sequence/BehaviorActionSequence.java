@@ -15,7 +15,6 @@ import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
@@ -107,24 +106,10 @@ public class BehaviorActionSequence
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
-      addCommonFrames(referenceFrameLibrary, syncedRobot);
-
       updateSubscription = ros2.subscribe(SEQUENCE_COMMAND_TOPIC);
       manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
       automaticExecutionSubscription = ros2.subscribe(AUTOMATIC_EXECUTION_COMMAND_TOPIC);
       executionNextIndexSubscription = ros2.subscribe(EXECUTION_NEXT_INDEX_COMMAND_TOPIC);
-   }
-
-   public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
-   {
-
-      referenceFrameLibrary.add(ReferenceFrame.getWorldFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getChestFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
    }
 
    public void update()
