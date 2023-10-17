@@ -14,6 +14,9 @@ import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
+/**
+ * @deprecated Here for reference. We are going for a newer design.
+ */
 public class RDXImNodesTreeNode
 {
    private final RDXBehaviorUIInterface behaviorNodeUI;
