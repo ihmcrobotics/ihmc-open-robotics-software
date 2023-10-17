@@ -10,7 +10,4 @@ int8 NOT_TICKED=3
 # The current status of the node
 int8 status
 
-# The instant the node was last ticked
-ihmc_common_msgs/InstantMessage last_tick_instant
-
 

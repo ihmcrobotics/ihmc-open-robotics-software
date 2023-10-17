@@ -130,7 +130,8 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return getState().wasTickedRecently(0.5);
+//      return getState().wasTickedRecently(0.5);
+      return false;
    }
 
    @Override

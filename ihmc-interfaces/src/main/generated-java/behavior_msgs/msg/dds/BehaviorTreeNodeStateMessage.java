@@ -16,14 +16,9 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
             * The current status of the node
             */
    public byte status_;
-   /**
-            * The instant the node was last ticked
-            */
-   public ihmc_common_msgs.msg.dds.InstantMessage last_tick_instant_;
 
    public BehaviorTreeNodeStateMessage()
    {
-      last_tick_instant_ = new ihmc_common_msgs.msg.dds.InstantMessage();
    }
 
    public BehaviorTreeNodeStateMessage(BehaviorTreeNodeStateMessage other)
@@ -36,7 +31,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
    {
       status_ = other.status_;
 
-      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_tick_instant_, last_tick_instant_);
    }
 
    /**
@@ -52,15 +46,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
    public byte getStatus()
    {
       return status_;
-   }
-
-
-   /**
-            * The instant the node was last ticked
-            */
-   public ihmc_common_msgs.msg.dds.InstantMessage getLastTickInstant()
-   {
-      return last_tick_instant_;
    }
 
 
@@ -83,8 +68,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.status_, other.status_, epsilon)) return false;
 
-      if (!this.last_tick_instant_.epsilonEquals(other.last_tick_instant_, epsilon)) return false;
-
       return true;
    }
 
@@ -99,7 +82,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       if(this.status_ != otherMyClass.status_) return false;
 
-      if (!this.last_tick_instant_.equals(otherMyClass.last_tick_instant_)) return false;
 
       return true;
    }
@@ -111,9 +93,7 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       builder.append("BehaviorTreeNodeStateMessage {");
       builder.append("status=");
-      builder.append(this.status_);      builder.append(", ");
-      builder.append("last_tick_instant=");
-      builder.append(this.last_tick_instant_);
+      builder.append(this.status_);
       builder.append("}");
       return builder.toString();
    }

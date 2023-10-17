@@ -1,7 +1,6 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 
-#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -28,10 +27,6 @@ module behavior_msgs
          * The current status of the node
          */
         octet status;
-        /**
-         * The instant the node was last ticked
-         */
-        ihmc_common_msgs::msg::dds::InstantMessage last_tick_instant;
       };
     };
   };

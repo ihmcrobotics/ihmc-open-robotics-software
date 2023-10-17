@@ -112,10 +112,10 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void update()
    {
-      if (publishTestLoop.get())
-         periodicThread.setRunning(getState().wasTickedRecently(0.5));
-      else
-         periodicThread.setRunning(false);
+//      if (publishTestLoop.get())
+//         periodicThread.setRunning(getState().wasTickedRecently(0.5));
+//      else
+//         periodicThread.setRunning(false);
 
       Pose3D latestTargetPoseFromBehavior = latestTargetPoseFromBehaviorReference.getAndSet(null);
       if (latestTargetPoseFromBehavior != null)
@@ -153,7 +153,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return getState().wasTickedRecently(0.5);
+//      return getState().wasTickedRecently(0.5);
+      return false;
    }
 
    @Override

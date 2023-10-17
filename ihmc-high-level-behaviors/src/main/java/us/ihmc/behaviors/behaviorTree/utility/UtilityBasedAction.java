@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.utility;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 
 import java.util.ArrayList;
 
@@ -8,11 +8,10 @@ import java.util.ArrayList;
  * Based on Dave Mark Architecture Tricks: Managing Behaviors in Time, Space, and Depth
  * https://gdcvault.com/play/1018040
  */
-public abstract class UtilityBasedAction extends BehaviorTreeNodeState
+public abstract class UtilityBasedAction extends LocalOnlyBehaviorTreeNodeExecutor
 {
    private final ArrayList<UtilityAxis> axes = new ArrayList<>();
 
-   @Override
    public double evaluateUtility()
    {
       if (axes.isEmpty())

@@ -83,7 +83,6 @@ public abstract class RDXBehaviorUIInterface extends LocalOnlyBehaviorTreeNodeEx
    {
       getState().setStatus(externalNode.getState().getStatus());
       getDefinition().setDescription(externalNode.getDefinition().getDescription());
-      getState().setLastTickInstant(externalNode.getState().getLastTickInstant());
 
       for (BehaviorTreeNodeExecutor externalChild : externalNode.getChildren())
       {

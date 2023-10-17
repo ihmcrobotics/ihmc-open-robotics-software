@@ -88,7 +88,8 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return getState().wasTickedRecently(0.5) && lastTickedThing.equals("NONE");
+//      return getState().wasTickedRecently(0.5) && lastTickedThing.equals("NONE");
+      return lastTickedThing.equals("NONE");
    }
 
    @Override
