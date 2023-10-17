@@ -23,16 +23,16 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final RigidBodySceneNode rigidBodySceneNode;
+   private final RigidBodyTransform visualModelToNodeTransform = new RigidBodyTransform();
    private final RDX3DPanel panel3D;
 
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
    private String initialParentName;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
    private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
-   protected transient final FramePose3D nodePose = new FramePose3D();
 
-   private final RigidBodyTransform visualModelToNodeTransform = new RigidBodyTransform();
-   private final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
+   protected transient final FramePose3D nodePose = new FramePose3D();
+   protected transient final FramePose3D visualModelPose = new FramePose3D();
 
    public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform visualModelToNodeTransform, RDX3DPanel panel3D)
    {
@@ -79,10 +79,14 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       if (rigidBodySceneNode.getTrackingInitialParent())
          initialParentName = rigidBodySceneNode.getNodeFrame().getParent().getName();
 
-      // Update model
-      nodePose.get(visualModelToWorldTransform);
-      visualModelToNodeTransform.transform(visualModelToWorldTransform);
-      getModelInstance().setTransformToWorldFrame(visualModelToWorldTransform);
+      visualModelPose.setIncludingFrame(rigidBodySceneNode.getNodeFrame(), visualModelToNodeTransform);
+      visualModelPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      // Quaternion -> Rotation matrix for LibGDX
+      RigidBodyTransform temp = new RigidBodyTransform();
+      temp.set(visualModelPose);
+
+      getModelInstance().setTransformToWorldFrame(temp);
    }
 
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
