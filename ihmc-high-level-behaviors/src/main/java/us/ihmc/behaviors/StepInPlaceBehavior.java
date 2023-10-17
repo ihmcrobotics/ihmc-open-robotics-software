@@ -59,7 +59,7 @@ public class StepInPlaceBehavior extends LocalOnlyBehaviorTreeNodeExecutor imple
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

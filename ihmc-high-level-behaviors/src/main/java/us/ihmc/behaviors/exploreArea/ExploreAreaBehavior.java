@@ -75,7 +75,7 @@ public class ExploreAreaBehavior extends FallbackNode implements Destroyable
    class StopNode extends LocalOnlyBehaviorTreeNodeExecutor // TODO: Is there a more general reusable robot stop node?
    {
       @Override
-      public BehaviorTreeNodeStatus tickInternal()
+      public BehaviorTreeNodeStatus determineStatus()
       {
          if (explore.get())
          {

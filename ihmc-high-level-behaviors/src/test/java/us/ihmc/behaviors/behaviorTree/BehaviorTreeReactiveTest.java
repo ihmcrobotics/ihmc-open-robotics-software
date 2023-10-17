@@ -16,19 +16,19 @@ public class BehaviorTreeReactiveTest
    public void testExpirationCondition()
    {
       TimedExpirationCondition timedExpirationCondition = new TimedExpirationCondition(1.0);
-      assertEquals(FAILURE, timedExpirationCondition.tick());
+      assertEquals(FAILURE, timedExpirationCondition.tickAndGetStatus());
       timedExpirationCondition.update();
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
+      assertEquals(SUCCESS, timedExpirationCondition.tickAndGetStatus());
       ThreadTools.sleep(500);
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
+      assertEquals(SUCCESS, timedExpirationCondition.tickAndGetStatus());
       ThreadTools.sleep(520);
-      assertEquals(FAILURE, timedExpirationCondition.tick());
+      assertEquals(FAILURE, timedExpirationCondition.tickAndGetStatus());
       timedExpirationCondition.update();
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
+      assertEquals(SUCCESS, timedExpirationCondition.tickAndGetStatus());
       ThreadTools.sleep(500);
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
+      assertEquals(SUCCESS, timedExpirationCondition.tickAndGetStatus());
       ThreadTools.sleep(520);
-      assertEquals(FAILURE, timedExpirationCondition.tick());
+      assertEquals(FAILURE, timedExpirationCondition.tickAndGetStatus());
    }
 
    @Test
@@ -56,34 +56,34 @@ public class BehaviorTreeReactiveTest
 
       // use blocking polls to prevent flakiness
 
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220212223");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021222330");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122233031");
-      assertEquals(SUCCESS, sequenceNode.tick());
+      assertEquals(SUCCESS, sequenceNode.tickAndGetStatus());
       printAndAssert(output, "0101112202122233031");
    }
 
@@ -112,67 +112,67 @@ public class BehaviorTreeReactiveTest
 
       // use blocking polls to prevent flakiness
 
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112");
 
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220212223");
 
       testAction2.reset(FAILURE);
 
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021222320");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122232021");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220212223202122");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021222320212223");
 
-      assertEquals(FAILURE, sequenceNode.tick());
+      assertEquals(FAILURE, sequenceNode.tickAndGetStatus());
       testAction2.reset(SUCCESS);
 
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122232021222320");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220212223202122232021");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021222320212223202122");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122232021222320212223");
 
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220212223202122232021222330");
-      assertEquals(RUNNING, sequenceNode.tick());
+      assertEquals(RUNNING, sequenceNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021222320212223202122233031");
-      assertEquals(SUCCESS, sequenceNode.tick());
+      assertEquals(SUCCESS, sequenceNode.tickAndGetStatus());
       printAndAssert(output, "01011122021222320212223202122233031");
    }
 
@@ -201,34 +201,34 @@ public class BehaviorTreeReactiveTest
 
       // use blocking polls to prevent flakiness
 
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "010111220212223");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "01011122021222330");
-      assertEquals(RUNNING, fallbackNode.tick());
+      assertEquals(RUNNING, fallbackNode.tickAndGetStatus());
       stepNotification.blockingPoll();
       printAndAssert(output, "0101112202122233031");
-      assertEquals(FAILURE, fallbackNode.tick());
+      assertEquals(FAILURE, fallbackNode.tickAndGetStatus());
       printAndAssert(output, "0101112202122233031");
    }
 

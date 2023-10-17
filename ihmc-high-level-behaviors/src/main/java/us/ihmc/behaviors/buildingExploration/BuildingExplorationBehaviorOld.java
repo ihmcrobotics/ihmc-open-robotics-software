@@ -152,7 +152,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       syncedRobot.update();
 
@@ -160,7 +160,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
       {
          if (lookAndStepBehavior.isReset())
             lookAndStepBehavior.acceptGoal(goal.get());
-         return lookAndStepBehavior.tick();
+         return lookAndStepBehavior.tickAndGetStatus();
       }
 
       return BehaviorTreeNodeStatus.RUNNING;

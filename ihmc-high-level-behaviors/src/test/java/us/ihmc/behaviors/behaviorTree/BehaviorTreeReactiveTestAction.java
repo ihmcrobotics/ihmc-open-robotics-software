@@ -34,7 +34,7 @@ public class BehaviorTreeReactiveTestAction extends LocalOnlyBehaviorTreeNodeExe
    }
 
    @Override
-   public synchronized BehaviorTreeNodeStatus tickInternal()
+   public synchronized BehaviorTreeNodeStatus determineStatus()
    {
       if (currentStatus.get() == null)
       {

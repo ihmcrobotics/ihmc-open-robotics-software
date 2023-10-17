@@ -173,7 +173,7 @@ public class PatrolBehavior extends LocalOnlyBehaviorTreeNodeExecutor
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

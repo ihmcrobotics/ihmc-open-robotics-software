@@ -20,7 +20,7 @@ class BehaviorTreeSimpleCasesTest
          private int numberOfAttempts = 3;
          
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             output.setValue(output.getValue() + "F");
             
@@ -34,7 +34,7 @@ class BehaviorTreeSimpleCasesTest
       BehaviorTreeNodeExecutor pickBall = new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             output.setValue(output.getValue() + "P");
 
@@ -45,7 +45,7 @@ class BehaviorTreeSimpleCasesTest
       BehaviorTreeNodeExecutor dropBall = new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
-         public BehaviorTreeNodeStatus tickInternal()
+         public BehaviorTreeNodeStatus determineStatus()
          {
             output.setValue(output.getValue() + "D");
 
@@ -56,23 +56,23 @@ class BehaviorTreeSimpleCasesTest
       tree.getChildren().add(pickBall);
       tree.getChildren().add(dropBall);
 
-      BehaviorTreeNodeStatus status = tree.tick();
+      BehaviorTreeNodeStatus status = tree.tickAndGetStatus();
       assertEquals(status, BehaviorTreeNodeStatus.RUNNING);
       assertEquals(output.getValue(), "F");
       
-      status = tree.tick();
+      status = tree.tickAndGetStatus();
       assertEquals(status, BehaviorTreeNodeStatus.RUNNING);
       assertEquals(output.getValue(), "FF");
       
-      status = tree.tick();
+      status = tree.tickAndGetStatus();
       assertEquals(status, BehaviorTreeNodeStatus.RUNNING);
       assertEquals(output.getValue(), "FFF");
       
-      status = tree.tick();
+      status = tree.tickAndGetStatus();
       assertEquals(status, BehaviorTreeNodeStatus.SUCCESS);
       assertEquals(output.getValue(), "FFFFPD");
       
-      status = tree.tick();
+      status = tree.tickAndGetStatus();
       assertEquals(status, BehaviorTreeNodeStatus.SUCCESS);
       assertEquals(output.getValue(), "FFFFPDFPD");
    }

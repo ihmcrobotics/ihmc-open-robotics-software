@@ -16,7 +16,7 @@ public class BehaviorTreeConstantInstantTestAction extends LocalOnlyBehaviorTree
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       action.run();
       return status;

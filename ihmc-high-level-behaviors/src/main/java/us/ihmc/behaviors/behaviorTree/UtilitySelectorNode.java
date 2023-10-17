@@ -10,11 +10,11 @@ public class UtilitySelectorNode extends UtilityBasedAction
    }
 
    @Override
-   protected BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       double highestUtility = 0.0;
-      BehaviorTreeNodeExecutor nodeOfHighestUtility = null;
-      for (BehaviorTreeNodeExecutor child : getChildren())
+      UtilityBasedAction nodeOfHighestUtility = null;
+      for (UtilityBasedAction child : getUtilityChildren())
       {
          double utility = evaluateUtility();
          if (utility > highestUtility)
@@ -26,7 +26,7 @@ public class UtilitySelectorNode extends UtilityBasedAction
 
       if (highestUtility > 0.0)
       {
-         return nodeOfHighestUtility.tick();
+         return nodeOfHighestUtility.tickAndGetStatus();
       }
       else
       {

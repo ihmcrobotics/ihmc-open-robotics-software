@@ -97,7 +97,7 @@ public abstract class RDXBehaviorUIInterface extends LocalOnlyBehaviorTreeNodeEx
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
       return null;
    }

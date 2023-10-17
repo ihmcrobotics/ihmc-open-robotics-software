@@ -12,11 +12,11 @@ public class FallbackNode extends LocalOnlyBehaviorTreeNodeExecutor
 
    }
 
-   public BehaviorTreeNodeStatus tickInternal()
+   public BehaviorTreeNodeStatus determineStatus()
    {
-      for (BehaviorTreeNodeExecutor child : getChildren())
+      for (LocalOnlyBehaviorTreeNodeExecutor child : getLocalOnlyChildren())
       {
-         BehaviorTreeNodeStatus childStatus = child.tick();
+         BehaviorTreeNodeStatus childStatus = child.tickAndGetStatus();
 
          if (childStatus == RUNNING)
          {
