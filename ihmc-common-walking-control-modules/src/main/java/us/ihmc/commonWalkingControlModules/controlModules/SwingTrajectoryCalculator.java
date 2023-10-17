@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -209,9 +210,11 @@ public class SwingTrajectoryCalculator
       this.swingWaypoints.clear();
       lastFootstepPosition.changeFrame(worldFrame);
 
+      System.out.println(activeTrajectoryType.getEnumValue() + "-----------------------------------");
+
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
-         setWaypointsFromCustomMidpoints(footstep.getCustomPositionWaypoints());
+         setWaypointsFromCustomMidpoints(footstep);
       }
       else if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
@@ -372,10 +375,20 @@ public class SwingTrajectoryCalculator
       }
    }
 
-   private void setWaypointsFromCustomMidpoints(List<FramePoint3D> positionWaypointsForSole)
+   private void setWaypointsFromCustomMidpoints(Footstep footstep)
    {
+      // This is somehow working, TODO fix it and not make this so hacky
+      for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
+      {
+         footstep.getCustomPositionWaypoints().get(0).addZ(1.0);
+      }
+
+      List<FramePoint3D> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
+
       for (int i = 0; i < positionWaypointsForSole.size(); i++)
+      {
          this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
+      }
    }
 
    private void setWaypointsFromExternal(List<FrameSE3TrajectoryPoint> swingWaypoints)
