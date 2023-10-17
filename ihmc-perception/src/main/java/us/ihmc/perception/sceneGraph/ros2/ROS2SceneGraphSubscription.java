@@ -27,7 +27,6 @@ public class ROS2SceneGraphSubscription
    private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
-   private final ROS2IOTopicQualifier ioQualifier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
@@ -55,7 +54,6 @@ public class ROS2SceneGraphSubscription
          this.newNodeSupplier = newNodeSupplier;
       else
          this.newNodeSupplier = (uneeded, subscriptionNode) -> ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
-      this.ioQualifier = ioQualifier;
 
       sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
    }

@@ -15,7 +15,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b9931ee6c1485dd9f4ea680444ede2e8f7a04ec0812a16ffd57963534784bb33";
+   		return "6edc9e753ec7822c4b90d292051c3e648570f76f667d36ff53b822af6dc6d32a";
    }
    
    @Override
