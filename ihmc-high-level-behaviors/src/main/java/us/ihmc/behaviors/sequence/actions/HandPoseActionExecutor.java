@@ -42,7 +42,7 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IKRootCalculator rootCalculator;
 
-   public HandPoseActionExecutor(BehaviorActionSequence sequence,
+   public HandPoseActionExecutor(OldBehaviorActionSequence sequence,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
@@ -89,9 +89,9 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
             handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
          }
          if (definition.getSide() == RobotSide.LEFT)
-            ros2ControllerHelper.publish(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+            ros2ControllerHelper.publish(OldBehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
          else
-            ros2ControllerHelper.publish(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+            ros2ControllerHelper.publish(OldBehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
       }
    }
 

@@ -7,9 +7,9 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
  */
 public abstract class BehaviorActionExecutor implements BehaviorActionStateSupplier
 {
-   private final BehaviorActionSequence sequence;
+   private final OldBehaviorActionSequence sequence;
 
-   public BehaviorActionExecutor(BehaviorActionSequence sequence)
+   public BehaviorActionExecutor(OldBehaviorActionSequence sequence)
    {
       this.sequence = sequence;
    }
@@ -38,7 +38,7 @@ public abstract class BehaviorActionExecutor implements BehaviorActionStateSuppl
       return new ActionExecutionStatusMessage();
    }
 
-   public BehaviorActionSequence getSequence()
+   public OldBehaviorActionSequence getSequence()
    {
       return sequence;
    }

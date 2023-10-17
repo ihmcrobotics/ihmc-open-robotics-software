@@ -35,7 +35,7 @@ import java.util.List;
  * a sequence from file, and the sequence is always completely updated by the operator, even
  * when switching sequences entirely.
  */
-public class BehaviorActionSequence
+public class OldBehaviorActionSequence
 {
    public static final ROS2Topic<?> ROOT_TOPIC = ROS2Tools.IHMC_ROOT.withRobot("behavior_action_sequence");
    public static final ROS2Topic<?> COMMAND_TOPIC = ROOT_TOPIC.withInput();
@@ -93,7 +93,7 @@ public class BehaviorActionSequence
    private ActionExecutionStatusMessage nothingExecutingStatusMessage = new ActionExecutionStatusMessage();
    private final ActionsExecutionStatusMessage actionsExecutionStatusMessage = new ActionsExecutionStatusMessage();
 
-   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
+   public OldBehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
       this.ros2 = ros2;
@@ -335,7 +335,7 @@ public class BehaviorActionSequence
       if (oneHertzThrottler.run(1.0))
       {
          BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionSequenceStatusMessage);
-         ros2.publish(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC, actionSequenceStatusMessage);
+         ros2.publish(OldBehaviorActionSequence.SEQUENCE_STATUS_TOPIC, actionSequenceStatusMessage);
       }
    }
 

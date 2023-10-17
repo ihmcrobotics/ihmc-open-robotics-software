@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.sequence.IKRootCalculator;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
@@ -181,8 +181,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
 
-      leftHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
-      rightHandJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
+      leftHandJointAnglesStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
+      rightHandJointAnglesStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
       rootCalculator = new IKRootCalculator(ros2, syncedFullRobotModel, referenceFrameLibrary);
    }
 

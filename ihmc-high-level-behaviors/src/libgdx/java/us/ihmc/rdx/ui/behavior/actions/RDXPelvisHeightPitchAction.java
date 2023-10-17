@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionState;
 import us.ihmc.communication.packets.MessageTools;
@@ -159,13 +159,13 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
             if (throttler.run())
             {
                if (state.getActionIndex() >= 0)
-                  ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+                  ros2.publish(OldBehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
             }
          }
          else if (wasConcurrent)
          {
             pelvisPoseStatus.setCurrentAndConcurrent(false);
-            ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+            ros2.publish(OldBehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
             wasConcurrent = false;
          }
       }
@@ -175,7 +175,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    public void updateBeforeRemoving()
    {
       pelvisPoseStatus.setCurrentAndConcurrent(false);
-      ros2.publish(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
+      ros2.publish(OldBehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
    }
 
    @Override
