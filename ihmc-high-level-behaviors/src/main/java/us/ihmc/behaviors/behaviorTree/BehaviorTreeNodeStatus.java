@@ -7,9 +7,7 @@ public enum BehaviorTreeNodeStatus
 {
    RUNNING,
    FAILURE,
-   SUCCESS,
-   /** The status when the node was not ticked because the tick traveled elsewhere. */
-   NOT_TICKED;
+   SUCCESS;
 
    public static final BehaviorTreeNodeStatus[] values = values();
 

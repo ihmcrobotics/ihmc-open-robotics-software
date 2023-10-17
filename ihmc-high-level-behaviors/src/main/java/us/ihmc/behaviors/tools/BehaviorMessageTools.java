@@ -20,9 +20,9 @@ public class BehaviorMessageTools
 //      if (treeNode.getState().getLastTickInstant()  != null)
 //         MessageTools.toMessage(treeNode.getState().getLastTickInstant(), nodeMessage.getLastTickInstant());
       nodeMessage.setNodeName(treeNode.getDefinition().getDescription());
-      if (treeNode.getState().getStatus() != null)
-         nodeMessage.setPreviousStatus((byte) treeNode.getState().getStatus().ordinal());
-      else
+//      if (treeNode.getState().getStatus() != null)
+//         nodeMessage.setPreviousStatus((byte) treeNode.getState().getStatus().ordinal());
+//      else
          nodeMessage.setPreviousStatus((byte) -1);
 
       nodeMessage.setNumberOfChildren(treeNode.getChildren().size());

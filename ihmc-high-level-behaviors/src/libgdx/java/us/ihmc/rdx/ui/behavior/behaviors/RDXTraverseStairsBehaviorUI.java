@@ -131,7 +131,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
+      return getState().getIsActive();
    }
 
    @Override

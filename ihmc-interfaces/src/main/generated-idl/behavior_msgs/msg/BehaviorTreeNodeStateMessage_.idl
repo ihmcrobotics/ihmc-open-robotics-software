@@ -7,26 +7,14 @@ module behavior_msgs
   {
     module dds
     {
-      const octet RUNNING =
-      0;
-
-      const octet FAILURE =
-      1;
-
-      const octet SUCCESS =
-      2;
-
-      const octet NOT_TICKED =
-      3;
-
 
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeStateMessage_")
       struct BehaviorTreeNodeStateMessage
       {
         /**
-         * The current status of the node
+         * A node is active if it lies on the path of the current tree tick.
          */
-        octet status;
+        boolean is_active;
       };
     };
   };

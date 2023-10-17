@@ -114,7 +114,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void update()
    {
       if (publishTestLoop.get())
-         periodicThread.setRunning(getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED);
+         periodicThread.setRunning(getState().getIsActive());
       else
          periodicThread.setRunning(false);
 
@@ -154,7 +154,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
+      return getState().getIsActive();
    }
 
    @Override

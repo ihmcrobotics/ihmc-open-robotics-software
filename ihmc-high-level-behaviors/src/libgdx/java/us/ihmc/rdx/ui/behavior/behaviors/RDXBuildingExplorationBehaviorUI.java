@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.StringUtils;
 import std_msgs.msg.dds.UInt16;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -89,7 +88,7 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
+      return getState().getIsActive();
    }
 
    @Override

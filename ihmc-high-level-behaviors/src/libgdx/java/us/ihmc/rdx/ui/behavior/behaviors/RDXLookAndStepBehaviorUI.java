@@ -347,7 +347,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      boolean wasTickedRecently = getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
+      boolean wasTickedRecently = getState().getIsActive();
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
       boolean isInResetState = currentState.equals(LookAndStepBehavior.State.RESET.name());
       boolean isPlacingGoal = goalAffordance.isPlacingGoal();

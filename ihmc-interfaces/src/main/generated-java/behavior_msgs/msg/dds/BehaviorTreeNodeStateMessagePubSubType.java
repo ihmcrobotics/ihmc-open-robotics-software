@@ -15,7 +15,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6d08417954a59764fb91106a7eb413815af9115ab102764e02261bcdae84eb1f";
+   		return "446a311bb47596e64e66b0d339868369ca5407b836ebe958e3b289bb6c5b3b93";
    }
    
    @Override
@@ -76,13 +76,13 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_9(data.getStatus());
+      cdr.write_type_7(data.getIsActive());
 
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setStatus(cdr.read_type_9());
+      data.setIsActive(cdr.read_type_7());
       	
 
    }
@@ -90,13 +90,13 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_9("status", data.getStatus());
+      ser.write_type_7("is_active", data.getIsActive());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data)
    {
-      data.setStatus(ser.read_type_9("status"));   }
+      data.setIsActive(ser.read_type_7("is_active"));   }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage dest)
    {
