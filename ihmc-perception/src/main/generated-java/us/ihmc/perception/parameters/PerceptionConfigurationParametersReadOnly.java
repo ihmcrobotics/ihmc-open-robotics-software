@@ -30,6 +30,11 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
       return get(rapidRegionsEnabled);
    }
 
+   default boolean getHeightMapEnabled()
+   {
+      return get(heightMapEnabled);
+   }
+
    default boolean getLoggingEnabled()
    {
       return get(loggingEnabled);

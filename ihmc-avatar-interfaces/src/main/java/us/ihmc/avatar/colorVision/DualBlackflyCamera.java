@@ -14,7 +14,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,15 +26,13 @@ import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -61,7 +58,7 @@ public class DualBlackflyCamera
 
    private SpinnakerBlackfly spinnakerBlackfly;
    private final BlackflyLensProperties blackflyLensProperties;
-   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final ROS2SceneGraph sceneGraph;
 
    private final FrequencyCalculator readFrequencyCalculator = new FrequencyCalculator();
    private final Timer printCameraReadRateTimer = new Timer();
@@ -70,12 +67,10 @@ public class DualBlackflyCamera
 
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   private final ModifiableReferenceFrame blackflyFrameForSceneNodeUpdate = new ModifiableReferenceFrame();
+   private final MutableReferenceFrame blackflyFrameForSceneNodeUpdate = new MutableReferenceFrame();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
-   private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
-   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
@@ -132,7 +127,7 @@ public class DualBlackflyCamera
                              ROS2Node ros2Node,
                              SpinnakerBlackfly spinnakerBlackfly,
                              BlackflyLensProperties blackflyLensProperties,
-                             PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+                             ROS2SceneGraph sceneGraph)
    {
       this.side = side;
       this.referenceFrameSupplier = referenceFramesSupplier;
@@ -140,7 +135,7 @@ public class DualBlackflyCamera
       this.spinnakerBlackfly = spinnakerBlackfly;
       this.blackflyLensProperties = blackflyLensProperties;
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensProperties);
-      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+      this.sceneGraph = sceneGraph;
 
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
       ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
@@ -156,10 +151,6 @@ public class DualBlackflyCamera
       remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                            PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(side),
                                                                            cameraTransformToParent);
-
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
-                                                                                  ros2Helper,
-                                                                                  ROS2IOTopicQualifier.COMMAND);
 
       // Camera read thread
       cameraReadThread = new Thread(() ->
@@ -372,7 +363,7 @@ public class DualBlackflyCamera
       arUcoMarkerDetection.create(rightBlackflyCameraFrame);
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
       newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDToNodeMap());
 
       // Close pointers
       tempUndistortionMat2.close();
@@ -536,13 +527,13 @@ public class DualBlackflyCamera
 //          arUcoMarkerDetection.drawRejectedPoints(undistortedBytedecoImage.getBytedecoOpenCVMat());
          arUcoMarkerPublisher.update();
 
-         detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
-         ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+         sceneGraph.updateSubscription(); // Receive overridden poses from operator
+         ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
          synchronized (blackflyFrameForSceneNodeUpdate)
          {
-            predefinedSceneNodeLibrary.update(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
+            sceneGraph.updateOnRobotOnly(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
          }
-         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+         sceneGraph.updatePublication();
       }
       // TODO: left behavior?
    }

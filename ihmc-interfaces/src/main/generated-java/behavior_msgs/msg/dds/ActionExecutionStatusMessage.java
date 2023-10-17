@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is meant to communicate the status of currently executing actions
+       * This message is meant to communicate the status of a currently executing action
        */
 public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMessage> implements Settable<ActionExecutionStatusMessage>, EpsilonComparable<ActionExecutionStatusMessage>
 {

@@ -9,7 +9,6 @@ import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
 import us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -23,7 +22,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.RosTools;
@@ -34,8 +32,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 {
-   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(TargetFollowingBehavior.DEFINITION,
-                                                                                        RDXTargetFollowingBehaviorUI::new);
    private final BehaviorHelper helper;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean publishTestLoop = new ImBoolean(false);
@@ -170,6 +166,6 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Target Following";
    }
 }

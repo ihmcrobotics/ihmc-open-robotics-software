@@ -604,13 +604,6 @@ public class RapidPlanarRegionsExtractor
 
    private void calculateDerivativeParameters()
    {
-      int previousPatchHeight = patchHeight;
-      int previousPatchWidth = patchWidth;
-      int previousPatchImageHeight = patchImageHeight;
-      int previousPatchImageWidth = patchImageWidth;
-      int previousFilterPatchImageHeight = filterPatchImageHeight;
-      int previousFilterPatchImageWidth = filterPatchImageWidth;
-
       patchHeight = parameters.getPatchSize();
       patchWidth = parameters.getPatchSize();
       patchImageHeight = imageHeight / patchHeight;
@@ -618,29 +611,15 @@ public class RapidPlanarRegionsExtractor
       filterPatchImageHeight = imageHeight / parameters.getDeadPixelFilterPatchSize();
       filterPatchImageWidth = imageWidth / parameters.getDeadPixelFilterPatchSize();
 
-      int newPatchHeight = patchHeight;
-      int newPatchWidth = patchWidth;
-      int newPatchImageHeight = patchImageHeight;
-      int newPatchImageWidth = patchImageWidth;
-      int newFilterPatchImageHeight = filterPatchImageHeight;
-      int newFilterPatchImageWidth = filterPatchImageWidth;
-
-      boolean changed = previousPatchHeight != newPatchHeight;
-      changed |= previousPatchWidth != newPatchWidth;
-      changed |= previousPatchImageHeight != newPatchImageHeight;
-      changed |= previousPatchImageWidth != newPatchImageWidth;
-      changed |= previousFilterPatchImageHeight != newFilterPatchImageHeight;
-      changed |= previousFilterPatchImageWidth != newFilterPatchImageWidth;
-
-      if (changed)
+      if (debugger.isEnabled())
       {
-         LogTools.info("Updated patch sizes:");
-         LogTools.info("newPatchHeight: {} -> {}", previousPatchHeight, newPatchHeight);
-         LogTools.info("newPatchWidth: {} -> {}", previousPatchWidth, newPatchWidth);
-         LogTools.info("newPatchImageHeight: {} -> {}", previousPatchImageHeight, newPatchImageHeight);
-         LogTools.info("newPatchImageWidth: {} -> {}", previousPatchImageWidth, newPatchImageWidth);
-         LogTools.info("newFilterPatchImageHeight: {} -> {}", previousFilterPatchImageHeight, newFilterPatchImageHeight);
-         LogTools.info("newFilterPatchImageWidth: {} -> {}", previousFilterPatchImageWidth, newFilterPatchImageWidth);
+         LogTools.info(String.format("Patch Height: %d, Patch Width: %d, Patch Image Height: %d, Patch Image Width: %d, Filter Patch Image Height: %d, Filter Patch Image Width: %d",
+                                     patchHeight,
+                                     patchWidth,
+                                     patchImageHeight,
+                                     patchImageWidth,
+                                     filterPatchImageHeight,
+                                     filterPatchImageWidth));
       }
    }
 
