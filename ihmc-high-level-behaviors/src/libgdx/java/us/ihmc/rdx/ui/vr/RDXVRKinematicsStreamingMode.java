@@ -52,7 +52,7 @@ import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
-   private static final int NUMBER_OF_PARTS_TO_RECORD = 5;
+   private static final int NUMBER_OF_PARTS_TO_RECORD = 2;
    private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -303,7 +303,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       if (tempFramePose.getPosition().getZ() < 0.05)
          streamToController.set(false);
       // record motion if in recording mode
-      kinematicsRecorder.framePoseToRecord(tempFramePose);
+      kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
       if (kinematicsRecorder.isReplaying())
          kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
       else if (vrAssistant.isActive())
