@@ -319,7 +319,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
       maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, true);
       maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, true);
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(),  registry);
       comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(),
                                                                                             controllerToolbox.getOmega0Provider(),
                                                                                             registry));
