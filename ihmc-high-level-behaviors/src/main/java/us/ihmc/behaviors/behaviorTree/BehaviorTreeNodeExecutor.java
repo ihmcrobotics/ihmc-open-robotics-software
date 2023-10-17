@@ -13,7 +13,7 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
     */
    public void clock()
    {
-      getState().setStatus(BehaviorTreeNodeStatus.NOT_TICKED);
+      getState().setIsActive(false);
 
       for (BehaviorTreeNodeExecutor child : children)
       {
@@ -23,6 +23,7 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
 
    public BehaviorTreeNodeStatus tick()
    {
+      getState().setIsActive(true);
       getState().setStatus(tickInternal());
       return getState().getStatus();
    }

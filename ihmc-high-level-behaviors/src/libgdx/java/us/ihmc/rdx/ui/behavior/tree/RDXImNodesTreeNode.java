@@ -48,18 +48,18 @@ public class RDXImNodesTreeNode
       boolean isTickRecent = false;
 
       int color;
-      if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
-      {
-         color = ImColor.floatToColor(0.19607843f, 0.658823529412f, 0.321568627451f);
-      }
-      else if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
-      {
-         color = ImColor.floatToColor(0.658823529412f, 0.19607843f, 0.19607843f);
-      }
-      else
-      {
+//      if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
+//      {
+//         color = ImColor.floatToColor(0.19607843f, 0.658823529412f, 0.321568627451f);
+//      }
+//      else if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
+//      {
+//         color = ImColor.floatToColor(0.658823529412f, 0.19607843f, 0.19607843f);
+//      }
+//      else
+//      {
          color = ImColor.floatToColor(0.19607843f, 0.321568627451f, 0.921568627451f);
-      }
+//      }
 
       ImNodes.pushColorStyle(ImNodesColorStyle.NodeOutline, color);
 
@@ -138,9 +138,9 @@ public class RDXImNodesTreeNode
       double recentTickWindow = tickPeriod * 0.75;
 //      boolean tickedThisFrame = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < recentTickWindow;
 //      boolean tickedRecently = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 1.0;
-      boolean tickedThisFrame = behaviorNodeUI.getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
-      boolean tickedRecently = behaviorNodeUI.getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
-      BehaviorTreeNodeStatus status = behaviorNodeUI.getState().getStatus();
+      boolean tickedThisFrame = behaviorNodeUI.getState().getIsActive();
+      boolean tickedRecently = behaviorNodeUI.getState().getIsActive();
+      BehaviorTreeNodeStatus status = null;
       tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
       tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);
 

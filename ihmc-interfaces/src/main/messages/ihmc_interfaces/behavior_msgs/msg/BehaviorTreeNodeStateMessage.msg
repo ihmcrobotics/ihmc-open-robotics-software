@@ -1,7 +1,2 @@
-byte RUNNING = 0
-byte FAILURE = 1
-byte SUCCESS = 2
-byte NOT_TICKED = 3
-
-# The current status of the node
-byte status
+# A node is active if it lies on the path of the current tree tick.
+bool is_active
