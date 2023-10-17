@@ -100,14 +100,14 @@ public class NavigationBehavior extends LocalOnlyBehaviorTreeNodeExecutor implem
 //      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
 
       sequence = new LoopSequenceNode();
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::aquireMap));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::planBodyPath));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
-      sequence.getState().getChildren().add(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::aquireMap));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::planBodyPath));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
+      sequence.getChildren().add(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
    }

@@ -94,7 +94,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
       walkThroughDoorState = new BuildingExplorationBehaviorWalkThroughDoorState(helper);
       traverseStairsState = new BuildingExplorationBehaviorTraverseStairsState(helper, bombPose);
 
-      addChild(lookAndStepBehavior);
+      getChildren().add(lookAndStepBehavior);
 
       syncedRobot = helper.newSyncedRobot();
 //      helper.subscribeViaCallback(Goal, this::setGoal);
@@ -283,8 +283,10 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
       return factory.build(BuildingExplorationStateName.TELEOP);
    }
 
-   private void update()
+   public void update()
    {
+      super.update();
+
       if (stopRequested.getAndSet(false))
       {
          requestState(BuildingExplorationStateName.TELEOP);

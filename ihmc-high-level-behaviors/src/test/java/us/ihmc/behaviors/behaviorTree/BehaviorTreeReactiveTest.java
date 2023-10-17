@@ -48,9 +48,9 @@ public class BehaviorTreeReactiveTest
       BehaviorTreeReactiveTestAction testAction3 = new BehaviorTreeReactiveTestAction(taskStepDuration, 2, 30, SUCCESS, output, stepNotification);
 
       SequenceNode sequenceNode = new SequenceNode();
-      sequenceNode.addChild(testAction1);
-      sequenceNode.addChild(testAction2);
-      sequenceNode.addChild(testAction3);
+      sequenceNode.getChildren().add(testAction1);
+      sequenceNode.getChildren().add(testAction2);
+      sequenceNode.getChildren().add(testAction3);
 
       printAndAssert(output, "0");
 
@@ -104,9 +104,9 @@ public class BehaviorTreeReactiveTest
       BehaviorTreeReactiveTestAction testAction3 = new BehaviorTreeReactiveTestAction(taskStepDuration, 2, 30, SUCCESS, output, stepNotification);
 
       SequenceNode sequenceNode = new SequenceNode();
-      sequenceNode.addChild(testAction1);
-      sequenceNode.addChild(testAction2);
-      sequenceNode.addChild(testAction3);
+      sequenceNode.getChildren().add(testAction1);
+      sequenceNode.getChildren().add(testAction2);
+      sequenceNode.getChildren().add(testAction3);
 
       printAndAssert(output, "0");
 
@@ -193,9 +193,9 @@ public class BehaviorTreeReactiveTest
       BehaviorTreeReactiveTestAction testAction3 = new BehaviorTreeReactiveTestAction(taskStepDuration, 2, 30, FAILURE, output, stepNotification);
 
       FallbackNode fallbackNode = new FallbackNode();
-      fallbackNode.addChild(testAction1);
-      fallbackNode.addChild(testAction2);
-      fallbackNode.addChild(testAction3);
+      fallbackNode.getChildren().add(testAction1);
+      fallbackNode.getChildren().add(testAction2);
+      fallbackNode.getChildren().add(testAction3);
 
       printAndAssert(output, "0");
 

@@ -45,12 +45,12 @@ public class BuildingExplorationBehavior extends ResettingNode implements Destro
       parameters = new BuildingExplorationBehaviorParameters();
       syncedRobot = helper.newSyncedRobot();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
-      addChild(lookAndStepBehavior);
+      getChildren().add(lookAndStepBehavior);
       doorBehavior = new DoorBehavior(helper, syncedRobot);
-      addChild(doorBehavior);
+      getChildren().add(doorBehavior);
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
       traverseStairsBehavior.setSyncedRobot(syncedRobot);
-      addChild(traverseStairsBehavior);
+      getChildren().add(traverseStairsBehavior);
       helper.subscribeViaCallback(PARAMETERS.getCommandTopic(), message ->
       {
          helper.getOrCreateStatusLogger().info("Accepting new building exploration parameters");

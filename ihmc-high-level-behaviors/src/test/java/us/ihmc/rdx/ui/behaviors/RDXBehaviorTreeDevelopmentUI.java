@@ -21,7 +21,7 @@ public class RDXBehaviorTreeDevelopmentUI
    private final RDXBaseUI baseUI;
 
    private final RDXImNodesBehaviorTreeUI treePanel;
-   private final BehaviorTreeNodeState tree;
+   private final BehaviorTreeNodeExecutor tree;
    private final RDXBehaviorUIInterface treeGui;
 
    private final Timer timer;
@@ -39,8 +39,8 @@ public class RDXBehaviorTreeDevelopmentUI
       timer = new Timer();
 
       tree = new SequenceNode();
-      BehaviorTreeNodeState node = new FallbackNode();
-      node.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
+      BehaviorTreeNodeExecutor node = new FallbackNode();
+      node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -56,7 +56,7 @@ public class RDXBehaviorTreeDevelopmentUI
             return "Primary";
          }
       });
-      node.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
+      node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -72,7 +72,7 @@ public class RDXBehaviorTreeDevelopmentUI
             return "Secondary";
          }
       });
-      node.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
+      node.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -91,7 +91,7 @@ public class RDXBehaviorTreeDevelopmentUI
 
       tree.getChildren().add(node);
 
-      tree.getChildren().add((T) new LocalOnlyBehaviorTreeNodeExecutor()
+      tree.getChildren().add(new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()

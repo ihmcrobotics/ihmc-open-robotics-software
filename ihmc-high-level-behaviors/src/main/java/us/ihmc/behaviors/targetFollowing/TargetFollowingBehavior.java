@@ -44,7 +44,7 @@ public class TargetFollowingBehavior extends ResettingNode implements Destroyabl
       LogTools.info("Constructing");
       targetFollowingParameters = new TargetFollowingBehaviorParameters();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
-      addChild(lookAndStepBehavior);
+      getChildren().add(lookAndStepBehavior);
 //      helper.subscribeViaCallback(TargetFollowingParameters, parameters ->
 //      {
 //         helper.getOrCreateStatusLogger().info("Accepting new target following parameters");

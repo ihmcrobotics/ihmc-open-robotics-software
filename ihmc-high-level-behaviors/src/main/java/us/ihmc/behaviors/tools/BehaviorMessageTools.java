@@ -15,21 +15,21 @@ public class BehaviorMessageTools
     * TODO: This is going to have to be fixed to pack different node types in
     *   appropriate fields in the ROS 2 message.
     */
-   public static void packBehaviorTreeMessage(BehaviorTreeNodeState treeNode, BehaviorTreeMessage behaviorTreeMessage)
+   public static void packBehaviorTreeMessage(BehaviorTreeNodeExecutor treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
-      if (treeNode.getLastTickInstant()  != null)
-         MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
+      if (treeNode.getState().getLastTickInstant()  != null)
+         MessageTools.toMessage(treeNode.getState().getLastTickInstant(), nodeMessage.getLastTickInstant());
       nodeMessage.setNodeName(treeNode.getDefinition().getDescription());
-      if (treeNode.getStatus() != null)
-         nodeMessage.setPreviousStatus((byte) treeNode.getStatus().ordinal());
+      if (treeNode.getState().getStatus() != null)
+         nodeMessage.setPreviousStatus((byte) treeNode.getState().getStatus().ordinal());
       else
          nodeMessage.setPreviousStatus((byte) -1);
 
       nodeMessage.setNumberOfChildren(treeNode.getChildren().size());
       // TODO: Pack status
 
-      for (BehaviorTreeNodeState child : treeNode.getChildren())
+      for (BehaviorTreeNodeExecutor child : treeNode.getChildren())
       {
          packBehaviorTreeMessage(child, behaviorTreeMessage);
       }
@@ -39,24 +39,24 @@ public class BehaviorMessageTools
     * We unpack a tree from a list of nodes using recursion and the number of
     * children of that node. We assume the ordering as packed in {@link #packBehaviorTreeMessage}.
     */
-   public static BehaviorTreeNodeState unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
+   public static BehaviorTreeNodeExecutor unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
    {
       return unpackBehaviorTreeMessage(behaviorTreeMessage, new MutableInt());
    }
 
-   private static BehaviorTreeNodeState unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
+   private static BehaviorTreeNodeExecutor unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
    {
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 
-      BehaviorTreeNodeState behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
+      BehaviorTreeNodeExecutor behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
       // The message will have 0s for a node that has not yet been ticked
       if (treeNodeMessage.getLastTickInstant().getSecondsSinceEpoch() != 0)
-         behaviorTreeStatusNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
+         behaviorTreeStatusNode.getState().setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
       String name = treeNodeMessage.getNodeNameAsString();
       behaviorTreeStatusNode.getDefinition().setDescription(name);
       // Previous status will be -1 if the node has not been ticked yet
       if (treeNodeMessage.getPreviousStatus() >= 0)
-         behaviorTreeStatusNode.setStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
+         behaviorTreeStatusNode.getState().setStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
 
       for (int i = 0; i < treeNodeMessage.getNumberOfChildren(); i++)
       {
@@ -66,9 +66,9 @@ public class BehaviorMessageTools
       return behaviorTreeStatusNode;
    }
 
-   private static BehaviorTreeNodeState createBehaviorTreeNode(String typeName)
+   private static BehaviorTreeNodeExecutor createBehaviorTreeNode(String typeName)
    {
-      BehaviorTreeNodeState behaviorTreeStatusNode = null;
+      BehaviorTreeNodeExecutor behaviorTreeStatusNode = null;
       // TODO: We need to instantiate certain types of status nodes instead.
       //  They will need different functionality depending on their type.
 //      if (typeName.equals(SequenceNode.class.getSimpleName()))
