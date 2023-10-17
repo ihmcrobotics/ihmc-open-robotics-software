@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -24,7 +25,7 @@ public class BehaviorActionSequenceModule
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
    private final double PERIOD = Conversions.hertzToSeconds(30.0);
-   private final OldBehaviorActionSequence sequence;
+   private final ROS2BehaviorActionSequence sequence;
    private final Notification stopped = new Notification();
 
    public BehaviorActionSequenceModule(DRCRobotModel robotModel)
@@ -36,7 +37,7 @@ public class BehaviorActionSequenceModule
       referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
-      sequence = new OldBehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
+      sequence = new ROS2BehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
       ThreadTools.startAThread(this::actionThread, "ActionThread");

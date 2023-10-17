@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
+import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -42,7 +43,7 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IKRootCalculator rootCalculator;
 
-   public HandPoseActionExecutor(OldBehaviorActionSequence sequence,
+   public HandPoseActionExecutor(BehaviorActionSequence sequence,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
@@ -89,9 +90,9 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
             handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
          }
          if (definition.getSide() == RobotSide.LEFT)
-            ros2ControllerHelper.publish(OldBehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+            ros2ControllerHelper.publish(ROS2BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
          else
-            ros2ControllerHelper.publish(OldBehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
+            ros2ControllerHelper.publish(ROS2BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
       }
    }
 

@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
+import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -34,8 +35,8 @@ public class IKRootCalculator
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      chestPoseStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.CHEST_POSE_STATUS);
-      pelvisPoseStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS);
+      chestPoseStatusSubscription = ros2.subscribe(ROS2BehaviorActionSequence.CHEST_POSE_STATUS);
+      pelvisPoseStatusSubscription = ros2.subscribe(ROS2BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS);
    }
 
    /**

@@ -10,11 +10,11 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -22,7 +22,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
@@ -35,37 +34,13 @@ import java.util.List;
  * a sequence from file, and the sequence is always completely updated by the operator, even
  * when switching sequences entirely.
  */
-public class OldBehaviorActionSequence
+public class BehaviorActionSequence
 {
-   public static final ROS2Topic<?> ROOT_TOPIC = ROS2Tools.IHMC_ROOT.withRobot("behavior_action_sequence");
-   public static final ROS2Topic<?> COMMAND_TOPIC = ROOT_TOPIC.withInput();
-   public static final ROS2Topic<?> STATUS_TOPIC = ROOT_TOPIC.withOutput();
-   public static final ROS2Topic<ActionSequenceUpdateMessage> SEQUENCE_COMMAND_TOPIC
-         = COMMAND_TOPIC.withType(ActionSequenceUpdateMessage.class).withSuffix("sequence_update");
-   public static final ROS2Topic<ActionSequenceUpdateMessage> SEQUENCE_STATUS_TOPIC
-         = STATUS_TOPIC.withType(ActionSequenceUpdateMessage.class).withSuffix("sequence_status");
-   public static final ROS2Topic<Empty> MANUALLY_EXECUTE_NEXT_ACTION_TOPIC = COMMAND_TOPIC.withType(Empty.class).withSuffix("manually_execute_next_action");
-   public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
-   public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
-   public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
-   public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
-   public static final ROS2Topic<std_msgs.msg.dds.String> EXECUTION_NEXT_INDEX_REJECTION_TOPIC = STATUS_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("execution_next_index_rejection");
-   public static final ROS2Topic<HandPoseJointAnglesStatusMessage> LEFT_HAND_POSE_JOINT_ANGLES_STATUS
-         = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("left_hand_pose_joint_angles");
-   public static final ROS2Topic<HandPoseJointAnglesStatusMessage> RIGHT_HAND_POSE_JOINT_ANGLES_STATUS
-         = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("right_hand_pose_joint_angles");
-   public static final ROS2Topic<BodyPartPoseStatusMessage> CHEST_POSE_STATUS
-         = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("chest_pose_status");
-   public static final ROS2Topic<BodyPartPoseStatusMessage> PELVIS_POSE_VARIATION_STATUS
-         = STATUS_TOPIC.withType(BodyPartPoseStatusMessage.class).withSuffix("pelvis_pose_status");
-   public static final ROS2Topic<ActionsExecutionStatusMessage> ACTIONS_EXECUTION_STATUS
-         = STATUS_TOPIC.withType(ActionsExecutionStatusMessage.class).withSuffix("execution_status");
 
    /** TODO: Make non-static and assign as actions are created. */
    public static final MutableLong NEXT_ID = new MutableLong();
 
    private final DRCRobotModel robotModel;
-   private final ROS2ControllerHelper ros2;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
@@ -75,28 +50,20 @@ public class OldBehaviorActionSequence
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final LinkedList<BehaviorActionExecutor> actionSequence = new LinkedList<>();
-   private final IHMCROS2Input<Empty> manuallyExecuteSubscription;
-   private final IHMCROS2Input<Bool> automaticExecutionSubscription;
-   private final IHMCROS2Input<Int32> executionNextIndexSubscription;
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
    private final BehaviorActionExecutionStatusCalculator executionStatusCalculator = new BehaviorActionExecutionStatusCalculator();
    private final List<BehaviorActionExecutor> currentlyExecutingActions = new ArrayList<>();
    private BehaviorActionExecutor lastCurrentlyExecutingAction = null;
 
-   private final IHMCROS2Input<ActionSequenceUpdateMessage> updateSubscription;
-   public final Int32 executionNextIndexStatusMessage = new Int32();
-   public final Bool automaticExecutionStatusMessage = new Bool();
-
    private final Throttler oneHertzThrottler = new Throttler();
    private final ActionSequenceUpdateMessage actionSequenceStatusMessage = new ActionSequenceUpdateMessage();
    private ActionExecutionStatusMessage nothingExecutingStatusMessage = new ActionExecutionStatusMessage();
    private final ActionsExecutionStatusMessage actionsExecutionStatusMessage = new ActionsExecutionStatusMessage();
 
-   public OldBehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
+   public BehaviorActionSequence(DRCRobotModel robotModel, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
-      this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
@@ -108,11 +75,6 @@ public class OldBehaviorActionSequence
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
       addCommonFrames(referenceFrameLibrary, syncedRobot);
-
-      updateSubscription = ros2.subscribe(SEQUENCE_COMMAND_TOPIC);
-      manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
-      automaticExecutionSubscription = ros2.subscribe(AUTOMATIC_EXECUTION_COMMAND_TOPIC);
-      executionNextIndexSubscription = ros2.subscribe(EXECUTION_NEXT_INDEX_COMMAND_TOPIC);
    }
 
    public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
@@ -129,6 +91,8 @@ public class OldBehaviorActionSequence
 
    public void update()
    {
+      // Creates a whole new list of actions and sets their state
+
       if (updateSubscription.getMessageNotification().poll()) // Do the update
       {
          ActionSequenceUpdateMessage latestUpdateMessage = updateSubscription.getMessageNotification().read();
@@ -249,13 +213,13 @@ public class OldBehaviorActionSequence
             ActionExecutionStatusMessage currentlyExecutingActionMessage = actionsExecutionStatusMessage.getActionStatusList().add();
             currentlyExecutingActionMessage.set(currentlyExecutingAction.getExecutionStatusMessage());
          }
-         ros2.publish(ACTIONS_EXECUTION_STATUS, actionsExecutionStatusMessage);
+         ros2.publish(ROS2BehaviorActionSequence.ACTIONS_EXECUTION_STATUS, actionsExecutionStatusMessage);
       }
       else
       {
          nothingExecutingStatusMessage = actionsExecutionStatusMessage.getActionStatusList().add();
          nothingExecutingStatusMessage.setActionIndex(-1);
-         ros2.publish(ACTIONS_EXECUTION_STATUS, actionsExecutionStatusMessage);
+         ros2.publish(ROS2BehaviorActionSequence.ACTIONS_EXECUTION_STATUS, actionsExecutionStatusMessage);
       }
 
       sendStatus();
@@ -328,14 +292,14 @@ public class OldBehaviorActionSequence
    private void sendStatus()
    {
       executionNextIndexStatusMessage.setData(executionNextIndex);
-      ros2.publish(EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
+      ros2.publish(ROS2BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
       automaticExecutionStatusMessage.setData(automaticExecution);
-      ros2.publish(AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);
+      ros2.publish(ROS2BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);
 
       if (oneHertzThrottler.run(1.0))
       {
          BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionSequenceStatusMessage);
-         ros2.publish(OldBehaviorActionSequence.SEQUENCE_STATUS_TOPIC, actionSequenceStatusMessage);
+         ros2.publish(ROS2BehaviorActionSequence.SEQUENCE_STATUS_TOPIC, actionSequenceStatusMessage);
       }
    }
 
