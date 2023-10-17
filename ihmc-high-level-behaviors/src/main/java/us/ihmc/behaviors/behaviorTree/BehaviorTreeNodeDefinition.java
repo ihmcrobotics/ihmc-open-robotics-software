@@ -4,8 +4,11 @@ import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.tools.io.JSONTools;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The base definition of a behavior tree node is just a
@@ -16,7 +19,9 @@ public class BehaviorTreeNodeDefinition
    /** A human readable description of what the node does */
    private String description = "";
    /** Behavior tree children node definitions. */
-   private final RecyclingArrayList<BehaviorTreeNodeDefinition> children = new RecyclingArrayList<>(BehaviorTreeNodeDefinition::new);
+   private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
+
+   private transient int childIndex;
 
    public BehaviorTreeNodeDefinition()
    {
@@ -48,8 +53,9 @@ public class BehaviorTreeNodeDefinition
    {
       description = jsonNode.get("description").textValue();
 
-      children.clear();
-      JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode -> children.add().loadFromFile(childJsonNode));
+      // It is expected that this class does
+      childIndex = 0;
+      JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode -> children.get(childIndex++).loadFromFile(childJsonNode));
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
@@ -76,7 +82,7 @@ public class BehaviorTreeNodeDefinition
       return description;
    }
 
-   public RecyclingArrayList<BehaviorTreeNodeDefinition> getChildren()
+   public List<BehaviorTreeNodeDefinition> getChildren()
    {
       return children;
    }
