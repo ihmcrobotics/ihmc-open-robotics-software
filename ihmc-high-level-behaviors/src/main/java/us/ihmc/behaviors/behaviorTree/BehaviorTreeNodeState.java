@@ -15,19 +15,6 @@ public abstract class BehaviorTreeNodeState implements BehaviorTreeNodeDefinitio
 
    private final List<BehaviorTreeNodeState> children = new ArrayList<>();
 
-   /**
-    * A method that can be called on every node in the tree every time the root gets ticked
-    * in order for parallel nodes to figure out when they are no longer being selected.
-    */
-   public void clock()
-   {
-      status = BehaviorTreeNodeStatus.NOT_TICKED;
-
-      for (BehaviorTreeNodeState child : children)
-      {
-         child.clock();
-      }
-   }
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {

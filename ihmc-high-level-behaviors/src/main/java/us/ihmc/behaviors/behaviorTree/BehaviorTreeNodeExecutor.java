@@ -7,9 +7,18 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
 {
    private final List<BehaviorTreeNodeExecutor> children = new ArrayList<>();
 
-   public void update()
+   /**
+    * A method that should be called before each {@link #tick}
+    * in order for nodes to know when they are no longer being selected.
+    */
+   public void clock()
    {
-      getState().clock();
+      getState().setStatus(BehaviorTreeNodeStatus.NOT_TICKED);
+
+      for (BehaviorTreeNodeExecutor child : children)
+      {
+         child.clock();
+      }
    }
 
    public BehaviorTreeNodeStatus tick()
