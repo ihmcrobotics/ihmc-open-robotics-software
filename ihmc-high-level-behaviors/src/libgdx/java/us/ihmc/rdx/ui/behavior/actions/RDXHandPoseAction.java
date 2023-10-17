@@ -8,10 +8,10 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.sequence.IKRootCalculator;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -181,8 +181,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
 
-      leftHandJointAnglesStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
-      rightHandJointAnglesStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
+      leftHandJointAnglesStatusSubscription = ros2.subscribe(ROS2BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS);
+      rightHandJointAnglesStatusSubscription = ros2.subscribe(ROS2BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS);
       rootCalculator = new IKRootCalculator(ros2, syncedFullRobotModel, referenceFrameLibrary);
    }
 

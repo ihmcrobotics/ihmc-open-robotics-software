@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
@@ -20,7 +20,7 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    private final Timer executionTimer = new Timer();
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public SakeHandCommandActionExecutor(OldBehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
    {
       super(sequence);
 

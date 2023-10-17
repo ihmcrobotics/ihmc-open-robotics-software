@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -73,7 +73,7 @@ public class RDXBehaviorActionSequenceUI
       this.selectionCollisionModel = selectionCollisionModel;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      OldBehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
+      BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
 
       reindexSequences();
    }
