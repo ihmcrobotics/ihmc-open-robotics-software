@@ -34,6 +34,8 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    protected transient final FramePose3D nodePose = new FramePose3D();
    protected transient final FramePose3D visualModelPose = new FramePose3D();
 
+   private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
+
    public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform visualModelToNodeTransform, RDX3DPanel panel3D)
    {
       super(rigidBodySceneNode);
@@ -83,10 +85,9 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       visualModelPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Quaternion -> Rotation matrix for LibGDX
-      RigidBodyTransform temp = new RigidBodyTransform();
-      temp.set(visualModelPose);
+      visualModelToWorldTransform.set(visualModelPose);
 
-      getModelInstance().setTransformToWorldFrame(temp);
+      getModelInstance().setTransformToWorldFrame(visualModelToWorldTransform);
    }
 
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
