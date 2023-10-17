@@ -210,8 +210,6 @@ public class SwingTrajectoryCalculator
       this.swingWaypoints.clear();
       lastFootstepPosition.changeFrame(worldFrame);
 
-      System.out.println(activeTrajectoryType.getEnumValue() + "-----------------------------------");
-
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
          setWaypointsFromCustomMidpoints(footstep);
