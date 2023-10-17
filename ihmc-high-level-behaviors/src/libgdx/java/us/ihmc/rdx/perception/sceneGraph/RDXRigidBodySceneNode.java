@@ -31,15 +31,15 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
    protected transient final FramePose3D nodePose = new FramePose3D();
 
-   private final RigidBodyTransform modelToNodeTransform;
-   private final RigidBodyTransform modelToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform visualModelToNodeTransform = new RigidBodyTransform();
+   private final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
 
-   public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform modelToNodeTransform, RDX3DPanel panel3D)
+   public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform visualModelToNodeTransform, RDX3DPanel panel3D)
    {
       super(rigidBodySceneNode);
 
       this.rigidBodySceneNode = rigidBodySceneNode;
-      this.modelToNodeTransform = modelToNodeTransform;
+      this.visualModelToNodeTransform.set(visualModelToNodeTransform);
       this.panel3D = panel3D;
 
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(rigidBodySceneNode.getNodeFrame(), rigidBodySceneNode.getNodeToParentFrameTransform());
@@ -80,9 +80,9 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
          initialParentName = rigidBodySceneNode.getNodeFrame().getParent().getName();
 
       // Update model
-      nodePose.get(modelToWorldTransform);
-      modelToNodeTransform.transform(modelToWorldTransform);
-      getModelInstance().setTransformToWorldFrame(modelToWorldTransform);
+      nodePose.get(visualModelToWorldTransform);
+      visualModelToNodeTransform.transform(visualModelToWorldTransform);
+      getModelInstance().setTransformToWorldFrame(visualModelToWorldTransform);
    }
 
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
