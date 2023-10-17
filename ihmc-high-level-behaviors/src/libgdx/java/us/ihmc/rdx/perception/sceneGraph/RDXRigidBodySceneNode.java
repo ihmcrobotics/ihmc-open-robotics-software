@@ -10,11 +10,16 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
-public class RDXRigidBodySceneNode extends RDXSceneNode
+public abstract class RDXRigidBodySceneNode extends RDXSceneNode
 {
+   protected static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.6);
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final RigidBodySceneNode rigidBodySceneNode;
@@ -24,14 +29,17 @@ public class RDXRigidBodySceneNode extends RDXSceneNode
    private String initialParentName;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
    private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
-   private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
    protected transient final FramePose3D nodePose = new FramePose3D();
 
-   public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RDX3DPanel panel3D)
+   private final RigidBodyTransform modelToNodeTransform;
+   private final RigidBodyTransform modelToWorldTransform = new RigidBodyTransform();
+
+   public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform modelToNodeTransform, RDX3DPanel panel3D)
    {
       super(rigidBodySceneNode);
 
       this.rigidBodySceneNode = rigidBodySceneNode;
+      this.modelToNodeTransform = modelToNodeTransform;
       this.panel3D = panel3D;
 
       offsetPoseGizmo = new RDXSelectablePose3DGizmo(rigidBodySceneNode.getNodeFrame(), rigidBodySceneNode.getNodeToParentFrameTransform());
@@ -67,10 +75,14 @@ public class RDXRigidBodySceneNode extends RDXSceneNode
 
       nodePose.setToZero(rigidBodySceneNode.getNodeFrame());
       nodePose.changeFrame(ReferenceFrame.getWorldFrame());
-      nodePose.get(visualModelToWorldTransform);
 
       if (rigidBodySceneNode.getTrackingInitialParent())
          initialParentName = rigidBodySceneNode.getNodeFrame().getParent().getName();
+
+      // Update model
+      nodePose.get(modelToWorldTransform);
+      modelToNodeTransform.transform(modelToWorldTransform);
+      getModelInstance().setTransformToWorldFrame(modelToWorldTransform);
    }
 
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
@@ -96,4 +108,6 @@ public class RDXRigidBodySceneNode extends RDXSceneNode
       super.remove(modificationQueue, sceneGraph);
       offsetPoseGizmo.removeRenderables(panel3D);
    }
+
+   public abstract RDXModelInstance getModelInstance();
 }
