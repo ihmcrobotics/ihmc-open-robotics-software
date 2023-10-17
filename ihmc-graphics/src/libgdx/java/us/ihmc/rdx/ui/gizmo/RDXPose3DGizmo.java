@@ -22,6 +22,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -120,10 +121,22 @@ public class RDXPose3DGizmo implements RenderableProvider
       this(ReferenceFrame.getWorldFrame());
    }
 
+   public RDXPose3DGizmo(String gizmoFrameName)
+   {
+      this(gizmoFrameName, ReferenceFrame.getWorldFrame());
+   }
+
    public RDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
+      this(ReferenceFrameMissingTools.computeFrameName(), parentReferenceFrame);
+   }
+
+   public RDXPose3DGizmo(String gizmoFrameName, ReferenceFrame parentReferenceFrame)
+   {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
-      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,
+                                                                                                  parentReferenceFrame,
+                                                                                                  transformToParent);
       initialize(gizmoFrame, transformToParent);
    }
 
@@ -134,8 +147,14 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public RDXPose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
-      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame,
-                                                                                                         gizmoTransformToParentFrameToModify);
+      this(ReferenceFrameMissingTools.computeFrameName(), gizmoTransformToParentFrameToModify, parentReferenceFrame);
+   }
+
+   public RDXPose3DGizmo(String gizmoFrameName, RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,
+                                                                                                  parentReferenceFrame,
+                                                                                                  gizmoTransformToParentFrameToModify);
       initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
@@ -154,8 +173,8 @@ public class RDXPose3DGizmo implements RenderableProvider
       RDXBaseUI.getInstance().getKeyBindings().register("Pitch adjustment -", "Alt + Down arrow");
       RDXBaseUI.getInstance().getKeyBindings().register("Roll adjustment +", "Alt + Right arrow");
       RDXBaseUI.getInstance().getKeyBindings().register("Roll adjustment -", "Alt + Left arrow");
-      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment +", "Ctrl + Alt + Left arrow");
-      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment -", "Ctrl + Alt + Right arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment +", "Ctrl + Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment -", "Ctrl + Right arrow");
       RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment +", "Ctrl + Mouse scroll down");
       RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment -", "Ctrl + Mouse scroll up");
       RDXBaseUI.getInstance().getKeyBindings().register("Fine adjustment modifier", "Shift");
@@ -320,66 +339,72 @@ public class RDXPose3DGizmo implements RenderableProvider
          {
             boolean altHeld = ImGui.getIO().getKeyAlt();
             double deltaTime = Gdx.graphics.getDeltaTime();
-            if (altHeld) // orientation
+
+            double amountRotation = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            double amountTranslation = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            Orientation3DBasics orientationToAdjust = frameBasedGizmoModification.beforeForRotationAdjustment();
+            Point3DBasics positionToAdjust = frameBasedGizmoModification.beforeForTranslationAdjustment();
+
+            if (altHeld && !ctrlHeld) // orientation
             {
-               double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
-               Orientation3DBasics orientationToAdjust = frameBasedGizmoModification.beforeForRotationAdjustment();
                if (upArrowHeld) // pitch +
                {
-                  orientationToAdjust.appendPitchRotation(amount);
+                  orientationToAdjust.appendPitchRotation(amountRotation);
                }
                if (downArrowHeld) // pitch -
                {
-                  orientationToAdjust.appendPitchRotation(-amount);
+                  orientationToAdjust.appendPitchRotation(-amountRotation);
                }
-               if (rightArrowHeld && !ctrlHeld) // roll +
+               if (rightArrowHeld) // roll +
                {
-                  orientationToAdjust.appendRollRotation(amount);
+                  orientationToAdjust.appendRollRotation(amountRotation);
                }
-               if (leftArrowHeld && !ctrlHeld) // roll -
+               if (leftArrowHeld) // roll -
                {
-                  orientationToAdjust.appendRollRotation(-amount);
+                  orientationToAdjust.appendRollRotation(-amountRotation);
                }
-               if (leftArrowHeld && ctrlHeld) // yaw +
+            }
+            else if (!altHeld && ctrlHeld) // yaw the orientation, or z the translation
+            {
+               if (leftArrowHeld) // yaw +
                {
-                  orientationToAdjust.appendYawRotation(amount);
+                  orientationToAdjust.appendYawRotation(amountRotation);
                }
-               if (rightArrowHeld && ctrlHeld) // yaw -
+               if (rightArrowHeld) // yaw -
                {
-                  orientationToAdjust.appendYawRotation(-amount);
+                  orientationToAdjust.appendYawRotation(-amountRotation);
                }
-               frameBasedGizmoModification.afterRotationAdjustment(FrameBasedGizmoModification.PREPEND);
+               if (upArrowHeld) // z +
+               {
+                  positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
+               }
+               if (downArrowHeld) // z -
+               {
+                  positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+               }
             }
             else // translation
             {
-               double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
-               Point3DBasics positionToAdjust = frameBasedGizmoModification.beforeForTranslationAdjustment();
                if (upArrowHeld && !ctrlHeld) // x +
                {
-                  positionToAdjust.addX(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
                }
                if (downArrowHeld && !ctrlHeld) // x -
                {
-                  positionToAdjust.subX(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
                }
-               if (leftArrowHeld) // y +
+               if (leftArrowHeld && !ctrlHeld) // y +
                {
-                  positionToAdjust.addY(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
                }
-               if (rightArrowHeld) // y -
+               if (rightArrowHeld && !ctrlHeld) // y -
                {
-                  positionToAdjust.subY(getTranslateSpeedFactor() * amount);
-               }
-               if (upArrowHeld && ctrlHeld) // z +
-               {
-                  positionToAdjust.addZ(getTranslateSpeedFactor() * amount);
-               }
-               if (downArrowHeld && ctrlHeld) // z -
-               {
-                  positionToAdjust.subZ(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
                }
             }
 
+            frameBasedGizmoModification.afterRotationAdjustment(FrameBasedGizmoModification.PREPEND);
+            frameBasedGizmoModification.afterRotationAdjustment(FrameBasedGizmoModification.PREPEND);
             frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
          }
       }

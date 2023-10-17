@@ -12,7 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -129,7 +129,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       {
          teleportCameraToRobotPelvis();
       }
-      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\nKeybind: Ctrl + P");
+      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\n (Ctrl + P)");
       ImGui.sameLine();
 
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))

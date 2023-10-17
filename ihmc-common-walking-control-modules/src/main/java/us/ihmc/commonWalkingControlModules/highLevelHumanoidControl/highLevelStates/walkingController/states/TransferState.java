@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -28,11 +27,9 @@ public abstract class TransferState extends WalkingState
 
    protected final WalkingMessageHandler walkingMessageHandler;
    protected final WalkingTrajectoryPath walkingTrajectoryPath;
-   protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    protected final CenterOfMassHeightManager comHeightManager;
-   protected final BalanceManager balanceManager;
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
@@ -57,17 +54,16 @@ public abstract class TransferState extends WalkingState
                         DoubleProvider rhoMin,
                         YoRegistry parentRegistry)
    {
-      super(transferStateEnum, parentRegistry);
+      super(transferStateEnum, managerFactory, controllerToolbox, parentRegistry);
+
       this.transferToSide = transferStateEnum.getTransferToSide();
       this.walkingMessageHandler = walkingMessageHandler;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.controllerToolbox = controllerToolbox;
       this.unloadFraction = unloadFraction;
       this.rhoMin = rhoMin;
 
       walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 

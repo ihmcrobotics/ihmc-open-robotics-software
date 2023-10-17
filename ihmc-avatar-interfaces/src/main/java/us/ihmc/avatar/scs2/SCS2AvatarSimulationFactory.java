@@ -41,8 +41,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
@@ -56,9 +55,12 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
@@ -129,6 +131,7 @@ public class SCS2AvatarSimulationFactory
                                                                                                                                out) -> new SCS2OutputWriter(in,
                                                                                                                                                             out,
                                                                                                                                                             true));
+   protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
@@ -565,7 +568,7 @@ public class SCS2AvatarSimulationFactory
       if (yoVariableServer != null)
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
-                                          estimatorThread.getFullRobotModel().getElevator(),
+                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
                                           enableSCS1YoGraphics.get() ? estimatorThread.getSCS1YoGraphicsListRegistry() : null,
                                           enableSCS2YoGraphics.get() ? estimatorThread.getSCS2YoGraphics() : null);
          estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
@@ -626,6 +629,25 @@ public class SCS2AvatarSimulationFactory
                ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
          }
       });
+   }
+
+   public static List<JointBasics> createYoVariableServerJointList(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof CrossFourBarJoint)
+         {
+            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 
    private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
@@ -740,7 +762,10 @@ public class SCS2AvatarSimulationFactory
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
 
-      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+      if (!initialState.hasValue())
+         controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+      else
+         controllerFactory.setInitialState(initialState.get());
 
       if (realtimeROS2Node.hasBeenSet())
       {
@@ -954,5 +979,28 @@ public class SCS2AvatarSimulationFactory
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
+   }
+
+   public void setInitialState(HighLevelControllerName initialState)
+   {
+      this.initialState.set(initialState);
+   }
+
+   public void setupDefaultExternalControllerFactory()
+   {
+      HighLevelHumanoidControllerFactory highLevelControllerFactory = highLevelHumanoidControllerFactory.get();
+      if (highLevelControllerFactory == null)
+         throw new RuntimeException("You must call this.setDefaultHighLevelHumanoidCointrollerFactory first!");
+
+      highLevelControllerFactory.addCustomControlState(new StandReadyControllerStateFactory());
+      highLevelControllerFactory.addCustomControlState(new ExternalControllerStateFactory());
+      highLevelControllerFactory.addCustomControlState(new ExternalTransitionControllerStateFactory());
+
+      highLevelControllerFactory.addRequestableTransition(HighLevelControllerName.STAND_READY, HighLevelControllerName.EXTERNAL_TRANSITION_STATE); // FIXME not necessary
+      highLevelControllerFactory.addRequestableTransition(HighLevelControllerName.EXTERNAL_TRANSITION_STATE, HighLevelControllerName.EXTERNAL); // FIXME not necessary
+      highLevelControllerFactory.addControllerFailureTransition(HighLevelControllerName.EXTERNAL_TRANSITION_STATE,
+                                                                robotModel.get().getHighLevelControllerParameters().getFallbackControllerState());
+      highLevelControllerFactory.addControllerFailureTransition(HighLevelControllerName.EXTERNAL,
+                                                                robotModel.get().getHighLevelControllerParameters().getFallbackControllerState());
    }
 }
