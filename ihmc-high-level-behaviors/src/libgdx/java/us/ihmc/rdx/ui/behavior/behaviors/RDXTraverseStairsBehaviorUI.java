@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -130,8 +131,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-//      return getState().wasTickedRecently(0.5);
-      return false;
+      return getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
    }
 
    @Override

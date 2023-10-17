@@ -9,6 +9,7 @@ import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -112,10 +113,10 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void update()
    {
-//      if (publishTestLoop.get())
-//         periodicThread.setRunning(getState().wasTickedRecently(0.5));
-//      else
-//         periodicThread.setRunning(false);
+      if (publishTestLoop.get())
+         periodicThread.setRunning(getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED);
+      else
+         periodicThread.setRunning(false);
 
       Pose3D latestTargetPoseFromBehavior = latestTargetPoseFromBehaviorReference.getAndSet(null);
       if (latestTargetPoseFromBehavior != null)
@@ -153,8 +154,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-//      return getState().wasTickedRecently(0.5);
-      return false;
+      return getState().getStatus() != BehaviorTreeNodeStatus.NOT_TICKED;
    }
 
    @Override
