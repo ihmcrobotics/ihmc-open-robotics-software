@@ -18,9 +18,9 @@ public class BehaviorActionSequenceROS2Test
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "action_sequence_test");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      IHMCROS2Input<ActionSequenceUpdateMessage> subscription = ros2Helper.subscribe(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC);
+      IHMCROS2Input<ActionSequenceUpdateMessage> subscription = ros2Helper.subscribe(OldBehaviorActionSequence.SEQUENCE_COMMAND_TOPIC);
 
-      ros2Helper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, new ActionSequenceUpdateMessage());
+      ros2Helper.publish(OldBehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, new ActionSequenceUpdateMessage());
 
       Assertions.assertTrue(subscription.hasReceivedFirstMessage());
 
@@ -34,14 +34,14 @@ public class BehaviorActionSequenceROS2Test
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "action_sequence_test");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      IHMCROS2Input<ActionSequenceUpdateMessage> subscription = ros2Helper.subscribe(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC);
+      IHMCROS2Input<ActionSequenceUpdateMessage> subscription = ros2Helper.subscribe(OldBehaviorActionSequence.SEQUENCE_COMMAND_TOPIC);
 
       ActionSequenceUpdateMessage message = new ActionSequenceUpdateMessage();
       message.setSequenceSize(1);
       WaitDurationActionStateMessage waitAction = message.getWaitDurationActions().add();
       String description = "Wait for something";
       waitAction.getDefinition().getActionDefinition().getNodeDefinition().setDescription(description);
-      ros2Helper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, message);
+      ros2Helper.publish(OldBehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, message);
 
       Assertions.assertTrue(subscription.hasReceivedFirstMessage());
 

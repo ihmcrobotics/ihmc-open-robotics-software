@@ -7,7 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -51,7 +51,7 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
-   public WalkActionExecutor(BehaviorActionSequence sequence,
+   public WalkActionExecutor(OldBehaviorActionSequence sequence,
                              ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
                              WalkingFootstepTracker footstepTracker,

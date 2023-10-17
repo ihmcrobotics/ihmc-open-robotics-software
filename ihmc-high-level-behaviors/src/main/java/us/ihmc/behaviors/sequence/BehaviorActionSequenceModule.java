@@ -24,7 +24,7 @@ public class BehaviorActionSequenceModule
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Throttler throttler = new Throttler();
    private final double PERIOD = Conversions.hertzToSeconds(30.0);
-   private final BehaviorActionSequence sequence;
+   private final OldBehaviorActionSequence sequence;
    private final Notification stopped = new Notification();
 
    public BehaviorActionSequenceModule(DRCRobotModel robotModel)
@@ -36,7 +36,7 @@ public class BehaviorActionSequenceModule
       referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
-      sequence = new BehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
+      sequence = new OldBehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
       ThreadTools.startAThread(this::actionThread, "ActionThread");

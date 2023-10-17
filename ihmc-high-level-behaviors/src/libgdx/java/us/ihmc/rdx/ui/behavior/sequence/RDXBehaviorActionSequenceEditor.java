@@ -23,7 +23,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutionStatusCalculator;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.commons.FormattingTools;
@@ -157,12 +157,12 @@ public class RDXBehaviorActionSequenceEditor
       this.referenceFrameLibrary = referenceFrameLibrary;
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      executionNextIndexStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
-      automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
-      executionNextIndexRejectionSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_REJECTION_TOPIC);
-      sequenceStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
+      executionNextIndexStatusSubscription = ros2ControllerHelper.subscribe(OldBehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
+      automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(OldBehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
+      executionNextIndexRejectionSubscription = ros2ControllerHelper.subscribe(OldBehaviorActionSequence.EXECUTION_NEXT_INDEX_REJECTION_TOPIC);
+      sequenceStatusSubscription = ros2ControllerHelper.subscribe(OldBehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
-      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTIONS_EXECUTION_STATUS);
+      executionStatusSubscription = ros2ControllerHelper.subscribe(OldBehaviorActionSequence.ACTIONS_EXECUTION_STATUS);
    }
 
    public void loadNameFromFile()
@@ -227,7 +227,7 @@ public class RDXBehaviorActionSequenceEditor
    private void commandNextActionIndex(int nextActionIndex)
    {
       currentActionIndexCommandMessage.setData(nextActionIndex);
-      ros2ControllerHelper.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
+      ros2ControllerHelper.publish(OldBehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
    }
 
    public void saveToFile()
@@ -486,7 +486,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             // Automatically attempt to get back in sync
             BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionSequenceUpdateMessage);
-            ros2ControllerHelper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
+            ros2ControllerHelper.publish(OldBehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
          }
       }
 
@@ -507,7 +507,7 @@ public class RDXBehaviorActionSequenceEditor
          if (ImGui.checkbox(labels.get("Autonomously"), automaticExecution))
          {
             automaticExecutionCommandMessage.setData(automaticExecution.get());
-            ros2ControllerHelper.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
+            ros2ControllerHelper.publish(OldBehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
          }
          if (!canExecuteNextAction)
             ImGui.endDisabled();
@@ -522,7 +522,7 @@ public class RDXBehaviorActionSequenceEditor
             {
                if (ImGui.button(labels.get("Manually")))
                {
-                  ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+                  ros2ControllerHelper.publish(OldBehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
                }
             }
             else
@@ -532,7 +532,7 @@ public class RDXBehaviorActionSequenceEditor
                   ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
                   if (ImGui.button(labels.get("Manually (confirm)")))
                   {
-                     ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+                     ros2ControllerHelper.publish(OldBehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
                      lastManualExecutionConfirmTime = 0;
                   }
                   ImGui.popStyleColor();

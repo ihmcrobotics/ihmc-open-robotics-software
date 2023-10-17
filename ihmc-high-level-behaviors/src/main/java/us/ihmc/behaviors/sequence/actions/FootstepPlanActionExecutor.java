@@ -7,7 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -48,7 +48,7 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
 
-   public FootstepPlanActionExecutor(BehaviorActionSequence sequence,
+   public FootstepPlanActionExecutor(OldBehaviorActionSequence sequence,
                                      ROS2ControllerHelper ros2ControllerHelper,
                                      ROS2SyncedRobotModel syncedRobot,
                                      WalkingFootstepTracker footstepTracker,

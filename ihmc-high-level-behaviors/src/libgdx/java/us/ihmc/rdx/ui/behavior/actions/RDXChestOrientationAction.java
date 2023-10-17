@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.OldBehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
 import us.ihmc.communication.packets.MessageTools;
@@ -154,13 +154,13 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
             if (throttler.run())
             {
                if (state.getActionIndex() >= 0)
-                  ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+                  ros2.publish(OldBehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
             }
          }
          else if (wasConcurrent)
          {
             chestPoseStatus.setCurrentAndConcurrent(false);
-            ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+            ros2.publish(OldBehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
             wasConcurrent = false;
          }
       }
@@ -170,7 +170,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    public void updateBeforeRemoving()
    {
       chestPoseStatus.setCurrentAndConcurrent(false);
-      ros2.publish(BehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
+      ros2.publish(OldBehaviorActionSequence.CHEST_POSE_STATUS, chestPoseStatus);
    }
 
    @Override

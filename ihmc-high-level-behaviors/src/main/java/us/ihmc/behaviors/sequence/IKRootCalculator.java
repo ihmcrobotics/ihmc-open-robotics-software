@@ -34,8 +34,8 @@ public class IKRootCalculator
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      chestPoseStatusSubscription = ros2.subscribe(BehaviorActionSequence.CHEST_POSE_STATUS);
-      pelvisPoseStatusSubscription = ros2.subscribe(BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS);
+      chestPoseStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.CHEST_POSE_STATUS);
+      pelvisPoseStatusSubscription = ros2.subscribe(OldBehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS);
    }
 
    /**
