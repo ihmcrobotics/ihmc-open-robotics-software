@@ -219,6 +219,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME, getMidFeetZUpFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.PELVIS_ZUP_FRAME, getPelvisZUpFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_GROUND_FRAME, getMidFootZUpGroundFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.WALKING_FRAME, getMidFeetUnderPelvisFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.PELVIS_FRAME, getPelvisFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME, getCenterOfMassFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.LEFT_SOLE_FRAME, getSoleFrame(RobotSide.LEFT));
