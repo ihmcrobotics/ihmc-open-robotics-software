@@ -49,12 +49,12 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
-      packSceneTreeToMessage(sceneGraph.getRootNode(), sceneGraphMessage);
+      packSceneTreeToMessage(sceneGraph.getRootNode());
 
       ros2PublishSubscribeAPI.publish(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier), sceneGraphMessage);
    }
 
-   private void packSceneTreeToMessage(SceneNode sceneNode, SceneGraphMessage sceneGraphMessage)
+   private void packSceneTreeToMessage(SceneNode sceneNode)
    {
       // We handle packing the most specific types and then the more basic ones
       // We keep track of the more basic ones so we can share the
@@ -140,7 +140,7 @@ public class ROS2SceneGraphPublisher
 
       for (SceneNode child : sceneNode.getChildren())
       {
-         packSceneTreeToMessage(child, sceneGraphMessage);
+         packSceneTreeToMessage(child);
       }
    }
 }
