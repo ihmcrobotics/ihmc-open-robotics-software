@@ -79,6 +79,6 @@ public class RestartableThrottledThread
    // only used for testing
    boolean isAlive()
    {
-      return thread.isAlive();
+      return thread == null ? false : thread.isAlive();
    }
 }

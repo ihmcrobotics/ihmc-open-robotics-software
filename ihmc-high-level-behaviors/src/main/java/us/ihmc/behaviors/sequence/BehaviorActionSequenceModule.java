@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
@@ -32,11 +33,14 @@ public class BehaviorActionSequenceModule
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_action_sequence");
       ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
+      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
+
       sceneGraph = new ROS2SceneGraph(ros2ControllerHelper);
       referenceFrameLibrary = new ReferenceFrameLibrary();
+      referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
-      sequence = new BehaviorActionSequence(robotModel, ros2ControllerHelper, referenceFrameLibrary);
+      sequence = new BehaviorActionSequence(robotModel, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
       ThreadTools.startAThread(this::actionThread, "ActionThread");

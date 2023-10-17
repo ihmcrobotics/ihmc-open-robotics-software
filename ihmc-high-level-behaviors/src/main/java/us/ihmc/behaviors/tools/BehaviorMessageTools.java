@@ -3,7 +3,7 @@ package us.ihmc.behaviors.tools;
 import behavior_msgs.msg.dds.BehaviorTreeNodeMessage;
 import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.communication.packets.MessageTools;
 
 public class BehaviorMessageTools
