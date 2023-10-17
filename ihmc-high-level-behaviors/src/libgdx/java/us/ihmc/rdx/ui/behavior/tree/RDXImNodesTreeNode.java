@@ -39,8 +39,10 @@ public class RDXImNodesTreeNode
 
    public void render(int parentPinIndex, ArrayList<Pair<Integer, Integer>> links)
    {
-      double timeSinceLastTick = behaviorNodeUI.getState().getTimeSinceLastTick();
-      boolean isTickRecent = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 5.0;
+//      double timeSinceLastTick = behaviorNodeUI.getState().getTimeSinceLastTick();
+//      boolean isTickRecent = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 5.0;
+      double timeSinceLastTick = 1.0; // FIXME
+      boolean isTickRecent = false;
 
       int color;
       if (behaviorNodeUI.getState().getStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
@@ -131,8 +133,10 @@ public class RDXImNodesTreeNode
 
       double tickPeriod = 0.2;
       double recentTickWindow = tickPeriod * 0.75;
-      boolean tickedThisFrame = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < recentTickWindow;
-      boolean tickedRecently = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 1.0;
+//      boolean tickedThisFrame = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < recentTickWindow;
+//      boolean tickedRecently = behaviorNodeUI.getState().hasBeenTicked() && timeSinceLastTick < 1.0;
+      boolean tickedThisFrame = false;
+      boolean tickedRecently = false;
       BehaviorTreeNodeStatus status = behaviorNodeUI.getState().getStatus();
       tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
       tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);

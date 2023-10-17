@@ -18,8 +18,6 @@ public class SequenceNode extends LocalOnlyBehaviorTreeNodeExecutor
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         BehaviorTreeNodeState.checkStatusIsNotNull(childStatus);
-
          if (childStatus == RUNNING)
          {
             return RUNNING;

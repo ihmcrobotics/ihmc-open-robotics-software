@@ -15,7 +15,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3e050a2033dc471455439001bcf9c636bf28dc846723ac522a18e007165afe7e";
+   		return "6d08417954a59764fb91106a7eb413815af9115ab102764e02261bcdae84eb1f";
    }
    
    @Override
@@ -54,8 +54,6 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -72,8 +70,6 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastTickInstant(), current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -82,14 +78,12 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    {
       cdr.write_type_9(data.getStatus());
 
-      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastTickInstant(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setStatus(cdr.read_type_9());
       	
-      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastTickInstant(), cdr);	
 
    }
 
@@ -97,17 +91,12 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_9("status", data.getStatus());
-      ser.write_type_a("last_tick_instant", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastTickInstant());
-
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data)
    {
-      data.setStatus(ser.read_type_9("status"));
-      ser.read_type_a("last_tick_instant", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastTickInstant());
-
-   }
+      data.setStatus(ser.read_type_9("status"));   }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage dest)
    {

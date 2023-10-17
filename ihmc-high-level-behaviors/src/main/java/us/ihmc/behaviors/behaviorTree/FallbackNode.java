@@ -18,8 +18,6 @@ public class FallbackNode extends LocalOnlyBehaviorTreeNodeExecutor
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         BehaviorTreeNodeState.checkStatusIsNotNull(childStatus);
-
          if (childStatus == RUNNING)
          {
             return RUNNING;

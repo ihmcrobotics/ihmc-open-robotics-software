@@ -24,7 +24,7 @@ public class LoopSequenceNode extends SequenceNode
          currentChild = 0; // this loops back to first child
       }
 
-      BehaviorTreeNodeState.checkStatusIsNotNull(getChildren().get(currentChild++).tick());
+      getChildren().get(currentChild++).tick();
 
       return RUNNING;
    }
