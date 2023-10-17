@@ -14,7 +14,7 @@ public class SequenceNode extends LocalOnlyBehaviorTreeNodeExecutor
 
    public BehaviorTreeNodeStatus tickInternal()
    {
-      for (BehaviorTreeNodeState child : getChildren())
+      for (BehaviorTreeNodeExecutor child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 

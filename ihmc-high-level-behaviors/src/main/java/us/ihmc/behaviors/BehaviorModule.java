@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import behavior_msgs.msg.dds.StatusLogMessage;
 
 import std_msgs.msg.dds.Empty;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -21,10 +21,10 @@ public class BehaviorModule
 {
    private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();
    private final StatusLogger statusLogger;
-   private final BehaviorTreeNodeState rootNode;
+   private final BehaviorTreeNodeExecutor rootNode;
    private final BehaviorHelper behaviorHelper;
 
-   public BehaviorModule(BehaviorTreeNodeState rootNode, BehaviorHelper behaviorHelper)
+   public BehaviorModule(BehaviorTreeNodeExecutor rootNode, BehaviorHelper behaviorHelper)
    {
       this.rootNode = rootNode;
       this.behaviorHelper = behaviorHelper;

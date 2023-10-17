@@ -113,7 +113,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void update()
    {
       if (publishTestLoop.get())
-         periodicThread.setRunning(wasTickedRecently(0.5));
+         periodicThread.setRunning(getState().wasTickedRecently(0.5));
       else
          periodicThread.setRunning(false);
 
@@ -153,7 +153,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5);
+      return getState().wasTickedRecently(0.5);
    }
 
    @Override

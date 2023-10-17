@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-public class UtilitySelectorNode extends BehaviorTreeNodeState
+public class UtilitySelectorNode extends LocalOnlyBehaviorTreeNodeExecutor
 {
    public UtilitySelectorNode()
    {
@@ -8,13 +8,13 @@ public class UtilitySelectorNode extends BehaviorTreeNodeState
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   protected BehaviorTreeNodeStatus tickInternal()
    {
       double highestUtility = 0.0;
-      BehaviorTreeNodeState nodeOfHighestUtility = null;
-      for (BehaviorTreeNodeState child : getChildren())
+      BehaviorTreeNodeExecutor nodeOfHighestUtility = null;
+      for (BehaviorTreeNodeExecutor child : getChildren())
       {
-         double utility = child.evaluateUtility();
+         double utility = child.getState().evaluateUtility();
          if (utility > highestUtility)
          {
             highestUtility = utility;

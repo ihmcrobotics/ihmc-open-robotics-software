@@ -5,7 +5,7 @@ import java.util.function.BooleanSupplier;
 /**
  * A behavior tree action that draws from a boolean supplier.
  */
-public abstract class BehaviorTreeCondition extends BehaviorTreeNodeState
+public abstract class BehaviorTreeCondition extends LocalOnlyBehaviorTreeNodeExecutor
 {
    private final BooleanSupplier conditionSupplier;
 

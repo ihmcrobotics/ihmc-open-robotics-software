@@ -346,7 +346,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      boolean wasTickedRecently = wasTickedRecently(0.5);
+      boolean wasTickedRecently = getState().wasTickedRecently(0.5);
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
       boolean isInResetState = currentState.equals(LookAndStepBehavior.State.RESET.name());
       boolean isPlacingGoal = goalAffordance.isPlacingGoal();

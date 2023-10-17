@@ -61,8 +61,8 @@ public class ExploreAreaBehavior extends FallbackNode implements Destroyable
       stop = new StopNode();
       restOfStatesNode = new RestOfStatesNode();
 
-      addChild(stop);
-      addChild(restOfStatesNode);
+      getChildren().add(stop);
+      getChildren().add(restOfStatesNode);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), TICK_PERIOD, 5, this::tick);
    }
@@ -113,11 +113,11 @@ public class ExploreAreaBehavior extends FallbackNode implements Destroyable
                                                   helper,
                                                   determineNextLocations.getExplorationPlanner());
 
-         addChild(lookAround);
-         addChild(determineNextLocations);
-         addChild(lookAndStep);
-         addChild(turnInPlace);
-         addChild(new AlwaysSuccessfulAction(lookAround::reset));
+         getChildren().add(lookAround);
+         getChildren().add(determineNextLocations);
+         getChildren().add(lookAndStep);
+         getChildren().add(turnInPlace);
+         getChildren().add(new AlwaysSuccessfulAction(lookAround::reset));
       }
 
       class LookAndStepNode extends AsynchronousActionNode // TODO: Use look and step node directly somehow.

@@ -14,7 +14,7 @@ class BehaviorTreeSimpleCasesTest
       MutableObject<String> output = new MutableObject<>("");
       SequenceNode tree = new SequenceNode();
 
-      BehaviorTreeNodeState findBall = new LocalOnlyBehaviorTreeNodeExecutor()
+      BehaviorTreeNodeExecutor findBall = new LocalOnlyBehaviorTreeNodeExecutor()
       {
          private int attempt = 0;
          private int numberOfAttempts = 3;
@@ -31,7 +31,7 @@ class BehaviorTreeSimpleCasesTest
          }
       };
 
-      BehaviorTreeNodeState pickBall = new LocalOnlyBehaviorTreeNodeExecutor()
+      BehaviorTreeNodeExecutor pickBall = new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -42,7 +42,7 @@ class BehaviorTreeSimpleCasesTest
          }
       };
 
-      BehaviorTreeNodeState dropBall = new LocalOnlyBehaviorTreeNodeExecutor()
+      BehaviorTreeNodeExecutor dropBall = new LocalOnlyBehaviorTreeNodeExecutor()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -52,9 +52,9 @@ class BehaviorTreeSimpleCasesTest
             return BehaviorTreeNodeStatus.SUCCESS;
          }
       };
-      tree.addChild(findBall);
-      tree.addChild(pickBall);
-      tree.addChild(dropBall);
+      tree.getChildren().add(findBall);
+      tree.getChildren().add(pickBall);
+      tree.getChildren().add(dropBall);
 
       BehaviorTreeNodeStatus status = tree.tick();
       assertEquals(status, BehaviorTreeNodeStatus.RUNNING);
