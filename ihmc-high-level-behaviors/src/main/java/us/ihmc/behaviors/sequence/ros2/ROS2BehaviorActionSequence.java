@@ -15,6 +15,9 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * @deprecated Probably removing most of this
+ */
 public class ROS2BehaviorActionSequence extends BehaviorActionSequence
 {
    public static final ROS2Topic<?> ROOT_TOPIC = ROS2Tools.IHMC_ROOT.withRobot("behavior_action_sequence");
