@@ -21,7 +21,7 @@ public abstract class ResettingNode extends LocalOnlyBehaviorTreeNodeExecutor
          setIsReset(true);
       }
       setLastWasClock(true);
-      super.getState().clock();
+      super.clock();
    }
 
    public BehaviorTreeNodeStatus tick()

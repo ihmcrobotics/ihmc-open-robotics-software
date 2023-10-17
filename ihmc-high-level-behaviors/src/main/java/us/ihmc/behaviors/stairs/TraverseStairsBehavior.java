@@ -245,11 +245,8 @@ public class TraverseStairsBehavior extends ResettingNode
       helper.publish(PerceptionAPI::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
-   @Override
    public void update()
    {
-      super.update();
-
       if (behaviorHasCrashed.get())
       {
 //         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());

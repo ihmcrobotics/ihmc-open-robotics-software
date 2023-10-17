@@ -285,8 +285,6 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Des
 
    public void update()
    {
-      super.update();
-
       if (stopRequested.getAndSet(false))
       {
          requestState(BuildingExplorationStateName.TELEOP);
