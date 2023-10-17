@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class ReferenceFrameLibrary
 {
    /**
-    * These frames are are always present.
+    * These frames are always present.
     */
    private final ArrayList<ReferenceFrame> alwaysPresentFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> nameToAlwaysPresentFrameMap = new HashMap<>();
