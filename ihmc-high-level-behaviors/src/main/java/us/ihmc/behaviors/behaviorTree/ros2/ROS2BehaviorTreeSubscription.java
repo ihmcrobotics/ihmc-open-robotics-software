@@ -4,8 +4,8 @@ import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeRebuildSubtree;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateRebuildSubtree;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -54,10 +54,10 @@ public class ROS2BehaviorTreeSubscription
 
          behaviorTree.modifyTree(modificationQueue ->
          {
-            BehaviorTreeRebuildSubtree rebuildSubtree = null;
+            BehaviorTreeStateRebuildSubtree rebuildSubtree = null;
             if (!localTreeFrozen)
             {
-               rebuildSubtree = new BehaviorTreeRebuildSubtree(behaviorTree.getRootNode());
+               rebuildSubtree = new BehaviorTreeStateRebuildSubtree(behaviorTree.getRootNode());
                modificationQueue.accept(rebuildSubtree.getClearSubtreeModification());
             }
 
@@ -69,11 +69,10 @@ public class ROS2BehaviorTreeSubscription
       }
    }
 
-
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
                                                 BehaviorTreeNodeState localNode,
                                                 BehaviorTreeNodeState localParentNode,
-                                                BehaviorTreeModificationQueue modificationQueue)
+                                                BehaviorTreeStateModificationQueue modificationQueue)
    {
       // Set fields only modifiable by the robot
       localNode.setIsActive(subscriptionNode.getBehaviorTreeNodeStateMessage().getIsActive());
