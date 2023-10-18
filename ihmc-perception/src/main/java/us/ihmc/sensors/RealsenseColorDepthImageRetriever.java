@@ -18,7 +18,6 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final RealSenseHardwareManager realSenseHardwareManager;
    private final BytedecoRealsense realsense;
 
    private long grabSequenceNumber = 0L;
@@ -34,12 +33,11 @@ public class RealsenseColorDepthImageRetriever
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final RestartableThrottledThread realsenseGrabThread;
 
-   public RealsenseColorDepthImageRetriever(String serialNumber, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
+   public RealsenseColorDepthImageRetriever(BytedecoRealsense realsense, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
 
-      realSenseHardwareManager = new RealSenseHardwareManager();
-      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      this.realsense = realsense;
 
       colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 

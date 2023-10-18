@@ -12,7 +12,10 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
+import us.ihmc.perception.realsense.BytedecoRealsense;
+import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -48,6 +51,7 @@ public class PerceptionAndAutonomyProcess
    private final ZEDColorDepthImagePublisher zedImagePublisher;
    private final RestartableThrottledThread zedProcessAndPublishThread;
 
+   private final RealSenseHardwareManager realSenseManager;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
    private final ROS2HeartbeatMonitor realsenseDepthHeartbeat;
@@ -79,9 +83,14 @@ public class PerceptionAndAutonomyProcess
       initializeZEDHeartbeatCallbacks();
 
       // REALSENSE
+      realSenseManager = new RealSenseHardwareManager();
       realsenseColorHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_REALSENSE_COLOR);
       realsenseDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_REALSENSE_DEPTH);
-      realsenseImageRetriever = new RealsenseColorDepthImageRetriever(REALSENSE_SERIAL_NUMBER, RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ, realsenseFrameSupplier);
+      BytedecoRealsense realsense = realSenseManager.createBytedecoRealsenseDevice(REALSENSE_SERIAL_NUMBER,
+                                                                                   RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
+      realsenseImageRetriever = new RealsenseColorDepthImageRetriever(realsense,
+                                                                      RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+                                                                      realsenseFrameSupplier);
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
       realsenseProcessAndPublishThread = new RestartableThrottledThread("RealsenseProcessAndPublish", REALSENSE_FPS, this::processAndPublishRealsense);
       initializeRealsenseHearbeatCallbacks();
