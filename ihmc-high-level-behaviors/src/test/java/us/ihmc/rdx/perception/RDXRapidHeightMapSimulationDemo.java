@@ -87,6 +87,7 @@ public class RDXRapidHeightMapSimulationDemo
 
    private boolean autoIncrement = false;
    private int autoIncrementCounter = 0;
+   private int plansLoggedSoFar = 0;
    private boolean initialized = false;
    private boolean heightMapCaptured = false;
    private boolean planLogged = false;
@@ -112,7 +113,7 @@ public class RDXRapidHeightMapSimulationDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated_2.json");
+            environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated.json");
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
@@ -359,7 +360,7 @@ public class RDXRapidHeightMapSimulationDemo
 
          public void setToRandomPose(RigidBodyTransform transformToPack)
          {
-            transformToPack.getTranslation().set(1.2 + Math.random() * 6.0, Math.random() * 8.0, 1.5 + Math.random() * 0.75);
+            transformToPack.getTranslation().set(1.2 + Math.random() * 6.0, 1.0f + Math.random() * 5.0, 1.5 + Math.random() * 0.75);
             transformToPack.getRotation().setYawPitchRoll(Math.random() * 2.0 * Math.PI, Math.toRadians(60.0f), 0.0f);
          }
 
@@ -412,6 +413,15 @@ public class RDXRapidHeightMapSimulationDemo
 
          public void logFootsteps(FootstepPlannerOutput plannerOutput)
          {
+            if (plannerOutput.getFootstepPlanningResult() != FootstepPlanningResult.FOUND_SOLUTION)
+            {
+               LogTools.warn("Failed to find a solution. Not logging.");
+               return;
+            }
+
+
+            LogTools.info("Logging Plan No. {}", plansLoggedSoFar++);
+
             FootstepPlan plan = plannerOutput.getFootstepPlan();
             Point3D footstepPosition = new Point3D();
             Quaternion footstepOrientation = new Quaternion();
