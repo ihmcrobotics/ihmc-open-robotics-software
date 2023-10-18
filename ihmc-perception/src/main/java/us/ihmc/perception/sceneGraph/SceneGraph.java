@@ -70,8 +70,8 @@ public class SceneGraph
     */
    public void updateOnRobotOnly(ReferenceFrame sensorFrame)
    {
-      // This must happen only once per on-robot tick
-      detectionFilterCollection.update();
+//      // This must happen only once per on-robot tick
+//      detectionFilterCollection.update();
 
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, sensorFrame, modificationQueue));
    }
