@@ -189,6 +189,7 @@ public class RDXAffordanceTemplateFrame
          else
             interactableHands.get(side).setSelected(false);
       }
+      editorStatus.disableMirror();
    }
 
    public void setHandConfiguration(String configuration, RobotSide side)
