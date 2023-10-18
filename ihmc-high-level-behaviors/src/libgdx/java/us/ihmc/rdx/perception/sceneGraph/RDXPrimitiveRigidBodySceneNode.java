@@ -17,8 +17,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import java.util.Set;
 
@@ -30,10 +28,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private static final float DEFAULT_DIMENSION = 0.1F;
-   private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
 
    private RDXModelInstance modelInstance;
-   private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
+
    private final ImFloat xLength = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat yLength = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat zLength = new ImFloat(DEFAULT_DIMENSION);
@@ -43,7 +40,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
    {
-      super(primitiveRigidBodySceneNode, panel3D);
+      super(primitiveRigidBodySceneNode, new RigidBodyTransform(), panel3D);
 
       switch (primitiveRigidBodySceneNode.getShape())
       {
@@ -57,13 +54,7 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       modelInstance.setColor(GHOST_COLOR);
    }
 
-   public void update(SceneGraphModificationQueue modificationQueue)
-   {
-      super.update(modificationQueue);
-      nodePose.get(visualModelToWorldTransform);
-      modelInstance.setTransformToWorldFrame(visualModelToWorldTransform);
-   }
-
+   @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
@@ -158,11 +149,18 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
       }
    }
 
+   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
       if (sceneLevels.contains(RDXSceneLevel.MODEL))
          modelInstance.getRenderables(renderables, pool);
+   }
+
+   @Override
+   public RDXModelInstance getModelInstance()
+   {
+      return modelInstance;
    }
 }
