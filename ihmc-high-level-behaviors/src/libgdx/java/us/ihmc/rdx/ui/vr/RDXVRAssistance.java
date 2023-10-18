@@ -58,7 +58,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private final AffordanceAssistant affordanceAssistant;
-   private final SideDependentList<RigidBodyTransform> affordanceToVRHandControlFrameTransform = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> affordanceToVRHandControlFrameTransforms = new SideDependentList<>();
    private String objectName = "";
    private ReferenceFrame objectFrame;
    private boolean previewValidated = false;
@@ -105,11 +105,11 @@ public class RDXVRAssistance implements TeleoperationAssistant
       {
          ReferenceFrame afterLastWristJointFrame = ghostRobotModel.getEndEffectorFrame(side, LimbName.ARM);
          ReferenceFrame VRHandControlFrame = ghostRobotModel.getHand(side).getBodyFixedFrame();
-         VRHandControlFrame.getTransformToDesiredFrame(afterLastWristJointFrame).invert();
-         affordanceToVRHandControlFrameTransform.put(side, VRHandControlFrame.getTransformToDesiredFrame(afterLastWristJointFrame));
-         LogTools.info(affordanceToVRHandControlFrameTransform.get(side));
+         RigidBodyTransform affordanceToVRHandControlFrameTransform = new RigidBodyTransform(VRHandControlFrame.getTransformToDesiredFrame(afterLastWristJointFrame));
+         affordanceToVRHandControlFrameTransform.invert();
+         affordanceToVRHandControlFrameTransforms.put(side, affordanceToVRHandControlFrameTransform);
       }
-      affordanceAssistant= new AffordanceAssistant(affordanceToVRHandControlFrameTransform);
+      affordanceAssistant= new AffordanceAssistant(affordanceToVRHandControlFrameTransforms);
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)

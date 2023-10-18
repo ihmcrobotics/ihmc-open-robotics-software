@@ -6,8 +6,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,7 +19,7 @@ import java.util.HashMap;
 
 public class AffordanceAssistant
 {
-   private final SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransform;
+   private final SideDependentList<RigidBodyTransform> affordanceToVRHandControlFrameTransforms;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(),
                                                                                                      "/us/ihmc/behaviors/sharedControl/affordances");
    private TrajectoryRecordReplay affordancePlayer;
@@ -33,9 +31,9 @@ public class AffordanceAssistant
    private ReferenceFrame objectFrame;
    private boolean affordanceStarted = false;
 
-   public AffordanceAssistant(SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransform)
+   public AffordanceAssistant(SideDependentList<RigidBodyTransform> affordanceToVRHandControlFrameTransforms)
    {
-      this.affordanceToHandControlFrameTransform = affordanceToHandControlFrameTransform;
+      this.affordanceToVRHandControlFrameTransforms = affordanceToVRHandControlFrameTransforms;
    }
 
    public void loadAffordance(String fileName, ReferenceFrame objectFrame)
@@ -48,7 +46,7 @@ public class AffordanceAssistant
       double[] initialData = affordancePlayer.play();
       RigidBodyTransform initialTransform = new RigidBodyTransform(initialData);
       FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
-      initialBodyPartPose.appendTranslation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getTranslation());
+      initialBodyPartPose.appendTranslation(affordanceToVRHandControlFrameTransforms.get(RobotSide.RIGHT).getTranslation());
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPartPreviousFrameMap.put("rightHand", new FramePose3D(initialBodyPartPose));
       // pre-apply rotation of VR controllers to cancel out the rotation in the VRKinematicsStreaming
@@ -77,7 +75,7 @@ public class AffordanceAssistant
                affordanceStarted = true;
                RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
                FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
-               affordancePose.appendTranslation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getTranslation());
+               affordancePose.appendTranslation(affordanceToVRHandControlFrameTransforms.get(RobotSide.RIGHT).getTranslation());
                affordancePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.set(affordancePose);
 
