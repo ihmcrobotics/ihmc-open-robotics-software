@@ -17,6 +17,10 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
+         * The node's unique ID
+         */
+        unsigned long id;
+        /**
          * A node is active if it lies on the path of the current tree tick.
          */
         boolean is_active;

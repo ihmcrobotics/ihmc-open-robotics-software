@@ -59,4 +59,21 @@ public class ROS2BehaviorTreeTools
 
       return behaviorTreeNodeState;
    }
+
+   public static Class<?> getNodeStateClass(byte nodeType)
+   {
+      return switch (nodeType)
+      {
+         case BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION -> ArmJointAnglesActionState.class;
+         case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION -> ChestOrientationActionState.class;
+         case BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION -> FootstepPlanActionState.class;
+         case BehaviorTreeStateMessage.HAND_POSE_ACTION -> HandPoseActionState.class;
+         case BehaviorTreeStateMessage.HAND_WRENCH_ACTION -> HandWrenchActionState.class;
+         case BehaviorTreeStateMessage.PELVIS_HEIGHT_PITCH_ACTION -> PelvisHeightPitchActionState.class;
+         case BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION -> SakeHandCommandActionState.class;
+         case BehaviorTreeStateMessage.WAIT_DURATION_ACTION -> WaitDurationActionState.class;
+         case BehaviorTreeStateMessage.WALK_ACTION -> WalkActionState.class;
+         default -> BehaviorTreeNodeState.class;
+      };
+   }
 }
