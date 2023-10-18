@@ -88,6 +88,8 @@ public class ROS2SceneGraphSubscription
                modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
 
             updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
+
+            // FIXME: We seem to be missing now the destroy functionality if nodes didn't get added back
          });
       }
    }
