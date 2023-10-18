@@ -16,6 +16,7 @@ public class CenterposeNode extends DetectableSceneNode
    private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
    private int markerID;
+   private long sequenceID;
    private double breakFrequency = 1.0;
    private Point3D[] vertices3D = new Point3D[8];
    private Point3D[] vertices2D = new Point3D[8];
@@ -27,6 +28,16 @@ public class CenterposeNode extends DetectableSceneNode
       this.markerID = markerID;
       this.vertices3D = vertices3D;
       this.vertices2D = vertices2D;
+   }
+
+   public long getSequenceID()
+   {
+      return sequenceID;
+   }
+
+   public void setSequenceID(long sequenceID)
+   {
+      this.sequenceID = sequenceID;
    }
 
    public Point3D[] getVertices2D()
