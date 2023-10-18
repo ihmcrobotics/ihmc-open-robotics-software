@@ -5,11 +5,8 @@ package us.ihmc.behaviors.behaviorTree;
  */
 public class BehaviorTreeRootNode extends BehaviorTreeNodeState
 {
-   private final BehaviorTreeNodeDefinition definition = new BehaviorTreeNodeDefinition();
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
+   public BehaviorTreeRootNode()
    {
-      return definition;
+      super(new BehaviorTreeNodeDefinition());
    }
 }

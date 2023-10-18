@@ -5,6 +5,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
 public abstract class BehaviorActionState extends BehaviorTreeNodeState implements BehaviorActionDefinitionSupplier
 {
+   private final BehaviorActionDefinition definition;
+
    /** The action's unique ID. */
    private long id;
    private int actionIndex = -1;
@@ -13,10 +15,14 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
    private boolean canExecute = true;
    private boolean isExecuting = false;
 
-   public BehaviorActionState()
+   public BehaviorActionState(BehaviorActionDefinition definition)
    {
+      super(definition);
+
       // TODO: Re-enable when we do the CRDT
 //      id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
+
+      this.definition = definition;
    }
 
    public void update()
@@ -99,5 +105,11 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
    public boolean getIsExecuting()
    {
       return isExecuting;
+   }
+
+   @Override
+   public BehaviorActionDefinition getDefinition()
+   {
+      return definition;
    }
 }

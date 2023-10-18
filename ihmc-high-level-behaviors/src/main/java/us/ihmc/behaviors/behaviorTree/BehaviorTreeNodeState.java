@@ -11,6 +11,8 @@ import java.util.List;
  */
 public abstract class BehaviorTreeNodeState extends FreezableNode implements BehaviorTreeNodeDefinitionSupplier
 {
+   private final BehaviorTreeNodeDefinition definition;
+
    /** The node's unique ID. */
    private final long id = -1;
    /**
@@ -25,6 +27,11 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
 
    private final List<BehaviorTreeNodeState> children = new ArrayList<>();
 
+   public BehaviorTreeNodeState(BehaviorTreeNodeDefinition definition)
+   {
+      this.definition = definition;
+   }
+
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
       message.setIsActive(isActive);
@@ -33,6 +40,11 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
       isActive = message.getIsActive();
+   }
+
+   public void destroy()
+   {
+
    }
 
    public long getID()
@@ -53,5 +65,11 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
    public List<BehaviorTreeNodeState> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return definition;
    }
 }

@@ -1,10 +1,8 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.tools.io.JSONTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +18,6 @@ public class BehaviorTreeNodeDefinition
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
 
-   private transient int childIndex;
-
-   public BehaviorTreeNodeDefinition()
-   {
-
-   }
-
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("type", getClass().getSimpleName());
@@ -40,15 +31,6 @@ public class BehaviorTreeNodeDefinition
          ObjectNode childJsonNode = childrenArrayJsonNode.addObject();
          child.saveToFile(childJsonNode);
       }
-   }
-
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      description = jsonNode.get("description").textValue();
-
-      // It is expected that this class does
-      childIndex = 0;
-      JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode -> children.get(childIndex++).loadFromFile(childJsonNode));
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
