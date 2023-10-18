@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Detection():
+    sequence_id : int = 0
     skipDetaction : bool = False
     objectType: str = 'object_type'
     kps_2d: List[Point] = None
@@ -198,6 +199,7 @@ class Zed2CenterposeNode():
                     vertex = vertex/self.scale
                     point = Point(x=vertex[0], y=vertex[1], z=vertex[2])
                     detection.kps_3d.append(point)
+                detection.kps_3d = detection.kps_3d[-8:]
             else:
                 detection.skipDetaction = True
 
@@ -208,6 +210,7 @@ class Zed2CenterposeNode():
                 for vertex in bbox:
                     point = Point(x=vertex[0], y=vertex[1], z=0.0)
                     detection.kps_2d.append(point)
+                detection.kps_2d = detection.kps_2d[-8:]
             else:
                 detection.skipDetaction = True
             
@@ -227,18 +230,20 @@ class Zed2CenterposeNode():
             return None
 
     def publish_message(self, detection:Detection):
-        if detection.skipDetaction == True:
-            return
-        
-        self.detected_object.confidence = detection.confidence
-        self.detected_object.object_type = detection.objectType
-        self.detected_object.bounding_box_vertices = detection.kps_3d[-8:]
-        self.detected_object.bounding_box_2d_vertices = detection.kps_2d[-8:]
-        position = Point(x=detection.position[0], y=detection.position[1], z=detection.position[2])
-        quaternion_xyzw = Quaternion(x=detection.quaternion_xyzw.as_quat()[0], y=detection.quaternion_xyzw.as_quat()[1], z=detection.quaternion_xyzw.as_quat()[2], w=detection.quaternion_xyzw.as_quat()[3])
-        self.detected_object.pose = Pose(position=position, orientation=quaternion_xyzw)
+        if detection.skipDetaction == False:
+            self.detected_object.sequence_id = detection.sequence_id
+            detection.sequence_id += 1
+            self.detected_object.confidence = detection.confidence
+            self.detected_object.object_type = detection.objectType
+            self.detected_object.bounding_box_vertices = detection.kps_3d
+            self.detected_object.bounding_box_2d_vertices = detection.kps_2d
+            position = Point(x=detection.position[0], y=detection.position[1], z=detection.position[2])
+            quaternion_xyzw = Quaternion(x=detection.quaternion_xyzw.as_quat()[0], y=detection.quaternion_xyzw.as_quat()[1], z=detection.quaternion_xyzw.as_quat()[2], w=detection.quaternion_xyzw.as_quat()[3])
+            self.detected_object.pose = Pose(position=position, orientation=quaternion_xyzw)
+            self.ros2_node.get_logger().info('Object Detected in the Image!')
+        else:
+            self.ros2_node.get_logger().info('No Object Detected in the Image!')
 
-        self.ros2_node.get_logger().info('Object Detected in the Image!')
         self.centerpose_publisher_.publish(self.detected_object)
 
 def main(args=None):

@@ -62,13 +62,6 @@ public class RDXCenterposeSceneGraphDemo
                                                                                                             baseUI.getPrimary3DPanel().getCamera3D());
             zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
 
-            RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
-            sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
-            sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
-            ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
-                                                                                                           ReferenceFrame.getWorldFrame(),
-                                                                                                           sensorInWorldTransform);
-
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         DomainFactory.PubSubImplementation.FAST_RTPS,
                                                                                                                         PerceptionAPI.ZED2_DEPTH,

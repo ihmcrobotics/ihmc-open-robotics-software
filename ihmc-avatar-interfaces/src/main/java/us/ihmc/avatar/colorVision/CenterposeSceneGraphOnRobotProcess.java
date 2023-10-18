@@ -17,6 +17,7 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.perception.filters.DetectionFilter;
 
 public class CenterposeSceneGraphOnRobotProcess
 {
@@ -59,12 +60,13 @@ public class CenterposeSceneGraphOnRobotProcess
                                          CenterposeNode CenterposeDetectedMarkerNode = sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedID);
                                          if (CenterposeDetectedMarkerNode == null) // Add node if it is missing
                                          {
-//                                            DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
-//                                            candidateFilter.registerDetection();
-//                                            if (candidateFilter.isStableDetectionResult())
-                                            if (true)
+                                            DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getFilter(detectedID);
+                                            if (candidateFilter==null)
+                                               candidateFilter = sceneGraph.getDetectionFilterCollection().createFilter(detectedID, 10);
+                                            candidateFilter.registerDetection();
+                                            if (candidateFilter.isStableDetectionResult())
                                             {
-//                                               sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
+                                               sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
                                                Point3D[] vertices = detectedObjectMessage.getBoundingBoxVertices();
                                                for (int i = 0; i < vertices.length; i++)
@@ -96,10 +98,11 @@ public class CenterposeSceneGraphOnRobotProcess
          {
             if (child instanceof CenterposeNode centerposeDetectedMarkerNode)
             {
-               boolean isDetected = detectedObjectMessage.getId() == centerposeDetectedMarkerNode.getMarkerID();
+               boolean isDetected = detectedObjectMessage.getSequenceId() == centerposeDetectedMarkerNode.getSequenceID() + 1 ;
                centerposeDetectedMarkerNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
+                  centerposeDetectedMarkerNode.setSequenceID(detectedObjectMessage.getSequenceId());
                   Point3D[] vertices = detectedObjectMessage.getBoundingBoxVertices();
                   for (int i = 0; i < vertices.length; i++)
                   {
