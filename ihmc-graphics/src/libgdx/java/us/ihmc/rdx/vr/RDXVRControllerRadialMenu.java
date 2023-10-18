@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -31,9 +31,9 @@ public class RDXVRControllerRadialMenu
 {
    private final RobotSide side;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
-   private final ModifiableReferenceFrame joystickReferenceFrame;
-   private final ModifiableReferenceFrame radialMenuSpherePoseFrame;
-   private final ModifiableReferenceFrame radialMenuReferenceFrame;
+   private final MutableReferenceFrame joystickReferenceFrame;
+   private final MutableReferenceFrame radialMenuSpherePoseFrame;
+   private final MutableReferenceFrame radialMenuReferenceFrame;
    private InputAnalogActionData joystickActionData;
    private InputDigitalActionData joystickPressActionData;
    private RDXModelInstance radialMenuSphere;
@@ -60,14 +60,14 @@ public class RDXVRControllerRadialMenu
 
       selectionCollisionBox.getSize().set(0.0125, 0.075, 0.0025);
 
-      joystickReferenceFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
+      joystickReferenceFrame = new MutableReferenceFrame(xForwardZUpControllerFrame);
       joystickReferenceFrame.getTransformToParent().getTranslation().setX(-0.04);
       joystickReferenceFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(-0.015));
       joystickReferenceFrame.getTransformToParent().getTranslation().setZ(-0.017);
       joystickReferenceFrame.getReferenceFrame().update();
 
-      radialMenuSpherePoseFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
-      radialMenuReferenceFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
+      radialMenuSpherePoseFrame = new MutableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
+      radialMenuReferenceFrame = new MutableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
    }
 
    public void create(InputAnalogActionData joystickActionData, InputDigitalActionData joystickPressActionData)

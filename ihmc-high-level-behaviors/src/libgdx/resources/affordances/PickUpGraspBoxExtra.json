@@ -16,10 +16,10 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "left",
-      "config" : "OPEN"
+      "type": "OPEN"
     }, {
       "side" : "right",
-      "config" : "OPEN"
+      "type": "OPEN"
     } ]
   }, {
     "x" : 0.0,
@@ -30,10 +30,10 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "left",
-      "config" : ""
+      "type": ""
     }, {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -44,10 +44,10 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "left",
-      "config" : ""
+      "type": ""
     }, {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.0,
@@ -58,10 +58,10 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "left",
-      "config" : "GRIP_HARD"
+      "type": "GRIP_HARD"
     }, {
       "side" : "right",
-      "config" : "GRIP_HARD"
+      "type": "GRIP_HARD"
     } ]
   }, {
     "x" : 0.0,
@@ -72,10 +72,10 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "left",
-      "config" : ""
+      "type": ""
     }, {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   }, {
     "x" : 0.123,
@@ -86,10 +86,10 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "left",
-      "config" : ""
+      "type": ""
     }, {
       "side" : "right",
-      "config" : ""
+      "type": ""
     } ]
   } ],
   "activeSides" : 2,

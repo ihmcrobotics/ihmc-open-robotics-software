@@ -11,7 +11,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
-import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;

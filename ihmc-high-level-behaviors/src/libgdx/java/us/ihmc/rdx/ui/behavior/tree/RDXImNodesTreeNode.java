@@ -7,7 +7,7 @@ import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.util.Pair;
-import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
