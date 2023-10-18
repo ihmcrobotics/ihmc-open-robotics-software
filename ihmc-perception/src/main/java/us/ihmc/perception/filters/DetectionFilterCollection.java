@@ -24,14 +24,6 @@ public class DetectionFilterCollection
       return markerIDFilters.get(markerID);
    }
 
-//   public void update()
-//   {
-//      for (int markerID : markerIDFilters.keys())
-//      {
-//         markerIDFilters.get(markerID).update();
-//      }
-//   }
-
    public void removeFilter(int markerID)
    {
       markerIDFilters.remove(markerID);
