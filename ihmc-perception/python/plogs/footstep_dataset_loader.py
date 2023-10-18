@@ -74,7 +74,7 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
 
     # Plot the footstep plan
     while True:
-        height_map = load_depth(data, i, 'cropped/height/')
+        height_map = load_depth(data, i, 'sensor/cropped/height/')
 
         sensor_position = sensor_positions[i, :]
         sensor_orientation = sensor_orientations[i, :]
@@ -191,5 +191,5 @@ if __name__ == '__main__':
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
 
-    data = h5py.File(path + '20231015_183228_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20231018_135001_PerceptionLog.hdf5', 'r')
     plan_view_main(data)

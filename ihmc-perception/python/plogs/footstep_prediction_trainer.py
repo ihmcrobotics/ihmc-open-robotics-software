@@ -54,9 +54,11 @@ class FootstepDataset(Dataset):
             current_plan_positions = self.footstep_plan_positions[i*10:(i+1)*10, :]
             current_plan_orientations = self.footstep_plan_orientations[i*10:(i+1)*10, :]
 
+            # check if there are no non-zero norm steps in the plan
             count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
 
-            valid = not(count_footsteps < 3)
+            valid = not(count_footsteps < 6)
+
 
             # valid = not(self.goal_positions[i, 2] < 0.11 and self.start_positions[i, 2] < 0.11 or count_footsteps < 3)
 
@@ -255,9 +257,9 @@ def load_validate(dataset):
     model = FootstepPredictor(70)
     model.load_state_dict(torch.load('footstep_predictor.pt'))
     model.eval()
-    # model.to(device)
+    model.to(device)
 
-    loader = DataLoader(dataset, batch_size=1, shuffle=False)
+    loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
     with torch.no_grad():
         for i, (height_map_input, linear_input, target_output) in enumerate(loader):

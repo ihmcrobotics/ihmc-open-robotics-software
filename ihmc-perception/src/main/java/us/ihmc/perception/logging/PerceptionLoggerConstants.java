@@ -53,6 +53,7 @@ public class PerceptionLoggerConstants
 
    public static final String INTERNAL_HEIGHT_MAP_NAME = "/internal/height/";
    public static final String CROPPED_HEIGHT_MAP_NAME = "/cropped/height/";
+   public static final String SENSOR_CROPPED_HEIGHT_MAP_NAME = "/sensor/cropped/height/";
    public static final String FOOTSTEP_POSITION = "/plan/footstep/position/";
    public static final String FOOTSTEP_ORIENTATION = "/plan/footstep/orientation/";
    public static final String START_FOOTSTEP_POSITION = "/start/footstep/position/";

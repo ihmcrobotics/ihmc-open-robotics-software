@@ -59,7 +59,7 @@ public class RDXRapidHeightMapSimulationDemo
    private final ROS2Node ros2Node;
 
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
-   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
+   private PerceptionDataLogger perceptionDataLogger;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXHighLevelDepthSensorSimulator steppingL515Simulator;
@@ -95,21 +95,6 @@ public class RDXRapidHeightMapSimulationDemo
    {
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "height_map_simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
-
-      String logFileName = HDF5Tools.generateLogFileName();
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-
-      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
-      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
 
       footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
@@ -239,6 +224,26 @@ public class RDXRapidHeightMapSimulationDemo
          {
             if (ImGui.button("Start"))
             {
+               if (perceptionDataLogger == null)
+               {
+                  perceptionDataLogger = new PerceptionDataLogger();
+                  String logFileName = HDF5Tools.generateLogFileName();
+                  FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+                  perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+                  perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.INTERNAL_HEIGHT_MAP_NAME);
+                  perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
+                  perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+                  perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+               }
+
                autoIncrement = true;
             }
             ImGui.sameLine();
@@ -246,6 +251,12 @@ public class RDXRapidHeightMapSimulationDemo
             {
                autoIncrement = false;
                logInternalHeightMap();
+
+               if (perceptionDataLogger != null)
+               {
+                  perceptionDataLogger.closeLogFile();
+                  perceptionDataLogger = null;
+               }
             }
             ImGui.separator();
             if (ImGui.button("Capture Height Map"))
@@ -375,6 +386,8 @@ public class RDXRapidHeightMapSimulationDemo
                   logFootsteps(footstepPlannerOutput);
                   logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
                                PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
+                  logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat(),
+                               PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);
                }
 
                planLogged = true;
@@ -451,7 +464,6 @@ public class RDXRapidHeightMapSimulationDemo
             steppingL515Simulator.dispose();
             humanoidPerception.destroy();
             humanoidPerceptionUI.destroy();
-            perceptionDataLogger.closeLogFile();
             bytedecoDepthImage.destroy(openCLManager);
             openCLManager.destroy();
          }

@@ -46,7 +46,6 @@ public class OpenCLTools
       if (returnCode != CL_SUCCESS) // duplicated to reduce stack trace height
       {
          LogTools.error( "OpenCL error code: ({}) -> {}", returnCode, getReturnCodeString(returnCode));
-         System.exit(-1);
       }
    }
 
