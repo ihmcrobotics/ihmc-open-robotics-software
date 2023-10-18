@@ -1,24 +1,15 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
-import perception_msgs.msg.dds.SceneGraphMessage;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeClearSubtree;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
-
-import java.util.function.BiFunction;
 
 public class ROS2BehaviorTreeSubscription
 {
@@ -27,11 +18,11 @@ public class ROS2BehaviorTreeSubscription
    private long numberOfMessagesReceived = 0;
    private boolean localTreeFrozen = false;
    private BehaviorTreeStateMessage latestBehaviorTreeMessage;
+   private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
+   private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
    /**
     * @param ioQualifier If in the on-robot autonomy process, COMMAND, else STATUS
-    * @param newNodeSupplier So that new nodes can be externally extended, like for UI representations.
-    *                        Use {@link ROS2BehaviorTreeTools#createNodeFromMessage} as a base.
     */
    public ROS2BehaviorTreeSubscription(BehaviorTreeState behaviorTree,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
@@ -44,8 +35,7 @@ public class ROS2BehaviorTreeSubscription
 
    public void update()
    {
-      boolean newMessageAvailable = behaviorTreeSubscription.getMessageNotification().poll();
-      if (newMessageAvailable)
+      if (behaviorTreeSubscription.getMessageNotification().poll())
       {
          ++numberOfMessagesReceived;
          latestBehaviorTreeMessage = behaviorTreeSubscription.getMessageNotification().read();
@@ -57,7 +47,7 @@ public class ROS2BehaviorTreeSubscription
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
          localTreeFrozen = false;
-         checkTreeModified(sceneGraph.getRootNode());
+         checkTreeModified(behaviorTree.getRootNode());
 
          if (!localTreeFrozen)
             behaviorTree.getNextID().setValue(latestBehaviorTreeMessage.getNextId());
@@ -65,31 +55,21 @@ public class ROS2BehaviorTreeSubscription
          behaviorTree.modifyTree(modificationQueue ->
          {
             if (!localTreeFrozen)
-               modificationQueue.accept(new SceneGraphClearSubtree(behaviorTree.getRootNode()));
+               modificationQueue.accept(new BehaviorTreeClearSubtree(behaviorTree.getRootNode()));
 
             updateLocalTreeFromSubscription(subscriptionRootNode, behaviorTree.getRootNode(), null, modificationQueue);
          });
       }
-      return newMessageAvailable;
    }
 
 
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
                                                 BehaviorTreeNodeState localNode,
                                                 BehaviorTreeNodeState localParentNode,
-                                                SceneGraphModificationQueue modificationQueue)
+                                                BehaviorTreeModificationQueue modificationQueue)
    {
-      // If tree is frozen and the ID isn't in the local tree, we don't have anything to update
-      // This'll happen if a node is deleted locally. We want that change to propagate and not add
-      // it right back.
-      if (localNode instanceof DetectableSceneNode detectableSceneNode)
-      {
-         detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
-      }
-      if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-      {
-         staticRelativeSceneNode.setCurrentDistance(subscriptionNode.getStaticRelativeSceneNodeMessage().getCurrentDistanceToRobot());
-      }
+      // Set fields only modifiable by the robot
+      localNode.setIsActive(subscriptionNode.getBehaviorTreeNodeStateMessage().getIsActive());
 
       // If the node was recently modified by the operator, the node does not accept
       // updates of these values. This is to allow the operator's changes to propagate
@@ -97,30 +77,15 @@ public class ROS2BehaviorTreeSubscription
       // On the robot side, this will always get updated because there is no operator.
       if (!localTreeFrozen)
       {
-         if (localNode instanceof ArUcoMarkerNode arUcoMarkerNode)
-         {
-            arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
-            arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
-            arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
-         }
-         if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-         {
-            staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
-         }
 
-         if (localParentNode != null) // Parent of root node is null
-         {
-            MessageTools.toEuclid(subscriptionNode.getSceneNodeMessage().getTransformToWorld(), nodeToWorldTransform);
-            modificationQueue.accept(new SceneGraphNodeReplacement(localNode, localParentNode, nodeToWorldTransform));
-         }
       }
 
-      for (ROS2SceneGraphSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
+      for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
-         SceneNode localChildNode = sceneGraph.getIDToNodeMap().get(subscriptionChildNode.getSceneNodeMessage().getId());
+         BehaviorTreeNodeState localChildNode = behaviorTree.getIDToNodeMap().get(subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId());
          if (localChildNode == null && !localTreeFrozen) // New node that wasn't in the local tree
          {
-            localChildNode = newNodeSupplier.apply(sceneGraph, subscriptionChildNode);
+            localChildNode = behaviorTree.getNewNodeSupplier().apply(ROS2BehaviorTreeTools.getNodeStateClass(subscriptionChildNode.getType()));
          }
 
          if (localChildNode != null)
@@ -130,8 +95,44 @@ public class ROS2BehaviorTreeSubscription
       }
    }
 
+   private void checkTreeModified(BehaviorTreeNodeState localNode)
+   {
+      localTreeFrozen |= localNode.isFrozenFromModification();
+
+      for (BehaviorTreeNodeState child : localNode.getChildren())
+      {
+         checkTreeModified(child);
+      }
+   }
+
+   /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
+   private void buildSubscriptionTree(BehaviorTreeStateMessage behaviorTreeStateMessage, ROS2BehaviorTreeSubscriptionNode subscriptionNode)
+   {
+
+   }
+
    public void destroy()
    {
 
+   }
+
+   public IHMCROS2Input<BehaviorTreeStateMessage> getBehaviorTreeSubscription()
+   {
+      return behaviorTreeSubscription;
+   }
+
+   public long getNumberOfMessagesReceived()
+   {
+      return numberOfMessagesReceived;
+   }
+
+   public BehaviorTreeStateMessage getLatestBehaviorTreeMessage()
+   {
+      return latestBehaviorTreeMessage;
+   }
+
+   public boolean getLocalTreeFrozen()
+   {
+      return localTreeFrozen;
    }
 }

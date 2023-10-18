@@ -8,6 +8,7 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.IHMCROS2Input;
@@ -53,9 +54,9 @@ public class ROS2BehaviorActionSequence extends BehaviorActionSequence
    public final Int32 executionNextIndexStatusMessage = new Int32();
    public final Bool automaticExecutionStatusMessage = new Bool();
 
-   public ROS2BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
+   public ROS2BehaviorActionSequence(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(robotModel, referenceFrameLibrary);
+      super(robotModel, syncedRobot, referenceFrameLibrary);
 
       this.ros2 = ros2;
 

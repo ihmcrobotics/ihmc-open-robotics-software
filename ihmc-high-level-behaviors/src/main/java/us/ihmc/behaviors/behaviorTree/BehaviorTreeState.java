@@ -25,7 +25,7 @@ public class BehaviorTreeState
 
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is created automatically
    private final BehaviorTreeRootNode rootNode = new BehaviorTreeRootNode();
-   private final Function<Class<?>, BehaviorTreeState> newNodeSupplier;
+   private final Function<Class<?>, BehaviorTreeNodeState> newNodeSupplier;
    private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -37,7 +37,7 @@ public class BehaviorTreeState
    private transient final Map<String, BehaviorTreeNodeState> namesToNodesMap = new HashMap<>();
    private transient final SortedSet<BehaviorTreeNodeState> nodesByID = new TreeSet<>(Comparator.comparingLong(BehaviorTreeNodeState::getID));
 
-   public BehaviorTreeState(Function<Class<?>, BehaviorTreeState> newNodeSupplier)
+   public BehaviorTreeState(Function<Class<?>, BehaviorTreeNodeState> newNodeSupplier)
    {
       this.newNodeSupplier = newNodeSupplier;
    }
@@ -90,8 +90,13 @@ public class BehaviorTreeState
       return nextID;
    }
 
-   public Function<Class<?>, BehaviorTreeState> getNewNodeSupplier()
+   public Function<Class<?>, BehaviorTreeNodeState> getNewNodeSupplier()
    {
       return newNodeSupplier;
+   }
+
+   public TLongObjectMap<BehaviorTreeNodeState> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 }
