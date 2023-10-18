@@ -22,8 +22,9 @@ public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition
 
    public ArmJointAnglesActionDefinition()
    {
-      super("Arm joint angles");
+      setDescription("Arm joint angles");
    }
+
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {

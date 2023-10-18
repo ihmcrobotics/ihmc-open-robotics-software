@@ -18,7 +18,7 @@ public class ChestOrientationActionDefinition extends BehaviorActionDefinition
 
    public ChestOrientationActionDefinition()
    {
-      super("Chest orientation");
+      setDescription("Chest orientation");
    }
 
    @Override

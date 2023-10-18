@@ -19,7 +19,7 @@ public class FootstepPlanActionDefinition extends BehaviorActionDefinition
 
    public FootstepPlanActionDefinition()
    {
-      super("Footstep plan");
+      setDescription("Footstep plan");
    }
 
    @Override

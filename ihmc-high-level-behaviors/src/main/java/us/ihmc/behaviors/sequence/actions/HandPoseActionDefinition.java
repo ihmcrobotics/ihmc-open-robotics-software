@@ -21,7 +21,7 @@ public class HandPoseActionDefinition extends BehaviorActionDefinition implement
 
    public HandPoseActionDefinition()
    {
-      super("Hand pose");
+      setDescription("Hand pose");
    }
 
    @Override

@@ -11,7 +11,7 @@ public class WaitDurationActionDefinition extends BehaviorActionDefinition
 
    public WaitDurationActionDefinition()
    {
-      super("Wait");
+      setDescription("Wait");
    }
 
    @Override
