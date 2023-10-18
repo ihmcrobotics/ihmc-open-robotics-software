@@ -13,4 +13,13 @@ public class RDXBehaviorTreeTools
 
       return null;
    }
+
+   public static RDXBehaviorTreeNode createNode(Class<?> nodeType,
+                                                long id)
+   {
+      if (nodeType == RDXArmJointAnglesAction.class)
+      {
+         return new RDXArmJointAnglesAction();
+      }
+   }
 }

@@ -3,16 +3,15 @@ package us.ihmc.rdx.ui.behavior.tree;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeDestroySubtree;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModificationQueue;
+import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class RDXBehaviorTree
 {
@@ -21,18 +20,17 @@ public class RDXBehaviorTree
 
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is created automatically
    private RDXBehaviorTreeNode rootNode;
-   private final Function<Class<?>, RDXBehaviorTreeNode> newNodeSupplier;
    private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
     * back together.
     */
-   private transient final TLongObjectMap<BehaviorTreeNodeState> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final TLongObjectMap<RDXBehaviorTreeNode> idToNodeMap = new TLongObjectHashMap<>();
 
-   public RDXBehaviorTree(Function<Class<?>, RDXBehaviorTreeNode> newNodeSupplier)
+   public RDXBehaviorTree()
    {
-      this.newNodeSupplier = newNodeSupplier;
+
    }
 
    public void loadFromFile()
@@ -40,13 +38,23 @@ public class RDXBehaviorTree
       WorkspaceResourceFile file = null; // FIXME
 
       // Delete the entire tree. We are starting over
-      modifyTree(modificationQueue -> new RDXBehaviorTreeDestroySubtree(rootNode));
-
-      JSONFileTools.load(file, jsonNode ->
+      modifyTree(modificationQueue ->
       {
-         String typeName = jsonNode.get("type").textValue();
+         modificationQueue.accept(new RDXBehaviorTreeDestroySubtree(rootNode));
+
+         JSONFileTools.load(file, jsonNode ->
+         {
+            String typeName = jsonNode.get("type").textValue();
+
+            rootNode = RDXBehaviorTreeTools.createNode(RDXBehaviorTreeTools.getClassFromTypeName(typeName), nextID.getAndIncrement());
+
+            // load children
+
+         });
+
 
       });
+
 
    }
 
@@ -72,17 +80,17 @@ public class RDXBehaviorTree
       updateCaches(rootNode);
    }
 
-   private void updateCaches(BehaviorTreeNodeState node)
+   private void updateCaches(RDXBehaviorTreeNode node)
    {
       idToNodeMap.put(node.getID(), node);
 
-      for (BehaviorTreeNodeState child : node.getChildren())
+      for (RDXBehaviorTreeNode child : node.getChildren())
       {
          updateCaches(child);
       }
    }
 
-   public TLongObjectMap<BehaviorTreeNodeState> getIDToNodeMap()
+   public TLongObjectMap<RDXBehaviorTreeNode> getIDToNodeMap()
    {
       return idToNodeMap;
    }
