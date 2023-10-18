@@ -3,8 +3,8 @@ package us.ihmc.behaviors.behaviorTree;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,7 +26,7 @@ public class BehaviorTreeState
    private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is created automatically
    private final BehaviorTreeRootNode rootNode = new BehaviorTreeRootNode();
    private final Function<Class<?>, BehaviorTreeNodeState> newNodeSupplier;
-   private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
+   private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -42,7 +42,7 @@ public class BehaviorTreeState
       this.newNodeSupplier = newNodeSupplier;
    }
 
-   public void modifyTree(Consumer<BehaviorTreeModificationQueue> modifier)
+   public void modifyTree(Consumer<BehaviorTreeStateModificationQueue> modifier)
    {
       modifier.accept(queuedModifications::add);
 
@@ -50,7 +50,7 @@ public class BehaviorTreeState
 
       while (!queuedModifications.isEmpty())
       {
-         BehaviorTreeModification modification = queuedModifications.poll();
+         BehaviorTreeStateModification modification = queuedModifications.poll();
          modification.performOperation();
       }
 
