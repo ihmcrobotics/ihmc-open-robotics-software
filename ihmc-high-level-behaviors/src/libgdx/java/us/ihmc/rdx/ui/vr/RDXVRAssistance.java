@@ -523,7 +523,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       if (ImGui.checkbox(labels.get("Assistance"), enabled))
          setEnabled(enabled.get());
       ghostRobotGraphic.renderImGuiWidgets();
-      if(ImGui.checkbox(labels.get("SPORT Mode"), sportMode))
+      if(ImGui.checkbox(labels.get("Sport Mode"), sportMode))
          proMPAssistant.setSportMode(sportMode.get());
    }
 

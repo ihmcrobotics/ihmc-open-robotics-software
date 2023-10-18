@@ -1,33 +1,25 @@
 package us.ihmc.rdx.ui.tools;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
-import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class for recording or replaying motions in the UI.
@@ -46,24 +38,23 @@ public class KinematicsRecordReplay
    private boolean isUserMoving = false;
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
-   private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
-   private boolean sceneNodeLocked = false;
+   private final SceneGraph sceneGraph;
    private ReferenceFrame sceneNodeFrame;
+   private List<String> selectableSceneNodeNames = new ArrayList<>();
+   private int selectedNodeIndex = 0;
    private final Map<String, FramePose3D> previousFramePose = new HashMap<>();
    private final Map<String, FramePose3D> firstFramePose = new HashMap<>();
 
 
-   public KinematicsRecordReplay(ROS2PublishSubscribeAPI ros2, ImBoolean enabledKinematicsStreaming, int numberOfParts)
+   public KinematicsRecordReplay(SceneGraph sceneGraph, ImBoolean enabledKinematicsStreaming, int numberOfParts)
    {
-      this.ros2 = ros2;
+      this.sceneGraph = sceneGraph;
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
       trajectoryRecorder.setNumberOfParts(numberOfParts);
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
       trajectoryRecorder.setDoneReplay(true);
-      sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -72,7 +63,6 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
-         checkIfSceneNodeIsAvailable();
 
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
@@ -82,36 +72,10 @@ public class KinematicsRecordReplay
       if (enablerReplay.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isReplaying = !isReplaying;
-         checkIfSceneNodeIsAvailable();
 
          // check if replay file has been set to a different one from previous replay. In case update file path.
          if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
             trajectoryRecorder.setPath(replayPath.get()); // replayer is reset when changing path
-      }
-   }
-
-   private void checkIfSceneNodeIsAvailable()
-   {
-      if (sceneGraphSubscription.getMessageNotification().poll() && !sceneNodeLocked)
-      {
-         SceneGraphMessage sceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
-         var detectedObjectsMessages = sceneGraphMessage.getDetectableSceneNodes();
-         // iterate over the detectable scene nodes
-         for (DetectableSceneNodeMessage detectedObjectMessage : detectedObjectsMessages)
-         {
-            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
-            if (detectedObjectMessage.getCurrentlyDetected())
-            {
-               String detectedObjectName = detectedObjectMessage.getSceneNode().getNameAsString();
-               LogTools.info(detectedObjectName);
-               RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-               MessageTools.toEuclid(detectedObjectMessage.getSceneNode().getTransformToWorld(), objectTransformToWorld);
-               sceneNodeFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                         objectTransformToWorld);
-               break;
-            }
-         }
-         sceneNodeLocked = true;
       }
    }
 
@@ -147,8 +111,6 @@ public class KinematicsRecordReplay
                previousFramePose.replace(frame, firstFramePose.get(frame));
          }
          isUserMoving = false;
-         sceneNodeLocked = false;
-         sceneNodeFrame = null;
       }
    }
 
@@ -253,22 +215,71 @@ public class KinematicsRecordReplay
 
    public void renderRecordWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGui.checkbox(labels.get("Record motion"), enablerRecording))
+      if (ImGui.checkbox(labels.get("Record Motion"), enablerRecording))
       {
          setRecording(enablerRecording.get());
       }
       ImGui.sameLine();
-      ImGui.inputText(labels.get("Record folder"), recordPath);
+      ImGui.inputText(labels.get("Record Folder"), recordPath);
+      if (isRecording)
+      {
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+         ImGui.text("Recording");
+         ImGui.popStyleColor();
+      }
    }
 
    public void renderReplayWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGui.checkbox(labels.get("Replay motion"), enablerReplay))
+      if (ImGui.checkbox(labels.get("Replay Motion"), enablerReplay))
       {
          setReplay(enablerReplay.get());
       }
       ImGui.sameLine();
-      ImGui.inputText(labels.get("Replay file"), replayPath);
+      ImGui.inputText(labels.get("Replay File"), replayPath);
+      if (isReplaying)
+      {
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+         ImGui.text("Replaying");
+         ImGui.popStyleColor();
+      }
+   }
+
+   public void renderReferenceFrameSelection(ImGuiUniqueLabelMap labels)
+   {
+      if (sceneGraph.getNodeNameList().size() > 0)
+      {
+         if (sceneGraph.getNodeNameList().size() != selectableSceneNodeNames.size())
+            selectableSceneNodeNames = sceneGraph.getNodeNameList();
+         if(sceneNodeFrame == null)
+            selectedNodeIndex = 0;
+
+         ImGui.text("Select Record/Replay Reference Frame");
+         if (ImGui.beginCombo(labels.get("Scene Node"), selectedNodeIndex != 0 ? selectableSceneNodeNames.get(selectedNodeIndex) : "World"))
+         {
+            for (int i = 0; i < selectableSceneNodeNames.size(); i++)
+            {
+               // use world frame instead of root node
+               String selectableSceneNodeName;
+               if (i != 0)
+                  selectableSceneNodeName = selectableSceneNodeNames.get(i);
+               else
+                  selectableSceneNodeName = "World";
+
+               if (ImGui.selectable(selectableSceneNodeName, selectedNodeIndex == i))
+               {
+                  selectedNodeIndex = i;
+
+                  SceneNode selectedNode = sceneGraph.getNamesToNodesMap().get(selectableSceneNodeNames.get(selectedNodeIndex));
+                  if (selectedNode.getID() != 0)
+                     sceneNodeFrame = selectedNode.getNodeFrame();
+                  else
+                     sceneNodeFrame = null;
+               }
+            }
+            ImGui.endCombo();
+         }
+      }
    }
 
    private void setRecording(boolean enablerRecording)

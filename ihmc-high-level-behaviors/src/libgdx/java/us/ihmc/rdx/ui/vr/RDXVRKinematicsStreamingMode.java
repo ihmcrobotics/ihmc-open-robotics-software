@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
@@ -80,6 +81,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private RDXVRAssistance vrAssistant;
+   private final SceneGraph sceneGraph;
 
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
@@ -89,10 +91,12 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
    public RDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       SceneGraph sceneGraph,
                                        RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.sceneGraph = sceneGraph;
       this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
    }
 
@@ -133,7 +137,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
 
-      kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, NUMBER_OF_PARTS_TO_RECORD);
+      kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled, NUMBER_OF_PARTS_TO_RECORD);
       vrAssistant = new RDXVRAssistance(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
    }
 
@@ -448,10 +452,11 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          sleepToolbox();
       }
       // add widgets for recording/replaying motion in VR
-      ImGui.text("Start/Stop recording: Press Left Joystick");
+      ImGui.text("Press Left Joystick - Start/Stop recording");
       kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
+      ImGui.text("Press Left Joystick - Start/Stop replay");
       kinematicsRecorder.renderReplayWidgets(labels);
+      kinematicsRecorder.renderReferenceFrameSelection(labels);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
