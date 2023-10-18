@@ -130,28 +130,28 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    public void processInput(RDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
-                                                             {
-                                                                // Check if left B button is pressed in order to trigger shared control assistance
-                                                                InputDigitalActionData bButton = controller.getBButtonActionData();
-                                                                // use left joystick values to control affordance in shared control assistance
-                                                                double forwardJoystickValue = controller.getJoystickActionData().y();
-                                                                // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
-                                                                if (bButton.bChanged() && !bButton.bState())
-                                                                {
-                                                                   setEnabled(!enabled.get());
-                                                                }
-                                                                joystickValue = forwardJoystickValue;
-                                                                if (sportMode.get())
-                                                                   play = true;
-                                                                else
-                                                                   play = joystickValue > 0 || isPreviewGraphicActive();
-                                                             });
+       {
+          // Check if left B button is pressed in order to trigger shared control assistance
+          InputDigitalActionData bButton = controller.getBButtonActionData();
+          // use left joystick values to control affordance in shared control assistance
+          double forwardJoystickValue = controller.getJoystickActionData().y();
+          // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
+          if (bButton.bChanged() && !bButton.bState())
+          {
+             setEnabled(!enabled.get());
+          }
+          joystickValue = forwardJoystickValue;
+          if (sportMode.get())
+             play = true;
+          else
+             play = joystickValue > 0 || isPreviewGraphicActive();
+       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-                                                              {
-                                                                 if (menu != null)
-                                                                    menu.update(controller.getXForwardZUpControllerFrame());
-                                                              });
+        {
+           if (menu != null)
+              menu.update(controller.getXForwardZUpControllerFrame());
+        });
    }
 
    /**

@@ -53,7 +53,7 @@ import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
-   private static final int NUMBER_OF_PARTS_TO_RECORD = 2;
+   private static final int NUMBER_OF_PARTS_TO_RECORD = 5;
    private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -120,14 +120,9 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
          {
             if (side == RobotSide.LEFT)
-            {
-               handDesiredControlFrame.getTransformToParent().getRotation().setToYawOrientation(Math.PI);
-               handDesiredControlFrame.getTransformToParent().getRotation().appendRollRotation(Math.PI / 2.0);
-            }
+               handDesiredControlFrame.getTransformToParent().getRotation().append(TrackedSegmentType.LEFT_HAND.getTrackerToSegmentRotation());
             else
-            {
-               handDesiredControlFrame.getTransformToParent().getRotation().setToRollOrientation(Math.PI / 2.0);
-            }
+               handDesiredControlFrame.getTransformToParent().getRotation().append(TrackedSegmentType.RIGHT_HAND.getTrackerToSegmentRotation());
          }
          handDesiredControlFrame.getReferenceFrame().update();
          handDesiredControlFrames.put(side, handDesiredControlFrame);
@@ -234,7 +229,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
                 trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
                                           .getTransformToParent()
                                           .getRotation()
-                                          .append(segmentType.getTrackerToRigidBodyRotation());
+                                          .append(segmentType.getTrackerToSegmentRotation());
              }
              trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
                                        .setParentFrame(vrContext.getTracker(segmentType.getSegmentName())
@@ -273,21 +268,6 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
                                                                               segmentType.getSegmentName(),
                                                                               segmentType.getPositionWeight(),
                                                                               segmentType.getOrientationWeight());
-
-            if (!vrAssistant.isActive())
-            {
-               // TODO. this transform should go in TrackedSegmentType. and also the one in the create() method. Actually check if they cancel out
-               message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
-                                                                                 segmentType.getSegmentSide().negateIfLeftSide(Math.PI / 2.0),
-                                                                                 segmentType.getSegmentSide().negateIfLeftSide(Math.PI / 2.0));
-            }
-            else if (vrAssistant.isPlaying() && vrAssistant.containsBodyPart(segmentType.getSegmentSide().getLowerCaseName() + "Hand"))
-            {
-               if(!vrAssistant.isAffordancePhase())
-                  message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
-                                                                                    segmentType.getSegmentSide().negateIfLeftSide(Math.PI / 2.0),
-                                                                                    segmentType.getSegmentSide().negateIfLeftSide(Math.PI / 2.0));
-            }
            toolboxInputMessage.getInputs().add().set(message);
          });
       }

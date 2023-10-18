@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -255,7 +254,7 @@ public class KinematicsRecordReplay
             selectedNodeIndex = 0;
 
          ImGui.text("Select Record/Replay Reference Frame");
-         if (ImGui.beginCombo(labels.get("Scene Node"), selectedNodeIndex != 0 ? selectableSceneNodeNames.get(selectedNodeIndex) : "World"))
+         if (ImGui.beginCombo(labels.get("Reference Frame"), selectedNodeIndex != 0 ? selectableSceneNodeNames.get(selectedNodeIndex) : "World"))
          {
             for (int i = 0; i < selectableSceneNodeNames.size(); i++)
             {
