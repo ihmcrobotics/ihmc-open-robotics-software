@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeClearSubtree;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeRebuildSubtree;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
@@ -54,10 +54,17 @@ public class ROS2BehaviorTreeSubscription
 
          behaviorTree.modifyTree(modificationQueue ->
          {
+            BehaviorTreeRebuildSubtree rebuildSubtree = null;
             if (!localTreeFrozen)
-               modificationQueue.accept(new BehaviorTreeClearSubtree(behaviorTree.getRootNode()));
+            {
+               rebuildSubtree = new BehaviorTreeRebuildSubtree(behaviorTree.getRootNode());
+               modificationQueue.accept(rebuildSubtree.getClearSubtreeModification());
+            }
 
             updateLocalTreeFromSubscription(subscriptionRootNode, behaviorTree.getRootNode(), null, modificationQueue);
+
+            if (rebuildSubtree != null)
+               modificationQueue.accept(rebuildSubtree.getDestroyLeftoversModification());
          });
       }
    }
