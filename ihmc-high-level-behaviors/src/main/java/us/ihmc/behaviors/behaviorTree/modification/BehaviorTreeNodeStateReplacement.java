@@ -12,12 +12,12 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
  * need to recursively check children frames, as the tree is rebuilt
  * in depth first order.
  */
-public class BehaviorTreeNodeReplacement implements BehaviorTreeModification
+public class BehaviorTreeNodeStateReplacement implements BehaviorTreeStateModification
 {
    private final BehaviorTreeNodeState nodeToAdd;
    private final BehaviorTreeNodeState parent;
 
-   public BehaviorTreeNodeReplacement(BehaviorTreeNodeState nodeToAdd, BehaviorTreeNodeState parent)
+   public BehaviorTreeNodeStateReplacement(BehaviorTreeNodeState nodeToAdd, BehaviorTreeNodeState parent)
    {
       this.nodeToAdd = nodeToAdd;
       this.parent = parent;

@@ -1,23 +1,22 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 
-public class BehaviorTreeNodeRemoval implements BehaviorTreeModification
+public class BehaviorTreeNodeStateRemoval implements BehaviorTreeStateModification
 {
    private final BehaviorTreeNodeState nodeToRemove;
-   private final BehaviorTreeState behaviorTreeState;
+   private final BehaviorTreeNodeState rootNode;
 
-   public BehaviorTreeNodeRemoval(BehaviorTreeNodeState nodeToRemove, BehaviorTreeState behaviorTreeState)
+   public BehaviorTreeNodeStateRemoval(BehaviorTreeNodeState nodeToRemove, BehaviorTreeNodeState rootNode)
    {
       this.nodeToRemove = nodeToRemove;
-      this.behaviorTreeState = behaviorTreeState;
+      this.rootNode = rootNode;
    }
 
    @Override
    public void performOperation()
    {
-      findAndRemove(behaviorTreeState.getRootNode());
+      findAndRemove(rootNode);
    }
 
    private void findAndRemove(BehaviorTreeNodeState node)
