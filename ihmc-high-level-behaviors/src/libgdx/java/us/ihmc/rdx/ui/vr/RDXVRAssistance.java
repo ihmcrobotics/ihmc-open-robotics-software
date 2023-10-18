@@ -5,14 +5,9 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.SceneGraphMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.*;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -26,7 +21,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
@@ -40,7 +34,6 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -58,14 +51,14 @@ import java.util.*;
  */
 public class RDXVRAssistance implements TeleoperationAssistant
 {
-   private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
    private final RDXVRAssistanceStatus status;
    private final SceneGraph sceneGraph;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
-   private final AffordanceAssistant affordanceAssistant = new AffordanceAssistant();
+   private final AffordanceAssistant affordanceAssistant;
+   private final SideDependentList<RigidBodyTransform> affordanceToVRHandControlFrameTransform = new SideDependentList<>();
    private String objectName = "";
    private ReferenceFrame objectFrame;
    private boolean previewValidated = false;
@@ -111,9 +104,12 @@ public class RDXVRAssistance implements TeleoperationAssistant
       for (RobotSide side: RobotSide.values)
       {
          ReferenceFrame afterLastWristJointFrame = ghostRobotModel.getEndEffectorFrame(side, LimbName.ARM);
-         ReferenceFrame comFrame = ghostRobotModel.getHand(side).getBodyFixedFrame();
-         affordanceToCOMHandTransform.put(side, comFrame.getTransformToDesiredFrame(afterLastWristJointFrame));
+         ReferenceFrame VRHandControlFrame = ghostRobotModel.getHand(side).getBodyFixedFrame();
+         VRHandControlFrame.getTransformToDesiredFrame(afterLastWristJointFrame).invert();
+         affordanceToVRHandControlFrameTransform.put(side, VRHandControlFrame.getTransformToDesiredFrame(afterLastWristJointFrame));
+         LogTools.info(affordanceToVRHandControlFrameTransform.get(side));
       }
+      affordanceAssistant= new AffordanceAssistant(affordanceToVRHandControlFrameTransform);
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)

@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.io.File;
@@ -20,8 +21,7 @@ import java.util.HashMap;
 
 public class AffordanceAssistant
 {
-   private static final Tuple3DReadOnly AFFORDANCE_TO_HAND_COM_TRANSFORM = new Point3D(0.0, 0.0, 0.06441);
-
+   private final SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransform;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(),
                                                                                                      "/us/ihmc/behaviors/sharedControl/affordances");
    private TrajectoryRecordReplay affordancePlayer;
@@ -33,16 +33,22 @@ public class AffordanceAssistant
    private ReferenceFrame objectFrame;
    private boolean affordanceStarted = false;
 
+   public AffordanceAssistant(SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransform)
+   {
+      this.affordanceToHandControlFrameTransform = affordanceToHandControlFrameTransform;
+   }
+
    public void loadAffordance(String fileName, ReferenceFrame objectFrame)
    {
+      //TODO generalize for multiple body parts
       this.objectFrame = objectFrame;
       Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".csv");
-      affordancePlayer = new TrajectoryRecordReplay(filePath.toString(), 1);
+      affordancePlayer = new TrajectoryRecordReplay(filePath.toString(), 1); // data of each part has been already concatenated into single rows
 
       double[] initialData = affordancePlayer.play();
       RigidBodyTransform initialTransform = new RigidBodyTransform(initialData);
       FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
-      initialBodyPartPose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
+      initialBodyPartPose.appendTranslation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getTranslation());
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPartPreviousFrameMap.put("rightHand", new FramePose3D(initialBodyPartPose));
       // pre-apply rotation of VR controllers to cancel out the rotation in the VRKinematicsStreaming
@@ -50,23 +56,12 @@ public class AffordanceAssistant
       initialBodyPartPose.appendRollRotation(Math.PI / 2.0);
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
 
-      //      for (RobotSide side : RobotSide.values)
-      //      {
-      //         RigidBodyTransform initialBodyPartTransform = new RigidBodyTransform();
-      //
-      //         initialBodyPartTransform.appendRollRotation(side.negateIfLeftSide(Math.PI / 2.0));
-      //         initialBodyPartTransform.appendYawRotation(-side.negateIfLeftSide(Math.PI / 2.0));
-      //         initialBodyPartTransform.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
-      //         FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialBodyPartTransform);
-      //         initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
-      //         bodyPartInitialPoseMap.put(side.getCamelCaseName() + "Hand", initialBodyPartPose);
-      //      }
-
       isActive = true;
    }
 
    public void framePoseToPack(FramePose3D framePose, String bodyPart, boolean playForward)
    {
+      //TODO generalize for multiple body parts
       if (bodyPart.equals("rightHand"))
       {
          if (playForward)
@@ -82,7 +77,7 @@ public class AffordanceAssistant
                affordanceStarted = true;
                RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
                FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
-               affordancePose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
+               affordancePose.appendTranslation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getTranslation());
                affordancePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.set(affordancePose);
 
@@ -157,6 +152,7 @@ public class AffordanceAssistant
       return affordancePlayer.hasDoneReplay();
    }
 
+   //TODO generalize for multiple body parts
    public boolean containsBodyPart(String bodyPart)
    {
       return bodyPart.equals("rightHand");
