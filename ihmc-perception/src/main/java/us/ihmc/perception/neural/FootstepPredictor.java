@@ -21,8 +21,9 @@ public class FootstepPredictor
 
    public void create()
    {
-      int imageHeight = 200;
-      int imageWidth = 200;
+      int LINEAR_INPUT_SIZE = 14;
+      int imageHeight = 201;
+      int imageWidth = 201;
 
       Mat inputImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
 
@@ -52,13 +53,13 @@ public class FootstepPredictor
 
          // set the image to be in the first input
          String inputName = (String) session.getInputNames().toArray()[0];
-         long[] tensorInputShape = {1, 1, 200, 200};
+         long[] tensorInputShape = {1, 1, imageHeight, imageWidth};
          FloatBuffer data = inputImage.getByteBuffer().asFloatBuffer();
 
          // set a 1x200 vector to be second input
          String inputName2 = (String) session.getInputNames().toArray()[1];
-         long[] tensorInputShape2 = {1, 200};
-         float[] data2 = new float[200];
+         long[] tensorInputShape2 = {1, LINEAR_INPUT_SIZE};
+         float[] data2 = new float[LINEAR_INPUT_SIZE];
          FloatBuffer data2Buffer = FloatBuffer.wrap(data2);
 
          // create a map
