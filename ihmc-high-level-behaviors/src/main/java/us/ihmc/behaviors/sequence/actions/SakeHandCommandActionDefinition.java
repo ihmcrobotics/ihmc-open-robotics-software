@@ -17,7 +17,7 @@ public class SakeHandCommandActionDefinition extends BehaviorActionDefinition
 
    public SakeHandCommandActionDefinition()
    {
-      super("Hand configuration");
+      setDescription("Hand configuration");
    }
 
    @Override

@@ -15,7 +15,7 @@ public class HandWrenchActionDefinition extends BehaviorActionDefinition impleme
 
    public HandWrenchActionDefinition()
    {
-      super("Hand wrench");
+      setDescription("Hand wrench");
    }
 
    @Override

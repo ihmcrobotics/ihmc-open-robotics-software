@@ -24,12 +24,6 @@ public class BehaviorActionDefinition extends BehaviorTreeNodeDefinition
 
    }
 
-   @Deprecated // TODO Remove
-   public BehaviorActionDefinition(String description)
-   {
-      super(description);
-   }
-
    public void saveToFile(ObjectNode jsonNode)
    {
       super.saveToFile(jsonNode);

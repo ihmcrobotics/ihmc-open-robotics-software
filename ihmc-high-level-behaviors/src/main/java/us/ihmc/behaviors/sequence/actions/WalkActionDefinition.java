@@ -21,7 +21,7 @@ public class WalkActionDefinition extends BehaviorActionDefinition
 
    public WalkActionDefinition(FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      super("Walk");
+      setDescription("Walk");
 
       for (RobotSide side : RobotSide.values)
       {

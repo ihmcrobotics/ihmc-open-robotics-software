@@ -17,7 +17,7 @@ public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition
 
    public PelvisHeightPitchActionDefinition()
    {
-      super("Pelvis height and pitch");
+      setDescription("Pelvis height and pitch");
    }
 
    @Override

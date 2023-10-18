@@ -4,7 +4,6 @@ import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.ArrayList;
@@ -26,12 +25,6 @@ public class BehaviorTreeNodeDefinition
    public BehaviorTreeNodeDefinition()
    {
 
-   }
-
-   @Deprecated // TODO Remove
-   public BehaviorTreeNodeDefinition(String description)
-   {
-      this.description = description;
    }
 
    public void saveToFile(ObjectNode jsonNode)
