@@ -1,5 +1,5 @@
 {
-  "name" : "PushDoorLeverHandle",
+  "name" : "RightDoorLeverHandle",
   "preGraspFrames" : [ {
     "side" : "right",
     "isPoseSet" : true,

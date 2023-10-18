@@ -2,20 +2,14 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableLong;
-import std_msgs.msg.dds.Bool;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
@@ -61,32 +55,18 @@ public class BehaviorActionSequence
    private ActionExecutionStatusMessage nothingExecutingStatusMessage = new ActionExecutionStatusMessage();
    private final ActionsExecutionStatusMessage actionsExecutionStatusMessage = new ActionsExecutionStatusMessage();
 
-   public BehaviorActionSequence(DRCRobotModel robotModel, ReferenceFrameLibrary referenceFrameLibrary)
+   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       footstepTracker = new WalkingFootstepTracker(ros2.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       for (RobotSide side : RobotSide.values)
          handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
-
-      addCommonFrames(referenceFrameLibrary, syncedRobot);
-   }
-
-   public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
-   {
-
-      referenceFrameLibrary.add(ReferenceFrame.getWorldFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getChestFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
    }
 
    public void update()
