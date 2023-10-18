@@ -12,8 +12,8 @@ import us.ihmc.commons.thread.Notification;
  */
 public class DetectionFilter
 {
-   public int HISTORY = 30; // 1 second at 30 HZ
-   public final float ACCEPTANCE_THRESHOLD = 0.6f;
+   public int history = 30; // 1 second at 30 HZ
+   public final static float ACCEPTANCE_THRESHOLD = 0.6f;
 
    private final TFloatList detections = new TFloatLinkedList();
    private final Notification detected = new Notification();
@@ -21,7 +21,7 @@ public class DetectionFilter
 
    public DetectionFilter(int history)
    {
-      this.HISTORY = history;
+      this.history = history;
    }
 
    public void registerDetection()
@@ -29,7 +29,7 @@ public class DetectionFilter
       detected.set();
       detections.add(detected.poll() ? 1.0f : 0.0f);
 
-      while (detections.size() > HISTORY)
+      while (detections.size() > history)
       {
          detections.removeAt(0);
       }
@@ -41,16 +41,11 @@ public class DetectionFilter
       }
       average /= (float) detections.size();
 
-      isStableDetectionResult = detections.size() == HISTORY && average >= ACCEPTANCE_THRESHOLD;
+      isStableDetectionResult = detections.size() == history && average >= ACCEPTANCE_THRESHOLD;
    }
 
    public boolean isStableDetectionResult()
    {
       return isStableDetectionResult;
    }
-
-//   public void update()
-//   {
-//
-//   }
 }
