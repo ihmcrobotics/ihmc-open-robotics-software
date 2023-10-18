@@ -3,12 +3,13 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.YoSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -21,7 +22,6 @@ import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.awt.*;
 import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -83,7 +83,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       for (RobotSide robotSide : RobotSide.values)
       {
          soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
-         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
       Footstep footstep = new Footstep();
@@ -160,7 +160,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       for (RobotSide robotSide : RobotSide.values)
       {
          soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
-         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
       Footstep footstep = new Footstep();
@@ -253,7 +253,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       for (RobotSide robotSide : RobotSide.values)
       {
          soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
-         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
       Footstep footstep = new Footstep();

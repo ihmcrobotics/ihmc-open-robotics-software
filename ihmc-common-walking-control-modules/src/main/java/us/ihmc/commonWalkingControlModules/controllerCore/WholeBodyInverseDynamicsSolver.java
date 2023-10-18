@@ -313,7 +313,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
          }
 
-         inverseDynamicsCalculator.compute(jointAccelerations);
+         inverseDynamicsCalculator.compute(jointAccelerations); // see why the torques are 0
 
          for (OneDoFJointBasics joint : controlledOneDoFJoints)
          {

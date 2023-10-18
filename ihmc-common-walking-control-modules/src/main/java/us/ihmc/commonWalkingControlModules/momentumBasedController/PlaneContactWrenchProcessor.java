@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
 {
-   public final static boolean VISUALIZE = false;
+   public final static boolean VISUALIZE = true;
 
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
