@@ -444,6 +444,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
          for (Map.Entry<String, SceneNode> sceneNamesToNodeMap : sceneGraph.getNamesToNodesMap().entrySet())
          {
             SceneNode sceneNode = sceneNamesToNodeMap.getValue();
+            //TODO add here if parent node is detectable and remove this string comparisons
             if (sceneNode.getChildren().size() == 0 && sceneNode.getClass() == PredefinedRigidBodySceneNode.class && !sceneNode.getName().contains("Panel") &&
                 !sceneNode.getName().contains("Frame") && !sceneNode.getName().contains("Knob") && !sceneNode.getName().contains("Bar"))
             {
