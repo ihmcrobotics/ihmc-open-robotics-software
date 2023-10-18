@@ -52,7 +52,7 @@ import java.util.*;
  * 2. spline trajectories for end-effectors
  * 3. std deviation colored region of the autonomy used for assistance
  */
-public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
+public class RDXVRAssistance implements TeleoperationAssistant
 {
    private final RDXVRAssistanceStatus status;
    private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
@@ -85,7 +85,6 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
    private int blendingCounter = 0;
    private RDXVRAssistanceMenu menu;
    boolean sentInitialHandConfiguration = false;
-   private final ImBoolean sportMode =  new ImBoolean(false);
 
    public RDXVRAssistance(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -141,10 +140,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
              setEnabled(!enabled.get());
           }
           joystickValue = forwardJoystickValue;
-          if (sportMode.get())
-             play = true;
-          else
-             play = joystickValue > 0 || isPreviewGraphicActive();
+          play = joystickValue > 0 || isPreviewGraphicActive();
        });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -304,7 +300,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 
       if (!objectName.isEmpty())
       {
-         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame, this);
+         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
 
          if (previewSetToActive)
          {
@@ -429,13 +425,6 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       }
    }
 
-   @Override
-   public void streamOnNotification() {
-      LogTools.info("Notified: ", enabledIKStreaming.get());
-      if (!enabledIKStreaming.get())
-         enabledIKStreaming.set(true);
-   }
-
    public void checkForHandConfigurationUpdates(HandConfigurationListener listener)
    {
       if (status.getAssistancePhase() != AssistancePhase.PROMP)
@@ -523,8 +512,6 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       if (ImGui.checkbox(labels.get("Assistance"), enabled))
          setEnabled(enabled.get());
       ghostRobotGraphic.renderImGuiWidgets();
-      if(ImGui.checkbox(labels.get("Sport Mode"), sportMode))
-         proMPAssistant.setSportMode(sportMode.get());
    }
 
    public void destroy()
@@ -545,7 +532,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
-            if (!enabledIKStreaming.get() && !isPreviewGraphicActive() && !sportMode.get())
+            if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
                this.enabledIKStreaming.set(true);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
             else if (isPreviewGraphicActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller

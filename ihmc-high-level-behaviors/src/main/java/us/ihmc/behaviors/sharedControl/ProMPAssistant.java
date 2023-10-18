@@ -63,7 +63,6 @@ public class ProMPAssistant
    private double isMovingThreshold = -1;
    private final HashMap<String, FramePose3D> previousObservedPose = new HashMap<>();
    private boolean useCustomSpeed;
-   private boolean sportMode = false;
 
    public ProMPAssistant()
    {
@@ -246,7 +245,7 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame, ControlStreamer controlStreamer)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
       if (taskDetected(observedPose, bodyPart, objectName, objectFrame))
       {
@@ -271,8 +270,6 @@ public class ProMPAssistant
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
-                  if(sportMode && controlStreamer != null)
-                     controlStreamer.streamOnNotification();
 
                   LogTools.info("Generated prediction");
                }
@@ -306,7 +303,7 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, FramePose3D objectPose, ControlStreamer controlStreamer)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, FramePose3D objectPose)
    {
       if (taskDetected(observedPose, bodyPart, objectName, null))
       {
@@ -331,8 +328,6 @@ public class ProMPAssistant
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
-                  if(sportMode && controlStreamer != null)
-                     controlStreamer.streamOnNotification();
 
                   LogTools.info("Generated prediction");
                }
@@ -503,10 +498,8 @@ public class ProMPAssistant
       for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, frame));
-         if(sportMode)
-            setStartTrajectories(0);
-         else // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-            setStartTrajectories(numberObservations + 1);
+         // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
+         setStartTrajectories(numberObservations + 1);
       }
    }
 
@@ -621,10 +614,5 @@ public class ProMPAssistant
    public boolean startedProcessing()
    {
       return !currentTask.isEmpty();
-   }
-
-   public void setSportMode(boolean activate)
-   {
-      sportMode = activate;
    }
 }
