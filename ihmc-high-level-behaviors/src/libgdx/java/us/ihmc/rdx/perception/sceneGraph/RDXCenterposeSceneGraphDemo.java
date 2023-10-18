@@ -11,10 +11,10 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -82,7 +82,7 @@ public class RDXCenterposeSceneGraphDemo
             centerposeProcess = new CenterposeSceneGraphOnRobotProcess(ros2Helper);
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
-            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel(), referenceFrameLibrary);
+            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
             referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
