@@ -59,7 +59,7 @@ public class OusterDepthImageRetriever
                                    ouster.getImageWidth(),
                                    ouster.getImageHeight(),
                                    1.0f,
-                                   depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
+                                   depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat().clone(),
                                    null,
                                    opencv_core.CV_16UC1,
                                    ouster.getImageWidth() / (2.0f * (float) Math.PI),
