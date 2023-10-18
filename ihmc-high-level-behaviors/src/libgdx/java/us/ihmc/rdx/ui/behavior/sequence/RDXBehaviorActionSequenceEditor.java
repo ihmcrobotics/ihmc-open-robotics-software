@@ -217,6 +217,7 @@ public class RDXBehaviorActionSequenceEditor
       if (successfullyLoadedActions.getValue())
       {
          commandNextActionIndex(0);
+         panel3D.getNotificationManager().pushNotification("Loaded action sequence: " + workspaceFile.getFileName());
          return true;
       }
 
@@ -338,6 +339,7 @@ public class RDXBehaviorActionSequenceEditor
                chestOrientationAction.getState().getChestFrame().setToReferenceFrameIncludingParent(syncedRobot.getReferenceFrames().getChestFrame());
                chestOrientationAction.getState().getChestFrame().update(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getName());
             }
+            chestOrientationAction.getDefinition().setParentFrameName(chestOrientationAction.getReferenceFrame().getName());
          }
          else if (newAction instanceof RDXPelvisHeightPitchAction pelvisHeightPitchAction)
          {
@@ -354,6 +356,7 @@ public class RDXBehaviorActionSequenceEditor
                pelvisHeightPitchAction.getState().getPelvisFrame().setToReferenceFrameIncludingParent(syncedRobot.getReferenceFrames().getPelvisFrame());
                pelvisHeightPitchAction.getState().getPelvisFrame().update(ReferenceFrame.getWorldFrame().getName());
             }
+            pelvisHeightPitchAction.getDefinition().setParentFrameName(pelvisHeightPitchAction.getReferenceFrame().getName());
          }
          else if (newAction instanceof RDXFootstepPlanAction footstepPlanAction)
          {
@@ -370,6 +373,8 @@ public class RDXBehaviorActionSequenceEditor
 
          int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
          actionSequence.add(insertionIndex, newAction);
+
+         panel3D.getNotificationManager().pushNotification("Added new " + actionType.getSimpleName());
 
          for (int i = 0; i < actionSequence.size(); i++)
          {
