@@ -115,6 +115,7 @@ public class PerceptionAPI
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
+   public static final ROS2Topic<Empty> PUBLISH_OUSTER_DEPTH = PERCEPTION_MODULE.withSuffix("publish_ouster_depth").withType(Empty.class);
 
    public static final ROS2Topic<Empty> PUBLISH_ZED_COLOR = PERCEPTION_MODULE.withSuffix("publish_zed_color").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("publish_zed_depth").withType(Empty.class);

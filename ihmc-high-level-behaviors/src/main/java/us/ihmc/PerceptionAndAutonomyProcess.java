@@ -9,6 +9,9 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.ouster.NettyOuster;
+import us.ihmc.perception.ouster.OusterDepthImagePublisher;
+import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,6 +37,9 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
    private static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_TOPIC = PerceptionAPI.D455_DEPTH_IMAGE;
 
+   private static final double OUSTER_FPS = 10.0;
+   private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
+
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
    private final ROS2HeartbeatMonitor zedColorHeartbeat;
@@ -50,10 +56,21 @@ public class PerceptionAndAutonomyProcess
    private final RealsenseColorDepthImagePublisher realsenseImagePublisher;
    private final RestartableThrottledThread realsenseProcessAndPublishThread;
 
+   private final NettyOuster ouster;
+   private RawImage ousterDepthImage;
+   private final ROS2HeartbeatMonitor ousterDeptHeartbeat;
+   private final ROS2HeartbeatMonitor lidarScanHeartbeat;
+   private final ROS2HeartbeatMonitor heightMapHeartbeat;
+   private final OusterDepthImageRetriever ousterDepthImageRetriever;
+   private final OusterDepthImagePublisher ousterDepthImagePublisher;
+   private final RestartableThrottledThread ousterProcessAndPublishThread;
+
    PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                 Supplier<ReferenceFrame> zedFrameSupplier,
-                                Supplier<ReferenceFrame> realsenseFrameSupplier)
+                                Supplier<ReferenceFrame> realsenseFrameSupplier,
+                                Supplier<ReferenceFrame> ousterFrameSupplier)
    {
+      // ZED
       zedColorHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_COLOR);
       zedDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_DEPTH);
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier);
@@ -61,12 +78,23 @@ public class PerceptionAndAutonomyProcess
       zedProcessAndPublishThread = new RestartableThrottledThread("ZEDImageProcessAndPublish", ZED_FPS, this::processAndPublishZED);
       initializeZEDHeartbeatCallbacks();
 
+      // REALSENSE
       realsenseColorHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_REALSENSE_COLOR);
       realsenseDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_REALSENSE_DEPTH);
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(REALSENSE_SERIAL_NUMBER, RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ, realsenseFrameSupplier);
-      realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC, realsenseFrameSupplier);
+      realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
       realsenseProcessAndPublishThread = new RestartableThrottledThread("RealsenseProcessAndPublish", REALSENSE_FPS, this::processAndPublishRealsense);
       initializeRealsenseHearbeatCallbacks();
+
+      // OUSTER
+      ouster = new NettyOuster();
+      ouster.bind();
+      ousterDeptHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_OUSTER_DEPTH);
+      lidarScanHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_LIDAR_SCAN);
+      heightMapHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
+      ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster, ousterFrameSupplier, lidarScanHeartbeat::isAlive, heightMapHeartbeat::isAlive);
+      ousterDepthImagePublisher = new OusterDepthImagePublisher(ouster, OUSTER_DEPTH_TOPIC);
+      ousterProcessAndPublishThread = new RestartableThrottledThread("OusterProcessAndPublish", OUSTER_FPS, this::processAndPublishOuster);
    }
 
    public void start()
@@ -78,6 +106,10 @@ public class PerceptionAndAutonomyProcess
       realsenseProcessAndPublishThread.start();
       realsenseImageRetriever.start();
       realsenseImagePublisher.startAll();
+
+      ousterProcessAndPublishThread.start();
+      ousterDepthImageRetriever.start();
+      ousterDepthImagePublisher.startDepth();
    }
 
    public void destroy()
@@ -89,6 +121,10 @@ public class PerceptionAndAutonomyProcess
       realsenseProcessAndPublishThread.stop();
       realsenseImageRetriever.destroy();
       realsenseImagePublisher.destroy();
+
+      ouster.destroy();
+      ousterDepthImageRetriever.destroy();
+      ousterDepthImagePublisher.destroy();
    }
 
    private void processAndPublishZED()
@@ -117,6 +153,13 @@ public class PerceptionAndAutonomyProcess
 
       realsenseImagePublisher.setNextDepthImage(realsenseDepthImage);
       realsenseImagePublisher.setNextColorImage(realsenseColorImage);
+   }
+
+   private void processAndPublishOuster()
+   {
+      ousterDepthImage = ousterDepthImageRetriever.getLatestRawDepthImage();
+
+      ousterDepthImagePublisher.setNextDepthImage(ousterDepthImage);
    }
 
    private void initializeZEDHeartbeatCallbacks()
@@ -184,12 +227,32 @@ public class PerceptionAndAutonomyProcess
       });
    }
 
+   private void initializeOusterHeartbeatCallbacks()
+   {
+      ousterDeptHeartbeat.setAlivenessChangedCallback(isAlive ->
+      {
+         if (isAlive)
+         {
+            ousterDepthImageRetriever.start();
+            ousterDepthImagePublisher.startDepth();
+         }
+         else
+         {
+            ousterDepthImageRetriever.stop();
+            ousterDepthImagePublisher.stopDepth();
+         }
+      });
+   }
+
    public static void main(String[] args)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper, ReferenceFrame::getWorldFrame, ReferenceFrame::getWorldFrame);
+      PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                ReferenceFrame::getWorldFrame,
+                                                                                ReferenceFrame::getWorldFrame,
+                                                                                ReferenceFrame::getWorldFrame);
       publisher.start();
    }
 }

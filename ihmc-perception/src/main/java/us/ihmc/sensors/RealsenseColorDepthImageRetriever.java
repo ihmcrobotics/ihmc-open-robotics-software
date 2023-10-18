@@ -21,7 +21,7 @@ public class RealsenseColorDepthImageRetriever
    private final RealSenseHardwareManager realSenseHardwareManager;
    private final BytedecoRealsense realsense;
 
-   private long grabSequenceNumber = 0;
+   private long grabSequenceNumber = 0L;
 
    private RawImage depthImage = null;
    private RawImage colorImage = null;

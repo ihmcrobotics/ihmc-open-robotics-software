@@ -30,9 +30,6 @@ import java.util.function.Supplier;
 
 public class RealsenseColorDepthImagePublisher
 {
-
-   private final Supplier<ReferenceFrame> sensorFrameSupplier;
-
    private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
@@ -53,11 +50,8 @@ public class RealsenseColorDepthImagePublisher
    private final Condition newColorImageAvailable = colorPublishLock.newCondition();
 
    public RealsenseColorDepthImagePublisher(ROS2Topic<ImageMessage> depthTopic,
-                                            ROS2Topic<ImageMessage> colorTopic,
-                                            Supplier<ReferenceFrame> sensorFrameSupplier)
+                                            ROS2Topic<ImageMessage> colorTopic)
    {
-      this.sensorFrameSupplier = sensorFrameSupplier;
-
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_depth_publisher");
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
       ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic);
