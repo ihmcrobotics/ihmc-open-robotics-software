@@ -12,7 +12,7 @@ import java.util.function.Function;
  * This class is concerned with syncing behavior tree state only
  * over ROS 2 nodes as a CRDT.
  */
-public class ROS2BehaviorTree extends BehaviorTreeState
+public class ROS2BehaviorTreeState extends BehaviorTreeState
 {
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2ActorDesignation ros2ActorDesignation;
@@ -25,9 +25,9 @@ public class ROS2BehaviorTree extends BehaviorTreeState
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTree(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                           ROS2ActorDesignation ros2ActorDesignation,
-                           Function<Class<?>, BehaviorTreeNodeState> newNodeSupplier)
+   public ROS2BehaviorTreeState(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+                                ROS2ActorDesignation ros2ActorDesignation,
+                                Function<Class<?>, BehaviorTreeNodeState> newNodeSupplier)
    {
       super(newNodeSupplier);
 
