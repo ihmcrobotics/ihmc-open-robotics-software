@@ -4,14 +4,14 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
 import java.util.HashMap;
 
-public class BehaviorTreeRebuildSubtree
+public class BehaviorTreeStateRebuildSubtree
 {
    private final HashMap<Long, BehaviorTreeNodeState> idToNodesMap = new HashMap<>();
 
-   private final BehaviorTreeModification clearSubtreeModification;
-   private final BehaviorTreeModification destroyLeftoversModification;
+   private final BehaviorTreeStateModification clearSubtreeModification;
+   private final BehaviorTreeStateModification destroyLeftoversModification;
 
-   public BehaviorTreeRebuildSubtree(BehaviorTreeNodeState subtreeToRebuild)
+   public BehaviorTreeStateRebuildSubtree(BehaviorTreeNodeState subtreeToRebuild)
    {
       clearSubtreeModification = () -> clearChildren(subtreeToRebuild);
 
@@ -47,12 +47,12 @@ public class BehaviorTreeRebuildSubtree
       }
    }
 
-   public BehaviorTreeModification getClearSubtreeModification()
+   public BehaviorTreeStateModification getClearSubtreeModification()
    {
       return clearSubtreeModification;
    }
 
-   public BehaviorTreeModification getDestroyLeftoversModification()
+   public BehaviorTreeStateModification getDestroyLeftoversModification()
    {
       return destroyLeftoversModification;
    }

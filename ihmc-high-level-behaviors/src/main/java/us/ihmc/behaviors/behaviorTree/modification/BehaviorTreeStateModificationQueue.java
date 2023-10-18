@@ -7,7 +7,7 @@ import java.util.function.Consumer;
  * which gets passed down from BehaviorTree's modifyTree method and serves
  * to queue up tree modifications.
  */
-public interface BehaviorTreeModificationQueue extends Consumer<BehaviorTreeModification>
+public interface BehaviorTreeStateModificationQueue extends Consumer<BehaviorTreeStateModification>
 {
 
 }
