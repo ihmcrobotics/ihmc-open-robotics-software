@@ -20,13 +20,14 @@ import java.util.HashMap;
 
 public class AffordanceAssistant
 {
+   private static final Tuple3DReadOnly AFFORDANCE_TO_HAND_COM_TRANSFORM = new Point3D(0.0, 0.0, 0.06441);
+
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(),
                                                                                                      "/us/ihmc/behaviors/sharedControl/affordances");
    private TrajectoryRecordReplay affordancePlayer;
    private boolean isActive = false;
    private final HashMap<String, Pose3DReadOnly> bodyPartInitialPoseMap = new HashMap<>();
    private final HashMap<String, Pose3DReadOnly> bodyPartPreviousFrameMap = new HashMap<>();
-   private static final Tuple3DReadOnly AFFORDANCE_TO_HAND_COM_TRANSFORM = new Point3D(0.0, 0.0, 0.06441);
    private boolean isHandConfigurationCommand = false;
    private Pair<RobotSide, HandConfiguration> handConfigurationToSend;
    private ReferenceFrame objectFrame;

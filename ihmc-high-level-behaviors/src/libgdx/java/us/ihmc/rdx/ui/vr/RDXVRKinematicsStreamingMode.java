@@ -80,6 +80,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
+//   private RDXVRAssistanceManager vrAssistanceManager;
    private RDXVRAssistance vrAssistant;
    private final SceneGraph sceneGraph;
 
@@ -133,7 +134,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled, NUMBER_OF_PARTS_TO_RECORD);
-      vrAssistant = new RDXVRAssistance(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
+//      vrAssistanceManager = new RDXVRAssistanceManager();
+      vrAssistant = new RDXVRAssistance(robotModel, sceneGraph, streamToController, kinematicsRecorder.isReplayingEnabled());
    }
 
    public void processVRInput(RDXVRContext vrContext)

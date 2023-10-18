@@ -26,6 +26,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiTransparentPanel;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -54,19 +58,16 @@ import java.util.*;
  */
 public class RDXVRAssistance implements TeleoperationAssistant
 {
-   private final RDXVRAssistanceStatus status;
    private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
-   private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
+   private final RDXVRAssistanceStatus status;
+   private final SceneGraph sceneGraph;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private final AffordanceAssistant affordanceAssistant = new AffordanceAssistant();
    private String objectName = "";
-   private RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-   private ReferenceFrame objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                               objectTransformToWorld);
+   private ReferenceFrame objectFrame;
    private boolean previewValidated = false;
    private final FullHumanoidRobotModel ghostRobotModel;
    private final RDXMultiBodyGraphic ghostRobotGraphic;
@@ -86,9 +87,9 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private RDXVRAssistanceMenu menu;
    boolean sentInitialHandConfiguration = false;
 
-   public RDXVRAssistance(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRAssistance(DRCRobotModel robotModel, SceneGraph sceneGraph, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
-      this.ros2 = ros2;
+      this.sceneGraph = sceneGraph;
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
 
@@ -104,8 +105,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostRobotModel.getElevator());
       ghostRobotGraphic.setActive(false);
       ghostRobotGraphic.create();
-
-      sceneGraphSubscription = ros2.subscribe(PerceptionAPI.SCENE_GRAPH.getStatusTopic());
 
       status = new RDXVRAssistanceStatus(AssistancePhase.DISABLED, RDXVRAssistanceMenuMode.OFF);
 
@@ -382,7 +381,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
          {
             //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
-            double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
+            double x = (double) (blendingCounter) / (ProMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
             double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
             if(play)
                blendingCounter++;
@@ -438,20 +437,23 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public void update()
    {
-//      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
-//      {
-//         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-//         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
-//         {
-//            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
-//            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
-//            {
-//               objectName = sceneNodeMessage.getNameAsString();
-//               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
-//               objectFrame.update();
-//            }
-//         }
-//      }
+      //TODO change this to highlight objects and click to confirm which one has to be used
+      // now assumes only one object is detected at a time
+      if (sceneGraph.getNodeNameList().size() > 0 && objectName.isEmpty())
+      {
+         for (Map.Entry<String, SceneNode> sceneNamesToNodeMap : sceneGraph.getNamesToNodesMap().entrySet())
+         {
+            SceneNode sceneNode = sceneNamesToNodeMap.getValue();
+            if (sceneNode.getChildren().size() == 0 && sceneNode.getClass() == PredefinedRigidBodySceneNode.class && !sceneNode.getName().contains("Panel") &&
+                !sceneNode.getName().contains("Frame") && !sceneNode.getName().contains("Knob") && !sceneNode.getName().contains("Bar"))
+            {
+               objectName = sceneNode.getName();
+               LogTools.info(objectName);
+               objectFrame = sceneNode.getNodeFrame();
+            }
+         }
+      }
+
       //update menu
       if (!enabled.get() && !objectName.isEmpty()) // if assistance not enabled and objects in the scene
       { // Press left B button to activate
@@ -461,7 +463,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       else if (!enabled.get()) // if assistance is off and no object in the scene
          status.setActiveMenu(RDXVRAssistanceMenuMode.OFF);
-      else if (enabled.get() && proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack()) // if assistance is on and promp ready
+      else if (proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack()) // if assistance is on and promp ready
       { // move joysticks
          if(status.getActiveMenu() != RDXVRAssistanceMenuMode.MOVE)
             menu.resetTimer();
@@ -489,10 +491,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
          if(proMPAssistant.getNumberOfSamples()>0 && !menu.hasProMPSamples())
          {
             menu.setProMPSamples(proMPAssistant.getNumberOfSamples());
-            if(!affordanceAssistant.hasAffordance(objectName))
-               menu.setHasAffordance(false);
-            else
-               menu.setHasAffordance(true);
+            menu.setHasAffordance(affordanceAssistant.hasAffordance(objectName));
          }
          menu.setCurrentProMPSample(proMPAssistant.getCurrentSample());
       }
@@ -544,6 +543,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             // reset promp assistance
             proMPAssistant.reset();
             objectName = "";
+            objectFrame = null;
             firstPreview = true;
             previewValidated = false;
             replayPreviewCounter = 0;
@@ -604,11 +604,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
       return affordanceAssistant.isActive();
    }
 
-   public boolean isAffordancePhase()
-   {
-      return affordanceAssistant.hasAffordanceStarted();
-   }
-
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
    {
       kinematicsToolboxOutputStatusList.add(new KinematicsToolboxOutputStatus(status));
@@ -629,8 +624,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
       if (!sentInitialHandConfiguration)
       {
          sentInitialHandConfiguration = true;
-         var initialHandConfiguration = Pair.of(RobotSide.RIGHT, HandConfiguration.HALF_CLOSE);
-         return initialHandConfiguration;
+         return Pair.of(RobotSide.RIGHT, HandConfiguration.HALF_CLOSE);
       }
       else
          return affordanceAssistant.getHandConfigurationToSend();
