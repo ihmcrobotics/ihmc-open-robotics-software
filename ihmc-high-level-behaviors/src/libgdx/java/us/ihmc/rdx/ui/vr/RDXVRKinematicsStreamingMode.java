@@ -120,9 +120,9 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
          {
             if (side == RobotSide.LEFT)
-               handDesiredControlFrame.getTransformToParent().getRotation().append(TrackedSegmentType.LEFT_HAND.getTrackerToSegmentRotation());
+               handDesiredControlFrame.getTransformToParent().getRotation().append(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentRotation());
             else
-               handDesiredControlFrame.getTransformToParent().getRotation().append(TrackedSegmentType.RIGHT_HAND.getTrackerToSegmentRotation());
+               handDesiredControlFrame.getTransformToParent().getRotation().append(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentRotation());
          }
          handDesiredControlFrame.getReferenceFrame().update();
          handDesiredControlFrames.put(side, handDesiredControlFrame);
@@ -192,7 +192,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
-         for (TrackedSegmentType segmentType : TrackedSegmentType.values())
+         for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
          if (enabled.get())
@@ -207,7 +207,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
    private void handleTrackedSegment(RDXVRContext vrContext,
                                      KinematicsStreamingToolboxInputMessage toolboxInputMessage,
-                                     TrackedSegmentType segmentType,
+                                     VRTrackedSegmentType segmentType,
                                      Set<String> additionalTrackedSegments)
    {
       if (additionalTrackedSegments.contains(segmentType.getSegmentName()))
