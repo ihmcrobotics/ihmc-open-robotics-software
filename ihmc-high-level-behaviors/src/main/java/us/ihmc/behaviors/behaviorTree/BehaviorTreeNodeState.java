@@ -11,6 +11,8 @@ import java.util.List;
  */
 public abstract class BehaviorTreeNodeState extends FreezableNode implements BehaviorTreeNodeDefinitionSupplier
 {
+   /** The node's unique ID. */
+   private final long id = -1;
    /**
     * A node is active if it lies on the path of the current tree tick.
     *
@@ -31,6 +33,11 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
       isActive = message.getIsActive();
+   }
+
+   public long getID()
+   {
+      return id;
    }
 
    public void setIsActive(boolean isActive)
