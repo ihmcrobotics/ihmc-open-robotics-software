@@ -378,7 +378,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
             bodyPartInitialAffordancePoseMap = affordanceAssistant.getInitialHandPoseMap();
          }
          if (containsBodyPart(bodyPart))
-
          {
             //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
             double x = (double) (blendingCounter) / (ProMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
@@ -386,7 +385,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             if(play)
                blendingCounter++;
             proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
-            if (alpha <= 0.9999)
+            if (alpha <= 0.999)
             {
                if (alpha >= 0.998)
                   alpha = 1;
@@ -449,7 +448,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
                 !sceneNode.getName().contains("Frame") && !sceneNode.getName().contains("Knob") && !sceneNode.getName().contains("Bar"))
             {
                objectName = sceneNode.getName();
-               LogTools.info(objectName);
                objectFrame = sceneNode.getNodeFrame();
             }
          }

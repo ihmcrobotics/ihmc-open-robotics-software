@@ -339,60 +339,66 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       // Safety features!
       if (!ikStreamingModeEnabled)
          streamToController.set(false);
-      if (!enabled.get())
-         streamToController.set(false);
-
-      if (status.getMessageNotification().poll())
+      else
       {
-         KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
-         statusFrequencyPlot.recordEvent();
-         if (latestStatus.getJointNameHash() == -1)
-         {
-            if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD
-                && messageThrottler.run(1.0))
-               LogTools.warn("Status update: Toolbox failed initialization, missing RobotConfigurationData.");
-            else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
-               LogTools.info("Status update: Toolbox initialized successfully.");
-         }
+         if (!enabled.get())
+            streamToController.set(false);
          else
          {
-            // update IK ghost robot
-            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
-            ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
-            for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+            if (status.getMessageNotification().poll())
             {
-               ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
-            }
-            ghostFullRobotModel.getElevator().updateFramesRecursively();
-
-            // update preview assistance
-            if (vrAssistant.isActive() && vrAssistant.isPreviewActive()) // if preview is enabled
-            {
-               if (vrAssistant.isFirstPreview()) // first preview
+               KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
+               statusFrequencyPlot.recordEvent();
+               if (latestStatus.getJointNameHash() == -1)
                {
-                  vrAssistant.saveStatusForPreview(latestStatus); // store the status
-                  vrAssistant.updatePreviewModel(latestStatus); // update shared control ghost robot
+                  if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD
+                      && messageThrottler.run(1.0))
+                     LogTools.warn("Status update: Toolbox failed initialization, missing RobotConfigurationData.");
+                  else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
+                     LogTools.info("Status update: Toolbox initialized successfully.");
                }
-               else if (vrAssistant.isPreviewGraphicActive()) // replay preview
+               else
                {
-                  // update IK ghost
-                  KinematicsToolboxOutputStatus statusPreview = vrAssistant.getPreviewStatus();
-                  ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
-                  ghostFullRobotModel.getRootJoint().setJointOrientation(statusPreview.getDesiredRootOrientation());
+                  // update IK ghost robot
+                  ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
+                  ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
-                     ghostOneDoFJointsExcludingHands[i].setQ(statusPreview.getDesiredJointAngles().get(i));
+                  {
+                     ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+                  }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
-                  // update shared control ghost
-                  vrAssistant.replayPreviewModel();
+
+                  // update preview assistance
+                  if (vrAssistant.isActive() && vrAssistant.isPreviewActive()) // if preview is enabled
+                  {
+                     if (vrAssistant.isFirstPreview()) // first preview
+                     {
+                        vrAssistant.saveStatusForPreview(latestStatus); // store the status
+                        vrAssistant.updatePreviewModel(latestStatus); // update shared control ghost robot
+                     }
+                     else if (vrAssistant.isPreviewGraphicActive()) // replay preview
+                     {
+                        // update IK ghost
+                        KinematicsToolboxOutputStatus statusPreview = vrAssistant.getPreviewStatus();
+                        ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
+                        ghostFullRobotModel.getRootJoint().setJointOrientation(statusPreview.getDesiredRootOrientation());
+                        for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+                           ghostOneDoFJointsExcludingHands[i].setQ(statusPreview.getDesiredJointAngles().get(i));
+                        ghostFullRobotModel.getElevator().updateFramesRecursively();
+                        // update shared control ghost
+                        vrAssistant.replayPreviewModel();
+                     }
+                  }
                }
             }
+            if (ghostRobotGraphic.isActive())
+               ghostRobotGraphic.update();
+
+            if (vrAssistant.isActive() && vrAssistant.isPreviewActive()) // if graphic active update also graphic
+               vrAssistant.getGhostPreviewGraphic().update();
+            vrAssistant.update();
          }
       }
-      if (ghostRobotGraphic.isActive())
-         ghostRobotGraphic.update();
-      if (vrAssistant.isActive() && vrAssistant.isPreviewActive()) // if graphic active update also graphic
-         vrAssistant.getGhostPreviewGraphic().update();
-      vrAssistant.update();
    }
 
    public void renderImGuiWidgets()
