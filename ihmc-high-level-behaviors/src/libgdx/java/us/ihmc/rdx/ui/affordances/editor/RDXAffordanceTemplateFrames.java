@@ -188,6 +188,7 @@ public class RDXAffordanceTemplateFrames
             index = 0;
          }
       }
+      activeSide = editorStatus.getActiveSide();
       ImGui.text("Hand Configuration: " + (selectedFrameConfiguration == null ? "" : selectedFrameConfiguration.toString()));
       ImGui.sameLine();
       if (ImGui.button(labels.get("Set") + "##hand" + labelId) && editorStatus.getActiveMenu().equals(this.menu))
@@ -296,19 +297,20 @@ public class RDXAffordanceTemplateFrames
          if (handConfigurations.get(side).get(index) != null)
          {
             interactableHands.get(side).setToConfiguration(handConfigurations.get(side).get(index)); // update hand configuration when teleporting
-            selectedFrameConfiguration = handConfigurations.get(side).get(index);
+            if (side == editorStatus.getActiveSide())
+               selectedFrameConfiguration = handConfigurations.get(side).get(index);
          }
-         else
+         else if (side == editorStatus.getActiveSide())
+         {
             selectedFrameConfiguration = null;
+         }
 
-         if (side == editorStatus.getActiveSide())
-            interactableHands.get(side).setSelected(true);
-         else
-            interactableHands.get(side).setSelected(false);
+         interactableHands.get(side).setSelected(side == editorStatus.getActiveSide());
       }
       selectedIndex = index;
       // update pose of the object
       objectTransformToWorld.set(objectTransforms.get(selectedIndex));
+      editorStatus.disableMirror();
    }
 
    public void addObjectTransform(RigidBodyTransform transform)

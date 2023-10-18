@@ -36,7 +36,7 @@ public class RDXAffordanceTemplateMirror
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RDXAffordanceTemplateEditorStatus editorStatus;
-   private final ImBoolean mirrorActive = new ImBoolean(false);
+   private final ImBoolean mirrorActive;
    private final Map<String, Boolean> activeTransformAxisMirror = new LinkedHashMap<>();
    private final Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
    private boolean negatedAxis = false;
@@ -57,6 +57,7 @@ public class RDXAffordanceTemplateMirror
       this.handPoses = handPoses;
       this.handTransformsToWorld = handTransformsToWorld;
       this.editorStatus = editorStatus;
+      this.mirrorActive = editorStatus.getIsMirrorActive();
 
       activeTransformAxisMirror.put("X", false);
       activeTransformAxisMirror.put("Y", false);
@@ -188,7 +189,14 @@ public class RDXAffordanceTemplateMirror
                if (changedColorTranslationAxisButton.get(axisMirror.getKey()))
                   ImGui.popStyleColor();
             }
-            if (ImGui.button(labels.get("Switch Direction")))
+            ImGui.text("Switch Direction: ");
+            ImGui.sameLine();
+            String label;
+            if (negatedAxis)
+               label = "Opposite Direction";
+            else
+               label = "Same Direction";
+            if (ImGui.button(labels.get(label)))
             {
                negatedAxis = !negatedAxis;
             }
