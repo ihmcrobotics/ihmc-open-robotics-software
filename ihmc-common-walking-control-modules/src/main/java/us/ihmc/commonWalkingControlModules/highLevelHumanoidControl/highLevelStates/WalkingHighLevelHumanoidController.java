@@ -188,7 +188,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       ReferenceFrame chestBodyFrame = null;
       if (chest != null)
       {
-         //comment out to remove chest control
          chestBodyFrame = chest.getBodyFixedFrame();
          RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
          bodyManagers.add(chestManager);
@@ -203,7 +202,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         //comment out to remove hand control
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          RigidBodyBasics handBaseBody = chest != null ? chest : pelvis;
@@ -525,7 +523,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-      //comment out to turn off priv for arms
+
       for (RobotSide robotSide : RobotSide.values)
       {
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
