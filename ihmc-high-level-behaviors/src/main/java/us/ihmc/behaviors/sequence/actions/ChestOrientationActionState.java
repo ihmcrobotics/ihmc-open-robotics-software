@@ -7,11 +7,15 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class ChestOrientationActionState extends BehaviorActionState
 {
-   private final ChestOrientationActionDefinition definition = new ChestOrientationActionDefinition();
+   private final ChestOrientationActionDefinition definition;
    private final DetachableReferenceFrame chestFrame;
 
-   public ChestOrientationActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, ChestOrientationActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(id, definition);
+
+      this.definition = definition;
+
       chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getChestToParentTransform());
    }
 

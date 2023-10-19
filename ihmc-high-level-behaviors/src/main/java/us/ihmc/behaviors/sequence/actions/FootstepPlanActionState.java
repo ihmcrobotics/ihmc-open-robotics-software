@@ -9,13 +9,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class FootstepPlanActionState extends BehaviorActionState
 {
-   private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
+   private final FootstepPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
 
-   public FootstepPlanActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id, FootstepPlanActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(id, definition);
+
+      this.definition = definition;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       footsteps = new RecyclingArrayList<>(() ->

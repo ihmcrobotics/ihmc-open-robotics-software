@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
 import us.ihmc.communication.crdt.FreezableNode;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
    private final BehaviorTreeNodeDefinition definition;
 
    /** The node's unique ID. */
-   private final long id = -1;
+   private final long id;
    /**
     * A node is active if it lies on the path of the current tree tick.
     *
@@ -27,18 +28,23 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
 
    private final List<BehaviorTreeNodeState> children = new ArrayList<>();
 
-   public BehaviorTreeNodeState(BehaviorTreeNodeDefinition definition)
+   public BehaviorTreeNodeState(long id, BehaviorTreeNodeDefinition definition)
    {
+      this.id = id;
       this.definition = definition;
    }
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
+      message.setId(id);
       message.setIsActive(isActive);
    }
 
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
+      if (id != message.getId())
+         LogTools.error("IDs should match! {} != {}", id, message.getId());
+
       isActive = message.getIsActive();
    }
 
@@ -47,6 +53,7 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
 
    }
 
+   /** The node's unique ID. */
    public long getID()
    {
       return id;

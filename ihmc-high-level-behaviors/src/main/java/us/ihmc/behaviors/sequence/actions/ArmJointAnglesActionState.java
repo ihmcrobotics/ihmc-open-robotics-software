@@ -5,7 +5,14 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 
 public class ArmJointAnglesActionState extends BehaviorActionState
 {
-   private final ArmJointAnglesActionDefinition definition = new ArmJointAnglesActionDefinition();
+   private final ArmJointAnglesActionDefinition definition;
+
+   public ArmJointAnglesActionState(long id, ArmJointAnglesActionDefinition definition)
+   {
+      super(id, definition);
+
+      this.definition = definition;
+   }
 
    public void toMessage(ArmJointAnglesActionStateMessage message)
    {

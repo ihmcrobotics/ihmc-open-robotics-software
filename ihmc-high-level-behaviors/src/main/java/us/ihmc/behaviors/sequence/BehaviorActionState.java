@@ -7,20 +7,15 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
 {
    private final BehaviorActionDefinition definition;
 
-   /** The action's unique ID. */
-   private long id;
    private int actionIndex = -1;
    private boolean isNextForExecution = false;
    private boolean isToBeExecutedConcurrently = false;
    private boolean canExecute = true;
    private boolean isExecuting = false;
 
-   public BehaviorActionState(BehaviorActionDefinition definition)
+   public BehaviorActionState(long id, BehaviorActionDefinition definition)
    {
-      super(definition);
-
-      // TODO: Re-enable when we do the CRDT
-//      id = BehaviorActionSequence.NEXT_ID.getAndIncrement();
+      super(id, definition);
 
       this.definition = definition;
    }
@@ -34,7 +29,6 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
    {
       super.toMessage(message.getNodeState());
 
-      message.setId(id);
       message.setActionIndex(actionIndex);
       message.setIsNextForExecution(isNextForExecution);
       message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
@@ -44,16 +38,9 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
    {
       super.fromMessage(message.getNodeState());
 
-      id = message.getId();
       actionIndex = message.getActionIndex();
       isNextForExecution = message.getIsNextForExecution();
       isToBeExecutedConcurrently = message.getIsToBeExecutedConcurrently();
-   }
-
-   /** The action's unique ID. */
-   public long getID()
-   {
-      return id;
    }
 
    public void setActionIndex(int actionIndex)

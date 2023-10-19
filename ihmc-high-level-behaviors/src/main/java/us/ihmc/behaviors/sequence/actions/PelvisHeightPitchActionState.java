@@ -7,11 +7,15 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class PelvisHeightPitchActionState extends BehaviorActionState
 {
-   private final PelvisHeightPitchActionDefinition definition = new PelvisHeightPitchActionDefinition();
+   private final PelvisHeightPitchActionDefinition definition;
    private final DetachableReferenceFrame pelvisFrame;
 
-   public PelvisHeightPitchActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public PelvisHeightPitchActionState(long id, PelvisHeightPitchActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(id, definition);
+
+      this.definition = definition;
+
       pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getPelvisToParentTransform());
    }
 

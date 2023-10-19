@@ -5,7 +5,14 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 
 public class WaitDurationActionState extends BehaviorActionState
 {
-   private final WaitDurationActionDefinition definition = new WaitDurationActionDefinition();
+   private final WaitDurationActionDefinition definition;
+
+   public WaitDurationActionState(long id, WaitDurationActionDefinition definition)
+   {
+      super(id, definition);
+
+      this.definition = definition;
+   }
 
    public void toMessage(WaitDurationActionStateMessage message)
    {
