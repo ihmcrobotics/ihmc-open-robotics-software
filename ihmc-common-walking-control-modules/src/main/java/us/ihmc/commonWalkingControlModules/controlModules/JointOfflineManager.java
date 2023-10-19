@@ -4,6 +4,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.JointOfflineParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -30,15 +32,23 @@ public class JointOfflineManager
    private final HashMap<OneDoFJointBasics, YoBoolean> offlineStatus = new HashMap<>();
    private final JointTorqueCommand jointTorqueCommand = new JointTorqueCommand();
 
-   private final SideDependentList<RecyclingArrayList<Point2D>> nominalContactPoints = new SideDependentList<>(side -> new RecyclingArrayList<>(4, Point2D.class));
+   private final SideDependentList<RecyclingArrayList<Point2D>> nominalContactPoints = new SideDependentList<>(side -> new RecyclingArrayList<>(4,
+                                                                                                                                                Point2D.class));
    private final SideDependentList<MutableBoolean> hasNewContactState = new SideDependentList<>(side -> new MutableBoolean(false));
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public JointOfflineManager(HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry registry)
+   //   public static final double dampingCoefficient = 5.0;
+   public static final double jointOfflineLatency = 0.0;
+   private final JointOfflineParameters jointOfflineParameters;
+
+   public JointOfflineManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                              WalkingControllerParameters walkingControllerParameters,
+                              YoRegistry registry)
    {
       this.oneDoFJoints = controllerToolbox.getControlledOneDoFJoints();
       this.controllerToolbox = controllerToolbox;
+      this.jointOfflineParameters = walkingControllerParameters.getJointOfflineParameters();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -72,7 +82,8 @@ public class JointOfflineManager
             throw new RuntimeException("Joint " + joint.getName() + " occurred multiple times in JointOfflineCommand");
          }
 
-         double desiredJointTorque = 0.0;
+         double dampingCoefficient = jointOfflineParameters.getDampingCoefficient(joint.getName());
+         double desiredJointTorque = -joint.getQd() * dampingCoefficient;
          jointTorqueCommand.addJoint(joint, desiredJointTorque);
          offlineStatus.get(joint).set(true);
       }
@@ -149,4 +160,8 @@ public class JointOfflineManager
       return jointTorqueCommand;
    }
 
+   public JointOfflineParameters getJointOfflineParameters()
+   {
+      return jointOfflineParameters;
+   }
 }

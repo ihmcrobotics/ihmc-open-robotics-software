@@ -649,7 +649,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.consumeLoadBearingCommands();
       commandConsumer.consumePrepareForLocomotionCommands();
       commandConsumer.consumeJointOfflineCommand();
-      
+
       updateFailureDetection();
 
       walkingStateTimer.startMeasurement();
