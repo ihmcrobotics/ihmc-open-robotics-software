@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
@@ -48,7 +49,7 @@ public class CenterposeSceneGraphOnRobotProcess
          // Update or add the corresponding CenterposeSceneNode
          sceneGraph.modifyTree(modificationQueue ->
          {
-            final CenterposeNode centerposeNode;
+          final CenterposeNode centerposeNode;
 
             Point3D[] vertices = detectedObjectPacket.getBoundingBoxVertices();
             for (Point3D vertex : vertices)
@@ -64,7 +65,6 @@ public class CenterposeSceneGraphOnRobotProcess
             {
                centerposeNode = sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().get(detectedObjectPacket.getId());
 
-               centerposeNode.setSequenceID(detectedObjectPacket.getSequenceId());
                centerposeNode.setVertices3D(vertices);
                centerposeNode.setObjectType(detectedObjectPacket.getObjectTypeAsString());
                centerposeNode.setConfidence(detectedObjectPacket.getConfidence());
@@ -80,21 +80,19 @@ public class CenterposeSceneGraphOnRobotProcess
 
                modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
                sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);
-               sceneGraph.getDetectionFilterCollection().createFilter(centerposeNode.getObjectID(), 10);
+               sceneGraph.getCenterposeNodeDetectionFilters().put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
             }
 
-            centerposeNode.applyFilter();
-            centerposeNode.getNodeFrame().update();
-
-            sceneGraph.getDetectionFilterCollection().getFilter(centerposeNode.getObjectID()).registerDetection();
+            sceneGraph.getCenterposeNodeDetectionFilters().get(centerposeNode.getObjectID()).registerDetection();
          });
       }
 
-      // Update the detected status for all CenterposeNode\s in the SceneGraph
       for (CenterposeNode centerposeNode : sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().valueCollection())
       {
-         boolean currentlyDetected = sceneGraph.getDetectionFilterCollection().getFilter(centerposeNode.getObjectID()).isStableDetectionResult();
-         centerposeNode.setCurrentlyDetected(currentlyDetected);
+         centerposeNode.update();
+         TimeBasedDetectionFilter detectionFilter = sceneGraph.getCenterposeNodeDetectionFilters().get(centerposeNode.getObjectID());
+         detectionFilter.update();
+         centerposeNode.setCurrentlyDetected(detectionFilter.isDetected());
       }
    }
 
