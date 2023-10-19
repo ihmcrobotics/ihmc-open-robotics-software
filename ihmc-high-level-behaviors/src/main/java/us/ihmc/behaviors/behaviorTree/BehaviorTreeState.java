@@ -15,6 +15,11 @@ public class BehaviorTreeState
 
    private BehaviorTreeNodeState behaviorTreeNodeState;
 
+   public void update()
+   {
+
+   }
+
    public MutableLong getNextID()
    {
       return nextID;
