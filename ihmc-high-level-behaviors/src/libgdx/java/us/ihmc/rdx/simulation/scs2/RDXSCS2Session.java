@@ -58,7 +58,7 @@ public class RDXSCS2Session
    protected final RDXYoManager yoManager = new RDXYoManager();
    private final ArrayList<RDXSCS2Robot> robots = new ArrayList<>();
    private final ArrayList<RDXSCS2TerrainObject> terrainObjects = new ArrayList<>();
-   private final RDXSCS2YoImPlotManager plotManager = new RDXSCS2YoImPlotManager();
+   private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();

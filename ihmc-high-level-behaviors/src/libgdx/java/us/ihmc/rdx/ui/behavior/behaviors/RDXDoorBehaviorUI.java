@@ -8,6 +8,7 @@ import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
@@ -21,6 +22,7 @@ import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXDoorObject;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -34,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
 {
+   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(DoorBehavior.DEFINITION, RDXDoorBehaviorUI::new);
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final BehaviorHelper helper;
    private final ResettableExceptionHandlingExecutorService behaviorStopperExecutor = MissingThreadTools.newSingleThreadExecutor("behavior_stopper", true);
@@ -188,6 +191,6 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public String getName()
    {
-      return getClass().getSimpleName();
+      return DEFINITION.getName();
    }
 }

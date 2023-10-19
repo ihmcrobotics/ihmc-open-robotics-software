@@ -21,7 +21,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 

@@ -15,6 +15,7 @@ import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
@@ -92,13 +93,13 @@ public class BehaviorActionSequence
    private ActionExecutionStatusMessage nothingExecutingStatusMessage = new ActionExecutionStatusMessage();
    private final ActionsExecutionStatusMessage actionsExecutionStatusMessage = new ActionsExecutionStatusMessage();
 
-   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
+   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
-      this.syncedRobot = syncedRobot;
       this.ros2 = ros2;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       footstepTracker = new WalkingFootstepTracker(ros2.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       for (RobotSide side : RobotSide.values)
          handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
@@ -106,16 +107,32 @@ public class BehaviorActionSequence
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
+      addCommonFrames(referenceFrameLibrary, syncedRobot);
+
       updateSubscription = ros2.subscribe(SEQUENCE_COMMAND_TOPIC);
       manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
       automaticExecutionSubscription = ros2.subscribe(AUTOMATIC_EXECUTION_COMMAND_TOPIC);
       executionNextIndexSubscription = ros2.subscribe(EXECUTION_NEXT_INDEX_COMMAND_TOPIC);
    }
 
+   public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
+   {
+
+      referenceFrameLibrary.add(ReferenceFrame.getWorldFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getChestFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
+   }
+
    public void update()
    {
       if (updateSubscription.getMessageNotification().poll()) // Do the update
       {
+         automaticExecution = false;
+
          ActionSequenceUpdateMessage latestUpdateMessage = updateSubscription.getMessageNotification().read();
 
          BehaviorActionExecutor[] actionArray = new BehaviorActionExecutor[latestUpdateMessage.getSequenceSize()];

@@ -32,7 +32,7 @@ import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -67,7 +67,7 @@ public class DualBlackflyCamera
 
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   private final MutableReferenceFrame blackflyFrameForSceneNodeUpdate = new MutableReferenceFrame();
+   private final ModifiableReferenceFrame blackflyFrameForSceneNodeUpdate = new ModifiableReferenceFrame();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;

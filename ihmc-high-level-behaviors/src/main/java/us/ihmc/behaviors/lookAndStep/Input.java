@@ -4,13 +4,10 @@ import us.ihmc.commons.thread.Notification;
 
 import java.util.ArrayList;
 
-/**
- * An input to a module as in the subsumption style architecture.
- */
 public class Input
 {
-   private final Notification notification = new Notification();
-   private final ArrayList<Runnable> callbacks = new ArrayList<>();
+   private Notification notification = new Notification();
+   private ArrayList<Runnable> callbacks = new ArrayList<>();
 
    public Notification getNotification()
    {

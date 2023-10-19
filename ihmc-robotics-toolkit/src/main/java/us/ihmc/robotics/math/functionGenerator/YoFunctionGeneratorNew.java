@@ -13,21 +13,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoFunctionGeneratorNew
 {
-   public enum ChirpBaseFunctionMode
-   {
-      SINE(new SineWaveFunctionGenerator()),
-      SQUARE(new SquareWaveFunctionGenerator()),
-      SAWTOOTH(new SawtoothWaveFunctionGenerator()),
-      TRIANGLE(new TriangleWaveFunctionGenerator());
-
-      private final BaseFunctionGenerator function;
-
-      private ChirpBaseFunctionMode(BaseFunctionGenerator function)
-      {
-         this.function = function;
-      }
-   };
-
    /** Duration used to smooth changes in values of the inputs or to smooth switch between modes. */
    private final YoDouble transitionDuration;
    /** Signals will be centered around the offset. */
@@ -61,7 +46,6 @@ public class YoFunctionGeneratorNew
    private final InputFilter modeTransition;
    private final YoEnum<YoFunctionGeneratorMode> mode;
    private final YoEnum<YoFunctionGeneratorMode> modePrevious;
-   private final YoEnum<ChirpBaseFunctionMode> chirpBaseFunctionMode;
    private boolean hasModeChanged = false;
 
    private final SineWaveFunctionGenerator sineFunction = new SineWaveFunctionGenerator();
@@ -117,8 +101,6 @@ public class YoFunctionGeneratorNew
       modeTransition = new InputFilter(namePrefix + "ModeTransition", transitionDuration, registry);
       mode = new YoEnum<>(namePrefix + "Mode", registry, YoFunctionGeneratorMode.class);
       modePrevious = new YoEnum<>(namePrefix + "ModePrevious", registry, YoFunctionGeneratorMode.class);
-      chirpBaseFunctionMode = new YoEnum<>(namePrefix + "ChirpBaseFunctionMode", registry, ChirpBaseFunctionMode.class);
-      chirpBaseFunctionMode.set(ChirpBaseFunctionMode.SINE);
 
       mode.set(YoFunctionGeneratorMode.OFF);
       modePrevious.set(YoFunctionGeneratorMode.OFF);
@@ -287,34 +269,25 @@ public class YoFunctionGeneratorNew
 
    private void initializeMode(YoFunctionGeneratorMode mode)
    {
-      BaseFunctionGenerator function = switch (mode)
+      switch (mode)
       {
-         case SQUARE -> squareFunction;
-         case SINE -> sineFunction;
-         case SAWTOOTH -> sawtoothFunction;
-         case TRIANGLE -> triangleFunction;
-         default -> null;
-      };
-
-      if (function != null)
-      { // Reset all the providers, the chirp changes the frequency.
-         function.setOffset(offset);
-         function.setAmplitude(amplitude);
-         function.setFrequency(frequency);
-         function.setPhase(phase);
-         function.resetAngle();
-      }
-
-      if (mode == YoFunctionGeneratorMode.CHIRP_LINEAR)
-      {
-         BaseFunctionGenerator baseFunction = chirpBaseFunctionMode.getValue().function;
-         baseFunction.setOffset(offset);
-         baseFunction.setAmplitude(amplitude);
-         baseFunction.setFrequency(frequency);
-         baseFunction.setPhase(phase);
-         baseFunction.resetAngle();
-         chirpLinearFunction.setBaseFunction(baseFunction);
-         chirpLinearFunction.resetChirp();
+         case SQUARE:
+            squareFunction.resetAngle();
+            return;
+         case SINE:
+            sineFunction.resetAngle();
+            return;
+         case SAWTOOTH:
+            sawtoothFunction.resetAngle();
+            return;
+         case TRIANGLE:
+            triangleFunction.resetAngle();
+            return;
+         case CHIRP_LINEAR:
+            chirpLinearFunction.resetChirp();
+            return;
+         default:
+            return;
       }
    }
 

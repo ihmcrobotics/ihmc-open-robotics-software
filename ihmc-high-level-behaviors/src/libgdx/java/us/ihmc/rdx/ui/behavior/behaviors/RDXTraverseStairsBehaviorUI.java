@@ -26,6 +26,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
+import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -38,6 +39,9 @@ import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 {
+   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(TraverseStairsBehavior.DEFINITION,
+                                                                                        RDXTraverseStairsBehaviorUI::new);
+
    private final BehaviorHelper helper;
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -65,7 +69,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, getName()));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
       });
       footstepPlanGraphic.setOpacity(0.5);
 //      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
@@ -235,6 +239,6 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public String getName()
    {
-      return "Traverse Stairs";
+      return DEFINITION.getName();
    }
 }

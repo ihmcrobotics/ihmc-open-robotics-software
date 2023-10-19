@@ -1,14 +1,15 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
@@ -25,6 +26,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,7 +36,10 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new);
+
    final BehaviorHelper helper;
+   final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    final StatusLogger statusLogger;
    final RemoteHumanoidRobotInterface robotInterface;
 
@@ -206,6 +211,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    @Override
    public String getName()
    {
-      return "Look and Step";
+      return DEFINITION.getName();
    }
 }

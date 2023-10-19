@@ -12,7 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;

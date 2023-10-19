@@ -9,7 +9,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
 public class RDXInteractableRobotLinkDemo
@@ -40,7 +40,7 @@ public class RDXInteractableRobotLinkDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotRobotCollidable::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
 
-            MutableReferenceFrame controlFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
+            ModifiableReferenceFrame controlFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
             interactableRobotLink = new RDXInteractableRobotLink();
             interactableRobotLink.create(robotRobotCollidable,
                                          controlFrame.getReferenceFrame(),

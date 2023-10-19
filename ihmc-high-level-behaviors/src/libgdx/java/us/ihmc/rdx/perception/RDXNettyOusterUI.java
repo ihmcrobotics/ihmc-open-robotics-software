@@ -24,9 +24,9 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
-import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
-import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
+import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.nio.ByteOrder;
 import java.util.Set;
@@ -42,7 +42,7 @@ public class RDXNettyOusterUI
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat pointSize = new ImFloat(0.01f);
-   private MutableReferenceFrame sensorFrame;
+   private ModifiableReferenceFrame sensorFrame;
    private RDXInteractableOuster ousterInteractable;
    private int depthWidth;
    private int depthHeight;
@@ -63,7 +63,7 @@ public class RDXNettyOusterUI
 
    public void create(RDXBaseUI baseUI)
    {
-      sensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
+      sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
       ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
                                                      sensorFrame.getReferenceFrame(),
                                                      sensorFrame.getTransformToParent());
@@ -236,7 +236,7 @@ public class RDXNettyOusterUI
       return imagePanel;
    }
 
-   public MutableReferenceFrame getSensorFrame()
+   public ModifiableReferenceFrame getSensorFrame()
    {
       return sensorFrame;
    }

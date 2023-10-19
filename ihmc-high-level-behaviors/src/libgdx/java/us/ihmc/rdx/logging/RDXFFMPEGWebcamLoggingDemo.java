@@ -15,8 +15,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
-import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
-import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
+import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
+import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 
 import java.nio.ByteOrder;
 

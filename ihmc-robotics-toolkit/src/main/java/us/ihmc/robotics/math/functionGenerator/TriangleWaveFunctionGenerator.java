@@ -11,13 +11,8 @@ public class TriangleWaveFunctionGenerator extends BaseFunctionGenerator
    @Override
    protected double computeValue()
    {
-      double frequency = getFrequency();
-      double offset = getOffset();
-
-      if (frequency == 0.0)
-         return offset;
-
       double angle = getAngle();
+      double offset = getOffset();
       double amplitude = getAmplitude();
 
       if (angle <= Math.PI)
@@ -35,13 +30,9 @@ public class TriangleWaveFunctionGenerator extends BaseFunctionGenerator
    @Override
    protected double computeValueDot()
    {
-      double frequency = getFrequency();
-
-      if (frequency == 0.0)
-         return 0.0;
-
       double angle = getAngle();
       double amplitude = getAmplitude();
+      double frequency = getFrequency();
       return (angle <= Math.PI ? 1.0 : -1.0) * (4.0 * amplitude * frequency);
    }
 

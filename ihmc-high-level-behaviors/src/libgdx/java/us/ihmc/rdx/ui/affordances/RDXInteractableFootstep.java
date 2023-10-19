@@ -42,7 +42,7 @@ import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -66,7 +66,7 @@ public class RDXInteractableFootstep
    private ModelInstance footstepModelInstance;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final FrameBox3D selectionCollisionBox;
-   private final MutableReferenceFrame collisionBoxFrame;
+   private final ModifiableReferenceFrame collisionBoxFrame;
    private final MouseCollidable mouseCollidable;
    private final PointCollidable pointCollidable;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -110,7 +110,7 @@ public class RDXInteractableFootstep
       selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       selectionCollisionBox.getSize().set(FOOTSTEP_GRAPHIC_LENGTH, FOOTSTEP_GRAPHIC_WIDTH, FOOTSTEP_GRAPHIC_HEIGHT);
       selectionCollisionBox.getPose().getTranslation().add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
-      collisionBoxFrame = new MutableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
       pointCollidable = new PointCollidable(selectionCollisionBox);
@@ -252,7 +252,7 @@ public class RDXInteractableFootstep
       }
 
       if (collisionBoxFrame.getReferenceFrame().getParent() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
-         collisionBoxFrame.setParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+         collisionBoxFrame.changeParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       if (selectionCollisionBox.getReferenceFrame() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
          selectionCollisionBox.setReferenceFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
 

@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 /**
  * This class is used for pointing the VR controllers at the ground
@@ -26,7 +26,7 @@ public class RDXVRPickPlaneYawCalculator
    private final Point3D controllerZAxisProjectedToPlanePoint = new Point3D();
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D yawPose = new FramePose3D();
-   private final MutableReferenceFrame yawReferenceFrame = new MutableReferenceFrame();
+   private final ModifiableReferenceFrame yawReferenceFrame = new ModifiableReferenceFrame();
 
    public FramePose3DReadOnly calculate(ReferenceFrame controllerPickFrame, ReferenceFrame xyPlaneFrame)
    {

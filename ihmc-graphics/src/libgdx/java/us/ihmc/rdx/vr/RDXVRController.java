@@ -23,7 +23,7 @@ import us.ihmc.rdx.imgui.ImGuiRigidBodyTransformTuner;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.LongBuffer;
@@ -113,7 +113,7 @@ public class RDXVRController extends RDXVRTrackedDevice
     * selecting or interacting with.
     */
    private final FramePose3D pickPoseFramePose = new FramePose3D();
-   private final MutableReferenceFrame pickPoseFrame;
+   private final ModifiableReferenceFrame pickPoseFrame;
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
    private final ArrayList<RDXVRPickResult> pickResults = new ArrayList<>();
    private RDXVRPickResult selectedPick;
@@ -139,7 +139,7 @@ public class RDXVRController extends RDXVRTrackedDevice
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
                                                                                 getDeviceYUpZBackFrame(),
                                                                                 controllerYBackZLeftXRightToXForwardZUp);
-      pickPoseFrame = new MutableReferenceFrame(xForwardZUpControllerFrame);
+      pickPoseFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
       pickPoseFrame.getTransformToParent().getTranslation().setX(0.029);
       pickPoseFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(0.020));
       pickPoseFrame.getTransformToParent().getTranslation().setZ(-0.017);

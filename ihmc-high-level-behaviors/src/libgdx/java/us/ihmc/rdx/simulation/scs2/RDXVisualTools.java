@@ -21,7 +21,10 @@ import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
-import us.ihmc.scs2.definition.visual.*;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.util.HashMap;
 import java.util.List;

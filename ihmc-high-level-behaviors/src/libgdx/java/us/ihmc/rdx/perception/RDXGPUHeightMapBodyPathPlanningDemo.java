@@ -35,7 +35,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
+import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;

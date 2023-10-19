@@ -1,6 +1,5 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -11,9 +10,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidSwingTrajectoryTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-/**
- * Some of these tests are disables because they exist for Nadia
- */
 @Tag("humanoid-rough-terrain-slow")
 public class AtlasSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
 {
@@ -30,7 +26,6 @@ public class AtlasSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
    }
 
    @Override
-   @Disabled
    @Test
    public void testMultipleHeightFootsteps()
    {
@@ -38,7 +33,6 @@ public class AtlasSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
    }
 
    @Override
-   @Disabled
    @Test
    public void testNegativeSwingHeight()
    {
@@ -46,7 +40,6 @@ public class AtlasSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
    }
 
    @Override
-   @Disabled
    @Test
    public void testReallyHighFootstep()
    {

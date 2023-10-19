@@ -7,8 +7,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import std_msgs.msg.dds.Bool;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -32,6 +32,8 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
  */
 public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new);
+
    private final BehaviorHelper helper;
 
    private final IHMCROS2Input<Bool> stepping;

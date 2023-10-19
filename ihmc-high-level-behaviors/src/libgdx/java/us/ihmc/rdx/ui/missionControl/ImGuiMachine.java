@@ -15,8 +15,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
-import us.ihmc.rdx.imgui.ImPlotPlot;
+import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
+import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.ros2.ROS2Node;
 
 import java.text.DecimalFormat;

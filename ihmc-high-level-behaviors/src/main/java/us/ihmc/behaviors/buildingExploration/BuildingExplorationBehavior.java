@@ -2,14 +2,15 @@ package us.ihmc.behaviors.buildingExploration;
 
 import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
@@ -27,6 +28,7 @@ import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorM
  */
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehavior::new);
    private final BehaviorHelper helper;
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;
@@ -154,7 +156,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    @Override
    public String getName()
    {
-      return "Building Exploration";
+      return DEFINITION.getName();
    }
 
    @Override

@@ -75,7 +75,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    @Test
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
-      testStairs(testInfo, false, true, 1.0, 0.25, 0.0);
+      testStairs(testInfo, false, true, 1.0, 0.25, 0.025);
    }
 
    @Test
