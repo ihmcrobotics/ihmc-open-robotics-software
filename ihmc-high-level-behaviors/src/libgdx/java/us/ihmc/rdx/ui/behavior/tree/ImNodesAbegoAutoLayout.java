@@ -16,6 +16,10 @@ import java.util.Map;
  * This was a work in progress to see if we could automate the layout of
  * the behavior tree UI panels. It turned out to be tricky and maybe not
  * the greatest direction to go in.
+ *
+ * Update 10/12/2023 Actually using this tree layout may be exactly what we
+ * need when going to smaller icons and shapes for the nodes. - @dcalvert
+ *
  * @deprecated Needs work.
  */
 public class ImNodesAbegoAutoLayout

@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.processes.RestartableProcess;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
@@ -39,7 +38,6 @@ public abstract class RDXProcessManagerPanel
    protected final ArrayList<RestartableProcess> processes = new ArrayList<>();
 
    private final ROS1MasterProcess ros1MasterProcess;
-   private final BehaviorModuleProcess behaviorModuleProcess;
    private final BehaviorManagerProcess behaviorManagerProcess;
    private final FootstepPlanningModuleProcess footstepPlanningModuleProcess;
    private final MapSenseHeadlessProcess mapsenseHeadlessProcess;
@@ -66,10 +64,7 @@ public abstract class RDXProcessManagerPanel
       this.environmentInitialSetup = environmentInitialSetup;
 
       // TODO: GUI selection
-      RDXBehaviorUIRegistry behaviorRegistry = RDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
-
       ros1MasterProcess = new ROS1MasterProcess();
-      behaviorModuleProcess = new BehaviorModuleProcess(this::getRobotModel, ros2Mode, behaviorRegistry);
       behaviorManagerProcess = new BehaviorManagerProcess(this::getRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
@@ -77,7 +72,6 @@ public abstract class RDXProcessManagerPanel
       lidarREAProcess = new LidarREAProcess();
 
       processes.add(ros1MasterProcess);
-      processes.add(behaviorModuleProcess);
       processes.add(behaviorManagerProcess);
       processes.add(footstepPlanningModuleProcess);
       processes.add(mapsenseHeadlessProcess);
@@ -143,7 +137,6 @@ public abstract class RDXProcessManagerPanel
    {
       // Destroy in a reasonable order
       mapsenseHeadlessProcess.destroy();
-      behaviorModuleProcess.destroy();
       footstepPlanningModuleProcess.destroy();
       objectDetectionProcess.destroy();
       lidarREAProcess.destroy();
@@ -170,11 +163,6 @@ public abstract class RDXProcessManagerPanel
    public void setEnableROS1(boolean enableROS1)
    {
       this.enableROS1.set(enableROS1);
-   }
-
-   public BehaviorModuleProcess getBehaviorModuleProcess()
-   {
-      return behaviorModuleProcess;
    }
 
    public ROS1MasterProcess getRos1MasterProcess()
