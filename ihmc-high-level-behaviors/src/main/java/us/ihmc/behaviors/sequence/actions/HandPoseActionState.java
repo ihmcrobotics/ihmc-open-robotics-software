@@ -7,11 +7,15 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class HandPoseActionState extends BehaviorActionState
 {
-   private final HandPoseActionDefinition definition = new HandPoseActionDefinition();
+   private final HandPoseActionDefinition definition;
    private final DetachableReferenceFrame palmFrame;
 
-   public HandPoseActionState(ReferenceFrameLibrary referenceFrameLibrary)
+   public HandPoseActionState(long id, HandPoseActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(id, definition);
+
+      this.definition = definition;
+
       palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getPalmTransformToParent());
    }
 

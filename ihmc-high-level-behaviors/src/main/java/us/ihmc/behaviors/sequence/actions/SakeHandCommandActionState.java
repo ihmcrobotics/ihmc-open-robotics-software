@@ -5,7 +5,14 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 
 public class SakeHandCommandActionState extends BehaviorActionState
 {
-   private final SakeHandCommandActionDefinition definition = new SakeHandCommandActionDefinition();
+   private final SakeHandCommandActionDefinition definition;
+
+   public SakeHandCommandActionState(long id, SakeHandCommandActionDefinition definition)
+   {
+      super(id, definition);
+
+      this.definition = definition;
+   }
 
    public void toMessage(SakeHandCommandActionStateMessage message)
    {

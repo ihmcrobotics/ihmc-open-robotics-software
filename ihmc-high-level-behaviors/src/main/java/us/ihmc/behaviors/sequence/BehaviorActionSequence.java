@@ -27,6 +27,8 @@ import java.util.List;
  * Since this class always currently gets its instructions from the operator, it never loads
  * a sequence from file, and the sequence is always completely updated by the operator, even
  * when switching sequences entirely.
+ *
+ * @deprecated Gonna be replaced
  */
 public class BehaviorActionSequence
 {

@@ -5,7 +5,14 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 
 public class HandWrenchActionState extends BehaviorActionState
 {
-   private final HandWrenchActionDefinition definition = new HandWrenchActionDefinition();
+   private final HandWrenchActionDefinition definition;
+
+   public HandWrenchActionState(long id, HandWrenchActionDefinition definition)
+   {
+      super(id, definition);
+
+      this.definition = definition;
+   }
 
    public void toMessage(HandWrenchActionStateMessage message)
    {

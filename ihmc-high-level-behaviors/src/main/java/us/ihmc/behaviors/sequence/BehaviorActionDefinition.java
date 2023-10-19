@@ -21,7 +21,7 @@ public class BehaviorActionDefinition extends BehaviorTreeNodeDefinition
 
    public BehaviorActionDefinition()
    {
-
+      // Declared to use IDE to check usages
    }
 
    public void saveToFile(ObjectNode jsonNode)
