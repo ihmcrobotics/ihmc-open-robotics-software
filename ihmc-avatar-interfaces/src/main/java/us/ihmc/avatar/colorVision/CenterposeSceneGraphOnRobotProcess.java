@@ -6,6 +6,8 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
@@ -15,11 +17,15 @@ import us.ihmc.ros2.ROS2Topic;
 public class CenterposeSceneGraphOnRobotProcess
 {
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
+   private final RigidBodyTransform sensorInZedTransform = new RigidBodyTransform(); // TODO: This is specific to ZED, remove or move somewhere else?
 
    public CenterposeSceneGraphOnRobotProcess(ROS2Helper ros2Helper)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
       subscriber = ros2Helper.subscribe(topicName);
+
+      sensorInZedTransform.getTranslation().set(0.0, 0.06, 0.0);
+      sensorInZedTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
    }
 
    public void update(ROS2SceneGraph onRobotSceneGraph, ReferenceFrame sensorFrame)
@@ -35,6 +41,8 @@ public class CenterposeSceneGraphOnRobotProcess
       // Handle a new DetectedObjectPacket message
       if (subscriber.getMessageNotification().poll())
       {
+         ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("SensorFrame", cameraFrame, sensorInZedTransform);
+
          DetectedObjectPacket detectedObjectPacket = subscriber.getMessageNotification().read();
 
          // Update or add the corresponding CenterposeSceneNode
@@ -46,7 +54,7 @@ public class CenterposeSceneGraphOnRobotProcess
             for (Point3D vertex : vertices)
             {
                FramePoint3D frameVertex = new FramePoint3D();
-               frameVertex.setIncludingFrame(cameraFrame, vertex);
+               frameVertex.setIncludingFrame(sensorFrame, vertex);
                frameVertex.changeFrame(ReferenceFrame.getWorldFrame());
                vertex.set(frameVertex);
             }
