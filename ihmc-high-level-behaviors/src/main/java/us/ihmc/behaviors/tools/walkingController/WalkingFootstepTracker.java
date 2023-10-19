@@ -124,6 +124,11 @@ public class WalkingFootstepTracker
          }
       }
 
+      for (Notification completedStepListener : completedStepListeners)
+      {
+         completedStepListener.set();
+      }
+
       LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}. IDs: {}",
                            executionMode.name(),
                            size,
@@ -151,11 +156,6 @@ public class WalkingFootstepTracker
       previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
 
       return previousFootstepPose;
-   }
-
-   public List<QueuedFootstepStatusMessage> getQueuedFootsteps()
-   {
-      return queuedFootsteps;
    }
 
    public int getNumberOfIncompleteFootsteps()

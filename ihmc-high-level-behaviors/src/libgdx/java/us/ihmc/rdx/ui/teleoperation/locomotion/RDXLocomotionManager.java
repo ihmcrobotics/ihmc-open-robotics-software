@@ -119,6 +119,7 @@ public class RDXLocomotionManager
 
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
+                                                 controllerStatusTracker,
                                                  locomotionParameters,
                                                  footstepPlannerParameters,
                                                  bodyPathPlannerParameters,
