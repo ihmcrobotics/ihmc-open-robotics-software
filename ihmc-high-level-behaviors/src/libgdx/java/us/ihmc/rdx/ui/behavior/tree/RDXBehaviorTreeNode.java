@@ -1,12 +1,9 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImStringWrapper;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModificationQueue;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeReplacement;
 
 import java.util.ArrayList;
 import java.util.List;

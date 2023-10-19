@@ -6,11 +6,11 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeDestroySubtree;
+import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModification;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModificationQueue;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -27,7 +27,7 @@ public class RDXBehaviorTree
    private final BehaviorTreeState behaviorTreeState = new BehaviorTreeState();
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private RDXBehaviorTreeNode rootNode;
-   private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
+   private final Queue<RDXBehaviorTreeModification> queuedModifications = new LinkedList<>();
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -93,7 +93,7 @@ public class RDXBehaviorTree
 
       while (!queuedModifications.isEmpty())
       {
-         BehaviorTreeStateModification modification = queuedModifications.poll();
+         RDXBehaviorTreeModification modification = queuedModifications.poll();
          modification.performOperation();
       }
 
@@ -109,7 +109,7 @@ public class RDXBehaviorTree
 
    private void updateCaches(RDXBehaviorTreeNode node)
    {
-      idToNodeMap.put(node.getID(), node);
+      idToNodeMap.put(node.getState().getID(), node);
 
       for (RDXBehaviorTreeNode child : node.getChildren())
       {
