@@ -89,7 +89,7 @@ public class RDXCenterposeSceneGraphDemo
             if (runPerception)
             {
                onRobotSceneGraph.updateSubscription();
-               centerposeProcess.updateSceneGraph(onRobotSceneGraph);
+               centerposeProcess.updateSceneGraph(onRobotSceneGraph, ReferenceFrame.getWorldFrame());
                onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
                onRobotSceneGraph.updatePublication();
             }
