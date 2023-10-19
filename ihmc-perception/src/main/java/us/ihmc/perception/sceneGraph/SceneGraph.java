@@ -7,6 +7,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
+import us.ihmc.perception.filters.TimeBasedDetectionFilter;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -35,6 +36,7 @@ public class SceneGraph
    private final SceneNode rootNode;
    private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
+   private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -148,6 +150,11 @@ public class SceneGraph
    public DetectionFilterCollection getDetectionFilterCollection()
    {
       return detectionFilterCollection;
+   }
+
+   public Map<Integer, TimeBasedDetectionFilter> getCenterposeNodeDetectionFilters()
+   {
+      return centerposeNodeDetectionFilters;
    }
 
    public TLongObjectMap<SceneNode> getIDToNodeMap()
