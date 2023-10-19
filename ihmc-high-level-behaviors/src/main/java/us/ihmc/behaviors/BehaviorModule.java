@@ -16,6 +16,8 @@ import us.ihmc.tools.Destroyable;
 /**
  * Manages a behavior tree based process on the real robot and syncs it
  * with an operator UI with shared autonomy.
+ *
+ * @deprecated Replaced by ROS2BehaviorTreeExecutor
  */
 public class BehaviorModule
 {

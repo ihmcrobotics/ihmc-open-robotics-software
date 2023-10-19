@@ -28,7 +28,6 @@ public class RDXBehaviorTreeNodeBuilder
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      ROS2ControllerPublishSubscribeAPI ros2)
    {
-
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
