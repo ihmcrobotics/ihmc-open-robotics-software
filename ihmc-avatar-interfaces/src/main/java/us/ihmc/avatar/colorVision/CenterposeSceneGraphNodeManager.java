@@ -21,12 +21,12 @@ import us.ihmc.ros2.ROS2Topic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CenterposeSceneGraphOnRobotProcess
+public class CenterposeSceneGraphNodeManager
 {
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final RigidBodyTransform sensorInZedTransform = new RigidBodyTransform(); // TODO: This is specific to ZED, remove or move somewhere else?
 
-   public CenterposeSceneGraphOnRobotProcess(ROS2Helper ros2Helper)
+   public CenterposeSceneGraphNodeManager(ROS2Helper ros2Helper)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
       subscriber = ros2Helper.subscribe(topicName);
