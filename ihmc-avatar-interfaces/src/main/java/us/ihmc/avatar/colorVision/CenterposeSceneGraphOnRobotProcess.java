@@ -4,7 +4,9 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -72,6 +74,12 @@ public class CenterposeSceneGraphOnRobotProcess
                centerposeNode.setVertices3D(vertices);
                centerposeNode.setObjectType(detectedObjectPacket.getObjectTypeAsString());
                centerposeNode.setConfidence(detectedObjectPacket.getConfidence());
+
+               Pose3D objectPoseInSensorFrame = detectedObjectPacket.getPose();
+               FramePose3D objectOriginPoseFrame = new FramePose3D();
+               objectOriginPoseFrame.setIncludingFrame(sensorFrame, objectPoseInSensorFrame);
+               objectOriginPoseFrame.changeFrame(ReferenceFrame.getWorldFrame());
+               centerposeNode.getNodeToParentFrameTransform().set(objectOriginPoseFrame);
             }
             // Add
             else
