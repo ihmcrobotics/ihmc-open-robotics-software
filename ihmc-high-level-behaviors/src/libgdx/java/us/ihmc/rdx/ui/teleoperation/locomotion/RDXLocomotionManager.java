@@ -16,6 +16,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -37,6 +38,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
@@ -88,7 +90,8 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
-   private final Notification completedStepNotification = new Notification();
+   private final TypedNotification<FootstepQueueStatusMessage> footstepQueueNotification = new TypedNotification<>();
+   private FootstepQueueStatusMessage previousFootstepQueue = new FootstepQueueStatusMessage();
    private final Timer footstepPlanningCompleteTimer = new Timer();
 
    // Used for UI logic
@@ -159,7 +162,7 @@ public class RDXLocomotionManager
       this.baseUI = baseUI;
 
       controllerStatusTracker.registerAbortedListener(abortedNotification);
-      controllerStatusTracker.getFootstepTracker().registerCompletedStepListener(completedStepNotification);
+      controllerStatusTracker.getFootstepTracker().registerFootstepQueuedMessageListener(footstepQueueNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
       footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
 
@@ -198,8 +201,13 @@ public class RDXLocomotionManager
    {
       controllerStatusTracker.checkControllerIsRunning();
 
-      if (completedStepNotification.poll())
-         footstepsSentToControllerGraphic.update();
+      if (footstepQueueNotification.poll())
+      {
+         if (previousFootstepQueue.getQueuedFootstepList().size() != footstepQueueNotification.read().getQueuedFootstepList().size())
+            footstepsSentToControllerGraphic.update();
+
+         previousFootstepQueue = footstepQueueNotification.read();
+      }
 
       if (abortedNotification.poll())
       {
