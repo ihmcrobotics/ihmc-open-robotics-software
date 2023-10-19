@@ -30,13 +30,14 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
+import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.rdx.ui.yo.ImPlotYoHelperDoublePlotLine;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
+import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -50,6 +51,8 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 {
+   public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
+                                                                                        RDXLookAndStepBehaviorUI::new);
    private final BehaviorHelper helper;
    private String currentState = "";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -312,7 +315,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       ImGui.pushItemWidth(340.0f);
       ImGui.text("Latest log:");
       int flags2 = ImGuiInputTextFlags.ReadOnly;
-      ImGui.inputText(labels.getHidden("Planner log path"), latestFootstepPlannerLogPath, flags2);
+      ImGui.inputText("", latestFootstepPlannerLogPath, flags2);
       ImGui.popItemWidth();
 //      ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
@@ -413,12 +416,12 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    public String getWindowName()
    {
-      return "Look and Step";
+      return LookAndStepBehavior.DEFINITION.getName();
    }
 
    @Override
    public String getName()
    {
-      return "Look and Step";
+      return DEFINITION.getName();
    }
 }

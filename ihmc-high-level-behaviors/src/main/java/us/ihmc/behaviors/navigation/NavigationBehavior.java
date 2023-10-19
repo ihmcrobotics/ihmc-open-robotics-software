@@ -2,8 +2,8 @@ package us.ihmc.behaviors.navigation;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -27,12 +27,13 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.AlwaysSuccessfulAction;
-import us.ihmc.behaviors.behaviorTree.LoopSequenceNode;
+import us.ihmc.behaviors.tools.behaviorTree.AlwaysSuccessfulAction;
+import us.ihmc.behaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
@@ -59,6 +60,8 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
  */
 public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new);
+
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 
    private final BehaviorHelper helper;

@@ -27,7 +27,6 @@ public class BehaviorActionDefinition
 
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("type", getClass().getSimpleName());
       jsonNode.put("description", description);
       jsonNode.put("executeWithNextAction", executeWitNextAction);
    }

@@ -32,7 +32,6 @@ public abstract class BaseFunctionGenerator
    public void integrateAngle(double dt)
    {
       setAngle(getAngle() + getAngleDot() * dt);
-      markDirty();
    }
 
    void markDirty()

@@ -7,37 +7,40 @@ import javax.annotation.Nullable;
 
 public class RDX3DPanelNotification extends RDX3DPanelTooltip
 {
-   public static final double NOTIFICATION_DURATION = 3.0;
+   private static final double NOTIFICATION_DURATION = 3.0;
 
    private final Timer timer = new Timer();
+   @Nullable
    private String text;
 
-   public RDX3DPanelNotification(RDX3DPanel panel3D, String text)
+   public RDX3DPanelNotification(RDX3DPanel panel3D)
    {
       super(panel3D);
-      this.text = text;
       super.setInput(new ImGui3DViewInput(panel3D));
-      timer.reset();
    }
 
-   public void render(int notificationIndex)
+   public void render()
    {
-      super.render(text, notificationIndex);
-   }
-
-   public Timer getTimer()
-   {
-      return timer;
+      if (timer.getElapsedTime() < NOTIFICATION_DURATION && text != null)
+      {
+         super.render(text);
+      }
    }
 
    public void setText(@Nullable String text)
    {
       this.text = text;
+      reset();
    }
 
    @Nullable
    public String getText()
    {
       return text;
+   }
+
+   public void reset()
+   {
+      timer.reset();
    }
 }

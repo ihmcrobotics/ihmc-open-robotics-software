@@ -9,17 +9,17 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXVRControllerButtonLabel
 {
-   private final MutableReferenceFrame textFrame;
+   private final ModifiableReferenceFrame textFrame;
    private final RDX3DSituatedText situatedText;
 
    public RDXVRControllerButtonLabel(ReferenceFrame controllerFrame, RobotSide side, Point3D labelOffset, YawPitchRoll labelOrientation)
    {
-      textFrame = new MutableReferenceFrame(controllerFrame);
+      textFrame = new ModifiableReferenceFrame(controllerFrame);
       textFrame.update(transformToParent ->
       {
          transformToParent.getTranslation().set(labelOffset);

@@ -17,8 +17,8 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
-import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
+import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
+import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;

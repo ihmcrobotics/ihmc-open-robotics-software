@@ -13,7 +13,7 @@ import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiInputDouble;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleForRotations;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.tools.UnitConversions;
 
 import java.util.function.Supplier;
@@ -44,7 +44,7 @@ public class FrameBasedGizmoModification
    /** Used for adjusting orientation with respect to different frames. */
    private final FrameQuaternion rotationAdjustmentQuaternion = new FrameQuaternion();
    /** Used to move the gizmo with respect to where you are looking at the scene from. */
-   private final MutableReferenceFrame cameraZUpFrameForAdjustment = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final ModifiableReferenceFrame cameraZUpFrameForAdjustment = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final ImGuiInputDouble translationStepSizeInput;
    private final ImGuiInputDouble positionXImGuiInput;
    private final ImGuiInputDouble positionYImGuiInput;

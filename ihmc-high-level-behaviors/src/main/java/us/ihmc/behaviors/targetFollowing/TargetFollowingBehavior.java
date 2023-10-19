@@ -2,11 +2,12 @@ package us.ihmc.behaviors.targetFollowing;
 
 import geometry_msgs.PoseStamped;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -26,6 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class TargetFollowingBehavior extends ResettingNode implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Target Following",
+                                                                              TargetFollowingBehavior::new);
    private final BehaviorHelper helper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final LookAndStepBehavior lookAndStepBehavior;
@@ -105,7 +108,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
    @Override
    public String getName()
    {
-      return "Target Following";
+      return DEFINITION.getName();
    }
 
    @Override

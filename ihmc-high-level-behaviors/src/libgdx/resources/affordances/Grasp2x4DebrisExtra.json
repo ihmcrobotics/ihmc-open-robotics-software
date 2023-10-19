@@ -16,7 +16,7 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "right",
-      "type" : "OPEN"
+      "config" : "OPEN"
     } ]
   }, {
     "x" : 0.0,
@@ -27,7 +27,7 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "right",
-      "type": ""
+      "config" : ""
     } ]
   }, {
     "x" : 0.0,
@@ -38,7 +38,7 @@
     "yawInDegrees" : 0.0,
     "configuration": [ {
       "side" : "right",
-      "type": "GRIP_HARD"
+      "config" : "GRIP_HARD"
     } ]
   } ],
   "activeSides" : 1,

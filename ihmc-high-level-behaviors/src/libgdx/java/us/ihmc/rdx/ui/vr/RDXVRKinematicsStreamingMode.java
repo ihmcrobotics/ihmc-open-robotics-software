@@ -26,7 +26,7 @@ import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.processes.RestartableJavaProcess;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -35,7 +35,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -68,9 +68,9 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
    private PausablePeriodicThread wakeUpThread;
    private final ImBoolean wakeUpThreadRunning = new ImBoolean(false);
-   private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
+   private final SideDependentList<ModifiableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
-   private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
+   private final Map<String, ModifiableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private double userHeightChangeRate = 0.0;
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
@@ -110,7 +110,7 @@ public class RDXVRKinematicsStreamingMode
       for (RobotSide side : RobotSide.values)
       {
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-         MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+         ModifiableReferenceFrame handDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
          {
             if (side == RobotSide.LEFT)
             {
@@ -223,8 +223,8 @@ public class RDXVRKinematicsStreamingMode
              if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
              {
                 trackedSegmentDesiredFrame.put(segmentType.getSegmentName(),
-                                               new MutableReferenceFrame(segmentType.getSegmentName(),
-                                                                         vrContext.getTracker(
+                                               new ModifiableReferenceFrame(segmentType.getSegmentName(),
+                                                                            vrContext.getTracker(
                                                                                            segmentType.getSegmentName())
                                                                                      .getXForwardZUpTrackerFrame()));
                 trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
@@ -233,8 +233,8 @@ public class RDXVRKinematicsStreamingMode
                                           .append(segmentType.getTrackerToRigidBodyRotation());
              }
              trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
-                                       .setParentFrame(vrContext.getTracker(segmentType.getSegmentName())
-                                                                .getXForwardZUpTrackerFrame());
+                                       .changeParentFrame(vrContext.getTracker(segmentType.getSegmentName())
+                                                                   .getXForwardZUpTrackerFrame());
              trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame().update();
              trackerFrameGraphics.get(segmentType.getSegmentName())
                                  .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
@@ -280,7 +280,7 @@ public class RDXVRKinematicsStreamingMode
    }
 
    private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
-                                                                    MutableReferenceFrame desiredControlFrame,
+                                                                    ModifiableReferenceFrame desiredControlFrame,
                                                                     String frameName,
                                                                     double positionWeight,
                                                                     double orientationWeight)

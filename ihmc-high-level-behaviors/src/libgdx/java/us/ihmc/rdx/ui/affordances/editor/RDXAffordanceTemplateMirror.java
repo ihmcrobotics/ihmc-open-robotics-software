@@ -11,7 +11,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,11 +31,11 @@ import java.util.Map;
  */
 public class RDXAffordanceTemplateMirror
 {
-   private final SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands;
+   private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RDXAffordanceTemplateEditorStatus editorStatus;
-   private final ImBoolean mirrorActive;
+   private final ImBoolean mirrorActive = new ImBoolean(false);
    private final Map<String, Boolean> activeTransformAxisMirror = new LinkedHashMap<>();
    private final Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
    private boolean negatedAxis = false;
@@ -48,7 +47,7 @@ public class RDXAffordanceTemplateMirror
                                                                                                                             frameNonActiveSideTransform);
    private FramePose3DReadOnly lastActivePose = new FramePose3D(frameActiveSide);
 
-   public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands,
+   public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableSakeGripper> interactableHands,
                                       SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
                                       RDXAffordanceTemplateEditorStatus editorStatus)
@@ -57,7 +56,6 @@ public class RDXAffordanceTemplateMirror
       this.handPoses = handPoses;
       this.handTransformsToWorld = handTransformsToWorld;
       this.editorStatus = editorStatus;
-      this.mirrorActive = editorStatus.getIsMirrorActive();
 
       activeTransformAxisMirror.put("X", false);
       activeTransformAxisMirror.put("Y", false);
@@ -189,14 +187,7 @@ public class RDXAffordanceTemplateMirror
                if (changedColorTranslationAxisButton.get(axisMirror.getKey()))
                   ImGui.popStyleColor();
             }
-            ImGui.text("Switch Direction: ");
-            ImGui.sameLine();
-            String label;
-            if (negatedAxis)
-               label = "Opposite Direction";
-            else
-               label = "Same Direction";
-            if (ImGui.button(labels.get(label)))
+            if (ImGui.button(labels.get("Switch Direction")))
             {
                negatedAxis = !negatedAxis;
             }

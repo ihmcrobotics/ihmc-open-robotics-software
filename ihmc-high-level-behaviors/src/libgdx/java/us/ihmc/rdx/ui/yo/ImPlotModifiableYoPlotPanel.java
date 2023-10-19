@@ -4,7 +4,6 @@ import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.scs2.RDXYoManager;
-import us.ihmc.rdx.imgui.ImPlotPlotPanelLayout;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;

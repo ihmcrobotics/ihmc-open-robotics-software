@@ -10,10 +10,10 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 /**

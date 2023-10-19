@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.tools;
 
+import com.google.common.base.CaseFormat;
 import org.apache.commons.lang.WordUtils;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
@@ -62,11 +63,13 @@ public class BehaviorHelper extends CommunicationHelper implements YoVariableCli
    private final YoVariableClientHelper yoVariableClientHelper;
    private StatusLogger statusLogger;
    private ControllerStatusTracker controllerStatusTracker;
+   private static final boolean commsEnabledToStart = true;
 
    // TODO: Considerations for YoVariableClient with reconnecting
    public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       super(robotModel, ros2Node);
+      String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, titleCasedBehaviorName.replace(" ", ""));
       String yoVariableRegistryName = WordUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
       yoVariableClientHelper = new YoVariableClientHelper(yoVariableRegistryName);
    }
