@@ -2,6 +2,8 @@ package us.ihmc.rdx.perception.sceneGraph;
 
 import imgui.ImGui;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 
@@ -19,9 +21,9 @@ public abstract class RDXDetectableSceneNode extends RDXSceneNode
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      super.renderImGuiWidgets();
+      super.renderImGuiWidgets(modificationQueue, sceneGraph);
       ImGui.sameLine();
 
       boolean currentlyDetected = detectableSceneNode.getCurrentlyDetected();

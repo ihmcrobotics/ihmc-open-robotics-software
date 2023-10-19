@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
-import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 
 /**
  * The parameters for the real and simulated door.
