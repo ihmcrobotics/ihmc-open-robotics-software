@@ -1,7 +1,6 @@
 package us.ihmc.perception.filters;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.PriorityQueue;
 
 /**
  * Keep track of how many detections have been had in some amount of time.
@@ -11,7 +10,7 @@ public class TimeBasedDetectionFilter
 {
    private final double timeWindow;
    private final long requiredNumberOfDetections;
-   private final Queue<Long> detectionTimes = new LinkedList<>();
+   private final PriorityQueue<Long> detectionTimes = new PriorityQueue<>();
 
    public TimeBasedDetectionFilter(double timeWindow, long requiredNumberOfDetections)
    {
@@ -26,15 +25,10 @@ public class TimeBasedDetectionFilter
 
    public void update()
    {
-      if (!detectionTimes.isEmpty())
+      while (!detectionTimes.isEmpty() && (System.currentTimeMillis() - detectionTimes.peek() > (timeWindow * 1000)))
       {
-         long detectionTime = detectionTimes.peek();
-
          // If the detection is older than the expiry time, remove from the queue
-         if (System.currentTimeMillis() - detectionTime > (timeWindow * 1000))
-         {
-            detectionTimes.poll();
-         }
+         detectionTimes.poll();
       }
    }
 
