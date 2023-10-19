@@ -37,17 +37,21 @@ public class CenterposeSceneGraphOnRobotProcess
       sensorInZEDFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
                                                                                       ReferenceFrame.getWorldFrame(),
                                                                                       sensorInWorldTransform);
+      for (FramePoint3D framePoint3D : verticesFramePoint3D)
+      {
+         framePoint3D = new FramePoint3D();
+      }
    }
 
    public void update(ROS2SceneGraph onRobotSceneGraph, ReferenceFrame sensorFrame)
    {
       onRobotSceneGraph.updateSubscription();
-      updateSceneGraph(onRobotSceneGraph);
+      updateSceneGraph(onRobotSceneGraph, sensorFrame);
       onRobotSceneGraph.updateOnRobotOnly(sensorFrame);
       onRobotSceneGraph.updatePublication();
    }
 
-   public void updateSceneGraph(ROS2SceneGraph sceneGraph)
+   public void updateSceneGraph(ROS2SceneGraph sceneGraph, ReferenceFrame zedInWorldFrame)
    {
       if (subscriber.getMessageNotification().poll())
       {
@@ -72,10 +76,11 @@ public class CenterposeSceneGraphOnRobotProcess
                   {
                      if (verticesFramePoint3D[i] == null)
                         verticesFramePoint3D[i] = new FramePoint3D();
-                     verticesFramePoint3D[i].changeFrame(sensorInZEDFrame);
-                     verticesFramePoint3D[i].interpolate(vertices[i], 0.2);
+                     verticesFramePoint3D[i].setIncludingFrame(sensorInZEDFrame, vertices[i]);
+                     verticesFramePoint3D[i].setIncludingFrame(zedInWorldFrame, verticesFramePoint3D[i]);
+//                     verticesFramePoint3D[i].changeFrame(zedInWorldFrame);
                      verticesFramePoint3D[i].changeFrame(ReferenceFrame.getWorldFrame());
-                     vertices[i].set(verticesFramePoint3D[i].getX(), verticesFramePoint3D[i].getY(), verticesFramePoint3D[i].getZ());
+                     vertices[i].set(verticesFramePoint3D[i]);
                   }
 
                   String nodeName = "CenterposeDetectedObject%d".formatted(detectedID);
@@ -96,7 +101,8 @@ public class CenterposeSceneGraphOnRobotProcess
          {
             if (child instanceof CenterposeNode centerposeNode)
             {
-               boolean isDetected = detectedObjectMessage.getSequenceId() == centerposeNode.getSequenceID() + 1 ;
+//               boolean isDetected = detectedObjectMessage.getSequenceId() == centerposeNode.getSequenceID() + 1 ;
+               boolean isDetected = true;
                centerposeNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
@@ -104,17 +110,18 @@ public class CenterposeSceneGraphOnRobotProcess
                   Point3D[] vertices = detectedObjectMessage.getBoundingBoxVertices();
                   for (int i = 0; i < vertices.length; i++)
                   {
-                     if (verticesFramePoint3D[i] == null)
-                        verticesFramePoint3D[i] = new FramePoint3D();
-                     verticesFramePoint3D[i].changeFrame(sensorInZEDFrame);
-                     verticesFramePoint3D[i].interpolate(vertices[i], 0.2);
+                     verticesFramePoint3D[i].setIncludingFrame(sensorInZEDFrame, vertices[i]);
+                     verticesFramePoint3D[i].setIncludingFrame(zedInWorldFrame, verticesFramePoint3D[i]);
+//                     verticesFramePoint3D[i].changeFrame(zedInWorldFrame);
                      verticesFramePoint3D[i].changeFrame(ReferenceFrame.getWorldFrame());
-                     vertices[i].set(verticesFramePoint3D[i].getX(), verticesFramePoint3D[i].getY(), verticesFramePoint3D[i].getZ());
+                     vertices[i].set(verticesFramePoint3D[i]);
                   }
                   centerposeNode.setVertices3D(vertices);
 
                   Pose3D objectPoseSensorFrame = detectedObjectMessage.getPose();
                   markerPose.setIncludingFrame(sensorInZEDFrame, objectPoseSensorFrame);
+                  markerPose.setIncludingFrame(zedInWorldFrame, markerPose);
+//                  markerPose.changeFrame(zedInWorldFrame);
                   markerPose.changeFrame(ReferenceFrame.getWorldFrame());
                   centerposeNode.getNodeToParentFrameTransform().set(markerPose);
 

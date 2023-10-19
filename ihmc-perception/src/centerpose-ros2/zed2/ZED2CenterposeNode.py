@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Detection():
+    stabilizer : int = 0
     sequence_id : int = 0
     skipDetaction : bool = False
     objectType: str = 'object_type'
@@ -231,8 +232,8 @@ class ZED2CenterposeNode():
 
     def publish_message(self, detection:Detection):
         if detection.skipDetaction == False:
-            self.detected_object.sequence_id = detection.sequence_id
             detection.sequence_id += 1
+            self.detected_object.sequence_id = detection.sequence_id
             self.detected_object.confidence = detection.confidence
             self.detected_object.object_type = detection.objectType
             self.detected_object.bounding_box_vertices = detection.kps_3d
@@ -242,6 +243,10 @@ class ZED2CenterposeNode():
             self.detected_object.pose = Pose(position=position, orientation=quaternion_xyzw)
             self.ros2_node.get_logger().info('Object Detected in the Image!')
         else:
+            if (detection.stabilizer<=5):
+                detection.sequence_id += 1
+                detection.stabilizer += 1
+            self.detected_object.sequence_id = detection.sequence_id
             self.ros2_node.get_logger().info('No Object Detected in the Image!')
 
         self.centerpose_publisher_.publish(self.detected_object)
