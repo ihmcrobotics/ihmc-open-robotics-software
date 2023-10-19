@@ -10,10 +10,14 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CenterposeSceneGraphOnRobotProcess
 {
@@ -87,12 +91,36 @@ public class CenterposeSceneGraphOnRobotProcess
          });
       }
 
+      List<CenterposeNode> removals = new ArrayList<>();
+
       for (CenterposeNode centerposeNode : sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().valueCollection())
       {
-         centerposeNode.update();
-         TimeBasedDetectionFilter detectionFilter = sceneGraph.getCenterposeNodeDetectionFilters().get(centerposeNode.getObjectID());
-         detectionFilter.update();
-         centerposeNode.setCurrentlyDetected(detectionFilter.isDetected());
+         boolean found = false;
+
+         // TODO: fix this state issue
+         for (SceneNode rootChild : sceneGraph.getRootNode().getChildren())
+            if (rootChild instanceof CenterposeNode centerposeRootChild)
+               if (centerposeRootChild.getObjectID() == centerposeNode.getObjectID())
+                  found = true;
+
+         if (found)
+         {
+            centerposeNode.update();
+            TimeBasedDetectionFilter detectionFilter = sceneGraph.getCenterposeNodeDetectionFilters().get(centerposeNode.getObjectID());
+            detectionFilter.update();
+            centerposeNode.setCurrentlyDetected(detectionFilter.isDetected());
+         }
+         else
+         {
+            removals.add(centerposeNode);
+         }
+      }
+
+      // TODO: fix this state issue
+      for (CenterposeNode centerposeNode : removals)
+      {
+         sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().remove(centerposeNode.getObjectID());
+         sceneGraph.getCenterposeNodeDetectionFilters().remove(centerposeNode.getObjectID());
       }
    }
 
