@@ -32,7 +32,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.Set;
 
-public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
+public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
 {
    private final ROS2Topic<DetectedObjectPacket> topic;
    private final IHMCROS2Input<DetectedObjectPacket> subscription;
@@ -50,13 +50,17 @@ public class RDXROS2BoundingBoxVisualizer extends RDXVisualizer
    private final FramePose3D textPose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public RDXROS2BoundingBoxVisualizer(String title, ROS2PublishSubscribeAPI ros2Helper, ReferenceFrame sensorFrame, ROS2Topic<DetectedObjectPacket> topic, RDXFocusBasedCamera camera)
+   public RDXROS2DetectedObjectBoundingBoxVisualizer(String title,
+                                                     ROS2PublishSubscribeAPI ros2Helper,
+                                                     ReferenceFrame sensorFrame,
+                                                     ROS2Topic<DetectedObjectPacket> topic,
+                                                     RDXFocusBasedCamera camera)
    {
       super(title + " (ROS 2)");
       this.sensorFrame = sensorFrame;
       this.topic = topic;
       this.subscription = ros2Helper.subscribe(topic);
-      this.text = new RDX3DSituatedText("test", 0.05f);
+      this.text = new RDX3DSituatedText("", 0.05f);
       this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
       this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));
       this.camera = camera;

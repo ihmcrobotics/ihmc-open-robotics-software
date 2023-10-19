@@ -128,9 +128,9 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
-            centerposeNode.setMarkerID(subscriptionNode.getCenterposeNodeMessage().getObjectId());
+            centerposeNode.setObjectID(subscriptionNode.getCenterposeNodeMessage().getObjectId());
             centerposeNode.setConfidence(subscriptionNode.getCenterposeNodeMessage().getConfidence());
-            centerposeNode.setObject_type(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
+            centerposeNode.setObjectType(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
             centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
             centerposeNode.setBreakFrequency(subscriptionNode.getCenterposeNodeMessage().getBreakFrequency());

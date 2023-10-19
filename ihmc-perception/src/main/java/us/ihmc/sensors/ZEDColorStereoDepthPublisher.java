@@ -161,37 +161,37 @@ public class ZEDColorStereoDepthPublisher
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
 
       grabImageThread = new Thread(() ->
-                                   {
-                                      while (running)
-                                      {
-                                         // Continuously grab images from the camera. These images go to GPU memory.
-                                         // sl_grab processes the stereo images to create the depth image
-                                         checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+      {
+         while (running)
+         {
+            // Continuously grab images from the camera. These images go to GPU memory.
+            // sl_grab processes the stereo images to create the depth image
+            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
-                                         // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
-                                         leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-                                         leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
-                                         leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-                                      }
-                                   }, "ZEDImageGrabThread");
+            // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
+            leftCameraFramePose.setToZero(sensorFrameSupplier.get());
+            leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
+            leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+      }, "ZEDImageGrabThread");
 
       colorImagePublishThread = new Thread(() ->
-                                           {
-                                              while (running)
-                                              {
-                                                 throttler.waitAndRun();
-                                                 retrieveAndPublishColorImage();
-                                              }
-                                           }, "ZEDColorImagePublishThread");
+      {
+         while (running)
+         {
+            throttler.waitAndRun();
+            retrieveAndPublishColorImage();
+         }
+      }, "ZEDColorImagePublishThread");
 
       depthImagePublishThread = new Thread(() ->
-                                           {
-                                              while (running)
-                                              {
-                                                 throttler.waitAndRun();
-                                                 retrieveAndPublishDepthImage();
-                                              }
-                                           }, "ZEDDepthImagePublishThread");
+      {
+         while (running)
+         {
+            throttler.waitAndRun();
+            retrieveAndPublishDepthImage();
+         }
+      }, "ZEDDepthImagePublishThread");
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
