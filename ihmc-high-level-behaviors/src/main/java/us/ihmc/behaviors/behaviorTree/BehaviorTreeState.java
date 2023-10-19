@@ -1,6 +1,12 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.function.Consumer;
 
 /**
  * This is the state related functionality of a behavior tree,
@@ -12,12 +18,29 @@ import org.apache.commons.lang3.mutable.MutableLong;
 public class BehaviorTreeState
 {
    private final MutableLong nextID = new MutableLong(0);
+   private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
 
    private BehaviorTreeNodeState behaviorTreeNodeState;
 
    public void update()
    {
 
+   }
+
+   public void modifyTree(Consumer<BehaviorTreeStateModificationQueue> modifier)
+   {
+      modifier.accept(queuedModifications::add);
+
+      boolean modified = !queuedModifications.isEmpty();
+
+      while (!queuedModifications.isEmpty())
+      {
+         BehaviorTreeStateModification modification = queuedModifications.poll();
+         modification.performOperation();
+      }
+
+      if (modified)
+         update();
    }
 
    public MutableLong getNextID()

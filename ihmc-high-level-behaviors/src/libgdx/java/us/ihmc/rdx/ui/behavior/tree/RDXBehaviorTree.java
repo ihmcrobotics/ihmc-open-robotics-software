@@ -9,6 +9,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -16,8 +17,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeDestroySubtree;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModification;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModificationQueue;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -26,16 +25,12 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.util.*;
-import java.util.function.Consumer;
-
 public class RDXBehaviorTree
 {
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final BehaviorTreeState behaviorTreeState = new BehaviorTreeState();
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private RDXBehaviorTreeNode rootNode;
-   private final Queue<RDXBehaviorTreeModification> queuedModifications = new LinkedList<>();
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -71,7 +66,7 @@ public class RDXBehaviorTree
       WorkspaceResourceFile file = null; // FIXME
 
       // Delete the entire tree. We are starting over
-      modifyTree(modificationQueue ->
+      behaviorTreeState.modifyTree(modificationQueue ->
       {
          modificationQueue.accept(new RDXBehaviorTreeDestroySubtree(rootNode));
 
@@ -82,7 +77,7 @@ public class RDXBehaviorTree
       });
    }
 
-   public RDXBehaviorTreeNode loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode parentNode, RDXBehaviorTreeModificationQueue modificationQueue)
+   public RDXBehaviorTreeNode loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode parentNode, BehaviorTreeStateModificationQueue modificationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -101,22 +96,6 @@ public class RDXBehaviorTree
       });
 
       return node;
-   }
-
-   public void modifyTree(Consumer<RDXBehaviorTreeModificationQueue> modifier)
-   {
-      modifier.accept(queuedModifications::add);
-
-      boolean modified = !queuedModifications.isEmpty();
-
-      while (!queuedModifications.isEmpty())
-      {
-         RDXBehaviorTreeModification modification = queuedModifications.poll();
-         modification.performOperation();
-      }
-
-      if (modified)
-         update();
    }
 
    public void update()
