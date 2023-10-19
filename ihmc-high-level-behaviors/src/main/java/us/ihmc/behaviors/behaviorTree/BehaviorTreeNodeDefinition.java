@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -18,6 +19,9 @@ public class BehaviorTreeNodeDefinition
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
 
+   /**
+    * Saves the file recursively.
+    */
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("type", getClass().getSimpleName());
@@ -31,6 +35,15 @@ public class BehaviorTreeNodeDefinition
          ObjectNode childJsonNode = childrenArrayJsonNode.addObject();
          child.saveToFile(childJsonNode);
       }
+   }
+
+   /**
+    * Loads just this node's definition data. Not recursive
+    * because higher level node builders are required.
+    */
+   public void loadFromFile(JsonNode jsonNode)
+   {
+      description = jsonNode.get("description").textValue();
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)

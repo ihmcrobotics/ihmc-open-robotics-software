@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import org.apache.commons.lang3.mutable.MutableLong;
+
 /**
  * This is the state related functionality of a behavior tree,
  * which would live on the UI side and the robot side.
@@ -9,5 +11,12 @@ package us.ihmc.behaviors.behaviorTree;
  */
 public class BehaviorTreeState
 {
+   private final MutableLong nextID = new MutableLong(0);
 
+   private BehaviorTreeNodeState behaviorTreeNodeState;
+
+   public MutableLong getNextID()
+   {
+      return nextID;
+   }
 }

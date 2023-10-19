@@ -1,12 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.tools.thread.Throttler;
-
-import java.util.function.Function;
 
 /**
  * This class is concerned with syncing behavior tree state only
@@ -26,11 +23,8 @@ public class ROS2BehaviorTreeState extends BehaviorTreeState
     * on-robot ones.
     */
    public ROS2BehaviorTreeState(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                ROS2ActorDesignation ros2ActorDesignation,
-                                Function<Class<?>, BehaviorTreeNodeState> newNodeSupplier)
+                                ROS2ActorDesignation ros2ActorDesignation)
    {
-      super(newNodeSupplier);
-
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.ros2ActorDesignation = ros2ActorDesignation;
 
