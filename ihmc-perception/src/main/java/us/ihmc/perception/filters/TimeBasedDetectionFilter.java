@@ -9,14 +9,14 @@ import java.util.Queue;
  */
 public class TimeBasedDetectionFilter
 {
-   private final double expiry;
-   private final long detectionsThreshold;
+   private final double timeWindow;
+   private final long requiredNumberOfDetections;
    private final Queue<Long> detectionTimes = new LinkedList<>();
 
-   public TimeBasedDetectionFilter(double expiry, long detectionsThreshold)
+   public TimeBasedDetectionFilter(double timeWindow, long requiredNumberOfDetections)
    {
-      this.expiry = expiry;
-      this.detectionsThreshold = detectionsThreshold;
+      this.timeWindow = timeWindow;
+      this.requiredNumberOfDetections = requiredNumberOfDetections;
    }
 
    public void registerDetection()
@@ -31,7 +31,7 @@ public class TimeBasedDetectionFilter
          long detectionTime = detectionTimes.peek();
 
          // If the detection is older than the expiry time, remove from the queue
-         if (System.currentTimeMillis() - detectionTime > (expiry * 1000))
+         if (System.currentTimeMillis() - detectionTime > (timeWindow * 1000))
          {
             detectionTimes.poll();
          }
@@ -40,6 +40,6 @@ public class TimeBasedDetectionFilter
 
    public boolean isDetected()
    {
-      return detectionTimes.size() >= detectionsThreshold;
+      return detectionTimes.size() >= requiredNumberOfDetections;
    }
 }
