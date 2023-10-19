@@ -88,6 +88,14 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    }
 
    @Override
+   public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
+   {
+      super.remove(modificationQueue, sceneGraph);
+      sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().remove(centerposeNode.getObjectID());
+      sceneGraph.getCenterposeNodeDetectionFilters().remove(centerposeNode.getObjectID());
+   }
+
+   @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
