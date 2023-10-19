@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -36,7 +36,7 @@ public class WalkingFootstepTracker
    private volatile int totalStepsCompleted = 0;
    private volatile int totalIncompleteFootsteps = 0;
 
-   private final List<Notification> completedStepListeners = new ArrayList<>();
+   private final List<TypedNotification<FootstepQueueStatusMessage>> footstepQueueListener = new ArrayList<>();
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
@@ -51,13 +51,18 @@ public class WalkingFootstepTracker
                                                              this::acceptFootstepQueueStatusMessage);
    }
 
-   public void registerCompletedStepListener(Notification completedStepListener)
+   public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)
    {
-      completedStepListeners.add(completedStepListener);
+      this.footstepQueueListener.add(footstepQueueListener);
    }
 
    private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
+      for (TypedNotification<FootstepQueueStatusMessage> footstepQueueListener : footstepQueueListener)
+      {
+         footstepQueueListener.set(footstepQueueStatusMessage);
+      }
+
       totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();
       queuedFootsteps = footstepQueueStatusMessage.getQueuedFootstepList();
    }
@@ -78,11 +83,6 @@ public class WalkingFootstepTracker
                   completedIndex = i + 1;
                   break;
                }
-            }
-
-            for (Notification completedStepListener : completedStepListeners)
-            {
-               completedStepListener.set();
             }
 
             totalStepsCompleted++;
@@ -121,11 +121,6 @@ public class WalkingFootstepTracker
             ids[i] = footstep.getSequenceId();
             footsteps.add(footstep);
          }
-      }
-
-      for (Notification completedStepListener : completedStepListeners)
-      {
-         completedStepListener.set();
       }
 
       LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}. IDs: {}",
