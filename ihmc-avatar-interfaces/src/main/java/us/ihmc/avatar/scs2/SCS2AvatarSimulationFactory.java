@@ -124,6 +124,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               (in,
                                                                                                                                out) -> new SCS2OutputWriter(in,
@@ -299,6 +300,13 @@ public class SCS2AvatarSimulationFactory
                                                                         robotModel.getEstimatorDT(),
                                                                         robot.getControllerManager().getControllerInput()),
                                    robotModel.getEstimatorDT());
+      if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
+      {
+         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
+                                                                    simulationConstructionSet.getTime(),
+                                                                    robotModel.getEstimatorDT()),
+                                      robotModel.getEstimatorDT());
+      }
 
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationConstructionSet.addRobot(secondaryRobot);
@@ -822,6 +830,11 @@ public class SCS2AvatarSimulationFactory
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
       this.usePerfectSensors.set(usePerfectSensors);
+   }
+
+   public void setCreateRigidBodyMutators(boolean createRigidBodyMutators)
+   {
+      this.createRigidBodyMutators.set(createRigidBodyMutators);
    }
 
    public void setOutputWriterFactory(SCS2JointDesiredOutputWriterFactory outputWriterFactory)
