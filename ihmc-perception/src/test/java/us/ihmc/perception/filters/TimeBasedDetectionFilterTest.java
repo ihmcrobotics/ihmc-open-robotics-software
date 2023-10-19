@@ -14,9 +14,10 @@ public class TimeBasedDetectionFilterTest
 
       while (!timeBasedDetectionFilter.isDetected())
       {
-         timeBasedDetectionFilter.update();
          timeBasedDetectionFilter.registerDetection();
       }
+
+      timeBasedDetectionFilter.update();
 
       assertTrue(timeBasedDetectionFilter.isDetected());
    }
@@ -29,12 +30,11 @@ public class TimeBasedDetectionFilterTest
 
       while (!timeBasedDetectionFilter.isDetected())
       {
-         timeBasedDetectionFilter.update();
          timeBasedDetectionFilter.registerDetection();
       }
 
-      // Add some time delay so the update() removes elements from the queue
-      Thread.sleep(100);
+      // Add some time delay (longer than the timeWindow above) so the update() removes elements from the queue
+      Thread.sleep(200);
 
       timeBasedDetectionFilter.update();
 
