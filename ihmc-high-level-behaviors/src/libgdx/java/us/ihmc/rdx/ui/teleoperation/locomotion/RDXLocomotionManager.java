@@ -203,7 +203,7 @@ public class RDXLocomotionManager
 
       if (footstepQueueNotification.poll())
       {
-         if (previousFootstepQueue.getQueuedFootstepList().size() != footstepQueueNotification.read().getQueuedFootstepList().size())
+         if (!previousFootstepQueue.epsilonEquals(footstepQueueNotification.read(), 1e-3))
             footstepsSentToControllerGraphic.update();
 
          previousFootstepQueue = footstepQueueNotification.read();
