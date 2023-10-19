@@ -59,6 +59,17 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(twoByFour, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "Target" ->
+         {
+            PredefinedRigidBodySceneNode twoByFour = new PredefinedRigidBodySceneNode(nextID,
+                                                                                      name.get(),
+                                                                                      sceneGraph.getIDToNodeMap(),
+                                                                                      parent.getID(),
+                                                                                      TARGET_TRANSFORM_TO_MARKER,
+                                                                                      TARGET_VISUAL_MODEL_FILE_PATH,
+                                                                                      TARGET_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(twoByFour, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }

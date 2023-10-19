@@ -1,23 +1,26 @@
 package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.Color;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sharedControl.*;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -52,6 +55,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
 {
    private final RDXVRAssistanceStatus status;
    private final SceneGraph sceneGraph;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -78,22 +83,27 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private int blendingCounter = 0;
    private RDXVRAssistanceMenu menu;
    boolean sentInitialHandConfiguration = false;
+   private final SideDependentList<double[]> armsFightingHome = new SideDependentList<>();
+   private final YawPitchRoll chestFightingHome;
+   private final SideDependentList<double[]> armsHome = new SideDependentList<>();
 
-   public RDXVRAssistance(DRCRobotModel robotModel, SceneGraph sceneGraph, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRAssistance(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2ControllerHelper, SceneGraph sceneGraph, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
+      this.syncedRobot = syncedRobot;
+      this.ros2ControllerHelper = ros2ControllerHelper;
       this.sceneGraph = sceneGraph;
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
 
       // create ghost robot for assistance preview
-      RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("#9370DB").derive(0.0, 1.0, 1.0, 0.5));
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
-      ghostRobotModel = robotModel.createFullRobotModel();
+      ghostRobotModel = syncedRobot.getRobotModel().createFullRobotModel();
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostRobotModel);
-      ghostRobotGraphic = new RDXMultiBodyGraphic(robotModel.getSimpleRobotName() + " (Assistance Preview Ghost)");
+      ghostRobotGraphic = new RDXMultiBodyGraphic(syncedRobot.getRobotModel().getSimpleRobotName() + " (Assistance Preview Ghost)");
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostRobotModel.getElevator());
       ghostRobotGraphic.setActive(false);
       ghostRobotGraphic.create();
@@ -109,6 +119,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
          affordanceToVRHandControlFrameTransforms.put(side, affordanceToVRHandControlFrameTransform);
       }
       affordanceAssistant= new AffordanceAssistant(affordanceToVRHandControlFrameTransforms);
+
+      armsFightingHome.put(RobotSide.LEFT, new double[] {-0.391, -0.024, -0.4, -2.613, -0.0, -0.0, 0.0});
+      armsFightingHome.put(RobotSide.RIGHT, new double[] {0.4, -0.124, 0.7, -2.6, 0.0, 0.0, -0.0});
+      chestFightingHome = new YawPitchRoll(0.475, -0.046, 0.0);
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
@@ -356,7 +370,31 @@ public class RDXVRAssistance implements TeleoperationAssistant
                if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
                   setEnabled(false);
                if (proMPAssistant.isCurrentTaskDone())
+               {
                   enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+                  if (proMPAssistant.getCurrentTask().contains("Punch"))
+                  {
+                     RobotSide side = proMPAssistant.getCurrentTask().contains("Left") ? RobotSide.LEFT : RobotSide.RIGHT;
+                     ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                                 2.0,
+                                                                                                                 armsFightingHome.get(side));
+                     ros2ControllerHelper.publishToController(armTrajectoryMessage);
+
+                     FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+                     frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+                     frameChestYawPitchRoll.set(chestFightingHome);
+                     ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
+                     chestTrajectoryMessage.getSo3Trajectory()
+                                           .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+                                                                                                frameChestYawPitchRoll,
+                                                                                                EuclidCoreTools.zeroVector3D,
+                                                                                                syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
+                     chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setXSelected(true);
+                     chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setYSelected(true);
+                     chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
+                     ros2ControllerHelper.publishToController(chestTrajectoryMessage);
+                  }
+               }
                if (proMPAssistant.inEndZone())
                {
                   if (affordanceAssistant.hasAffordance(objectName))

@@ -2,12 +2,12 @@ package us.ihmc.behaviors.sharedControl;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.ProMPUtil;
-import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.io.IOException;
@@ -100,7 +100,7 @@ public class ProMPAssistantGenerationFrameTest
       }
       //concatenate each set point of hands in single row
       trajectoryRecorder.concatenateData();
-      ArrayList<double[]> dataConcatenated = trajectoryRecorder.getData();
+      List<double[]> dataConcatenated = trajectoryRecorder.getData();
       assertTrue(dataConcatenated.size() > 0); // check data is not empty
       // save recorded file name
       String recordFile = trajectoryRecorder.getRecordFileName();
@@ -182,7 +182,7 @@ public class ProMPAssistantGenerationFrameTest
       }
       //concatenate each set point of hands in single row
       trajectoryRecorder.concatenateData();
-      ArrayList<double[]> dataConcatenated = trajectoryRecorder.getData();
+      List<double[]> dataConcatenated = trajectoryRecorder.getData();
       assertTrue(dataConcatenated.size() > 0); // check data is not empty
       // save recorded file name
       String recordFile = trajectoryRecorder.getRecordFileName();

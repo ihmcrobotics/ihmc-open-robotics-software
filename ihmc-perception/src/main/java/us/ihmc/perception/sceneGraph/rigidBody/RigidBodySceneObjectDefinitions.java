@@ -69,11 +69,23 @@ public class RigidBodySceneObjectDefinitions
    public static final String DEBRIS_VISUAL_MODEL_FILE_PATH = "environmentObjects/debris/2x4.g3dj";
    public static final RigidBodyTransform DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
+   public static final String TARGET_NAME = "Target";
+   public static final int TARGET_MARKER_ID = 4;
+   public static final double TARGET_MARKER_WIDTH = 0.1;
+   public static final RigidBodyTransform TARGET_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   static
+   {
+      TARGET_TRANSFORM_TO_MARKER.getTranslation().set(0, -TARGET_MARKER_WIDTH/2, TARGET_MARKER_WIDTH/2);
+   }
+   public static final String TARGET_VISUAL_MODEL_FILE_PATH = "environmentObjects/target/target.g3dj";
+   public static final RigidBodyTransform TARGET_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {
       ARUCO_MARKER_SIZES.put(BOX_MARKER_ID, BOX_MARKER_SIZE);
       ARUCO_MARKER_SIZES.put(CAN_OF_SOUP_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(TARGET_MARKER_ID, TARGET_MARKER_WIDTH);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
@@ -84,6 +96,7 @@ public class RigidBodySceneObjectDefinitions
          SceneNode box = sceneGraph.getNamesToNodesMap().get(BOX_NAME);
          if (box == null)
          {
+
             ensureBoxNodeAdded(sceneGraph, modificationQueue, boxArUcoMarker);
          }
       }
@@ -95,6 +108,16 @@ public class RigidBodySceneObjectDefinitions
          if (canOfSoup == null)
          {
             ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, canOfSoupMarker);
+         }
+      }
+
+      ArUcoMarkerNode targetMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(TARGET_MARKER_ID);
+      if (targetMarker != null)
+      {
+         SceneNode target = sceneGraph.getNamesToNodesMap().get(TARGET_NAME);
+         if (target == null)
+         {
+            ensureTargetNodeAdded(sceneGraph, modificationQueue, targetMarker);
          }
       }
    }
@@ -135,7 +158,7 @@ public class RigidBodySceneObjectDefinitions
     */
    public static void ensureDebrisNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
    {
-      SceneNode canOfSoup = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+      SceneNode debris = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                              DEBRIS_NAME,
                                                              sceneGraph.getIDToNodeMap(),
                                                              parentNode.getID(),
@@ -143,6 +166,22 @@ public class RigidBodySceneObjectDefinitions
                                                              DEBRIS_VISUAL_MODEL_FILE_PATH,
                                                              DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Debris to scene graph.");
-      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(debris, parentNode));
+   }
+
+   /**
+    * Represents a target to hit
+    */
+   public static void ensureTargetNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode target = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                             TARGET_NAME,
+                                                             sceneGraph.getIDToNodeMap(),
+                                                             parentNode.getID(),
+                                                             TARGET_TRANSFORM_TO_MARKER,
+                                                             TARGET_VISUAL_MODEL_FILE_PATH,
+                                                             TARGET_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Target to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(target, parentNode));
    }
 }

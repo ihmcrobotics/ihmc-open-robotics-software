@@ -53,7 +53,7 @@ public class RDXVRModeManager
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArms())
       {
-         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, sceneGraph, kinematicsStreamingToolboxProcess);
+         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, sceneGraph, kinematicsStreamingToolboxProcess);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
       }
 

@@ -10,7 +10,7 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sharedControl.HandConfigurationListener;
@@ -18,8 +18,10 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -55,7 +57,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
    private static final int NUMBER_OF_PARTS_TO_RECORD = 5;
    private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
-   private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
    private RDXMultiBodyGraphic ghostRobotGraphic;
@@ -80,6 +82,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
+   private MutableReferenceFrame chestDesiredControlFrame;
+   private MutableReferenceFrame pelvisDesiredControlFrame;
 //   private RDXVRAssistanceManager vrAssistanceManager;
    private RDXVRAssistance vrAssistant;
    private final SceneGraph sceneGraph;
@@ -90,12 +94,12 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
-   public RDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
+   public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        SceneGraph sceneGraph,
                                        RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
-      this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.sceneGraph = sceneGraph;
       this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
@@ -103,14 +107,14 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
    public void create(RDXVRContext vrContext)
    {
-      RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
-      ghostFullRobotModel = robotModel.createFullRobotModel();
+      ghostFullRobotModel = syncedRobot.getRobotModel().createFullRobotModel();
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostFullRobotModel);
-      ghostRobotGraphic = new RDXMultiBodyGraphic(robotModel.getSimpleRobotName() + " (IK Preview Ghost)");
+      ghostRobotGraphic = new RDXMultiBodyGraphic(syncedRobot.getRobotModel().getSimpleRobotName() + " (IK Preview Ghost)");
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
@@ -129,13 +133,13 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          handDesiredControlFrames.put(side, handDesiredControlFrame);
       }
 
-      status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
+      status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled, NUMBER_OF_PARTS_TO_RECORD);
 //      vrAssistanceManager = new RDXVRAssistanceManager();
-      vrAssistant = new RDXVRAssistance(robotModel, sceneGraph, streamToController, kinematicsRecorder.isReplayingEnabled());
+      vrAssistant = new RDXVRAssistance(syncedRobot, ros2ControllerHelper, sceneGraph, streamToController, kinematicsRecorder.isReplayingEnabled());
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -183,10 +187,9 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
          // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
          // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
-         userHeightChangeRate = -controller.getJoystickActionData().y();
-         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation()
-                                                                                      .addZ(userHeightChangeRate
-                                                                                            * 0.01));
+//         userHeightChangeRate = -controller.getJoystickActionData().y();
+//         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(userHeightChangeRate * 0.01));
+
       });
       vrAssistant.processInput(vrContext);
 
@@ -198,11 +201,46 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
          if (enabled.get())
+         {
+            if (chestDesiredControlFrame == null)
+            {
+               FixedReferenceFrame initialChestFrame = new FixedReferenceFrame("fixedChestFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame()));
+               chestDesiredControlFrame = new MutableReferenceFrame("chestInitial", initialChestFrame);
+
+               FixedReferenceFrame initialPelvisFrame = new FixedReferenceFrame("fixedPelvisFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame()));
+               pelvisDesiredControlFrame = new MutableReferenceFrame("pelvisInitial", initialPelvisFrame);
+            }
+            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+            message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
+            tempFramePose.setToZero(chestDesiredControlFrame.getReferenceFrame());
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+            message.getAngularSelectionMatrix().setXSelected(false);
+            message.getAngularSelectionMatrix().setYSelected(false);
+            message.getAngularSelectionMatrix().setZSelected(false);
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
+
+            toolboxInputMessage.getInputs().add().set(message);
+
+            message = new KinematicsToolboxRigidBodyMessage();
+            message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
+            tempFramePose.setToZero(pelvisDesiredControlFrame.getReferenceFrame());
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+
+            toolboxInputMessage.getInputs().add().set(message);
+         }
+
+
+         if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
          toolboxInputMessage.setTimestamp(System.nanoTime());
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
    }
@@ -307,7 +345,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
       if (!Double.isNaN(positionWeight))
       {
-         if (positionWeight == 0)
+         if (positionWeight < 0.0)
          {
             message.getLinearSelectionMatrix().setXSelected(false);
             message.getLinearSelectionMatrix().setYSelected(false);
@@ -320,7 +358,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       }
       if (!Double.isNaN(orientationWeight))
       {
-         if (orientationWeight == 0)
+         if (orientationWeight < 0.0)
          {
             message.getAngularSelectionMatrix().setXSelected(false);
             message.getAngularSelectionMatrix().setYSelected(false);
@@ -471,6 +509,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       else
       {
          vrAssistant.setEnabled(false);
+         chestDesiredControlFrame = null;
       }
    }
 
@@ -478,21 +517,21 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    {
       ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
       toolboxStateMessage.setRequestedToolboxState(ToolboxState.REINITIALIZE.toByte());
-      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
    }
 
    private void wakeUpToolbox()
    {
       ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
       toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
-      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
    }
 
    private void sleepToolbox()
    {
       ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
       toolboxStateMessage.setRequestedToolboxState(ToolboxState.SLEEP.toByte());
-      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

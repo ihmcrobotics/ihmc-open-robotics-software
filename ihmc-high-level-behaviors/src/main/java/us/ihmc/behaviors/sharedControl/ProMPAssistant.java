@@ -161,6 +161,11 @@ public class ProMPAssistant
       }
    }
 
+   public void framePoseToPack(FramePose3D framePose, String bodyPart)
+   {
+      framePoseToPack(framePose, bodyPart, true);
+   }
+
    public void framePoseToPack(FramePose3D framePose, String bodyPart, boolean play)
    {
       if (containsBodyPart(bodyPart))
@@ -568,6 +573,11 @@ public class ProMPAssistant
    public boolean isCurrentTaskDone()
    {
       return this.doneCurrentTask;
+   }
+
+   public String getCurrentTask()
+   {
+      return currentTask;
    }
 
    public boolean inEndZone()
