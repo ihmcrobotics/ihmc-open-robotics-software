@@ -22,6 +22,7 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
    public static final IntegerStoredPropertyKey ousterThrottlerFrequency = keys.addIntegerKey("Ouster throttler frequency");
    public static final IntegerStoredPropertyKey occupancyGridResolution = keys.addIntegerKey("Occupancy grid resolution");
    public static final BooleanStoredPropertyKey rapidRegionsEnabled = keys.addBooleanKey("Rapid regions enabled");
+   public static final BooleanStoredPropertyKey heightMapEnabled = keys.addBooleanKey("Height map enabled");
    public static final BooleanStoredPropertyKey loggingEnabled = keys.addBooleanKey("Logging enabled");
    public static final BooleanStoredPropertyKey publishColor = keys.addBooleanKey("Publish color");
    public static final BooleanStoredPropertyKey publishDepth = keys.addBooleanKey("Publish depth");

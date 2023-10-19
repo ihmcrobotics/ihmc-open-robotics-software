@@ -7,12 +7,11 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -49,8 +48,6 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
  */
 public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehaviorOld::new);
-
    private static final int UPDATE_RATE_MILLIS = 50;
    private final static Pose3D NAN_POSE = new Pose3D();
    static
@@ -178,7 +175,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
    @Override
    public String getName()
    {
-      return DEFINITION.getName();
+      return "Building Exploration";
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)

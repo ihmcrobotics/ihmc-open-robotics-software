@@ -314,7 +314,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                               bipedSupportPolygons,
                                                                               registry);
 
-      FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
+      SideDependentList<FrameConvexPolygon2D> defaultSupportPolygons = controllerToolbox.getDefaultFootPolygons();
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
       maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
@@ -326,7 +326,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                                             registry));
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry, maxNumberOfStepsToConsider);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
-      copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, splitFractionParameters, defaultSupportPolygon, registry);
+      copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, splitFractionParameters, defaultSupportPolygons, registry);
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);

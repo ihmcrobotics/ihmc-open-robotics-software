@@ -18,6 +18,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.List;
@@ -159,12 +160,24 @@ public class RDXModelBuilder
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
    }
 
-   public static ModelInstance createCylinder(double height, double radius, Color color)
+   public static ModelInstance createCylinder(float height, float radius, Color color)
    {
-      return buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addCylinder(height, radius, new Point3D(), color);
-      }, "cylinder");
+      return buildModelInstance(meshBuilder -> meshBuilder.addCylinder(height, radius, new Point3D(), color), "cylinder");
+   }
+
+   public static ModelInstance createEllipsoid(float xRadius, float yRadius, float zRadius, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addEllipsoid(xRadius, yRadius, zRadius, new Point3D(), color), "ellipsoid");
+   }
+
+   public static ModelInstance createPrism(float triangleWidth, float prismThickness, float triangleHeight, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addIsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness, new Point3D(), color), "prism");
+   }
+
+   public static ModelInstance createCone(float height, float radius, Color color)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addCone(height, radius, new Point3D(), color), "cone");
    }
 
    public static ModelInstance createArrow(double length, Color color)

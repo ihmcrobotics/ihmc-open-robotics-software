@@ -1,9 +1,8 @@
 package us.ihmc.rdx.ui;
 
-import imgui.internal.ImGui;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 /**
@@ -12,14 +11,9 @@ import us.ihmc.tools.time.FrequencyCalculator;
  */
 public class RDXBaseUIFrameRateDisplay
 {
-
-   private static final int HISTORY = 100;
+   private final ImGuiAveragedFrequencyText averagedFrequencyText = new ImGuiAveragedFrequencyText();
    private final FrequencyCalculator latestFPSCalculator = new FrequencyCalculator(1);
-   private final FrequencyCalculator averagedFPSCalculator = new FrequencyCalculator(HISTORY);
-   private final Throttler throttler = new Throttler().setFrequency(1.0);
-   private final ImGuiMovingPlot plot = new ImGuiMovingPlot("###frameRateDisplay", HISTORY, 100, (int) ImGuiTools.TAB_BAR_HEIGHT);
-
-   private String fpsString = "0 Hz";
+   private final ImGuiMovingPlot plot = new ImGuiMovingPlot("###frameRateDisplay", ImGuiAveragedFrequencyText.HISTORY, 100, (int) ImGuiTools.TAB_BAR_HEIGHT);
 
    public void renderPlot()
    {
@@ -30,17 +24,7 @@ public class RDXBaseUIFrameRateDisplay
    public void renderHz()
    {
       latestFPSCalculator.ping();
-      averagedFPSCalculator.ping();
-
-      if (throttler.run())
-      {
-         fpsString = String.valueOf((int) averagedFPSCalculator.getFrequency());
-         while (fpsString.length() < 3)
-         {
-            fpsString = " " + fpsString;
-         }
-         fpsString += " Hz";
-      }
-      ImGui.text(fpsString);
+      averagedFrequencyText.ping();
+      averagedFrequencyText.render();
    }
 }

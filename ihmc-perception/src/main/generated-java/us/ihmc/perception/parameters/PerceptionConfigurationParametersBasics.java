@@ -28,6 +28,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.rapidRegionsEnabled, rapidRegionsEnabled);
    }
 
+   default void setHeightMapEnabled(boolean heightMapEnabled)
+   {
+      set(PerceptionConfigurationParameters.heightMapEnabled, heightMapEnabled);
+   }
+
    default void setLoggingEnabled(boolean loggingEnabled)
    {
       set(PerceptionConfigurationParameters.loggingEnabled, loggingEnabled);
