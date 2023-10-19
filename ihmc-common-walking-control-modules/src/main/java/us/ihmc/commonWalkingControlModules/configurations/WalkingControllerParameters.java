@@ -879,5 +879,5 @@ public abstract class WalkingControllerParameters
    public JointOfflineParameters getJointOfflineParameters()
    {
       return null;
-   };
+   }
 }

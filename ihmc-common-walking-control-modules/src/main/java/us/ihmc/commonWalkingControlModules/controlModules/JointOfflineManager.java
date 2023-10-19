@@ -82,7 +82,7 @@ public class JointOfflineManager
             throw new RuntimeException("Joint " + joint.getName() + " occurred multiple times in JointOfflineCommand");
          }
 
-         double dampingCoefficient = jointOfflineParameters.getDampingCoefficentPerJoint().get(joint.getName());
+         double dampingCoefficient = jointOfflineParameters.getDampingCoefficient(joint.getName());
          double desiredJointTorque = -joint.getQd() * dampingCoefficient;
          jointTorqueCommand.addJoint(joint, desiredJointTorque);
          offlineStatus.get(joint).set(true);

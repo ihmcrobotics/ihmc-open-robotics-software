@@ -8,7 +8,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
  * <p>
  * Created by Christian DeBuys on 2023-09-26
  */
-public abstract class JointOfflineParameters
+public interface JointOfflineParameters
 {
-   public abstract TObjectDoubleHashMap<String> getDampingCoefficentPerJoint();
+   double getDampingCoefficient(String jointName);
 }
