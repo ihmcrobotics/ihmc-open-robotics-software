@@ -17,8 +17,8 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.string.StringTools;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.time.Instant;
+import java.util.Date;
 
 public class ZEDColorAndDepthLogger
 {
@@ -64,7 +64,7 @@ public class ZEDColorAndDepthLogger
       subscriber.takeNextData(imageMessage, sampleInfo);
 
       byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      System.arraycopy( imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size() );
+      System.arraycopy(imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size());
 
       BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
       bytePointer.put(heapArray, 0, imageMessage.getData().size());
@@ -83,7 +83,7 @@ public class ZEDColorAndDepthLogger
       subscriber.takeNextData(imageMessage, sampleInfo);
 
       byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      System.arraycopy( imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size() );
+      System.arraycopy(imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size());
 
       synchronized (colorBytePointerSyncObject)
       {
@@ -103,7 +103,6 @@ public class ZEDColorAndDepthLogger
       new ZEDColorAndDepthLogger("ZED 2 Depth",
                                  DomainFactory.PubSubImplementation.FAST_RTPS,
                                  PerceptionAPI.ZED2_DEPTH,
-                                 PerceptionAPI.ZED2_COLOR_IMAGES
-                                       .get(RobotSide.LEFT));
+                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
    }
 }

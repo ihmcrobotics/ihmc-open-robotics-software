@@ -10,7 +10,6 @@ import imgui.ImGui;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -29,13 +28,12 @@ import java.util.Set;
 public class RDXCenterposeNode extends RDXDetectableSceneNode
 {
    private final CenterposeNode centerposeNode;
-   private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
+   private final Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
    private final RDX3DSituatedText text;
    private final FramePose3D textPose = new FramePose3D();
    private RDX3DSituatedTextData previousTextData;
-   private ModelInstance markerModelInstance;
-   private FramePoint3D[] vertices3D = new FramePoint3D[8];
-   private Point3D[] vertices = new Point3D[8];
+   private ModelInstance objectModelInstance;
+   private final FramePoint3D[] vertices3D = new FramePoint3D[8];
    private final RDX3DPanel panel3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
@@ -44,7 +42,12 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       super(centerposeNode);
       this.panel3D = panel3D;
       this.centerposeNode = centerposeNode;
-      this.text = new RDX3DSituatedText("test", 0.05f);
+      this.text = new RDX3DSituatedText(getObjectTooltip(), 0.05f);
+   }
+
+   private String getObjectTooltip()
+   {
+      return centerposeNode.getObjectType() + " %.1f".formatted(centerposeNode.getConfidence());
    }
 
    @Override
@@ -52,7 +55,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    {
       super.update(modificationQueue);
 
-      vertices = centerposeNode.getVertices3D();
+      Point3D[] vertices = centerposeNode.getVertices3D();
       for (int i = 0; i < vertices.length; i++)
       {
          if (vertices3D[i] == null)
@@ -62,27 +65,24 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
          vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
          vertices3D[i].interpolate(vertices[i], 0.2);
       }
-      Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
+      Model objectModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
 
-      if (markerModelInstance != null)
+      if (objectModelInstance != null)
       {
-         markerModelInstance.model.dispose();
+         objectModelInstance.model.dispose();
       }
-      markerModelInstance = new RDXModelInstance(markerModel);
-
-      String objectType = centerposeNode.getObject_type();
-      double confidence = centerposeNode.getConfidence();
+      objectModelInstance = new RDXModelInstance(objectModel);
 
       if (previousTextData != null)
          previousTextData.dispose();
-      previousTextData = text.setTextWithoutCache(objectType + " %.1f".formatted(confidence));
+      previousTextData = text.setTextWithoutCache(getObjectTooltip());
 
       textPose.setToZero(panel3D.getCamera3D().getCameraFrame());
       textPose.getOrientation().appendPitchRotation(3.0 / 2.0 * Math.PI);
       textPose.getOrientation().appendYawRotation(-Math.PI / 2.0);
 
       textPose.changeFrame(ReferenceFrame.getWorldFrame());
-      textPose.getPosition().set(centerposeNode.getNodeFrame().getTransformToWorldFrame().getTranslation());  // Not sure if this is correct?
+      textPose.getPosition().set(centerposeNode.getNodeFrame().getTransformToWorldFrame().getTranslation()); // Not sure if this is correct?
 
       LibGDXTools.toLibGDX(textPose, tempTransform, text.getModelTransform());
    }
@@ -91,7 +91,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
-      ImGui.text("Marker ID: %d".formatted(centerposeNode.getMarkerID()));
+      ImGui.text("ID: %d".formatted(centerposeNode.getObjectID()));
       ImGui.sameLine();
    }
 
@@ -101,10 +101,10 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       super.getRenderables(renderables, pool, sceneLevels);
       if (sceneLevelCheck(sceneLevels))
       {
-         if (markerModelInstance != null)
+         if (objectModelInstance != null)
          {
             text.getRenderables(renderables, pool);
-            markerModelInstance.getRenderables(renderables, pool);
+            objectModelInstance.getRenderables(renderables, pool);
          }
       }
    }
