@@ -1,7 +1,7 @@
 {
   "name" : "Grasp2x4Debris",
   "actions" : [ {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "parentFrame" : "2x4Debris",
     "side" : "right",
     "trajectoryDuration" : 1.0,
@@ -12,7 +12,7 @@
     "pitchInDegrees" : -2.14,
     "yawInDegrees" : 90.0
   }, {
-    "type" : "RDXSakeHandCommandAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Open (half close)",
     "side" : "right",
     "configuration" : "OPEN",
@@ -20,7 +20,7 @@
     "torque" : 0.30000001192092896,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "parentFrame" : "2x4Debris",
     "side" : "right",
     "trajectoryDuration" : 1.0461659323913874,
@@ -31,7 +31,7 @@
     "pitchInDegrees" : -2.14,
     "yawInDegrees" : 90.0
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "parentFrame" : "2x4Debris",
     "side" : "right",
     "trajectoryDuration" : 1.9229626863835646E-16,
@@ -42,7 +42,7 @@
     "pitchInDegrees" : -2.14,
     "yawInDegrees" : 90.0
   }, {
-    "type" : "RDXSakeHandCommandAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Crush",
     "side" : "right",
     "configuration" : "GRIP_HARD",

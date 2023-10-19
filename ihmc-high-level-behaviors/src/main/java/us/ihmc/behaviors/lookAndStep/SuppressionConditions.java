@@ -4,6 +4,9 @@ import us.ihmc.tools.string.StringTools;
 
 import java.util.function.Supplier;
 
+/**
+ * Predefined suppression conditions.
+ */
 public class SuppressionConditions
 {
    public static SuppressionCondition neckPitchWithCorrection(Supplier<Double> currentNeckPitch,

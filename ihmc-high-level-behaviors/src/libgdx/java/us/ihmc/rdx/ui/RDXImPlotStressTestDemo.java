@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.tools.ImPlotTools;
+import us.ihmc.rdx.imgui.ImPlotTools;
 import us.ihmc.log.LogTools;
 
 import java.util.*;

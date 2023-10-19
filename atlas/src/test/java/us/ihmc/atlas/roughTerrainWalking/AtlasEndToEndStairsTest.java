@@ -10,6 +10,9 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
 
+/**
+ * All the following tests exist for Nadia
+ */
 @Tag("humanoid-stairs-slow")
 public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
@@ -21,6 +24,7 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       return new AtlasRobotModel(selectedVersion);
    }
 
+   @Disabled
    @Test
    public void testUpStairsSlow(TestInfo testInfo) throws Exception
    {
@@ -28,6 +32,7 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       testStairs(testInfo, true, true, 0.6, 0.25, 0.0);
    }
 
+   @Disabled
    @Test
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
@@ -35,13 +40,15 @@ public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
       testStairs(testInfo, true, false, 0.9, 0.25, 0.0);
    }
 
+   @Disabled
    @Test
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
       selectedVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-      testStairs(testInfo, false, true, 0.9, 0.25, 0.04);
+      testStairs(testInfo, false, true, 0.9, 0.25, 0.0);
    }
 
+   @Disabled
    @Test
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
