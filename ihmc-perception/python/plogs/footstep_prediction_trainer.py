@@ -113,9 +113,9 @@ class FootstepDataset(Dataset):
         sensor_position = torch.from_numpy(self.sensor_positions[index, :]).to(device)
         # sensor_orientation = torch.from_numpy(self.sensor_orientations[index, :]).to(device)
         start_position = torch.from_numpy(self.start_positions[index, :2]).to(device) - sensor_position[:2]
-        # start_orientation = torch.from_numpy(self.start_orientations[index, :] ).to(device)
+        start_orientation = torch.from_numpy(self.start_orientations[index, :] ).to(device)
         goal_position = torch.from_numpy(self.goal_positions[index, :2]).to(device) - sensor_position[:2]
-        # goal_orientation = torch.from_numpy(self.goal_orientations[index, :] ).to(device)
+        goal_orientation = torch.from_numpy(self.goal_orientations[index, :] ).to(device)
         linear_input = torch.cat((start_position, goal_position), dim=0)
 
         # Outputs
@@ -367,7 +367,7 @@ if __name__ == "__main__":
    
     # train and store model
     criterion=torch.nn.L1Loss()
-    train_store(train_dataset, val_dataset, batch_size=10, epochs=100, criterion=criterion)
+    train_store(train_dataset, val_dataset, batch_size=32, epochs=20, criterion=criterion)
 
     # load and validate model
     load_validate(val_dataset)
