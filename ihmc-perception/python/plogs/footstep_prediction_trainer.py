@@ -156,7 +156,6 @@ class FootstepPredictor(Module):
         self.dropout1 = torch.nn.Dropout(0.5)
         self.fc2 = torch.nn.Linear(2048, 1024)
         self.bn2 = torch.nn.BatchNorm1d(1024)
-        self.dropout2 = torch.nn.Dropout(0.5)
         self.fc3 = torch.nn.Linear(1024, 512)
         self.bn3 = torch.nn.BatchNorm1d(512)
         self.fc4 = torch.nn.Linear(512, 256)
@@ -191,25 +190,28 @@ class FootstepPredictor(Module):
         # fully connected layers
         x = self.fc1(x)
         x = self.bn1(x)
-        x = F.relu(x)
+        x = F.leaky_relu(x)
         x = self.dropout1(x)
 
         x = self.fc2(x)
         x = self.bn2(x)
-        x = F.relu(x)
-        x = self.dropout2(x)
+        x = F.leaky_relu(x)
+        x = self.dropout1(x)
 
         x = self.fc3(x)
         x = self.bn3(x)
-        x = F.relu(x)
+        x = F.leaky_relu(x)
+        x = self.dropout1(x)
 
         x = self.fc4(x)
         x = self.bn4(x)
-        x = F.relu(x)
+        x = F.leaky_relu(x)
+        x = self.dropout1(x)
 
         x = self.fc5(x)
         x = self.bn5(x)
-        x = F.relu(x)
+        x = F.leaky_relu(x)
+        x = self.dropout1(x)
 
         x = self.fc6(x)
 
@@ -265,25 +267,19 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
 
     # save the model
     torch.save(model.state_dict(), 'footstep_predictor.pt')
-    export_onnx(model, x1, x2, y)
-
-
-def export_onnx(model, x1, x2, y):
-    # export model to onnx for a single image not full batch
     torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), 'footstep_predictor.onnx', verbose=False)
 
 
 def load_validate(val_dataset):
+    loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
+    
+    # Load the model
     input_size = val_dataset[0][1].shape[0]
     output_size = val_dataset[0][2].shape[0]
-
-    # Load the model
     model = FootstepPredictor(input_size, output_size)
     model.load_state_dict(torch.load('footstep_predictor.pt'))
     model.eval()
     model.to(device)
-
-    loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
 
     with torch.no_grad():
         for i, (height_map_input, linear_input, target_output) in enumerate(loader):
@@ -344,9 +340,7 @@ def load_validate(val_dataset):
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
-
     new_format_files = ['20231018_135001_PerceptionLog.hdf5']#, '20231018_143108_PerceptionLog.hdf5']
-
     # files = ['20231015_183228_PerceptionLog.hdf5', '20231015_234600_PerceptionLog.hdf5', '20231016_025456_PerceptionLog.hdf5']
     datasets = []
 
@@ -359,7 +353,6 @@ def load_dataset(validation_split):
     val_size = int(validation_split * len(dataset))
     train_size = len(dataset) - val_size
     train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
-
 
     return train_dataset, val_dataset
 
@@ -374,7 +367,6 @@ if __name__ == "__main__":
    
     # train and store model
     criterion=torch.nn.L1Loss()
-    # criterion=torch.nn.MSELoss()
     train_store(train_dataset, val_dataset, batch_size=10, epochs=100, criterion=criterion)
 
     # load and validate model
