@@ -8,7 +8,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 public class CenterposeNode extends DetectableSceneNode
 {
    private int objectID;
-   private long sequenceID;
    private Point3D[] vertices3D;
    private Point3D[] vertices2D;
    private String objectType;
@@ -26,11 +25,12 @@ public class CenterposeNode extends DetectableSceneNode
       this.vertices2D = vertices2D;
    }
 
-   public void applyFilter()
+   public void update()
    {
       alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
       alphaFilteredTransformToParent.update(getNodeToParentFrameTransform());
       getNodeToParentFrameTransform().set(alphaFilteredTransformToParent);
+      getNodeFrame().update();
    }
 
    public int getObjectID()
@@ -41,16 +41,6 @@ public class CenterposeNode extends DetectableSceneNode
    public void setObjectID(int objectID)
    {
       this.objectID = objectID;
-   }
-
-   public long getSequenceID()
-   {
-      return sequenceID;
-   }
-
-   public void setSequenceID(long sequenceID)
-   {
-      this.sequenceID = sequenceID;
    }
 
    public Point3D[] getVertices3D()
