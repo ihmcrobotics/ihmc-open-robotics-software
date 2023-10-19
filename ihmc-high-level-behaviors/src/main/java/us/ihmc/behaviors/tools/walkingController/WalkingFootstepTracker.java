@@ -56,7 +56,6 @@ public class WalkingFootstepTracker
       completedStepListeners.add(completedStepListener);
    }
 
-
    private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
       totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();
