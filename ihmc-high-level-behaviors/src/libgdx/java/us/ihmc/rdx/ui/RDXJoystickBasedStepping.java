@@ -348,17 +348,13 @@ public class RDXJoystickBasedStepping
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)
    {
-      ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
-
       for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
       {
          FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
          footstepDataMessage.setSwingHeight(swingHeight.get());
-         Pose3D pose = new Pose3D(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
-         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstepDataMessage.getRobotSide()), pose));
       }
 
-      footstepPlanGraphic.generateMeshesAsync(minimalFootsteps);
+      footstepPlanGraphic.generateMeshesAsync(footstepDataListMessage);
       footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
    }
 

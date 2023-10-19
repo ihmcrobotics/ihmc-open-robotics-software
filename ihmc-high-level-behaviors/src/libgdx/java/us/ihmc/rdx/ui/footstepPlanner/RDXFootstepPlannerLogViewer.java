@@ -127,7 +127,7 @@ public class RDXFootstepPlannerLogViewer
          planarRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket()
                                                                                                                             .getPlanarRegionsListMessage()));
          footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlannerLog.getStatusPacket().getFootstepDataList());
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Footstep plan"));
+         footstepPlanGraphic.generateMeshesAsync(footstepPlan, "Footstep plan");
 
          rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlannerLog);
          rejectionReasonReport.update();

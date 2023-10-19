@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
+import behavior_msgs.msg.dds.MinimalFootstepListMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -8,6 +9,8 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
@@ -16,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
@@ -93,6 +97,36 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          buildMeshAndCreateModelInstance.run();
          buildMeshAndCreateModelInstance = null;
       }
+   }
+
+   public void clearAsync()
+   {
+      generateMeshesAsync(new ArrayList<>());
+   }
+
+   public void generateMeshesAsync(FootstepPlan footstepPlan, String description)
+   {
+      generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, description));
+   }
+
+   public void generateMeshesAsync(MinimalFootstepListMessage minimalFootstepListMessage)
+   {
+      generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(minimalFootstepListMessage));
+   }
+
+   public void generateMeshesAsync(FootstepQueueStatusMessage queueStatusMessage, String description)
+   {
+      generateMeshesAsync(MinimalFootstep.convertFootstepQueueMessage(queueStatusMessage, description));
+   }
+
+   public void generateMeshesAsync(FootstepDataListMessage footstepDataListMessage)
+   {
+      generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, null));
+   }
+
+   public void generateMeshesAsync(FootstepDataListMessage footstepDataListMessage, String description)
+   {
+      generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, description));
    }
 
    public void generateMeshesAsync(ArrayList<MinimalFootstep> footsteps)

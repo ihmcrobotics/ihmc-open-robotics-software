@@ -126,17 +126,13 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       {
          reviewingBodyPath = false;
          numberOfPlannedSteps = footsteps.getMinimalFootsteps().size();
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(footsteps));
+         footstepPlanGraphic.generateMeshesAsync(footsteps);
       });
-      helper.subscribeViaCallback(LAST_COMMANDED_FOOTSTEPS, footsteps ->
-      {
-         commandedFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(footsteps));
-      });
+      helper.subscribeViaCallback(LAST_COMMANDED_FOOTSTEPS, commandedFootstepsGraphic::generateMeshesAsync);
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setOpacity(0.4);
-      helper.subscribeViaCallback(IMMINENT_FOOT_POSES_FOR_UI, message ->
-            startAndGoalFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(message)));
+      helper.subscribeViaCallback(IMMINENT_FOOT_POSES_FOR_UI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
       helper.subscribeViaCallback(FOOTSTEP_PLANNER_LATEST_LOG_PATH, message -> latestFootstepPlannerLogPath.set(message.getDataAsString()));
       helper.subscribeViaCallback(FOOTSTEP_PLANNER_REJECTION_REASONS, reasons ->

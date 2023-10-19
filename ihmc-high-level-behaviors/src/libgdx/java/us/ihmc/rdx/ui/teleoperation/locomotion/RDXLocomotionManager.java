@@ -141,8 +141,7 @@ public class RDXLocomotionManager
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepQueueStatusMessage.class, footsteps ->
-            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepQueueMessage(footsteps,
-                                                                                                             "Teleoperation Panel Controller Spy")));
+            footstepsSentToControllerGraphic.generateMeshesAsync(footsteps, "Teleoperation Panel Controller Spy"));
    }
 
    private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
