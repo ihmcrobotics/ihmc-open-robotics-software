@@ -18,17 +18,6 @@ public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeStateSuppli
 
    private final List<RDXBehaviorTreeNode> children = new ArrayList<>();
 
-   public void loadFromFile(JsonNode jsonNode,
-                            RDXBehaviorTreeNode parentNode,
-                            RDXBehaviorTreeModificationQueue modificationQueue)
-   {
-      if (parentNode != null)
-      {
-
-         modificationQueue.accept(new RDXBehaviorTreeNodeReplacement(this, parentNode));
-      }
-   }
-
    public void update()
    {
       if (descriptionWrapper == null)

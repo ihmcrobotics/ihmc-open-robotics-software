@@ -1,13 +1,22 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import org.apache.commons.lang3.mutable.MutableLong;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeDestroySubtree;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeModificationQueue;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
+import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
@@ -15,10 +24,8 @@ import java.util.function.Consumer;
 
 public class RDXBehaviorTree
 {
-   /** The root node is always ID 0 and all nodes in the tree are unique. */
-   public static long ROOT_NODE_ID = 0;
-
-   private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is created automatically
+   private final BehaviorTreeState behaviorTreeState = new BehaviorTreeState();
+   private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private RDXBehaviorTreeNode rootNode;
    private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
    /**
@@ -28,9 +35,17 @@ public class RDXBehaviorTree
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode> idToNodeMap = new TLongObjectHashMap<>();
 
-   public RDXBehaviorTree()
+   public RDXBehaviorTree(DRCRobotModel robotModel,
+                          ROS2SyncedRobotModel syncedRobot,
+                          RobotCollisionModel selectionCollisionModel,
+                          RDXBaseUI baseUI,
+                          RDX3DPanel panel3D,
+                          ReferenceFrameLibrary referenceFrameLibrary,
+                          ROS2ControllerPublishSubscribeAPI ros2)
    {
+      // TODO: Do we create the publishers and subscribers here?
 
+      nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
    }
 
    public void loadFromFile()
@@ -44,18 +59,30 @@ public class RDXBehaviorTree
 
          JSONFileTools.load(file, jsonNode ->
          {
-            String typeName = jsonNode.get("type").textValue();
-
-            rootNode = RDXBehaviorTreeTools.createNode(RDXBehaviorTreeTools.getClassFromTypeName(typeName), nextID.getAndIncrement());
-
-            // load children
-
+            rootNode = loadFromFile(jsonNode, null, modificationQueue);
          });
+      });
+   }
 
+   public RDXBehaviorTreeNode loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode parentNode, RDXBehaviorTreeModificationQueue modificationQueue)
+   {
+      String typeName = jsonNode.get("type").textValue();
 
+      RDXBehaviorTreeNode node = nodeBuilder.createNode(RDXBehaviorTreeTools.getClassFromTypeName(typeName), behaviorTreeState.getNextID().getAndIncrement());
+
+      node.getDefinition().loadFromFile(jsonNode);
+
+      if (parentNode != null)
+      {
+         modificationQueue.accept(new RDXBehaviorTreeNodeAddition(node, parentNode));
+      }
+
+      JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
+      {
+         loadFromFile(childJsonNode, node, modificationQueue);
       });
 
-
+      return node;
    }
 
    public void modifyTree(Consumer<RDXBehaviorTreeModificationQueue> modifier)
