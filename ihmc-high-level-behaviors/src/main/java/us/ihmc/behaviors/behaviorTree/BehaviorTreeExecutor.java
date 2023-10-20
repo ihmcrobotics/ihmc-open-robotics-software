@@ -42,6 +42,7 @@ public class BehaviorTreeExecutor
                                                         ros2ControllerHelper);
       treeRebuilder = new BehaviorTreeExecutorSubtreeRebuilder(rootNode);
 
+      /// FIXME Flipped abstraction probabbly
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
    }
 
