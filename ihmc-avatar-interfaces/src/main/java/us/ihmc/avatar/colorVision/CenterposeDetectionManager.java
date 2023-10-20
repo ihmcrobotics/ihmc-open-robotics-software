@@ -55,7 +55,7 @@ public class CenterposeDetectionManager
          // Update or add the corresponding CenterposeSceneNode
          sceneGraph.modifyTree(modificationQueue ->
          {
-          final CenterposeNode centerposeNode;
+            CenterposeNode centerposeNode;
 
             Point3D[] vertices = detectedObjectPacket.getBoundingBoxVertices();
             for (Point3D vertex : vertices)
