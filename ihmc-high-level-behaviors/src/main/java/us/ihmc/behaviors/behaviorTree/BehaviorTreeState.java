@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * This is the state related functionality of a behavior tree,
@@ -22,14 +23,16 @@ public class BehaviorTreeState
    private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeRebuilder treeRebuilder;
-
-   private BehaviorTreeNodeState rootNode;
+   private final Supplier<BehaviorTreeNodeStateSupplier> rootNodeSupplier;
+   private boolean localTreeFrozen = false;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
-                            BehaviorTreeRebuilder treeRebuilder)
+                            BehaviorTreeRebuilder treeRebuilder,
+                            Supplier<BehaviorTreeNodeStateSupplier> rootNodeSupplier)
    {
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;
+      this.rootNodeSupplier = rootNodeSupplier;
    }
 
    public void update()
@@ -53,14 +56,30 @@ public class BehaviorTreeState
          update();
    }
 
+   public void checkTreeModified()
+   {
+      localTreeFrozen = false;
+      checkTreeModified(rootNodeSupplier.get().getState());
+   }
+
+   private void checkTreeModified(BehaviorTreeNodeState localNode)
+   {
+      localTreeFrozen |= localNode.isFrozenFromModification();
+
+      for (BehaviorTreeNodeState child : localNode.getChildren())
+      {
+         checkTreeModified(child);
+      }
+   }
+
    public MutableLong getNextID()
    {
       return nextID;
    }
 
-   public BehaviorTreeNodeState getRootNode()
+   public BehaviorTreeNodeStateSupplier getRootNode()
    {
-      return rootNode;
+      return rootNodeSupplier.get();
    }
 
    public BehaviorTreeNodeStateBuilder getNodeStateBuilder()
@@ -71,5 +90,10 @@ public class BehaviorTreeState
    public BehaviorTreeRebuilder getTreeRebuilder()
    {
       return treeRebuilder;
+   }
+
+   public boolean getLocalTreeFrozen()
+   {
+      return localTreeFrozen;
    }
 }
