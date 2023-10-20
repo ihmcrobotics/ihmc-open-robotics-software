@@ -223,7 +223,7 @@ public class ZEDColorStereoDepthPublisher
                }
             }
          }
-      });
+      }, "CenterposeUpdateThread");
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
