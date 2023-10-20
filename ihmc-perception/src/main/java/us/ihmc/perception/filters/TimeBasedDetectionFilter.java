@@ -23,17 +23,14 @@ public class TimeBasedDetectionFilter
       detectionTimes.offer(System.currentTimeMillis());
    }
 
-   public void update()
+   public boolean isDetected()
    {
       while (!detectionTimes.isEmpty() && (System.currentTimeMillis() - detectionTimes.peek() > (timeWindow * 1000)))
       {
          // If the detection is older than the expiry time, remove from the queue
          detectionTimes.poll();
       }
-   }
 
-   public boolean isDetected()
-   {
       return detectionTimes.size() >= requiredNumberOfDetections;
    }
 }
