@@ -12,25 +12,26 @@ public class DetectionFilterCollection
 {
    private final TIntObjectHashMap<DetectionFilter> markerIDFilters = new TIntObjectHashMap<>();
 
-   public DetectionFilter createFilter(int markerID, int history)
+   public DetectionFilter getOrCreateFilter(int markerID)
    {
-      DetectionFilter filter = new DetectionFilter(history);
-      markerIDFilters.put(markerID, filter);
+      DetectionFilter filter = markerIDFilters.get(markerID);
+
+      if (filter == null)
+      {
+         filter = new DetectionFilter();
+         markerIDFilters.put(markerID, filter);
+      }
+
       return filter;
    }
 
-   public DetectionFilter getFilter(int markerID)
+   public void update()
    {
-      return markerIDFilters.get(markerID);
+      for (int markerID : markerIDFilters.keys())
+      {
+         markerIDFilters.get(markerID).update();
+      }
    }
-
-//   public void update()
-//   {
-//      for (int markerID : markerIDFilters.keys())
-//      {
-//         markerIDFilters.get(markerID).update();
-//      }
-//   }
 
    public void removeFilter(int markerID)
    {

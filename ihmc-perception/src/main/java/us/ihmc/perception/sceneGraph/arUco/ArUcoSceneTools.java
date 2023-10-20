@@ -37,9 +37,7 @@ public class ArUcoSceneTools
 
                   if (markerSize != DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.getNoEntryValue())
                   {
-                     DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getFilter(detectedID);
-                     if (candidateFilter==null)
-                        candidateFilter = sceneGraph.getDetectionFilterCollection().createFilter(detectedID, 30);
+                     DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
                      candidateFilter.registerDetection();
                      if (candidateFilter.isStableDetectionResult())
                      {
