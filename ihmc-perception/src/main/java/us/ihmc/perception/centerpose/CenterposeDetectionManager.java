@@ -96,9 +96,7 @@ public class CenterposeDetectionManager
       for (CenterposeNode centerposeNode : sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().valueCollection())
       {
          centerposeNode.update();
-         TimeBasedDetectionFilter detectionFilter = centerposeNodeDetectionFilters.get(centerposeNode.getObjectID());
-         detectionFilter.update();
-         centerposeNode.setCurrentlyDetected(detectionFilter.isDetected());
+         centerposeNode.setCurrentlyDetected(centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).isDetected());
       }
    }
 
