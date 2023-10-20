@@ -1,6 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import us.ihmc.avatar.colorVision.CenterposeDetectionManager;
+import us.ihmc.perception.centerpose.CenterposeDetectionManager;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -10,8 +10,8 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -70,7 +70,7 @@ public class RDXCenterposeSceneGraphDemo
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-            centerposeProcess = new CenterposeDetectionManager(ros2Helper, syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
+            centerposeProcess = new CenterposeDetectionManager(ros2Helper, ReferenceFrame.getWorldFrame());
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
@@ -89,7 +89,7 @@ public class RDXCenterposeSceneGraphDemo
             if (runPerception)
             {
                onRobotSceneGraph.updateSubscription();
-               centerposeProcess.updateSceneGraph(onRobotSceneGraph, ReferenceFrame.getWorldFrame());
+               centerposeProcess.updateSceneGraph(onRobotSceneGraph);
                onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
                onRobotSceneGraph.updatePublication();
             }

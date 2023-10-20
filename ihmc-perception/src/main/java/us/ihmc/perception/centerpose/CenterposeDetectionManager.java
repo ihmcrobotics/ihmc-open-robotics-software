@@ -1,4 +1,4 @@
-package us.ihmc.avatar.colorVision;
+package us.ihmc.perception.centerpose;
 
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.IHMCROS2Input;
@@ -55,7 +55,7 @@ public class CenterposeDetectionManager
             for (Point3D vertex : vertices)
             {
                FramePoint3D frameVertex = new FramePoint3D();
-               frameVertex.setIncludingFrame(sensorFrame, vertex);
+               frameVertex.setIncludingFrame(centerposeOutputFrame, vertex);
                frameVertex.changeFrame(ReferenceFrame.getWorldFrame());
                vertex.set(frameVertex);
             }

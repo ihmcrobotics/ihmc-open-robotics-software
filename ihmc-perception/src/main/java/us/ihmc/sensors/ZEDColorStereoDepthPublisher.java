@@ -19,9 +19,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,6 +33,7 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -80,6 +83,12 @@ public class ZEDColorStereoDepthPublisher
    private final Thread depthImagePublishThread;
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
+
+   // Optional CenterPose/SceneGraph integration
+   @Nullable
+   private ROS2SceneGraph ros2SceneGraph;
+   @Nullable
+   private CenterposeDetectionManager centerposeDetectionManager;
 
    public ZEDColorStereoDepthPublisher(int cameraID,
                                        SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
@@ -181,6 +190,9 @@ public class ZEDColorStereoDepthPublisher
          {
             throttler.waitAndRun();
             retrieveAndPublishColorImage();
+
+            if (centerposeDetectionManager != null)
+               centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
          }
       }, "ZEDColorImagePublishThread");
 
@@ -353,6 +365,12 @@ public class ZEDColorStereoDepthPublisher
             LogTools.error("Failed to associate model number with a ZED sensor model");
          }
       }
+   }
+
+   public void createCenterposeDetectionManager(ROS2SceneGraph ros2SceneGraph, CenterposeDetectionManager centerposeDetectionManager)
+   {
+      this.ros2SceneGraph = ros2SceneGraph;
+      this.centerposeDetectionManager = centerposeDetectionManager;
    }
 
    public static void main(String[] args)
