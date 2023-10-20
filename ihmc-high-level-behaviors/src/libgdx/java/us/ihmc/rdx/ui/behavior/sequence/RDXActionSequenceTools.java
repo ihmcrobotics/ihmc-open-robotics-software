@@ -44,10 +44,10 @@ public class RDXActionSequenceTools
                                                      ReferenceFrameLibrary referenceFrameLibrary,
                                                      ROS2ControllerPublishSubscribeAPI ros2)
    {
-//      boolean robotHasArms = robotModel.getRobotVersion().hasArms();
+      boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       if (actionDefinitionTypeName.equals(ArmJointAnglesActionDefinition.class.getSimpleName()))
       {
-         return new RDXArmJointAnglesAction(editor, robotModel);
+         return robotHasArms ? new RDXArmJointAnglesAction(editor, robotModel) : null;
       }
       if (actionDefinitionTypeName.equals(ChestOrientationActionDefinition.class.getSimpleName()))
       {
@@ -65,15 +65,17 @@ public class RDXActionSequenceTools
       }
       if (actionDefinitionTypeName.equals(SakeHandCommandActionDefinition.class.getSimpleName()))
       {
-         return new RDXSakeHandCommandAction(editor);
+         return robotHasArms ? new RDXSakeHandCommandAction(editor) : null;
       }
       if (actionDefinitionTypeName.equals(HandPoseActionDefinition.class.getSimpleName()))
       {
-         return new RDXHandPoseAction(editor, panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
+         return robotHasArms ?
+               new RDXHandPoseAction(editor, panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2) :
+               null;
       }
       if (actionDefinitionTypeName.equals(HandWrenchActionDefinition.class.getSimpleName()))
       {
-         return new RDXHandWrenchAction(editor);
+         return robotHasArms ? new RDXHandWrenchAction(editor) : null;
       }
       if (actionDefinitionTypeName.equals(PelvisHeightPitchActionDefinition.class.getSimpleName()))
       {
