@@ -1,4 +1,4 @@
-package us.ihmc.perception.centerpose;
+package us.ihmc.perception.sceneGraph.centerpose;
 
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.IHMCROS2Input;

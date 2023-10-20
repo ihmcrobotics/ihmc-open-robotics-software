@@ -1,6 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import us.ihmc.perception.centerpose.CenterposeDetectionManager;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
