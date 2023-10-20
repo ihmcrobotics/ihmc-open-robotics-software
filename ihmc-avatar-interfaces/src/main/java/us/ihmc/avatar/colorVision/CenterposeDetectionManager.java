@@ -20,13 +20,13 @@ import us.ihmc.ros2.ROS2Topic;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CenterposeDetectionManagerManager
+public class CenterposeDetectionManager
 {
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final RigidBodyTransform sensorInZedTransform = new RigidBodyTransform(); // TODO: This is specific to ZED, remove or move somewhere else?
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
 
-   public CenterposeDetectionManagerManager(ROS2Helper ros2Helper)
+   public CenterposeDetectionManager(ROS2Helper ros2Helper)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
       subscriber = ros2Helper.subscribe(topicName);
