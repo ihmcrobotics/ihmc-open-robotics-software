@@ -4,9 +4,8 @@ import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.*;
+import org.ejml.data.FMatrixRMaj;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -44,7 +43,7 @@ public class PerceptionDebugTools
          return;
 
       LogTools.info("[{}]", tag);
-      for(int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
+      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
       {
          LogTools.info("Region Index: {}, Region ID: {}", i, regions.getPlanarRegion(i).getRegionId());
          printPlanarRegionVertices(regions.getPlanarRegion(i), debug);
@@ -213,9 +212,9 @@ public class PerceptionDebugTools
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
       LogTools.info("Height Map: [Center: {}]", heightMapData.getGridCenter());
-      for (int i = 0; i<heightMapData.getCellsPerAxis(); i+=skip)
+      for (int i = 0; i < heightMapData.getCellsPerAxis(); i += skip)
       {
-         for (int j = 0; j<heightMapData.getCellsPerAxis(); j+=skip)
+         for (int j = 0; j < heightMapData.getCellsPerAxis(); j += skip)
          {
             double height = heightMapData.getHeightAt(i, j);
             if (height > 0.0001)
@@ -232,9 +231,9 @@ public class PerceptionDebugTools
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "], Type: [" + getTypeString(image.type()) + "], Channels: [" + image.channels() + "]\n");
 
-      for (int i = row; i < nRows; i+=skip)
+      for (int i = row; i < nRows; i += skip)
       {
-         for (int j = col; j < nCols; j+=skip)
+         for (int j = col; j < nCols; j += skip)
          {
             if (image.type() == opencv_core.CV_8UC1)
                matString.append(image.ptr(i, j).get() & 0xFF).append(" ");
@@ -355,6 +354,38 @@ public class PerceptionDebugTools
       LogTools.info(String.format("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2f,R:%.2f)\n", yaw, pitch, yawCount, pitchCount, z, radius));
 
       return proj;
+   }
+
+   public static void plotFootsteps(Mat displayImage, FMatrixRMaj linearOutput, int size)
+   {
+      Scalar leftColor = new Scalar(0, 255, 255, 0);
+      Scalar rightColor = new Scalar(0, 0, 255, 0);
+
+      for (int i = 0; i < linearOutput.getNumElements() / 2; i++)
+      {
+         Point2D point = new Point2D(linearOutput.get(2 * i, 0), linearOutput.get(2 * i + 1, 0));
+         Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+         opencv_imgproc.rectangle(displayImage,
+                                  new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                                  new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                                  i % 2 == 1 ? leftColor : rightColor,
+                                  -1,
+                                  opencv_imgproc.LINE_4,
+                                  0);
+      }
+   }
+
+   public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
+   {
+      // just like plotFootsteps
+      Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      opencv_imgproc.rectangle(displayImage,
+                                 new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                                 new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               color,
+                               -1,
+                               opencv_imgproc.LINE_4,
+                               0);
    }
 
    public static void clearAllWindows()

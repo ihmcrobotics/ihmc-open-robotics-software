@@ -1,37 +1,49 @@
 package us.ihmc.perception.neural;
 
 import ai.onnxruntime.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.ejml.data.FMatrixRMaj;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.logging.PerceptionDataLoader;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
+
 public class FootstepPredictor
 {
+   private static final int LINEAR_INPUT_SIZE = 4;
+   private static final int LINEAR_OUTPUT_SIZE = 20;
+
+   private static final int IMAGE_INPUT_HEIGHT = 201;
+   private static final int IMAGE_INPUT_WIDTH = 201;
+
    private String modelFilePath = "/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
    private String onnxFileName = "footstep_predictor.onnx";
 
+   private OrtEnvironment environment = OrtEnvironment.getEnvironment();
+   private OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
+   private OrtSession session;
+
    public FootstepPredictor()
    {
-      create();
-   }
-
-   public void create()
-   {
-      int LINEAR_INPUT_SIZE = 14;
-      int imageHeight = 201;
-      int imageWidth = 201;
-
-      Mat inputImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
-
       try
       {
-         OrtEnvironment environment = OrtEnvironment.getEnvironment();
-         OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
-         OrtSession session = environment.createSession(modelFilePath + onnxFileName, sessionOptions);
+         session = environment.createSession(modelFilePath + onnxFileName, sessionOptions);
 
          for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getInputInfo().entrySet())
          {
@@ -50,27 +62,136 @@ public class FootstepPredictor
             LogTools.info("Input Name: {}", inputName);
             LogTools.info("Input Info: {}", nodeInfo.toString());
          }
+      }
+      catch (OrtException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
-         // set the image to be in the first input
-         String inputName = (String) session.getInputNames().toArray()[0];
-         long[] tensorInputShape = {1, 1, imageHeight, imageWidth};
-         FloatBuffer data = inputImage.getByteBuffer().asFloatBuffer();
+   public FootstepDataListMessage generateFootsteps(Mat heightMap, Point2D startPosition, Point2D goalPosition)
+   {
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      FMatrixRMaj linearInput = new FMatrixRMaj(LINEAR_INPUT_SIZE, 1);
+      linearInput.set(0, 0, startPosition.getX32());
+      linearInput.set(1, 0, startPosition.getY32());
+      linearInput.set(2, 0, goalPosition.getX32());
+      linearInput.set(3, 0, goalPosition.getY32());
 
-         // set a 1x200 vector to be second input
-         String inputName2 = (String) session.getInputNames().toArray()[1];
-         long[] tensorInputShape2 = {1, LINEAR_INPUT_SIZE};
-         float[] data2 = new float[LINEAR_INPUT_SIZE];
-         FloatBuffer data2Buffer = FloatBuffer.wrap(data2);
+      FMatrixRMaj linearOutput = null;
 
-         // create a map
-         Map<String, OnnxTensor> inputs = new HashMap<>();
-         inputs.put(inputName, OnnxTensor.createTensor(environment, data, tensorInputShape));
-         inputs.put(inputName2, OnnxTensor.createTensor(environment, data2Buffer, tensorInputShape2));
+      try
+      {
+         linearOutput = predict(heightMap, linearInput);
+      }
+      catch (OrtException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      if (linearOutput == null)
+      {
+         for (int i = 0; i < LINEAR_OUTPUT_SIZE / 2; i++)
+         {
+            footstepDataListMessage.getFootstepDataList().add().getLocation().set(linearOutput.get(2 * i, 0), linearOutput.get(2 * i + 1, 0), 0.0);
+         }
+      }
+
+      return footstepDataListMessage;
+   }
+
+   public FMatrixRMaj predict(Mat imageInput, FMatrixRMaj linearInput) throws OrtException
+   {
+      if (imageInput.rows() != IMAGE_INPUT_HEIGHT || imageInput.cols() != IMAGE_INPUT_WIDTH)
+         throw new RuntimeException("Image height and width must be " + IMAGE_INPUT_HEIGHT + " and " + IMAGE_INPUT_WIDTH);
+
+      if (linearInput.getNumRows() != LINEAR_INPUT_SIZE || linearInput.getNumCols() != 1)
+         throw new RuntimeException("Linear input size must be " + LINEAR_INPUT_SIZE + "x1");
+
+      // set the image to be in the first input
+      String inputName = (String) session.getInputNames().toArray()[0];
+      long[] tensorInputShape = {1, 1, imageInput.rows(), imageInput.cols()};
+      FloatBuffer data = imageInput.getByteBuffer().asFloatBuffer();
+
+      // set the linear input to be in the second input (extract from linearInput matrix)
+      String inputName2 = (String) session.getInputNames().toArray()[1];
+      long[] tensorInputShape2 = {1, LINEAR_INPUT_SIZE};
+      float[] data2 = linearInput.getData();
+      FloatBuffer data2Buffer = FloatBuffer.wrap(data2);
+
+      // create a map to store the input tensors
+      Map<String, OnnxTensor> inputs = new HashMap<>();
+      inputs.put(inputName, OnnxTensor.createTensor(environment, data, tensorInputShape));
+      inputs.put(inputName2, OnnxTensor.createTensor(environment, data2Buffer, tensorInputShape2));
+
+      // run the inference
+      OrtSession.Result output = session.run(inputs);
+
+      FMatrixRMaj outputMatrix = new FMatrixRMaj(LINEAR_OUTPUT_SIZE, 1);
+      for (Map.Entry<String, OnnxValue> stringOnnxValueEntry : output)
+      {
+         LogTools.debug("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
+
+         OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
+         float[][] outputArray = (float[][]) outputTensor.getValue();
+
+         if (outputArray[0].length != LINEAR_OUTPUT_SIZE)
+            throw new RuntimeException("Linear output size must be " + LINEAR_OUTPUT_SIZE + "x1");
+
+         outputMatrix.setData(outputArray[0]);
+
+         LogTools.info("Output: {}", outputTensor.getInfo());
+      }
+
+      return outputMatrix;
+   }
+
+   public static void main(String[] args) throws OrtException
+   {
+      String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20231018_135001_PerceptionLog.hdf5").toString();
+      ArrayList<Point3D> startPositions = new ArrayList<>();
+      ArrayList<Point3D> goalPositions = new ArrayList<>();
+      ArrayList<Point3D> sensorPositions = new ArrayList<>();
+
+      FootstepPredictor footstepPredictor = new FootstepPredictor();
+
+      PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
+
+      perceptionDataLoader.openLogFile(perceptionLogFile);
+
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, startPositions);
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, goalPositions);
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositions);
+
+      BytePointer depthBytePointer = new BytePointer(1000000);
+      Mat heightMapImage = new Mat(201, 201, opencv_core.CV_16UC1);
+      Mat inputImage = new Mat(201, 201, opencv_core.CV_32FC1);
+      FMatrixRMaj linearInput = new FMatrixRMaj(LINEAR_INPUT_SIZE, 1);
+      FMatrixRMaj output = null;
+
+      for (int i = 0; i < 100; i++)
+      {
+         perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME, i, depthBytePointer, heightMapImage);
+
+         Mat heightMapForDisplay = heightMapImage.clone();
+         opencv_core.convertScaleAbs(heightMapForDisplay, heightMapForDisplay, 255.0 / 65535.0, 0);
+         Mat display = new Mat(heightMapForDisplay.rows(), heightMapForDisplay.cols(), opencv_core.CV_8UC3);
+         opencv_imgproc.cvtColor(heightMapForDisplay, display, opencv_imgproc.COLOR_GRAY2RGB);
+
+         heightMapImage.convertTo(inputImage, opencv_core.CV_32FC1, 1.0 / 10000.0, 0);
+
+         startPositions.get(i).sub(sensorPositions.get(i));
+         goalPositions.get(i).sub(sensorPositions.get(i));
+
+         linearInput.set(0, 0, startPositions.get(i).getX32());
+         linearInput.set(1, 0, startPositions.get(i).getY32());
+         linearInput.set(2, 0, goalPositions.get(i).getX32());
+         linearInput.set(3, 0, goalPositions.get(i).getY32());
 
          // Measure start time
          long startTime = System.nanoTime();
 
-         OrtSession.Result output = session.run(inputs);
+         output = footstepPredictor.predict(inputImage, linearInput);
 
          // Measure end time
          long endTime = System.nanoTime();
@@ -78,29 +199,20 @@ public class FootstepPredictor
          // Print time difference in ms
          LogTools.info("Inference time: {} ms", (endTime - startTime) / 1000000.0);
 
-         LogTools.info("Size: {}", output.size());
+         // plot and display the image using imshow, brighten the image
+         PerceptionDebugTools.plotRectangle(display, new Point2D(startPositions.get(i)), 4, new Scalar(0, 0, 0, 255));
+         PerceptionDebugTools.plotRectangle(display, new Point2D(goalPositions.get(i)), 4, new Scalar(255, 255, 255, 255));
+         PerceptionDebugTools.plotFootsteps(display, output, 2);
+         opencv_imgproc.resize(display, display, new org.bytedeco.opencv.opencv_core.Size(1000, 1000));
+         imshow("Display", display);
+         int code = waitKeyEx(0);
 
-         for (Map.Entry<String, OnnxValue> stringOnnxValueEntry : output)
+         if (code == 'q')
          {
-            LogTools.info("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
-            OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
-            float[][] outputArray = (float[][]) outputTensor.getValue();
-            LogTools.info("Output: {}", outputTensor.getInfo());
+            break;
          }
 
       }
-      catch (Exception exception)
-
-      {
-         exception.printStackTrace();
-      }
-
-      //  YOLOv5ImagePanel.draw();
-   }
-
-   public static void main(String[] args)
-   {
-      FootstepPredictor footstepPredictor = new FootstepPredictor();
    }
 }
 
