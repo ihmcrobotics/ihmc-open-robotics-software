@@ -5,7 +5,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -15,6 +15,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.ZEDModelData;
 
 public class RDXCenterposeObjectDetectionDemo
 {
@@ -41,18 +42,19 @@ public class RDXCenterposeObjectDetectionDemo
             zed2LeftColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
-            RigidBodyTransform sensorInWorldTransform = new RigidBodyTransform();
-            sensorInWorldTransform.getTranslation().set(0.0, 0.06, 0.0);
-            sensorInWorldTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
-            ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("SensorFrame",
-                                                                                                           ReferenceFrame.getWorldFrame(),
-                                                                                                           sensorInWorldTransform);
+            ReferenceFrame zedLeftCameraFrame = ZEDModelData.createCameraReferenceFrame(RobotSide.LEFT, ReferenceFrame.getWorldFrame());
+            ReferenceFrame centerposeOutputFrame
+                  = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
+                                                                                      zedLeftCameraFrame,
+                                                                                      CenterposeDetectionManager.CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM);
 
-            RDXROS2DetectedObjectBoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2DetectedObjectBoundingBoxVisualizer("CenterPose Bounding Box",
-                                                                                                                                        ros2Helper,
-                                                                                                                                        sensorFrame,
-                                                                                                                                        PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
-                                                                                                                                        baseUI.getPrimary3DPanel().getCamera3D());
+
+            RDXROS2DetectedObjectBoundingBoxVisualizer centerPoseBoundingBoxVisualizer
+                  = new RDXROS2DetectedObjectBoundingBoxVisualizer("CenterPose Bounding Box",
+                                                                   ros2Helper,
+                                                                   centerposeOutputFrame,
+                                                                   PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
+                                                                   baseUI.getPrimary3DPanel().getCamera3D());
             centerPoseBoundingBoxVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
             zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);

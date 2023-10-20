@@ -46,25 +46,27 @@ public class RDXCenterposeSceneGraphDemo
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
 
-            RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
-                                                                                                           DomainFactory.PubSubImplementation.FAST_RTPS,
-                                                                                                           PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+            RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer
+                  = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
+                                                      DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2LeftColorImageVisualizer.setSubscribed(true);
             zed2LeftColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
-            RDXROS2DetectedObjectBoundingBoxVisualizer centerPoseBoundingBoxVisualizer = new RDXROS2DetectedObjectBoundingBoxVisualizer("CenterPose Bounding Box",
-                                                                                                                                        ros2Helper,
-                                                                                                                                        ReferenceFrame.getWorldFrame(),
-                                                                                                                                        PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
-                                                                                                                                        baseUI.getPrimary3DPanel().getCamera3D());
+            RDXROS2DetectedObjectBoundingBoxVisualizer centerPoseBoundingBoxVisualizer
+                  = new RDXROS2DetectedObjectBoundingBoxVisualizer("CenterPose Bounding Box",
+                                                                   ros2Helper,
+                                                                   ReferenceFrame.getWorldFrame(),
+                                                                   PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
+                                                                   baseUI.getPrimary3DPanel().getCamera3D());
             zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
 
-            RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
-                                                                                                                        DomainFactory.PubSubImplementation.FAST_RTPS,
-                                                                                                                        PerceptionAPI.ZED2_DEPTH,
-                                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(
-                                                                                                                              RobotSide.LEFT));
+            RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer
+                  = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
+                                                           DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                           PerceptionAPI.ZED2_DEPTH,
+                                                           PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2ColoredPointCloudVisualizer.setSubscribed(true);
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
