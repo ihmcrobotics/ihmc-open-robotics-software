@@ -17,8 +17,6 @@ public class TimeBasedDetectionFilterTest
          timeBasedDetectionFilter.registerDetection();
       }
 
-      timeBasedDetectionFilter.update();
-
       assertTrue(timeBasedDetectionFilter.isDetected());
    }
 
@@ -35,8 +33,6 @@ public class TimeBasedDetectionFilterTest
 
       // Add some time delay (longer than the timeWindow above) so the update() removes elements from the queue
       Thread.sleep(200);
-
-      timeBasedDetectionFilter.update();
 
       assertFalse(timeBasedDetectionFilter.isDetected());
    }
