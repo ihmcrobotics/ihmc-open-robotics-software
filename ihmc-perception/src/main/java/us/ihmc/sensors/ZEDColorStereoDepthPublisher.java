@@ -19,10 +19,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
@@ -203,16 +203,24 @@ public class ZEDColorStereoDepthPublisher
          }
       }, "ZEDDepthImagePublishThread");
 
-      centerposeUpdateThread = new Thread(() ->
+      centerposeUpdateThread = new Thread(new Runnable()
       {
-         while (running)
+         private final Throttler centerposeSceneGraphThrottler = new Throttler();
+
+         @Override
+         public void run()
          {
-            throttler.waitAndRun();
-            if (centerposeDetectionManager != null && ros2SceneGraph != null)
+            centerposeSceneGraphThrottler.setFrequency(CAMERA_FPS);
+
+            while (running)
             {
-               ros2SceneGraph.updateSubscription(); // Receive overridden poses from operator
-               centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
-               ros2SceneGraph.updatePublication();
+               centerposeSceneGraphThrottler.waitAndRun();
+               if (centerposeDetectionManager != null && ros2SceneGraph != null)
+               {
+                  ros2SceneGraph.updateSubscription(); // Receive overridden poses from operator
+                  centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
+                  ros2SceneGraph.updatePublication();
+               }
             }
          }
       });
