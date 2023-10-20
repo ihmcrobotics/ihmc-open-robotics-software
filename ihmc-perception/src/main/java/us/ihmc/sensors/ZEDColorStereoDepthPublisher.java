@@ -208,8 +208,12 @@ public class ZEDColorStereoDepthPublisher
          while (running)
          {
             throttler.waitAndRun();
-            if (centerposeDetectionManager != null)
+            if (centerposeDetectionManager != null && ros2SceneGraph != null)
+            {
+               ros2SceneGraph.updateSubscription(); // Receive overridden poses from operator
                centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
+               ros2SceneGraph.updatePublication();
+            }
          }
       });
 
