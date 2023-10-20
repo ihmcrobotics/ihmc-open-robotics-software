@@ -142,8 +142,6 @@ public class RealsenseColorDepthImagePublisher
       // Redundant safety checks
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumber)
       {
-
-
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
          imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
@@ -151,12 +149,6 @@ public class RealsenseColorDepthImagePublisher
                                 colorImageToPublish.getImageWidth(),
                                 colorImageToPublish.getImageHeight(),
                                 colorImageToPublish.getGpuImageMatrix().step());
-
-         Mat compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-         compressedBytesMat.cols((int) colorJPEGPointer.limit());
-         compressedBytesMat.data(colorJPEGPointer);
-         Mat decompressedImage = new Mat(colorImageToPublish.getImageHeight(), colorImageToPublish.getImageWidth(), opencv_core.CV_8UC3);
-         opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();

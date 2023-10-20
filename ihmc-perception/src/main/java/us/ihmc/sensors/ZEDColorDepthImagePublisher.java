@@ -11,7 +11,6 @@ import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

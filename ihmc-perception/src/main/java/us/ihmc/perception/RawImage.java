@@ -71,9 +71,9 @@ public class RawImage
       this.depthDiscretization = other.depthDiscretization;
       if (!other.isEmpty())
       {
-         if (other.cpuImageMatrix != null)
+         if (other.cpuImageMatrix != null && !other.cpuImageMatrix.isNull())
             this.cpuImageMatrix = other.cpuImageMatrix.clone();
-         if (other.gpuImageMatrix != null)
+         if (other.gpuImageMatrix != null && !other.gpuImageMatrix.isNull())
             this.gpuImageMatrix = other.gpuImageMatrix.clone();
       }
       this.openCVType = other.openCVType;
