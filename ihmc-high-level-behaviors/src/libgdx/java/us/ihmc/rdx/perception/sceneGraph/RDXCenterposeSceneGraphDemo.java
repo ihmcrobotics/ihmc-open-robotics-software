@@ -1,6 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import us.ihmc.avatar.colorVision.CenterposeSceneGraphNodeManager;
+import us.ihmc.avatar.colorVision.CenterposeDetectionManagerManager;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -24,7 +24,7 @@ public class RDXCenterposeSceneGraphDemo
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private RDXGlobalVisualizersPanel globalVisualizersPanel;
-   private CenterposeSceneGraphNodeManager centerposeProcess;
+   private CenterposeDetectionManagerManager centerposeProcess;
    private ROS2SceneGraph onRobotSceneGraph;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private RDXSceneGraphUI sceneGraphUI;
@@ -70,7 +70,7 @@ public class RDXCenterposeSceneGraphDemo
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-            centerposeProcess = new CenterposeSceneGraphNodeManager(ros2Helper);
+            centerposeProcess = new CenterposeDetectionManagerManager(ros2Helper);
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
