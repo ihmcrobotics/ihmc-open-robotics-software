@@ -5,11 +5,11 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 /**
  * There is no need for destroying definitions, so we let the GC get them.
  */
-public class BehaviorTreeDefinitionClearSubtree implements BehaviorTreeDefinitionModification
+public class BehaviorTreeDefinitionSubtreeClear implements BehaviorTreeDefinitionModification
 {
    private final BehaviorTreeNodeDefinition subtreeToClear;
 
-   public BehaviorTreeDefinitionClearSubtree(BehaviorTreeNodeDefinition subtreeToClear)
+   public BehaviorTreeDefinitionSubtreeClear(BehaviorTreeNodeDefinition subtreeToClear)
    {
       this.subtreeToClear = subtreeToClear;
    }

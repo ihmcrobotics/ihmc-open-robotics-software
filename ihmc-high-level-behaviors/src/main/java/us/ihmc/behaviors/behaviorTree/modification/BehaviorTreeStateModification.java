@@ -6,7 +6,7 @@ package us.ihmc.behaviors.behaviorTree.modification;
  * and performed inside the scene graph with consistency guarantees.
  */
 @FunctionalInterface
-public interface BehaviorTreeStateModification
+public interface BehaviorTreeStateModification extends BehaviorTreeDefinitionModification
 {
-   void performOperation();
+
 }
