@@ -27,7 +27,6 @@ public class RDXModelMeshModificationDemo
          private Model boxModel;
          private ModelInstance boxModelInstance;
          private final MeshDataBuilder meshDataBuilder = new MeshDataBuilder();
-         private float[] intermediateVertexBuffer;
          private final Stopwatch stopwatch = new Stopwatch().start();
          private double size = SIZE_MEDIAN;
 
@@ -47,8 +46,6 @@ public class RDXModelMeshModificationDemo
                ImGui.text("Number of vertices: %d".formatted(mesh.getNumVertices()));
                ImGui.text("Number of indices: %d".formatted(mesh.getNumIndices()));
             });
-
-            intermediateVertexBuffer = new float[mesh.getNumVertices() * 3];
 
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
             baseUI.getPrimaryScene().addModelInstance(boxModelInstance);
