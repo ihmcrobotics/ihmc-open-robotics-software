@@ -39,8 +39,6 @@ public class RealsenseColorDepthImageRetriever
 
       this.realsense = realsense;
 
-      colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
-
       if (realsense.getDevice() == null)
       {
          // Find something else to do here
@@ -79,6 +77,8 @@ public class RealsenseColorDepthImageRetriever
                                    (float) realsense.getDepthPrincipalOffsetYPixels(),
                                    cameraFramePose.getPosition(),
                                    cameraFramePose.getOrientation());
+
+         colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
          if (colorMatRGB != null)
             colorMatRGB.close();
