@@ -119,12 +119,18 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
    public void setJointDitherAmplitude(OneDoFJointBasics joint, double amplitude)
    {
-      jointSpecificDitherParameters.get(joint).setAmplitude(amplitude);
+      if (jointSpecificDitherParameters.containsKey(joint))
+         jointSpecificDitherParameters.get(joint).setAmplitude(amplitude);
+      else
+         LogTools.warn("No dither parameters for joint: " + joint.getName());
    }
-   
+
    public void setJointDitherPhase(OneDoFJointBasics joint, double phase)
    {
-      jointSpecificDitherParameters.get(joint).setPhase(phase);
+      if (jointSpecificDitherParameters.containsKey(joint))
+         jointSpecificDitherParameters.get(joint).setPhase(phase);
+      else
+         LogTools.warn("No dither parameters for joint: " + joint.getName());
    }
 
    public void attachJointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
@@ -210,7 +216,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       {
          tau = diagnosticsWhenHangingHelper.getTorqueToApply(tau, estimateTorqueOffset.getBooleanValue(), maximumTorqueOffset.getDoubleValue());
          if (hasReachedMaximumTorqueOffset.getBooleanValue()
-               && Math.abs(diagnosticsWhenHangingHelper.getTorqueOffset()) == maximumTorqueOffset.getDoubleValue())
+             && Math.abs(diagnosticsWhenHangingHelper.getTorqueOffset()) == maximumTorqueOffset.getDoubleValue())
          {
             LogTools.warn("Reached maximum torque for at least one joint.");
             hasReachedMaximumTorqueOffset.set(true);
@@ -284,37 +290,38 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
    private void setDefaultPDControllerGains()
    {
+      setPDControllerGains(ArmJointName.SHOULDER_YAW, 30.0, 3.0);
+      setPDControllerGains(ArmJointName.SHOULDER_PITCH, 50.0, 5.0);
+      setPDControllerGains(ArmJointName.SHOULDER_ROLL, 50.0, 5.0);
+      setPDControllerGains(ArmJointName.ELBOW_PITCH, 40.0, 4.0);
+
+      setPDControllerGains(SpineJointName.SPINE_YAW, 30.0, 2.0);
+      setPDControllerGains(SpineJointName.SPINE_PITCH, 150.0, 8.0);
+      setPDControllerGains(SpineJointName.SPINE_ROLL, 150.0, 8.0);
+
+      setPDControllerGains(LegJointName.HIP_YAW, 30.0, 2.0);
+      setPDControllerGains(LegJointName.HIP_PITCH, 150.0, 7.5);
+      setPDControllerGains(LegJointName.HIP_ROLL, 165, 6.0);
+      setPDControllerGains(LegJointName.KNEE_PITCH, 80.0, 3.0);
+      setPDControllerGains(LegJointName.ANKLE_PITCH, 20.0, 2.0);
+      setPDControllerGains(LegJointName.ANKLE_ROLL, 16.0, 1.0);
+   }
+
+   public void setPDControllerGains(SpineJointName spineJointName, double kp, double kd)
+   {
+      setPDControllerGains(fullRobotModel.getSpineJoint(spineJointName), kp, kd);
+   }
+
+   public void setPDControllerGains(LegJointName legJointName, double kp, double kd)
+   {
       for (RobotSide robotSide : RobotSide.values)
-      {
-         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW), 30.0, 3.0);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, legJointName), kp, kd);
+   }
 
-         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 50.0, 5.0);
-
-         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), 50.0, 5.0);
-
-         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 40.0, 4.0);
-      }
-
-      setPDControllerGains(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW), 30.0, 2.0);
-
-      setPDControllerGains(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH), 150.0, 8.0);
-
-      setPDControllerGains(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL), 150.0, 8.0);
-
+   public void setPDControllerGains(ArmJointName armJointName, double kp, double kd)
+   {
       for (RobotSide robotSide : RobotSide.values)
-      {
-         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW), 30.0, 2.0);
-
-         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH), 150.0, 7.5);
-
-         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL), 165, 6.0);
-
-         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), 80.0, 3.0);
-
-         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH), 20.0, 2.0);
-
-         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL), 16.0, 1.0);
-      }
+         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, armJointName), kp, kd);
    }
 
    private void setPDControllerGains(OneDoFJointBasics joint, double kp, double kd)
@@ -327,7 +334,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
          pdController.setDerivativeGain(kd);
       }
    }
-   
+
    public void setMaximumTorqueOffset(double maxValue)
    {
       maximumTorqueOffset.set(maxValue);
