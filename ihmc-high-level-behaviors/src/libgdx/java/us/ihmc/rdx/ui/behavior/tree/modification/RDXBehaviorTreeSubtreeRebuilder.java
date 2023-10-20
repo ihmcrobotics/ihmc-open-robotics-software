@@ -1,37 +1,29 @@
 package us.ihmc.rdx.ui.behavior.tree.modification;
 
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateSubtreeRebuild;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 
 import java.util.HashMap;
 
-public class RDXBehaviorTreeSubtreeRebuild
+public class RDXBehaviorTreeSubtreeRebuilder
 {
-   private final BehaviorTreeStateSubtreeRebuild stateRebuildSubtree;
+   private final RDXBehaviorTreeNode subtreeToRebuild;
 
    private final HashMap<Long, RDXBehaviorTreeNode> idToNodesMap = new HashMap<>();
 
    private final RDXBehaviorTreeModification clearSubtreeModification;
    private final RDXBehaviorTreeModification destroyLeftoversModification;
 
-   public RDXBehaviorTreeSubtreeRebuild(RDXBehaviorTreeNode subtreeToRebuild)
+   public RDXBehaviorTreeSubtreeRebuilder(RDXBehaviorTreeNode subtreeToRebuild)
    {
-      stateRebuildSubtree = new BehaviorTreeStateSubtreeRebuild(subtreeToRebuild.getState());
+      this.subtreeToRebuild = subtreeToRebuild;
 
-      clearSubtreeModification = () ->
-      {
-         stateRebuildSubtree.getClearSubtreeModification().performOperation();
-         clearChildren(subtreeToRebuild);
-      };
+      clearSubtreeModification = () -> clearChildren(subtreeToRebuild);
 
       destroyLeftoversModification = () ->
       {
-         stateRebuildSubtree.getDestroyLeftoversModification().performOperation();
-
-         removeRemainingFromMap(subtreeToRebuild);
-
          for (RDXBehaviorTreeNode leftover : idToNodesMap.values())
          {
+            leftover.getState().destroy();
             leftover.destroy();
          }
       };
@@ -46,17 +38,14 @@ public class RDXBehaviorTreeSubtreeRebuild
          clearChildren(child);
       }
 
+      localNode.getDefinition().getChildren().clear();
+      localNode.getState().getChildren().clear();
       localNode.getChildren().clear();
    }
 
-   private void removeRemainingFromMap(RDXBehaviorTreeNode localNode)
+   public RDXBehaviorTreeNodeReplacement createReplacement(long id)
    {
-      idToNodesMap.remove(localNode.getState().getID());
-
-      for (RDXBehaviorTreeNode child : localNode.getChildren())
-      {
-         removeRemainingFromMap(child);
-      }
+      return new RDXBehaviorTreeNodeReplacement(idToNodesMap.remove(id), subtreeToRebuild);
    }
 
    public RDXBehaviorTreeModification getClearSubtreeModification()
