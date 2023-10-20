@@ -6,21 +6,17 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.BehaviorDefinition;
-import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeBasics;
-import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBasics;
+import us.ihmc.behaviors.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.behavior.tree.RDXImNodesBehaviorTreeUI;
 import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -38,6 +34,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.*;
  * TODO:
  *   - Somehow rework the ImNodes area, it takes a lot of space. Perhaps showing the
  *     nodes as normal panels as an option would be good.
+ * @deprecated We are working on a new design - @dcalvert
  */
 public class RDXBehaviorUIManager
 {
@@ -50,17 +47,15 @@ public class RDXBehaviorUIManager
    private final RDXBaseUI baseUI;
    private final RDXImNodesBehaviorTreeUI imNodeBehaviorTreeUI;
    private final RDXPanel treeViewPanel;
-   private final RDXBehaviorUIRegistry behaviorRegistry;
    private final RDXBehaviorUIInterface rootBehaviorUI;
    private RDXBehaviorUIInterface highestLevelUI;
 
    public RDXBehaviorUIManager(ROS2Node ros2Node,
                                Supplier<? extends DRCRobotModel> robotModelSupplier,
                                RDXBaseUI baseUI,
-                               RDXBehaviorUIRegistry behaviorRegistry)
+                               RDXBehaviorUIInterface firstLevelChild)
    {
       this.baseUI = baseUI;
-      this.behaviorRegistry = behaviorRegistry;
 
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       logWidget = new ImGuiLogWidget("Behavior status");
@@ -80,33 +75,8 @@ public class RDXBehaviorUIManager
       treeViewPanel = new RDXPanel("Behavior Tree Panel", this::renderBehaviorTreeImGuiWidgets, false, true);
       treeViewPanel.addChild(new RDXPanel("Behaviors Status Log", logWidget::renderImGuiWidgets));
 
-      rootBehaviorUI = new RDXRootBehaviorUI(this::renderRootUIImGuiWidgets);
+      this.rootBehaviorUI = new RDXRootBehaviorUI(this::renderRootUIImGuiWidgets);
       imNodeBehaviorTreeUI = new RDXImNodesBehaviorTreeUI();
-   }
-
-   public void switchHighestLevelBehavior(String behaviorName)
-   {
-      // TODO: This needs to be a message sent to the module. This panel should react to differently shaped incoming trees.
-      helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, behaviorName);
-
-      if (highestLevelUI != null)
-      {
-         rootBehaviorUI.clearChildren();
-         highestLevelUI.destroy();
-         highestLevelUI = null;
-         behaviorRegistry.setHighestLevelNode(null);
-      }
-
-      if (!behaviorName.equals(BehaviorDefinition.NONE))
-      {
-         behaviorRegistry.setHighestLevelNode(behaviorRegistry.getBehaviorFromName(behaviorName));
-         highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
-         highestLevelUI.addChildPanelsIncludingChildren(treeViewPanel);
-         highestLevelUI.create(baseUI);
-
-         rootBehaviorUI.addChild(highestLevelUI);
-         imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI); // rebuilds the UI
-      }
    }
 
    public void create(RDXBaseUI baseUI)
@@ -137,26 +107,6 @@ public class RDXBehaviorUIManager
          {
             imNodeBehaviorTreeUI.saveLayoutToFile();
          }
-         ImGui.endMenu();
-      }
-      if (ImGui.beginMenu(labels.get("Behavior")))
-      {
-         ImGui.text("Highest level behavior:");
-
-         String selectedBehaviorName = highestLevelUI == null ? BehaviorDefinition.NONE : highestLevelUI.getName();
-         if (ImGui.radioButton(labels.get(BehaviorDefinition.NONE), selectedBehaviorName.equals(BehaviorDefinition.NONE)))
-         {
-            switchHighestLevelBehavior(BehaviorDefinition.NONE);
-         }
-         for (RDXBehaviorUIDefinition behaviorUIDefinition : behaviorRegistry.getUIDefinitionEntries())
-         {
-            String behaviorName = behaviorUIDefinition.getName();
-            if (ImGui.radioButton(labels.get(behaviorName), selectedBehaviorName.equals(behaviorName)))
-            {
-               switchHighestLevelBehavior(behaviorName);
-            }
-         }
-
          ImGui.endMenu();
       }
       ImGui.endMenuBar();

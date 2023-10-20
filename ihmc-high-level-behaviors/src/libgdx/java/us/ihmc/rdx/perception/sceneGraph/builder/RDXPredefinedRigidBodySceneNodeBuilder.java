@@ -1,11 +1,11 @@
 package us.ihmc.rdx.perception.sceneGraph.builder;
 
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-import static us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions.*;
+import static us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions.*;
 
 public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<RDXPredefinedRigidBodySceneNode>
 {

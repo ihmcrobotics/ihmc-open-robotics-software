@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
 
+import java.util.Collection;
 import java.util.EnumMap;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
@@ -222,6 +223,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME, getMidFeetZUpFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.PELVIS_ZUP_FRAME, getPelvisZUpFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_GROUND_FRAME, getMidFootZUpGroundFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.WALKING_FRAME, getMidFeetUnderPelvisFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.PELVIS_FRAME, getPelvisFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME, getCenterOfMassFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.LEFT_SOLE_FRAME, getSoleFrame(RobotSide.LEFT));
@@ -465,6 +468,16 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
       return nameBasedHashCodeToReferenceFrameMap;
+   }
+
+   public Collection<ReferenceFrame> getCommonReferenceFrames()
+   {
+      return nameBasedHashCodeToReferenceFrameMap.valueCollection();
+   }
+
+   public ReferenceFrame getCommonReferenceFrame(CommonReferenceFrameIds referenceFrameIds)
+   {
+      return nameBasedHashCodeToReferenceFrameMap.get(referenceFrameIds.getHashId());
    }
 
    public ReferenceFrame getLidarSensorFrame()
