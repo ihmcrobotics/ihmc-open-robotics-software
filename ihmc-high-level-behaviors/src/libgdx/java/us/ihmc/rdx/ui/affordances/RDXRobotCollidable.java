@@ -24,7 +24,7 @@ import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -40,7 +40,7 @@ public class RDXRobotCollidable implements RenderableProvider
    /** This link frame can be changed by the user to "detach" the collidable from the synced robot link. */
    private ReferenceFrame linkFrame;
    private final MovingReferenceFrame syncedLinkFrame;
-   private final ModifiableReferenceFrame collisionShapeFrame;
+   private final MutableReferenceFrame collisionShapeFrame;
    private final MouseCollidable mouseCollidable;
    private final MouseCollidable vrPickRayCollidable;
    private final PointCollidable pointCollidable;
@@ -97,7 +97,7 @@ public class RDXRobotCollidable implements RenderableProvider
       linkFrame = syncedLinkFrame;
 
       RigidBodyTransform collisionToLinkFrameTransform = new RigidBodyTransform();
-      collisionShapeFrame = new ModifiableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
+      collisionShapeFrame = new MutableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
 
       mouseCollidable = new MouseCollidable(this.shape);
       vrPickRayCollidable = new MouseCollidable(this.shape);
@@ -173,7 +173,7 @@ public class RDXRobotCollidable implements RenderableProvider
    {
       if (collisionShapeFrame.getReferenceFrame().getParent() != linkFrame)
       {
-         collisionShapeFrame.changeParentFrame(linkFrame);
+         collisionShapeFrame.setParentFrame(linkFrame);
       }
 
       collisionModelInstance.setOpacity(isHoveredByAnything ? 1.0f : 0.4f);

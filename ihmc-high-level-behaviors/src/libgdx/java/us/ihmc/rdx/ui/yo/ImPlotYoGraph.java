@@ -7,7 +7,7 @@ import imgui.extension.implot.flag.*;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.rdx.ui.tools.ImPlotTools;
+import us.ihmc.rdx.imgui.ImPlotTools;
 
 import java.util.ArrayList;
 import java.util.Iterator;
