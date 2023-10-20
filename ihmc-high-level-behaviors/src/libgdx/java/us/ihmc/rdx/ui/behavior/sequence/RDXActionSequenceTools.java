@@ -44,7 +44,7 @@ public class RDXActionSequenceTools
                                                      ReferenceFrameLibrary referenceFrameLibrary,
                                                      ROS2ControllerPublishSubscribeAPI ros2)
    {
-      boolean robotHasArms = robotModel.getRobotVersion().hasArms();
+      boolean robotHasArms = robotModel.getRobotVersion().hasBothArms();
       if (actionDefinitionTypeName.equals(ArmJointAnglesActionDefinition.class.getSimpleName()))
       {
          return robotHasArms ? new RDXArmJointAnglesAction(editor, robotModel) : null;
