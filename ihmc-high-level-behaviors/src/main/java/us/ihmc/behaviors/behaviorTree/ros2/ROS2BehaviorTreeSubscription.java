@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
@@ -16,7 +15,6 @@ public class ROS2BehaviorTreeSubscription
    private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;
    private final BehaviorTreeState behaviorTree;
    private long numberOfMessagesReceived = 0;
-   private boolean localTreeFrozen = false;
    private BehaviorTreeStateMessage latestBehaviorTreeMessage;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
@@ -46,22 +44,21 @@ public class ROS2BehaviorTreeSubscription
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
-         localTreeFrozen = false;
-         checkTreeModified(behaviorTree.getRootNode());
+         behaviorTree.checkTreeModified();
 
-         if (!localTreeFrozen)
+         if (!behaviorTree.getLocalTreeFrozen())
             behaviorTree.getNextID().setValue(latestBehaviorTreeMessage.getNextId());
 
          behaviorTree.modifyTree(modificationQueue ->
          {
-            if (!localTreeFrozen)
+            if (!behaviorTree.getLocalTreeFrozen())
             {
                modificationQueue.accept(behaviorTree.getTreeRebuilder().getClearSubtreeModification());
             }
 
             updateLocalTreeFromSubscription(subscriptionRootNode, behaviorTree.getRootNode(), null, modificationQueue);
 
-            if (!localTreeFrozen)
+            if (!behaviorTree.getLocalTreeFrozen())
             {
                modificationQueue.accept(behaviorTree.getTreeRebuilder().getDestroyLeftoversModification());
             }
@@ -81,7 +78,7 @@ public class ROS2BehaviorTreeSubscription
       // updates of these values. This is to allow the operator's changes to propagate
       // and so it doesn't get overriden immediately by an out of date message coming from the robot.
       // On the robot side, this will always get updated because there is no operator.
-      if (!localTreeFrozen)
+      if (!behaviorTree.getLocalTreeFrozen())
       {
          modificationQueue.accept(behaviorTree.getTreeRebuilder().getReplacementModification(localNode.getState().getID()));
       }
@@ -90,7 +87,7 @@ public class ROS2BehaviorTreeSubscription
       {
          long childNodeID = subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId();
          BehaviorTreeNodeStateSupplier localChildNode = behaviorTree.getTreeRebuilder().getReplacementNode(childNodeID);
-         if (localChildNode == null && !localTreeFrozen) // New node that wasn't in the local tree
+         if (localChildNode == null && !behaviorTree.getLocalTreeFrozen()) // New node that wasn't in the local tree
          {
             Class<?> nodeTypeClass = ROS2BehaviorTreeTools.getNodeStateClass(subscriptionChildNode.getType());
             localChildNode = behaviorTree.getNodeStateBuilder().createNode(nodeTypeClass, childNodeID);
@@ -100,16 +97,6 @@ public class ROS2BehaviorTreeSubscription
          {
             updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
          }
-      }
-   }
-
-   private void checkTreeModified(BehaviorTreeNodeState localNode)
-   {
-      localTreeFrozen |= localNode.isFrozenFromModification();
-
-      for (BehaviorTreeNodeState child : localNode.getChildren())
-      {
-         checkTreeModified(child);
       }
    }
 
@@ -137,10 +124,5 @@ public class ROS2BehaviorTreeSubscription
    public BehaviorTreeStateMessage getLatestBehaviorTreeMessage()
    {
       return latestBehaviorTreeMessage;
-   }
-
-   public boolean getLocalTreeFrozen()
-   {
-      return localTreeFrozen;
    }
 }
