@@ -81,6 +81,7 @@ public class ZEDColorStereoDepthPublisher
    private final Thread grabImageThread;
    private final Thread colorImagePublishThread;
    private final Thread depthImagePublishThread;
+   private final Thread centerposeUpdateThread;
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
@@ -190,9 +191,6 @@ public class ZEDColorStereoDepthPublisher
          {
             throttler.waitAndRun();
             retrieveAndPublishColorImage();
-
-            if (centerposeDetectionManager != null)
-               centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
          }
       }, "ZEDColorImagePublishThread");
 
@@ -205,6 +203,16 @@ public class ZEDColorStereoDepthPublisher
          }
       }, "ZEDDepthImagePublishThread");
 
+      centerposeUpdateThread = new Thread(() ->
+      {
+         while (running)
+         {
+            throttler.waitAndRun();
+            if (centerposeDetectionManager != null)
+               centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
+         }
+      });
+
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
       LogTools.info("Image resolution: {} x {}", imageWidth, imageHeight);
@@ -212,6 +220,7 @@ public class ZEDColorStereoDepthPublisher
       grabImageThread.start();
       colorImagePublishThread.start();
       depthImagePublishThread.start();
+      centerposeUpdateThread.start();
    }
 
    private void retrieveAndPublishColorImage()
@@ -316,6 +325,7 @@ public class ZEDColorStereoDepthPublisher
          grabImageThread.join();
          colorImagePublishThread.join();
          depthImagePublishThread.join();
+         centerposeUpdateThread.join();
       }
       catch (InterruptedException interruptedException)
       {
