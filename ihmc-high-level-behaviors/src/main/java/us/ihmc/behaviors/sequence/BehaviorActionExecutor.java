@@ -1,11 +1,12 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public abstract class BehaviorActionExecutor implements BehaviorActionStateSupplier
+public abstract class BehaviorActionExecutor extends BehaviorTreeNodeExecutor implements BehaviorActionStateSupplier
 {
    private final BehaviorActionSequence sequence;
 

@@ -9,8 +9,9 @@ import us.ihmc.tools.thread.Throttler;
  * This class is concerned with syncing behavior tree state only
  * over ROS 2 nodes as a CRDT.
  */
-public class ROS2BehaviorTreeState extends BehaviorTreeState
+public class ROS2BehaviorTreeState
 {
+   private final BehaviorTreeState behaviorTreeState;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2ActorDesignation ros2ActorDesignation;
    private final ROS2BehaviorTreeSubscription behaviorTreeSubscription;
@@ -22,13 +23,15 @@ public class ROS2BehaviorTreeState extends BehaviorTreeState
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTreeState(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+   public ROS2BehaviorTreeState(BehaviorTreeState behaviorTreeState,
+                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                 ROS2ActorDesignation ros2ActorDesignation)
    {
+      this.behaviorTreeState = behaviorTreeState;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.ros2ActorDesignation = ros2ActorDesignation;
 
-      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getIncomingQualifier());
+      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(behaviorTreeState, ros2PublishSubscribeAPI, ros2ActorDesignation.getIncomingQualifier());
    }
 
    /**
@@ -53,7 +56,7 @@ public class ROS2BehaviorTreeState extends BehaviorTreeState
    public void updatePublication()
    {
       if (publishThrottler.run())
-         behaviorTreePublisher.publish(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
+         behaviorTreePublisher.publish(behaviorTreeState, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
    }
 
    public void destroy()

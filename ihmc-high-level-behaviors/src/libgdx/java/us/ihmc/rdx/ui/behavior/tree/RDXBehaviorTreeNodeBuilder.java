@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -41,13 +42,13 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    @Override
    public RDXBehaviorTreeNode createNode(Class<?> nodeType, long id)
    {
-      RDXBehaviorActionSequenceEditor editor = null; // TODO ????
+      RDXBehaviorActionSequenceEditor editor = null; // TODO ???? Probably need the parent sequence node?
 
-      if (nodeType == RDXArmJointAnglesAction.class)
+      if (nodeType == ArmJointAnglesActionDefinition.class)
       {
          return new RDXArmJointAnglesAction(editor, robotModel);
       }
-      if (nodeType == RDXChestOrientationAction.class)
+      if (nodeType == ChestOrientationActionDefinition.class)
       {
          return new RDXChestOrientationAction(editor,
                                               panel3D,
@@ -57,19 +58,19 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                               referenceFrameLibrary,
                                               ros2);
       }
-      if (nodeType == RDXFootstepPlanAction.class)
+      if (nodeType == FootstepPlanActionDefinition.class)
       {
          return new RDXFootstepPlanAction(editor, baseUI, robotModel, syncedRobot, referenceFrameLibrary);
       }
-      if (nodeType == RDXHandPoseAction.class)
+      if (nodeType == HandPoseActionDefinition.class)
       {
          return new RDXHandPoseAction(editor, panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2);
       }
-      if (nodeType == RDXHandWrenchAction.class)
+      if (nodeType == HandWrenchActionDefinition.class)
       {
          return new RDXHandWrenchAction(editor);
       }
-      if (nodeType == RDXPelvisHeightPitchAction.class)
+      if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
          return new RDXPelvisHeightPitchAction(editor,
                                                panel3D,
@@ -79,15 +80,15 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                                referenceFrameLibrary,
                                                ros2);
       }
-      if (nodeType == RDXSakeHandCommandAction.class)
+      if (nodeType == SakeHandCommandActionDefinition.class)
       {
          return new RDXSakeHandCommandAction(editor);
       }
-      if (nodeType == RDXWaitDurationAction.class)
+      if (nodeType == WaitDurationActionDefinition.class)
       {
          return new RDXWaitDurationAction(editor);
       }
-      if (nodeType == RDXWalkAction.class)
+      if (nodeType == WalkActionDefinition.class)
       {
          return new RDXWalkAction(editor, panel3D, robotModel, referenceFrameLibrary);
       }

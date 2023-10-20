@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
@@ -13,7 +14,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 public class ROS2BehaviorTreeSubscription
 {
    private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;
-   private final BehaviorTreeState behaviorTree;
+   private final BehaviorTreeState behaviorTreeState;
    private long numberOfMessagesReceived = 0;
    private BehaviorTreeStateMessage latestBehaviorTreeMessage;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
@@ -22,11 +23,11 @@ public class ROS2BehaviorTreeSubscription
    /**
     * @param ioQualifier If in the on-robot autonomy process, COMMAND, else STATUS
     */
-   public ROS2BehaviorTreeSubscription(BehaviorTreeState behaviorTree,
+   public ROS2BehaviorTreeSubscription(BehaviorTreeState behaviorTreeState,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                        ROS2IOTopicQualifier ioQualifier)
    {
-      this.behaviorTree = behaviorTree;
+      this.behaviorTreeState = behaviorTreeState;
 
       behaviorTreeSubscription = ros2PublishSubscribeAPI.subscribe(AutonomyAPI.BEAVIOR_TREE.getTopic(ioQualifier));
    }
@@ -44,23 +45,23 @@ public class ROS2BehaviorTreeSubscription
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
-         behaviorTree.checkTreeModified();
+         behaviorTreeState.checkTreeModified();
 
-         if (!behaviorTree.getLocalTreeFrozen())
-            behaviorTree.getNextID().setValue(latestBehaviorTreeMessage.getNextId());
+         if (!behaviorTreeState.getLocalTreeFrozen())
+            behaviorTreeState.getNextID().setValue(latestBehaviorTreeMessage.getNextId());
 
-         behaviorTree.modifyTree(modificationQueue ->
+         behaviorTreeState.modifyTree(modificationQueue ->
          {
-            if (!behaviorTree.getLocalTreeFrozen())
+            if (!behaviorTreeState.getLocalTreeFrozen())
             {
-               modificationQueue.accept(behaviorTree.getTreeRebuilder().getClearSubtreeModification());
+               modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification());
             }
 
-            updateLocalTreeFromSubscription(subscriptionRootNode, behaviorTree.getRootNode(), null, modificationQueue);
+            updateLocalTreeFromSubscription(subscriptionRootNode, behaviorTreeState.getRootNode(), null, modificationQueue);
 
-            if (!behaviorTree.getLocalTreeFrozen())
+            if (!behaviorTreeState.getLocalTreeFrozen())
             {
-               modificationQueue.accept(behaviorTree.getTreeRebuilder().getDestroyLeftoversModification());
+               modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
             }
          });
       }
@@ -78,19 +79,19 @@ public class ROS2BehaviorTreeSubscription
       // updates of these values. This is to allow the operator's changes to propagate
       // and so it doesn't get overriden immediately by an out of date message coming from the robot.
       // On the robot side, this will always get updated because there is no operator.
-      if (!behaviorTree.getLocalTreeFrozen())
+      if (!behaviorTreeState.getLocalTreeFrozen())
       {
-         modificationQueue.accept(behaviorTree.getTreeRebuilder().getReplacementModification(localNode.getState().getID()));
+         modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getReplacementModification(localNode.getState().getID()));
       }
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
          long childNodeID = subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId();
-         BehaviorTreeNodeStateSupplier localChildNode = behaviorTree.getTreeRebuilder().getReplacementNode(childNodeID);
-         if (localChildNode == null && !behaviorTree.getLocalTreeFrozen()) // New node that wasn't in the local tree
+         BehaviorTreeNodeStateSupplier localChildNode = behaviorTreeState.getTreeRebuilder().getReplacementNode(childNodeID);
+         if (localChildNode == null && !behaviorTreeState.getLocalTreeFrozen()) // New node that wasn't in the local tree
          {
-            Class<?> nodeTypeClass = ROS2BehaviorTreeTools.getNodeStateClass(subscriptionChildNode.getType());
-            localChildNode = behaviorTree.getNodeStateBuilder().createNode(nodeTypeClass, childNodeID);
+            Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionChildNode.getType());
+            localChildNode = behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, childNodeID);
          }
 
          if (localChildNode != null)
