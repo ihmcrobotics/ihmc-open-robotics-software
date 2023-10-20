@@ -69,9 +69,9 @@ public class FootstepPredictor
       }
    }
 
-   public FootstepDataListMessage generateFootsteps(Mat heightMap, Point2D startPosition, Point2D goalPosition)
+   public ArrayList<Point3D> generateFootsteps(Mat heightMap, Point2D startPosition, Point2D goalPosition, Point2D sensorPosition)
    {
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      ArrayList<Point3D> footstepPositions = new ArrayList<>();
       FMatrixRMaj linearInput = new FMatrixRMaj(LINEAR_INPUT_SIZE, 1);
       linearInput.set(0, 0, startPosition.getX32());
       linearInput.set(1, 0, startPosition.getY32());
@@ -89,15 +89,16 @@ public class FootstepPredictor
          throw new RuntimeException(e);
       }
 
-      if (linearOutput == null)
+      if (linearOutput != null)
       {
          for (int i = 0; i < LINEAR_OUTPUT_SIZE / 2; i++)
          {
-            footstepDataListMessage.getFootstepDataList().add().getLocation().set(linearOutput.get(2 * i, 0), linearOutput.get(2 * i + 1, 0), 0.0);
+            Point3D point = new Point3D(linearOutput.get(2 * i, 0) + sensorPosition.getX32(), linearOutput.get(2 * i + 1, 0) + sensorPosition.getY32(), 1.0);
+            footstepPositions.add(point);
          }
       }
 
-      return footstepDataListMessage;
+      return footstepPositions;
    }
 
    public FMatrixRMaj predict(Mat imageInput, FMatrixRMaj linearInput) throws OrtException
@@ -108,10 +109,16 @@ public class FootstepPredictor
       if (linearInput.getNumRows() != LINEAR_INPUT_SIZE || linearInput.getNumCols() != 1)
          throw new RuntimeException("Linear input size must be " + LINEAR_INPUT_SIZE + "x1");
 
+      LogTools.info("Image Input Size: {}x{}", imageInput.rows(), imageInput.cols());
+      LogTools.info("Linear Input Size: {}x{}", linearInput.getNumRows(), linearInput.getNumCols());
+
+      Mat heightMapImage = imageInput.clone();
+      heightMapImage.convertTo(heightMapImage, opencv_core.CV_32FC1, 1.0 / 10000.0, 0);
+
       // set the image to be in the first input
       String inputName = (String) session.getInputNames().toArray()[0];
-      long[] tensorInputShape = {1, 1, imageInput.rows(), imageInput.cols()};
-      FloatBuffer data = imageInput.getByteBuffer().asFloatBuffer();
+      long[] tensorInputShape = {1, 1, heightMapImage.rows(), heightMapImage.cols()};
+      FloatBuffer data = heightMapImage.getByteBuffer().asFloatBuffer();
 
       // set the linear input to be in the second input (extract from linearInput matrix)
       String inputName2 = (String) session.getInputNames().toArray()[1];
@@ -211,7 +218,6 @@ public class FootstepPredictor
          {
             break;
          }
-
       }
    }
 }

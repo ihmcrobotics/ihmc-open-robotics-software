@@ -15,6 +15,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
@@ -28,6 +29,7 @@ import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.neural.FootstepPredictor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -49,6 +51,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class RDXRapidHeightMapSimulationDemo
 {
@@ -70,6 +73,7 @@ public class RDXRapidHeightMapSimulationDemo
    private OpenCLManager openCLManager;
    private RDXPanel navigationPanel;
 
+   private FootstepPredictor footstepPredictor;
    private FootstepPlanningModule footstepPlanningModule;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -99,6 +103,8 @@ public class RDXRapidHeightMapSimulationDemo
 
       footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+
+      footstepPredictor = new FootstepPredictor();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -273,13 +279,56 @@ public class RDXRapidHeightMapSimulationDemo
 
                humanoidPerception.getRapidHeightMapExtractor().reset();
                humanoidPerceptionUI.update();
-
             }
             ImGui.separator();
-            if(ImGui.button("Plan Footsteps"))
+            if (ImGui.button("Plan Footsteps"))
             {
                planFootsteps(cameraZUpFrame.getTransformToWorldFrame());
             }
+            ImGui.sameLine();
+            if (ImGui.button("Predict Footsteps"))
+            {
+               ArrayList<Point3D> feetLocations = predictFootsteps(cameraZUpFrame.getTransformToWorldFrame());
+
+               // set the heights to be the same as on height map
+               for (Point3D feetLocation : feetLocations)
+               {
+                  feetLocation.setZ(latestHeightMapData.getHeightAt(feetLocation.getX(), feetLocation.getY()));
+               }
+
+               FootstepDataListMessage message = FootstepDataMessageConverter.convertFeetLocationsToMessage(feetLocations);
+               footstepPlanGraphic.generateMeshesAsync(message, "Predicted Footsteps");
+               footstepPlanGraphic.update();
+
+               // translate the l515 pose forward by 0.1 meters
+               l515PoseGizmo.getTransformToParent().prependTranslation(0.1, 0.0, 0.0);
+               l515PoseGizmo.update();
+            }
+         }
+
+         public ArrayList<Point3D> predictFootsteps(RigidBodyTransform zUpToWorldTransform)
+         {
+
+            Mat heightMapImage = humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage();
+            if (latestHeightMapData == null)
+            {
+               latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                       RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                       cameraFrame.getX(),
+                                                       cameraFrame.getY());
+            }
+            PerceptionMessageTools.convertToHeightMapData(heightMapImage,
+                                                          latestHeightMapData,
+                                                          new Point3D(zUpToWorldTransform.getTranslation()),
+                                                          RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                          RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+
+            LogTools.info("Cropped Image Size: {} {}", heightMapImage.cols(), heightMapImage.rows());
+            return footstepPredictor.generateFootsteps(heightMapImage,
+                                                       new Point2D(zUpToWorldTransform.getTranslation()),
+                                                       new Point2D(zUpToWorldTransform.getTranslation().getX() + 1.65,
+                                                                   zUpToWorldTransform.getTranslation().getY()),
+                                                       new Point2D(zUpToWorldTransform.getTranslation()));
          }
 
          public FootstepPlannerOutput planFootsteps(RigidBodyTransform zUpToWorldTransform)
@@ -288,7 +337,9 @@ public class RDXRapidHeightMapSimulationDemo
             if (latestHeightMapData == null)
             {
                latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                                       RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS, cameraFrame.getX(), cameraFrame.getY());
+                                                       RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                       cameraFrame.getX(),
+                                                       cameraFrame.getY());
             }
             PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                           latestHeightMapData,
@@ -301,7 +352,7 @@ public class RDXRapidHeightMapSimulationDemo
             //PerceptionDebugTools.printHeightMap("Height Map Data", latestHeightMapData, 4);
 
             double heightAtStartPose = latestHeightMapData.getHeightAt(zUpToWorldTransform.getTranslation().getX(),
-                                                                      zUpToWorldTransform.getTranslation().getY());
+                                                                       zUpToWorldTransform.getTranslation().getY());
 
             double heightAtGoalPose = latestHeightMapData.getHeightAt(zUpToWorldTransform.getTranslation().getX() + 1.65,
                                                                       zUpToWorldTransform.getTranslation().getY());
@@ -329,7 +380,6 @@ public class RDXRapidHeightMapSimulationDemo
             LogTools.info("Start Poses: {} {}", startPose.get(RobotSide.LEFT).getPosition(), startPose.get(RobotSide.RIGHT).getPosition());
             LogTools.info("Goal Poses: {} {}", goalPose.get(RobotSide.LEFT).getPosition(), goalPose.get(RobotSide.RIGHT).getPosition());
 
-
             FootstepPlannerRequest request = new FootstepPlannerRequest();
             request.setHeightMapData(latestHeightMapData);
             request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
@@ -347,10 +397,13 @@ public class RDXRapidHeightMapSimulationDemo
             if (plannerOutput != null)
             {
                FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
-               LogTools.info(String.format("Plan Result: %s, Steps: %d", footstepPlanningResult,
+               LogTools.info(String.format("Plan Result: %s, Steps: %d",
+                                           footstepPlanningResult,
                                            footstepPlanningModule.getOutput().getFootstepPlan().getNumberOfSteps()));
 
-               FootstepDataListMessage footstepsMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 2.0, 1.0);
+               FootstepDataListMessage footstepsMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
+                                                                                                                      2.0,
+                                                                                                                      1.0);
 
                footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
                footstepPlanGraphic.update();
@@ -419,13 +472,12 @@ public class RDXRapidHeightMapSimulationDemo
                return;
             }
 
-
             LogTools.info("Logging Plan No. {}", plansLoggedSoFar++);
 
             FootstepPlan plan = plannerOutput.getFootstepPlan();
             Point3D footstepPosition = new Point3D();
             Quaternion footstepOrientation = new Quaternion();
-            for (int i = 0; i<PerceptionLoggerConstants.LEGACY_BLOCK_SIZE; i++)
+            for (int i = 0; i < PerceptionLoggerConstants.LEGACY_BLOCK_SIZE; i++)
             {
                if (i < plan.getNumberOfSteps())
                {
@@ -440,12 +492,16 @@ public class RDXRapidHeightMapSimulationDemo
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_POSITION, footstepPosition);
                perceptionDataLogger.storeFloats(PerceptionLoggerConstants.FOOTSTEP_ORIENTATION, footstepOrientation);
             }
-            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, new Point3D(l515PoseGizmo.getTransformToParent().getTranslation()));
-            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, new Quaternion(l515PoseGizmo.getTransformToParent().getRotation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION,
+                                             new Point3D(l515PoseGizmo.getTransformToParent().getTranslation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION,
+                                             new Quaternion(l515PoseGizmo.getTransformToParent().getRotation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, new Point3D(startPose.get(RobotSide.LEFT).getTranslation()));
-            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION, new Quaternion(startPose.get(RobotSide.LEFT).getOrientation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.START_FOOTSTEP_ORIENTATION,
+                                             new Quaternion(startPose.get(RobotSide.LEFT).getOrientation()));
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, new Point3D(goalPose.get(RobotSide.LEFT).getTranslation()));
-            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION, new Quaternion(goalPose.get(RobotSide.LEFT).getOrientation()));
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.GOAL_FOOTSTEP_ORIENTATION,
+                                             new Quaternion(goalPose.get(RobotSide.LEFT).getOrientation()));
          }
 
          public void logInternalHeightMap()
