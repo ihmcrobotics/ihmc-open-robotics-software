@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
 
@@ -19,16 +20,16 @@ public class BehaviorTreeState
 {
    private final MutableLong nextID = new MutableLong(0);
    private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
-   private final BehaviorTreeNodeTypeClassSupplier nodeTypeClassSupplier;
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
+   private final BehaviorTreeRebuilder treeRebuilder;
 
    private BehaviorTreeNodeState rootNode;
 
-   public BehaviorTreeState(BehaviorTreeNodeTypeClassSupplier nodeTypeClassSupplier,
-                            BehaviorTreeNodeStateBuilder nodeStateBuilder)
+   public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
+                            BehaviorTreeRebuilder treeRebuilder)
    {
-      this.nodeTypeClassSupplier = nodeTypeClassSupplier;
       this.nodeStateBuilder = nodeStateBuilder;
+      this.treeRebuilder = treeRebuilder;
    }
 
    public void update()
@@ -62,13 +63,13 @@ public class BehaviorTreeState
       return rootNode;
    }
 
-   public BehaviorTreeNodeTypeClassSupplier getNodeTypeClassSupplier()
-   {
-      return nodeTypeClassSupplier;
-   }
-
    public BehaviorTreeNodeStateBuilder getNodeStateBuilder()
    {
       return nodeStateBuilder;
+   }
+
+   public BehaviorTreeRebuilder getTreeRebuilder()
+   {
+      return treeRebuilder;
    }
 }

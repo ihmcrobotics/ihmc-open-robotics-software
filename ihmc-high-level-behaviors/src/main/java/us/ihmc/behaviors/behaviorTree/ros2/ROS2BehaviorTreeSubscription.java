@@ -3,8 +3,8 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateSubtreeRebuild;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
@@ -54,28 +54,28 @@ public class ROS2BehaviorTreeSubscription
 
          behaviorTree.modifyTree(modificationQueue ->
          {
-            BehaviorTreeStateSubtreeRebuild rebuildSubtree = null;
             if (!localTreeFrozen)
             {
-               rebuildSubtree = new BehaviorTreeStateSubtreeRebuild(behaviorTree.getRootNode());
-               modificationQueue.accept(rebuildSubtree.getClearSubtreeModification());
+               modificationQueue.accept(behaviorTree.getTreeRebuilder().getClearSubtreeModification());
             }
 
             updateLocalTreeFromSubscription(subscriptionRootNode, behaviorTree.getRootNode(), null, modificationQueue);
 
-            if (rebuildSubtree != null)
-               modificationQueue.accept(rebuildSubtree.getDestroyLeftoversModification());
+            if (!localTreeFrozen)
+            {
+               modificationQueue.accept(behaviorTree.getTreeRebuilder().getDestroyLeftoversModification());
+            }
          });
       }
    }
 
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
-                                                BehaviorTreeNodeState localNode,
-                                                BehaviorTreeNodeState localParentNode,
+                                                BehaviorTreeNodeStateSupplier localNode,
+                                                BehaviorTreeNodeStateSupplier localParentNode,
                                                 BehaviorTreeStateModificationQueue modificationQueue)
    {
       // Set fields only modifiable by the robot
-      localNode.setIsActive(subscriptionNode.getBehaviorTreeNodeStateMessage().getIsActive());
+      localNode.getState().setIsActive(subscriptionNode.getBehaviorTreeNodeStateMessage().getIsActive());
 
       // If the node was recently modified by the operator, the node does not accept
       // updates of these values. This is to allow the operator's changes to propagate
@@ -83,16 +83,17 @@ public class ROS2BehaviorTreeSubscription
       // On the robot side, this will always get updated because there is no operator.
       if (!localTreeFrozen)
       {
-
+         modificationQueue.accept(behaviorTree.getTreeRebuilder().getReplacementModification(localNode.getState().getID()));
       }
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
-         BehaviorTreeNodeState localChildNode = behaviorTree.getIDToNodeMap().get(subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId());
+         long childNodeID = subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId();
+         BehaviorTreeNodeStateSupplier localChildNode = behaviorTree.getTreeRebuilder().getReplacementNode(childNodeID);
          if (localChildNode == null && !localTreeFrozen) // New node that wasn't in the local tree
          {
             Class<?> nodeTypeClass = ROS2BehaviorTreeTools.getNodeStateClass(subscriptionChildNode.getType());
-            behaviorTree.getNodeStateBuilder().createNode(nodeTypeClass, subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId());
+            localChildNode = behaviorTree.getNodeStateBuilder().createNode(nodeTypeClass, childNodeID);
          }
 
          if (localChildNode != null)
