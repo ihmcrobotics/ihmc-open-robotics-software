@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -20,9 +21,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDX3DSituatedTextData;
 import us.ihmc.rdx.RDXFocusBasedCamera;
+import us.ihmc.rdx.mesh.MeshDataBuilderMissingTools;
+import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -38,6 +43,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
    private final IHMCROS2Input<DetectedObjectPacket> subscription;
    private final RDXFocusBasedCamera camera;
    private ModelInstance markerModelInstance;
+   private final MeshDataBuilder meshDataBuilder = new MeshDataBuilder();
    private final RDX3DSituatedText text;
    private RDX3DSituatedTextData previousTextData;
    private final RDXModelInstance markerCoordinateFrameInstance;
@@ -79,11 +85,6 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
          double confidence = detectedObjectMessage.getConfidence();
          String objectType = detectedObjectMessage.getObjectTypeAsString();
 
-         if (markerModelInstance != null)
-         {
-            markerModelInstance.model.dispose();
-         }
-
          for (int i = 0; i < vertices.length; i++)
          {
             if (vertices3D[i] == null)
@@ -97,8 +98,22 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
             vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
          }
 
-         Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, 0.005, Color.WHITE));
-         markerModelInstance = new RDXModelInstance(markerModel);
+         double lineWidth = 0.005;
+         Color color = Color.WHITE;
+         if (markerModelInstance == null)
+         {
+            Model markerModel = RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices3D, lineWidth, color));
+            markerModelInstance = new RDXModelInstance(markerModel);
+         }
+         else
+         {
+            Mesh mesh = markerModelInstance.model.nodes.get(0).parts.get(0).meshPart.mesh;
+            meshDataBuilder.clear();
+            MeshDataBuilderMissingTools.addMultiLineBox(vertices3D, lineWidth, meshDataBuilder);
+            MeshDataHolder meshDataHolder = meshDataBuilder.generateMeshDataHolder();
+
+            RDXMeshDataInterpreter.repositionMeshVertices(meshDataHolder, mesh, color);
+         }
 
          markerPose.setIncludingFrame(sensorFrame, objectPoseSensorFrame);
          markerPose.changeFrame(ReferenceFrame.getWorldFrame());
