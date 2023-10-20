@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
-import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 
 /**
  * The parameters for the real and simulated door.
@@ -30,9 +30,9 @@ public class DoorModelParameters
    /** The horizontal length of the panel. */
    public static final double DOOR_PANEL_WIDTH = 0.914;
    /** Distance the handle joint in from the edge of the panel. */
-   public static final double DOOR_LEVER_HANDLE_INSET = 0.062;
+   public static final double DOOR_OPENER_INSET = 0.062;
    /** We place the lever handle up from the bottom of the panel as measured on our lab door. */
-   public static final double DOOR_LEVER_HANDLE_FROM_BOTTOM_OF_PANEL = 0.915;
+   public static final double DOOR_OPENER_FROM_BOTTOM_OF_PANEL = 0.915;
    /** Mount the panel up off the ground a little so it's not dragging. */
    public static final double DOOR_PANEL_GROUND_GAP_HEIGHT = 0.02;
    /** Place the panel away from the hinge a little.
@@ -43,16 +43,18 @@ public class DoorModelParameters
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
    public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
-   public static final int PULL_DOOR_MARKER_ID = 0;
-   public static final int PUSH_DOOR_MARKER_ID = 1;
+   public static final int LEFT_PULL_DOOR_MARKER_ID = 0;
+   public static final int RIGHT_PUSH_DOOR_MARKER_ID = 1;
+   public static final int RIGHT_PULL_DOOR_MARKER_ID = 10;
+   public static final int LEFT_PUSH_DOOR_MARKER_ID = 11;
 
    /**
     * It is actually important to measure the ArUco marker pose relative to the lever handle,
     * as that's what's most important to get right.
     */
-   public static final double PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z = 0.127;
-   public static final double PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = 0.0885;
+   public static final double RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Z = 0.127;
+   public static final double RIGHT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Y = 0.0885;
 
-   public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z = 0.127;
-   public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = -0.0885 - DOOR_ARUCO_MARKER_WIDTH;
+   public static final double LEFT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Z = 0.127;
+   public static final double LEFT_SIDE_ARUCO_MARKER_TO_OPENER_AXIS_Y = -0.0885 - DOOR_ARUCO_MARKER_WIDTH;
 }

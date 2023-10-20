@@ -3,7 +3,7 @@ package us.ihmc.rdx.vr;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.function.BooleanSupplier;
 
@@ -29,13 +29,13 @@ public class RDXVRDragData
     * (without even updating it), so we can safely grab the transform to world
     * and set the interactable's pose to it.
     */
-   private final ModifiableReferenceFrame dragReferenceFrame;
+   private final MutableReferenceFrame dragReferenceFrame;
    /**
     * Used for dragging from a distance on the XY plane while the controller's
     * respective roll controls the yaw.
     */
    private final RDXVRPickPlaneYawCalculator pickPlaneYawCalculator = new RDXVRPickPlaneYawCalculator();
-   private final ModifiableReferenceFrame zUpDragParentFrame;
+   private final MutableReferenceFrame zUpDragParentFrame;
    private final FramePose3D zUpDragPose = new FramePose3D();
    /**
     * Used for detecting clicks, which are most robustly a press and release
@@ -48,8 +48,8 @@ public class RDXVRDragData
    {
       this.isButtonDown = isButtonDown;
       this.controllerPickFrame = controllerPickFrame;
-      dragReferenceFrame = new ModifiableReferenceFrame(controllerPickFrame);
-      zUpDragParentFrame = new ModifiableReferenceFrame();
+      dragReferenceFrame = new MutableReferenceFrame(controllerPickFrame);
+      zUpDragParentFrame = new MutableReferenceFrame();
    }
 
    public void update()
@@ -144,7 +144,7 @@ public class RDXVRDragData
    {
       updateZUpDrag(interactableFrame);
 
-      zUpDragParentFrame.changeParentFrame(pickPlaneYawCalculator.getYawReferenceFrame());
+      zUpDragParentFrame.setParentFrame(pickPlaneYawCalculator.getYawReferenceFrame());
       interactableFrame.getTransformToDesiredFrame(zUpDragParentFrame.getTransformToParent(), pickPlaneYawCalculator.getYawReferenceFrame());
       // This is a rotation only thing
       zUpDragParentFrame.getTransformToParent().getTranslation().setToZero();
