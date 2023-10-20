@@ -38,7 +38,7 @@ public class RDX3DPanelTooltip
    {
       if (latestInput != null)
       {
-         float lineHeight = ImGui.getFrameHeight();
+         float lineHeight = 15.0f;
 
          // Calculate exact rendered dimensions of the text considering the font.
          ImFont font = ImGuiTools.getSmallFont();
