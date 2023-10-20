@@ -32,7 +32,7 @@ public class FootstepPredictor
    private static final int IMAGE_INPUT_HEIGHT = 201;
    private static final int IMAGE_INPUT_WIDTH = 201;
 
-   private String modelFilePath = "/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
+   private String modelFilePath = "/home/bmishra/Workspace/Code/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
    private String onnxFileName = "footstep_predictor.onnx";
 
    private OrtEnvironment environment = OrtEnvironment.getEnvironment();

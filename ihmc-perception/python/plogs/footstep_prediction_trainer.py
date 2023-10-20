@@ -340,11 +340,11 @@ def load_validate(val_dataset):
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
-    new_format_files = ['20231018_135001_PerceptionLog.hdf5']#, '20231018_143108_PerceptionLog.hdf5']
-    # files = ['20231015_183228_PerceptionLog.hdf5', '20231015_234600_PerceptionLog.hdf5', '20231016_025456_PerceptionLog.hdf5']
+    # new_format_files = ['20231018_135001_PerceptionLog.hdf5']#, '20231018_143108_PerceptionLog.hdf5']
+    files = ['20231015_183228_PerceptionLog.hdf5', '20231015_234600_PerceptionLog.hdf5', '20231016_025456_PerceptionLog.hdf5']
     datasets = []
 
-    for file in new_format_files:
+    for file in files:
         data = h5py.File(path + file, 'r')
         dataset = FootstepDataset(data)
         datasets.append(dataset)
@@ -356,21 +356,23 @@ def load_dataset(validation_split):
 
     return train_dataset, val_dataset
 
-
-
-
-
 if __name__ == "__main__":
 
     # load dataset
-    train_dataset, val_dataset = load_dataset(validation_split=0.1)
+    train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    # train and store model
-    criterion=torch.nn.L1Loss()
-    train_store(train_dataset, val_dataset, batch_size=32, epochs=20, criterion=criterion)
+    train = False
 
-    # load and validate model
-    load_validate(val_dataset)
+    if train:
+        # train and store model
+        criterion=torch.nn.L1Loss()
+        train_store(train_dataset, val_dataset, batch_size=32, epochs=20, criterion=criterion)
+
+    else:
+        # load and validate model
+        load_validate(val_dataset)
+
+    torch.cuda.empty_cache()
 
 
 

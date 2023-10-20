@@ -356,4 +356,9 @@ public class TerrainPerceptionProcessWithDriver
       openCLManager.destroy();
       destroyedNotification.blockingPoll();
    }
+
+   public PerceptionConfigurationParameters getConfigurationParameters()
+   {
+      return parameters;
+   }
 }

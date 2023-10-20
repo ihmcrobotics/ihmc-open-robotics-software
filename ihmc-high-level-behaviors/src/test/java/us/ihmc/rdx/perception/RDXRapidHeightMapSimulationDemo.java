@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.HDF5Tools;
@@ -60,6 +61,8 @@ public class RDXRapidHeightMapSimulationDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Helper ros2Helper;
    private final ROS2Node ros2Node;
+
+   private HumanoidActivePerceptionModule activePerceptionModule;
 
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private PerceptionDataLogger perceptionDataLogger;
