@@ -8,6 +8,7 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
@@ -29,7 +30,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 public class RDXBehaviorTree
 {
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
-   private final BehaviorTreeState behaviorTreeState = new BehaviorTreeState();
+   private final BehaviorTreeState behaviorTreeState;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final RDXBehaviorTreeSubtreeRebuilder treeRebuilder;
    private RDXBehaviorTreeNode rootNode;
@@ -53,7 +54,7 @@ public class RDXBehaviorTree
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
       treeRebuilder = new RDXBehaviorTreeSubtreeRebuilder(rootNode);
 
-      behaviorTreeState = new BehaviorTreeState();
+      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
@@ -86,7 +87,7 @@ public class RDXBehaviorTree
    {
       String typeName = jsonNode.get("type").textValue();
 
-      RDXBehaviorTreeNode node = nodeBuilder.createNode(RDXBehaviorTreeTools.getClassFromTypeName(typeName),
+      RDXBehaviorTreeNode node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
                                                         behaviorTreeState.getNextID().getAndIncrement());
 
       node.getDefinition().loadFromFile(jsonNode);
@@ -155,8 +156,13 @@ public class RDXBehaviorTree
 
    }
 
-   public TLongObjectMap<RDXBehaviorTreeNode> getIDToNodeMap()
+   public BehaviorTreeState getBehaviorTreeState()
    {
-      return idToNodeMap;
+      return behaviorTreeState;
+   }
+
+   public RDXBehaviorTreeNode getRootNode()
+   {
+      return rootNode;
    }
 }
