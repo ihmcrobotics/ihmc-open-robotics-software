@@ -70,7 +70,7 @@ public class RDXCenterposeSceneGraphDemo
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-            centerposeProcess = new CenterposeDetectionManager(ros2Helper);
+            centerposeProcess = new CenterposeDetectionManager(ros2Helper, syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
 
             referenceFrameLibrary = new ReferenceFrameLibrary();
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());

@@ -23,32 +23,27 @@ import java.util.Map;
 public class CenterposeDetectionManager
 {
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
-   private final RigidBodyTransform sensorInZedTransform = new RigidBodyTransform(); // TODO: This is specific to ZED, remove or move somewhere else?
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
+   private final ReferenceFrame centerposeOutputFrame;
 
-   public CenterposeDetectionManager(ROS2Helper ros2Helper)
+   public CenterposeDetectionManager(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
       subscriber = ros2Helper.subscribe(topicName);
 
-      sensorInZedTransform.getTranslation().set(0.0, 0.06, 0.0);
-      sensorInZedTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+      RigidBodyTransform centerposeOutputToIHMCZUpTransform = new RigidBodyTransform();
+      centerposeOutputToIHMCZUpTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+
+      centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
+                                                                                                sensorFrame,
+                                                                                                centerposeOutputToIHMCZUpTransform);
    }
 
-   public void update(ROS2SceneGraph onRobotSceneGraph, ReferenceFrame sensorFrame)
-   {
-      onRobotSceneGraph.updateSubscription();
-      updateSceneGraph(onRobotSceneGraph, sensorFrame);
-      onRobotSceneGraph.updateOnRobotOnly(sensorFrame);
-      onRobotSceneGraph.updatePublication();
-   }
-
-   public void updateSceneGraph(ROS2SceneGraph sceneGraph, ReferenceFrame cameraFrame)
+   public void updateSceneGraph(ROS2SceneGraph sceneGraph)
    {
       // Handle a new DetectedObjectPacket message
       if (subscriber.getMessageNotification().poll())
       {
-         ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("SensorFrame", cameraFrame, sensorInZedTransform);
 
          DetectedObjectPacket detectedObjectPacket = subscriber.getMessageNotification().read();
 
@@ -77,7 +72,7 @@ public class CenterposeDetectionManager
 
                Pose3D objectPoseInSensorFrame = detectedObjectPacket.getPose();
                FramePose3D objectOriginPoseFrame = new FramePose3D();
-               objectOriginPoseFrame.setIncludingFrame(sensorFrame, objectPoseInSensorFrame);
+               objectOriginPoseFrame.setIncludingFrame(centerposeOutputFrame, objectPoseInSensorFrame);
                objectOriginPoseFrame.changeFrame(ReferenceFrame.getWorldFrame());
                centerposeNode.getNodeToParentFrameTransform().set(objectOriginPoseFrame);
             }
