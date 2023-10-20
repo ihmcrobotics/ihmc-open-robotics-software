@@ -18,6 +18,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeSubtreeDestruction;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
+import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeSubtreeRebuilder;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -30,6 +31,7 @@ public class RDXBehaviorTree
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final BehaviorTreeState behaviorTreeState = new BehaviorTreeState();
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
+   private final RDXBehaviorTreeSubtreeRebuilder treeRebuilder;
    private RDXBehaviorTreeNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -49,6 +51,9 @@ public class RDXBehaviorTree
       // TODO: Do we create the publishers and subscribers here?
 
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
+      treeRebuilder = new RDXBehaviorTreeSubtreeRebuilder(rootNode);
+
+      behaviorTreeState = new BehaviorTreeState();
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)

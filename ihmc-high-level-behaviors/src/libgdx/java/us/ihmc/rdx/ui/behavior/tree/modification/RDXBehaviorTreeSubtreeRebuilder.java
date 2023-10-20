@@ -1,10 +1,13 @@
 package us.ihmc.rdx.ui.behavior.tree.modification;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 
 import java.util.HashMap;
 
-public class RDXBehaviorTreeSubtreeRebuilder
+public class RDXBehaviorTreeSubtreeRebuilder implements BehaviorTreeRebuilder
 {
    private final RDXBehaviorTreeNode subtreeToRebuild;
 
@@ -43,17 +46,26 @@ public class RDXBehaviorTreeSubtreeRebuilder
       localNode.getChildren().clear();
    }
 
-   public RDXBehaviorTreeNodeReplacement createReplacement(long id)
+   @Override
+   public BehaviorTreeNodeStateSupplier getReplacementNode(long id)
+   {
+      return idToNodesMap.get(id);
+   }
+
+   @Override
+   public BehaviorTreeStateModification getReplacementModification(long id)
    {
       return new RDXBehaviorTreeNodeReplacement(idToNodesMap.remove(id), subtreeToRebuild);
    }
 
-   public RDXBehaviorTreeModification getClearSubtreeModification()
+   @Override
+   public BehaviorTreeStateModification getClearSubtreeModification()
    {
       return clearSubtreeModification;
    }
 
-   public RDXBehaviorTreeModification getDestroyLeftoversModification()
+   @Override
+   public BehaviorTreeStateModification getDestroyLeftoversModification()
    {
       return destroyLeftoversModification;
    }
