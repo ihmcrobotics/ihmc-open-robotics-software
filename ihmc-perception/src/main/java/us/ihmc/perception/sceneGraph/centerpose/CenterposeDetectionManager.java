@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.ros2.ROS2Topic;
@@ -22,6 +21,12 @@ import java.util.Map;
 
 public class CenterposeDetectionManager
 {
+   public static final RigidBodyTransform CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
+   }
+
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    private final ReferenceFrame centerposeOutputFrame;
@@ -31,12 +36,9 @@ public class CenterposeDetectionManager
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
       subscriber = ros2Helper.subscribe(topicName);
 
-      RigidBodyTransform centerposeOutputToIHMCZUpTransform = new RigidBodyTransform();
-      centerposeOutputToIHMCZUpTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), Math.toRadians(180.0));
-
       centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
                                                                                                 sensorFrame,
-                                                                                                centerposeOutputToIHMCZUpTransform);
+                                                                                                CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM);
    }
 
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)
