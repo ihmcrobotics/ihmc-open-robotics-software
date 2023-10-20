@@ -10,13 +10,10 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 
 public class ROS2BehaviorTreePublisher
 {
-   private ROS2IOTopicQualifier ioQualifier;
    private final BehaviorTreeStateMessage behaviorTreeMessage = new BehaviorTreeStateMessage();
 
    public void publish(BehaviorTreeState behaviorTreeState, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, ROS2IOTopicQualifier outgoingQualifier)
    {
-      this.ioQualifier = ioQualifier;
-
       behaviorTreeMessage.setNextId(behaviorTreeState.getNextID().intValue());
       behaviorTreeMessage.getBehaviorTreeTypes().clear();
       behaviorTreeMessage.getBehaviorTreeIndices().clear();
@@ -30,9 +27,9 @@ public class ROS2BehaviorTreePublisher
       behaviorTreeMessage.getWaitDurationActions().clear();
       behaviorTreeMessage.getWalkActions().clear();
 
-      packSceneTreeToMessage(behaviorTreeState.getRootNode());
+      packSceneTreeToMessage(behaviorTreeState.getRootNode().getState());
 
-      ros2PublishSubscribeAPI.publish(AutonomyAPI.BEAVIOR_TREE.getTopic(ioQualifier), behaviorTreeMessage);
+      ros2PublishSubscribeAPI.publish(AutonomyAPI.BEAVIOR_TREE.getTopic(outgoingQualifier), behaviorTreeMessage);
    }
 
    private void packSceneTreeToMessage(BehaviorTreeNodeState behaviorTreeNode)
