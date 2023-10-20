@@ -111,6 +111,9 @@ public class PerceptionAPI
                                    IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
                                             .withType(ImageMessage.class)
                                             .withSuffix("right"));
+   public static final SideDependentList<ROS2Topic<Empty>> PUBLISH_BLACKFLY_COLOR_IMAGE
+         = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("publish_left_blackfly_color").withType(Empty.class),
+                                   PERCEPTION_MODULE.withSuffix("publish_right_blackfly_color").withType(Empty.class));
    public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
@@ -196,6 +199,7 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
+   public static final ROS2Topic<Empty> PUBLISH_ARUCO = PERCEPTION_MODULE.withSuffix("publish_aruco").withType(Empty.class);
 
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                     .withModule("transform_tuning");
