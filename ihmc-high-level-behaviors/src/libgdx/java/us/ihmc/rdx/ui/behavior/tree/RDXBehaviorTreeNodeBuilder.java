@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -10,7 +11,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class RDXBehaviorTreeNodeBuilder
+public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -37,6 +38,7 @@ public class RDXBehaviorTreeNodeBuilder
       this.ros2 = ros2;
    }
 
+   @Override
    public RDXBehaviorTreeNode createNode(Class<?> nodeType, long id)
    {
       RDXBehaviorActionSequenceEditor editor = null; // TODO ????

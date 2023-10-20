@@ -19,8 +19,17 @@ public class BehaviorTreeState
 {
    private final MutableLong nextID = new MutableLong(0);
    private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
+   private final BehaviorTreeNodeTypeClassSupplier nodeTypeClassSupplier;
+   private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
 
-   private BehaviorTreeNodeState behaviorTreeNodeState;
+   private BehaviorTreeNodeState rootNode;
+
+   public BehaviorTreeState(BehaviorTreeNodeTypeClassSupplier nodeTypeClassSupplier,
+                            BehaviorTreeNodeStateBuilder nodeStateBuilder)
+   {
+      this.nodeTypeClassSupplier = nodeTypeClassSupplier;
+      this.nodeStateBuilder = nodeStateBuilder;
+   }
 
    public void update()
    {
@@ -46,5 +55,20 @@ public class BehaviorTreeState
    public MutableLong getNextID()
    {
       return nextID;
+   }
+
+   public BehaviorTreeNodeState getRootNode()
+   {
+      return rootNode;
+   }
+
+   public BehaviorTreeNodeTypeClassSupplier getNodeTypeClassSupplier()
+   {
+      return nodeTypeClassSupplier;
+   }
+
+   public BehaviorTreeNodeStateBuilder getNodeStateBuilder()
+   {
+      return nodeStateBuilder;
    }
 }

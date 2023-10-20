@@ -91,7 +91,8 @@ public class ROS2BehaviorTreeSubscription
          BehaviorTreeNodeState localChildNode = behaviorTree.getIDToNodeMap().get(subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId());
          if (localChildNode == null && !localTreeFrozen) // New node that wasn't in the local tree
          {
-            localChildNode = behaviorTree.getNewNodeSupplier().apply(ROS2BehaviorTreeTools.getNodeStateClass(subscriptionChildNode.getType()));
+            Class<?> nodeTypeClass = ROS2BehaviorTreeTools.getNodeStateClass(subscriptionChildNode.getType());
+            behaviorTree.getNodeStateBuilder().createNode(nodeTypeClass, subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId());
          }
 
          if (localChildNode != null)
