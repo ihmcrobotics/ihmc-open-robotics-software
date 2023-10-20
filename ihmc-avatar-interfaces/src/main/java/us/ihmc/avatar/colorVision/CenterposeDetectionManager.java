@@ -44,7 +44,6 @@ public class CenterposeDetectionManager
       // Handle a new DetectedObjectPacket message
       if (subscriber.getMessageNotification().poll())
       {
-
          DetectedObjectPacket detectedObjectPacket = subscriber.getMessageNotification().read();
 
          // Update or add the corresponding CenterposeSceneNode
