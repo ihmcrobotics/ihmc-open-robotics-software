@@ -1,22 +1,21 @@
 package us.ihmc.rdx.ui.behavior.tree.modification;
 
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeStateRemoval;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateNodeRemoval;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 
-public class RDXBehaviorTreeNodeRemoval implements BehaviorTreeStateModification
+public class RDXBehaviorTreeNodeRemoval implements RDXBehaviorTreeModification
 {
-   private final BehaviorTreeNodeStateRemoval stateRemoval;
-
    private final RDXBehaviorTreeNode nodeToRemove;
    private final RDXBehaviorTreeNode rootNode;
+
+   private final BehaviorTreeStateNodeRemoval stateRemoval;
 
    public RDXBehaviorTreeNodeRemoval(RDXBehaviorTreeNode nodeToRemove, RDXBehaviorTreeNode rootNode)
    {
       this.nodeToRemove = nodeToRemove;
       this.rootNode = rootNode;
 
-      stateRemoval = new BehaviorTreeNodeStateRemoval(nodeToRemove.getState(), rootNode.getState());
+      stateRemoval = new BehaviorTreeStateNodeRemoval(nodeToRemove.getState(), rootNode.getState());
    }
 
    @Override

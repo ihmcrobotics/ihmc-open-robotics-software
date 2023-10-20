@@ -1,22 +1,22 @@
 package us.ihmc.rdx.ui.behavior.tree.modification;
 
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateRebuildSubtree;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateSubtreeRebuild;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 
 import java.util.HashMap;
 
-public class RDXBehaviorTreeRebuildSubtree
+public class RDXBehaviorTreeSubtreeRebuild
 {
-   private final BehaviorTreeStateRebuildSubtree stateRebuildSubtree;
+   private final BehaviorTreeStateSubtreeRebuild stateRebuildSubtree;
 
    private final HashMap<Long, RDXBehaviorTreeNode> idToNodesMap = new HashMap<>();
 
    private final RDXBehaviorTreeModification clearSubtreeModification;
    private final RDXBehaviorTreeModification destroyLeftoversModification;
 
-   public RDXBehaviorTreeRebuildSubtree(RDXBehaviorTreeNode subtreeToRebuild)
+   public RDXBehaviorTreeSubtreeRebuild(RDXBehaviorTreeNode subtreeToRebuild)
    {
-      stateRebuildSubtree = new BehaviorTreeStateRebuildSubtree(subtreeToRebuild.getState());
+      stateRebuildSubtree = new BehaviorTreeStateSubtreeRebuild(subtreeToRebuild.getState());
 
       clearSubtreeModification = () ->
       {

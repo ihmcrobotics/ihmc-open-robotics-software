@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree.modification;
 
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeStateAddition;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateNodeAddition;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 
 /**
@@ -9,15 +9,19 @@ import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
  * In the behavior tree, when node additions are requested, they are queued up
  * and performed later to avoid concurrent modifications of node children in the tree.
  */
-public class RDXBehaviorTreeNodeAddition extends RDXBehaviorTreeNodeReplacement
+public class RDXBehaviorTreeNodeAddition implements RDXBehaviorTreeModification
 {
-   private final BehaviorTreeNodeStateAddition stateAddition;
+   private final RDXBehaviorTreeNode nodeToAdd;
+   private final RDXBehaviorTreeNode parent;
+
+   private final BehaviorTreeStateNodeAddition stateAddition;
 
    public RDXBehaviorTreeNodeAddition(RDXBehaviorTreeNode nodeToAdd, RDXBehaviorTreeNode parent)
    {
-      super(nodeToAdd, parent);
+      this.nodeToAdd = nodeToAdd;
+      this.parent = parent;
 
-      stateAddition = new BehaviorTreeNodeStateAddition(nodeToAdd.getState(), parent.getState());
+      stateAddition = new BehaviorTreeStateNodeAddition(nodeToAdd.getState(), parent.getState());
    }
 
    @Override
@@ -25,6 +29,6 @@ public class RDXBehaviorTreeNodeAddition extends RDXBehaviorTreeNodeReplacement
    {
       stateAddition.performOperation();
 
-      super.performOperation();
+      parent.getChildren().add(nodeToAdd);
    }
 }

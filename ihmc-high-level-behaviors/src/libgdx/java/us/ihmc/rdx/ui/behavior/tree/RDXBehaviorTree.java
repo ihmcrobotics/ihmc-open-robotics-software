@@ -16,7 +16,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeDestroySubtree;
+import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeSubtreeDestruction;
 import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -68,7 +68,7 @@ public class RDXBehaviorTree
       // Delete the entire tree. We are starting over
       behaviorTreeState.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new RDXBehaviorTreeDestroySubtree(rootNode));
+         modificationQueue.accept(new RDXBehaviorTreeSubtreeDestruction(rootNode));
 
          JSONFileTools.load(file, jsonNode ->
          {
