@@ -4,20 +4,23 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
 import java.util.HashMap;
 
-public class BehaviorTreeStateSubtreeRebuild
+public class BehaviorTreeStateSubtreeRebuilder
 {
+   private final BehaviorTreeNodeState subtreeToRebuild;
+
    private final HashMap<Long, BehaviorTreeNodeState> idToNodesMap = new HashMap<>();
 
    private final BehaviorTreeStateModification clearSubtreeModification;
    private final BehaviorTreeStateModification destroyLeftoversModification;
 
-   public BehaviorTreeStateSubtreeRebuild(BehaviorTreeNodeState subtreeToRebuild)
+   public BehaviorTreeStateSubtreeRebuilder(BehaviorTreeNodeState subtreeToRebuild)
    {
+      this.subtreeToRebuild = subtreeToRebuild;
+
       clearSubtreeModification = () -> clearChildren(subtreeToRebuild);
 
       destroyLeftoversModification = () ->
       {
-         removeRemainingFromMap(subtreeToRebuild);
          for (BehaviorTreeNodeState leftover : idToNodesMap.values())
          {
             leftover.destroy();
@@ -34,17 +37,13 @@ public class BehaviorTreeStateSubtreeRebuild
          clearChildren(child);
       }
 
+      localNode.getDefinition().getChildren().clear();
       localNode.getChildren().clear();
    }
 
-   private void removeRemainingFromMap(BehaviorTreeNodeState localNode)
+   public BehaviorTreeStateNodeReplacement createReplacement(long id)
    {
-      idToNodesMap.remove(localNode.getID());
-
-      for (BehaviorTreeNodeState child : localNode.getChildren())
-      {
-         removeRemainingFromMap(child);
-      }
+      return new BehaviorTreeStateNodeReplacement(idToNodesMap.remove(id), subtreeToRebuild);
    }
 
    public BehaviorTreeStateModification getClearSubtreeModification()
