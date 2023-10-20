@@ -12,19 +12,19 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.filters.TimeBasedDetectionFilter;
-import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CenterposeSceneGraphNodeManager
 {
    private final IHMCROS2Input<DetectedObjectPacket> subscriber;
    private final RigidBodyTransform sensorInZedTransform = new RigidBodyTransform(); // TODO: This is specific to ZED, remove or move somewhere else?
+   private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
 
    public CenterposeSceneGraphNodeManager(ROS2Helper ros2Helper)
    {
@@ -92,43 +92,19 @@ public class CenterposeSceneGraphNodeManager
 
                modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
                sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);
-               sceneGraph.getCenterposeNodeDetectionFilters().put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
+               centerposeNodeDetectionFilters.put(centerposeNode.getObjectID(), new TimeBasedDetectionFilter(1.0f, 2));
             }
 
-            sceneGraph.getCenterposeNodeDetectionFilters().get(centerposeNode.getObjectID()).registerDetection();
+            centerposeNodeDetectionFilters.get(centerposeNode.getObjectID()).registerDetection();
          });
       }
 
-      List<CenterposeNode> removals = new ArrayList<>();
-
       for (CenterposeNode centerposeNode : sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().valueCollection())
       {
-         boolean found = false;
-
-         // TODO: fix this state issue
-         for (SceneNode rootChild : sceneGraph.getRootNode().getChildren())
-            if (rootChild instanceof CenterposeNode centerposeRootChild)
-               if (centerposeRootChild.getObjectID() == centerposeNode.getObjectID())
-                  found = true;
-
-         if (found)
-         {
-            centerposeNode.update();
-            TimeBasedDetectionFilter detectionFilter = sceneGraph.getCenterposeNodeDetectionFilters().get(centerposeNode.getObjectID());
-            detectionFilter.update();
-            centerposeNode.setCurrentlyDetected(detectionFilter.isDetected());
-         }
-         else
-         {
-            removals.add(centerposeNode);
-         }
-      }
-
-      // TODO: fix this state issue
-      for (CenterposeNode centerposeNode : removals)
-      {
-         sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().remove(centerposeNode.getObjectID());
-         sceneGraph.getCenterposeNodeDetectionFilters().remove(centerposeNode.getObjectID());
+         centerposeNode.update();
+         TimeBasedDetectionFilter detectionFilter = centerposeNodeDetectionFilters.get(centerposeNode.getObjectID());
+         detectionFilter.update();
+         centerposeNode.setCurrentlyDetected(detectionFilter.isDetected());
       }
    }
 
