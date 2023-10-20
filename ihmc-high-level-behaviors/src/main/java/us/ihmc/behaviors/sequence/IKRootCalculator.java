@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -23,9 +23,9 @@ public class IKRootCalculator
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private BodyPartPoseStatusMessage chestPoseStatusMessage;
    private BodyPartPoseStatusMessage pelvisPoseStatusMessage;
-   private ModifiableReferenceFrame latestChestFrame;
-   private ModifiableReferenceFrame concurrentChestFrame;
-   private ModifiableReferenceFrame latestCombinedPelvisAndChestFrame;
+   private MutableReferenceFrame latestChestFrame;
+   private MutableReferenceFrame concurrentChestFrame;
+   private MutableReferenceFrame latestCombinedPelvisAndChestFrame;
    private ReferenceFrame concurrentCombinedPelvisAndChestFrame;
    private ReferenceFrame rootReferenceFrame;
 
@@ -63,7 +63,7 @@ public class IKRootCalculator
       if (chestPoseStatusMessage != null)
       {
          boolean isChestCurrentAndConcurrent = chestPoseStatusMessage.getCurrentAndConcurrent();
-         latestChestFrame = new ModifiableReferenceFrame(referenceFrameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrameNameAsString()));
+         latestChestFrame = new MutableReferenceFrame(referenceFrameLibrary.findFrameByName(chestPoseStatusMessage.getParentFrameNameAsString()));
          latestChestFrame.update(transformToParent -> MessageTools.toEuclid(chestPoseStatusMessage.getTransformToParent(), transformToParent));
          if (isChestCurrentAndConcurrent)
             concurrentChestFrame = latestChestFrame;
@@ -78,13 +78,13 @@ public class IKRootCalculator
                                                                 MessageTools.toEuclid(pelvisPoseStatusMessage.getTransformToParent()));
          if (concurrentChestFrame != null)
          {
-            latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(concurrentChestFrame.getReferenceFrame().getParent());
+            latestCombinedPelvisAndChestFrame = new MutableReferenceFrame(concurrentChestFrame.getReferenceFrame().getParent());
             latestCombinedPelvisAndChestFrame.update(transformToParent -> copyTransform(concurrentChestFrame.getTransformToParent(), transformToParent));
          }
          else
-            latestCombinedPelvisAndChestFrame = new ModifiableReferenceFrame(syncedRobot.getChest()
-                                                                                        .getParentJoint()
-                                                                                        .getFrameAfterJoint());
+            latestCombinedPelvisAndChestFrame = new MutableReferenceFrame(syncedRobot.getChest()
+                                                                                     .getParentJoint()
+                                                                                     .getFrameAfterJoint());
          latestCombinedPelvisAndChestFrame.update(transformToParent -> updateIKChestTransform(latestCombinedPelvisAndChestFrame,
                                                                                               pelvisFramePoseVariation,
                                                                                               transformToParent));
@@ -112,7 +112,7 @@ public class IKRootCalculator
     * @param pelvisFramePoseVariation The variation in the pelvis frame's pose.
     * @param IKChestTransform       The transform to update with the new chest pose.
     */
-   private void updateIKChestTransform(ModifiableReferenceFrame IKChestFrame, FramePose3D pelvisFramePoseVariation, RigidBodyTransform IKChestTransform)
+   private void updateIKChestTransform(MutableReferenceFrame IKChestFrame, FramePose3D pelvisFramePoseVariation, RigidBodyTransform IKChestTransform)
    {
       if (pelvisFramePoseVariation.getReferenceFrame() != IKChestFrame.getReferenceFrame().getParent())
       {

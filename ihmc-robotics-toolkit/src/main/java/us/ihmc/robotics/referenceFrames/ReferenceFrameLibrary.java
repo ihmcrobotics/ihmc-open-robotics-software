@@ -14,10 +14,14 @@ import java.util.function.Consumer;
  */
 public class ReferenceFrameLibrary
 {
-   /** These frames are are always present. */
+   /**
+    * These frames are always present.
+    */
    private final ArrayList<ReferenceFrame> alwaysPresentFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> nameToAlwaysPresentFrameMap = new HashMap<>();
-   /** Lookups allow for a dynamically changing set of frames. */
+   /**
+    * Lookups allow for a dynamically changing set of frames.
+    */
    private final List<ReferenceFrameDynamicCollection> dynamicCollections = new ArrayList<>();
 
    public ReferenceFrameLibrary()
@@ -25,14 +29,10 @@ public class ReferenceFrameLibrary
       // Here so it's easier to track instances in the IDE
    }
 
-   // TODO: Add robot frames in constructor?
-   public void add(ReferenceFrame referenceFrame)
+   public void addAll(Collection<ReferenceFrame> referenceFrames)
    {
-      if (referenceFrame != null)
-      {
-         alwaysPresentFrames.add(referenceFrame);
-         nameToAlwaysPresentFrameMap.put(referenceFrame.getName(), referenceFrame);
-      }
+      alwaysPresentFrames.addAll(referenceFrames);
+      referenceFrames.forEach(referenceFrame -> nameToAlwaysPresentFrameMap.put(referenceFrame.getName(), referenceFrame));
    }
 
    /**
