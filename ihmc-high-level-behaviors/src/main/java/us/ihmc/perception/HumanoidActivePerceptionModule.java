@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningRemoteTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
@@ -31,10 +32,13 @@ public class HumanoidActivePerceptionModule
    private ContinuousPlanningRemoteTask continuousElevationMappingRemoteThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private final ContinuousPlanningParameters continuousPlanningParameters;
 
-   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters)
+   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters,
+                                         ContinuousPlanningParameters continuousPlanningParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
+      this.continuousPlanningParameters = continuousPlanningParameters;
    }
 
    public void setupForImageMessage(ROS2Helper ros2)
@@ -46,6 +50,7 @@ public class HumanoidActivePerceptionModule
    {
       LogTools.info("Initializing Active Mapping Process");
       activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
+                                                                         continuousPlanningParameters,
                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                          PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
                                                                          ros2Node, referenceFrames, () -> {}, true);
@@ -53,7 +58,7 @@ public class HumanoidActivePerceptionModule
 
    public void initializeContinuousElevationMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousElevationMappingRemoteThread = new ContinuousPlanningRemoteTask(robotModel, ros2Node, referenceFrames, perceptionConfigurationParameters);
+      continuousElevationMappingRemoteThread = new ContinuousPlanningRemoteTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)

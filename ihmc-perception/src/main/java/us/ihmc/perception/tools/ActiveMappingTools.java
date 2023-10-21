@@ -25,7 +25,7 @@ public class ActiveMappingTools
          tempPose.get(side).getOrientation().set(originalPoseToPlanFrom.get(side).getOrientation());
          tempPose.get(side).changeFrame(originalReferenceFrame);
          tempPose.get(side).getTranslation().addX(distance * segment);
-         tempPose.get(side).getTranslation().addZ(startPose.get(side).getPosition().getZ() + 0.1);
+         tempPose.get(side).getTranslation().addZ(startPose.get(side).getPosition().getZ() + 0.25);
          tempPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
 
          goalPose.get(side).set(tempPose.get(side));

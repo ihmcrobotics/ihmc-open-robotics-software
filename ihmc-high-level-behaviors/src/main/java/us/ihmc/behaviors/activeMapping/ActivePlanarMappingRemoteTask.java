@@ -27,9 +27,11 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2Topic controllerFootstepDataTopic;
 
    private ContinuousPlanner activeMappingModule;
+   private final ContinuousPlanningParameters continuousPlanningParameters;
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,
+                                        ContinuousPlanningParameters continuousPlanningParameters,
                                         ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
                                         ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
                                         ROS2Node ros2Node,
@@ -42,6 +44,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
 
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
+      this.continuousPlanningParameters = continuousPlanningParameters;
 
       activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.MAX_COVERAGE);
       publisherMap = new ROS2PublisherMap(ros2Node);
@@ -84,7 +87,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
     */
    private void updateActiveMappingPlan()
    {
-      if (configurationParameters.getActiveMapping())
+      if (continuousPlanningParameters.getActiveMapping())
       {
          if (walkingStatusMessage.get() != null)
          {

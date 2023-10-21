@@ -65,6 +65,7 @@ public class ContinuousPlanner
    {
       this.referenceFrames = humanoidReferenceFrames;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      footstepPlanner.getFootstepPlannerParameters().set(robotModel.getFootstepPlannerParameters("ForContinuousWalking"));
       active = true;
 
       switch (mode)
@@ -198,7 +199,6 @@ public class ContinuousPlanner
 
    public FootstepDataListMessage getLimitedFootstepDataListMessage(FootstepPlannerOutput plannerOutput, int count, float swingDuration, float transferDuration)
    {
-      LogTools.info("Sending Plan to Controller: {}", plannerOutput.getFootstepPlan());
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(swingDuration);
       footstepDataListMessage.setDefaultTransferDuration(transferDuration);
@@ -212,8 +212,6 @@ public class ContinuousPlanner
          PlannedFootstep footstep = plannerOutput.getFootstepPlan().getFootstep(i);
          footstep.limitFootholdVertices();
          footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
-
-         LogTools.info("First Footstep Side: {}", footstep.getRobotSide());
       }
 
       return footstepDataListMessage;
@@ -226,9 +224,6 @@ public class ContinuousPlanner
       SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
       startPose.get(secondImminentFootstepSide.getOppositeSide()).set(firstImminentFootstep);
       startPose.get(secondImminentFootstepSide).set(secondImminentFootstep);
-
-      LogTools.info("New Stance for Planning: {}", secondImminentFootstepSide);
-
       return startPose;
    }
 

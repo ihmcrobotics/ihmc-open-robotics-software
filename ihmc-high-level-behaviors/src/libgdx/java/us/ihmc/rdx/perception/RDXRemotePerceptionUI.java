@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
@@ -22,6 +23,7 @@ public class RDXRemotePerceptionUI
    private RDXPanel panel;
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
+   private final ContinuousPlanningParameters continuousPlanningParameters = new ContinuousPlanningParameters();
 
    private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
@@ -78,5 +80,10 @@ public class RDXRemotePerceptionUI
    public PerceptionConfigurationParameters getPerceptionConfigurationParameters()
    {
       return perceptionConfigurationParameters;
+   }
+
+   public ContinuousPlanningParameters getContinuousPlanningParameters()
+   {
+      return continuousPlanningParameters;
    }
 }
