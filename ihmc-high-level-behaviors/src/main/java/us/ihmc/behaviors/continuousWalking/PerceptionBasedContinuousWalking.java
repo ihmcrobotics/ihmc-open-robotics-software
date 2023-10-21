@@ -2,6 +2,7 @@ package us.ihmc.behaviors.continuousWalking;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -16,6 +17,7 @@ public class PerceptionBasedContinuousWalking
    private final ROS2SyncedRobotModel syncedRobot;
    private TerrainPerceptionProcessWithDriver perceptionTask;
    private HumanoidActivePerceptionModule activePerceptionModule;
+   private final ContinuousPlanningParameters continuousPlanningParameters = new ContinuousPlanningParameters();
 
    public PerceptionBasedContinuousWalking(DRCRobotModel robotModel, String realsenseSerialNumber)
    {
@@ -34,7 +36,8 @@ public class PerceptionBasedContinuousWalking
                                                               syncedRobot::update);
       perceptionTask.run();
 
-      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
+      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(),
+                                                                  continuousPlanningParameters);
       activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
 
       ThreadTools.sleepForever();
