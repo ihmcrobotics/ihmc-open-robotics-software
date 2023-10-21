@@ -9,10 +9,9 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
+import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,11 +29,11 @@ public class RDXAffordanceTemplateFrames
    private final List<Color> colors;
    private int colorIndex = 0;
    private boolean changedColor = false;
-   private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
+   private final SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
-   private final SideDependentList<List<HandConfiguration>> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<List<String>> handConfigurations = new SideDependentList<>();
    private final SideDependentList<List<Boolean>> arePosesSet = new SideDependentList<>();
-   private HandConfiguration selectedFrameConfiguration;
+   private String selectedFrameConfiguration;
    private int selectedIndex = -1;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
@@ -42,7 +41,7 @@ public class RDXAffordanceTemplateFrames
    private final RDXAffordanceTemplateEditorStatus editorStatus;
    private final RDXActiveAffordanceMenu menu;
 
-   public RDXAffordanceTemplateFrames(SideDependentList<RDXInteractableSakeGripper> interactableHands,
+   public RDXAffordanceTemplateFrames(SideDependentList<RDXInteractableAffordanceTemplateHand> interactableHands,
                                       SideDependentList<RigidBodyTransform> handTransformsToWorld,
                                       SideDependentList<FramePose3D> handPoses,
                                       RigidBodyTransform objectTransformToWorld,
@@ -189,6 +188,7 @@ public class RDXAffordanceTemplateFrames
             index = 0;
          }
       }
+      activeSide = editorStatus.getActiveSide();
       ImGui.text("Hand Configuration: " + (selectedFrameConfiguration == null ? "" : selectedFrameConfiguration.toString()));
       ImGui.sameLine();
       if (ImGui.button(labels.get("Set") + "##hand" + labelId) && editorStatus.getActiveMenu().equals(this.menu))
@@ -296,20 +296,21 @@ public class RDXAffordanceTemplateFrames
          // if hand configuration has been assigned to this frame
          if (handConfigurations.get(side).get(index) != null)
          {
-            interactableHands.get(side).setGripperToConfiguration(handConfigurations.get(side).get(index)); // update hand configuration when teleporting
-            selectedFrameConfiguration = handConfigurations.get(side).get(index);
+            interactableHands.get(side).setToConfiguration(handConfigurations.get(side).get(index)); // update hand configuration when teleporting
+            if (side == editorStatus.getActiveSide())
+               selectedFrameConfiguration = handConfigurations.get(side).get(index);
          }
-         else
+         else if (side == editorStatus.getActiveSide())
+         {
             selectedFrameConfiguration = null;
+         }
 
-         if (side == editorStatus.getActiveSide())
-            interactableHands.get(side).setSelected(true);
-         else
-            interactableHands.get(side).setSelected(false);
+         interactableHands.get(side).setSelected(side == editorStatus.getActiveSide());
       }
       selectedIndex = index;
       // update pose of the object
       objectTransformToWorld.set(objectTransforms.get(selectedIndex));
+      editorStatus.disableMirror();
    }
 
    public void addObjectTransform(RigidBodyTransform transform)
@@ -317,7 +318,7 @@ public class RDXAffordanceTemplateFrames
       objectTransforms.add(transform);
    }
 
-   public void addHandConfiguration(HandConfiguration configuration, RobotSide side)
+   public void addHandConfiguration(String configuration, RobotSide side)
    {
       handConfigurations.get(side).add(configuration);
    }
@@ -365,7 +366,7 @@ public class RDXAffordanceTemplateFrames
       return arePosesSet;
    }
 
-   public SideDependentList<List<HandConfiguration>> getHandConfigurations()
+   public SideDependentList<List<String>> getHandConfigurations()
    {
       return handConfigurations;
    }

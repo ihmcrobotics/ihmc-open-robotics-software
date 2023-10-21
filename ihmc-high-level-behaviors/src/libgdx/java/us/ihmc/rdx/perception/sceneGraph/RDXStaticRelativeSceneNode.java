@@ -1,61 +1,45 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
-import java.util.Set;
-
-public class RDXStaticRelativeSceneNode extends StaticRelativeSceneNode implements RDXSceneNodeInterface
+public class RDXStaticRelativeSceneNode extends RDXPredefinedRigidBodySceneNode
 {
-   private final RDXPredefinedRigidBodySceneNodeBasics predefinedRigidBodySceneNodeBasics;
+   private final StaticRelativeSceneNode staticRelativeSceneNode;
    private final ImGuiInputDoubleWrapper distanceToDisableTrackingInput;
 
-   public RDXStaticRelativeSceneNode(StaticRelativeSceneNode nodeToCopy, RDX3DPanel panel3D)
+   public RDXStaticRelativeSceneNode(StaticRelativeSceneNode staticRelativeSceneNode, RDX3DPanel panel3D)
    {
-      super(nodeToCopy.getID(),
-            nodeToCopy.getName(),
-            nodeToCopy.getSceneGraphIDToNodeMap(),
-            nodeToCopy.getInitialParentNodeID(),
-            nodeToCopy.getInitialTransformToParent(),
-            nodeToCopy.getVisualModelFilePath(),
-            nodeToCopy.getVisualModelToNodeFrameTransform(),
-            nodeToCopy.getDistanceToDisableTracking());
+      super(staticRelativeSceneNode, panel3D);
+      this.staticRelativeSceneNode = staticRelativeSceneNode;
 
-      predefinedRigidBodySceneNodeBasics = new RDXPredefinedRigidBodySceneNodeBasics(this, panel3D);
-
-      distanceToDisableTrackingInput = new ImGuiInputDoubleWrapper("Distance to disable tracking", "%.2f", 0.1, 0.5,
-                                                                   this::getDistanceToDisableTracking,
-                                                                   this::setDistanceToDisableTracking,
-                                                                   this::freezeFromModification);
+      distanceToDisableTrackingInput = new ImGuiInputDoubleWrapper("Distance to disable tracking",
+                                                                   "%.2f",
+                                                                   0.1,
+                                                                   0.5,
+                                                                   staticRelativeSceneNode::getDistanceToDisableTracking,
+                                                                   staticRelativeSceneNode::setDistanceToDisableTracking,
+                                                                   staticRelativeSceneNode::freezeFromModification);
       distanceToDisableTrackingInput.setWidgetWidth(100.0f);
    }
 
    @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      predefinedRigidBodySceneNodeBasics.update(modificationQueue);
-   }
+      super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
-   @Override
-   public void renderImGuiWidgets()
-   {
-      predefinedRigidBodySceneNodeBasics.renderImGuiWidgets();
-
-      ImGui.text("Current distance: %.2f".formatted(getCurrentDistance()));
+      ImGui.text("Current distance: %.2f".formatted(staticRelativeSceneNode.getCurrentDistance()));
       ImGui.sameLine();
       distanceToDisableTrackingInput.render();
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   public StaticRelativeSceneNode getSceneNode()
    {
-      predefinedRigidBodySceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
+      return staticRelativeSceneNode;
    }
 }

@@ -135,7 +135,7 @@ public class RDXTeleoperationManager extends RDXPanel
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
       robotModel = communicationHelper.getRobotModel();
-      robotHasArms = robotModel.getRobotVersion().hasArms();
+      robotHasArms = robotModel.getRobotVersion().hasBothArms();
       ros2Helper = communicationHelper.getControllerHelper();
       this.yoVariableClientHelper = yoVariableClientHelper;
 

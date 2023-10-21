@@ -10,7 +10,7 @@ import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.*;
@@ -175,7 +175,11 @@ public class SceneGraph
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
    {
-      Function<String, ReferenceFrame> frameLookup = nodeName -> namesToNodesMap.get(nodeName).getNodeFrame();
+      Function<String, ReferenceFrame> frameLookup = nodeName ->
+      {
+         SceneNode sceneNode = namesToNodesMap.get(nodeName);
+         return sceneNode == null ? null : sceneNode.getNodeFrame();
+      };
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 }
