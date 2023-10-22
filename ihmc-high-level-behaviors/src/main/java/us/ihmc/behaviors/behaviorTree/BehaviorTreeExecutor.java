@@ -17,10 +17,8 @@ public class BehaviorTreeExecutor
    private final BehaviorTreeState behaviorTreeState;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
    private final BehaviorTreeExecutorSubtreeRebuilder treeRebuilder;
-   private final BehaviorTreeNodeExecutor rootNode;
 
-   public BehaviorTreeExecutor(BehaviorTreeState behaviorTreeState,
-                               DRCRobotModel robotModel,
+   public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ReferenceFrameLibrary referenceFrameLibrary,
                                WalkingFootstepTracker footstepTracker,
@@ -30,7 +28,6 @@ public class BehaviorTreeExecutor
                                WalkingControllerParameters walkingControllerParameters,
                                ROS2ControllerHelper ros2ControllerHelper)
    {
-
       nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel,
                                                         syncedRobot,
                                                         referenceFrameLibrary,
@@ -40,21 +37,25 @@ public class BehaviorTreeExecutor
                                                         footstepPlannerParameters,
                                                         walkingControllerParameters,
                                                         ros2ControllerHelper);
-      treeRebuilder = new BehaviorTreeExecutorSubtreeRebuilder(rootNode);
+      treeRebuilder = new BehaviorTreeExecutorSubtreeRebuilder(this::getRootNode);
 
-      /// FIXME Flipped abstraction probabbly
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
    }
 
    public void update()
    {
-      rootNode.clock();
+      getRootNode().clock();
 
-      rootNode.tick();
+      getRootNode().tick();
    }
 
    public BehaviorTreeNodeExecutor getRootNode()
    {
-      return rootNode;
+      return (BehaviorTreeNodeExecutor) behaviorTreeState.getRootNode();
+   }
+
+   public BehaviorTreeState getState()
+   {
+      return behaviorTreeState;
    }
 }

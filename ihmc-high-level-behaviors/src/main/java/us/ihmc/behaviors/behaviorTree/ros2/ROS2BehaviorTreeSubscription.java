@@ -81,7 +81,7 @@ public class ROS2BehaviorTreeSubscription
       // On the robot side, this will always get updated because there is no operator.
       if (!behaviorTreeState.getLocalTreeFrozen())
       {
-         modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getReplacementModification(localNode.getState().getID()));
+         modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getReplacementModification(localNode.getState().getID(), localParentNode));
       }
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())

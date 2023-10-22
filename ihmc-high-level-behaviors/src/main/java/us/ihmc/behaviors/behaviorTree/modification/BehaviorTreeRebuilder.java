@@ -12,7 +12,7 @@ public interface BehaviorTreeRebuilder
    @Nullable
    BehaviorTreeNodeStateSupplier getReplacementNode(long id);
 
-   BehaviorTreeStateModification getReplacementModification(long id);
+   BehaviorTreeStateModification getReplacementModification(long id, BehaviorTreeNodeStateSupplier parent);
 
    BehaviorTreeStateModification getClearSubtreeModification();
 

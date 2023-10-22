@@ -26,6 +26,11 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
       getState().setIsActive(true);
    }
 
+   public void destroy()
+   {
+
+   }
+
    public List<BehaviorTreeNodeExecutor> getChildren()
    {
       return children;
