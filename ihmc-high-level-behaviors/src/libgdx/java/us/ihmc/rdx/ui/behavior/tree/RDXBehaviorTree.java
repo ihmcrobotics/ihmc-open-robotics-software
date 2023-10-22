@@ -49,8 +49,6 @@ public class RDXBehaviorTree
                           ReferenceFrameLibrary referenceFrameLibrary,
                           ROS2ControllerPublishSubscribeAPI ros2)
    {
-      // TODO: Do we create the publishers and subscribers here?
-
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
       treeRebuilder = new RDXBehaviorTreeSubtreeRebuilder(rootNode);
 
