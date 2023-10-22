@@ -39,6 +39,8 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
    public void destroy()
    {
-      // TODO
+      ros2BehaviorTreeState.destroy();
+
+      super.destroy();
    }
 }
