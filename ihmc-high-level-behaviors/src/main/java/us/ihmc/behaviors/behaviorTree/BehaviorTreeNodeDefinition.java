@@ -12,7 +12,7 @@ import java.util.List;
  * The base definition of a behavior tree node is just a
  * human readable description and a list of children.
  */
-public class BehaviorTreeNodeDefinition
+public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
    /** A human readable description of what the node does */
    private String description = "";
@@ -70,6 +70,7 @@ public class BehaviorTreeNodeDefinition
       return description;
    }
 
+   @Override
    public List<BehaviorTreeNodeDefinition> getChildren()
    {
       return children;

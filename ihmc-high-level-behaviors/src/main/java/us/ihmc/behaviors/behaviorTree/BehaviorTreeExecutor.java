@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExecutorSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -16,7 +16,7 @@ public class BehaviorTreeExecutor
 {
    private final BehaviorTreeState behaviorTreeState;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
-   private final BehaviorTreeExecutorSubtreeRebuilder treeRebuilder;
+   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
 
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
@@ -37,7 +37,7 @@ public class BehaviorTreeExecutor
                                                         footstepPlannerParameters,
                                                         walkingControllerParameters,
                                                         ros2ControllerHelper);
-      treeRebuilder = new BehaviorTreeExecutorSubtreeRebuilder(this::getRootNode);
+      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
    }

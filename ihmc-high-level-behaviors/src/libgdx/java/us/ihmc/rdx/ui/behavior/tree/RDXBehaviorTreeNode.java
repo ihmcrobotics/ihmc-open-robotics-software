@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -8,7 +10,7 @@ import us.ihmc.rdx.imgui.ImStringWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeStateSupplier
+public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeExtension<RDXBehaviorTreeNode, BehaviorTreeNodeState>, BehaviorTreeNodeStateSupplier
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImStringWrapper descriptionWrapper;
@@ -25,6 +27,7 @@ public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeStateSuppli
       }
    }
 
+   @Override
    public void destroy()
    {
 
@@ -38,5 +41,11 @@ public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeStateSuppli
    public List<RDXBehaviorTreeNode> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public BehaviorTreeNodeState getExtendedNode()
+   {
+      return getState();
    }
 }

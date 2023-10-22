@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
+
 import java.util.function.Consumer;
 
 /**
@@ -7,7 +9,7 @@ import java.util.function.Consumer;
  * which gets passed down from BehaviorTree's modifyTree method and serves
  * to queue up tree modifications.
  */
-public interface BehaviorTreeStateModificationQueue extends Consumer<BehaviorTreeStateModification>
+public interface BehaviorTreeModificationQueue<T extends BehaviorTreeNode> extends Consumer<BehaviorTreeModification<T>>
 {
 
 }
