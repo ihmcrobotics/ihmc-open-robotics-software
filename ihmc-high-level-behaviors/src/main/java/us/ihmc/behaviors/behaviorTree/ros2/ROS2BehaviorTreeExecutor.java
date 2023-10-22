@@ -1,35 +1,52 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
+import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
-
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
 
-   private final BehaviorTreeNodeExecutor rootNode;
-
-   public BehaviorTreeExecutor(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                               ROS2ActorDesignation ros2ActorDesignation)
+   public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
+                                   ROS2ActorDesignation ros2ActorDesignation,
+                                   DRCRobotModel robotModel,
+                                   ROS2SyncedRobotModel syncedRobot,
+                                   ReferenceFrameLibrary referenceFrameLibrary,
+                                   WalkingFootstepTracker footstepTracker,
+                                   SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators,
+                                   FootstepPlanningModule footstepPlanner,
+                                   FootstepPlannerParametersBasics footstepPlannerParameters,
+                                   WalkingControllerParameters walkingControllerParameters)
    {
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(ros2PublishSubscribeAPI,
-                                                        ros2ActorDesignation);
+      super(robotModel,
+            syncedRobot,
+            referenceFrameLibrary,
+            footstepTracker,
+            handWrenchCalculators,
+            footstepPlanner,
+            footstepPlannerParameters,
+            walkingControllerParameters,
+            ros2ControllerHelper);
 
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), ros2ControllerHelper, ros2ActorDesignation);
    }
 
    public void update()
    {
       ros2BehaviorTreeState.updateSubscription();
 
-      rootNode.clock();
-
-      rootNode.tick();
-
+      super.update();
 
       ros2BehaviorTreeState.updatePublication();
-
    }
 }

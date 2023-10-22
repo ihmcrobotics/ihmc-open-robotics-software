@@ -1,24 +1,21 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutorSupplier;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
 
 import java.util.HashMap;
 
 public class BehaviorTreeExecutorSubtreeRebuilder implements BehaviorTreeRebuilder
 {
-   private final BehaviorTreeNodeExecutor subtreeToRebuild;
-
    private final HashMap<Long, BehaviorTreeNodeExecutor> idToNodesMap = new HashMap<>();
 
    private final BehaviorTreeExecutorModification clearSubtreeModification;
    private final BehaviorTreeExecutorModification destroyLeftoversModification;
 
-   public BehaviorTreeExecutorSubtreeRebuilder(BehaviorTreeNodeExecutor subtreeToRebuild)
+   public BehaviorTreeExecutorSubtreeRebuilder(BehaviorTreeNodeExecutorSupplier subtreeNodeSupplier)
    {
-      this.subtreeToRebuild = subtreeToRebuild;
-
-      clearSubtreeModification = () -> clearChildren(subtreeToRebuild);
+      clearSubtreeModification = () -> clearChildren(subtreeNodeSupplier.getExecutor());
 
       destroyLeftoversModification = () ->
       {
@@ -51,9 +48,9 @@ public class BehaviorTreeExecutorSubtreeRebuilder implements BehaviorTreeRebuild
    }
 
    @Override
-   public BehaviorTreeStateModification getReplacementModification(long id)
+   public BehaviorTreeStateModification getReplacementModification(long id, BehaviorTreeNodeStateSupplier parent)
    {
-      return new BehaviorTreeExecutorNodeReplacement(idToNodesMap.remove(id), subtreeToRebuild);
+      return new BehaviorTreeExecutorNodeReplacement(idToNodesMap.remove(id), (BehaviorTreeNodeExecutor) parent);
    }
 
    @Override
