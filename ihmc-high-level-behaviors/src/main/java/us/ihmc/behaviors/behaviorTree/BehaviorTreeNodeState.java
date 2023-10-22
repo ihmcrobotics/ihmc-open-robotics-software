@@ -10,7 +10,8 @@ import java.util.List;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public abstract class BehaviorTreeNodeState extends FreezableNode implements BehaviorTreeNodeDefinitionSupplier
+public abstract class BehaviorTreeNodeState extends FreezableNode
+      implements BehaviorTreeNodeExtension<BehaviorTreeNodeState, BehaviorTreeNodeDefinition>, BehaviorTreeNodeDefinitionSupplier
 {
    private final BehaviorTreeNodeDefinition definition;
 
@@ -48,6 +49,7 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
       isActive = message.getIsActive();
    }
 
+   @Override
    public void destroy()
    {
 
@@ -78,5 +80,11 @@ public abstract class BehaviorTreeNodeState extends FreezableNode implements Beh
    public BehaviorTreeNodeDefinition getDefinition()
    {
       return definition;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getExtendedNode()
+   {
+      return getDefinition();
    }
 }

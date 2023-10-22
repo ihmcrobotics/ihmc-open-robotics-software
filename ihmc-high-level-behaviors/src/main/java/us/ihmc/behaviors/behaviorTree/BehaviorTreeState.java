@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModification;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -20,14 +20,14 @@ import java.util.function.Supplier;
 public class BehaviorTreeState
 {
    private final MutableLong nextID = new MutableLong(0);
-   private final Queue<BehaviorTreeStateModification> queuedModifications = new LinkedList<>();
+   private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
-   private final BehaviorTreeRebuilder treeRebuilder;
+   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeStateSupplier> rootNodeSupplier;
    private boolean localTreeFrozen = false;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
-                            BehaviorTreeRebuilder treeRebuilder,
+                            BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
                             Supplier<BehaviorTreeNodeStateSupplier> rootNodeSupplier)
    {
       this.nodeStateBuilder = nodeStateBuilder;
@@ -40,7 +40,7 @@ public class BehaviorTreeState
 
    }
 
-   public void modifyTree(Consumer<BehaviorTreeStateModificationQueue> modifier)
+   public void modifyTree(Consumer<BehaviorTreeModificationQueue> modifier)
    {
       modifier.accept(queuedModifications::add);
 
@@ -48,7 +48,7 @@ public class BehaviorTreeState
 
       while (!queuedModifications.isEmpty())
       {
-         BehaviorTreeStateModification modification = queuedModifications.poll();
+         BehaviorTreeModification modification = queuedModifications.poll();
          modification.performOperation();
       }
 
@@ -87,7 +87,7 @@ public class BehaviorTreeState
       return nodeStateBuilder;
    }
 
-   public BehaviorTreeRebuilder getTreeRebuilder()
+   public BehaviorTreeExtensionSubtreeRebuilder getTreeRebuilder()
    {
       return treeRebuilder;
    }

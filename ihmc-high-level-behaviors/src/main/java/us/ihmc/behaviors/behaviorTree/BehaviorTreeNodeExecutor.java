@@ -3,7 +3,8 @@ package us.ihmc.behaviors.behaviorTree;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateSupplier
+public abstract class BehaviorTreeNodeExecutor
+      implements BehaviorTreeNodeExtension<BehaviorTreeNodeExecutor, BehaviorTreeNodeState>, BehaviorTreeNodeStateSupplier
 {
    private final List<BehaviorTreeNodeExecutor> children = new ArrayList<>();
 
@@ -26,6 +27,7 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
       getState().setIsActive(true);
    }
 
+   @Override
    public void destroy()
    {
 
@@ -34,5 +36,11 @@ public abstract class BehaviorTreeNodeExecutor implements BehaviorTreeNodeStateS
    public List<BehaviorTreeNodeExecutor> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public BehaviorTreeNodeState getExtendedNode()
+   {
+      return getState();
    }
 }
