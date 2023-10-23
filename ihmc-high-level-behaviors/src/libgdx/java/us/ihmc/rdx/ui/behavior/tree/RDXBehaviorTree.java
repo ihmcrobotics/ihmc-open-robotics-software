@@ -15,6 +15,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeR
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddition;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -47,9 +48,17 @@ public class RDXBehaviorTree
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
                           ReferenceFrameLibrary referenceFrameLibrary,
+                          FootstepPlannerParametersBasics footstepPlannerParametersBasics,
                           ROS2ControllerPublishSubscribeAPI ros2)
    {
-      nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
+      nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel,
+                                                   syncedRobot,
+                                                   selectionCollisionModel,
+                                                   baseUI,
+                                                   panel3D,
+                                                   referenceFrameLibrary,
+                                                   footstepPlannerParametersBasics,
+                                                   ros2);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
