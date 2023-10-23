@@ -34,6 +34,7 @@ public class OusterDepthImagePublisher
    private final RestartableThread publishDepthThread;
    private final Lock depthPublishLock = new ReentrantLock();
    private final Condition newDepthImageAvailable = depthPublishLock.newCondition();
+   private boolean destroying = false;
 
    public OusterDepthImagePublisher(NettyOuster ouster, ROS2Topic<ImageMessage> depthTopic)
    {
@@ -47,9 +48,7 @@ public class OusterDepthImagePublisher
          depthPublishLock.lock();
          try
          {
-            while (nextCpuDepthImage == null ||
-                   nextCpuDepthImage.isEmpty() ||
-                   nextCpuDepthImage.getSequenceNumber() == lastSequenceNumber)
+            while (!destroying && (nextCpuDepthImage == null || nextCpuDepthImage.isEmpty() || nextCpuDepthImage.getSequenceNumber() == lastSequenceNumber))
             {
                newDepthImageAvailable.await();
             }
@@ -116,7 +115,17 @@ public class OusterDepthImagePublisher
 
    public void destroy()
    {
-      stopDepth();
+      destroying = true;
+      depthPublishLock.lock();
+      try
+      {
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
+      publishDepthThread.blockingStop();
 
       nextCpuDepthImage.destroy();
 
