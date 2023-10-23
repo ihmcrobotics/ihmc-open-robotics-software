@@ -45,8 +45,6 @@ public class FootstepPlanActionState extends BehaviorActionState
    {
       super.toMessage(message.getActionState());
 
-      definition.toMessage(message.getDefinition());
-
       message.getFootsteps().clear();
       for (FootstepPlanActionFootstepState footstep : footsteps)
       {
@@ -57,8 +55,6 @@ public class FootstepPlanActionState extends BehaviorActionState
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
 
       footsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())

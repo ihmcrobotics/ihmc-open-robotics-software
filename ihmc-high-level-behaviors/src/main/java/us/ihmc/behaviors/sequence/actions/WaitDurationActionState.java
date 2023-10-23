@@ -17,15 +17,11 @@ public class WaitDurationActionState extends BehaviorActionState
    public void toMessage(WaitDurationActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(WaitDurationActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override
