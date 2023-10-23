@@ -105,18 +105,9 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private DualBlackflyCamera createDualBlackflyCamera(RobotSide side, SpinnakerBlackfly spinnakerBlackfly)
    {
-      Supplier<ReferenceFrame> sensorFrameSupplier = new Supplier<ReferenceFrame>()
-      {
-         @Override
-         public ReferenceFrame get()
-         {
-            return syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(side);
-         }
-      };
-
       return new DualBlackflyCamera(robotModel,
                                     side,
-                                    sensorFrameSupplier,
+                                    syncedRobot::getReferenceFrames,
                                     ros2Node,
                                     spinnakerBlackfly,
                                     blackflyLensProperties,
