@@ -10,16 +10,16 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestruction;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddition;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeSubtreeDestruction;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeNodeAddition;
-import us.ihmc.rdx.ui.behavior.tree.modification.RDXBehaviorTreeSubtreeRebuilder;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -32,7 +32,7 @@ public class RDXBehaviorTree
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final BehaviorTreeState behaviorTreeState;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
-   private final RDXBehaviorTreeSubtreeRebuilder treeRebuilder;
+   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private RDXBehaviorTreeNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -50,7 +50,7 @@ public class RDXBehaviorTree
                           ROS2ControllerPublishSubscribeAPI ros2)
    {
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
-      treeRebuilder = new RDXBehaviorTreeSubtreeRebuilder(rootNode);
+      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
    }
@@ -72,7 +72,7 @@ public class RDXBehaviorTree
       // Delete the entire tree. We are starting over
       behaviorTreeState.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new RDXBehaviorTreeSubtreeDestruction(rootNode));
+         modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestruction<>(rootNode));
 
          JSONFileTools.load(file, jsonNode ->
          {
@@ -81,7 +81,7 @@ public class RDXBehaviorTree
       });
    }
 
-   public RDXBehaviorTreeNode loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode parentNode, BehaviorTreeStateModificationQueue modificationQueue)
+   public RDXBehaviorTreeNode loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode parentNode, BehaviorTreeModificationQueue modificationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -92,7 +92,7 @@ public class RDXBehaviorTree
 
       if (parentNode != null)
       {
-         modificationQueue.accept(new RDXBehaviorTreeNodeAddition(node, parentNode));
+         modificationQueue.accept(new BehaviorTreeNodeExtensionAddition<>(node, parentNode));
       }
 
       JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->

@@ -87,4 +87,10 @@ public abstract class BehaviorTreeNodeState extends FreezableNode
    {
       return getDefinition();
    }
+
+   @Override
+   public BehaviorTreeNodeState getState()
+   {
+      return this;
+   }
 }

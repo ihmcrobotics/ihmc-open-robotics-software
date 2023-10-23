@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtensionSupplier;
 
@@ -19,7 +18,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
 
       destroyLeftoversModification = () ->
       {
-         for (BehaviorTreeNodeExecutor leftover : idToNodesMap.values())
+         for (BehaviorTreeNodeExtension leftover : idToNodesMap.values())
          {
             leftover.getState().destroy();
             leftover.destroy();
