@@ -10,16 +10,18 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 public class RDXWaitDurationAction extends RDXBehaviorAction
 {
-   private final WaitDurationActionState state = new WaitDurationActionState();
-   private final WaitDurationActionDefinition definition = state.getDefinition();
+   private final WaitDurationActionDefinition definition = new WaitDurationActionDefinition();
+   private final WaitDurationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitDurationWidget = new ImDoubleWrapper(definition::getWaitDuration,
                                                                           definition::setWaitDuration,
                                                                           imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
 
-   public RDXWaitDurationAction(RDXBehaviorActionSequenceEditor editor)
+   public RDXWaitDurationAction(long id, RDXBehaviorActionSequenceEditor editor)
    {
       super(editor);
+
+      state = new WaitDurationActionState(id, definition);
    }
 
    @Override

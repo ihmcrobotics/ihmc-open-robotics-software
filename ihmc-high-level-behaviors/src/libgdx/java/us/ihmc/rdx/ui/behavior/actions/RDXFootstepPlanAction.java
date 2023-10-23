@@ -29,8 +29,8 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
    private final FootstepPlanActionState state;
-   private final FootstepPlanActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper swingDurationWidget;
@@ -41,7 +41,8 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final Notification userRemovedFootstep = new Notification();
    private boolean frameIsChildOfWorld = false;
 
-   public RDXFootstepPlanAction(RDXBehaviorActionSequenceEditor editor,
+   public RDXFootstepPlanAction(long id,
+                                RDXBehaviorActionSequenceEditor editor,
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
@@ -53,8 +54,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      state = new FootstepPlanActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new FootstepPlanActionState(id, definition, referenceFrameLibrary);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,

@@ -38,8 +38,8 @@ import java.util.List;
 
 public class RDXChestOrientationAction extends RDXBehaviorAction
 {
+   private final ChestOrientationActionDefinition definition = new ChestOrientationActionDefinition();
    private final ChestOrientationActionState state;
-   private final ChestOrientationActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
@@ -62,7 +62,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    private final Throttler throttler = new Throttler().setFrequency(10.0);
    private boolean wasConcurrent = false;
 
-   public RDXChestOrientationAction(RDXBehaviorActionSequenceEditor editor,
+   public RDXChestOrientationAction(long id,
+                                    RDXBehaviorActionSequenceEditor editor,
                                     RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
@@ -74,8 +75,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
 
       this.ros2 = ros2;
 
-      state = new ChestOrientationActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new ChestOrientationActionState(id, definition, referenceFrameLibrary);
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getChestToParentTransform());
       poseGizmo.create(panel3D);

@@ -15,8 +15,8 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
    private final DRCRobotModel robotModel;
-   private final ArmJointAnglesActionState state = new ArmJointAnglesActionState();
-   private final ArmJointAnglesActionDefinition definition = state.getDefinition();
+   private final ArmJointAnglesActionDefinition definition = new ArmJointAnglesActionDefinition();
+   private final ArmJointAnglesActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
@@ -25,11 +25,13 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                                                 definition::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   public RDXArmJointAnglesAction(RDXBehaviorActionSequenceEditor editor, DRCRobotModel robotModel)
+   public RDXArmJointAnglesAction(long id, RDXBehaviorActionSequenceEditor editor, DRCRobotModel robotModel)
    {
       super(editor);
 
       this.robotModel = robotModel;
+
+      state = new ArmJointAnglesActionState(id, definition);
 
       int c = 0;
       configurations[c++] = ArmJointAnglesActionDefinition.CUSTOM_ANGLES_NAME;
