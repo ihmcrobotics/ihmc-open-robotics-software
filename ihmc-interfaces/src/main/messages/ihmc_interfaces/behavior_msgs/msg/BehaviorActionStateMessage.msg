@@ -12,3 +12,9 @@ bool is_next_for_execution
 
 # If the action is to be executed concurrently
 bool is_to_be_executed_concurrently
+
+# If the node is able to execution
+bool can_execute
+
+# If the node is currently executing
+bool is_executing

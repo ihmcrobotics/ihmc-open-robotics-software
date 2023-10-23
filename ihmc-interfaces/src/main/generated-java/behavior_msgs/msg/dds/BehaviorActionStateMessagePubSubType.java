@@ -15,7 +15,7 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7b9c7fddbc192a2857a32484d7831d50d8252a7c44b42ada588f1faeb762948f";
+   		return "e5837b128b5e246454e827ebe8a7e685c91d85f3966227c51219406b0807ee4c";
    }
    
    @Override
@@ -62,6 +62,10 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -89,6 +93,12 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -104,6 +114,10 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_7(data.getIsToBeExecutedConcurrently());
 
+      cdr.write_type_7(data.getCanExecute());
+
+      cdr.write_type_7(data.getIsExecuting());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -117,6 +131,10 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       	
       data.setIsToBeExecutedConcurrently(cdr.read_type_7());
       	
+      data.setCanExecute(cdr.read_type_7());
+      	
+      data.setIsExecuting(cdr.read_type_7());
+      	
 
    }
 
@@ -129,6 +147,8 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
       ser.write_type_7("is_to_be_executed_concurrently", data.getIsToBeExecutedConcurrently());
+      ser.write_type_7("can_execute", data.getCanExecute());
+      ser.write_type_7("is_executing", data.getIsExecuting());
    }
 
    @Override
@@ -140,6 +160,8 @@ public class BehaviorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setActionIndex(ser.read_type_2("action_index"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
       data.setIsToBeExecutedConcurrently(ser.read_type_7("is_to_be_executed_concurrently"));
+      data.setCanExecute(ser.read_type_7("can_execute"));
+      data.setIsExecuting(ser.read_type_7("is_executing"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorActionStateMessage src, behavior_msgs.msg.dds.BehaviorActionStateMessage dest)

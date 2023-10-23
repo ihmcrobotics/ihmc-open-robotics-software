@@ -28,6 +28,14 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
             * If the action is to be executed concurrently
             */
    public boolean is_to_be_executed_concurrently_;
+   /**
+            * If the node is able to execution
+            */
+   public boolean can_execute_;
+   /**
+            * If the node is currently executing
+            */
+   public boolean is_executing_;
 
    public BehaviorActionStateMessage()
    {
@@ -50,6 +58,10 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
       is_next_for_execution_ = other.is_next_for_execution_;
 
       is_to_be_executed_concurrently_ = other.is_to_be_executed_concurrently_;
+
+      can_execute_ = other.can_execute_;
+
+      is_executing_ = other.is_executing_;
 
    }
 
@@ -122,6 +134,36 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
       return is_to_be_executed_concurrently_;
    }
 
+   /**
+            * If the node is able to execution
+            */
+   public void setCanExecute(boolean can_execute)
+   {
+      can_execute_ = can_execute;
+   }
+   /**
+            * If the node is able to execution
+            */
+   public boolean getCanExecute()
+   {
+      return can_execute_;
+   }
+
+   /**
+            * If the node is currently executing
+            */
+   public void setIsExecuting(boolean is_executing)
+   {
+      is_executing_ = is_executing;
+   }
+   /**
+            * If the node is currently executing
+            */
+   public boolean getIsExecuting()
+   {
+      return is_executing_;
+   }
+
 
    public static Supplier<BehaviorActionStateMessagePubSubType> getPubSubType()
    {
@@ -149,6 +191,10 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_to_be_executed_concurrently_, other.is_to_be_executed_concurrently_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.can_execute_, other.can_execute_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_executing_, other.is_executing_, epsilon)) return false;
+
 
       return true;
    }
@@ -171,6 +217,10 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
 
       if(this.is_to_be_executed_concurrently_ != otherMyClass.is_to_be_executed_concurrently_) return false;
 
+      if(this.can_execute_ != otherMyClass.can_execute_) return false;
+
+      if(this.is_executing_ != otherMyClass.is_executing_) return false;
+
 
       return true;
    }
@@ -190,7 +240,11 @@ public class BehaviorActionStateMessage extends Packet<BehaviorActionStateMessag
       builder.append("is_next_for_execution=");
       builder.append(this.is_next_for_execution_);      builder.append(", ");
       builder.append("is_to_be_executed_concurrently=");
-      builder.append(this.is_to_be_executed_concurrently_);
+      builder.append(this.is_to_be_executed_concurrently_);      builder.append(", ");
+      builder.append("can_execute=");
+      builder.append(this.can_execute_);      builder.append(", ");
+      builder.append("is_executing=");
+      builder.append(this.is_executing_);
       builder.append("}");
       return builder.toString();
    }

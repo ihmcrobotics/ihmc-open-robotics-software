@@ -1,0 +1,37 @@
+#ifndef __behavior_msgs__msg__BehaviorActionSequenceStateMessage__idl__
+#define __behavior_msgs__msg__BehaviorActionSequenceStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorActionSequenceDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorActionSequenceStateMessage_")
+      struct BehaviorActionSequenceStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::BehaviorActionSequenceDefinitionMessage definition;
+        /**
+         * If the sequence is currently set to proceed automatically
+         */
+        boolean automatic_execution;
+        /**
+         * The index of the action that is set to execute next
+         */
+        unsigned short execution_next_index;
+      };
+    };
+  };
+};
+
+#endif
