@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -20,9 +21,10 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
                               ReferenceFrameLibrary referenceFrameLibrary,
+                              FootstepPlannerParametersBasics footstepPlannerParametersBasics,
                               ROS2ControllerPublishSubscribeAPI ros2)
    {
-      super(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, ros2);
+      super(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, footstepPlannerParametersBasics, ros2);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), ros2, ROS2ActorDesignation.OPERATOR);
 
