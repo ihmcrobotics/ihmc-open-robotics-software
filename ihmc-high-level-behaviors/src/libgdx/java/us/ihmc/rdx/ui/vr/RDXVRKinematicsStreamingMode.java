@@ -217,28 +217,28 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
                FixedReferenceFrame initialPelvisFrame = new FixedReferenceFrame("fixedPelvisFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame()));
                pelvisDesiredControlFrame = new MutableReferenceFrame("pelvisInitial", initialPelvisFrame);
             }
-//            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-//            message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
-//            tempFramePose.setToZero(chestDesiredControlFrame.getReferenceFrame());
-//            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-//            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-//            message.getAngularSelectionMatrix().setXSelected(false);
-//            message.getAngularSelectionMatrix().setYSelected(false);
-//            message.getAngularSelectionMatrix().setZSelected(false);
-//            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
-//
-//            toolboxInputMessage.getInputs().add().set(message);
-//
-//            message = new KinematicsToolboxRigidBodyMessage();
-//            message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
-//            tempFramePose.setToZero(pelvisDesiredControlFrame.getReferenceFrame());
-//            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-//            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-//            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-//            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
-//            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-//
-//            toolboxInputMessage.getInputs().add().set(message);
+            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+            message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
+            tempFramePose.setToZero(chestDesiredControlFrame.getReferenceFrame());
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+            message.getAngularSelectionMatrix().setXSelected(false);
+            message.getAngularSelectionMatrix().setYSelected(false);
+            message.getAngularSelectionMatrix().setZSelected(false);
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
+
+            toolboxInputMessage.getInputs().add().set(message);
+
+            message = new KinematicsToolboxRigidBodyMessage();
+            message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
+            tempFramePose.setToZero(pelvisDesiredControlFrame.getReferenceFrame());
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+
+            toolboxInputMessage.getInputs().add().set(message);
          }
 
 
@@ -259,7 +259,6 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    {
       if (additionalTrackedSegments.contains(segmentType.getSegmentName()))
       {
-         LogTools.info("Additional tracker {}", segmentType.getSegmentName());
          vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
          {
              if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
