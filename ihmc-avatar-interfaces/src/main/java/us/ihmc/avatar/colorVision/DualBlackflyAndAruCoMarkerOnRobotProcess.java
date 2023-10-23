@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
-   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17403057");
+   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
 
    private final DRCRobotModel robotModel;
    private final ROS2SceneGraph sceneGraph;
