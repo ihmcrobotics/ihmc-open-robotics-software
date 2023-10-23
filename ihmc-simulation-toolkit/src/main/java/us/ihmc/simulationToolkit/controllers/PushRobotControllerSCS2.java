@@ -144,6 +144,11 @@ public class PushRobotControllerSCS2 implements Controller
       pushDelay.set(delay);
    }
 
+   public void addScheduledAction(Runnable action)
+   {
+      scheduledPushAction.set(action);
+   }
+
    public void addPushButtonToSCS(SimulationConstructionSet2 scs)
    {
       if (scs != null)
