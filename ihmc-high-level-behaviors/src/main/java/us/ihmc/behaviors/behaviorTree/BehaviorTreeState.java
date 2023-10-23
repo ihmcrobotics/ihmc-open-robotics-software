@@ -23,12 +23,12 @@ public class BehaviorTreeState
    private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
-   private final Supplier<BehaviorTreeNodeStateSupplier> rootNodeSupplier;
+   private final Supplier<BehaviorTreeNodeExtension> rootNodeSupplier;
    private boolean localTreeFrozen = false;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
-                            Supplier<BehaviorTreeNodeStateSupplier> rootNodeSupplier)
+                            Supplier<BehaviorTreeNodeExtension> rootNodeSupplier)
    {
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;
@@ -77,7 +77,7 @@ public class BehaviorTreeState
       return nextID;
    }
 
-   public BehaviorTreeNodeStateSupplier getRootNode()
+   public BehaviorTreeNodeExtension getRootNode()
    {
       return rootNodeSupplier.get();
    }

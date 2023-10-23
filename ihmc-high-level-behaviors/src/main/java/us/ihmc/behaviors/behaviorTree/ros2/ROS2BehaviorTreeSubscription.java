@@ -3,9 +3,9 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeStateModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -68,9 +68,9 @@ public class ROS2BehaviorTreeSubscription
    }
 
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
-                                                BehaviorTreeNodeStateSupplier localNode,
-                                                BehaviorTreeNodeStateSupplier localParentNode,
-                                                BehaviorTreeStateModificationQueue modificationQueue)
+                                                BehaviorTreeNodeExtension localNode,
+                                                BehaviorTreeNodeExtension localParentNode,
+                                                BehaviorTreeModificationQueue modificationQueue)
    {
       // Set fields only modifiable by the robot
       localNode.getState().setIsActive(subscriptionNode.getBehaviorTreeNodeStateMessage().getIsActive());
@@ -87,7 +87,7 @@ public class ROS2BehaviorTreeSubscription
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
          long childNodeID = subscriptionChildNode.getBehaviorTreeNodeStateMessage().getId();
-         BehaviorTreeNodeStateSupplier localChildNode = behaviorTreeState.getTreeRebuilder().getReplacementNode(childNodeID);
+         BehaviorTreeNodeExtension localChildNode = behaviorTreeState.getTreeRebuilder().getReplacementNode(childNodeID);
          if (localChildNode == null && !behaviorTreeState.getLocalTreeFrozen()) // New node that wasn't in the local tree
          {
             Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionChildNode.getType());

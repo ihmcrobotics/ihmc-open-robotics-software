@@ -5,5 +5,5 @@ package us.ihmc.behaviors.behaviorTree;
  */
 public interface BehaviorTreeNodeStateBuilder
 {
-   BehaviorTreeNodeStateSupplier createNode(Class<?> nodeType, long id);
+   BehaviorTreeNodeExtension createNode(Class<?> nodeType, long id);
 }
