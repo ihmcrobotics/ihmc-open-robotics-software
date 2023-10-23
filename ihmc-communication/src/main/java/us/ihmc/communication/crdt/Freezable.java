@@ -3,11 +3,11 @@ package us.ihmc.communication.crdt;
 import us.ihmc.tools.Timer;
 
 /**
- * Part of a simple CRDT algorithm where a node is frozen when modified
+ * Part of a simple CRDT algorithm where something is frozen when modified
  * to allow the changes to propagate without being immediately overritten
  * with out of date data.
  */
-public class FreezableNode
+public class Freezable
 {
    /**
     * Certain changes to this node will cause a freeze of that data

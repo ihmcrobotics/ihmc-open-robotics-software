@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.communication.crdt.FreezableNode;
+import us.ihmc.communication.crdt.Freezable;
 
 /**
  * Adds a node to a parent, freezing the parent if it's freezable.
@@ -21,7 +21,7 @@ public class BehaviorTreeNodeAddition<T extends BehaviorTreeNode> implements Beh
    public void performOperation()
    {
       parent.getChildren().add(nodeToAdd);
-      if (parent instanceof FreezableNode freezableParent)
+      if (parent instanceof Freezable freezableParent)
          freezableParent.freezeFromModification();
    }
 
