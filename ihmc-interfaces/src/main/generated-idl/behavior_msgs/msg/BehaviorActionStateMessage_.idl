@@ -32,6 +32,14 @@ module behavior_msgs
          * If the action is to be executed concurrently
          */
         boolean is_to_be_executed_concurrently;
+        /**
+         * If the node is able to execution
+         */
+        boolean can_execute;
+        /**
+         * If the node is currently executing
+         */
+        boolean is_executing;
       };
     };
   };

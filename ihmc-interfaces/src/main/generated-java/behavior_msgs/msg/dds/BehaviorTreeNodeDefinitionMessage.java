@@ -6,6 +6,13 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * The base description of a behavior tree node.
+       * Note that descriptions have children however we can not put them
+       * in this message because ROS 2 messages cannot contain themselves.
+       * Instead we use a depth first ordered list and number of children
+       * to send trees over. This is contained in another higher level message.
+       */
 public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDefinitionMessage> implements Settable<BehaviorTreeNodeDefinitionMessage>, EpsilonComparable<BehaviorTreeNodeDefinitionMessage>
 {
    /**
