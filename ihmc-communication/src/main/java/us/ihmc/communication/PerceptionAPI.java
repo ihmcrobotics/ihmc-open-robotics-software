@@ -91,6 +91,8 @@ public class PerceptionAPI
    public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
+   public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = IHMC_ROOT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+
    public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
          = IHMC_ROOT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
