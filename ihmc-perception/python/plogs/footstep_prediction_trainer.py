@@ -15,8 +15,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 writer = SummaryWriter("runs/footstep_predictor")
 
 class FootstepDataset(Dataset):
-    def __init__(self, data):
+    def __init__(self, data, filename):
         
+        self.n_steps = 10
         total_height_maps = len(data['cropped/height/'].keys()) - (len(data['cropped/height/'].keys()) % 10)
 
         self.height_maps = []
@@ -42,7 +43,7 @@ class FootstepDataset(Dataset):
 
         total_height_maps = len(self.height_maps)
 
-        self.print_size("Before Removal")
+        self.print_size("File Name: " + filename)
 
         new_height_maps = []
         new_sensor_positions = []
@@ -56,8 +57,8 @@ class FootstepDataset(Dataset):
 
         for i in range(total_height_maps):
 
-            current_plan_positions = self.footstep_plan_positions[i*10:(i+1)*10, :]
-            current_plan_orientations = self.footstep_plan_orientations[i*10:(i+1)*10, :]
+            current_plan_positions = self.footstep_plan_positions[i*self.n_steps:(i+1)*self.n_steps, :]
+            current_plan_orientations = self.footstep_plan_orientations[i*self.n_steps:(i+1)*self.n_steps, :]
 
             # check if there are no non-zero norm steps in the plan
             count_footsteps = np.count_nonzero(np.linalg.norm(current_plan_positions, axis=1))
@@ -68,12 +69,22 @@ class FootstepDataset(Dataset):
                 new_height_maps.append(self.height_maps[i])
                 new_sensor_positions.append(self.sensor_positions[i, :])
                 new_sensor_orientations.append(self.sensor_orientations[i, :])
-                new_footstep_plan_positions.append(self.footstep_plan_positions[i*10:(i+1)*10, :])
-                new_footstep_plan_orientations.append(self.footstep_plan_orientations[i*10:(i+1)*10, :])
+                new_footstep_plan_positions.append(self.footstep_plan_positions[i*self.n_steps:(i+1)*self.n_steps, :])
+                new_footstep_plan_orientations.append(self.footstep_plan_orientations[i*self.n_steps:(i+1)*self.n_steps, :])
                 new_start_positions.append(self.start_positions[i, :])
                 new_start_orientations.append(self.start_orientations[i, :])
                 new_goal_positions.append(self.goal_positions[i, :])
                 new_goal_orientations.append(self.goal_orientations[i, :])
+
+                # get last two non-zero steps
+                last_two_step_positions = current_plan_positions[(count_footsteps - 2) : count_footsteps, :]
+                last_two_step_orientations = current_plan_orientations[(count_footsteps - 2) : count_footsteps, :]
+                
+                # set zero footsteps to last two steps in plan
+                if count_footsteps < self.n_steps:
+                    print("Shapes: ", count_footsteps, self.n_steps, last_two_step_positions.shape, last_two_step_orientations.shape)
+                    self.footstep_plan_positions[count_footsteps:self.n_steps, :] = np.tile(last_two_step_positions, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
+                    self.footstep_plan_orientations[count_footsteps:self.n_steps, :] = np.tile(last_two_step_orientations, (self.n_steps - count_footsteps, 1))[:self.n_steps - count_footsteps, :]
 
         self.height_maps = new_height_maps
         self.sensor_positions = np.array(new_sensor_positions)
@@ -93,7 +104,7 @@ class FootstepDataset(Dataset):
         self.output_size = testData[2]
 
     def print_size(self, tag):
-        print("Dataset Tag: ", tag, "-------------------------------------------------")
+        print("Dataset: ------------------------", tag, "-------------------------")
         print(f'Total Height Maps: {len(self.height_maps)}')
         print(f'Total Sensor Positions: {self.sensor_positions.shape}')
         print(f'Total Sensor Orientations: {self.sensor_orientations.shape}')
@@ -130,10 +141,10 @@ class FootstepDataset(Dataset):
 
     
         # convert quaternion to yaw
-        footstep_plan_quaternions = self.footstep_plan_orientations[index*10:(index+1)*10, :]
+        footstep_plan_quaternions = self.footstep_plan_orientations[index*self.n_steps:(index+1)*self.n_steps, :]
         footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
                     1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
-        footstep_plan_poses = self.footstep_plan_positions[index*10:(index+1)*10, :] - sensor_pose
+        footstep_plan_poses = self.footstep_plan_positions[index*self.n_steps:(index+1)*self.n_steps, :] - sensor_pose
         footstep_plan_poses[:, 2] = footstep_plan_yaws
         footstep_plan_poses = np.array(footstep_plan_poses, dtype=np.float32)
 
@@ -322,7 +333,7 @@ def load_validate(val_dataset):
             visualize_output(height_map_input, linear_input, predict_output, i, val_dataset)
 
             
-def visualize_output(height_map_input, linear_input, final_output, i, val_dataset):
+def visualize_output(height_map_input, linear_input, final_output, i, val_dataset, n_steps=10):
 
     output = final_output.cpu().numpy()
     output = output.squeeze()
@@ -342,7 +353,7 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
 
     start_pose = linear_input[0:3]
     goal_pose = linear_input[3:6]
-    plan_poses = output[0:30].reshape((10, 3))
+    plan_poses = output[0:3*n_steps].reshape((n_steps, 3))
 
     # visualize plan
     visualize_plan(height_map, plan_poses, 
@@ -360,14 +371,13 @@ def load_dataset(validation_split):
         '20231015_183228_PerceptionLog.hdf5', 
         '20231015_234600_PerceptionLog.hdf5', 
         '20231016_025456_PerceptionLog.hdf5',
-        '20231022_002815_PerceptionLog.hdf5'
     ]
     
     datasets = []
 
     for file in files:
         data = h5py.File(path + file, 'r')
-        dataset = FootstepDataset(data)
+        dataset = FootstepDataset(data, file)
         datasets.append(dataset)
 
     dataset = torch.utils.data.ConcatDataset(datasets)

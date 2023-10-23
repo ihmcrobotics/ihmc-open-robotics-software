@@ -157,8 +157,6 @@ def plot_oriented_footstep(display, pose, color, index=-1, scale=1, dims=(3,6)):
 
 def plot_footstep_with_yaw(display, pose, color, index=-1, scale=1, dims=(3,6)):
 
-    print("Plotting footstep with yaw:", pose)
-
     position_on_map = pose[0:2]
     yaw = pose[2]
 
