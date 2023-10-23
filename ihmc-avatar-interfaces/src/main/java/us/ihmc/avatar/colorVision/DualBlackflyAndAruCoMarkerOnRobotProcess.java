@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -15,6 +16,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.function.Supplier;
+
 /**
  * To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
  * the install script inside of it.
@@ -22,7 +25,7 @@ import us.ihmc.tools.thread.Throttler;
 public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
-   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
+   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17403057");
 
    private final DRCRobotModel robotModel;
    private final ROS2SceneGraph sceneGraph;
@@ -102,9 +105,18 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private DualBlackflyCamera createDualBlackflyCamera(RobotSide side, SpinnakerBlackfly spinnakerBlackfly)
    {
+      Supplier<ReferenceFrame> sensorFrameSupplier = new Supplier<ReferenceFrame>()
+      {
+         @Override
+         public ReferenceFrame get()
+         {
+            return syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(side);
+         }
+      };
+
       return new DualBlackflyCamera(robotModel,
                                     side,
-                                    syncedRobot::getReferenceFrames,
+                                    sensorFrameSupplier,
                                     ros2Node,
                                     spinnakerBlackfly,
                                     blackflyLensProperties,
