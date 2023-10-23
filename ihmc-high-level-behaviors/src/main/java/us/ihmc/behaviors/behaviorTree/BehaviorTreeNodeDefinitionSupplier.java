@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-public interface BehaviorTreeNodeDefinitionSupplier
+public interface BehaviorTreeNodeDefinitionSupplier<D extends BehaviorTreeNodeDefinition<D>>
 {
-   BehaviorTreeNodeDefinition getDefinition();
+   D getDefinition();
 }
