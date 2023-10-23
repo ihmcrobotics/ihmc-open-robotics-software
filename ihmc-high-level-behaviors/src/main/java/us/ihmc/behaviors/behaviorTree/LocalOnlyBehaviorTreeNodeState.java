@@ -8,18 +8,16 @@ public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState
 {
    /** The current status of the behavior tree node. */
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.SUCCESS;
-   private final BehaviorTreeNodeDefinition definition;
 
    public LocalOnlyBehaviorTreeNodeState()
    {
       super(0, new BehaviorTreeNodeDefinition());
-      definition = getDefinition();
    }
 
    @Override
    public BehaviorTreeNodeDefinition getDefinition()
    {
-      return definition;
+      return super.getDefinition();
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)
