@@ -29,9 +29,7 @@ def plan_view_main(data):
     launch_plan_viewer(footstep_plan_positions, footstep_plan_orientations, 
                        start_positions, start_orientations, goal_positions, goal_orientations, sensor_positions, sensor_orientations)
 
-def visualize_plan(height_map, footstep_plan_positions, footstep_plan_orientations, 
-                   start_position, start_orientation, 
-                   goal_position, goal_orientation, index, total_plans):
+def visualize_plan(height_map, footstep_plan_poses, start_pose, goal_pose):
     
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
@@ -41,11 +39,22 @@ def visualize_plan(height_map, footstep_plan_positions, footstep_plan_orientatio
     # convert grayscale to RGB
     height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
 
-    plot_footstep(height_map_display, start_position, start_orientation, (0, 255, 0), dims=(5,5))
-    plot_footstep(height_map_display, goal_position, goal_orientation, (255, 255, 255), dims=(5,5))
+    # Resize the height map to 1000x1000
+    height_map_display = cv2.resize(height_map_display, (1000, 1000))
+
+    # compute scale factor
+    scale = 1000 / height_map.shape[0]
+
+    print("Start pose:", start_pose)
+    print("Goal pose:", goal_pose)
+
+    plot_oriented_footstep(height_map_display, start_pose, (0, 255, 0), scale=scale, dims=(4,8))
+    plot_oriented_footstep(height_map_display, goal_pose, (255, 0, 255), scale=scale, dims=(4,8))
 
     # if current position is not zero, plot footsteps
-    plot_footsteps(height_map_display, footstep_plan_positions, footstep_plan_orientations)
+    plot_oriented_footsteps(height_map_display, footstep_plan_poses, scale)
+
+    # test_visualize(height_map_display, scale=scale)
 
     # Create a resizeable window and resize by scale factor
     cv2.namedWindow("Footstep Plan", cv2.WINDOW_NORMAL)
@@ -61,6 +70,25 @@ def visualize_plan(height_map, footstep_plan_positions, footstep_plan_orientatio
 
 cv2.destroyAllWindows()
 
+def test_visualize(height_map_display, scale=1):
+    
+    for i in range(10):
+
+        yaw = i*math.pi/10
+
+        # quaternion in the form [w, x, y, z]
+        # quaternion = np.array([np.cos(yaw/2), 0, 0, np.sin(yaw/2)])
+        # computed_yaw = np.arctan2(2 * (quaternion[1] * quaternion[2] + quaternion[0] * quaternion[3]),
+        #             1 - 2 * (quaternion[1]**2 + quaternion[0]**2))
+
+        # quaternion in the form [x, y, z, w]
+        quaternion = np.array([0, 0, np.sin(yaw/2), np.cos(yaw/2)])
+        computed_yaw = np.arctan2(2 * (quaternion[0] * quaternion[1] + quaternion[3] * quaternion[2]),
+                    1 - 2 * (quaternion[0]**2 + quaternion[3]**2))
+
+        pose = np.array([20, i*100, computed_yaw])
+        plot_footstep_with_yaw(height_map_display, pose, (0, 255, 0), index=i, scale=scale, dims=(4,8))
+
 def launch_plan_viewer(footstep_positions, footstep_orientations, 
                        start_positions, start_orientations, 
                        goal_positions, goal_orientations,
@@ -74,7 +102,7 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
 
     # Plot the footstep plan
     while True:
-        height_map = load_depth(data, i, 'sensor/cropped/height/')
+        height_map = load_depth(data, i, 'cropped/height/')
 
         sensor_position = sensor_positions[i, :]
         sensor_orientation = sensor_orientations[i, :]
@@ -101,84 +129,62 @@ def launch_plan_viewer(footstep_positions, footstep_orientations,
         elif code == 65361 and i > 0:
             i -= 1
 
-    #     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
-    #     height_map = np.minimum(height_map * 10, 255)
-
-    #     height_map_display = height_map.copy()
-
-    #     # convert grayscale to RGB
-    #     height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
-
-
-    #     plot_footstep(height_map_display, start_positions[i, :] - sensor_position, start_orientations[i, :], (0, 255, 0), dims=(5,5))
-    #     plot_footstep(height_map_display, goal_positions[i, :] - sensor_position, goal_orientations[i, :], (255, 255, 255), dims=(5,5))
-
-    #     # if current position is not zero, plot footsteps
-    #     plot_footsteps(height_map_display, current_plan_positions, current_plan_orientations, sensor_position)
-
-    #     # Create a resizeable window and resize by scale factor
-    #     cv2.namedWindow("Footstep Plan", cv2.WINDOW_NORMAL)
-    #     cv2.resizeWindow("Footstep Plan", 1000, 1000)
-    #     cv2.imshow("Footstep Plan", height_map_display)
-    #     code = cv2.waitKeyEx(0)
-
-    #     if code == ord('q'):
-    #         break
-    #     elif code == 65363 and i < total_plans - 10:
-    #         i += 1
-    #     elif code == 65361 and i > 0:
-    #         i -= 1
-
-    #     print("Plan:", i)
-
-    # cv2.destroyAllWindows()
         
-def plot_footsteps(display, positions, orientations):
+def plot_oriented_footsteps(display, poses, scale):
 
     # Plot the footstep plan
     for i in range(10):
-        position = positions[i, :]
-        orientation = orientations[i, :]
+        pose = poses[i, :]
 
         # set color to red if left foot, yellow if right foot
-        color = (0, 0, 255) if i % 2 == 0 else (0, 255, 255)
+        color = (0, 0, 120) if i % 2 == 0 else (0, 120, 120)
 
         # if position is not zero, plot footsteps
-        if np.linalg.norm(position) > 0.001:
-            plot_footstep(display, position, orientation, color, dims=(2,2))
+        if np.linalg.norm(pose[:2]) > 0.001:
+            plot_oriented_footstep(display, pose, color, index=i, scale=scale)
 
-def plot_footstep(display, position, orientation, color, dims=(2,4)):
+def plot_footstep(display, position, orientation, color, scale=1, dims=(2,4)):
     
-    position_on_map = (int(position[1]*50 + display.shape[0]/2), int(position[0]*50 + display.shape[0]/2))
+    position_on_map = (int(position[1]*50*scale + display.shape[0]/2), int(position[0]*50*scale + display.shape[0]/2))
 
     # Draw a rectangle 2x4 pixels on height map, alternate red and yellow
     display = cv2.rectangle(display, (position_on_map[0] - dims[0], position_on_map[1] - dims[1]), (position_on_map[0] + dims[0], position_on_map[1] + dims[1]), color, -1)
 
-def plot_oriented_footstep(display, position, orientation, color, dims=(2,4)):
-    
-    position_on_map = (int(position[1]*50 + display.shape[0]/2), int(position[0]*50 + display.shape[0]/2))
+def plot_oriented_footstep(display, pose, color, index=-1, scale=1, dims=(3,6)):
+    position_on_map = (int(pose[1]*50*scale + display.shape[0]/2), int(pose[0]*50*scale + display.shape[0]/2))    
+    pose = np.array([position_on_map[0], position_on_map[1], pose[2]])
+    plot_footstep_with_yaw(display, pose, color, index=index, scale=scale, dims=dims)
+
+def plot_footstep_with_yaw(display, pose, color, index=-1, scale=1, dims=(3,6)):
+
+    print("Plotting footstep with yaw:", pose)
+
+    position_on_map = pose[0:2]
+    yaw = pose[2]
 
     # create the footstep rectangle using the position and orientation
-    points = np.array([[-dims[0], -dims[1]], [-dims[0], dims[1]], [dims[0], dims[1]], [dims[0], -dims[1]]], dtype=np.float32)
-
-    # get the yaw from orientation quaternion
-    yaw = np.arctan2(2*(orientation[3]*orientation[2] + orientation[0]*orientation[1]), 1 - 2*(orientation[1]**2 + orientation[2]**2))
+    points = np.array([[-dims[0], -dims[1]], [-dims[0], dims[1]], [dims[0], dims[1]], [dims[0], -dims[1]]], dtype=np.float32) * scale
 
     # create a 2D rotation matrix
-    rotation_matrix = np.array([[np.cos(yaw), -np.sin(yaw)], [np.sin(yaw), np.cos(yaw)]])
+    rotation_matrix = np.array([[np.cos(yaw), -np.sin(yaw)], [np.sin(yaw), np.cos(yaw)]], dtype=np.float32)
 
     # rotate the points
-    points = np.matmul(rotation_matrix, points.T).T
+    points = np.matmul(rotation_matrix, points.T).T + position_on_map
 
     # Reshape the array
     points = points.reshape((-1, 1, 2)).astype(np.int32)
 
     # Draw the polyline on the image
-    display = cv2.polylines(display, points, True, (0, 0, 255), 2)
+    display = cv2.fillPoly(display, [points], color)
 
-    # Draw a rectangle 2x4 pixels on height map, alternate red and yellow
-    # display = cv2.rectangle(display, (position_on_map[0] - dims[0], position_on_map[1] - dims[1]), (position_on_map[0] + dims[0], position_on_map[1] + dims[1]), color, -1)
-
+    # plot text on the footstep which is the index of the footstep (size 0.1)
+    if index != -1:
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text = str(index)
+        textsize = cv2.getTextSize(text, font, 1, 2)[0]
+        textX = int(position_on_map[0] - textsize[0]/2) + 2
+        textY = int(position_on_map[1] + textsize[1]/2)
+        cv2.putText(display, text, (textX, textY), font, 0.6, (255, 255, 255), 2)
 
 
 if __name__ == '__main__':
@@ -188,8 +194,10 @@ if __name__ == '__main__':
     # 20231015_234600_PerceptionLog.hdf5
     # 20231016_025456_PerceptionLog.hdf5
 
+    # 20231021_212238_PerceptionLog (Random Start and Goal Poses Within Ranges, Terrain One)
+
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
 
-    data = h5py.File(path + '20231018_135001_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20231022_002815_PerceptionLog.hdf5', 'r')
     plan_view_main(data)

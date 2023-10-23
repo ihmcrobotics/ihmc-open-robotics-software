@@ -3,6 +3,7 @@ import torch.nn.functional as F
 
 from torch.nn import Module, Sequential, Linear, ReLU, Dropout, BatchNorm1d
 from torch.utils.data import Dataset, DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from footstep_dataset_loader import visualize_plan
 from hdf5_reader import *
@@ -11,11 +12,12 @@ from tqdm import tqdm
 
 # create torch tensors on GPU 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+writer = SummaryWriter("runs/footstep_predictor")
 
 class FootstepDataset(Dataset):
     def __init__(self, data):
         
-        total_height_maps = len(data['cropped/height/'].keys()) - len(data['cropped/height/'].keys()) % 10
+        total_height_maps = len(data['cropped/height/'].keys()) - (len(data['cropped/height/'].keys()) % 10)
 
         self.height_maps = []
         for i in range(total_height_maps):
@@ -105,25 +107,50 @@ class FootstepDataset(Dataset):
 
     def __getitem__(self, index):
 
-        # Inputs
-        # --------- Image Inputs
-        height_map_input = torch.from_numpy(self.height_maps[index]).to(device).unsqueeze(0)
+        # Use the following to compute the yaw:
+        # computed_yaw = np.arctan2(2 * (quaternion[0] * quaternion[1] + quaternion[3] * quaternion[2]),
+                    # 1 - 2 * (quaternion[0]**2 + quaternion[3]**2))
+
+        # convert quaternion to yaw
+        sensor_quaternion = self.sensor_orientations[index, :]
+        sensor_yaw = np.arctan2(2 * (sensor_quaternion[0] * sensor_quaternion[1] + sensor_quaternion[3] * sensor_quaternion[2]),
+                    1 - 2 * (sensor_quaternion[0]**2 + sensor_quaternion[3]**2))
+        sensor_pose = np.array([self.sensor_positions[index, 0], self.sensor_positions[index, 1], sensor_yaw], dtype=np.float32)
         
-        # --------- 3D Pose Inputs
-        sensor_position = torch.from_numpy(self.sensor_positions[index, :]).to(device)
-        # sensor_orientation = torch.from_numpy(self.sensor_orientations[index, :]).to(device)
-        start_position = torch.from_numpy(self.start_positions[index, :2]).to(device) - sensor_position[:2]
-        start_orientation = torch.from_numpy(self.start_orientations[index, :] ).to(device)
-        goal_position = torch.from_numpy(self.goal_positions[index, :2]).to(device) - sensor_position[:2]
-        goal_orientation = torch.from_numpy(self.goal_orientations[index, :] ).to(device)
-        linear_input = torch.cat((start_position, goal_position), dim=0)
+        # convert quaternion to yaw
+        start_quaternion = self.start_orientations[index, :]
+        start_yaw = np.arctan2(2 * (start_quaternion[0] * start_quaternion[1] + start_quaternion[3] * start_quaternion[2]),
+                    1 - 2 * (start_quaternion[0]**2 + start_quaternion[3]**2))
+        start_pose = np.array([self.start_positions[index, 0] - sensor_pose[0], self.start_positions[index, 1] - sensor_pose[1], start_yaw], dtype=np.float32)
+
+        goal_quaternion = self.goal_orientations[index, :]
+        goal_yaw = np.arctan2(2 * (goal_quaternion[0] * goal_quaternion[1] + goal_quaternion[3] * goal_quaternion[2]),
+                    1 - 2 * (goal_quaternion[0]**2 + goal_quaternion[3]**2))
+        goal_pose = np.array([self.goal_positions[index, 0] - sensor_pose[0], self.goal_positions[index, 1] - sensor_pose[1], goal_yaw])
+
+    
+        # convert quaternion to yaw
+        footstep_plan_quaternions = self.footstep_plan_orientations[index*10:(index+1)*10, :]
+        footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
+                    1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
+        footstep_plan_poses = self.footstep_plan_positions[index*10:(index+1)*10, :] - sensor_pose
+        footstep_plan_poses[:, 2] = footstep_plan_yaws
+        footstep_plan_poses = np.array(footstep_plan_poses, dtype=np.float32)
+
+        # Inputs
+        # --------- Image Inputs (float54)
+        height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
+        
+        # --------- Pose Inputs (X, Y, Yaw) with float 64
+        sensor_pose = torch.Tensor(sensor_pose).to(device)
+        start_pose = torch.Tensor(start_pose).to(device)
+        goal_pose = torch.Tensor(goal_pose).to(device)
+        linear_input = torch.cat((start_pose, goal_pose), dim=0)
 
         # Outputs
         # --------- 3D Pose Outputs
-        current_plan_positions = torch.from_numpy(self.footstep_plan_positions[index*10:(index+1)*10, :]).to(device) - sensor_position
-        # current_plan_orientations = torch.from_numpy(self.footstep_plan_orientations[index*10:(index+1)*10, :]).to(device)
-
-        linear_output = torch.flatten(current_plan_positions[:,:2])
+        footstep_plan_poses = torch.Tensor(footstep_plan_poses).to(device)
+        linear_output = torch.flatten(footstep_plan_poses)
 
         return height_map_input, linear_input, linear_output
         
@@ -131,12 +158,11 @@ class FootstepDataset(Dataset):
         return len(self.height_maps)
 
 
-
-
-
 class FootstepPredictor(Module):
     def __init__(self, input_size, output_size):
         super(FootstepPredictor, self).__init__()
+
+        print("FootstepPredictor (Model) -> Linear Input Size: ", input_size, "Linear Output Size: ", output_size)
 
         # convolutional layers given a 200x200 16-bit grayscale image
         self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
@@ -165,27 +191,27 @@ class FootstepPredictor(Module):
         self.fc6 = torch.nn.Linear(128, output_size)
 
 
-    def forward(self, x1, x2):
+    def forward(self, h1, l1):
 
         # x1 is image 200x200 16-bit grayscale and x2 is the 3D pose
-        x1 = self.conv2d_1(x1)
-        x1 = self.maxpool2d_22(x1)
-        x1 = self.conv2d_2(x1)
-        x1 = self.maxpool2d_22(x1)
-        x1 = self.conv2d_3(x1)
-        x1 = self.maxpool2d_22(x1)
-        x1 = self.conv2d_4(x1)
-        x1 = self.maxpool2d_22(x1)
-        x1 = self.conv2d_5(x1)
-        x1 = self.maxpool2d_22(x1)
-        x1 = torch.flatten(x1, 1)
+        h1 = self.conv2d_1(h1)
+        h1 = self.maxpool2d_22(h1)
+        h1 = self.conv2d_2(h1)
+        h1 = self.maxpool2d_22(h1)
+        h1 = self.conv2d_3(h1)
+        h1 = self.maxpool2d_22(h1)
+        h1 = self.conv2d_4(h1)
+        h1 = self.maxpool2d_22(h1)
+        h1 = self.conv2d_5(h1)
+        h1 = self.maxpool2d_22(h1)
+        h1 = torch.flatten(h1, 1)
 
-        x2 = self.fc0(x2)
-        x2 = self.bn0(x2)
-        x2 = F.relu(x2)
+        l1 = self.fc0(l1)        
+        l1 = self.bn0(l1)
+        l1 = F.relu(l1)
 
         # flatten x1 and contactenate with x2
-        x = torch.cat((x1, x2), dim=1)
+        x = torch.cat((h1, l1), dim=1)
 
         # fully connected layers
         x = self.fc1(x)
@@ -253,6 +279,7 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
             average_loss = running_loss/(y.size(0)*(i+1))
             loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
             loop.set_postfix(loss=average_loss)
+            writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
         for x1, x2, y in val_loader:
             # send data to gpu
@@ -264,10 +291,12 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
             loss = criterion(y_pred,y)
             valid_loss = loss.item()
             print("Validiation loss - ",valid_loss,"\n")
+            writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
     # save the model
     torch.save(model.state_dict(), 'footstep_predictor.pt')
     torch.onnx.export(model, (x1[0].unsqueeze(0), x2[0].unsqueeze(0)), 'footstep_predictor.onnx', verbose=False)
+    writer.close()
 
 
 def load_validate(val_dataset):
@@ -289,59 +318,51 @@ def load_validate(val_dataset):
             target_output = target_output.to(device)
 
             predict_output = model(height_map_input, linear_input)
-            predict_output = predict_output.cpu().numpy()
-            predict_output = predict_output.squeeze()
-            print("Predict Output", predict_output.shape)
 
-            target_output = target_output.cpu().numpy()
-            target_output = target_output.squeeze()
-            print("Target Output", target_output.shape)
+            visualize_output(height_map_input, linear_input, predict_output, i, val_dataset)
 
-            linear_input = linear_input.cpu().numpy()
-            linear_input = linear_input.squeeze()
-            print("Linear Input", linear_input.shape)
+            
+def visualize_output(height_map_input, linear_input, final_output, i, val_dataset):
 
-            print(f'Dataset: {i}/{len(val_dataset)}, Height Map Size: {height_map_input.shape}, Linear Input Size: {linear_input.shape}, Linear Output Size: {target_output.shape}')
+    output = final_output.cpu().numpy()
+    output = output.squeeze()
+    print("Predict Output", output.shape)
 
-            # convert height map to numpy array 16-bit grayscale
-            height_map = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
+    linear_input = linear_input.cpu().numpy()
+    linear_input = linear_input.squeeze()
+    print("Linear Input", linear_input.shape)
 
-            # reshape for opencv
-            height_map = height_map.reshape((201, 201))        
+    print(f'Dataset: {i}/{len(val_dataset)}, Height Map Size: {height_map_input.shape}, Linear Input Size: {linear_input.shape}, Linear Output Size: {output.shape}')
 
-            print("Height Map Shape: ", height_map.shape)
+    # convert height map to numpy array 16-bit grayscale
+    height_map = np.array(height_map_input.cpu().numpy() * 10000.0, dtype=np.uint16)
 
-            # split linear input into start and goal positions x and y, set z and orientations to zero
-            start_position = linear_input[0:2]
-            start_position = np.hstack((start_position, np.zeros((1))))
-            start_orientation = np.zeros((4))
-            goal_position = linear_input[2:4]
-            goal_position = np.hstack((goal_position, np.zeros((1))))
-            goal_orientation = np.zeros((4))
+    # reshape for opencv
+    height_map = height_map.reshape((201, 201))        
 
-            # split linear output into current plan positions (x, y) and zero z to positions, set orientations to zero
-            current_plan_positions = target_output[0:20].reshape((10, 2))
-            current_plan_positions = np.hstack((current_plan_positions, np.zeros((10, 1))))
-            current_plan_orientations = np.zeros((10, 4))            
+    start_pose = linear_input[0:3]
+    goal_pose = linear_input[3:6]
+    plan_poses = output[0:30].reshape((10, 3))
 
-            # split predict output into current plan positions similarly
-            predict_plan_positions = predict_output[0:20].reshape((10, 2))
-            predict_plan_positions = np.hstack((predict_plan_positions, np.zeros((10, 1))))
-            predict_plan_orientations = np.zeros((10, 4))
-
-            print("Target Shape; ", target_output.shape, "Predict Shape: ", predict_output.shape)
-
-            # visualize plan
-            visualize_plan(height_map, predict_plan_positions, predict_plan_orientations, 
-                           start_position, start_orientation, goal_position, goal_orientation,
-                            i, len(val_dataset))
-
+    # visualize plan
+    visualize_plan(height_map, plan_poses, 
+                    start_pose, goal_pose)
 
 def load_dataset(validation_split):
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
-    # new_format_files = ['20231018_135001_PerceptionLog.hdf5']#, '20231018_143108_PerceptionLog.hdf5']
-    files = ['20231015_183228_PerceptionLog.hdf5', '20231015_234600_PerceptionLog.hdf5', '20231016_025456_PerceptionLog.hdf5']
+    
+    new_format_files = ['20231018_135001_PerceptionLog.hdf5', 
+                        '20231018_143108_PerceptionLog.hdf5']
+    
+    files = \
+    [
+        '20231015_183228_PerceptionLog.hdf5', 
+        '20231015_234600_PerceptionLog.hdf5', 
+        '20231016_025456_PerceptionLog.hdf5',
+        '20231022_002815_PerceptionLog.hdf5'
+    ]
+    
     datasets = []
 
     for file in files:
@@ -356,21 +377,36 @@ def load_dataset(validation_split):
 
     return train_dataset, val_dataset
 
+def visualize_dataset(dataset):
+    loader = DataLoader(dataset, batch_size=1, shuffle=True)
+    for i, (height_map_input, linear_input, target_output) in enumerate(loader):
+
+        height_map_input = height_map_input.to(device)
+        linear_input = linear_input.to(device)
+        target_output = target_output.to(device)
+
+        visualize_output(height_map_input, linear_input, target_output, i, val_dataset)
+
 if __name__ == "__main__":
 
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
+    train = True
+    visualize_raw = False
+
+    if visualize_raw:
+        visualize_dataset(train_dataset)    
 
     if train:
         # train and store model
         criterion=torch.nn.L1Loss()
-        train_store(train_dataset, val_dataset, batch_size=32, epochs=20, criterion=criterion)
+        train_store(train_dataset, val_dataset, batch_size=32, epochs=30, criterion=criterion)
 
     else:
         # load and validate model
         load_validate(val_dataset)
+
 
     torch.cuda.empty_cache()
 

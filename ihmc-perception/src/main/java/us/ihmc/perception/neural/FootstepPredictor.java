@@ -1,7 +1,6 @@
 package us.ihmc.perception.neural;
 
 import ai.onnxruntime.*;
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -32,7 +31,7 @@ public class FootstepPredictor
    private static final int IMAGE_INPUT_HEIGHT = 201;
    private static final int IMAGE_INPUT_WIDTH = 201;
 
-   private String modelFilePath = "/home/bmishra/Workspace/Code/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
+   private String modelFilePath = "/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
    private String onnxFileName = "footstep_predictor.onnx";
 
    private OrtEnvironment environment = OrtEnvironment.getEnvironment();
