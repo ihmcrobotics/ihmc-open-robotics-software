@@ -49,6 +49,11 @@ public abstract class BehaviorTreeNodeState extends FreezableNode
       isActive = message.getIsActive();
    }
 
+   public void update()
+   {
+
+   }
+
    @Override
    public void destroy()
    {

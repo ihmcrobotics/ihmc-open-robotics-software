@@ -20,11 +20,6 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
       this.definition = definition;
    }
 
-   public void update()
-   {
-
-   }
-
    public void toMessage(BehaviorActionStateMessage message)
    {
       super.toMessage(message.getNodeState());
@@ -32,6 +27,8 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
       message.setActionIndex(actionIndex);
       message.setIsNextForExecution(isNextForExecution);
       message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
+      message.setCanExecute(canExecute);
+      message.setIsExecuting(isExecuting);
    }
 
    public void fromMessage(BehaviorActionStateMessage message)
@@ -41,6 +38,8 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
       actionIndex = message.getActionIndex();
       isNextForExecution = message.getIsNextForExecution();
       isToBeExecutedConcurrently = message.getIsToBeExecutedConcurrently();
+      canExecute = message.getCanExecute();
+      isExecuting = message.getIsExecuting();
    }
 
    public void setActionIndex(int actionIndex)
