@@ -40,8 +40,8 @@ import java.util.List;
 
 public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
 {
+   private final PelvisHeightPitchActionDefinition definition = new PelvisHeightPitchActionDefinition();
    private final PelvisHeightPitchActionState state;
-   private final PelvisHeightPitchActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
    private final ImDoubleWrapper pitchWidget;
@@ -63,7 +63,8 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    private final Throttler throttler = new Throttler().setFrequency(10.0);
    private boolean wasConcurrent = false;
 
-   public RDXPelvisHeightPitchAction(RDXBehaviorActionSequenceEditor editor,
+   public RDXPelvisHeightPitchAction(long id,
+                                     RDXBehaviorActionSequenceEditor editor,
                                      RDX3DPanel panel3D,
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
@@ -76,8 +77,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       this.ros2 = ros2;
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      state = new PelvisHeightPitchActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new PelvisHeightPitchActionState(id, definition, referenceFrameLibrary);
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPelvisToParentTransform());
       poseGizmo.create(panel3D);

@@ -10,8 +10,8 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 public class RDXHandWrenchAction extends RDXBehaviorAction
 {
-   private final HandWrenchActionState state = new HandWrenchActionState();
-   private final HandWrenchActionDefinition definition = state.getDefinition();
+   private final HandWrenchActionDefinition definition = new HandWrenchActionDefinition();
+   private final HandWrenchActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                                                 definition::setTrajectoryDuration,
@@ -20,9 +20,11 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
                                                                    definition::setForce,
                                                                    imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
 
-   public RDXHandWrenchAction(RDXBehaviorActionSequenceEditor editor)
+   public RDXHandWrenchAction(long id, RDXBehaviorActionSequenceEditor editor)
    {
       super(editor);
+
+      state = new HandWrenchActionState(id, definition);
    }
 
    @Override

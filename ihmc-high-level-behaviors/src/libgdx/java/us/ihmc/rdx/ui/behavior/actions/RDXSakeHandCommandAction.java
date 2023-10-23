@@ -17,8 +17,8 @@ import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
 
 public class RDXSakeHandCommandAction extends RDXBehaviorAction
 {
-   private final SakeHandCommandActionState state = new SakeHandCommandActionState();
-   private final SakeHandCommandActionDefinition definition = state.getDefinition();
+   private final SakeHandCommandActionDefinition definition = new SakeHandCommandActionDefinition();
+   private final SakeHandCommandActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
 
@@ -36,9 +36,11 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
                                                                                       imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
                                                                                                                         imBoolean));
 
-   public RDXSakeHandCommandAction(RDXBehaviorActionSequenceEditor editor)
+   public RDXSakeHandCommandAction(long id, RDXBehaviorActionSequenceEditor editor)
    {
       super(editor);
+
+      state = new SakeHandCommandActionState(id, definition);
 
       for (int i = 0; i < SakeHandCommandOption.values.length; ++i)
       {

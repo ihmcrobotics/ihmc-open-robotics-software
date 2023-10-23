@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.WalkActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WalkActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -28,8 +29,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXWalkAction extends RDXBehaviorAction
 {
-   private final WalkActionState state;
    private final WalkActionDefinition definition;
+   private final WalkActionState state;
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
@@ -41,15 +42,17 @@ public class RDXWalkAction extends RDXBehaviorAction
    private final ImDoubleWrapper transferDurationWidget;
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXWalkAction(RDXBehaviorActionSequenceEditor editor,
+   public RDXWalkAction(long id,
+                        RDXBehaviorActionSequenceEditor editor,
                         RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
-                        ReferenceFrameLibrary referenceFrameLibrary)
+                        ReferenceFrameLibrary referenceFrameLibrary,
+                        FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       super(editor);
 
-      state = new WalkActionState(referenceFrameLibrary, robotModel.getFootstepPlannerParameters());
-      definition = state.getDefinition();
+      definition = new WalkActionDefinition(footstepPlannerParameters);
+      state = new WalkActionState(id, definition, referenceFrameLibrary);
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(), definition.getGoalToParentTransform(), getSelected());
       footstepPlannerGoalGizmo.create(panel3D);

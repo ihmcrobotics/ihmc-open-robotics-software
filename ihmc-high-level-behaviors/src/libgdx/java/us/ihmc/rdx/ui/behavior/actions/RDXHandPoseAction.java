@@ -62,8 +62,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";
+   private final HandPoseActionDefinition definition = new HandPoseActionDefinition();
    private final HandPoseActionState state;
-   private final HandPoseActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
@@ -89,7 +89,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final RDX3DPanelTooltip tooltip;
    private final IKRootCalculator rootCalculator;
 
-   public RDXHandPoseAction(RDXBehaviorActionSequenceEditor editor,
+   public RDXHandPoseAction(long id,
+                            RDXBehaviorActionSequenceEditor editor,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
                             FullHumanoidRobotModel syncedFullRobotModel,
@@ -99,8 +100,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       super(editor);
 
-      state = new HandPoseActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new HandPoseActionState(id, definition, referenceFrameLibrary);
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent(), getSelected());
       poseGizmo.create(panel3D);
