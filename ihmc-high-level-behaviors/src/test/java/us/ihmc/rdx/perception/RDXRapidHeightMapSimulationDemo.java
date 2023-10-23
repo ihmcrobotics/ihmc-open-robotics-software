@@ -126,7 +126,7 @@ public class RDXRapidHeightMapSimulationDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated.json");
+            environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated_1.json");
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
