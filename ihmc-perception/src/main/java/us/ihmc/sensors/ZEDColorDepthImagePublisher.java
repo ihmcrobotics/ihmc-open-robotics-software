@@ -45,6 +45,7 @@ public class ZEDColorDepthImagePublisher
    private final SideDependentList<Lock> colorPublishLocks = new SideDependentList<>(new ReentrantLock(), new ReentrantLock());
    private final SideDependentList<Condition> newColorImagesAvailable = new SideDependentList<>(colorPublishLocks.get(RobotSide.LEFT).newCondition(),
                                                                                                 colorPublishLocks.get(RobotSide.RIGHT).newCondition());
+   private boolean destroying = false;
 
    public ZEDColorDepthImagePublisher(SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
                                       ROS2Topic<ImageMessage> depthTopic)
@@ -59,9 +60,8 @@ public class ZEDColorDepthImagePublisher
          depthPublishLock.lock();
          try
          {
-            while (nextGpuDepthImage == null ||
-                   nextGpuDepthImage.isEmpty() ||
-                   nextGpuDepthImage.getSequenceNumber() == lastDepthSequenceNumber)
+            while (!destroying && (nextGpuDepthImage == null || nextGpuDepthImage.isEmpty()
+                                  || nextGpuDepthImage.getSequenceNumber() == lastDepthSequenceNumber))
             {
                newDepthImageAvailable.await();
             }
@@ -85,9 +85,8 @@ public class ZEDColorDepthImagePublisher
             colorPublishLocks.get(side).lock();
             try
             {
-               while (nextGpuColorImages.get(side) == null ||
-                      nextGpuColorImages.get(side).isEmpty() ||
-                      nextGpuColorImages.get(side).getSequenceNumber() == lastColorSequenceNumbers.get(side))
+               while (!destroying && (nextGpuColorImages.get(side) == null || nextGpuColorImages.get(side).isEmpty()
+                                     || nextGpuColorImages.get(side).getSequenceNumber() == lastColorSequenceNumbers.get(side)))
                {
                   newColorImagesAvailable.get(side).await();
                }
@@ -150,11 +149,12 @@ public class ZEDColorDepthImagePublisher
       {
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoders.get(side).encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
-                                colorJPEGPointer,
-                                colorImageToPublish.getImageWidth(),
-                                colorImageToPublish.getImageHeight(),
-                                colorImageToPublish.getGpuImageMatrix().step());
+         imageEncoders.get(side)
+                      .encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
+                                 colorJPEGPointer,
+                                 colorImageToPublish.getImageWidth(),
+                                 colorImageToPublish.getImageHeight(),
+                                 colorImageToPublish.getGpuImageMatrix().step());
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
@@ -223,11 +223,31 @@ public class ZEDColorDepthImagePublisher
 
    public void destroy()
    {
-      stopAll();
-
+      destroying = true;
+      depthPublishLock.lock();
+      try
+      {
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
+      publishDepthThread.blockingStop();
       nextGpuDepthImage.destroy();
+
       for (RobotSide side : RobotSide.values)
       {
+         colorPublishLocks.get(side).lock();
+         try
+         {
+            newColorImagesAvailable.get(side).signal();
+         }
+         finally
+         {
+            colorPublishLocks.get(side).unlock();
+         }
+         publishColorThreads.get(side).blockingStop();
          imageEncoders.get(side).destroy();
          nextGpuColorImages.get(side).destroy();
          ros2ColorImagePublishers.get(side).destroy();

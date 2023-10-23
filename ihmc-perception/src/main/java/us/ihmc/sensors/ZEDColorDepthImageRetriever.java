@@ -241,7 +241,7 @@ public class ZEDColorDepthImageRetriever
 
    public void destroy()
    {
-      stop();
+      zedGrabThread.blockingStop();
 
       depthImagePointer.close();
       depthImage.destroy();

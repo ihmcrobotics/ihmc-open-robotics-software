@@ -183,4 +183,22 @@ public class RestartableThreadTest
          assertFalse(thread.isAlive());
       }
    }
+
+   @Test
+   public void testBlockingStop()
+   {
+      RestartableThread thread = new RestartableThread(name, () ->
+      {
+         System.out.println("Test Thread Running");
+         Thread.sleep(500);
+      });
+
+      thread.start();
+      assertTrue(thread.isRunning());
+      assertTrue(thread.isAlive());
+
+      thread.blockingStop();
+      assertFalse(thread.isRunning());
+      assertFalse(thread.isAlive());
+   }
 }

@@ -71,6 +71,15 @@ public class RestartableThread
       running = false;
    }
 
+   /**
+    * Request the thread to stop and waits until the thread finishes
+    */
+   public void blockingStop()
+   {
+      stop();
+      ExceptionTools.handle((RunnableThatThrows) thread::join, exceptionHandler);
+   }
+
    public boolean isRunning()
    {
       return running;

@@ -307,7 +307,20 @@ public class BlackflyImagePublisher
 
    public void destroy()
    {
-      stopAll();
+      imagePublishLock.lock();
+      updateArUcoLock.lock();
+      try
+      {
+         newImageAvailable.signal();
+         updateArUcoCondition.signal();
+      }
+      finally
+      {
+         imagePublishLock.unlock();
+         updateArUcoLock.unlock();
+      }
+      publishDistoredColorThread.blockingStop();
+      undistortAndUpdateArUcoThread.blockingStop();
 
       undistortionMap1.close();
       undistortionMap2.close();

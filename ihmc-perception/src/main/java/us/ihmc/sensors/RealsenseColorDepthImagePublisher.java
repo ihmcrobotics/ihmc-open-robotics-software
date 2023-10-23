@@ -48,6 +48,7 @@ public class RealsenseColorDepthImagePublisher
    private final RestartableThread publishColorThread;
    private final Lock colorPublishLock = new ReentrantLock();
    private final Condition newColorImageAvailable = colorPublishLock.newCondition();
+   private boolean destroying = false;
 
    public RealsenseColorDepthImagePublisher(ROS2Topic<ImageMessage> depthTopic,
                                             ROS2Topic<ImageMessage> colorTopic)
@@ -61,7 +62,8 @@ public class RealsenseColorDepthImagePublisher
          depthPublishLock.lock();
          try
          {
-            while (nextCpuDepthImage == null || nextCpuDepthImage.isEmpty() || nextCpuDepthImage.getSequenceNumber() == lastDepthSequenceNumber)
+            while (!destroying && (nextCpuDepthImage == null || nextCpuDepthImage.isEmpty()
+                                   || nextCpuDepthImage.getSequenceNumber() == lastDepthSequenceNumber))
             {
                newDepthImageAvailable.await();
             }
@@ -83,7 +85,8 @@ public class RealsenseColorDepthImagePublisher
          colorPublishLock.lock();
          try
          {
-            while (nextCpuColorImage == null || nextCpuColorImage.isEmpty() || nextCpuColorImage.getSequenceNumber() == lastColorSequenceNumber)
+            while (!destroying && (nextCpuColorImage == null || nextCpuColorImage.isEmpty()
+                                   || nextCpuColorImage.getSequenceNumber() == lastColorSequenceNumber))
             {
                newColorImageAvailable.await();
             }
@@ -211,7 +214,26 @@ public class RealsenseColorDepthImagePublisher
 
    public void destroy()
    {
+      destroying = true;
       stopAll();
+      depthPublishLock.lock();
+      try
+      {
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
+      colorPublishLock.lock();
+      try
+      {
+         newColorImageAvailable.signal();
+      }
+      finally
+      {
+         colorPublishLock.unlock();
+      }
 
       nextCpuDepthImage.destroy();
       nextCpuColorImage.destroy();
