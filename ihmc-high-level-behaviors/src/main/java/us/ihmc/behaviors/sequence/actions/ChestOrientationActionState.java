@@ -29,15 +29,11 @@ public class ChestOrientationActionState extends BehaviorActionState
    public void toMessage(ChestOrientationActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override

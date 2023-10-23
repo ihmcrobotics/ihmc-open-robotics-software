@@ -29,15 +29,11 @@ public class PelvisHeightPitchActionState extends BehaviorActionState
    public void toMessage(PelvisHeightPitchActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(PelvisHeightPitchActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override

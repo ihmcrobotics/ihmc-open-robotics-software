@@ -17,15 +17,11 @@ public class SakeHandCommandActionState extends BehaviorActionState
    public void toMessage(SakeHandCommandActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(SakeHandCommandActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override

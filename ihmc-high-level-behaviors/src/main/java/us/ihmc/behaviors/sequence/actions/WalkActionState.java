@@ -29,15 +29,11 @@ public class WalkActionState extends BehaviorActionState
    public void toMessage(WalkActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(WalkActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override

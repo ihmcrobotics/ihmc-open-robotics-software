@@ -17,15 +17,11 @@ public class ArmJointAnglesActionState extends BehaviorActionState
    public void toMessage(ArmJointAnglesActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(ArmJointAnglesActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override

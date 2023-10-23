@@ -17,15 +17,11 @@ public class HandWrenchActionState extends BehaviorActionState
    public void toMessage(HandWrenchActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(HandWrenchActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override

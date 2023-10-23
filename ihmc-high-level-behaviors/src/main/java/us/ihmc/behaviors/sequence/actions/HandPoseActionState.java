@@ -29,15 +29,11 @@ public class HandPoseActionState extends BehaviorActionState
    public void toMessage(HandPoseActionStateMessage message)
    {
       super.toMessage(message.getActionState());
-
-      definition.toMessage(message.getDefinition());
    }
 
    public void fromMessage(HandPoseActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-
-      definition.fromMessage(message.getDefinition());
    }
 
    @Override
