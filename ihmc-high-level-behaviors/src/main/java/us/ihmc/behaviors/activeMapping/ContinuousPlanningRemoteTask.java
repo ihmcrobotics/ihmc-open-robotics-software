@@ -20,7 +20,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -104,7 +103,7 @@ public class ContinuousPlanningRemoteTask
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepStatusReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepQueueStatusReceived);
 
-      executorService.scheduleWithFixedDelay(this::updateContinuousPlanner, CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS,
+      executorService.scheduleWithFixedDelay(this::updateContinuousPlanner, 1500,
                                              CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS, TimeUnit.MILLISECONDS);
    }
 
@@ -175,12 +174,12 @@ public class ContinuousPlanningRemoteTask
          // TODO adjust this so that it doesn't consider the Z of the poses at all, otherwise there will be bugs in the future
          // Only update the goal poses if the robot gets within some distance of them
          double distance = firstImminentFootstep.getPositionDistance(goalPoseForFootstepPlanner.get(secondImminentFootstepSide.getOppositeSide()));
-         if (distance < 0.5)
+         if (distance < 0.46)
          {
             multiplierForGoalPoseDistance += 1;
             ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
                                                     multiplierForGoalPoseDistance, originalPoseToBaseGoalPoseFrom, startPoseForFootstepPlanner,
-                                                    goalPoseForFootstepPlanner, 0.8f);
+                                                    goalPoseForFootstepPlanner, 0.6f);
          }
 
          plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
@@ -290,8 +289,6 @@ public class ContinuousPlanningRemoteTask
                                                        incomingCompressedImageBytePointer,
                                                        compressedBytesMat);
 
-        PerceptionDebugTools.displayHeightMap("Height Map", heightMapImage, 1, 1.2f);
-
         if (latestHeightMapData == null)
         {
            latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
@@ -308,7 +305,7 @@ public class ContinuousPlanningRemoteTask
 
    public void setLatestHeightMapData(HeightMapData latestHeightMapData)
    {
-      this.latestHeightMapData = latestHeightMapData;
+      this.latestHeightMapData = new HeightMapData(latestHeightMapData);
    }
 
    public ContinuousPlanner getContinuousPlanner()

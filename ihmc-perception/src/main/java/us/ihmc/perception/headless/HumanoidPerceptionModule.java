@@ -74,6 +74,7 @@ public class HumanoidPerceptionModule
    private boolean heightMapEnabled = false;
    private boolean mappingEnabled = false;
    private boolean occupancyGridEnabled = false;
+   public boolean isHeightMapBeingUpdatedLock = false;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -90,6 +91,11 @@ public class HumanoidPerceptionModule
    {
       heightMap = new RemoteHeightMapUpdater(robotName, frameSupplier, realtimeRos2Node);
       heightMap.start();
+   }
+
+   public boolean getIsHeightMapBeingUpdatedLock()
+   {
+      return isHeightMapBeingUpdatedLock;
    }
 
    public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
@@ -122,7 +128,9 @@ public class HumanoidPerceptionModule
       {
          executorService.submit(() ->
          {
+            isHeightMapBeingUpdatedLock = true;
             updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
+            isHeightMapBeingUpdatedLock = false;
          });
       }
    }
