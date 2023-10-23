@@ -1,5 +1,10 @@
 package us.ihmc.simulationToolkit.controllers;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,9 +27,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PushRobotControllerSCS2 implements Controller
 {
@@ -120,23 +122,19 @@ public class PushRobotControllerSCS2 implements Controller
 
    public void setPushDuration(double duration)
    {
-      System.out.println(pushDuration);
       pushDuration.set(duration);
-      System.out.println(pushDuration);
    }
 
    public void setPushForceMagnitude(double magnitude)
    {
-      System.out.println(pushForceMagnitude);
       pushForceMagnitude.set(magnitude);
-      System.out.println(pushForceMagnitude);
    }
 
    public void setPushForceDirection(Vector3DReadOnly direction)
    {
-      System.out.println("direction " + pushDirection);
+      System.out.println("pushDirection "+pushDirection);
       pushDirection.set(direction);
-      System.out.println("direction " + pushDirection);
+      System.out.println("pushDirection "+pushDirection);
    }
 
    public void setPushDelay(double delay)
@@ -149,20 +147,20 @@ public class PushRobotControllerSCS2 implements Controller
       if (scs != null)
       {
          scs.executeOrScheduleVisualizerTask(() ->
-                                             {
-                                                Button button = new Button("PushRobot");
-                                                button.setTooltip(new Tooltip(
-                                                      "Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'"));
-                                                button.setOnAction(e ->
-                                                                   {
-                                                                      scheduledPushAction.set(() ->
-                                                                                              {
-                                                                                                 pushCondition = null;
-                                                                                                 applyForce();
-                                                                                              });
-                                                                   });
-                                                scs.addCustomGUIControl(button);
-                                             });
+         {
+            Button button = new Button("PushRobot");
+            button.setTooltip(new Tooltip("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'"));
+            button.setOnAction(e ->
+            {
+               scheduledPushAction.set(() ->
+               {
+                  pushCondition = null;
+                  applyForce();
+               });
+            });
+            scs.addCustomGUIControl(button);
+         });
+
       }
    }
 
@@ -175,15 +173,15 @@ public class PushRobotControllerSCS2 implements Controller
    {
       hasForceBeenApplied = true;
       this.pushCondition = pushCondition;
-      //      setPushDuration(duration);
-      //      System.out.println("pushDuration " + pushDuration);
+//      setPushDuration(duration);
+//      System.out.println("pushDuration " + pushDuration);
       setPushForceDirection(direction);
       setPushDuration(duration);
-      //      System.out.println("pushDirection "+pushDirection);
+//      System.out.println("pushDirection "+pushDirection);
       setPushForceMagnitude(magnitude);
-      //      System.out.println("pushForceMagnitude "+pushForceMagnitude);
+//      System.out.println("pushForceMagnitude "+pushForceMagnitude);
       setPushDelay(timeDelay);
-      //      System.out.println("pushDelay "+pushDelay);
+//      System.out.println("pushDelay "+pushDelay);
       applyForce();
    }
 
@@ -239,17 +237,17 @@ public class PushRobotControllerSCS2 implements Controller
             pushCondition = null;
          }
       }
-
-      //      System.out.println("pushDuration " + pushDuration);
-      //      System.out.println("pushDirection "+pushDirection);
-      //      System.out.println("pushForceMagnitude "+pushForceMagnitude);
-      //      System.out.println("pushDelay "+pushDelay);
+      
+//      System.out.println("pushDuration " + pushDuration);
+//      System.out.println("pushDirection "+pushDirection);
+//      System.out.println("pushForceMagnitude "+pushForceMagnitude);
+//      System.out.println("pushDelay "+pushDelay);
       if (yoTime.getValue() <= pushTimeSwitch.getValue() + pushDuration.getValue() && yoTime.getValue() >= pushTimeSwitch.getValue())
       {
-         //         System.out.println("pushDuration " + pushDuration);
-         //         System.out.println("pushDirection "+pushDirection);
-         //         System.out.println("pushForceMagnitude "+pushForceMagnitude);
-         //         System.out.println("pushDelay "+pushDelay);
+//         System.out.println("pushDuration " + pushDuration);
+//         System.out.println("pushDirection "+pushDirection);
+//         System.out.println("pushForceMagnitude "+pushForceMagnitude);
+//         System.out.println("pushDelay "+pushDelay);
          isBeingPushed.set(true);
          forceVector.set(pushForce);
          pushNumber.decrement();
