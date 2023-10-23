@@ -16,6 +16,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.ZEDModelData;
 import us.ihmc.tools.thread.Throttler;
 
 public class RDXCenterposeSceneGraphDemo
@@ -71,14 +72,15 @@ public class RDXCenterposeSceneGraphDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-            centerposeProcess = new CenterposeDetectionManager(ros2Helper, ReferenceFrame.getWorldFrame());
-
-            referenceFrameLibrary = new ReferenceFrameLibrary();
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
-            referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
+
+            referenceFrameLibrary = new ReferenceFrameLibrary();
+            referenceFrameLibrary.addDynamicCollection(sceneGraphUI.getSceneGraph().asNewDynamicReferenceFrameCollection());
+
+            onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
+            centerposeProcess = new CenterposeDetectionManager(ros2Helper, ZEDModelData.createCameraReferenceFrame(RobotSide.LEFT, ReferenceFrame.getWorldFrame()));
 
             globalVisualizersPanel.create();
          }
