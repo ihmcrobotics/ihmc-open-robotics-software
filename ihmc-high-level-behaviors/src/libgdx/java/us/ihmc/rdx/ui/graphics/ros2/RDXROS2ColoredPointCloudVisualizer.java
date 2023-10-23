@@ -9,6 +9,8 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -173,9 +175,15 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       }
       else if (depthChannel.getCameraModel() == CameraModel.OUSTER) // Assuming color is equidistant fisheye if using it
       {
+         RotationMatrix depthToColorRotation = colorChannel.getRotationMatrixToWorld();
+         depthToColorRotation.invert();
+         depthToColorRotation.multiply(depthChannel.getRotationMatrixToWorld());
+
+         Vector3D depthToColorTranslation = colorChannel.getTranslationToWorld();
+         depthToColorTranslation.sub(depthChannel.getTranslationToWorld());
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
-         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
+         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(depthToColorRotation, depthToColorTranslation);
          ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterBeamAltitudeAnglesBuffer(), depthChannel.getOusterBeamAzimuthAnglesBuffer());
          ousterFisheyeKernel.runKernel(0.0f,
                                        pointSize,
