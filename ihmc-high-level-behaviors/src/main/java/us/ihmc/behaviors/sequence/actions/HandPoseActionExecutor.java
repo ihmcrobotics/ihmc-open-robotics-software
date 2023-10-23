@@ -27,8 +27,8 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final HandPoseActionDefinition definition = new HandPoseActionDefinition();
    private final HandPoseActionState state;
-   private final HandPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -43,7 +43,8 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
    private final IKRootCalculator rootCalculator;
 
-   public HandPoseActionExecutor(BehaviorActionSequence sequence,
+   public HandPoseActionExecutor(long id,
+                                 BehaviorActionSequence sequence,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
@@ -56,8 +57,7 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculators = handWrenchCalculators;
 
-      state = new HandPoseActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new HandPoseActionState(id, definition, referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {

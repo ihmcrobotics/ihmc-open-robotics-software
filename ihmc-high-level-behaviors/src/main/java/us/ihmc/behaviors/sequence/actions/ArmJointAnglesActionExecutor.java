@@ -11,19 +11,24 @@ import us.ihmc.tools.Timer;
 
 public class ArmJointAnglesActionExecutor extends BehaviorActionExecutor
 {
-   private final ArmJointAnglesActionState state = new ArmJointAnglesActionState();
-   private final ArmJointAnglesActionDefinition definition = state.getDefinition();
+   private final ArmJointAnglesActionDefinition definition = new ArmJointAnglesActionDefinition();
+   private final ArmJointAnglesActionState state;
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public ArmJointAnglesActionExecutor(BehaviorActionSequence sequence, DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
+   public ArmJointAnglesActionExecutor(long id,
+                                       BehaviorActionSequence sequence,
+                                       DRCRobotModel robotModel,
+                                       ROS2ControllerHelper ros2ControllerHelper)
    {
       super(sequence);
 
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
+
+      state = new ArmJointAnglesActionState(id, definition);
    }
 
    @Override

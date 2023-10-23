@@ -21,8 +21,8 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final PelvisHeightPitchActionDefinition definition = new PelvisHeightPitchActionDefinition();
    private final PelvisHeightPitchActionState state;
-   private final PelvisHeightPitchActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final Timer executionTimer = new Timer();
@@ -33,7 +33,8 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
-   public PelvisHeightPitchActionExecutor(BehaviorActionSequence sequence,
+   public PelvisHeightPitchActionExecutor(long id,
+                                          BehaviorActionSequence sequence,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
@@ -43,8 +44,7 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new PelvisHeightPitchActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new PelvisHeightPitchActionState(id, definition, referenceFrameLibrary);
    }
 
    @Override

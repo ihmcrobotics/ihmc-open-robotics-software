@@ -51,7 +51,8 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
-   public WalkActionExecutor(BehaviorActionSequence sequence,
+   public WalkActionExecutor(long id,
+                             BehaviorActionSequence sequence,
                              ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
                              WalkingFootstepTracker footstepTracker,
@@ -69,8 +70,8 @@ public class WalkActionExecutor extends BehaviorActionExecutor
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new WalkActionState(referenceFrameLibrary, footstepPlannerParameters);
-      definition = state.getDefinition();
+      definition = new WalkActionDefinition(footstepPlannerParameters);
+      state = new WalkActionState(id, definition, referenceFrameLibrary);
    }
 
    @Override

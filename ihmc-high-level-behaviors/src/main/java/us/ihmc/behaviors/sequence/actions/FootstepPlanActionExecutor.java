@@ -29,8 +29,8 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
    private final FootstepPlanActionState state;
-   private final FootstepPlanActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final WalkingFootstepTracker footstepTracker;
@@ -48,7 +48,8 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
 
-   public FootstepPlanActionExecutor(BehaviorActionSequence sequence,
+   public FootstepPlanActionExecutor(long id,
+                                     BehaviorActionSequence sequence,
                                      ROS2ControllerHelper ros2ControllerHelper,
                                      ROS2SyncedRobotModel syncedRobot,
                                      WalkingFootstepTracker footstepTracker,
@@ -63,8 +64,7 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new FootstepPlanActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new FootstepPlanActionState(id, definition, referenceFrameLibrary);
    }
 
    @Override

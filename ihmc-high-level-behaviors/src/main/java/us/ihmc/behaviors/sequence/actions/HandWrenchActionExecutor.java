@@ -13,15 +13,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandWrenchActionExecutor extends BehaviorActionExecutor
 {
-   private final HandWrenchActionState state = new HandWrenchActionState();
-   private final HandWrenchActionDefinition definition = state.getDefinition();
+   private final HandWrenchActionDefinition definition = new HandWrenchActionDefinition();
+   private final HandWrenchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
 
-   public HandWrenchActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
+   public HandWrenchActionExecutor(long id, BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
    {
       super(sequence);
 
       this.ros2ControllerHelper = ros2ControllerHelper;
+
+      state = new HandWrenchActionState(id, definition);
    }
 
    @Override

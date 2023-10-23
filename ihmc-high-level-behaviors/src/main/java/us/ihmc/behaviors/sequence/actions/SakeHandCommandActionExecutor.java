@@ -14,17 +14,19 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
 
-   private final SakeHandCommandActionState state = new SakeHandCommandActionState();
-   private final SakeHandCommandActionDefinition definition = state.getDefinition();
+   private final SakeHandCommandActionDefinition definition = new SakeHandCommandActionDefinition();
+   private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public SakeHandCommandActionExecutor(BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(long id, BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
    {
       super(sequence);
 
       this.ros2ControllerHelper = ros2ControllerHelper;
+
+      state = new SakeHandCommandActionState(id, definition);
    }
 
    @Override
