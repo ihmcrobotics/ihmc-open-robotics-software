@@ -29,7 +29,7 @@ public class HumanoidActivePerceptionModule
    private final Mat gridColor = new Mat();
 
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
-   private ContinuousPlanningRemoteTask continuousElevationMappingRemoteThread;
+   private ContinuousPlanningRemoteTask continuousPlanningRemoteThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private final ContinuousPlanningParameters continuousPlanningParameters;
@@ -39,11 +39,6 @@ public class HumanoidActivePerceptionModule
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
       this.continuousPlanningParameters = continuousPlanningParameters;
-   }
-
-   public void setupForImageMessage(ROS2Helper ros2)
-   {
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, continuousElevationMappingRemoteThread::onHeightMapReceived);
    }
 
    public void initializeActivePlaneMappingTask(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
@@ -58,7 +53,7 @@ public class HumanoidActivePerceptionModule
 
    public void initializeContinuousElevationMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousElevationMappingRemoteThread = new ContinuousPlanningRemoteTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
+      continuousPlanningRemoteThread = new ContinuousPlanningRemoteTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -114,12 +109,12 @@ public class HumanoidActivePerceptionModule
       if (activePlaneMappingRemoteThread != null)
          activePlaneMappingRemoteThread.destroy();
 
-      if (continuousElevationMappingRemoteThread != null)
-         continuousElevationMappingRemoteThread.destroy();
+      if (continuousPlanningRemoteThread != null)
+         continuousPlanningRemoteThread.destroy();
    }
 
    public ContinuousPlanningRemoteTask getContinuousMappingRemoteThread()
    {
-      return continuousElevationMappingRemoteThread;
+      return continuousPlanningRemoteThread;
    }
 }

@@ -361,4 +361,9 @@ public class TerrainPerceptionProcessWithDriver
    {
       return parameters;
    }
+
+   public HumanoidPerceptionModule getHumanoidPerceptionModule()
+   {
+      return humanoidPerception;
+   }
 }

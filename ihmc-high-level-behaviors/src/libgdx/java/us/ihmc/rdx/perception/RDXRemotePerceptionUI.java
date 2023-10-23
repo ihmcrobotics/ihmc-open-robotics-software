@@ -50,6 +50,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(continuousPlanningParameters, PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS);
 
       //remotePropertySets.registerRemotePropertySet(rapidRegionsExtractorParameters, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
       //remotePropertySets.registerRemotePropertySet(polygonizerParameters, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);

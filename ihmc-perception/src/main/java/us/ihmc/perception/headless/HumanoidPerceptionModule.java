@@ -349,6 +349,23 @@ public class HumanoidPerceptionModule
       return HeightMapMessageTools.toMessage(latestHeightMapData);
    }
 
+   public HeightMapData getLatestHeightMapData()
+   {
+      Mat heightMapMat = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+      if (latestHeightMapData == null)
+      {
+         latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                 RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                 rapidHeightMapExtractor.getSensorOrigin().getX(),
+                                                 rapidHeightMapExtractor.getSensorOrigin().getY());
+      }
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat, latestHeightMapData,
+                                                    rapidHeightMapExtractor.getSensorOrigin(),
+                                                    RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                    RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+      return latestHeightMapData;
+   }
+
    public void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
    {
       this.rapidRegionsEnabled = rapidRegionsEnabled;

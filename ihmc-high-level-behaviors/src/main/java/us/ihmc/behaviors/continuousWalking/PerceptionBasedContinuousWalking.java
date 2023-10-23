@@ -11,6 +11,7 @@ import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class PerceptionBasedContinuousWalking
 {
@@ -34,12 +35,15 @@ public class PerceptionBasedContinuousWalking
                                                               PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
-      perceptionTask.run();
-
-      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(),
-                                                                  continuousPlanningParameters);
+      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
       activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
 
+      perceptionTask.run();
       ThreadTools.sleepForever();
+   }
+
+   public void update()
+   {
+      activePerceptionModule.getContinuousMappingRemoteThread().setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
    }
 }

@@ -5,6 +5,7 @@ import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 public class PerceptionComms
 {
    private static final String MODULE_NAME = "perception";
+   private static final String ACTIVE_MODULE_NAME = "active_perception";
 
    public static final StoredPropertySetROS2TopicPair PERCEPTION_CONFIGURATION_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perception_configuration_parameters");
@@ -32,4 +33,7 @@ public class PerceptionComms
 
    public static final StoredPropertySetROS2TopicPair SPHERICAL_PLANAR_REGION_MAPPING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perspective_planar_region_mapping_parameters");
+
+   public static final StoredPropertySetROS2TopicPair CONTINUOUS_PLANNING_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"continuous_planning_parameters");
 }
