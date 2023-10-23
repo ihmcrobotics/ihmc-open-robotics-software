@@ -3,10 +3,13 @@ package us.ihmc.behaviors.behaviorTree;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BehaviorTreeNodeExecutor
-      implements BehaviorTreeNodeExtension<BehaviorTreeNodeExecutor, BehaviorTreeNodeState>, BehaviorTreeNodeStateSupplier
+public abstract class BehaviorTreeNodeExecutor<E extends BehaviorTreeNodeExecutor<E, S, D>,
+                                               S extends BehaviorTreeNodeState<S, D>,
+                                               D extends BehaviorTreeNodeDefinition<D>>
+      implements BehaviorTreeNodeExtension<E, S>,
+                 BehaviorTreeNodeStateSupplier<S, D>
 {
-   private final List<BehaviorTreeNodeExecutor> children = new ArrayList<>();
+   private final List<E> children = new ArrayList<>();
 
    /**
     * A method that should be called before each {@link #tick}
@@ -33,13 +36,13 @@ public abstract class BehaviorTreeNodeExecutor
 
    }
 
-   public List<BehaviorTreeNodeExecutor> getChildren()
+   public List<E> getChildren()
    {
       return children;
    }
 
    @Override
-   public BehaviorTreeNodeState getExtendedNode()
+   public S getExtendedNode()
    {
       return getState();
    }
