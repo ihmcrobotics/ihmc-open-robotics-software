@@ -7,14 +7,16 @@ import us.ihmc.tools.Timer;
 
 public class WaitDurationActionExecutor extends BehaviorActionExecutor
 {
-   private final WaitDurationActionState state = new WaitDurationActionState();
-   private final WaitDurationActionDefinition definition = state.getDefinition();
+   private final WaitDurationActionDefinition definition = new WaitDurationActionDefinition();
+   private final WaitDurationActionState state;
    private final Timer executionTimer = new Timer();
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
-   public WaitDurationActionExecutor(BehaviorActionSequence sequence)
+   public WaitDurationActionExecutor(long id, BehaviorActionSequence sequence)
    {
       super(sequence);
+
+      state = new WaitDurationActionState(id, definition);
    }
 
    @Override

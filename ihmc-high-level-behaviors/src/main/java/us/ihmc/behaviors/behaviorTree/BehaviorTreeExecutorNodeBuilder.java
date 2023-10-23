@@ -53,15 +53,17 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
 
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(sequence, robotModel, ros2ControllerHelper);
+         return new ArmJointAnglesActionExecutor(id, sequence, robotModel, ros2ControllerHelper);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
-         return new ChestOrientationActionExecutor(sequence, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+         return new ChestOrientationActionExecutor(id, sequence, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
-         return new FootstepPlanActionExecutor(sequence, ros2ControllerHelper,
+         return new FootstepPlanActionExecutor(id,
+                                               sequence,
+                                               ros2ControllerHelper,
                                                syncedRobot,
                                                footstepTracker,
                                                referenceFrameLibrary,
@@ -69,27 +71,29 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
-         return new HandPoseActionExecutor(sequence, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
+         return new HandPoseActionExecutor(id, sequence, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
-         return new HandWrenchActionExecutor(sequence, ros2ControllerHelper);
+         return new HandWrenchActionExecutor(id, sequence, ros2ControllerHelper);
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
-         return new PelvisHeightPitchActionExecutor(sequence, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+         return new PelvisHeightPitchActionExecutor(id, sequence, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
-         return new SakeHandCommandActionExecutor(sequence, ros2ControllerHelper);
+         return new SakeHandCommandActionExecutor(id, sequence, ros2ControllerHelper);
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {
-         return new WaitDurationActionExecutor(sequence);
+         return new WaitDurationActionExecutor(id, sequence);
       }
       if (nodeType == WalkActionDefinition.class)
       {
-         return new WalkActionExecutor(sequence, ros2ControllerHelper,
+         return new WalkActionExecutor(id,
+                                       sequence,
+                                       ros2ControllerHelper,
                                        syncedRobot,
                                        footstepTracker,
                                        footstepPlanner,

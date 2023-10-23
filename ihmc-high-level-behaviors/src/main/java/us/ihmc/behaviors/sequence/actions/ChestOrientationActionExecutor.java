@@ -22,8 +22,8 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
+   private final ChestOrientationActionDefinition definition = new ChestOrientationActionDefinition();
    private final ChestOrientationActionState state;
-   private final ChestOrientationActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final Timer executionTimer = new Timer();
@@ -33,7 +33,8 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
-   public ChestOrientationActionExecutor(BehaviorActionSequence sequence,
+   public ChestOrientationActionExecutor(long id,
+                                         BehaviorActionSequence sequence,
                                          ROS2ControllerHelper ros2ControllerHelper,
                                          ROS2SyncedRobotModel syncedRobot,
                                          ReferenceFrameLibrary referenceFrameLibrary)
@@ -43,8 +44,7 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new ChestOrientationActionState(referenceFrameLibrary);
-      definition = state.getDefinition();
+      state = new ChestOrientationActionState(id, definition, referenceFrameLibrary);
    }
 
    @Override
