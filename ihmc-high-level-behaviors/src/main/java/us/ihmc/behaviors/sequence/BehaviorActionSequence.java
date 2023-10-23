@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
-import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -32,10 +31,6 @@ import java.util.List;
  */
 public class BehaviorActionSequence
 {
-
-   /** TODO: Make non-static and assign as actions are created. */
-   public static final MutableLong NEXT_ID = new MutableLong();
-
    private final DRCRobotModel robotModel;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
