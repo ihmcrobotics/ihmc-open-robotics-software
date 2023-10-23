@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.communication.crdt.FreezableNode;
+import us.ihmc.communication.crdt.Freezable;
 
 public class BehaviorTreeNodeMove<T extends BehaviorTreeNode> implements BehaviorTreeModification<T>
 {
@@ -26,14 +26,14 @@ public class BehaviorTreeNodeMove<T extends BehaviorTreeNode> implements Behavio
    protected void doRemovePart()
    {
       previousParent.getChildren().remove(nodeToMove);
-      if (previousParent instanceof FreezableNode freezableParent)
+      if (previousParent instanceof Freezable freezableParent)
          freezableParent.freezeFromModification();
    }
 
    protected void doAddPart()
    {
       newParent.getChildren().add(nodeToMove);
-      if (newParent instanceof FreezableNode freezableParent)
+      if (newParent instanceof Freezable freezableParent)
          freezableParent.freezeFromModification();
    }
 }

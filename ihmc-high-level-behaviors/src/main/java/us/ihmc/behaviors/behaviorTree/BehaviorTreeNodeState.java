@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
-import us.ihmc.communication.crdt.FreezableNode;
+import us.ihmc.communication.crdt.Freezable;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public abstract class BehaviorTreeNodeState extends FreezableNode
+public abstract class BehaviorTreeNodeState extends Freezable
       implements BehaviorTreeNodeExtension<BehaviorTreeNodeState, BehaviorTreeNodeDefinition>, BehaviorTreeNodeDefinitionSupplier
 {
    private final BehaviorTreeNodeDefinition definition;
