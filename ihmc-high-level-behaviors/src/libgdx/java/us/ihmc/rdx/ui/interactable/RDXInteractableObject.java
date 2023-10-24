@@ -187,6 +187,12 @@ public class RDXInteractableObject implements RenderableProvider
       }
    }
 
+   public float[] getResizablePrimitiveSize()
+   {
+      float[] latestSize = {xLength.get(), yLength.get(), zLength.get(), xRadius.get(), yRadius.get(), zRadius.get()};
+      return latestSize;
+   }
+
    public void clear()
    {
       shape = null;
