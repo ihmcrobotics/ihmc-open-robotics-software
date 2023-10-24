@@ -16,6 +16,7 @@ public class ROS2SceneGraphSubscriptionNode
    private DetectableSceneNodeMessage detectableSceneNodeMessage;
    private PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
+   private CenterposeNodeMessage centerposeNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
@@ -27,6 +28,7 @@ public class ROS2SceneGraphSubscriptionNode
       detectableSceneNodeMessage = null;
       predefinedRigidBodySceneNodeMessage = null;
       arUcoMarkerNodeMessage = null;
+      centerposeNodeMessage = null;
       staticRelativeSceneNodeMessage = null;
       children.clear();
    }
@@ -79,6 +81,16 @@ public class ROS2SceneGraphSubscriptionNode
    public void setArUcoMarkerNodeMessage(ArUcoMarkerNodeMessage arUcoMarkerNodeMessage)
    {
       this.arUcoMarkerNodeMessage = arUcoMarkerNodeMessage;
+   }
+
+   public CenterposeNodeMessage getCenterposeNodeMessage()
+   {
+      return centerposeNodeMessage;
+   }
+
+   public void setCenterposeNodeMessage(CenterposeNodeMessage centerposeNodeMessage)
+   {
+      this.centerposeNodeMessage = centerposeNodeMessage;
    }
 
    public StaticRelativeSceneNodeMessage getStaticRelativeSceneNodeMessage()

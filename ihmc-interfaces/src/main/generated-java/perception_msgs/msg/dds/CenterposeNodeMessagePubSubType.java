@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "DetectedObjectPacket" defined in "DetectedObjectPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "CenterposeNodeMessage" defined in "CenterposeNodeMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from DetectedObjectPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit DetectedObjectPacket_.idl instead.
+* This file was automatically generated from CenterposeNodeMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit CenterposeNodeMessage_.idl instead.
 *
 */
-public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectedObjectPacket>
+public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.CenterposeNodeMessage>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::DetectedObjectPacket_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::CenterposeNodeMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0e7e0d7d38734434db33d9d7f6cf34916560fae9bcd7eaa92ec19a177d5648e4";
+   		return "39bc7e4dd32541b580a6fceaeb6c40051a381d88df6b7d4ad54f5e1ab53ff592";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.DetectedObjectPacket data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.CenterposeNodeMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,7 +52,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -67,21 +67,22 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       for(int i0 = 0; i0 < (8); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectedObjectPacket data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.CenterposeNodeMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectedObjectPacket data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.CenterposeNodeMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getCdrSerializedSize(data.getDetectableSceneNode(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -101,15 +102,17 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       {
               current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxVertices()[i0], current_alignment);
       }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
-
-      cdr.write_type_2(data.getId());
+      perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
+      cdr.write_type_2(data.getObjectId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
       cdr.write_type_6(data.getConfidence());
@@ -128,13 +131,14 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
         	geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxVertices()[i0], cdr);		
       }
 
+      cdr.write_type_5(data.getBreakFrequency());
+
    }
 
-   public static void read(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
-      	
-      data.setId(cdr.read_type_2());
+      perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
+      data.setObjectId(cdr.read_type_2());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setConfidence(cdr.read_type_6());
@@ -150,44 +154,50 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
         	geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxVertices()[i0], cdr);	
       }
       	
+      data.setBreakFrequency(cdr.read_type_5());
+      	
 
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_2("id", data.getId());
+      ser.write_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
+
+      ser.write_type_2("object_id", data.getObjectId());
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       ser.write_type_6("confidence", data.getConfidence());
       ser.write_type_d("object_type", data.getObjectType());
       ser.write_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
       ser.write_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
+      ser.write_type_5("break_frequency", data.getBreakFrequency());
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedObjectPacket data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.CenterposeNodeMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setId(ser.read_type_2("id"));
+      ser.read_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
+
+      data.setObjectId(ser.read_type_2("object_id"));
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       data.setConfidence(ser.read_type_6("confidence"));
       ser.read_type_d("object_type", data.getObjectType());
       ser.read_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
       ser.read_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
+      data.setBreakFrequency(ser.read_type_5("break_frequency"));
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.DetectedObjectPacket src, perception_msgs.msg.dds.DetectedObjectPacket dest)
+   public static void staticCopy(perception_msgs.msg.dds.CenterposeNodeMessage src, perception_msgs.msg.dds.CenterposeNodeMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.DetectedObjectPacket createData()
+   public perception_msgs.msg.dds.CenterposeNodeMessage createData()
    {
-      return new perception_msgs.msg.dds.DetectedObjectPacket();
+      return new perception_msgs.msg.dds.CenterposeNodeMessage();
    }
    @Override
    public int getTypeSize()
@@ -201,24 +211,24 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.DetectedObjectPacket src, perception_msgs.msg.dds.DetectedObjectPacket dest)
+   public void copy(perception_msgs.msg.dds.CenterposeNodeMessage src, perception_msgs.msg.dds.CenterposeNodeMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public DetectedObjectPacketPubSubType newInstance()
+   public CenterposeNodeMessagePubSubType newInstance()
    {
-      return new DetectedObjectPacketPubSubType();
+      return new CenterposeNodeMessagePubSubType();
    }
 }
