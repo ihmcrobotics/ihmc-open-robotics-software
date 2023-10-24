@@ -32,9 +32,11 @@ class FootstepDataset(Dataset):
 
         self.sensor_positions[:, 2] = 0
 
+        self.footstep_plan_sides = get_data(data, 'plan/footstep/side/')
         self.footstep_plan_positions = get_data(data, 'plan/footstep/position/')
         self.footstep_plan_orientations = get_data(data, 'plan/footstep/orientation/')
 
+        self.start_side = get_data(data, 'initial/side/')
         self.start_positions = get_data(data, 'start/footstep/position/')
         self.start_orientations = get_data(data, 'start/footstep/orientation/')
 
@@ -128,6 +130,9 @@ class FootstepDataset(Dataset):
                     1 - 2 * (sensor_quaternion[0]**2 + sensor_quaternion[3]**2))
         sensor_pose = np.array([self.sensor_positions[index, 0], self.sensor_positions[index, 1], sensor_yaw], dtype=np.float32)
         
+        # get intial side
+        start_side = self.start_side[index]
+
         # convert quaternion to yaw
         start_quaternion = self.start_orientations[index, :]
         start_yaw = np.arctan2(2 * (start_quaternion[0] * start_quaternion[1] + start_quaternion[3] * start_quaternion[2]),
@@ -147,6 +152,9 @@ class FootstepDataset(Dataset):
         footstep_plan_poses = self.footstep_plan_positions[index*self.n_steps:(index+1)*self.n_steps, :] - sensor_pose
         footstep_plan_poses[:, 2] = footstep_plan_yaws
         footstep_plan_poses = np.array(footstep_plan_poses, dtype=np.float32)
+
+        # get sides
+        footstep_plan_sides = self.footstep_plan_sides[index*self.n_steps:(index+1)*self.n_steps]
 
         # Inputs
         # --------- Image Inputs (float54)
@@ -368,9 +376,11 @@ def load_dataset(validation_split):
     
     files = \
     [
-        '20231015_183228_PerceptionLog.hdf5', 
-        '20231015_234600_PerceptionLog.hdf5', 
-        '20231016_025456_PerceptionLog.hdf5',
+        # '20231015_183228_PerceptionLog.hdf5', 
+        # '20231015_234600_PerceptionLog.hdf5', 
+        # '20231016_025456_PerceptionLog.hdf5',
+        '20231023_131517_PerceptionLog.hdf5',
+        '20231023_160823_PerceptionLog.hdf5'
     ]
     
     datasets = []
@@ -402,7 +412,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
+    train = True
     visualize_raw = False
 
     if visualize_raw:
