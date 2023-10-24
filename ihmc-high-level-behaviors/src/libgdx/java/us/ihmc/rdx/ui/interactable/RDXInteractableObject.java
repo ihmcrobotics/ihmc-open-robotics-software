@@ -13,7 +13,6 @@ import imgui.type.ImFloat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -27,6 +26,10 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class RDXInteractableObject implements RenderableProvider
 {
@@ -78,11 +81,11 @@ public class RDXInteractableObject implements RenderableProvider
       selectablePose3DGizmo.getSelected().set(true);
    }
 
-   public void setVisuals(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode)
+   public void setVisuals(PrimitiveRigidBodyShape shape)
    {
 //      , RigidBodyTransform visualModelTransform
-      shape = primitiveRigidBodySceneNode.getShape();
-      switch (primitiveRigidBodySceneNode.getShape())
+      this.shape = shape;
+      switch (this.shape)
       {
          case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
          case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
@@ -187,10 +190,29 @@ public class RDXInteractableObject implements RenderableProvider
       }
    }
 
-   public float[] getResizablePrimitiveSize()
+   public PrimitiveRigidBodyShape getShape()
    {
-      float[] latestSize = {xLength.get(), yLength.get(), zLength.get(), xRadius.get(), yRadius.get(), zRadius.get()};
-      return latestSize;
+      return shape;
+   }
+
+   public void setShape(PrimitiveRigidBodyShape newShape)
+   {
+      this.shape = newShape;
+   }
+
+   public List<Float> getResizablePrimitiveSize()
+   {
+      return new ArrayList<>(Arrays.asList(xLength.get(), yLength.get(), zLength.get(), xRadius.get(), yRadius.get(), zRadius.get()));
+   }
+
+   public void setResizablePrimitiveSize(List<Float> newSize)
+   {
+      xLength.set(newSize.get(0));
+      yLength.set(newSize.get(1));
+      zLength.set(newSize.get(2));
+      xRadius.set(newSize.get(3));
+      yRadius.set(newSize.get(4));
+      zRadius.set(newSize.get(5));
    }
 
    public void clear()

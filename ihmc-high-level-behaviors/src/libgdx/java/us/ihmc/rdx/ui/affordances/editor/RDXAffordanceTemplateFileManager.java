@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -505,12 +506,12 @@ public class RDXAffordanceTemplateFileManager
             if (objectBuilder.getSelectedObject().shape != null)
             {
                jsonNode.put("Resizable Primitive Shape", objectBuilder.getSelectedObject().shape.toString());
-               jsonNode.put("xLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[0]);
-               jsonNode.put("yLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[1]);
-               jsonNode.put("zLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[2]);
-               jsonNode.put("xRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[3]);
-               jsonNode.put("yRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[4]);
-               jsonNode.put("zRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[5]);
+               jsonNode.put("xLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(0));
+               jsonNode.put("yLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(1));
+               jsonNode.put("zLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(2));
+               jsonNode.put("xRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(3));
+               jsonNode.put("yRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(4));
+               jsonNode.put("zRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(5));
             }
          });
          LogTools.info("SAVED to file {}", extraFile.getFileName());
@@ -606,6 +607,47 @@ public class RDXAffordanceTemplateFileManager
                   String configuration = handConfigurationArrayNode.get(sideIndex).get("type").asText();
                   postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : configuration, side);
                }
+            }
+
+            String resizablePrimitiveShape = jsonNode.get("Resizable Primitive Shape").asText();
+            if (!resizablePrimitiveShape.isEmpty())
+            {
+               if (objectBuilder.isAnyObjectSelected())
+                  objectBuilder.getSelectedObject().clear();
+
+               if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.BOX.toString()))
+               {
+                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.BOX);
+               }
+               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.PRISM.toString()))
+               {
+                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.PRISM);
+               }
+               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.ELLIPSOID.toString()))
+               {
+                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.ELLIPSOID);
+               }
+               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.CYLINDER.toString()))
+               {
+                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.CYLINDER);
+               }
+               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.CONE.toString()))
+               {
+                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.CONE);
+               }
+               else
+               {
+                  LogTools.error("Primitive object shape not Defined!");
+               }
+
+               List<Float> myList = new ArrayList<Float>();
+               myList.add(jsonNode.get("xLength").floatValue());
+               myList.add(jsonNode.get("yLength").floatValue());
+               myList.add(jsonNode.get("zLength").floatValue());
+               myList.add(jsonNode.get("xRadius").floatValue());
+               myList.add(jsonNode.get("yRadius").floatValue());
+               myList.add(jsonNode.get("zRadius").floatValue());
+               objectBuilder.getSelectedObject().setResizablePrimitiveSize(myList);
             }
          });
          LogTools.info("Loaded file {}", filePath);
