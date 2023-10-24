@@ -29,9 +29,13 @@ public class ImGuiRemoteROS2StoredPropertySetGroup
       for (int i = 0; i < remotePropertySets.size(); i++)
       {
          ImGuiRemoteROS2StoredPropertySet remotePropertySet = remotePropertySets.get(i);
-         if (i > 0)
-            ImGui.separator();
-         remotePropertySet.renderImGuiWidgetsWithUpdateButton();
+
+         if (ImGui.collapsingHeader(remotePropertySet.getStoredPropertySet().getTitle()))
+         {
+            ImGui.indent();
+            remotePropertySet.renderImGuiWidgets();
+            ImGui.unindent();
+         }
       }
    }
 }

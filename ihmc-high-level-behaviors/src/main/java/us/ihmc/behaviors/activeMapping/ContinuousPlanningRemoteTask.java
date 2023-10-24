@@ -37,10 +37,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ContinuousPlanningRemoteTask
 {
    private final static long CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS = 50;
-   private final static float SWING_DURATION = 0.8f;
-   private final static float TRANSFER_DURATION = 0.4f;
-   private final static int MAXIMUM_FOOTSTEPS_TO_SEND = 1;
-   private final static int MAXIMUM_FOOTSTEPS_HELD_IN_CONTROLLER_QUEUE = 2;
 
    private enum ContinuousWalkingState
    {
@@ -146,8 +142,12 @@ public class ContinuousPlanningRemoteTask
          getImminentStanceFromLatestStatus();
          startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
          ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
-                                                 multiplierForGoalPoseDistance, originalPoseToBaseGoalPoseFrom, startPoseForFootstepPlanner,
-                                                 goalPoseForFootstepPlanner, 0.8f);
+                                                 multiplierForGoalPoseDistance,
+                                                 originalPoseToBaseGoalPoseFrom,
+                                                 startPoseForFootstepPlanner,
+                                                 goalPoseForFootstepPlanner,
+                                                 (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
+                                                 (float) continuousPlanningParameters.getGoalPoseUpDistance());
          plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
          if (continuousPlanner.getFootstepPlanningResult() != FootstepPlanningResult.INVALID_GOAL)
             continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
@@ -174,12 +174,16 @@ public class ContinuousPlanningRemoteTask
          // TODO adjust this so that it doesn't consider the Z of the poses at all, otherwise there will be bugs in the future
          // Only update the goal poses if the robot gets within some distance of them
          double distance = firstImminentFootstep.getPositionDistance(goalPoseForFootstepPlanner.get(secondImminentFootstepSide.getOppositeSide()));
-         if (distance < 0.46)
+         if (distance < continuousPlanningParameters.getDistanceToGoalPose())
          {
             multiplierForGoalPoseDistance += 1;
             ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
-                                                    multiplierForGoalPoseDistance, originalPoseToBaseGoalPoseFrom, startPoseForFootstepPlanner,
-                                                    goalPoseForFootstepPlanner, 0.6f);
+                                                    multiplierForGoalPoseDistance,
+                                                    originalPoseToBaseGoalPoseFrom,
+                                                    startPoseForFootstepPlanner,
+                                                    goalPoseForFootstepPlanner,
+                                                    (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
+                                                    (float) continuousPlanningParameters.getGoalPoseUpDistance());
          }
 
          plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
@@ -191,12 +195,12 @@ public class ContinuousPlanningRemoteTask
       }
       // If we got a plan from the last time the planner ran, and we are running low on footsteps in the queue, send this plan
       else if (continuousPlanner.isPlanAvailable() && continuousPlannerState == ContinuousWalkingState.FOOTSTEP_STARTED
-               && queuedFootstepSize < MAXIMUM_FOOTSTEPS_HELD_IN_CONTROLLER_QUEUE)
+               && queuedFootstepSize < continuousPlanningParameters.getMaxNumberOfStepsToHoldInControllerQueue())
       {
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
-                                                                                                        MAXIMUM_FOOTSTEPS_TO_SEND,
-                                                                                                        SWING_DURATION,
-                                                                                                        TRANSFER_DURATION);
+                                                                                                        continuousPlanningParameters.getNumberOfStepsToSend(),
+                                                                                                        (float) continuousPlanningParameters.getSwingTime(),
+                                                                                                        (float) continuousPlanningParameters.getTransferTime());
          footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
 
          if (originalFootstepDataListId == -1)

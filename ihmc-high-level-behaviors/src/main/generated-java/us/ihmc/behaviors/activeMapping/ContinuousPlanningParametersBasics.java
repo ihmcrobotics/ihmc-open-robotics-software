@@ -17,4 +17,39 @@ public interface ContinuousPlanningParametersBasics extends ContinuousPlanningPa
    {
       set(ContinuousPlanningParameters.pauseContinuousWalking, pauseContinuousWalking);
    }
+
+   default void setNumberOfStepsToSend(int numberOfStepsToSend)
+   {
+      set(ContinuousPlanningParameters.numberOfStepsToSend, numberOfStepsToSend);
+   }
+
+   default void setMaxNumberOfStepsToHoldInControllerQueue(int maxNumberOfStepsToHoldInControllerQueue)
+   {
+      set(ContinuousPlanningParameters.maxNumberOfStepsToHoldInControllerQueue, maxNumberOfStepsToHoldInControllerQueue);
+   }
+
+   default void setGoalPoseForwardDistance(double goalPoseForwardDistance)
+   {
+      set(ContinuousPlanningParameters.goalPoseForwardDistance, goalPoseForwardDistance);
+   }
+
+   default void setGoalPoseUpDistance(double goalPoseUpDistance)
+   {
+      set(ContinuousPlanningParameters.goalPoseUpDistance, goalPoseUpDistance);
+   }
+
+   default void setDistanceToGoalPose(double distanceToGoalPose)
+   {
+      set(ContinuousPlanningParameters.distanceToGoalPose, distanceToGoalPose);
+   }
+
+   default void setSwingTime(double swingTime)
+   {
+      set(ContinuousPlanningParameters.swingTime, swingTime);
+   }
+
+   default void setTransferTime(double transferTime)
+   {
+      set(ContinuousPlanningParameters.transferTime, transferTime);
+   }
 }
