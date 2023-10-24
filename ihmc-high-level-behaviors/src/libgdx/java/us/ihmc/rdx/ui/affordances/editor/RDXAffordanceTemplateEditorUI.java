@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.ResizablePrimitiveRigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -80,6 +81,11 @@ public class RDXAffordanceTemplateEditorUI
                                RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureShoeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureThinkPadNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizablePrismNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableCylinderNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableEllipsoidNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableConeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                             });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);

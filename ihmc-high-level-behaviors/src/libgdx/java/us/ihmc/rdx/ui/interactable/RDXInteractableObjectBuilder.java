@@ -1,12 +1,19 @@
 package us.ihmc.rdx.ui.interactable;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.*;
@@ -17,8 +24,16 @@ public class RDXInteractableObjectBuilder extends RDXPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXInteractableObject selectedObject;
    private final SortedMap<String, PredefinedRigidBodySceneNode> nameToNodesMap = new TreeMap<>();
+   private final SortedMap<String, PrimitiveRigidBodySceneNode> nameToPrimitiveNodesMap = new TreeMap<>();
    private String selectedObjectName = "";
    private final TypedNotification<String> selectedObjectChanged = new TypedNotification<>();
+   private static final float DEFAULT_DIMENSION = 0.1F;
+   private final ImFloat xLength = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat yLength = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat zLength = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat xRadius = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
 
    public RDXInteractableObjectBuilder(RDXBaseUI baseUI, SceneGraph sceneGraph)
    {
@@ -35,6 +50,11 @@ public class RDXInteractableObjectBuilder extends RDXPanel
       if (sceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
       {
          nameToNodesMap.put(predefinedRigidBodySceneNode.getName(), predefinedRigidBodySceneNode);
+      }
+
+      if (sceneNode instanceof PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode)
+      {
+         nameToPrimitiveNodesMap.put(primitiveRigidBodySceneNode.getName(), primitiveRigidBodySceneNode);
       }
 
       for (SceneNode child : sceneNode.getChildren())
@@ -60,6 +80,20 @@ public class RDXInteractableObjectBuilder extends RDXPanel
          }
          ImGui.separator();
       }
+      ImGui.text("Resizable Primitive Objects: ");
+      for (PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode : nameToPrimitiveNodesMap.values())
+      {
+         if (ImGui.button(labels.get(primitiveRigidBodySceneNode.getName())))
+         {
+            if (isAnyObjectSelected())
+               selectedObject.clear();
+            selectedObject.setVisuals(primitiveRigidBodySceneNode);
+            // Notify that the object selection has been updated
+            selectedObjectName = primitiveRigidBodySceneNode.getName();
+            selectedObjectChanged.set(selectedObjectName);
+         }
+         ImGui.separator();
+      }
       if (isAnyObjectSelected() && (ImGui.button(labels.get("Set Initial Pose") + "##object")))
       {
          selectedObject.setInitialPose();
@@ -77,6 +111,10 @@ public class RDXInteractableObjectBuilder extends RDXPanel
       if (isAnyObjectSelected() && (ImGui.button(labels.get("Hide/Show Gizmo") + "##object")))
       {
          selectedObject.switchGizmoVisualization();
+      }
+      if (selectedObject.shape != null)
+      {
+         selectedObject.updateVisuals();
       }
    }
 
