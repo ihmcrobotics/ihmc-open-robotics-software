@@ -31,7 +31,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -232,24 +231,28 @@ public class ZEDColorStereoDepthPublisher
          }
       }, "ZEDDepthImagePublishThread");
 
-      centerposeUpdateThread = new Thread(new Runnable()
+      centerposeUpdateThread = new Thread(() ->
       {
-         private final Throttler centerposeSceneGraphThrottler = new Throttler();
-
-         @Override
-         public void run()
+         while (running)
          {
-            centerposeSceneGraphThrottler.setFrequency(CAMERA_FPS);
-
-            while (running)
+            // Wait for the sl_grab to finish
+            synchronized (slGrabSync)
             {
-               centerposeSceneGraphThrottler.waitAndRun();
-               if (centerposeDetectionManager != null && ros2SceneGraph != null)
+               try
                {
-                  ros2SceneGraph.updateSubscription(); // Receive overridden poses from operator
-                  centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
-                  ros2SceneGraph.updatePublication();
+                  slGrabSync.wait();
                }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+
+            if (centerposeDetectionManager != null && ros2SceneGraph != null)
+            {
+               ros2SceneGraph.updateSubscription(); // Receive overridden poses from operator
+               centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
+               ros2SceneGraph.updatePublication();
             }
          }
       }, "CenterposeUpdateThread");
