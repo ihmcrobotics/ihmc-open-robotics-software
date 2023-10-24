@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -7,16 +8,25 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 public class RDXInteractableObject implements RenderableProvider
 {
@@ -26,6 +36,17 @@ public class RDXInteractableObject implements RenderableProvider
    private final ReferenceFrame objectFrame;
    private ReferenceFrame modelInstanceFrame;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), objectTransform);
+   private static final float DEFAULT_DIMENSION = 0.1F;
+   protected static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.6);
+   public PrimitiveRigidBodyShape shape;
+
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImFloat xLength = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat yLength = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat zLength = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat xRadius = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
+   private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
 
    public RDXInteractableObject(RDXBaseUI baseUI)
    {
@@ -55,6 +76,115 @@ public class RDXInteractableObject implements RenderableProvider
       modelInstance = new RDXModelInstance(new Model(objectModel));
       modelInstanceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(objectFrame, visualModelTransform);
       selectablePose3DGizmo.getSelected().set(true);
+   }
+
+   public void setVisuals(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode)
+   {
+//      , RigidBodyTransform visualModelTransform
+      shape = primitiveRigidBodySceneNode.getShape();
+      switch (primitiveRigidBodySceneNode.getShape())
+      {
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+         case ELLIPSOID ->
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+      }
+      modelInstance.setColor(GHOST_COLOR);
+      modelInstanceFrame = objectFrame;
+//            ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(objectFrame, visualModelTransform);
+      selectablePose3DGizmo.getSelected().set(true);
+   }
+
+   public void updateVisuals()
+   {
+      ImGui.text("Modify shape:");
+
+      switch (shape)
+      {
+         case BOX ->
+         {
+            boolean reshaped = false;
+            if (ImGuiTools.volatileInputFloat(labels.get("depth"), xLength))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("width"), yLength))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
+               reshaped = true;
+            if (reshaped)
+            {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+               modelInstance.setColor(GHOST_COLOR);
+            }
+         }
+         case PRISM ->
+         {
+            boolean reshaped = false;
+            if (ImGuiTools.volatileInputFloat(labels.get("depth"), xLength))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("width"), yLength))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
+               reshaped = true;
+            if (reshaped)
+            {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+               modelInstance.setColor(GHOST_COLOR);
+            }
+         }
+         case CYLINDER ->
+         {
+            boolean reshaped = false;
+            if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
+               reshaped = true;
+            if (reshaped)
+            {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
+               modelInstance.setColor(GHOST_COLOR);
+            }
+         }
+         case ELLIPSOID ->
+         {
+            boolean reshaped = false;
+            if (ImGuiTools.volatileInputFloat(labels.get("xRadius"), xRadius))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("yRadius"), yRadius))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("zRadius"), zRadius))
+               reshaped = true;
+            if (reshaped)
+            {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
+               modelInstance.setColor(GHOST_COLOR);
+            }
+         }
+         case CONE ->
+         {
+            boolean reshaped = false;
+            if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius))
+               reshaped = true;
+            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
+               reshaped = true;
+            if (reshaped)
+            {
+               if (modelInstance != null)
+                  modelInstance.model.dispose();
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
+               modelInstance.setColor(GHOST_COLOR);
+            }
+         }
+      }
    }
 
    public void clear()
