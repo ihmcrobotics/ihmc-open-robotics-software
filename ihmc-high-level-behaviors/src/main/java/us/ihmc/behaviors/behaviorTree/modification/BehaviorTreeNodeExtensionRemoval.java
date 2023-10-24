@@ -16,11 +16,11 @@ public class BehaviorTreeNodeExtensionRemoval<T extends BehaviorTreeNodeExtensio
        && rootNode.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedRootNode)
       {
          // This will result in recuresively performing the modification on all extended types
-         extendedNodeRemoval = new BehaviorTreeNodeExtensionRemoval<>(extendedNodeToRemove, extendedRootNode);
+         extendedNodeRemoval = new BehaviorTreeNodeExtensionRemoval(extendedNodeToRemove, extendedRootNode);
       }
       else
       {
-         extendedNodeRemoval = new BehaviorTreeNodeRemoval<>(nodeToRemove.getExtendedNode(), rootNode.getExtendedNode());
+         extendedNodeRemoval = new BehaviorTreeNodeRemoval(nodeToRemove.getExtendedNode(), rootNode.getExtendedNode());
       }
    }
 

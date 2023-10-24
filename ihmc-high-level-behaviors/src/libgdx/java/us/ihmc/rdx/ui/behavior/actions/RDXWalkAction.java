@@ -17,7 +17,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -42,14 +41,11 @@ public class RDXWalkAction extends RDXBehaviorAction<WalkActionState, WalkAction
    private final RDX3DPanelTooltip tooltip;
 
    public RDXWalkAction(long id,
-                        RDXBehaviorActionSequenceEditor editor,
                         RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
                         ReferenceFrameLibrary referenceFrameLibrary,
                         FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      super(editor);
-
       state = new WalkActionState(id, footstepPlannerParameters, referenceFrameLibrary);
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),

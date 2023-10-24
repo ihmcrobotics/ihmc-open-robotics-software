@@ -35,7 +35,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -89,7 +88,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction<HandPoseActionState, Ha
    private final IKRootCalculator rootCalculator;
 
    public RDXHandPoseAction(long id,
-                            RDXBehaviorActionSequenceEditor editor,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
                             FullHumanoidRobotModel syncedFullRobotModel,
@@ -97,8 +95,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction<HandPoseActionState, Ha
                             ReferenceFrameLibrary referenceFrameLibrary,
                             ROS2ControllerPublishSubscribeAPI ros2)
    {
-      super(editor);
-
       state = new HandPoseActionState(id, referenceFrameLibrary);
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent(), getSelected());

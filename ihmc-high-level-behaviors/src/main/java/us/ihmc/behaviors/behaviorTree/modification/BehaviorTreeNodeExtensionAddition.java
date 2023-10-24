@@ -16,11 +16,11 @@ public class BehaviorTreeNodeExtensionAddition<T extends BehaviorTreeNodeExtensi
        && parent.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedParent)
       {
          // This will result in recuresively performing the modification on all extended types
-         extendedTypeAddition = new BehaviorTreeNodeExtensionAddition<>(extendedNodeToAdd, extendedParent);
+         extendedTypeAddition = new BehaviorTreeNodeExtensionAddition(extendedNodeToAdd, extendedParent);
       }
       else
       {
-         extendedTypeAddition = new BehaviorTreeNodeAddition<>(nodeToAdd.getExtendedNode(), parent.getExtendedNode());
+         extendedTypeAddition = new BehaviorTreeNodeAddition(nodeToAdd.getExtendedNode(), parent.getExtendedNode());
       }
    }
 

@@ -22,15 +22,14 @@ public abstract class RDXBehaviorAction<S extends BehaviorActionState<D>,
                                         D extends BehaviorActionDefinition>
       extends RDXBehaviorTreeNode<S, D>
 {
-   private transient final RDXBehaviorActionSequenceEditor editor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
 
-   public RDXBehaviorAction(RDXBehaviorActionSequenceEditor editor)
+   public RDXBehaviorAction()
    {
-      this.editor = editor;
+
    }
 
    public void update()
@@ -103,10 +102,5 @@ public abstract class RDXBehaviorAction<S extends BehaviorActionState<D>,
    public ImString getRejectionTooltip()
    {
       return rejectionTooltip;
-   }
-
-   public RDXBehaviorActionSequenceEditor getEditor()
-   {
-      return editor;
    }
 }

@@ -10,7 +10,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
@@ -28,10 +27,8 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction<SakeHandCommandA
 
    private final ImBooleanWrapper executeWithNextActionWrapper;
 
-   public RDXSakeHandCommandAction(long id, RDXBehaviorActionSequenceEditor editor)
+   public RDXSakeHandCommandAction(long id)
    {
-      super(editor);
-
       state = new SakeHandCommandActionState(id);
 
       sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));

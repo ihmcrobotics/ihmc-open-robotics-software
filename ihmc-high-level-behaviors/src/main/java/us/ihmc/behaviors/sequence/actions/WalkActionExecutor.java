@@ -7,7 +7,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -35,7 +34,6 @@ public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, 
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
    private final WalkActionState state;
-   private final WalkActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -52,7 +50,6 @@ public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, 
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
    public WalkActionExecutor(long id,
-                             BehaviorActionSequence sequence,
                              ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
                              WalkingFootstepTracker footstepTracker,
@@ -61,8 +58,6 @@ public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, 
                              WalkingControllerParameters walkingControllerParameters,
                              ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(sequence);
-
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
@@ -70,7 +65,6 @@ public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, 
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      definition = new WalkActionDefinition(footstepPlannerParameters);
       state = new WalkActionState(id, footstepPlannerParameters, referenceFrameLibrary);
    }
 
@@ -83,7 +77,7 @@ public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, 
       {
          for (RobotSide side : RobotSide.values)
          {
-            goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(), definition.getGoalFootstepToGoalTransforms().get(side));
+            goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(), getDefinition().getGoalFootstepToGoalTransforms().get(side));
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
       }
@@ -146,24 +140,24 @@ public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, 
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
          {
             if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
-               footstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration() / 2.0);
+               footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
             else
-               footstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration());
+               footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
 
-            footstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
+            footstepPlan.getFootstep(i).setSwingDuration(getDefinition().getSwingDuration());
          }
 
          footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
-                                                                                               definition.getSwingDuration(),
-                                                                                               definition.getTransferDuration());
+                                                                                               getDefinition().getSwingDuration(),
+                                                                                               getDefinition().getTransferDuration());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
 
       nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
-                                                                                         definition.getSwingDuration(),
+                                                                                         getDefinition().getSwingDuration(),
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                         definition.getTransferDuration(),
+                                                                                         getDefinition().getTransferDuration(),
                                                                                          walkingControllerParameters.getDefaultFinalTransferTime());
       for (RobotSide side : RobotSide.values)
       {

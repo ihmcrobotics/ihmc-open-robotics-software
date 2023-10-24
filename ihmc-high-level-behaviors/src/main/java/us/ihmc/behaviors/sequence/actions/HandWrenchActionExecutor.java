@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
@@ -16,10 +15,8 @@ public class HandWrenchActionExecutor extends BehaviorActionExecutor<HandWrenchA
    private final HandWrenchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
 
-   public HandWrenchActionExecutor(long id, BehaviorActionSequence sequence, ROS2ControllerHelper ros2ControllerHelper)
+   public HandWrenchActionExecutor(long id, ROS2ControllerHelper ros2ControllerHelper)
    {
-      super(sequence);
-
       this.ros2ControllerHelper = ros2ControllerHelper;
 
       state = new HandWrenchActionState(id);

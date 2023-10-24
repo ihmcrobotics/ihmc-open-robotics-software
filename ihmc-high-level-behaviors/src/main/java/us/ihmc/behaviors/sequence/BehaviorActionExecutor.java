@@ -10,13 +10,6 @@ public abstract class BehaviorActionExecutor<S extends BehaviorActionState<D>,
                                              D extends BehaviorActionDefinition>
       extends BehaviorTreeNodeExecutor<S, D>
 {
-   private final BehaviorActionSequence sequence;
-
-   public BehaviorActionExecutor(BehaviorActionSequence sequence)
-   {
-      this.sequence = sequence;
-   }
-
    /** Called every tick. */
    public void update()
    {
@@ -39,10 +32,5 @@ public abstract class BehaviorActionExecutor<S extends BehaviorActionState<D>,
    public ActionExecutionStatusMessage getExecutionStatusMessage()
    {
       return new ActionExecutionStatusMessage();
-   }
-
-   public BehaviorActionSequence getSequence()
-   {
-      return sequence;
    }
 }
