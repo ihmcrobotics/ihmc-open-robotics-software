@@ -502,6 +502,16 @@ public class RDXAffordanceTemplateFileManager
                   gripArray.put("type", postGraspHandConfigurations.get(side).get(i) == null ? "" : postGraspHandConfigurations.get(side).get(i).toString());
                }
             }
+            if (objectBuilder.getSelectedObject().shape != null)
+            {
+               jsonNode.put("Resizable Primitive Shape", objectBuilder.getSelectedObject().shape.toString());
+               jsonNode.put("xLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[0]);
+               jsonNode.put("yLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[1]);
+               jsonNode.put("zLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[2]);
+               jsonNode.put("xRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[3]);
+               jsonNode.put("yRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[4]);
+               jsonNode.put("zRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize()[5]);
+            }
          });
          LogTools.info("SAVED to file {}", extraFile.getFileName());
       }
