@@ -77,7 +77,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public void setupForImageMessage(ROS2Helper ros2)
    {
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, this::acceptImageMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
       activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
    }
 

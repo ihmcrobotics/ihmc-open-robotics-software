@@ -15,6 +15,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
@@ -52,6 +53,8 @@ public class RapidHeightMapExtractor
    private float heightFilterAlpha = 0.65f;
 
    private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
+
+   private HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -282,7 +285,7 @@ public class RapidHeightMapExtractor
 
    public void reset()
    {
-      globalHeightMapImage.fillOpenCLImage(openCLManager, (byte) 0);
+      globalHeightMapImage.fill(openCLManager, (byte) 0);
       localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
       globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
       sequenceNumber = 0;
@@ -394,5 +397,10 @@ public class RapidHeightMapExtractor
    public boolean isHeightMapDataAvailable()
    {
       return heightMapDataAvailable;
+   }
+
+   public HeightMapParameters getHeightMapParameters()
+   {
+      return heightMapParameters;
    }
 }

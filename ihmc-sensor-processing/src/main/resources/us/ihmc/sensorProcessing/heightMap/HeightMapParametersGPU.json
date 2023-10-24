@@ -1,0 +1,50 @@
+{
+  "title": "GPU Height Map Parameters",
+  "Grid resolution XY": {
+    "value": 0.03,
+    "lowerBound": 0.01,
+    "upperBound": 0.1
+  },
+  "Grid size XY": {
+    "value": 5.0,
+    "lowerBound": 1.0,
+    "upperBound": 10.0
+  },
+  "Max Z": {
+    "value": 0.6,
+    "lowerBound": 0.1,
+    "upperBound": 1.0
+  },
+  "Nominal standard deviation": {
+    "value": 0.017992,
+    "lowerBound": 0.01,
+    "upperBound": 0.1
+  },
+  "Max points per cell": {
+    "value": 20,
+    "lowerBound": 10,
+    "upperBound": 30
+  },
+  "Mahalanobis scale": {
+    "value": 2.0,
+    "lowerBound": 1.0,
+    "upperBound": 3.0
+  },
+  "Variance added when translating": {
+    "value": 0.1,
+    "lowerBound": 0.01,
+    "upperBound": 0.2
+  },
+  "Sensor variance when standing": {
+    "value": 0.01,
+    "lowerBound": 0.001,
+    "upperBound": 0.1
+  },
+  "Sensor variance when moving": {
+    "value": 0.1,
+    "lowerBound": 0.01,
+    "upperBound": 0.2
+  },
+  "Estimate height with kalman filter": true,
+  "Reset Height Map" : false
+}

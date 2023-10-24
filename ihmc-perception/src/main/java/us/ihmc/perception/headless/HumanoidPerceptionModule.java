@@ -137,6 +137,10 @@ public class HumanoidPerceptionModule
          executorService.submit(() ->
          {
             isHeightMapBeingUpdatedLock = true;
+            if (rapidHeightMapExtractor.getHeightMapParameters().getResetHeightMap())
+            {
+               rapidHeightMapExtractor.reset();
+            }
             updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
             isHeightMapBeingUpdatedLock = false;
 

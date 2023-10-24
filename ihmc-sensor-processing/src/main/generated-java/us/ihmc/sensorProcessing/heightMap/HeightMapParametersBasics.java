@@ -84,4 +84,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
    }
+
+   default void setResetHeightMap(boolean resetHeightMap)
+   {
+      set(HeightMapParameters.resetHeightMap, resetHeightMap);
+   }
 }

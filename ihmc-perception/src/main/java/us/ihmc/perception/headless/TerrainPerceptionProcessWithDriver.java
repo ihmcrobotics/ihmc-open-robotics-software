@@ -236,12 +236,18 @@ public class TerrainPerceptionProcessWithDriver
             humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS,
+                                                           humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                            humanoidPerception.getRapidRegionsExtractor().getParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
-                    humanoidPerception.getRapidRegionsExtractor().getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
+                                                           humanoidPerception.getRapidRegionsExtractor()
+                                                                             .getRapidPlanarRegionsCustomizer()
+                                                                             .getPolygonizerParameters());
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                    humanoidPerception.getRapidRegionsExtractor().getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
+                                                           humanoidPerception.getRapidRegionsExtractor()
+                                                                             .getRapidPlanarRegionsCustomizer()
+                                                                             .getConcaveHullFactoryParameters());
 
             initialized = true;
          }
@@ -353,8 +359,9 @@ public class TerrainPerceptionProcessWithDriver
 
       realtimeROS2Node.destroy();;
       humanoidPerception.destroy();
-      depthBytedecoImage.destroy(openCLManager);
+
       openCLManager.destroy();
+      depthBytedecoImage.destroy(openCLManager);
 
       destroyedNotification.blockingPoll();
    }
