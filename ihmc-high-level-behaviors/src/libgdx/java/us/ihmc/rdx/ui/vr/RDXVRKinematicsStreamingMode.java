@@ -56,7 +56,7 @@ import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
-   private static final int NUMBER_OF_PARTS_TO_RECORD = 5;
+   private static final int NUMBER_OF_PARTS_TO_RECORD = 3;
    private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -67,7 +67,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private IHMCROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(10.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
@@ -181,7 +181,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          InputDigitalActionData aButton = controller.getAButtonActionData();
          if (aButton.bChanged() && !aButton.bState())
          {
-         setEnabled(!enabled.get());
+            setEnabled(!enabled.get());
          }
 
          // NOTE: Implement hand open close for controller trigger button.
@@ -388,7 +388,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       {
          if (!enabled.get())
             streamToController.set(false);
-         else
+
+         if (enabled.get() || kinematicsRecorder.isReplaying())
          {
             if (status.getMessageNotification().poll())
             {
@@ -428,7 +429,9 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
                         ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
                         ghostFullRobotModel.getRootJoint().setJointOrientation(statusPreview.getDesiredRootOrientation());
                         for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+                        {
                            ghostOneDoFJointsExcludingHands[i].setQ(statusPreview.getDesiredJointAngles().get(i));
+                        }
                         ghostFullRobotModel.getElevator().updateFramesRecursively();
                         // update shared control ghost
                         vrAssistant.replayPreviewModel();

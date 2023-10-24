@@ -29,8 +29,8 @@ testcolorY='olive'
 testcolorZ='teal'
 testcolorS='palevioletred'
 
-n_demos=33
-bodyParts = ['leftHand','rightHand','leftForeArm', 'rightForeArm', 'chest']
+n_demos=5
+bodyParts = ['leftHand','rightHand','chest']
 # bodyParts = ['leftHand','rightHand']
 for bodyPart in bodyParts:
     if 'right' not in bodyPart:
@@ -374,6 +374,5 @@ for bodyPart in bodyParts:
     
     
     
-
 
 

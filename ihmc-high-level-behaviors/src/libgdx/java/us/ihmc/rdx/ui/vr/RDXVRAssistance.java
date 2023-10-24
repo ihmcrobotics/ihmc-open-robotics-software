@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -120,9 +121,9 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       affordanceAssistant= new AffordanceAssistant(affordanceToVRHandControlFrameTransforms);
 
-      armsFightingHome.put(RobotSide.LEFT, new double[] {-0.391, -0.024, -0.4, -2.613, -0.0, -0.0, 0.0});
-      armsFightingHome.put(RobotSide.RIGHT, new double[] {0.4, -0.124, 0.7, -2.6, 0.0, 0.0, -0.0});
-      chestFightingHome = new YawPitchRoll(0.475, -0.046, 0.0);
+      armsFightingHome.put(RobotSide.LEFT, new double[] {0.333422, 0.08264014, 0.2183049, -2.35619});
+      armsFightingHome.put(RobotSide.RIGHT, new double[] {0.6753323, 0.0591941, -0.024862368, -2.35619});
+      chestFightingHome = new YawPitchRoll(0.435, 0.0, 0.0);
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
@@ -368,17 +369,23 @@ public class RDXVRAssistance implements TeleoperationAssistant
             {
                // exit assistance when the current task is over, reactivate it in VR or UI when you want to use it again
                if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
-                  setEnabled(false);
-               if (proMPAssistant.isCurrentTaskDone())
                {
-                  enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+                  boolean homingNeeded = false;
                   if (proMPAssistant.getCurrentTask().contains("Punch"))
                   {
-                     RobotSide side = proMPAssistant.getCurrentTask().contains("Left") ? RobotSide.LEFT : RobotSide.RIGHT;
-                     ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                                 2.0,
-                                                                                                                 armsFightingHome.get(side));
-                     ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                     homingNeeded = true;
+                  }
+                  setEnabled(false);
+                  if (homingNeeded)
+                  {
+                     LogTools.info("Homing from Punch");
+                     for (RobotSide side : RobotSide.values())
+                     {
+                        ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                                    2.0,
+                                                                                                                    armsFightingHome.get(side));
+                        ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                     }
 
                      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
                      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
@@ -394,6 +401,11 @@ public class RDXVRAssistance implements TeleoperationAssistant
                      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
                      ros2ControllerHelper.publishToController(chestTrajectoryMessage);
                   }
+               }
+               if (proMPAssistant.isCurrentTaskDone())
+               {
+                  enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+                  LogTools.info("Exiting Assistance");
                }
                if (proMPAssistant.inEndZone())
                {
@@ -482,6 +494,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
             {
                objectName = sceneNode.getName();
                objectFrame = sceneNode.getNodeFrame();
+               LogTools.info(objectFrame);
+               LogTools.info(objectFrame.getTransformToWorldFrame().getTranslationZ());
             }
          }
       }
@@ -555,43 +569,44 @@ public class RDXVRAssistance implements TeleoperationAssistant
       if (enabled != this.enabled.get())
       {
          this.enabled.set(enabled);
-         if (enabled)
-         {
-            firstPreview = true;
-            status.setAssistancePhase(AssistancePhase.PROMP);
+      }
+      if (enabled)
+      {
+         firstPreview = true;
+         status.setAssistancePhase(AssistancePhase.PROMP);
 
-            if (enabledReplay.get())
-               this.enabled.set(false); // check no concurrency with replay
+         if (enabledReplay.get())
+            this.enabled.set(false); // check no concurrency with replay
 
-            if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
-               this.enabledIKStreaming.set(true);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
-            else if (isPreviewGraphicActive())
-               enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
-            previewSetToActive = isPreviewGraphicActive();
-            ghostRobotGraphic.setActive(false); // do not show ghost robot immediately, wait that prediction is available
-         }
-         else // deactivated
-         {
-            // reset promp assistance
-            proMPAssistant.reset();
-            objectName = "";
-            objectFrame = null;
-            firstPreview = true;
-            previewValidated = false;
-            replayPreviewCounter = 0;
-            bodyPartReplayMotionMap.clear();
-            kinematicsToolboxOutputStatusList.clear();
-            ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
-            splineGraphics.clear();
-            stdDeviationGraphics.clear();
-            status.setAssistancePhase(AssistancePhase.DISABLED);
-            blendingCounter = 0;
-            affordanceAssistant.reset();
-            this.enabledIKStreaming.set(false);
-            menu.setProMPSamples(-1);
-            menu.setAffordanceSamples(-1);
-            sentInitialHandConfiguration = false;
-         }
+         if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
+            this.enabledIKStreaming.set(true);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
+         else if (isPreviewGraphicActive())
+            enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
+         previewSetToActive = isPreviewGraphicActive();
+         ghostRobotGraphic.setActive(false); // do not show ghost robot immediately, wait that prediction is available
+      }
+      else // deactivated
+      {
+         LogTools.info("Disabled Assistance");
+         // reset promp assistance
+         proMPAssistant.reset();
+         objectName = "";
+         objectFrame = null;
+         firstPreview = true;
+         previewValidated = false;
+         replayPreviewCounter = 0;
+         bodyPartReplayMotionMap.clear();
+         kinematicsToolboxOutputStatusList.clear();
+         ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
+         splineGraphics.clear();
+         stdDeviationGraphics.clear();
+         status.setAssistancePhase(AssistancePhase.DISABLED);
+         blendingCounter = 0;
+         affordanceAssistant.reset();
+         this.enabledIKStreaming.set(false);
+         menu.setProMPSamples(-1);
+         menu.setAffordanceSamples(-1);
+         sentInitialHandConfiguration = false;
       }
    }
 

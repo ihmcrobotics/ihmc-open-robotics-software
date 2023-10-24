@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -122,7 +123,7 @@ public class KinematicsRecordReplay
       QuaternionReadOnly quaternionToCheck = frameToCheck.getOrientation();
       if (previousFramePose.containsKey(frameName))
       {
-         if (sceneNodeFrame != null)
+
             previousFramePose.get(frameName).changeFrame(sceneNodeFrame);
 
          QuaternionReadOnly previousQuaternion = previousFramePose.get(frameName).getOrientation();
@@ -130,6 +131,15 @@ public class KinematicsRecordReplay
          frameToCheck.getOrientation().interpolate(previousQuaternion, quaternionToCheck, 1.0);
 
          previousFramePose.get(frameName).set(frameToCheck);
+
+         if (Math.abs(frameToCheck.getOrientation().getX() - previousQuaternion.getX()) > 0.05 ||
+             Math.abs(frameToCheck.getOrientation().getY() - previousQuaternion.getY()) > 0.05 ||
+             Math.abs(frameToCheck.getOrientation().getZ() - previousQuaternion.getZ()) > 0.05 ||
+             Math.abs(frameToCheck.getOrientation().getS() - previousQuaternion.getS()) > 0.05)
+         {
+            LogTools.error("Quaternion discontinuity asymmetric wrt zero. Check recorded part was not disconnected nor occluded during recording.");
+            frameToCheck.getOrientation().set(previousQuaternion);
+         }
       }
       else
       {

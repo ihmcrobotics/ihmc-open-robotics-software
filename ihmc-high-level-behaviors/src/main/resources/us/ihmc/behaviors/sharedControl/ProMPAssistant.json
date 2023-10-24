@@ -1,11 +1,11 @@
 {
-  "testNumberUseOnlyForTesting": 10,
-  "logging" : false,
+  "testNumberUseOnlyForTesting": 1,
+  "logging" : true,
   "numberBasisFunctions": 20,
-  "numberObservations": 10,
-  "conditionOnlyLastObservation": true,
+  "numberObservations": 20,
+  "conditionOnlyLastObservation": false,
   "conditioningStep": 2,
-  "useCustomSpeed": true,
+  "useCustomSpeed": false,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "tasks":[
@@ -18,9 +18,7 @@
       "rotationGoalToEE": [0.0, 0.0, 0.0, 1.0],
       "customSpeed": 40,
       "bodyParts":[
-        { "name":"leftHand", "geometry":"Pose" },
-        { "name":"leftForeArm", "geometry":"Orientation" },
-        { "name":"chest", "geometry":"Orientation" }
+        { "name":"leftHand", "geometry":"Pose" }
       ]
     },
     {
