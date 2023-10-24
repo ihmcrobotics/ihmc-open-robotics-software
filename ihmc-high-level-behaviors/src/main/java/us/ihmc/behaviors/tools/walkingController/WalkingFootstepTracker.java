@@ -36,7 +36,7 @@ public class WalkingFootstepTracker
    private volatile int totalStepsCompleted = 0;
    private volatile int totalIncompleteFootsteps = 0;
 
-   private final List<TypedNotification<FootstepQueueStatusMessage>> footstepQueueListener = new ArrayList<>();
+   private final List<TypedNotification<FootstepQueueStatusMessage>> footstepQueueListeners = new ArrayList<>();
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
@@ -53,12 +53,12 @@ public class WalkingFootstepTracker
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)
    {
-      this.footstepQueueListener.add(footstepQueueListener);
+      footstepQueueListeners.add(footstepQueueListener);
    }
 
    private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
-      for (TypedNotification<FootstepQueueStatusMessage> footstepQueueListener : footstepQueueListener)
+      for (TypedNotification<FootstepQueueStatusMessage> footstepQueueListener : footstepQueueListeners)
       {
          footstepQueueListener.set(footstepQueueStatusMessage);
       }
