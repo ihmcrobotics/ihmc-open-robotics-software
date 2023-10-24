@@ -16,9 +16,9 @@ public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorA
    private final List<BehaviorActionState> actionChildren = new ArrayList<>();
    private final List<BehaviorActionState> currentlyExecutingActions = new ArrayList<>();
 
-   public BehaviorActionSequenceState(long id, BehaviorActionSequenceDefinition definition)
+   public BehaviorActionSequenceState(long id)
    {
-      super(id, definition);
+      super(id, new BehaviorActionSequenceDefinition());
    }
 
    @Override

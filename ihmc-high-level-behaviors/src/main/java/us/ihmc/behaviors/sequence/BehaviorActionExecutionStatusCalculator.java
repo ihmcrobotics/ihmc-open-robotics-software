@@ -4,9 +4,9 @@ import java.util.List;
 
 public class BehaviorActionExecutionStatusCalculator
 {
-   public static void update(List<BehaviorActionState> actionSequence, int actionIndex, int executionNextIndex)
+   public static void update(List<BehaviorActionState<BehaviorActionDefinition>> actionSequence, int actionIndex, int executionNextIndex)
    {
-      BehaviorActionState actionNode = actionSequence.get(actionIndex);
+      BehaviorActionState<BehaviorActionDefinition> actionNode = actionSequence.get(actionIndex);
 
       boolean executeWithNextAction = actionNode.getDefinition().getExecuteWithNextAction();
       boolean executeWithPreviousAction;
