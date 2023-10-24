@@ -54,9 +54,9 @@ public class PerceptionBasedContinuousWalking
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
 
+      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getFootstepPlannerParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS, continuousPlanningParameters);
-      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
       activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
 
       perceptionTask.run();
