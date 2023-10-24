@@ -38,7 +38,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
             walkingControllerParameters,
             ros2ControllerHelper);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), ros2ControllerHelper, ros2ActorDesignation);
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper, ros2ActorDesignation);
    }
 
    public void update()
@@ -47,7 +47,8 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 
       super.update();
 
-      ros2BehaviorTreeState.updatePublication();
+      if (getRootNode() != null)
+         ros2BehaviorTreeState.updatePublication();
    }
 
    public void destroy()

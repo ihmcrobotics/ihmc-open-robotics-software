@@ -8,21 +8,26 @@ import java.util.HashMap;
 
 public class BehaviorTreeExtensionSubtreeRebuilder
 {
-   private final HashMap<Long, BehaviorTreeNodeExtension> idToNodesMap = new HashMap<>();
+   private final HashMap<Long, BehaviorTreeNodeExtension<?, ?, ?, ?>> idToNodesMap = new HashMap<>();
 
    private final BehaviorTreeModification clearSubtreeModification;
    private final BehaviorTreeModification destroyLeftoversModification;
 
    public BehaviorTreeExtensionSubtreeRebuilder(BehaviorTreeNodeExtensionSupplier subtreeNodeSupplier)
    {
-      clearSubtreeModification = () -> clearChildren(subtreeNodeSupplier.getNodeExtension());
+      clearSubtreeModification = () ->
+      {
+         idToNodesMap.clear();
+         clearChildren(subtreeNodeSupplier.getNodeExtension());
+      };
 
       destroyLeftoversModification = () ->
       {
-         for (BehaviorTreeNodeExtension leftover : idToNodesMap.values())
+         for (BehaviorTreeNodeExtension<?, ?, ?, ?> leftover : idToNodesMap.values())
          {
             leftover.getState().destroy();
-            leftover.destroy();
+            if (leftover.getExtendedNode() != leftover.getState()) // FIXME Kinda weird
+               leftover.destroy();
          }
       };
    }
@@ -36,19 +41,19 @@ public class BehaviorTreeExtensionSubtreeRebuilder
          clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
       }
 
-      localNode.getDefinition().getChildren().clear();
+      localNode.getDefinition().getChildren().clear(); // FIXME This is kinda weird
       localNode.getState().getChildren().clear();
       localNode.getChildren().clear();
    }
 
-   public BehaviorTreeNodeExtension getReplacementNode(long id)
+   public BehaviorTreeNodeExtension<?, ?, ?, ?> getReplacementNode(long id)
    {
       return idToNodesMap.get(id);
    }
 
    public BehaviorTreeModification getReplacementModification(long id, BehaviorTreeNodeExtension<?, ?, ?, ?> parent)
    {
-      return new BehaviorTreeNodeReplacement(idToNodesMap.remove(id), parent);
+      return new BehaviorTreeNodeAdd(idToNodesMap.remove(id), parent);
    }
 
    public BehaviorTreeModification getClearSubtreeModification()

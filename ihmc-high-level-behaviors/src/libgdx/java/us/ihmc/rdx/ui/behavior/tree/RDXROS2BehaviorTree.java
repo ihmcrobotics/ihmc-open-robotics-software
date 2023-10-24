@@ -26,7 +26,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       super(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, footstepPlannerParametersBasics, ros2);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), ros2, ROS2ActorDesignation.OPERATOR);
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2, ROS2ActorDesignation.OPERATOR);
 
    }
 
@@ -36,7 +36,8 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       super.update();
 
-      ros2BehaviorTreeState.updatePublication();
+      if (getRootNode() != null)
+         ros2BehaviorTreeState.updatePublication();
    }
 
    public void destroy()

@@ -23,12 +23,12 @@ public class BehaviorTreeState
    private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
-   private final Supplier<BehaviorTreeNodeExtension> rootNodeSupplier;
+   private final Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier;
    private boolean localTreeFrozen = false;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
-                            Supplier<BehaviorTreeNodeExtension> rootNodeSupplier)
+                            Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier)
    {
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;
@@ -62,13 +62,13 @@ public class BehaviorTreeState
       checkTreeModified(rootNodeSupplier.get().getState());
    }
 
-   private void checkTreeModified(BehaviorTreeNodeState localNode)
+   private void checkTreeModified(BehaviorTreeNodeState<?> localNode)
    {
       localTreeFrozen |= localNode.isFrozenFromModification();
 
-      for (Object child : localNode.getChildren())
+      for (BehaviorTreeNodeState<?> child : localNode.getChildren())
       {
-         checkTreeModified((BehaviorTreeNodeState) child);
+         checkTreeModified(child);
       }
    }
 
@@ -77,7 +77,7 @@ public class BehaviorTreeState
       return nextID;
    }
 
-   public BehaviorTreeNodeExtension getRootNode()
+   public BehaviorTreeNodeExtension<?, ?, ?, ?> getRootNode()
    {
       return rootNodeSupplier.get();
    }
