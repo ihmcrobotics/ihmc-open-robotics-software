@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.yo;
 
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.imgui.ImPlotPlotPanelLayout;
 
 import java.util.ArrayList;
 

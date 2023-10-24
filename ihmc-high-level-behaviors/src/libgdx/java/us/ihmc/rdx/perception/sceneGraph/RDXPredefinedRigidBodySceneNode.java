@@ -3,45 +3,38 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.rigidBodies.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
 import java.util.Set;
 
-public class RDXPredefinedRigidBodySceneNode extends PredefinedRigidBodySceneNode implements RDXSceneNodeInterface
+public class RDXPredefinedRigidBodySceneNode extends RDXRigidBodySceneNode
 {
-   private final RDXPredefinedRigidBodySceneNodeBasics predefinedRigidBodySceneNodeBasics;
+   private final RDXModelInstance modelInstance;
 
-   public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode nodeToCopy, RDX3DPanel panel3D)
+   public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
-      super(nodeToCopy.getID(),
-            nodeToCopy.getName(),
-            nodeToCopy.getSceneGraphIDToNodeMap(),
-            nodeToCopy.getInitialParentNodeID(),
-            nodeToCopy.getInitialTransformToParent(),
-            nodeToCopy.getVisualModelFilePath(),
-            nodeToCopy.getVisualModelToNodeFrameTransform());
+      super(predefinedRigidBodySceneNode, predefinedRigidBodySceneNode.getVisualModelToNodeFrameTransform(), panel3D);
 
-      predefinedRigidBodySceneNodeBasics = new RDXPredefinedRigidBodySceneNodeBasics(this, panel3D);
-   }
-
-   @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
-   {
-      predefinedRigidBodySceneNodeBasics.update(modificationQueue);
-   }
-
-   @Override
-   public void renderImGuiWidgets()
-   {
-      predefinedRigidBodySceneNodeBasics.renderImGuiWidgets();
+      modelInstance = new RDXModelInstance(RDXModelLoader.load(predefinedRigidBodySceneNode.getVisualModelFilePath()));
+      modelInstance.setColor(GHOST_COLOR);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      predefinedRigidBodySceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
+      super.getRenderables(renderables, pool, sceneLevels);
+
+      if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         modelInstance.getRenderables(renderables, pool);
+   }
+
+   @Override
+   public RDXModelInstance getModelInstance()
+   {
+      return modelInstance;
    }
 }

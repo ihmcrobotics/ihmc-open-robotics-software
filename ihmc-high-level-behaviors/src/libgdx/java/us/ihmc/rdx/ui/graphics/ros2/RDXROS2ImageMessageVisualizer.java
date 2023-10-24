@@ -21,7 +21,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
+import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;

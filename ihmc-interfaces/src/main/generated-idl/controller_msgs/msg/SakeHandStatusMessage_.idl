@@ -1,0 +1,49 @@
+#ifndef __controller_msgs__msg__SakeHandStatusMessage__idl__
+#define __controller_msgs__msg__SakeHandStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * Message used to report the current joint angles for the fingers of the sake gripper.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SakeHandStatusMessage_")
+      struct SakeHandStatusMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet robot_side;
+        double temperature;
+        /**
+         * 0.0 min, 1.0 max
+         */
+        double present_torque_ratio;
+        /**
+         * 0.0 closed, 1.0 open
+         */
+        double postion_ratio;
+        /**
+         * 0.0 min, 1.0 max
+         */
+        double goal_torque_ratio;
+        boolean calibrated;
+        boolean needs_reset;
+      };
+    };
+  };
+};
+
+#endif

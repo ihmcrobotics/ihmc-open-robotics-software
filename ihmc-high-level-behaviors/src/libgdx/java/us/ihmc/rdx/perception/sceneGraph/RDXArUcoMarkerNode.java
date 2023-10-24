@@ -1,55 +1,38 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
-import java.util.Set;
-
-public class RDXArUcoMarkerNode extends ArUcoMarkerNode implements RDXSceneNodeInterface
+public class RDXArUcoMarkerNode extends RDXDetectableSceneNode
 {
-   private final RDXDetectableSceneNodeBasics detectableSceneNodeBasics;
+   private final ArUcoMarkerNode arUcoMarkerNode;
    private final ImGuiInputDoubleWrapper alphaFilterValueSlider;
 
-   public RDXArUcoMarkerNode(ArUcoMarkerNode nodeToCopy)
+   public RDXArUcoMarkerNode(ArUcoMarkerNode arUcoMarkerNode)
    {
-      super(nodeToCopy.getID(),
-            nodeToCopy.getName(),
-            nodeToCopy.getMarkerID(),
-            nodeToCopy.getMarkerSize());
+      super(arUcoMarkerNode);
 
-      detectableSceneNodeBasics = new RDXDetectableSceneNodeBasics(this);
+      this.arUcoMarkerNode = arUcoMarkerNode;
 
-      alphaFilterValueSlider = new ImGuiInputDoubleWrapper("Break frequency:", "%.2f", 0.2, 5.0,
-                                                           this::getBreakFrequency,
-                                                           this::setBreakFrequency,
-                                                           this::freezeFromModification);
+      alphaFilterValueSlider = new ImGuiInputDoubleWrapper("Break frequency:",
+                                                           "%.2f",
+                                                           0.2,
+                                                           5.0,
+                                                           arUcoMarkerNode::getBreakFrequency,
+                                                           arUcoMarkerNode::setBreakFrequency,
+                                                           arUcoMarkerNode::freezeFromModification);
       alphaFilterValueSlider.setWidgetWidth(100.0f);
    }
 
    @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
-      detectableSceneNodeBasics.update();
-   }
-
-   @Override
-   public void renderImGuiWidgets()
-   {
-      detectableSceneNodeBasics.renderImGuiWidgets();
-      ImGui.text("Marker ID: %d   Size: %.2f m".formatted(getMarkerID(), getMarkerSize()));
+      super.renderImGuiWidgets(modificationQueue, sceneGraph);
+      ImGui.text("Marker ID: %d   Size: %.2f m".formatted(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode.getMarkerSize()));
       ImGui.sameLine();
       alphaFilterValueSlider.render();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
-   {
-      detectableSceneNodeBasics.getRenderables(renderables, pool, sceneLevels);
    }
 }

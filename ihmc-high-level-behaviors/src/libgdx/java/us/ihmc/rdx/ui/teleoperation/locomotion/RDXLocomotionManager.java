@@ -26,10 +26,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.imgui.ImGuiTextOverlay;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
@@ -92,7 +91,9 @@ public class RDXLocomotionManager
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
    private final Timer footstepPlanningCompleteTimer = new Timer();
-   private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
+
+   // Used for UI logic
+   private boolean wasPlanning = false;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -361,7 +362,7 @@ public class RDXLocomotionManager
       }
 
       // Handles all shortcuts for when the spacebar key is pressed
-      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
+      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
       {
          if (walkAvailable)
          {
@@ -369,10 +370,12 @@ public class RDXLocomotionManager
          }
          else if (pauseAvailable)
          {
+            baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Commanded pause walking");
             setPauseWalkingAndPublish(true);
          }
          else if (continueAvailable)
          {
+            baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Commanded resume walking");
             setPauseWalkingAndPublish(false);
          }
       }
@@ -497,19 +500,23 @@ public class RDXLocomotionManager
       boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
       if (isPlanning || hasPlannedRecently)
       {
-         ImGui.pushFont(ImGuiTools.getMediumFont());
-         String text;
          if (isPlanning)
          {
+            if (!wasPlanning)
+            {
+               wasPlanning = true;
+               panel3D.getNotificationManager().pushNotification("Planning footsteps...");
+            }
             footstepPlanningCompleteTimer.reset();
-            text = "Planning footsteps...";
          }
          else
          {
-            text = "Footstep planning completed.";
+            if (wasPlanning)
+            {
+               wasPlanning = false;
+               panel3D.getNotificationManager().pushNotification("Footstep planning completed.");
+            }
          }
-         statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
-         ImGui.popFont();
       }
    }
 
