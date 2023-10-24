@@ -81,18 +81,17 @@ public class RDXInteractableObject implements RenderableProvider
       selectablePose3DGizmo.getSelected().set(true);
    }
 
-   public void setVisuals(PrimitiveRigidBodyShape shape)
+   public void setVisuals()
    {
 //      , RigidBodyTransform visualModelTransform
-      this.shape = shape;
-      switch (this.shape)
+      switch (shape)
       {
-         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+         case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+         case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
          case ELLIPSOID ->
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
-         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(DEFAULT_DIMENSION, DEFAULT_DIMENSION, Color.WHITE));
+               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
+         case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
       }
       modelInstance.setColor(GHOST_COLOR);
       modelInstanceFrame = objectFrame;
@@ -200,7 +199,7 @@ public class RDXInteractableObject implements RenderableProvider
       this.shape = newShape;
    }
 
-   public List<Float> getResizablePrimitiveSize()
+   public ArrayList<Float> getResizablePrimitiveSize()
    {
       return new ArrayList<>(Arrays.asList(xLength.get(), yLength.get(), zLength.get(), xRadius.get(), yRadius.get(), zRadius.get()));
    }
@@ -218,6 +217,7 @@ public class RDXInteractableObject implements RenderableProvider
    public void clear()
    {
       shape = null;
+      modelInstance.model.dispose();
       modelInstance = null;
       selectablePose3DGizmo.getSelected().set(false);
    }

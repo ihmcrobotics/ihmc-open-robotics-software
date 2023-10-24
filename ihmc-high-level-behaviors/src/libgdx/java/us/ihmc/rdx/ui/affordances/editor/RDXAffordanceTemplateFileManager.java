@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -609,37 +608,9 @@ public class RDXAffordanceTemplateFileManager
                }
             }
 
-            String resizablePrimitiveShape = jsonNode.get("Resizable Primitive Shape").asText();
+            String resizablePrimitiveShape = jsonNode.get("resizablePrimitiveShape").asText();
             if (!resizablePrimitiveShape.isEmpty())
             {
-               if (objectBuilder.isAnyObjectSelected())
-                  objectBuilder.getSelectedObject().clear();
-
-               if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.BOX.toString()))
-               {
-                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.BOX);
-               }
-               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.PRISM.toString()))
-               {
-                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.PRISM);
-               }
-               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.ELLIPSOID.toString()))
-               {
-                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.ELLIPSOID);
-               }
-               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.CYLINDER.toString()))
-               {
-                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.CYLINDER);
-               }
-               else if (resizablePrimitiveShape.equals(PrimitiveRigidBodyShape.CONE.toString()))
-               {
-                  objectBuilder.getSelectedObject().setVisuals(PrimitiveRigidBodyShape.CONE);
-               }
-               else
-               {
-                  LogTools.error("Primitive object shape not Defined!");
-               }
-
                List<Float> myList = new ArrayList<Float>();
                myList.add(jsonNode.get("xLength").floatValue());
                myList.add(jsonNode.get("yLength").floatValue());
@@ -648,6 +619,7 @@ public class RDXAffordanceTemplateFileManager
                myList.add(jsonNode.get("yRadius").floatValue());
                myList.add(jsonNode.get("zRadius").floatValue());
                objectBuilder.getSelectedObject().setResizablePrimitiveSize(myList);
+               objectBuilder.getSelectedObject().setVisuals();
             }
          });
          LogTools.info("Loaded file {}", filePath);
