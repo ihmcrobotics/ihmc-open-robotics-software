@@ -66,7 +66,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
    public void renderImGuiWidgets()
    {
       ImGui.text("Selected: " + (!isAnyObjectSelected() ? "" : (selectedObjectChanged.read())));
-      ImGui.text("Select object: ");
+      ImGui.text("Predefined object: ");
       for (PredefinedRigidBodySceneNode predefinedRigidBodySceneNode : nameToNodesMap.values())
       {
          if (ImGui.button(labels.get(predefinedRigidBodySceneNode.getName())))

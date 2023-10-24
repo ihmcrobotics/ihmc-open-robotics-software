@@ -189,6 +189,7 @@ public class RDXInteractableObject implements RenderableProvider
 
    public void clear()
    {
+      shape = null;
       modelInstance = null;
       selectablePose3DGizmo.getSelected().set(false);
    }
