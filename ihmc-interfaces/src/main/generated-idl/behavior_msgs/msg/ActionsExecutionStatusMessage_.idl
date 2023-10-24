@@ -18,7 +18,7 @@ module behavior_msgs
         /**
          * This message contains a list of action status messages
          */
-        sequence<behavior_msgs::msg::dds::ActionExecutionStatusMessage> action_status_list;
+        sequence<behavior_msgs::msg::dds::ActionExecutionStatusMessage, 200> action_status_list;
       };
     };
   };

@@ -1,10 +1,10 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A library of reference frames. Useful for putting together a specific collection
@@ -14,32 +14,25 @@ import java.util.*;
  */
 public class ReferenceFrameLibrary
 {
-   /** Reference frames are have immutable parents, so we must use Suppliers. */
-   private final Map<String, ReferenceFrameSupplier> frameNameToSupplierMap = new HashMap<>();
-   /** Lookups allow for a dynamically changing set of frames. */
+   /**
+    * These frames are always present.
+    */
+   private final ArrayList<ReferenceFrame> alwaysPresentFrames = new ArrayList<>();
+   private final Map<String, ReferenceFrame> nameToAlwaysPresentFrameMap = new HashMap<>();
+   /**
+    * Lookups allow for a dynamically changing set of frames.
+    */
    private final List<ReferenceFrameDynamicCollection> dynamicCollections = new ArrayList<>();
-   private transient final SortedSet<String> referenceFrameNameSet = new TreeSet<>();
-   private transient String[] referenceFrameNameArray = new String[0];
 
    public ReferenceFrameLibrary()
    {
       // Here so it's easier to track instances in the IDE
    }
 
-   public void addAll(List<ReferenceFrameSupplier> referenceFrameSuppliers)
+   public void addAll(Collection<ReferenceFrame> referenceFrames)
    {
-      for (ReferenceFrameSupplier referenceFrame : referenceFrameSuppliers)
-      {
-         add(referenceFrame);
-      }
-   }
-
-   public void add(ReferenceFrameSupplier referenceFrame)
-   {
-      if (!frameNameToSupplierMap.containsKey(referenceFrame.get().getName()))
-      {
-         frameNameToSupplierMap.put(referenceFrame.get().getName(), referenceFrame);
-      }
+      alwaysPresentFrames.addAll(referenceFrames);
+      referenceFrames.forEach(referenceFrame -> nameToAlwaysPresentFrameMap.put(referenceFrame.getName(), referenceFrame));
    }
 
    /**
@@ -50,35 +43,34 @@ public class ReferenceFrameLibrary
       dynamicCollections.add(dynamicCollection);
    }
 
-   public void update()
+   public boolean containsFrame(String referenceFrameName)
    {
-      // Sort in alphabetical order
-      referenceFrameNameSet.clear();
-      referenceFrameNameSet.addAll(frameNameToSupplierMap.keySet());
+      for (ReferenceFrame frame : alwaysPresentFrames)
+      {
+         if (referenceFrameName.equals(frame.getName()))
+            return true;
+      }
+
       for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
+      {
          for (String dynamicFrameName : dynamicCollection.getFrameNameList())
-            referenceFrameNameSet.add(dynamicFrameName);
+         {
+            if (referenceFrameName.equals(dynamicFrameName))
+               return true;
+         }
+      }
 
-      referenceFrameNameArray = referenceFrameNameSet.toArray(referenceFrameNameArray);
+      return false;
    }
 
-   public ReferenceFrame findFrameByIndex(int referenceFrameIndex)
-   {
-      return findFrameByName(getReferenceFrameNameArray()[referenceFrameIndex]);
-   }
-
-   public ReferenceFrame findFrameByNameOrWorld(String referenceFrameName)
+   @Nullable
+   public ReferenceFrame findFrameByName(String referenceFrameName)
    {
       // Check map first, then dynamic collections
-      ReferenceFrameSupplier frameSupplier = frameNameToSupplierMap.get(referenceFrameName);
-      boolean frameFound = frameSupplier != null;
+      ReferenceFrame referenceFrame = nameToAlwaysPresentFrameMap.get(referenceFrameName);
+      boolean frameFound = referenceFrame != null;
 
-      ReferenceFrame referenceFrame = null;
-      if (frameFound)
-      {
-         referenceFrame = frameSupplier.get();
-      }
-      else
+      if (!frameFound)
       {
          for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
          {
@@ -89,32 +81,22 @@ public class ReferenceFrameLibrary
          }
       }
 
-      if (!frameFound)
-         LogTools.error("Frame not found: {}. Using world frame.", referenceFrameName);
-      return frameFound ? referenceFrame : ReferenceFrame.getWorldFrame();
+      return frameFound ? referenceFrame : null;
    }
 
-   @Nullable
-   public ReferenceFrame findFrameByName(String referenceFrameName)
+   public void getAllFrameNames(Consumer<String> frameNameConsumer)
    {
-      return frameNameToSupplierMap.get(referenceFrameName).get();
-   }
-
-   public int findFrameIndexByName(String referenceFrameName)
-   {
-      for (int i = 0; i < referenceFrameNameArray.length; i++)
+      for (ReferenceFrame frame : alwaysPresentFrames)
       {
-         if (referenceFrameName.equals(referenceFrameNameArray[i]))
+         frameNameConsumer.accept(frame.getName());
+      }
+
+      for (ReferenceFrameDynamicCollection dynamicCollection : dynamicCollections)
+      {
+         for (String dynamicFrameName : dynamicCollection.getFrameNameList())
          {
-            return i;
+            frameNameConsumer.accept(dynamicFrameName);
          }
       }
-      LogTools.error("Frame {} is not present in library! {}", referenceFrameName, Arrays.toString(referenceFrameNameArray));
-      return -1;
-   }
-
-   public String[] getReferenceFrameNameArray()
-   {
-      return referenceFrameNameArray;
    }
 }

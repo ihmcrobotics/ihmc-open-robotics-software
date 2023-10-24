@@ -1,7 +1,7 @@
 {
   "name" : "PickUpGraspBox",
   "actions" : [ {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -15,13 +15,15 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Pre-grasp Left Hand Configuration",
     "side" : "left",
-    "grip" : "HALF_CLOSE",
+    "configuration" : "OPEN",
+    "position" : 0.4999999976514124,
+    "torque" : 0.30000001192092896,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -35,13 +37,15 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Pre-grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "HALF_CLOSE",
+    "configuration" : "OPEN",
+    "position" : 0.4999999976514124,
+    "torque" : 0.30000001192092896,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -55,7 +59,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -69,7 +73,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -83,7 +87,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -97,7 +101,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -111,13 +115,15 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Grasp Left Hand Configuration",
     "side" : "left",
-    "grip" : "CRUSH",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
     "executeWithNextAction" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -131,13 +137,15 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandConfigurationAction",
+    "type" : "SakeHandCommandActionDefinition",
     "description" : "Grasp Right Hand Configuration",
     "side" : "right",
-    "grip" : "CRUSH",
+    "configuration" : "GRIP_HARD",
+    "position" : 0.0,
+    "torque" : 1.0,
     "executeWithNextAction" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -151,7 +159,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",
@@ -165,7 +173,7 @@
     "executeWithNextAction" : false,
     "holdPoseInWorldLater" : true
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Left Hand Pose",
     "parentFrame" : "Box",
     "side" : "left",
@@ -179,7 +187,7 @@
     "executeWithNextAction" : true,
     "holdPoseInWorldLater" : false
   }, {
-    "type" : "RDXHandPoseAction",
+    "type" : "HandPoseActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "parentFrame" : "Box",
     "side" : "right",

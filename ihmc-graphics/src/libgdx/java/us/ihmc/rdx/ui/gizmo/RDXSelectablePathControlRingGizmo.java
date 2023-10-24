@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -27,20 +28,28 @@ public class RDXSelectablePathControlRingGizmo
    private final RDXPathControlRingGizmo pathControlRingGizmo;
    private boolean selectable = true;
    private boolean modified = false;
-   private boolean selected = false;
+   private final ImBoolean selected;
 
    public RDXSelectablePathControlRingGizmo()
    {
+      this.selected = new ImBoolean(false);
       pathControlRingGizmo = new RDXPathControlRingGizmo();
    }
 
    public RDXSelectablePathControlRingGizmo(ReferenceFrame parentReferenceFrame)
    {
+      this.selected = new ImBoolean(false);
       pathControlRingGizmo = new RDXPathControlRingGizmo(parentReferenceFrame);
    }
 
    public RDXSelectablePathControlRingGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
+      this(gizmoFrame, gizmoTransformToParentFrameToModify, new ImBoolean(false));
+   }
+
+   public RDXSelectablePathControlRingGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify, ImBoolean selected)
+   {
+      this.selected = selected;
       pathControlRingGizmo = new RDXPathControlRingGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
@@ -70,10 +79,10 @@ public class RDXSelectablePathControlRingGizmo
       if (selectable && (pathControlRingGizmo.getIsRingBeingDraggedVR().get(RobotSide.LEFT) ||
                          pathControlRingGizmo.getIsRingBeingDraggedVR().get(RobotSide.RIGHT)))
       {
-         selected = true;
+         selected.set(true);
       }
 
-      pathControlRingGizmo.setShowArrows(selected);
+      pathControlRingGizmo.setShowArrows(selected.get());
       pathControlRingGizmo.setHighlightingEnabled(modified);
    }
 
@@ -100,19 +109,19 @@ public class RDXSelectablePathControlRingGizmo
          // Determine selectedness
          if (selectable && isClickedOn)
          {
-            selected = true;
+            selected.set(true);
          }
          if (somethingElseIsClickedOn)
          {
-            selected = false;
+            selected.set(false);
          }
       }
 
-      pathControlRingGizmo.setShowArrows(selected);
+      pathControlRingGizmo.setShowArrows(selected.get());
       pathControlRingGizmo.setHighlightingEnabled(modified);
 
       // Act
-      if (selected)
+      if (selected.get())
       {
          pathControlRingGizmo.process3DViewInputModification(input);
       }
@@ -126,7 +135,7 @@ public class RDXSelectablePathControlRingGizmo
    {
       if ((selectable && (pathControlRingGizmo.getRingHovered()) ||
            pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.RIGHT) ||
-           pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.LEFT)) || modified || selected)
+           pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.LEFT)) || modified || selected.get())
       {
          pathControlRingGizmo.getRenderables(renderables, pool);
       }
@@ -139,12 +148,17 @@ public class RDXSelectablePathControlRingGizmo
 
    public boolean getSelected()
    {
+      return selected.get();
+   }
+
+   public ImBoolean getImSelected()
+   {
       return selected;
    }
 
    public void setSelected(boolean selected)
    {
-      this.selected = selected;
+      this.selected.set(selected);
    }
 
    /**

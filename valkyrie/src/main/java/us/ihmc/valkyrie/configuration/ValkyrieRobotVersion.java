@@ -61,7 +61,7 @@ public enum ValkyrieRobotVersion implements RobotVersion
       }
    }
 
-   public boolean hasArms()
+   public boolean hasBothArms()
    {
       switch(this)
       {

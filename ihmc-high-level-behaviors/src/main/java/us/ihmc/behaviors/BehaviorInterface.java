@@ -1,6 +1,6 @@
 package us.ihmc.behaviors;
 
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNodeBasics;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeControlFlowNodeBasics;
 
 public interface BehaviorInterface extends BehaviorTreeControlFlowNodeBasics
 {

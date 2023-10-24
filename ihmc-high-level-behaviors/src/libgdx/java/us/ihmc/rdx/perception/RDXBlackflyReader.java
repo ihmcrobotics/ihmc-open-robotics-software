@@ -13,8 +13,8 @@ import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
-import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 
 import java.util.function.Consumer;
 
