@@ -5,24 +5,21 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class ChestOrientationActionState extends BehaviorActionState
+public class ChestOrientationActionState extends BehaviorActionState<ChestOrientationActionDefinition>
 {
-   private final ChestOrientationActionDefinition definition;
    private final DetachableReferenceFrame chestFrame;
 
-   public ChestOrientationActionState(long id, ChestOrientationActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, definition);
+      super(id, new ChestOrientationActionDefinition());
 
-      this.definition = definition;
-
-      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getChestToParentTransform());
+      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform());
    }
 
    @Override
    public void update()
    {
-      chestFrame.update(definition.getParentFrameName());
+      chestFrame.update(getDefinition().getParentFrameName());
       setCanExecute(chestFrame.isChildOfWorld());
    }
 
@@ -34,12 +31,6 @@ public class ChestOrientationActionState extends BehaviorActionState
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-   }
-
-   @Override
-   public ChestOrientationActionDefinition getDefinition()
-   {
-      return definition;
    }
 
    public DetachableReferenceFrame getChestFrame()

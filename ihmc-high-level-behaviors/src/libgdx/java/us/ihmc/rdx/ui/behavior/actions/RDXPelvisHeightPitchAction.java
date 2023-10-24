@@ -38,9 +38,8 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
+public class RDXPelvisHeightPitchAction extends RDXBehaviorAction<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
 {
-   private final PelvisHeightPitchActionDefinition definition = new PelvisHeightPitchActionDefinition();
    private final PelvisHeightPitchActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
@@ -77,24 +76,26 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       this.ros2 = ros2;
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      state = new PelvisHeightPitchActionState(id, definition, referenceFrameLibrary);
+      state = new PelvisHeightPitchActionState(id, referenceFrameLibrary);
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPelvisToParentTransform());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform());
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      heightWidget = new ImDoubleWrapper(definition::getHeight,
-                                         definition::setHeight,
+                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition()::setParentFrameName);
+      heightWidget = new ImDoubleWrapper(getDefinition()::getHeight,
+                                         getDefinition()::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
-      pitchWidget = new ImDoubleWrapper(definition::getPitch, definition::setPitch, imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                     definition::setTrajectoryDuration,
+      pitchWidget = new ImDoubleWrapper(getDefinition()::getPitch,
+                                        getDefinition()::setPitch,
+                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
+      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
+                                                     getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
+                                                          getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
@@ -139,7 +140,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
             highlightModel.setTransparency(0.5);
          }
 
-         pelvisPoseStatus.setParentFrameName(definition.getParentFrameName());
+         pelvisPoseStatus.setParentFrameName(getDefinition().getParentFrameName());
 
          // compute transform variation from previous pose
          FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
@@ -147,7 +148,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
             currentRobotPelvisPose.changeFrame(state.getPelvisFrame().getReferenceFrame().getParent());
          RigidBodyTransform transformVariation = new RigidBodyTransform();
          transformVariation.setAndInvert(currentRobotPelvisPose);
-         definition.getPelvisToParentTransform().transform(transformVariation);
+         getDefinition().getPelvisToParentTransform().transform(transformVariation);
          MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
 
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
@@ -197,7 +198,7 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           state.getActionIndex(),
-                                                                          definition.getDescription()));
+                                                                          getDefinition().getDescription()));
       }
    }
 
@@ -264,11 +265,5 @@ public class RDXPelvisHeightPitchAction extends RDXBehaviorAction
    public PelvisHeightPitchActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public PelvisHeightPitchActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

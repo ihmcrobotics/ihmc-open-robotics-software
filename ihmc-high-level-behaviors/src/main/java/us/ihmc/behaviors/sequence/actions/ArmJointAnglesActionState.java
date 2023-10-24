@@ -3,11 +3,11 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 
-public class ArmJointAnglesActionState extends BehaviorActionState
+public class ArmJointAnglesActionState extends BehaviorActionState<ArmJointAnglesActionDefinition>
 {
-   public ArmJointAnglesActionState(long id, ArmJointAnglesActionDefinition definition)
+   public ArmJointAnglesActionState(long id)
    {
-      super(id, definition);
+      super(id, new ArmJointAnglesActionDefinition());
    }
 
    public void toMessage(ArmJointAnglesActionStateMessage message)

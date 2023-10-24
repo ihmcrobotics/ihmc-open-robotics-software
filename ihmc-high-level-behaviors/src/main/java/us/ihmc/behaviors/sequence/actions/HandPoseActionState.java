@@ -5,24 +5,21 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class HandPoseActionState extends BehaviorActionState
+public class HandPoseActionState extends BehaviorActionState<HandPoseActionDefinition>
 {
-   private final HandPoseActionDefinition definition;
    private final DetachableReferenceFrame palmFrame;
 
-   public HandPoseActionState(long id, HandPoseActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
+   public HandPoseActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, definition);
+      super(id, new HandPoseActionDefinition());
 
-      this.definition = definition;
-
-      palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getPalmTransformToParent());
+      palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPalmTransformToParent());
    }
 
    @Override
    public void update()
    {
-      palmFrame.update(definition.getPalmParentFrameName());
+      palmFrame.update(getDefinition().getPalmParentFrameName());
       setCanExecute(palmFrame.isChildOfWorld());
    }
 
@@ -34,12 +31,6 @@ public class HandPoseActionState extends BehaviorActionState
    public void fromMessage(HandPoseActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-   }
-
-   @Override
-   public HandPoseActionDefinition getDefinition()
-   {
-      return definition;
    }
 
    public DetachableReferenceFrame getPalmFrame()

@@ -27,9 +27,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXWalkAction extends RDXBehaviorAction
+public class RDXWalkAction extends RDXBehaviorAction<WalkActionState, WalkActionDefinition>
 {
-   private final WalkActionDefinition definition;
    private final WalkActionState state;
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -51,29 +50,30 @@ public class RDXWalkAction extends RDXBehaviorAction
    {
       super(editor);
 
-      definition = new WalkActionDefinition(footstepPlannerParameters);
-      state = new WalkActionState(id, definition, referenceFrameLibrary);
+      state = new WalkActionState(id, footstepPlannerParameters, referenceFrameLibrary);
 
-      footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(), definition.getGoalToParentTransform(), getSelected());
+      footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
+                                                                       getDefinition().getGoalToParentTransform(),
+                                                                       getSelected());
       footstepPlannerGoalGizmo.create(panel3D);
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
-                                                definition::setSwingDuration,
+                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition()::setParentFrameName);
+      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
+                                                getDefinition()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
-                                                   definition::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
+                                                   getDefinition()::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
       for (RobotSide side : RobotSide.values)
       {
          goalFeetPosesSelected.put(side, new ImBoolean(false));
 
-         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getGoalFootstepToGoalTransforms().get(side));
+         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getGoalFootstepToGoalTransforms().get(side));
          footGizmo.create(panel3D);
          goalFeetGizmos.put(side, footGizmo);
 
@@ -206,7 +206,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           state.getActionIndex(),
-                                                                          definition.getDescription()));
+                                                                          getDefinition().getDescription()));
       }
    }
 
@@ -242,11 +242,5 @@ public class RDXWalkAction extends RDXBehaviorAction
    public WalkActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public WalkActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

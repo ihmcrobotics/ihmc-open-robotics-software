@@ -7,30 +7,28 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class FootstepPlanActionState extends BehaviorActionState
+public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanActionDefinition>
 {
-   private final FootstepPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
 
-   public FootstepPlanActionState(long id, FootstepPlanActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, definition);
+      super(id, new FootstepPlanActionDefinition());
 
-      this.definition = definition;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              this,
-                                             RecyclingArrayListTools.getUnsafe(definition.getFootsteps(), numberOfAllocatedFootsteps++)));
+                                             RecyclingArrayListTools.getUnsafe(getDefinition().getFootsteps(), numberOfAllocatedFootsteps++)));
    }
 
    @Override
    public void update()
    {
-      RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps());
+      RecyclingArrayListTools.synchronizeSize(footsteps, getDefinition().getFootsteps());
 
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -38,7 +36,7 @@ public class FootstepPlanActionState extends BehaviorActionState
          footsteps.get(i).update();
       }
 
-      setCanExecute(referenceFrameLibrary.containsFrame(definition.getParentFrameName()));
+      setCanExecute(referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName()));
    }
 
    public void toMessage(FootstepPlanActionStateMessage message)
@@ -66,11 +64,5 @@ public class FootstepPlanActionState extends BehaviorActionState
    public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
    {
       return footsteps;
-   }
-
-   @Override
-   public FootstepPlanActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

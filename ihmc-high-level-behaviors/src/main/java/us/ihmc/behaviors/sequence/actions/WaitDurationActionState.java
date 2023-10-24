@@ -3,15 +3,11 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 
-public class WaitDurationActionState extends BehaviorActionState
+public class WaitDurationActionState extends BehaviorActionState<WaitDurationActionDefinition>
 {
-   private final WaitDurationActionDefinition definition;
-
-   public WaitDurationActionState(long id, WaitDurationActionDefinition definition)
+   public WaitDurationActionState(long id)
    {
-      super(id, definition);
-
-      this.definition = definition;
+      super(id, new WaitDurationActionDefinition());
    }
 
    public void toMessage(WaitDurationActionStateMessage message)
@@ -22,11 +18,5 @@ public class WaitDurationActionState extends BehaviorActionState
    public void fromMessage(WaitDurationActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-   }
-
-   @Override
-   public WaitDurationActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

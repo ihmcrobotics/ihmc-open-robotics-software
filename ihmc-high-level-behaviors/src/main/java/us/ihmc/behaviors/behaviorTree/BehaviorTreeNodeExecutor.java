@@ -44,4 +44,10 @@ public abstract class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D
    {
       return getState();
    }
+
+   @Override
+   public D getDefinition()
+   {
+      return getState().getDefinition();
+   }
 }

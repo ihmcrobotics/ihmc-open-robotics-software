@@ -24,12 +24,11 @@ import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXFootstepPlanAction extends RDXBehaviorAction
+public class RDXFootstepPlanAction extends RDXBehaviorAction<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
    private final FootstepPlanActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -54,17 +53,17 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      state = new FootstepPlanActionState(id, definition, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, referenceFrameLibrary);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
-                                                definition::setSwingDuration,
+                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition()::setParentFrameName);
+      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
+                                                getDefinition()::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
-                                                   definition::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
+                                                   getDefinition()::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
       footsteps = new RecyclingArrayList<>(() ->
@@ -81,14 +80,14 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
 
       RecyclingArrayListTools.synchronizeSize(footsteps, state.getFootsteps());
 
-      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(definition.getParentFrameName());
+      frameIsChildOfWorld = referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName());
       if (frameIsChildOfWorld)
       {
          // Add a footstep to the action data only
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(definition.getFootsteps(), state.getFootsteps());
+            RecyclingArrayListTools.addToAll(getDefinition().getFootsteps(), state.getFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             FramePose3D newFootstepPose = new FramePose3D();
@@ -111,7 +110,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
             double aLittleInFront = 0.15;
             newFootstepPose.getPosition().addX(aLittleInFront);
 
-            newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(definition.getParentFrameName()));
+            newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(getDefinition().getParentFrameName()));
             addedFootstep.getDefinition().getSoleToPlanFrameTransform().set(newFootstepPose);
          }
 
@@ -119,7 +118,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          {
             RecyclingArrayListTools.removeLast(footsteps);
             RecyclingArrayListTools.removeLast(state.getFootsteps());
-            RecyclingArrayListTools.removeLast(definition.getFootsteps());
+            RecyclingArrayListTools.removeLast(getDefinition().getFootsteps());
          }
 
          state.getFootsteps().clear();
@@ -209,11 +208,5 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    public FootstepPlanActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public FootstepPlanActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

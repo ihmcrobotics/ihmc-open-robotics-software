@@ -24,12 +24,11 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class FootstepPlanActionExecutor extends BehaviorActionExecutor
+public class FootstepPlanActionExecutor extends BehaviorActionExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final FootstepPlanActionDefinition definition = new FootstepPlanActionDefinition();
    private final FootstepPlanActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -64,7 +63,7 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new FootstepPlanActionState(id, definition, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, referenceFrameLibrary);
    }
 
    @Override
@@ -87,17 +86,17 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
          }
 
          FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
-                                                                                                                       definition.getSwingDuration(),
-                                                                                                                       definition.getTransferDuration());
+                                                                                                                       getDefinition().getSwingDuration(),
+                                                                                                                       getDefinition().getTransferDuration());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
          ros2ControllerHelper.publishToController(footstepDataListMessage);
          executionTimer.reset();
 
          nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
-                                                                                            definition.getSwingDuration(),
+                                                                                            getDefinition().getSwingDuration(),
                                                                                             walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                            definition.getTransferDuration(),
+                                                                                            getDefinition().getTransferDuration(),
                                                                                             walkingControllerParameters.getDefaultFinalTransferTime());
 
          for (RobotSide side : RobotSide.values)
@@ -189,11 +188,5 @@ public class FootstepPlanActionExecutor extends BehaviorActionExecutor
    public FootstepPlanActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public FootstepPlanActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

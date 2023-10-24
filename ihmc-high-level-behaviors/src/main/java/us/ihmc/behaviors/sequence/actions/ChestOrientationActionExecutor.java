@@ -18,11 +18,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class ChestOrientationActionExecutor extends BehaviorActionExecutor
+public class ChestOrientationActionExecutor extends BehaviorActionExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final ChestOrientationActionDefinition definition = new ChestOrientationActionDefinition();
    private final ChestOrientationActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -44,7 +43,7 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new ChestOrientationActionState(id, definition, referenceFrameLibrary);
+      state = new ChestOrientationActionState(id, referenceFrameLibrary);
    }
 
    @Override
@@ -63,7 +62,7 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
 
          ChestTrajectoryMessage message = new ChestTrajectoryMessage();
          message.getSo3Trajectory()
-                .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
+                .set(HumanoidMessageTools.createSO3TrajectoryMessage(getDefinition().getTrajectoryDuration(),
                                                                      frameChestQuaternion,
                                                                      EuclidCoreTools.zeroVector3D,
                                                                      ReferenceFrame.getWorldFrame()));
@@ -96,18 +95,18 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
                                                                syncedChestPose,
                                                                Double.NaN,
                                                                ORIENTATION_TOLERANCE,
-                                                               definition.getTrajectoryDuration(),
+                                                               getDefinition().getTrajectoryDuration(),
                                                                executionTimer,
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 
          executionStatusMessage.setActionIndex(state.getActionIndex());
-         executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         executionStatusMessage.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
          executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
          executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
          executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
          executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
-         if (!state.getIsExecuting() && wasExecuting && !definition.getHoldPoseInWorldLater())
+         if (!state.getIsExecuting() && wasExecuting && !getDefinition().getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();
          }
@@ -121,7 +120,7 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(getDefinition().getTrajectoryDuration(),
                                                                   frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
                                                                   syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));
@@ -141,11 +140,5 @@ public class ChestOrientationActionExecutor extends BehaviorActionExecutor
    public ChestOrientationActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public ChestOrientationActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

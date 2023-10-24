@@ -36,9 +36,8 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXChestOrientationAction extends RDXBehaviorAction
+public class RDXChestOrientationAction extends RDXBehaviorAction<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
-   private final ChestOrientationActionDefinition definition = new ChestOrientationActionDefinition();
    private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper executeWithNextActionWrapper;
@@ -75,30 +74,30 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
 
       this.ros2 = ros2;
 
-      state = new ChestOrientationActionState(id, definition, referenceFrameLibrary);
+      state = new ChestOrientationActionState(id, referenceFrameLibrary);
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getChestToParentTransform());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform());
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
+                                                          getDefinition()::setExecuteWithNextAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
-      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
-                                                         definition::setHoldPoseInWorldLater,
+      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
+                                                         getDefinition()::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                definition::setParentFrameName);
-      yawWidget = new ImDoubleWrapper(definition.getRotation()::getYaw, definition::setYaw,
+                                                                getDefinition()::getParentFrameName,
+                                                                getDefinition()::setParentFrameName);
+      yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-      pitchWidget = new ImDoubleWrapper(definition.getRotation()::getPitch, definition::setPitch,
+      pitchWidget = new ImDoubleWrapper(getDefinition().getRotation()::getPitch, getDefinition()::setPitch,
                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      rollWidget = new ImDoubleWrapper(definition.getRotation()::getRoll, definition::setRoll,
+      rollWidget = new ImDoubleWrapper(getDefinition().getRotation()::getRoll, getDefinition()::setRoll,
                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
-                                                     definition::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
+                                                     getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
@@ -143,8 +142,8 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
             highlightModel.setTransparency(0.5);
          }
 
-         chestPoseStatus.setParentFrameName(definition.getParentFrameName());
-         MessageTools.toMessage(definition.getChestToParentTransform(), chestPoseStatus.getTransformToParent());
+         chestPoseStatus.setParentFrameName(getDefinition().getParentFrameName());
+         MessageTools.toMessage(getDefinition().getChestToParentTransform(), chestPoseStatus.getTransformToParent());
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
          if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
@@ -196,7 +195,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
       {
          tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
                                                                           state.getActionIndex(),
-                                                                          definition.getDescription()));
+                                                                          getDefinition().getDescription()));
       }
    }
 
@@ -257,11 +256,5 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    public ChestOrientationActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public ChestOrientationActionDefinition getDefinition()
-   {
-      return definition;
    }
 }
