@@ -2,13 +2,13 @@ package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeNodeExtensionAddition<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
-      extends BehaviorTreeNodeAddition<T>
+public class BehaviorTreeNodeExtensionAdd<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
+      extends BehaviorTreeNodeAdd<T>
       implements BehaviorTreeModification
 {
-   private final BehaviorTreeNodeAddition extendedTypeAddition;
+   private final BehaviorTreeNodeAdd extendedTypeAddition;
 
-   public BehaviorTreeNodeExtensionAddition(T nodeToAdd, T parent)
+   public BehaviorTreeNodeExtensionAdd(T nodeToAdd, T parent)
    {
       super(nodeToAdd, parent);
 
@@ -16,11 +16,11 @@ public class BehaviorTreeNodeExtensionAddition<T extends BehaviorTreeNodeExtensi
        && parent.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedParent)
       {
          // This will result in recuresively performing the modification on all extended types
-         extendedTypeAddition = new BehaviorTreeNodeExtensionAddition(extendedNodeToAdd, extendedParent);
+         extendedTypeAddition = new BehaviorTreeNodeExtensionAdd(extendedNodeToAdd, extendedParent);
       }
       else
       {
-         extendedTypeAddition = new BehaviorTreeNodeAddition(nodeToAdd.getExtendedNode(), parent.getExtendedNode());
+         extendedTypeAddition = new BehaviorTreeNodeAdd(nodeToAdd.getExtendedNode(), parent.getExtendedNode());
       }
    }
 

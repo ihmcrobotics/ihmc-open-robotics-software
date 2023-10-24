@@ -2,22 +2,22 @@ package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeExtensionSubtreeDestruction extends BehaviorTreeSubtreeDestruction implements BehaviorTreeModification
+public class BehaviorTreeExtensionSubtreeDestroy extends BehaviorTreeSubtreeDestroy implements BehaviorTreeModification
 {
-   private final BehaviorTreeSubtreeDestruction extensionSubtreeDestruction;
+   private final BehaviorTreeSubtreeDestroy extensionSubtreeDestruction;
 
-   public BehaviorTreeExtensionSubtreeDestruction(BehaviorTreeNodeExtension<?, ?, ?, ?> subtreeToDestroy)
+   public BehaviorTreeExtensionSubtreeDestroy(BehaviorTreeNodeExtension<?, ?, ?, ?> subtreeToDestroy)
    {
       super(subtreeToDestroy);
 
       if (subtreeToDestroy.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedSubtreeToDestroy)
       {
          // This will result in recuresively performing the modification on all extended types
-         extensionSubtreeDestruction = new BehaviorTreeExtensionSubtreeDestruction(extendedSubtreeToDestroy);
+         extensionSubtreeDestruction = new BehaviorTreeExtensionSubtreeDestroy(extendedSubtreeToDestroy);
       }
       else
       {
-         extensionSubtreeDestruction = new BehaviorTreeSubtreeDestruction(subtreeToDestroy.getExtendedNode());
+         extensionSubtreeDestruction = new BehaviorTreeSubtreeDestroy(subtreeToDestroy.getExtendedNode());
       }
    }
 

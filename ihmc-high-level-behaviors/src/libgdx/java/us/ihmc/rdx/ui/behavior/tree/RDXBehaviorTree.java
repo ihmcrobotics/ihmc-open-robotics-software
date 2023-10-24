@@ -9,11 +9,12 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestruction;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddition;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -40,7 +41,7 @@ public class RDXBehaviorTree
     * Also, sometimes, the tree will be disassembled and this is used in putting it
     * back together.
     */
-   private transient final TLongObjectMap<RDXBehaviorTreeNode> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
 
    public RDXBehaviorTree(DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
@@ -81,7 +82,7 @@ public class RDXBehaviorTree
       // Delete the entire tree. We are starting over
       behaviorTreeState.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestruction(rootNode));
+         modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(rootNode));
 
          JSONFileTools.load(file, jsonNode ->
          {
@@ -90,18 +91,18 @@ public class RDXBehaviorTree
       });
    }
 
-   public RDXBehaviorTreeNode loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode parentNode, BehaviorTreeModificationQueue modificationQueue)
+   public RDXBehaviorTreeNode<?, ?> loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeModificationQueue modificationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
-      RDXBehaviorTreeNode node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
-                                                        behaviorTreeState.getNextID().getAndIncrement());
+      RDXBehaviorTreeNode<?, ?> node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
+                                                              behaviorTreeState.getNextID().getAndIncrement());
 
       node.getDefinition().loadFromFile(jsonNode);
 
       if (parentNode != null)
       {
-         modificationQueue.accept(new BehaviorTreeNodeExtensionAddition<>(node, parentNode));
+         modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze<>(node, parentNode));
       }
 
       JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
@@ -170,6 +171,11 @@ public class RDXBehaviorTree
    public BehaviorTreeState getBehaviorTreeState()
    {
       return behaviorTreeState;
+   }
+
+   public void setRootNode(BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode)
+   {
+      this.rootNode = (RDXBehaviorTreeNode<?, ?>) rootNode;
    }
 
    public RDXBehaviorTreeNode<?, ?> getRootNode()

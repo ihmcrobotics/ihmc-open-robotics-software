@@ -6,11 +6,11 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 /**
  * Clearing the subtree and detroying the removed nodes.
  */
-public class BehaviorTreeSubtreeDestruction implements BehaviorTreeModification
+public class BehaviorTreeSubtreeDestroy implements BehaviorTreeModification
 {
    private final BehaviorTreeNode<?> subtreeToClear;
 
-   public BehaviorTreeSubtreeDestruction(BehaviorTreeNode<?> subtreeToClear)
+   public BehaviorTreeSubtreeDestroy(BehaviorTreeNode<?> subtreeToClear)
    {
       this.subtreeToClear = subtreeToClear;
    }
