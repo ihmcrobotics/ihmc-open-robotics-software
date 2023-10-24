@@ -6,7 +6,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
  * Adds a node to a parent, without freezing its parent, for use in rebuilding a tree with
  * nodes that already existed.
  */
-public class BehaviorTreeNodeReplacement<T extends BehaviorTreeNode> implements BehaviorTreeModification<T>
+public class BehaviorTreeNodeReplacement<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification<T>
 {
    private final T nodeToAdd;
    private final T parent;

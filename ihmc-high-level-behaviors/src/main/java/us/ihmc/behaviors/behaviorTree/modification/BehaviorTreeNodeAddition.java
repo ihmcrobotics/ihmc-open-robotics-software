@@ -6,7 +6,7 @@ import us.ihmc.communication.crdt.Freezable;
 /**
  * Adds a node to a parent, freezing the parent if it's freezable.
  */
-public class BehaviorTreeNodeAddition<T extends BehaviorTreeNode> implements BehaviorTreeModification<T>
+public class BehaviorTreeNodeAddition<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification<T>
 {
    private final T nodeToAdd;
    private final T parent;

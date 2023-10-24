@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class BehaviorTreeNodeState<S extends BehaviorTreeNodeState<S, D>,
                                             D extends BehaviorTreeNodeDefinition<D>>
       extends Freezable
-      implements BehaviorTreeNodeExtension<S, D, D, S>,
+      implements BehaviorTreeNodeExtension<S, D, S, D>,
                  BehaviorTreeNodeDefinitionSupplier<D>
 {
    private final D definition;
@@ -100,6 +100,6 @@ public abstract class BehaviorTreeNodeState<S extends BehaviorTreeNodeState<S, D
    @Override
    public S getState()
    {
-      return this;
+      return (S) this;
    }
 }

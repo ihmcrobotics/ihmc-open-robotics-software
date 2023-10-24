@@ -3,11 +3,12 @@ package us.ihmc.behaviors.behaviorTree.modification;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeExtensionSubtreeDestruction<T extends BehaviorTreeNodeExtension<T, U>,
-                                                     U extends BehaviorTreeNode<U>>
-      extends BehaviorTreeSubtreeDestruction<T> implements BehaviorTreeModification<T>
+public class BehaviorTreeExtensionSubtreeDestruction<T extends BehaviorTreeNodeExtension<T, E, ?, ?>,
+                                                     E extends BehaviorTreeNode<E>>
+      extends BehaviorTreeSubtreeDestruction<T>
+      implements BehaviorTreeModification<T>
 {
-   private final BehaviorTreeSubtreeDestruction<U> extensionSubtreeDestruction;
+   private final BehaviorTreeSubtreeDestruction<E> extensionSubtreeDestruction;
 
    public BehaviorTreeExtensionSubtreeDestruction(T subtreeToDestroy)
    {
