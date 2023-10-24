@@ -1,11 +1,14 @@
 package us.ihmc.behaviors.tools.footstepPlanner;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import behavior_msgs.msg.dds.MinimalFootstepListMessage;
 import behavior_msgs.msg.dds.MinimalFootstepMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import ihmc_common_msgs.msg.dds.Point2DMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -79,6 +82,22 @@ public class MinimalFootstep
    public ConvexPolygon2DReadOnly getFoothold()
    {
       return foothold;
+   }
+
+   public static ArrayList<MinimalFootstep> convertFootstepQueueMessage(FootstepQueueStatusMessage queueStatusMessage, String description)
+   {
+      ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+      List<QueuedFootstepStatusMessage> queuedFootsteps = queueStatusMessage.getQueuedFootstepList();
+      int size = queueStatusMessage.getQueuedFootstepList().size();
+
+      for (int i = 0; i < size; i++)
+      {
+         QueuedFootstepStatusMessage queuedFootstep = queuedFootsteps.get(i);
+         Pose3D pose = new Pose3D(queuedFootstep.getLocation(), queuedFootstep.getOrientation());
+         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(queuedFootstep.getRobotSide()), pose, i == size - 1 ? description : ""));
+      }
+
+      return minimalFootsteps;
    }
 
    public static ArrayList<MinimalFootstep> convertPairListToMinimalFoostepList(ArrayList<Pair<RobotSide, Pose3D>> pairList, String description)
