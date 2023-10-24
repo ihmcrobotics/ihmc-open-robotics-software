@@ -31,6 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -82,7 +83,6 @@ public class ZEDColorStereoDepthPublisher
    private final Thread colorImagePublishThread;
    private final Thread depthImagePublishThread;
    private final Thread centerposeUpdateThread;
-   private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
    // Optional CenterPose/SceneGraph integration
