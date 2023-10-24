@@ -1,19 +1,13 @@
 package us.ihmc.rdx.ui.interactable;
 
-import com.badlogic.gdx.graphics.Color;
 import imgui.internal.ImGui;
-import imgui.type.ImFloat;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.*;
@@ -80,7 +74,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
          {
             if (isAnyObjectSelected())
                selectedObject.clear();
-            selectedObject.setVisuals(primitiveRigidBodySceneNode);
+            selectedObject.setVisuals(primitiveRigidBodySceneNode.getShape());
             // Notify that the object selection has been updated
             selectedObjectName = primitiveRigidBodySceneNode.getName();
             selectedObjectChanged.set(selectedObjectName);
