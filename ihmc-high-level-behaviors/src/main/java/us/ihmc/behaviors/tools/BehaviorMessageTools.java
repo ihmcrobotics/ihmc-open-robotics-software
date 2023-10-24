@@ -5,6 +5,8 @@ import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.*;
 
+import java.util.List;
+
 public class BehaviorMessageTools
 {
    /**
@@ -14,7 +16,7 @@ public class BehaviorMessageTools
     * TODO: This is going to have to be fixed to pack different node types in
     *   appropriate fields in the ROS 2 message.
     */
-   public static void packBehaviorTreeMessage(BehaviorTreeNodeExecutor treeNode, BehaviorTreeMessage behaviorTreeMessage)
+   public static void packBehaviorTreeMessage(BehaviorTreeNodeExecutor<?, ?> treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
 //      if (treeNode.getState().getLastTickInstant()  != null)
@@ -28,7 +30,7 @@ public class BehaviorMessageTools
       nodeMessage.setNumberOfChildren(treeNode.getChildren().size());
       // TODO: Pack status
 
-      for (BehaviorTreeNodeExecutor child : treeNode.getChildren())
+      for (BehaviorTreeNodeExecutor<?, ?> child : treeNode.getChildren())
       {
          packBehaviorTreeMessage(child, behaviorTreeMessage);
       }
