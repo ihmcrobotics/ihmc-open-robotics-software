@@ -5,13 +5,9 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 
 public class ArmJointAnglesActionState extends BehaviorActionState
 {
-   private final ArmJointAnglesActionDefinition definition;
-
    public ArmJointAnglesActionState(long id, ArmJointAnglesActionDefinition definition)
    {
       super(id, definition);
-
-      this.definition = definition;
    }
 
    public void toMessage(ArmJointAnglesActionStateMessage message)
@@ -22,11 +18,5 @@ public class ArmJointAnglesActionState extends BehaviorActionState
    public void fromMessage(ArmJointAnglesActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-   }
-
-   @Override
-   public ArmJointAnglesActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

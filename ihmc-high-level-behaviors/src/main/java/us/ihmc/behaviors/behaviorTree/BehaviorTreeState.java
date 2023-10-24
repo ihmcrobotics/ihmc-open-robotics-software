@@ -66,9 +66,9 @@ public class BehaviorTreeState
    {
       localTreeFrozen |= localNode.isFrozenFromModification();
 
-      for (BehaviorTreeNodeState child : localNode.getChildren())
+      for (Object child : localNode.getChildren())
       {
-         checkTreeModified(child);
+         checkTreeModified((BehaviorTreeNodeState) child);
       }
    }
 

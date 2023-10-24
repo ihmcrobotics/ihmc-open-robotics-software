@@ -1,8 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateSupplier;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImStringWrapper;
@@ -10,12 +8,14 @@ import us.ihmc.rdx.imgui.ImStringWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeExtension<RDXBehaviorTreeNode, BehaviorTreeNodeState>, BehaviorTreeNodeStateSupplier
+public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
+                                          D extends BehaviorTreeNodeDefinition>
+      implements BehaviorTreeNodeExtension<RDXBehaviorTreeNode<?, ?>, S, S, D>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImStringWrapper descriptionWrapper;
 
-   private final List<RDXBehaviorTreeNode> children = new ArrayList<>();
+   private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
 
    public void update()
    {
@@ -38,13 +38,13 @@ public abstract class RDXBehaviorTreeNode implements BehaviorTreeNodeExtension<R
       return descriptionWrapper;
    }
 
-   public List<RDXBehaviorTreeNode> getChildren()
+   public List<RDXBehaviorTreeNode<?, ?>> getChildren()
    {
       return children;
    }
 
    @Override
-   public BehaviorTreeNodeState getExtendedNode()
+   public S getExtendedNode()
    {
       return getState();
    }

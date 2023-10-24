@@ -4,7 +4,7 @@ package us.ihmc.behaviors.behaviorTree;
  * This is currently around to keep older behavior tree nodes
  * compiling without them fully adhering to the newer standards.
  */
-public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState
+public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState<BehaviorTreeNodeDefinition>
 {
    /** The current status of the behavior tree node. */
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.SUCCESS;
@@ -12,12 +12,6 @@ public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState
    public LocalOnlyBehaviorTreeNodeState()
    {
       super(0, new BehaviorTreeNodeDefinition());
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return super.getDefinition();
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)

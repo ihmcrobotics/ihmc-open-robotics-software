@@ -1,14 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeNodeExtensionMove<T extends BehaviorTreeNodeExtension<T, E, ?, ?>,
-                                           E extends BehaviorTreeNode<E>>
+public class BehaviorTreeNodeExtensionMove<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
       extends BehaviorTreeNodeMove<T>
-      implements BehaviorTreeModification<T>
+      implements BehaviorTreeModification
 {
-   private final BehaviorTreeNodeMove<E> extendedTypeMove;
+   private final BehaviorTreeNodeMove extendedTypeMove;
 
    public BehaviorTreeNodeExtensionMove(T nodeToMove, T previousParent, T newParent)
    {

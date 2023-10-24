@@ -6,7 +6,7 @@ import us.ihmc.communication.crdt.Freezable;
 /**
  * Searches the tree, removing the given node and freezing it's parent.
  */
-public class BehaviorTreeNodeRemoval<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification<T>
+public class BehaviorTreeNodeRemoval<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification
 {
    private final T nodeToRemove;
    private final T rootNode;

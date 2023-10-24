@@ -58,10 +58,4 @@ public class TimedExpirationCondition extends BehaviorTreeCondition
       boolean success = !expired;
       return success;
    }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return null; // FIXME
-   }
 }

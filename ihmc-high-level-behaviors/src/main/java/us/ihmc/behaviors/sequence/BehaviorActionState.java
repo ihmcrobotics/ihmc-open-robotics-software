@@ -3,21 +3,18 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.BehaviorActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
-public abstract class BehaviorActionState extends BehaviorTreeNodeState implements BehaviorActionDefinitionSupplier
+public abstract class BehaviorActionState<D extends BehaviorActionDefinition>
+      extends BehaviorTreeNodeState<D>
 {
-   private final BehaviorActionDefinition definition;
-
    private int actionIndex = -1;
    private boolean isNextForExecution = false;
    private boolean isToBeExecutedConcurrently = false;
    private boolean canExecute = true;
    private boolean isExecuting = false;
 
-   public BehaviorActionState(long id, BehaviorActionDefinition definition)
+   public BehaviorActionState(long id, D definition)
    {
       super(id, definition);
-
-      this.definition = definition;
    }
 
    public void toMessage(BehaviorActionStateMessage message)
@@ -91,11 +88,5 @@ public abstract class BehaviorActionState extends BehaviorTreeNodeState implemen
    public boolean getIsExecuting()
    {
       return isExecuting;
-   }
-
-   @Override
-   public BehaviorActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

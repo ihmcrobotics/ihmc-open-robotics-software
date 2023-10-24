@@ -1,14 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeNodeExtensionRemoval<T extends BehaviorTreeNodeExtension<T, E, ?, ?>,
-                                              E extends BehaviorTreeNode<E>>
+public class BehaviorTreeNodeExtensionRemoval<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
       extends BehaviorTreeNodeRemoval<T>
-      implements BehaviorTreeModification<T>
+      implements BehaviorTreeModification
 {
-   private final BehaviorTreeNodeRemoval<E> extendedNodeRemoval;
+   private final BehaviorTreeNodeRemoval extendedNodeRemoval;
 
    public BehaviorTreeNodeExtensionRemoval(T nodeToRemove, T rootNode)
    {
