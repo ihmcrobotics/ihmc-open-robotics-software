@@ -16,7 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
 
-public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
+public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -44,7 +44,7 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new PelvisHeightPitchActionState(id, definition, referenceFrameLibrary);
+      state = new PelvisHeightPitchActionState(id, referenceFrameLibrary);
    }
 
    @Override
@@ -131,11 +131,5 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor
    public PelvisHeightPitchActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public PelvisHeightPitchActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

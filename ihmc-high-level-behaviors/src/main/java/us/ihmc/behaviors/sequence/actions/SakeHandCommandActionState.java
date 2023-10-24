@@ -3,15 +3,11 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
 import us.ihmc.behaviors.sequence.BehaviorActionState;
 
-public class SakeHandCommandActionState extends BehaviorActionState
+public class SakeHandCommandActionState extends BehaviorActionState<SakeHandCommandActionDefinition>
 {
-   private final SakeHandCommandActionDefinition definition;
-
-   public SakeHandCommandActionState(long id, SakeHandCommandActionDefinition definition)
+   public SakeHandCommandActionState(long id)
    {
-      super(id, definition);
-
-      this.definition = definition;
+      super(id, new SakeHandCommandActionDefinition());
    }
 
    public void toMessage(SakeHandCommandActionStateMessage message)
@@ -22,11 +18,5 @@ public class SakeHandCommandActionState extends BehaviorActionState
    public void fromMessage(SakeHandCommandActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-   }
-
-   @Override
-   public SakeHandCommandActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

@@ -8,20 +8,21 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
-public class RDXWaitDurationAction extends RDXBehaviorAction
+public class RDXWaitDurationAction extends RDXBehaviorAction<WaitDurationActionState, WaitDurationActionDefinition>
 {
-   private final WaitDurationActionDefinition definition = new WaitDurationActionDefinition();
    private final WaitDurationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper waitDurationWidget = new ImDoubleWrapper(definition::getWaitDuration,
-                                                                          definition::setWaitDuration,
-                                                                          imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
+   private final ImDoubleWrapper waitDurationWidget;
 
    public RDXWaitDurationAction(long id, RDXBehaviorActionSequenceEditor editor)
    {
       super(editor);
 
-      state = new WaitDurationActionState(id, definition);
+      state = new WaitDurationActionState(id);
+
+      waitDurationWidget = new ImDoubleWrapper(getDefinition()::getWaitDuration,
+                                               getDefinition()::setWaitDuration,
+                                               imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
    }
 
    @Override
@@ -35,18 +36,12 @@ public class RDXWaitDurationAction extends RDXBehaviorAction
    @Override
    public String getActionTypeTitle()
    {
-      return String.format("Wait %.1f s", definition.getWaitDuration());
+      return String.format("Wait %.1f s", getDefinition().getWaitDuration());
    }
 
    @Override
    public WaitDurationActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public WaitDurationActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

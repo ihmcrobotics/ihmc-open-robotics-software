@@ -5,24 +5,21 @@ import us.ihmc.behaviors.sequence.BehaviorActionState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class PelvisHeightPitchActionState extends BehaviorActionState
+public class PelvisHeightPitchActionState extends BehaviorActionState<PelvisHeightPitchActionDefinition>
 {
-   private final PelvisHeightPitchActionDefinition definition;
    private final DetachableReferenceFrame pelvisFrame;
 
-   public PelvisHeightPitchActionState(long id, PelvisHeightPitchActionDefinition definition, ReferenceFrameLibrary referenceFrameLibrary)
+   public PelvisHeightPitchActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, definition);
+      super(id, new PelvisHeightPitchActionDefinition());
 
-      this.definition = definition;
-
-      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getPelvisToParentTransform());
+      pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPelvisToParentTransform());
    }
 
    @Override
    public void update()
    {
-      pelvisFrame.update(definition.getParentFrameName());
+      pelvisFrame.update(getDefinition().getParentFrameName());
       setCanExecute(pelvisFrame.isChildOfWorld());
    }
 
@@ -34,12 +31,6 @@ public class PelvisHeightPitchActionState extends BehaviorActionState
    public void fromMessage(PelvisHeightPitchActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
-   }
-
-   @Override
-   public PelvisHeightPitchActionDefinition getDefinition()
-   {
-      return definition;
    }
 
    public DetachableReferenceFrame getPelvisFrame()

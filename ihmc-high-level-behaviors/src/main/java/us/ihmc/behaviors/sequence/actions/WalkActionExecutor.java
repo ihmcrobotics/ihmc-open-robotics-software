@@ -29,7 +29,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class WalkActionExecutor extends BehaviorActionExecutor
+public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, WalkActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -71,7 +71,7 @@ public class WalkActionExecutor extends BehaviorActionExecutor
       this.walkingControllerParameters = walkingControllerParameters;
 
       definition = new WalkActionDefinition(footstepPlannerParameters);
-      state = new WalkActionState(id, definition, referenceFrameLibrary);
+      state = new WalkActionState(id, footstepPlannerParameters, referenceFrameLibrary);
    }
 
    @Override
@@ -238,11 +238,5 @@ public class WalkActionExecutor extends BehaviorActionExecutor
    public WalkActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public WalkActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

@@ -5,9 +5,8 @@ import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationActionExecutor extends BehaviorActionExecutor
+public class WaitDurationActionExecutor extends BehaviorActionExecutor<WaitDurationActionState, WaitDurationActionDefinition>
 {
-   private final WaitDurationActionDefinition definition = new WaitDurationActionDefinition();
    private final WaitDurationActionState state;
    private final Timer executionTimer = new Timer();
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -16,7 +15,7 @@ public class WaitDurationActionExecutor extends BehaviorActionExecutor
    {
       super(sequence);
 
-      state = new WaitDurationActionState(id, definition);
+      state = new WaitDurationActionState(id);
    }
 
    @Override
@@ -34,10 +33,10 @@ public class WaitDurationActionExecutor extends BehaviorActionExecutor
    @Override
    public void updateCurrentlyExecuting()
    {
-      state.setIsExecuting(executionTimer.isRunning(definition.getWaitDuration()));
+      state.setIsExecuting(executionTimer.isRunning(getDefinition().getWaitDuration()));
 
       executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(definition.getWaitDuration());
+      executionStatusMessage.setNominalExecutionDuration(getDefinition().getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
@@ -51,11 +50,5 @@ public class WaitDurationActionExecutor extends BehaviorActionExecutor
    public WaitDurationActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public WaitDurationActionDefinition getDefinition()
-   {
-      return definition;
    }
 }

@@ -9,12 +9,11 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
+public class SakeHandCommandActionExecutor extends BehaviorActionExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;
 
-   private final SakeHandCommandActionDefinition definition = new SakeHandCommandActionDefinition();
    private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
@@ -26,7 +25,7 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
 
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      state = new SakeHandCommandActionState(id, definition);
+      state = new SakeHandCommandActionState(id);
    }
 
    @Override
@@ -39,10 +38,10 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    public void triggerActionExecution()
    {
       SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
-      message.setRobotSide(definition.getSide().toByte());
-      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[definition.getHandConfigurationIndex()].getCommandNumber());
-      message.setPostionRatio(definition.getGoalPosition());
-      message.setTorqueRatio(definition.getGoalTorque());
+      message.setRobotSide(getDefinition().getSide().toByte());
+      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[getDefinition().getHandConfigurationIndex()].getCommandNumber());
+      message.setPostionRatio(getDefinition().getGoalPosition());
+      message.setTorqueRatio(getDefinition().getGoalTorque());
 
       ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
 
@@ -69,11 +68,5 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    public SakeHandCommandActionState getState()
    {
       return state;
-   }
-
-   @Override
-   public SakeHandCommandActionDefinition getDefinition()
-   {
-      return definition;
    }
 }
