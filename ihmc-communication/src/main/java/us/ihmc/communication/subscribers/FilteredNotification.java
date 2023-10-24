@@ -4,6 +4,10 @@ import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.function.BiFunction;
 
+/**
+ * Useful for filtering notifications by some acceptance function, in the
+ * case you might want to act only if certain things changed.
+ */
 public class FilteredNotification<T> extends TypedNotification<T>
 {
    private final BiFunction<T, T, Boolean> acceptanceFunction;
@@ -19,10 +23,10 @@ public class FilteredNotification<T> extends TypedNotification<T>
 
    public boolean pollFiltered()
    {
-      if (peekHasValue()) // Poll the new value
+      if (peekHasValue()) // Check if there is anything to poll, before we poll and lose the previous value
       {
          T previousValue = read(); // May be null
-         poll();
+         poll(); // Poll the new value
          T newValue = read(); // Shouldn't be null unless something called set(null)
          return acceptanceFunction.apply(previousValue, newValue);
       }
