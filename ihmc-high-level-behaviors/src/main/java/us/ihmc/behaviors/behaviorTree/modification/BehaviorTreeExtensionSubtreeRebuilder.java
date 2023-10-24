@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtensionSupplier;
 
@@ -26,13 +27,13 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       };
    }
 
-   private void clearChildren(BehaviorTreeNodeExtension localNode)
+   private void clearChildren(BehaviorTreeNodeExtension<?, ?, ?, ?> localNode)
    {
       idToNodesMap.put(localNode.getState().getID(), localNode);
 
-      for (Object child : localNode.getChildren())
+      for (BehaviorTreeNode<?> child : localNode.getChildren())
       {
-         clearChildren((BehaviorTreeNodeExtension) child);
+         clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
       }
 
       localNode.getDefinition().getChildren().clear();
@@ -45,7 +46,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       return idToNodesMap.get(id);
    }
 
-   public BehaviorTreeModification getReplacementModification(long id, BehaviorTreeNodeExtension parent)
+   public BehaviorTreeModification getReplacementModification(long id, BehaviorTreeNodeExtension<?, ?, ?, ?> parent)
    {
       return new BehaviorTreeNodeReplacement(idToNodesMap.remove(id), parent);
    }

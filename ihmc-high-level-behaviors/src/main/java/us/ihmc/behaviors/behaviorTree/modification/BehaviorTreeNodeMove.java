@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.modification;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.communication.crdt.Freezable;
 
-public class BehaviorTreeNodeMove<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification<T>
+public class BehaviorTreeNodeMove<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification
 {
    private final T nodeToMove;
    private final T previousParent;

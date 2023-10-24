@@ -6,7 +6,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BehaviorActionSequenceState extends BehaviorTreeNodeState
+public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorActionSequenceDefinition>
 {
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;

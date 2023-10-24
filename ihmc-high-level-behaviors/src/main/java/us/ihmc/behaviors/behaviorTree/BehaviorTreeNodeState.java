@@ -10,11 +10,9 @@ import java.util.List;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public abstract class BehaviorTreeNodeState<S extends BehaviorTreeNodeState<S, D>,
-                                            D extends BehaviorTreeNodeDefinition<D>>
+public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       extends Freezable
-      implements BehaviorTreeNodeExtension<S, D, S, D>,
-                 BehaviorTreeNodeDefinitionSupplier<D>
+      implements BehaviorTreeNodeExtension<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
 {
    private final D definition;
 
@@ -30,7 +28,10 @@ public abstract class BehaviorTreeNodeState<S extends BehaviorTreeNodeState<S, D
     */
    private boolean isActive = false;
 
-   private final List<S> children = new ArrayList<>();
+   /**
+    * The state's children. They can be any type that is a BehaviorTreeNodeState.
+    */
+   private final List<BehaviorTreeNodeState<?>> children = new ArrayList<>();
 
    public BehaviorTreeNodeState(long id, D definition)
    {
@@ -80,15 +81,9 @@ public abstract class BehaviorTreeNodeState<S extends BehaviorTreeNodeState<S, D
    }
 
    @Override
-   public List<S> getChildren()
+   public List<BehaviorTreeNodeState<?>> getChildren()
    {
       return children;
-   }
-
-   @Override
-   public D getDefinition()
-   {
-      return definition;
    }
 
    @Override
@@ -98,8 +93,14 @@ public abstract class BehaviorTreeNodeState<S extends BehaviorTreeNodeState<S, D
    }
 
    @Override
-   public S getState()
+   public D getDefinition()
    {
-      return (S) this;
+      return definition;
+   }
+
+   @Override
+   public BehaviorTreeNodeState<D> getState()
+   {
+      return this;
    }
 }

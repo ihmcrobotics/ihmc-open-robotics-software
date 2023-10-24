@@ -1,16 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeExtensionSubtreeClear<T extends BehaviorTreeNodeExtension<T, E, ?, ?>,
-                                               E extends BehaviorTreeNode<E>>
-      extends BehaviorTreeSubtreeClear<T>
-      implements BehaviorTreeModification<T>
+public class BehaviorTreeExtensionSubtreeClear extends BehaviorTreeSubtreeClear implements BehaviorTreeModification
 {
-   private final BehaviorTreeSubtreeClear<E> extensionSubtreeClear;
+   private final BehaviorTreeSubtreeClear extensionSubtreeClear;
 
-   public BehaviorTreeExtensionSubtreeClear(T subtreeToClear)
+   public BehaviorTreeExtensionSubtreeClear(BehaviorTreeNodeExtension<?, ?, ?, ?> subtreeToClear)
    {
       super(subtreeToClear);
 
@@ -21,7 +17,7 @@ public class BehaviorTreeExtensionSubtreeClear<T extends BehaviorTreeNodeExtensi
       }
       else
       {
-         extensionSubtreeClear = new BehaviorTreeSubtreeClear<>(subtreeToClear.getExtendedNode());
+         extensionSubtreeClear = new BehaviorTreeSubtreeClear(subtreeToClear.getExtendedNode());
       }
    }
 

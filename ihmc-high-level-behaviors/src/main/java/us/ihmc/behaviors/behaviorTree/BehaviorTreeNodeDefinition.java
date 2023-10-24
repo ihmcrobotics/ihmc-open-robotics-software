@@ -12,13 +12,12 @@ import java.util.List;
  * The base definition of a behavior tree node is just a
  * human readable description and a list of children.
  */
-public class BehaviorTreeNodeDefinition<T extends BehaviorTreeNodeDefinition<T>>
-      implements BehaviorTreeNode<T>
+public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
    /** A human readable description of what the node does */
    private String description = "";
    /** Behavior tree children node definitions. */
-   private final List<T> children = new ArrayList<>();
+   private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
 
    /**
     * Saves the file recursively.
@@ -31,7 +30,7 @@ public class BehaviorTreeNodeDefinition<T extends BehaviorTreeNodeDefinition<T>>
          jsonNode.put("description", description);
 
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
-      for (T child : children)
+      for (BehaviorTreeNodeDefinition child : children)
       {
          ObjectNode childJsonNode = childrenArrayJsonNode.addObject();
          child.saveToFile(childJsonNode);
@@ -72,7 +71,7 @@ public class BehaviorTreeNodeDefinition<T extends BehaviorTreeNodeDefinition<T>>
    }
 
    @Override
-   public List<T> getChildren()
+   public List<BehaviorTreeNodeDefinition> getChildren()
    {
       return children;
    }

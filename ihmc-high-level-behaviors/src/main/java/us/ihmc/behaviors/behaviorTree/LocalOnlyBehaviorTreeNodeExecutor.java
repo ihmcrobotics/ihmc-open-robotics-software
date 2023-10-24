@@ -7,7 +7,7 @@ import java.util.List;
  * This is currently around to keep older behavior tree nodes
  * compiling without them fully adhering to the newer standards.
  */
-public abstract class LocalOnlyBehaviorTreeNodeExecutor extends BehaviorTreeNodeExecutor
+public abstract class LocalOnlyBehaviorTreeNodeExecutor extends BehaviorTreeNodeExecutor<LocalOnlyBehaviorTreeNodeState, BehaviorTreeNodeDefinition>
 {
    private final LocalOnlyBehaviorTreeNodeState state = new LocalOnlyBehaviorTreeNodeState();
 
@@ -36,15 +36,15 @@ public abstract class LocalOnlyBehaviorTreeNodeExecutor extends BehaviorTreeNode
       return state;
    }
 
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return state.getDefinition();
-   }
-
    // TODO: Fix
    public List<LocalOnlyBehaviorTreeNodeExecutor> getLocalOnlyChildren()
    {
       return children;
+   }
+
+   @Override
+   public BehaviorTreeNodeDefinition getDefinition()
+   {
+      return state.getDefinition();
    }
 }
