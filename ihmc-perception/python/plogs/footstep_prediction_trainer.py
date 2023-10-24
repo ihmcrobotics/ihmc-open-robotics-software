@@ -184,9 +184,9 @@ class FootstepPredictor(Module):
         print("FootstepPredictor (Model) -> Linear Input Size: ", input_size, "Linear Output Size: ", output_size)
 
         # convolutional layers given a 200x200 16-bit grayscale image
-        self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        self.conv2d_2 = torch.nn.Conv2d(32, 48, kernel_size=3, stride=1, padding=1)
-        self.conv2d_3 = torch.nn.Conv2d(48, 64, kernel_size=3, stride=1, padding=1)
+        self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=5, stride=1, padding=1)
+        self.conv2d_2 = torch.nn.Conv2d(32, 48, kernel_size=5, stride=1, padding=1)
+        self.conv2d_3 = torch.nn.Conv2d(48, 64, kernel_size=7, stride=1, padding=1)
         self.conv2d_4 = torch.nn.Conv2d(64, 96, kernel_size=3, stride=1, padding=1)
         self.conv2d_5 = torch.nn.Conv2d(96, 128, kernel_size=3, stride=1, padding=1)
         self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
@@ -412,7 +412,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = True
+    train = False
     visualize_raw = False
 
     if visualize_raw:

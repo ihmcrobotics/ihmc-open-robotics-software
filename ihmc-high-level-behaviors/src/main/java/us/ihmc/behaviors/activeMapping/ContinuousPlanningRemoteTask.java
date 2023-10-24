@@ -85,7 +85,9 @@ public class ContinuousPlanningRemoteTask
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private long originalFootstepDataListId = -1;
 
-//   IHMCROS2Publisher<FootstepDataListMessage> publisherForPlannedFootsteps;
+   IHMCROS2Publisher<FootstepDataListMessage> publisherForPlannedFootsteps;
+   IHMCROS2Publisher<RigidBodyTransformMessage> publisherForGoalPoses;
+   IHMCROS2Publisher<RigidBodyTransformMessage> publisherForStartPoses;
 
    public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
                                        ROS2Node ros2Node,
@@ -100,7 +102,7 @@ public class ContinuousPlanningRemoteTask
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
-//      publisherForPlannedFootsteps = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
+      publisherForPlannedFootsteps = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
 
       robotModel.getLookAndStepParameters();
 
@@ -142,34 +144,34 @@ public class ContinuousPlanningRemoteTask
          multiplierForGoalPoseDistance = 1;
          return;
       }
-//
-//
-//      if (continuousPlanningParameters.getOnlyDoPlanning())
-//      {
-//         getImminentStanceFromLatestStatus();
-//         startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
-//         ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
-//                 multiplierForGoalPoseDistance,
-//                 originalPoseToBaseGoalPoseFrom,
-//                 startPoseForFootstepPlanner,
-//                 goalPoseForFootstepPlanner,
-//                 (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
-//                 (float) continuousPlanningParameters.getGoalPoseUpDistance());
-//         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
-//
-//         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
-//                 continuousPlanningParameters.getNumberOfStepsToSend(),
-//                 (float) continuousPlanningParameters.getSwingTime(),
-//                 (float) continuousPlanningParameters.getTransferTime());
-//
-//         footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
-//
-//         if (originalFootstepDataListId == -1)
-//            originalFootstepDataListId = footstepDataList.getUniqueId();
-//         footstepDataList.setUniqueId(originalFootstepDataListId);
-//
-//         publisherForPlannedFootsteps.publish(footstepDataList);
-//      }
+
+      if (continuousPlanningParameters.getOnlyDoPlanning())
+      {
+         getImminentStanceFromLatestStatus();
+         startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
+         ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
+                 multiplierForGoalPoseDistance,
+                 originalPoseToBaseGoalPoseFrom,
+                 startPoseForFootstepPlanner,
+                 goalPoseForFootstepPlanner,
+                 (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
+                 (float) continuousPlanningParameters.getGoalPoseUpDistance());
+         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
+
+         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
+                 continuousPlanningParameters.getNumberOfStepsToSend(),
+                 (float) continuousPlanningParameters.getSwingTime(),
+                 (float) continuousPlanningParameters.getTransferTime());
+
+         footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
+
+         if (originalFootstepDataListId == -1)
+            originalFootstepDataListId = footstepDataList.getUniqueId();
+         footstepDataList.setUniqueId(originalFootstepDataListId);
+
+         publisherForPlannedFootsteps.publish(footstepDataList);
+      }
+
       // Initialize the continuous planner so that the state machine starts in the correct configuration
       if (!continuousPlanner.isInitialized())
       {
@@ -244,6 +246,7 @@ public class ContinuousPlanningRemoteTask
 
          LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
          publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+         publisherForPlannedFootsteps.publish(footstepDataList);
 
          continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
          continuousPlanner.setPlanAvailable(false);

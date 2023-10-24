@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
-public class RDXContinuousPlanningUI implements RenderableProvider
+public class RDXContinuousPlanningPanel implements RenderableProvider
 {
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
@@ -33,10 +33,10 @@ public class RDXContinuousPlanningUI implements RenderableProvider
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
-   public RDXContinuousPlanningUI(String name,
-                                  ContinuousPlanningRemoteTask continuousPlanningRemoteTask,
-                                  ContinuousPlanningParameters continuousPlanningParameters,
-                                  ROS2SyncedRobotModel syncedRobot)
+   public RDXContinuousPlanningPanel(String name,
+                                     ContinuousPlanningRemoteTask continuousPlanningRemoteTask,
+                                     ContinuousPlanningParameters continuousPlanningParameters,
+                                     ROS2SyncedRobotModel syncedRobot)
    {
       panel = new RDXPanel(name, this::renderImGuiWidgets);
       this.continuousPlanningRemoteTask = continuousPlanningRemoteTask;

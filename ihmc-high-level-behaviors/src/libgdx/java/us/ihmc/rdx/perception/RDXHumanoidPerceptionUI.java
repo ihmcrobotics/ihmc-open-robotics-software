@@ -14,7 +14,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -23,7 +22,6 @@ import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
 import us.ihmc.ros2.ROS2Node;
 
@@ -41,7 +39,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    private HumanoidActivePerceptionModule activePerceptionModule;
 
    private RDXRapidRegionsUI rapidRegionsUI;
-   private RDXContinuousPlanningUI continuousPlanningUI;
+   private RDXContinuousPlanningPanel continuousPlanningUI;
    private RDXRemoteHeightMapPanel heightMapUI;
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
@@ -84,10 +82,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       if (activePerceptionModule != null)
       {
          this.activePerceptionModule = activePerceptionModule;
-         this.continuousPlanningUI = new RDXContinuousPlanningUI("Active Mapping",
-                                                                 activePerceptionModule.getContinuousMappingRemoteThread(),
-                                                                 remotePerceptionUI.getContinuousPlanningParameters(),
-                                                                 syncedRobot);
+         this.continuousPlanningUI = new RDXContinuousPlanningPanel("Active Mapping",
+                                                                    activePerceptionModule.getContinuousMappingRemoteThread(),
+                                                                    remotePerceptionUI.getContinuousPlanningParameters(),
+                                                                    syncedRobot);
       }
    }
 
@@ -325,7 +323,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       return remotePerceptionUI;
    }
 
-   public RDXContinuousPlanningUI getContinuousPlanningUI()
+   public RDXContinuousPlanningPanel getContinuousPlanningUI()
    {
       return continuousPlanningUI;
    }

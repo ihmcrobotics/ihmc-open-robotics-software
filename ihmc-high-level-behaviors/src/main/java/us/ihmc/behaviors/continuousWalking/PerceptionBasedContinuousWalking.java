@@ -8,14 +8,12 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,9 +53,10 @@ public class PerceptionBasedContinuousWalking
                                                               syncedRobot::update);
 
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
+      activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
+
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getFootstepPlannerParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS, continuousPlanningParameters);
-      activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
 
       perceptionTask.run();
 
