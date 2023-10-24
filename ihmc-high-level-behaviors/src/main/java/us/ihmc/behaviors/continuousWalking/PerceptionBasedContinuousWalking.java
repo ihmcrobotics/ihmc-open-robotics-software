@@ -8,6 +8,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
@@ -28,7 +29,6 @@ public class PerceptionBasedContinuousWalking
    private TerrainPerceptionProcessWithDriver perceptionTask;
    private HumanoidActivePerceptionModule activePerceptionModule;
    private final ContinuousPlanningParameters continuousPlanningParameters = new ContinuousPlanningParameters();
-
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
@@ -54,6 +54,7 @@ public class PerceptionBasedContinuousWalking
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
 
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getFootstepPlannerParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS, continuousPlanningParameters);
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
       activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
@@ -70,9 +71,11 @@ public class PerceptionBasedContinuousWalking
    {
       ros2PropertySetGroup.update();
 
-      if (!perceptionTask.getIsHeightMapBeingUpdatedLock() && perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData() != null)
+      if (perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData() != null)
       {
+         perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(true);
          activePerceptionModule.getContinuousMappingRemoteThread().setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
+         perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(false);
       }
    }
 }

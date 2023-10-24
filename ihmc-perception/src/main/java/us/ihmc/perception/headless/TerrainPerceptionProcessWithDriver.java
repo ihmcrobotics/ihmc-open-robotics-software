@@ -366,12 +366,6 @@ public class TerrainPerceptionProcessWithDriver
       destroyedNotification.blockingPoll();
    }
 
-   public boolean getIsHeightMapBeingUpdatedLock()
-   {
-      return humanoidPerception.getIsHeightMapBeingUpdatedLock();
-   }
-
-
    public PerceptionConfigurationParameters getConfigurationParameters()
    {
       return parameters;

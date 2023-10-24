@@ -6,6 +6,7 @@ import imgui.type.ImFloat;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
@@ -26,6 +27,7 @@ public class RDXRemotePerceptionUI
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
    private final ContinuousPlanningParameters continuousPlanningParameters = new ContinuousPlanningParameters();
    private final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
@@ -54,6 +56,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(continuousPlanningParameters, PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(footstepPlannerParameters, PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS);
 
       //remotePropertySets.registerRemotePropertySet(rapidRegionsExtractorParameters, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
       //remotePropertySets.registerRemotePropertySet(polygonizerParameters, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);
@@ -89,5 +92,10 @@ public class RDXRemotePerceptionUI
    public ContinuousPlanningParameters getContinuousPlanningParameters()
    {
       return continuousPlanningParameters;
+   }
+
+   public void setFootstepPlannerParameters(FootstepPlannerParametersBasics parameters)
+   {
+      this.footstepPlannerParameters = parameters;
    }
 }

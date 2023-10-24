@@ -80,7 +80,7 @@ public class HumanoidPerceptionModule
    private boolean heightMapEnabled = false;
    private boolean mappingEnabled = false;
    private boolean occupancyGridEnabled = false;
-   public boolean isHeightMapBeingUpdatedLock = false;
+   public boolean heightMapDataBeingProcessed = false;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -99,9 +99,14 @@ public class HumanoidPerceptionModule
       heightMap.start();
    }
 
-   public boolean getIsHeightMapBeingUpdatedLock()
+   public void setIsHeightMapDataBeingProcessed(boolean dataBeingProcessed)
    {
-      return isHeightMapBeingUpdatedLock;
+      heightMapDataBeingProcessed = dataBeingProcessed;
+   }
+
+   public boolean isHeightMapDataBeingProcessed()
+   {
+      return heightMapDataBeingProcessed;
    }
 
    public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
@@ -136,13 +141,14 @@ public class HumanoidPerceptionModule
       {
          executorService.submit(() ->
          {
-            isHeightMapBeingUpdatedLock = true;
-            if (rapidHeightMapExtractor.getHeightMapParameters().getResetHeightMap())
+            if (!heightMapDataBeingProcessed)
             {
-               rapidHeightMapExtractor.reset();
+               if (rapidHeightMapExtractor.getHeightMapParameters().getResetHeightMap())
+               {
+                  rapidHeightMapExtractor.reset();
+               }
+               updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
             }
-            updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
-            isHeightMapBeingUpdatedLock = false;
 
             Instant acquisitionTime = Instant.now();
             Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
@@ -153,10 +159,10 @@ public class HumanoidPerceptionModule
             {
                publishHeightMapImage(ros2Helper, croppedHeightMapImage, compressedCroppedHeightMapPointer, PerceptionAPI.HEIGHT_MAP_CROPPED,
                                      croppedHeightMapImageMessage, acquisitionTime);
-               publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
-                                     localHeightMapImageMessage, acquisitionTime);
-               publishHeightMapImage(ros2Helper, globalHeightMapImage, compressedInternalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL,
-                                     globalHeightMapImageMessage, acquisitionTime);
+//               publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
+//                                     localHeightMapImageMessage, acquisitionTime);
+//               publishHeightMapImage(ros2Helper, globalHeightMapImage, compressedInternalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL,
+//                                     globalHeightMapImageMessage, acquisitionTime);
             }
          });
       }

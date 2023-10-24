@@ -39,4 +39,7 @@ public class PerceptionComms
 
    public static final StoredPropertySetROS2TopicPair HEIGHT_MAP_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"height_map_parameters");
+
+   public static final StoredPropertySetROS2TopicPair FOOTSTEP_PLANNING_PARAMETERS
+           = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"footstep_planning_parameters");
 }

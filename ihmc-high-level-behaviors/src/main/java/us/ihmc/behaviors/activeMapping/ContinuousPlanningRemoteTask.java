@@ -20,6 +20,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -307,9 +308,9 @@ public class ContinuousPlanningRemoteTask
                                                       RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
    }
 
-   public void setLatestHeightMapData(HeightMapData latestHeightMapData)
+   public void setLatestHeightMapData(HeightMapData heightMapData)
    {
-      this.latestHeightMapData = new HeightMapData(latestHeightMapData);
+      this.latestHeightMapData = new HeightMapData(heightMapData);
    }
 
    public ContinuousPlanner getContinuousPlanner()
