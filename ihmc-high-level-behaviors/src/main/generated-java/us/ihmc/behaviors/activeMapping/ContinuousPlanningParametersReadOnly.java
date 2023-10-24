@@ -19,4 +19,34 @@ public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetR
    {
       return get(pauseContinuousWalking);
    }
+
+   default int getNumberOfStepsToSend()
+   {
+      return get(numberOfStepsToSend);
+   }
+
+   default int getMaxNumberOfStepsToHoldInControllerQueue()
+   {
+      return get(maxNumberOfStepsToHoldInControllerQueue);
+   }
+
+   default double getGoalPoseForwardDistance()
+   {
+      return get(goalPoseForwardDistance);
+   }
+
+   default double getGoalPoseUpDistance()
+   {
+      return get(goalPoseUpDistance);
+   }
+
+   default double getSwingTime()
+   {
+      return get(swingTime);
+   }
+
+   default double getTransferTime()
+   {
+      return get(transferTime);
+   }
 }
