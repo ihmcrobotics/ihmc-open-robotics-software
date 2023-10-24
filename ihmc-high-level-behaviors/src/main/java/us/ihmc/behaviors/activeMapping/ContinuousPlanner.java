@@ -64,8 +64,8 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
-      footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      footstepPlanner.getFootstepPlannerParameters().set(robotModel.getFootstepPlannerParameters("ForContinuousWalking"));
+      footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
+
       active = true;
 
       switch (mode)
