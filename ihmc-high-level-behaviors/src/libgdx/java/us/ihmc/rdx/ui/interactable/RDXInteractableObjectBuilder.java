@@ -27,13 +27,6 @@ public class RDXInteractableObjectBuilder extends RDXPanel
    private final SortedMap<String, PrimitiveRigidBodySceneNode> nameToPrimitiveNodesMap = new TreeMap<>();
    private String selectedObjectName = "";
    private final TypedNotification<String> selectedObjectChanged = new TypedNotification<>();
-   private static final float DEFAULT_DIMENSION = 0.1F;
-   private final ImFloat xLength = new ImFloat(DEFAULT_DIMENSION);
-   private final ImFloat yLength = new ImFloat(DEFAULT_DIMENSION);
-   private final ImFloat zLength = new ImFloat(DEFAULT_DIMENSION);
-   private final ImFloat xRadius = new ImFloat(DEFAULT_DIMENSION);
-   private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
-   private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
 
    public RDXInteractableObjectBuilder(RDXBaseUI baseUI, SceneGraph sceneGraph)
    {
