@@ -38,7 +38,6 @@ import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
@@ -72,7 +71,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
 
-   private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
+   private final RDXFootstepPlanGraphic controllerFootstepQueueGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
@@ -142,10 +141,10 @@ public class RDXLocomotionManager
          interactableFootstepPlan.setHeightMapMessage(heightMap);
       });
 
-      footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepQueueStatusMessage.class, footsteps ->
-            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepQueueMessage(footsteps,
-                                                                                                             "Teleoperation Panel Controller Spy")));
+            controllerFootstepQueueGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepQueueMessage(footsteps,
+                                                                                                           "Teleoperation Panel Controller Spy")));
    }
 
    private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
@@ -204,7 +203,7 @@ public class RDXLocomotionManager
       if (footstepQueueNotification.poll())
       {
          if (!previousFootstepQueue.epsilonEquals(footstepQueueNotification.read(), 1e-3))
-            footstepsSentToControllerGraphic.update();
+            controllerFootstepQueueGraphic.update();
 
          previousFootstepQueue = footstepQueueNotification.read();
       }
@@ -437,7 +436,7 @@ public class RDXLocomotionManager
    public void destroy()
    {
       footstepPlanning.destroy();
-      footstepsSentToControllerGraphic.destroy();
+      controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
    }
@@ -489,7 +488,7 @@ public class RDXLocomotionManager
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      footstepsSentToControllerGraphic.getRenderables(renderables, pool);
+      controllerFootstepQueueGraphic.getRenderables(renderables, pool);
       ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
       manualFootstepPlacement.getRenderables(renderables, pool);
       interactableFootstepPlan.getRenderables(renderables, pool);
