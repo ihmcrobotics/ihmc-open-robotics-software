@@ -43,15 +43,12 @@ public class HandPoseActionExecutor extends BehaviorActionExecutor<HandPoseActio
    private final IKRootCalculator rootCalculator;
 
    public HandPoseActionExecutor(long id,
-                                 BehaviorActionSequence sequence,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot,
                                  SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators)
    {
-      super(sequence);
-
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculators = handWrenchCalculators;

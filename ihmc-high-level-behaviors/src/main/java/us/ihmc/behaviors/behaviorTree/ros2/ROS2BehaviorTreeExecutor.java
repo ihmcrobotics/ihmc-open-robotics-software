@@ -49,4 +49,11 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 
       ros2BehaviorTreeState.updatePublication();
    }
+
+   public void destroy()
+   {
+      ros2BehaviorTreeState.destroy();
+
+      super.destroy();
+   }
 }

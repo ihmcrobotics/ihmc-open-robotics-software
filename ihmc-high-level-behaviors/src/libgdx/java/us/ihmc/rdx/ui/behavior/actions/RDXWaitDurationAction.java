@@ -6,7 +6,6 @@ import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 public class RDXWaitDurationAction extends RDXBehaviorAction<WaitDurationActionState, WaitDurationActionDefinition>
 {
@@ -14,10 +13,8 @@ public class RDXWaitDurationAction extends RDXBehaviorAction<WaitDurationActionS
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitDurationWidget;
 
-   public RDXWaitDurationAction(long id, RDXBehaviorActionSequenceEditor editor)
+   public RDXWaitDurationAction(long id)
    {
-      super(editor);
-
       state = new WaitDurationActionState(id);
 
       waitDurationWidget = new ImDoubleWrapper(getDefinition()::getWaitDuration,

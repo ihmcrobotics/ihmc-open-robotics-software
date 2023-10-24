@@ -22,7 +22,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -62,7 +61,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction<ChestOrientatio
    private boolean wasConcurrent = false;
 
    public RDXChestOrientationAction(long id,
-                                    RDXBehaviorActionSequenceEditor editor,
                                     RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
@@ -70,8 +68,6 @@ public class RDXChestOrientationAction extends RDXBehaviorAction<ChestOrientatio
                                     ReferenceFrameLibrary referenceFrameLibrary,
                                     ROS2PublishSubscribeAPI ros2)
    {
-      super(editor);
-
       this.ros2 = ros2;
 
       state = new ChestOrientationActionState(id, referenceFrameLibrary);

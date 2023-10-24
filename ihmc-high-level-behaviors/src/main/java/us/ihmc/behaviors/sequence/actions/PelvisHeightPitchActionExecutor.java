@@ -7,7 +7,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,13 +33,10 @@ public class PelvisHeightPitchActionExecutor extends BehaviorActionExecutor<Pelv
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public PelvisHeightPitchActionExecutor(long id,
-                                          BehaviorActionSequence sequence,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
    {
-      super(sequence);
-
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 

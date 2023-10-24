@@ -79,12 +79,12 @@ public abstract class RDXBehaviorUIInterface extends LocalOnlyBehaviorTreeNodeEx
       }
    }
 
-   public void syncTree(BehaviorTreeNodeExecutor externalNode)
+   public void syncTree(BehaviorTreeNodeExecutor<?, ?> externalNode)
    {
 //      getState().setStatus(externalNode.getState().getStatus());
       getDefinition().setDescription(externalNode.getDefinition().getDescription());
 
-      for (BehaviorTreeNodeExecutor externalChild : externalNode.getChildren())
+      for (BehaviorTreeNodeExecutor<?, ?> externalChild : externalNode.getChildren())
       {
          for (RDXBehaviorUIInterface child : children)
          {

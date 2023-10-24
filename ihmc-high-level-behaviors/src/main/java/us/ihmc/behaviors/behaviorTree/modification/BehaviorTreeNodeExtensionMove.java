@@ -17,11 +17,11 @@ public class BehaviorTreeNodeExtensionMove<T extends BehaviorTreeNodeExtension<T
        && newParent.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedNewParent)
       {
          // This will result in recuresively performing the modification on all extended types
-         extendedTypeMove = new BehaviorTreeNodeExtensionMove<>(extendedNodeToMove, extendedPreviousParent, extendedNewParent);
+         extendedTypeMove = new BehaviorTreeNodeExtensionMove(extendedNodeToMove, extendedPreviousParent, extendedNewParent);
       }
       else
       {
-         extendedTypeMove = new BehaviorTreeNodeMove<>(nodeToMove.getExtendedNode(), previousParent.getExtendedNode(), newParent.getExtendedNode());
+         extendedTypeMove = new BehaviorTreeNodeMove(nodeToMove.getExtendedNode(), previousParent.getExtendedNode(), newParent.getExtendedNode());
       }
    }
 

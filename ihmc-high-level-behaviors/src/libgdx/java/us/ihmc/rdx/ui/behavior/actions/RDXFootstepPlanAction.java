@@ -19,7 +19,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,14 +40,11 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction<FootstepPlanActionS
    private boolean frameIsChildOfWorld = false;
 
    public RDXFootstepPlanAction(long id,
-                                RDXBehaviorActionSequenceEditor editor,
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(editor);
-
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;

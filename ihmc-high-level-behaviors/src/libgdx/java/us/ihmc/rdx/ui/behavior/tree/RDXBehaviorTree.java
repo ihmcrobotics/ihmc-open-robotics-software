@@ -81,7 +81,7 @@ public class RDXBehaviorTree
       // Delete the entire tree. We are starting over
       behaviorTreeState.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestruction<>(rootNode));
+         modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestruction(rootNode));
 
          JSONFileTools.load(file, jsonNode ->
          {
@@ -118,11 +118,11 @@ public class RDXBehaviorTree
       updateCaches(rootNode);
    }
 
-   private void updateCaches(RDXBehaviorTreeNode node)
+   private void updateCaches(RDXBehaviorTreeNode<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 
-      for (RDXBehaviorTreeNode child : node.getChildren())
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
          updateCaches(child);
       }
@@ -168,7 +168,7 @@ public class RDXBehaviorTree
       return behaviorTreeState;
    }
 
-   public RDXBehaviorTreeNode getRootNode()
+   public RDXBehaviorTreeNode<?, ?> getRootNode()
    {
       return rootNode;
    }

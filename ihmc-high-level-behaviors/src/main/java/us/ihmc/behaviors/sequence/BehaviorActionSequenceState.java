@@ -10,11 +10,12 @@ public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorA
 {
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
-   private BehaviorActionExecutor lastCurrentlyExecutingAction = null;
+   private BehaviorActionExecutor<?, ?> lastCurrentlyExecutingAction = null;
 
    // This node enforces that all it's children are of a certain type
-   private final List<BehaviorActionState> actionChildren = new ArrayList<>();
-   private final List<BehaviorActionState> currentlyExecutingActions = new ArrayList<>();
+   private final List<BehaviorActionState<BehaviorActionDefinition>> actionChildren = new ArrayList<>();
+   // TODO: Review this
+   private final List<BehaviorActionState<BehaviorActionDefinition>> currentlyExecutingActions = new ArrayList<>();
 
    public BehaviorActionSequenceState(long id)
    {
@@ -25,9 +26,9 @@ public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorA
    public void update()
    {
       actionChildren.clear();
-      for (BehaviorTreeNodeState child : getChildren())
+      for (BehaviorTreeNodeState<?> child : getChildren())
       {
-         actionChildren.add((BehaviorActionState) child);
+         actionChildren.add((BehaviorActionState<BehaviorActionDefinition>) child);
       }
 
       for (int i = 0; i < getChildren().size(); i++)
@@ -68,10 +69,5 @@ public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorA
 
       automaticExecution = message.getAutomaticExecution();
       executionNextIndex = message.getExecutionNextIndex();
-   }
-
-   public List<BehaviorActionState> getCurrentlyExecutingActions()
-   {
-      return currentlyExecutingActions;
    }
 }

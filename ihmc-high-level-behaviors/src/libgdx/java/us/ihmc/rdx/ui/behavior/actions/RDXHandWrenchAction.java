@@ -6,7 +6,6 @@ import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 public class RDXHandWrenchAction extends RDXBehaviorAction<HandWrenchActionState, HandWrenchActionDefinition>
 {
@@ -15,10 +14,8 @@ public class RDXHandWrenchAction extends RDXBehaviorAction<HandWrenchActionState
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final ImDoubleWrapper forceWidget;
 
-   public RDXHandWrenchAction(long id, RDXBehaviorActionSequenceEditor editor)
+   public RDXHandWrenchAction(long id)
    {
-      super(editor);
-
       state = new HandWrenchActionState(id);
 
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,

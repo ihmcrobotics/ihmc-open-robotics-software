@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
@@ -47,22 +46,19 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    }
 
    @Override
-   public BehaviorTreeNodeExecutor createNode(Class<?> nodeType, long id)
+   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id)
    {
-      BehaviorActionSequence sequence = null; // TODO ???? Probably need the parent sequence node?
-
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(id, sequence, robotModel, ros2ControllerHelper);
+         return new ArmJointAnglesActionExecutor(id, robotModel, ros2ControllerHelper);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
-         return new ChestOrientationActionExecutor(id, sequence, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+         return new ChestOrientationActionExecutor(id, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
          return new FootstepPlanActionExecutor(id,
-                                               sequence,
                                                ros2ControllerHelper,
                                                syncedRobot,
                                                footstepTracker,
@@ -71,28 +67,27 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
-         return new HandPoseActionExecutor(id, sequence, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
+         return new HandPoseActionExecutor(id, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
-         return new HandWrenchActionExecutor(id, sequence, ros2ControllerHelper);
+         return new HandWrenchActionExecutor(id, ros2ControllerHelper);
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
-         return new PelvisHeightPitchActionExecutor(id, sequence, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+         return new PelvisHeightPitchActionExecutor(id, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
-         return new SakeHandCommandActionExecutor(id, sequence, ros2ControllerHelper);
+         return new SakeHandCommandActionExecutor(id, ros2ControllerHelper);
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {
-         return new WaitDurationActionExecutor(id, sequence);
+         return new WaitDurationActionExecutor(id);
       }
       if (nodeType == WalkActionDefinition.class)
       {
          return new WalkActionExecutor(id,
-                                       sequence,
                                        ros2ControllerHelper,
                                        syncedRobot,
                                        footstepTracker,

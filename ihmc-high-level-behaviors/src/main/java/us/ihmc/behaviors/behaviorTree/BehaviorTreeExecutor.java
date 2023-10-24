@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestruction;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
@@ -49,9 +50,14 @@ public class BehaviorTreeExecutor
       getRootNode().tick();
    }
 
-   public BehaviorTreeNodeExecutor getRootNode()
+   public void destroy()
    {
-      return (BehaviorTreeNodeExecutor) behaviorTreeState.getRootNode();
+      behaviorTreeState.modifyTree(behaviorTreeModificationQueue -> new BehaviorTreeExtensionSubtreeDestruction(getRootNode()));
+   }
+
+   public BehaviorTreeNodeExecutor<?, ?> getRootNode()
+   {
+      return (BehaviorTreeNodeExecutor<?, ?>) behaviorTreeState.getRootNode();
    }
 
    public BehaviorTreeState getState()

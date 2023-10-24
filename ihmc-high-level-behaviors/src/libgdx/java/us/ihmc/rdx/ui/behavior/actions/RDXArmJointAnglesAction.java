@@ -10,7 +10,6 @@ import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorActionSequenceEditor;
 
 public class RDXArmJointAnglesAction extends RDXBehaviorAction<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
@@ -23,10 +22,8 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction<ArmJointAnglesAct
    private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
    private final ImDoubleWrapper trajectoryDurationWidget;
 
-   public RDXArmJointAnglesAction(long id, RDXBehaviorActionSequenceEditor editor, DRCRobotModel robotModel)
+   public RDXArmJointAnglesAction(long id, DRCRobotModel robotModel)
    {
-      super(editor);
-
       this.robotModel = robotModel;
 
       state = new ArmJointAnglesActionState(id);
