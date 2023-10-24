@@ -416,6 +416,11 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
+   public void requestReinitializeEstimator()
+   {
+      reinitializeStateEstimator.set(true);
+   }
+
    @Override
    public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
    {
