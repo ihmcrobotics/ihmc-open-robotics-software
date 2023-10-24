@@ -18,6 +18,7 @@ public class BehaviorTreeExecutor
    private final BehaviorTreeState behaviorTreeState;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
+   private BehaviorTreeNodeExecutor<?, ?> rootNode;
 
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
@@ -45,19 +46,27 @@ public class BehaviorTreeExecutor
 
    public void update()
    {
-      getRootNode().clock();
+      if (rootNode != null)
+      {
+         rootNode.clock();
 
-      getRootNode().tick();
+         rootNode.tick();
+      }
    }
 
    public void destroy()
    {
-      behaviorTreeState.modifyTree(behaviorTreeModificationQueue -> new BehaviorTreeExtensionSubtreeDestruction(getRootNode()));
+      behaviorTreeState.modifyTree(behaviorTreeModificationQueue -> new BehaviorTreeExtensionSubtreeDestruction(rootNode));
+   }
+
+   public void setRootNode(BehaviorTreeNodeExecutor<?, ?> rootNode)
+   {
+      this.rootNode = rootNode;
    }
 
    public BehaviorTreeNodeExecutor<?, ?> getRootNode()
    {
-      return (BehaviorTreeNodeExecutor<?, ?>) behaviorTreeState.getRootNode();
+      return rootNode;
    }
 
    public BehaviorTreeState getState()

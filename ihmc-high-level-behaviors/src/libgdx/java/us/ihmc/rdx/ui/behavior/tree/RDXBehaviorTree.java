@@ -34,7 +34,7 @@ public class RDXBehaviorTree
    private final BehaviorTreeState behaviorTreeState;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
-   private RDXBehaviorTreeNode rootNode;
+   private RDXBehaviorTreeNode<?, ?> rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -115,7 +115,11 @@ public class RDXBehaviorTree
    public void update()
    {
       idToNodeMap.clear();
-      updateCaches(rootNode);
+
+      if (rootNode != null)
+      {
+         updateCaches(rootNode);
+      }
    }
 
    private void updateCaches(RDXBehaviorTreeNode<?, ?> node)
