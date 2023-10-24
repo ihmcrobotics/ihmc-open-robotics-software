@@ -24,6 +24,7 @@ public class ContinuousPlanningParameters extends StoredPropertySet implements C
    public static final IntegerStoredPropertyKey maxNumberOfStepsToHoldInControllerQueue = keys.addIntegerKey("Max number of steps to hold in controller queue");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
    public static final DoubleStoredPropertyKey goalPoseUpDistance = keys.addDoubleKey("Goal pose up distance");
+   public static final DoubleStoredPropertyKey distanceToGoalPose = keys.addDoubleKey("Distance to goal pose");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
 

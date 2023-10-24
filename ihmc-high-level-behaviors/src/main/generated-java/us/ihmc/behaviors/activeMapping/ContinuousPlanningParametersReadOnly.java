@@ -40,6 +40,11 @@ public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetR
       return get(goalPoseUpDistance);
    }
 
+   default double getDistanceToGoalPose()
+   {
+      return get(distanceToGoalPose);
+   }
+
    default double getSwingTime()
    {
       return get(swingTime);

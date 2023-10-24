@@ -6,6 +6,7 @@
   "Max number of steps to hold in controller queue" : 3,
   "Goal pose forward distance" : 0.6,
   "Goal pose up distance" : 0.25,
+  "Distance to goal pose" : 0.46,
   "Swing time" : 0.84,
   "Transfer time" : 0.4
 }

@@ -174,7 +174,7 @@ public class ContinuousPlanningRemoteTask
          // TODO adjust this so that it doesn't consider the Z of the poses at all, otherwise there will be bugs in the future
          // Only update the goal poses if the robot gets within some distance of them
          double distance = firstImminentFootstep.getPositionDistance(goalPoseForFootstepPlanner.get(secondImminentFootstepSide.getOppositeSide()));
-         if (distance < 0.46)
+         if (distance < continuousPlanningParameters.getDistanceToGoalPose())
          {
             multiplierForGoalPoseDistance += 1;
             ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,

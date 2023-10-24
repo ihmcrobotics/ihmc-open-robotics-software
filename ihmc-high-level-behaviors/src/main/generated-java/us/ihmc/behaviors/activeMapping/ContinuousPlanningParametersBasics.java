@@ -38,6 +38,11 @@ public interface ContinuousPlanningParametersBasics extends ContinuousPlanningPa
       set(ContinuousPlanningParameters.goalPoseUpDistance, goalPoseUpDistance);
    }
 
+   default void setDistanceToGoalPose(double distanceToGoalPose)
+   {
+      set(ContinuousPlanningParameters.distanceToGoalPose, distanceToGoalPose);
+   }
+
    default void setSwingTime(double swingTime)
    {
       set(ContinuousPlanningParameters.swingTime, swingTime);
