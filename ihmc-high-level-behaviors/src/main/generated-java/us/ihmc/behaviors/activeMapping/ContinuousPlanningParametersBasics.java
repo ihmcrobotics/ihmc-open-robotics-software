@@ -18,6 +18,11 @@ public interface ContinuousPlanningParametersBasics extends ContinuousPlanningPa
       set(ContinuousPlanningParameters.pauseContinuousWalking, pauseContinuousWalking);
    }
 
+   default void setOnlyDoPlanning(boolean onlyDoPlanning)
+   {
+      set(ContinuousPlanningParameters.onlyDoPlanning, onlyDoPlanning);
+   }
+
    default void setNumberOfStepsToSend(int numberOfStepsToSend)
    {
       set(ContinuousPlanningParameters.numberOfStepsToSend, numberOfStepsToSend);

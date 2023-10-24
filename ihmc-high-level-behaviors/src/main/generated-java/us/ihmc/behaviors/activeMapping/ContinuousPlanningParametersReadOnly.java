@@ -20,6 +20,11 @@ public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetR
       return get(pauseContinuousWalking);
    }
 
+   default boolean getOnlyDoPlanning()
+   {
+      return get(onlyDoPlanning);
+   }
+
    default int getNumberOfStepsToSend()
    {
       return get(numberOfStepsToSend);

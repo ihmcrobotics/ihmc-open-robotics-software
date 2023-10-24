@@ -2,6 +2,7 @@
   "title" : "Continuous planning parameters",
   "Active mapping" : false,
   "Pause Continuous Walking" : false,
+  "Only do planning" : false,
   "Number of steps to send" : 1,
   "Max number of steps to hold in controller queue" : 3,
   "Goal pose forward distance" : 0.6,

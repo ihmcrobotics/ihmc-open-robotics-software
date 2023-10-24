@@ -217,13 +217,16 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
       if (isActive && enableHeightMapRenderer.get() && heightMapImage != null)
       {
-         heightMapRenderer.update(zUpToWorldTransform,
-                                  heightMapImage.ptr(0),
-                                  zUpToWorldTransform.getTranslation().getX32(),
-                                  zUpToWorldTransform.getTranslation().getY32(),
-                                  heightMapImage.rows() / 2,
-                                  RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                  pixelScalingFactor);
+         if (heightMapImage.ptr(0) != null)
+         {
+            heightMapRenderer.update(zUpToWorldTransform,
+                                     heightMapImage.ptr(0),
+                                     zUpToWorldTransform.getTranslation().getX32(),
+                                     zUpToWorldTransform.getTranslation().getY32(),
+                                     heightMapImage.rows() / 2,
+                                     RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                     pixelScalingFactor);
+         }
       }
    }
 

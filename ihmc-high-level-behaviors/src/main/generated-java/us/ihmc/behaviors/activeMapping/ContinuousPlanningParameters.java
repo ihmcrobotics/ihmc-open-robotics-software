@@ -20,6 +20,7 @@ public class ContinuousPlanningParameters extends StoredPropertySet implements C
 
    public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
    public static final BooleanStoredPropertyKey pauseContinuousWalking = keys.addBooleanKey("Pause Continuous Walking");
+   public static final BooleanStoredPropertyKey onlyDoPlanning = keys.addBooleanKey("Only do planning");
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");
    public static final IntegerStoredPropertyKey maxNumberOfStepsToHoldInControllerQueue = keys.addIntegerKey("Max number of steps to hold in controller queue");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
