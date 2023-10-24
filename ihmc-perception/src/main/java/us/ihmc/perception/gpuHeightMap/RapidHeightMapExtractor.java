@@ -313,11 +313,6 @@ public class RapidHeightMapExtractor
       return localHeightMapImage;
    }
 
-   public BytedecoImage getGlobalHeightMapImage()
-   {
-      return globalHeightMapImage;
-   }
-
    public BytedecoImage getInternalGlobalHeightMapImage()
    {
       return globalHeightMapImage;

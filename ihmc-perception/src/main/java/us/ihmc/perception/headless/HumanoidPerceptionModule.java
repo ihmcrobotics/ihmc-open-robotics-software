@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -33,25 +32,32 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class HumanoidPerceptionModule
 {
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
+   private final ResettableExceptionHandlingExecutorService executorService =  MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 16);
+   private final BytePointer compressedDepthPointer = new BytePointer();
    private final FramePose3D cameraPose = new FramePose3D();
    private final FramePose3D lidarPose = new FramePose3D();
-   private final ImageMessage heightMapImageMessage = new ImageMessage();
-   private final BytePointer compressedDepthPointer = new BytePointer();
    private final OpenCLManager openCLManager;
+
+   private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
+   private final ImageMessage localHeightMapImageMessage = new ImageMessage();
+   private final ImageMessage globalHeightMapImageMessage = new ImageMessage();
+
+   private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
+   private final BytePointer compressedLocalHeightMapPointer = new BytePointer();
+   private final BytePointer compressedInternalHeightMapPointer = new BytePointer();
 
    private RemoteHeightMapUpdater heightMap;
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
@@ -116,6 +122,8 @@ public class HumanoidPerceptionModule
          }
       }
 
+      executorService.clearTaskQueue();
+
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
@@ -131,8 +139,39 @@ public class HumanoidPerceptionModule
             isHeightMapBeingUpdatedLock = true;
             updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
             isHeightMapBeingUpdatedLock = false;
+
+            Instant acquisitionTime = Instant.now();
+            Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+            Mat localHeightMapImage = rapidHeightMapExtractor.getLocalHeightMapImage().getBytedecoOpenCVMat();
+            Mat globalHeightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+
+            if (ros2Helper != null)
+            {
+               publishHeightMapImage(ros2Helper, croppedHeightMapImage, compressedCroppedHeightMapPointer, PerceptionAPI.HEIGHT_MAP_CROPPED,
+                                     croppedHeightMapImageMessage, acquisitionTime);
+               publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
+                                     localHeightMapImageMessage, acquisitionTime);
+               publishHeightMapImage(ros2Helper, globalHeightMapImage, compressedInternalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL,
+                                     globalHeightMapImageMessage, acquisitionTime);
+            }
          });
       }
+   }
+
+   public void publishHeightMapImage(ROS2Helper ros2Helper, Mat image, BytePointer pointer,
+                                     ROS2Topic<ImageMessage> topic, ImageMessage message, Instant acquisitionTime)
+   {
+      OpenCVTools.compressImagePNG(image, pointer);
+      PerceptionMessageTools.publishCompressedDepthImage(pointer,
+                                                         topic,
+                                                         message,
+                                                         ros2Helper,
+                                                         cameraPose,
+                                                         acquisitionTime,
+                                                         rapidHeightMapExtractor.getSequenceNumber(),
+                                                         image.rows(),
+                                                         image.cols(),
+                                                         RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
    }
 
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
@@ -159,23 +198,9 @@ public class HumanoidPerceptionModule
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Instant acquisitionTime = Instant.now();
-
       long begin = System.nanoTime();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
       perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
-
-      Mat heightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-
-      if (ros2Helper != null)
-      {
-         OpenCVTools.compressImagePNG(heightMapImage, compressedDepthPointer);
-         PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL, heightMapImageMessage,
-                                                            ros2Helper, cameraPose, acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
-                                                            heightMapImage.rows(), heightMapImage.cols(), RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
-      }
-
-      //LogTools.info("Perception Statistics: {}", perceptionStatistics);
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
@@ -185,7 +210,7 @@ public class HumanoidPerceptionModule
 
       if (occupancyGridEnabled)
       {
-         executorService.submit(() ->
+         executorService.clearQueueAndExecute(() ->
            {
               extractOccupancyGrid(pointCloud, occupancy, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
                                    perceptionConfigurationParameters.getOccupancyGridResolution(), 70);
@@ -311,16 +336,8 @@ public class HumanoidPerceptionModule
 
    public void destroy()
    {
-      executorService.shutdownNow();
-
-      try
-      {
-         boolean result = executorService.awaitTermination(1, TimeUnit.SECONDS);
-      }
-      catch (InterruptedException e)
-      {
-         throw new RuntimeException(e);
-      }
+      executorService.clearTaskQueue();
+      executorService.destroy();
 
       if (rapidPlanarRegionsExtractor != null)
          rapidPlanarRegionsExtractor.destroy();
@@ -341,7 +358,7 @@ public class HumanoidPerceptionModule
 
    public HeightMapMessage getGlobalHeightMapMessage()
    {
-      BytedecoImage heightMapImage = rapidHeightMapExtractor.getGlobalHeightMapImage();
+      BytedecoImage heightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage();
       Mat heightMapMat = heightMapImage.getBytedecoOpenCVMat().clone();
       if (latestHeightMapData == null)
       {

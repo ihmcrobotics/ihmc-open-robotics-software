@@ -199,8 +199,6 @@ public class TerrainPerceptionProcessWithDriver
          throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
       }
 
-      ThreadTools.sleep(100);
-
       if (realsense != null)
          realsense.deleteDevice();
       realSenseHardwareManager.deleteContext();
@@ -326,7 +324,6 @@ public class TerrainPerceptionProcessWithDriver
 
          // TODO: Add spherical region extraction toggling parameter.
          // humanoidPerception.setSphericalRegionsEnabled(parameters.getRapidRegionsEnabled());
-
          humanoidPerception.setRapidRegionsEnabled(parameters.getRapidRegionsEnabled());
          humanoidPerception.setHeightMapEnabled(parameters.getHeightMapEnabled());
          humanoidPerception.setMappingEnabled(parameters.getSLAMEnabled());
@@ -350,11 +347,15 @@ public class TerrainPerceptionProcessWithDriver
    {
       running = false;
 
+      scheduledExecutorService.shutdown();
+      executorService.clearTaskQueue();
       executorService.destroy();
+
       realtimeROS2Node.destroy();;
       humanoidPerception.destroy();
       depthBytedecoImage.destroy(openCLManager);
       openCLManager.destroy();
+
       destroyedNotification.blockingPoll();
    }
 
