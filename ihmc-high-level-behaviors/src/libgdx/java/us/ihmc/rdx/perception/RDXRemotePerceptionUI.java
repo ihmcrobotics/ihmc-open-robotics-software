@@ -56,7 +56,6 @@ public class RDXRemotePerceptionUI
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(continuousPlanningParameters, PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(footstepPlannerParameters, PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS);
 
       //remotePropertySets.registerRemotePropertySet(rapidRegionsExtractorParameters, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
       //remotePropertySets.registerRemotePropertySet(polygonizerParameters, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);
@@ -97,5 +96,6 @@ public class RDXRemotePerceptionUI
    public void setFootstepPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.footstepPlannerParameters = parameters;
+      remotePropertySets.registerRemotePropertySet(footstepPlannerParameters, PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS);
    }
 }
