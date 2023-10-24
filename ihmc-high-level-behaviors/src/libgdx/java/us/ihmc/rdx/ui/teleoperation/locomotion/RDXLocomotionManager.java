@@ -16,9 +16,9 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -89,8 +89,8 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
-   private final TypedNotification<FootstepQueueStatusMessage> footstepQueueNotification = new TypedNotification<>();
-   private FootstepQueueStatusMessage previousFootstepQueue = new FootstepQueueStatusMessage();
+   private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification
+         = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
    private final Timer footstepPlanningCompleteTimer = new Timer();
 
    // Used for UI logic
@@ -200,13 +200,11 @@ public class RDXLocomotionManager
    {
       controllerStatusTracker.checkControllerIsRunning();
 
-      if (footstepQueueNotification.poll())
+      if (footstepQueueNotification.pollFiltered())
       {
-         if (!previousFootstepQueue.epsilonEquals(footstepQueueNotification.read(), 1e-3))
-            controllerFootstepQueueGraphic.update();
-
-         previousFootstepQueue = footstepQueueNotification.read();
+         controllerFootstepQueueGraphic.generateMeshesAsync(footstepQueueNotification.read(), "Controller Queue");
       }
+      controllerFootstepQueueGraphic.update(); // Will happen once the async mesh generation has completed on a later tick
 
       if (abortedNotification.poll())
       {
