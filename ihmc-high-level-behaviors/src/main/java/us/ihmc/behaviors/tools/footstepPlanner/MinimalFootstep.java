@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import ihmc_common_msgs.msg.dds.Point2DMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -96,6 +97,17 @@ public class MinimalFootstep
          minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(queuedFootstep.getRobotSide()), pose, i == size - 1 ? description : ""));
       }
 
+      return minimalFootsteps;
+   }
+
+   public static ArrayList<MinimalFootstep> convertPairListToMinimalFoostepList(ArrayList<Pair<RobotSide, Pose3D>> pairList, String description)
+   {
+      ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+      for (int i = 0; i < pairList.size(); i++)
+      {
+         Pair<RobotSide, Pose3D> pair = pairList.get(i);
+         minimalFootsteps.add(new MinimalFootstep(pair.getLeft(), pair.getRight(), i == pairList.size() - 1 ? description : ""));
+      }
       return minimalFootsteps;
    }
 

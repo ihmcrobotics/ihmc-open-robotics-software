@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
@@ -93,6 +94,16 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          buildMeshAndCreateModelInstance.run();
          buildMeshAndCreateModelInstance = null;
       }
+   }
+
+   public void clearAsync()
+   {
+      generateMeshesAsync(new ArrayList<>());
+   }
+
+   public void generateMeshesAsync(FootstepDataListMessage footstepDataListMessage, String description)
+   {
+      generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, description));
    }
 
    public void generateMeshesAsync(ArrayList<MinimalFootstep> footsteps)
