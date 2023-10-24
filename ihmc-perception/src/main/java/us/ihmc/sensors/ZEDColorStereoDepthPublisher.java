@@ -78,7 +78,6 @@ public class ZEDColorStereoDepthPublisher
    private final Thread grabImageThread;
    private final Thread colorImagePublishThread;
    private final Thread depthImagePublishThread;
-   private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
    public ZEDColorStereoDepthPublisher(int cameraID,
@@ -156,7 +155,6 @@ public class ZEDColorStereoDepthPublisher
       // Setup other things
       imageEncoder = new CUDAImageEncoder();
       cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * zedModelData.getCenterToCameraDistance());
-      throttler.setFrequency(CAMERA_FPS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
 
@@ -175,21 +173,37 @@ public class ZEDColorStereoDepthPublisher
          }
       }, "ZEDImageGrabThread");
 
-      colorImagePublishThread = new Thread(() ->
+      colorImagePublishThread = new Thread(new Runnable()
       {
-         while (running)
+         private final Throttler colorImagePublishThrottler = new Throttler();
+
+         @Override
+         public void run()
          {
-            throttler.waitAndRun();
-            retrieveAndPublishColorImage();
+            colorImagePublishThrottler.setFrequency(CAMERA_FPS);
+
+            while (running)
+            {
+               colorImagePublishThrottler.waitAndRun();
+               retrieveAndPublishColorImage();
+            }
          }
       }, "ZEDColorImagePublishThread");
 
-      depthImagePublishThread = new Thread(() ->
+      depthImagePublishThread = new Thread(new Runnable()
       {
-         while (running)
+         private final Throttler depthImagePublishThrottler = new Throttler();
+
+         @Override
+         public void run()
          {
-            throttler.waitAndRun();
-            retrieveAndPublishDepthImage();
+            depthImagePublishThrottler.setFrequency(CAMERA_FPS);
+
+            while (running)
+            {
+               depthImagePublishThrottler.waitAndRun();
+               retrieveAndPublishDepthImage();
+            }
          }
       }, "ZEDDepthImagePublishThread");
 
