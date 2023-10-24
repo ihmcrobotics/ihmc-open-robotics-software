@@ -1,18 +1,14 @@
 package us.ihmc.behaviors.sequence;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
-public class BehaviorActionSequenceExecutor extends BehaviorTreeNodeExecutor
+public class BehaviorActionSequenceExecutor extends BehaviorTreeNodeExecutor<BehaviorActionSequenceState, BehaviorActionSequenceDefinition>
 {
-   private final BehaviorActionSequenceDefinition definition = new BehaviorActionSequenceDefinition();
    private final BehaviorActionSequenceState state;
-
 
    public BehaviorActionSequenceExecutor(long id)
    {
-      state = new BehaviorActionSequenceState(id, definition);
+      state = new BehaviorActionSequenceState(id);
    }
 
    @Override
@@ -22,13 +18,7 @@ public class BehaviorActionSequenceExecutor extends BehaviorTreeNodeExecutor
    }
 
    @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return definition;
-   }
-
-   @Override
-   public BehaviorTreeNodeState getState()
+   public BehaviorActionSequenceState getState()
    {
       return state;
    }
