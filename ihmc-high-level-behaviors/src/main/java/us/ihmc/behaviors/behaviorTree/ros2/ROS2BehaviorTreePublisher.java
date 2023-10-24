@@ -89,9 +89,9 @@ public class ROS2BehaviorTreePublisher
          walkActionState.toMessage(behaviorTreeMessage.getWalkActions().add());
       }
 
-      for (BehaviorTreeNodeState child : behaviorTreeNode.getChildren())
+      for (Object child : behaviorTreeNode.getChildren())
       {
-         packSceneTreeToMessage(child);
+         packSceneTreeToMessage((BehaviorTreeNodeState) child);
       }
    }
 }

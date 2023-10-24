@@ -6,7 +6,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 /**
  * Clearing the subtree and detroying the removed nodes.
  */
-public class BehaviorTreeSubtreeDestruction<T extends BehaviorTreeNode> implements BehaviorTreeModification<T>
+public class BehaviorTreeSubtreeDestruction<T extends BehaviorTreeNode<T>> implements BehaviorTreeModification<T>
 {
    private final T subtreeToClear;
 
@@ -23,9 +23,9 @@ public class BehaviorTreeSubtreeDestruction<T extends BehaviorTreeNode> implemen
 
    private void clearChildren(T localNode)
    {
-      for (Object child : localNode.getChildren())
+      for (T child : localNode.getChildren())
       {
-         clearChildren((T) child);
+         clearChildren(child);
       }
 
       localNode.getChildren().clear();

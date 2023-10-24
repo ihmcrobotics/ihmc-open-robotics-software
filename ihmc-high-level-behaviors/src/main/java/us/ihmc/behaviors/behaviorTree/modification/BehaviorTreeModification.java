@@ -8,7 +8,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
  * and performed inside the scene graph with consistency guarantees.
  */
 @FunctionalInterface
-public interface BehaviorTreeModification<T extends BehaviorTreeNode>
+public interface BehaviorTreeModification<T extends BehaviorTreeNode<T>>
 {
    void performOperation();
 }

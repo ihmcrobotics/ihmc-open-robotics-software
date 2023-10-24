@@ -6,8 +6,8 @@ package us.ihmc.behaviors.behaviorTree;
  */
 public interface BehaviorTreeNodeExtension<T extends BehaviorTreeNode<T>,
                                            E extends BehaviorTreeNode<E>,
-                                           D extends BehaviorTreeNodeDefinition<D>,
-                                           S extends BehaviorTreeNodeState<S, D>>
+                                           S extends BehaviorTreeNodeState<S, D>,
+                                           D extends BehaviorTreeNodeDefinition<D>>
       extends BehaviorTreeNode<T>,
               BehaviorTreeNodeStateSupplier<S, D>
 {

@@ -3,11 +3,12 @@ package us.ihmc.behaviors.behaviorTree.modification;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
-public class BehaviorTreeNodeExtensionAddition<T extends BehaviorTreeNodeExtension<T, U>,
-                                               U extends BehaviorTreeNode<U>>
-      extends BehaviorTreeNodeAddition<T> implements BehaviorTreeModification<T>
+public class BehaviorTreeNodeExtensionAddition<T extends BehaviorTreeNodeExtension<T, E, ?, ?>,
+                                               E extends BehaviorTreeNode<E>>
+      extends BehaviorTreeNodeAddition<T>
+      implements BehaviorTreeModification<T>
 {
-   private final BehaviorTreeNodeAddition<U> extendedTypeAddition;
+   private final BehaviorTreeNodeAddition<E> extendedTypeAddition;
 
    public BehaviorTreeNodeExtensionAddition(T nodeToAdd, T parent)
    {
