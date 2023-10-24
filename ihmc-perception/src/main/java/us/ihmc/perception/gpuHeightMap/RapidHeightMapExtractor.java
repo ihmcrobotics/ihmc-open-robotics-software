@@ -23,13 +23,9 @@ public class RapidHeightMapExtractor
    public int sequenceNumber = 0;
 
    public static float LOCAL_WIDTH_IN_METERS = 3.0f; // localWidthInMeters
-   public static float LOCAL_CELL_SIZE_IN_METERS = 0.02f; // localCellSizeInMeters
 
    public static float GLOBAL_WIDTH_IN_METERS = 4.0f; // globalWidthInMeters
    public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
-
-   private float internalGlobalWidthInMeters = 30.0f; // globalWidthInMeters
-   private float internalGlobalCellSizeInMeters = 0.02f; // globalCellSizeInMeters
 
    public static float HEIGHT_SCALE_FACTOR = 10000.0f;
    public static int CROP_WINDOW_SIZE = 201;
@@ -40,17 +36,8 @@ public class RapidHeightMapExtractor
    private int globalCenterIndex;
    private int globalCellsPerAxis;
 
-   private int searchWindowHeight = 250;
-   private int searchWindowWidth = 140;
-
-   private float minHeightRegistration = -0.1f;
-   private float maxHeightRegistration = 0.7f;
-   private float minHeightDifference = -0.05f;
-   private float maxHeightDifference = 0.1f;
-
    private float robotCollisionCylinderRadius = 0.5f;
    private float gridOffsetX = LOCAL_WIDTH_IN_METERS / 2.0f;
-   private float heightFilterAlpha = 0.65f;
 
    private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
@@ -108,10 +95,11 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
 
-      centerIndex = HeightMapTools.computeCenterIndex(LOCAL_WIDTH_IN_METERS, LOCAL_CELL_SIZE_IN_METERS);
+      centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
       localCellsPerAxis = 2 * centerIndex + 1;
 
-      globalCenterIndex = HeightMapTools.computeCenterIndex(internalGlobalWidthInMeters, internalGlobalCellSizeInMeters);
+      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(),
+                                                            heightMapParameters.getInternalGlobalCellSizeInMeters());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       parametersBuffer = new OpenCLFloatParameters();
@@ -244,7 +232,7 @@ public class RapidHeightMapExtractor
    private void populateParameterBuffer(Tuple3DReadOnly gridCenter)
    {
       //// Fill parameters buffer
-      parametersBuffer.setParameter(LOCAL_CELL_SIZE_IN_METERS);
+      parametersBuffer.setParameter((float) heightMapParameters.getLocalCellSizeInMeters());
       parametersBuffer.setParameter(centerIndex);
       parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
@@ -255,20 +243,20 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) cameraIntrinsics.getCy());
       parametersBuffer.setParameter((float) cameraIntrinsics.getFx());
       parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
-      parametersBuffer.setParameter(GLOBAL_CELL_SIZE_IN_METERS);
+      parametersBuffer.setParameter((float) heightMapParameters.getGlobalCellSizeInMeters());
       parametersBuffer.setParameter((float) globalCenterIndex);
       parametersBuffer.setParameter(robotCollisionCylinderRadius);
       parametersBuffer.setParameter(gridOffsetX);
-      parametersBuffer.setParameter(heightFilterAlpha);
+      parametersBuffer.setParameter((float) heightMapParameters.getHeightFilterAlpha());
       parametersBuffer.setParameter(localCellsPerAxis);
       parametersBuffer.setParameter(globalCellsPerAxis);
       parametersBuffer.setParameter(HEIGHT_SCALE_FACTOR);
-      parametersBuffer.setParameter(minHeightRegistration);
-      parametersBuffer.setParameter(maxHeightRegistration);
-      parametersBuffer.setParameter(minHeightDifference);
-      parametersBuffer.setParameter(maxHeightDifference);
-      parametersBuffer.setParameter(searchWindowHeight);
-      parametersBuffer.setParameter(searchWindowWidth);
+      parametersBuffer.setParameter((float) heightMapParameters.getMinHeightRegistration());
+      parametersBuffer.setParameter((float) heightMapParameters.getMaxHeightRegistration());
+      parametersBuffer.setParameter((float) heightMapParameters.getMinHeightDifference());
+      parametersBuffer.setParameter((float) heightMapParameters.getMaxHeightDifference());
+      parametersBuffer.setParameter((float) heightMapParameters.getSearchWindowHeight());
+      parametersBuffer.setParameter((float) heightMapParameters.getSearchWindowWidth());
       parametersBuffer.setParameter((float) CROP_WINDOW_SIZE / 2);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);

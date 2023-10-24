@@ -8,6 +8,81 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setLocalWidthInMeters(double localWidthInMeters)
+   {
+      set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
+   }
+
+   default void setLocalCellSizeInMeters(double localCellSizeInMeters)
+   {
+      set(HeightMapParameters.localCellSizeInMeters, localCellSizeInMeters);
+   }
+
+   default void setGlobalWidthInMeters(double globalWidthInMeters)
+   {
+      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
+   }
+
+   default void setGlobalCellSizeInMeters(double globalCellSizeInMeters)
+   {
+      set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
+   }
+
+   default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
+   {
+      set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
+   }
+
+   default void setInternalGlobalCellSizeInMeters(double internalGlobalCellSizeInMeters)
+   {
+      set(HeightMapParameters.internalGlobalCellSizeInMeters, internalGlobalCellSizeInMeters);
+   }
+
+   default void setHeightScaleFactor(double heightScaleFactor)
+   {
+      set(HeightMapParameters.heightScaleFactor, heightScaleFactor);
+   }
+
+   default void setCropWindowSize(int cropWindowSize)
+   {
+      set(HeightMapParameters.cropWindowSize, cropWindowSize);
+   }
+
+   default void setSearchWindowHeight(int searchWindowHeight)
+   {
+      set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
+   }
+
+   default void setSearchWindowWidth(int searchWindowWidth)
+   {
+      set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
+   }
+
+   default void setMinHeightRegistration(double minHeightRegistration)
+   {
+      set(HeightMapParameters.minHeightRegistration, minHeightRegistration);
+   }
+
+   default void setMaxHeightRegistration(double maxHeightRegistration)
+   {
+      set(HeightMapParameters.maxHeightRegistration, maxHeightRegistration);
+   }
+
+   default void setMinHeightDifference(double minHeightDifference)
+   {
+      set(HeightMapParameters.minHeightDifference, minHeightDifference);
+   }
+
+   default void setMaxHeightDifference(double maxHeightDifference)
+   {
+      set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
+   }
+
+   default void setHeightFilterAlpha(double heightFilterAlpha)
+   {
+      set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
+   }
+
    /**
     * Resolution of the height map grid
     */
