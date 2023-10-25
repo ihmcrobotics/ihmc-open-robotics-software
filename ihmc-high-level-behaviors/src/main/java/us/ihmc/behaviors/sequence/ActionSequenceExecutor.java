@@ -12,9 +12,17 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    }
 
    @Override
-   public void clock()
+   public void tick()
    {
+      super.tick();
 
+      // TODO: Tick children
+   }
+
+   public void update()
+   {
+      // TODO: Go through next for execution concurrent children and set chest action's goal pelvis frames
+      //   and the hand pose actions chest frames
    }
 
    @Override

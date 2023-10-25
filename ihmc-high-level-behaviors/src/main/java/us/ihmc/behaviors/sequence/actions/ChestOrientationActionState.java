@@ -2,12 +2,20 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
    private final DetachableReferenceFrame chestFrame;
+   /**
+    * This is the estimated goal pelvis frame as the robot executes a potential whole body action.
+    * This is used to compute joint angles that achieve the desired and previewed end pose
+    * even when the pelvis and/or chest might also move.
+    */
+   private final MutableReferenceFrame goalPelvisFrame = new MutableReferenceFrame();
 
    public ChestOrientationActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -26,15 +34,25 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    public void toMessage(ChestOrientationActionStateMessage message)
    {
       super.toMessage(message.getActionState());
+
+      MessageTools.toMessage(goalPelvisFrame.getTransformToParent(), message.getGoalPelvisTransformToWorld());
    }
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
+
+      MessageTools.toEuclid(message.getGoalPelvisTransformToWorld(), goalPelvisFrame.getTransformToParent());
+      goalPelvisFrame.getReferenceFrame().update();
    }
 
    public DetachableReferenceFrame getChestFrame()
    {
       return chestFrame;
+   }
+
+   public MutableReferenceFrame getGoalPelvisFrame()
+   {
+      return goalPelvisFrame;
    }
 }

@@ -35,7 +35,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
-   private final IKRootCalculator rootCalculator;
 
    public HandPoseActionExecutor(long id,
                                  ROS2ControllerHelper ros2ControllerHelper,
@@ -54,7 +53,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
-      rootCalculator = new IKRootCalculator(ros2ControllerHelper, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
    }
 
    @Override
@@ -66,10 +64,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
          armIKSolver.copySourceToWork();
-         rootCalculator.getKinematicsInfo();
-         rootCalculator.computeRoot();
-         ReferenceFrame chestFrame = rootCalculator.getRoot();
-         armIKSolver.update(chestFrame, state.getPalmFrame().getReferenceFrame());
+         armIKSolver.update(state.getGoalChestFrame().getReferenceFrame(), state.getPalmFrame().getReferenceFrame());
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.

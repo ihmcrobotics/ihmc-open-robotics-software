@@ -17,6 +17,10 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
             */
    public behavior_msgs.msg.dds.HandPoseActionDefinitionMessage definition_;
    /**
+            * This is the estimated goal chest frame as the robot executes a potential whole body action.
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage goal_chest_transform_to_world_;
+   /**
             * Linear hand wrench magnitude
             */
    public double hand_wrench_magnitude_linear_;
@@ -33,6 +37,7 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
    {
       action_state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.HandPoseActionDefinitionMessage();
+      goal_chest_transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       joint_angles_ = new double[7];
 
    }
@@ -47,6 +52,7 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.goal_chest_transform_to_world_, goal_chest_transform_to_world_);
       hand_wrench_magnitude_linear_ = other.hand_wrench_magnitude_linear_;
 
       for(int i1 = 0; i1 < joint_angles_.length; ++i1)
@@ -75,6 +81,15 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
    public behavior_msgs.msg.dds.HandPoseActionDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+
+   /**
+            * This is the estimated goal chest frame as the robot executes a potential whole body action.
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getGoalChestTransformToWorld()
+   {
+      return goal_chest_transform_to_world_;
    }
 
    /**
@@ -136,6 +151,7 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
 
       if (!this.action_state_.epsilonEquals(other.action_state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!this.goal_chest_transform_to_world_.epsilonEquals(other.goal_chest_transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_wrench_magnitude_linear_, other.hand_wrench_magnitude_linear_, epsilon)) return false;
 
       for(int i3 = 0; i3 < joint_angles_.length; ++i3)
@@ -160,6 +176,7 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
 
       if (!this.action_state_.equals(otherMyClass.action_state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if (!this.goal_chest_transform_to_world_.equals(otherMyClass.goal_chest_transform_to_world_)) return false;
       if(this.hand_wrench_magnitude_linear_ != otherMyClass.hand_wrench_magnitude_linear_) return false;
 
       for(int i5 = 0; i5 < joint_angles_.length; ++i5)
@@ -183,6 +200,8 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       builder.append(this.action_state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("goal_chest_transform_to_world=");
+      builder.append(this.goal_chest_transform_to_world_);      builder.append(", ");
       builder.append("hand_wrench_magnitude_linear=");
       builder.append(this.hand_wrench_magnitude_linear_);      builder.append(", ");
       builder.append("joint_angles=");

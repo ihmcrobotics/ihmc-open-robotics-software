@@ -39,12 +39,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       getState().update();
    }
 
-   /** @deprecated TODO: Figure out how to remove this. */
-   public void updateBeforeRemoving()
-   {
-
-   }
-
    public void calculateVRPick(RDXVRContext vrContext)
    {
 
