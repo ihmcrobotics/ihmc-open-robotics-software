@@ -6,25 +6,25 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class BehaviorActionSequenceDefinitionMessage extends Packet<BehaviorActionSequenceDefinitionMessage> implements Settable<BehaviorActionSequenceDefinitionMessage>, EpsilonComparable<BehaviorActionSequenceDefinitionMessage>
+public class ActionSequenceDefinitionMessage extends Packet<ActionSequenceDefinitionMessage> implements Settable<ActionSequenceDefinitionMessage>, EpsilonComparable<ActionSequenceDefinitionMessage>
 {
    /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
 
-   public BehaviorActionSequenceDefinitionMessage()
+   public ActionSequenceDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
    }
 
-   public BehaviorActionSequenceDefinitionMessage(BehaviorActionSequenceDefinitionMessage other)
+   public ActionSequenceDefinitionMessage(ActionSequenceDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(BehaviorActionSequenceDefinitionMessage other)
+   public void set(ActionSequenceDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
 
@@ -38,19 +38,19 @@ public class BehaviorActionSequenceDefinitionMessage extends Packet<BehaviorActi
    }
 
 
-   public static Supplier<BehaviorActionSequenceDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<ActionSequenceDefinitionMessagePubSubType> getPubSubType()
    {
-      return BehaviorActionSequenceDefinitionMessagePubSubType::new;
+      return ActionSequenceDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return BehaviorActionSequenceDefinitionMessagePubSubType::new;
+      return ActionSequenceDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(BehaviorActionSequenceDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(ActionSequenceDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -65,9 +65,9 @@ public class BehaviorActionSequenceDefinitionMessage extends Packet<BehaviorActi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof BehaviorActionSequenceDefinitionMessage)) return false;
+      if(!(other instanceof ActionSequenceDefinitionMessage)) return false;
 
-      BehaviorActionSequenceDefinitionMessage otherMyClass = (BehaviorActionSequenceDefinitionMessage) other;
+      ActionSequenceDefinitionMessage otherMyClass = (ActionSequenceDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
 
@@ -79,7 +79,7 @@ public class BehaviorActionSequenceDefinitionMessage extends Packet<BehaviorActi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("BehaviorActionSequenceDefinitionMessage {");
+      builder.append("ActionSequenceDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);
       builder.append("}");

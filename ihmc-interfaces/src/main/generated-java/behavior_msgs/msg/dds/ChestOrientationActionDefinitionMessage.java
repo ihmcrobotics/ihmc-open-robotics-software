@@ -11,7 +11,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage action_definition_;
    /**
             * Name of the frame the this action is expressed in
             */
@@ -31,7 +31,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
 
    public ChestOrientationActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      action_definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       chest_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -44,7 +44,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
 
    public void set(ChestOrientationActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       parent_frame_name_.setLength(0);
       parent_frame_name_.append(other.parent_frame_name_);
 
@@ -59,7 +59,7 @@ public class ChestOrientationActionDefinitionMessage extends Packet<ChestOrienta
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getActionDefinition()
    {
       return action_definition_;
    }

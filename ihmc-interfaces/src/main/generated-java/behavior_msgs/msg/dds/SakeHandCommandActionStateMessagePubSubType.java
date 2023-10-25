@@ -15,7 +15,7 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ee69e71c4d1b32ca516661ced509cb6af06b65bd004b580c4b096739f59b0c15";
+   		return "9170619a8cbdaa496afce4b21350d4a48d390ffbdc726826c26c9f1b27b7f5f1";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,7 +69,7 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
@@ -79,13 +79,13 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
 
    public static void write(behavior_msgs.msg.dds.SakeHandCommandActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.write(data.getActionState(), cdr);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getActionState(), cdr);
       behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.SakeHandCommandActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.read(data.getActionState(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getActionState(), cdr);	
       behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
@@ -93,7 +93,7 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(behavior_msgs.msg.dds.SakeHandCommandActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_state", new behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType(), data.getActionState());
+      ser.write_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -102,7 +102,7 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.SakeHandCommandActionStateMessage data)
    {
-      ser.read_type_a("action_state", new behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType(), data.getActionState());
+      ser.read_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType(), data.getDefinition());
 

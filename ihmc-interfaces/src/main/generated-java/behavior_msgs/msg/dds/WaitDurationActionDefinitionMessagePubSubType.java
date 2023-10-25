@@ -15,7 +15,7 @@ public class WaitDurationActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c1b270ea7d63b4ddb32abdddbe0a126a682612d3eed63ce640d81f3b34f3fba0";
+   		return "b420fd0d1857ebd2ca128c94b4f4f2d37472b6ffc9e526bdd7d6e5ef37f21cd0";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WaitDurationActionDefinitionMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -69,7 +69,7 @@ public class WaitDurationActionDefinitionMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -80,14 +80,14 @@ public class WaitDurationActionDefinitionMessagePubSubType implements us.ihmc.pu
 
    public static void write(behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
       cdr.write_type_6(data.getWaitDuration());
 
    }
 
    public static void read(behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
       data.setWaitDuration(cdr.read_type_6());
       	
 
@@ -96,7 +96,7 @@ public class WaitDurationActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
 
       ser.write_type_6("wait_duration", data.getWaitDuration());
    }
@@ -104,7 +104,7 @@ public class WaitDurationActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage data)
    {
-      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
 
       data.setWaitDuration(ser.read_type_6("wait_duration"));
    }

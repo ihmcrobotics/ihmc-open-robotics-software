@@ -15,7 +15,7 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "739d253d2f584cceb5d782ed5e5e4ce9b10780e3a2f04d870a682f488045897a";
+   		return "62881adeb8013fa7e4eed95148cbd92bf9cc1846e746c5f6ef2c4420cae6a7ac";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,7 +69,7 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
@@ -79,13 +79,13 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
 
    public static void write(behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.write(data.getActionState(), cdr);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getActionState(), cdr);
       behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.read(data.getActionState(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getActionState(), cdr);	
       behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
@@ -93,7 +93,7 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_state", new behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType(), data.getActionState());
+      ser.write_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -102,7 +102,7 @@ public class ArmJointAnglesActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage data)
    {
-      ser.read_type_a("action_state", new behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType(), data.getActionState());
+      ser.read_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessagePubSubType(), data.getDefinition());
 

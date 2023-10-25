@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -37,7 +36,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Timer executionTimer = new Timer();
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<Integer> indexOfLastFoot = new SideDependentList<>();
@@ -159,25 +157,19 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       state.setIsExecuting(!isComplete);
 
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
-      executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
-      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-      executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
-                                                                 + completionCalculator.get(RobotSide.RIGHT).getRotationError());
-      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
-                                                              + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
-      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
+      state.setActionIndex(state.getActionIndex());
+      state.setNominalExecutionDuration(nominalExecutionDuration);
+      state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      state.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());
+      state.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+      state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+      state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+      state.setCurrentOrientationDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
+                                               + completionCalculator.get(RobotSide.RIGHT).getRotationError());
+      state.setCurrentPositionDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
+                                           + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
+      state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+      state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
    }
 
    @Override

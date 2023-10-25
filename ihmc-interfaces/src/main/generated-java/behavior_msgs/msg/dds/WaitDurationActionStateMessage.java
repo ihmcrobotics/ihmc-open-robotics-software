@@ -11,7 +11,7 @@ public class WaitDurationActionStateMessage extends Packet<WaitDurationActionSta
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage action_state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage action_state_;
    /**
             * Definition
             */
@@ -19,7 +19,7 @@ public class WaitDurationActionStateMessage extends Packet<WaitDurationActionSta
 
    public WaitDurationActionStateMessage()
    {
-      action_state_ = new behavior_msgs.msg.dds.BehaviorActionStateMessage();
+      action_state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage();
    }
 
@@ -31,7 +31,7 @@ public class WaitDurationActionStateMessage extends Packet<WaitDurationActionSta
 
    public void set(WaitDurationActionStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
       behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
@@ -39,7 +39,7 @@ public class WaitDurationActionStateMessage extends Packet<WaitDurationActionSta
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionStateMessage getActionState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getActionState()
    {
       return action_state_;
    }

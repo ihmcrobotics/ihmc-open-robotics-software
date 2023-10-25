@@ -1,7 +1,7 @@
-#ifndef __behavior_msgs__msg__BehaviorActionSequenceStateMessage__idl__
-#define __behavior_msgs__msg__BehaviorActionSequenceStateMessage__idl__
+#ifndef __behavior_msgs__msg__ActionSequenceStateMessage__idl__
+#define __behavior_msgs__msg__ActionSequenceStateMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorActionSequenceDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./ActionSequenceDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
 module behavior_msgs
 {
@@ -10,8 +10,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorActionSequenceStateMessage_")
-      struct BehaviorActionSequenceStateMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::ActionSequenceStateMessage_")
+      struct ActionSequenceStateMessage
       {
         /**
          * Parent state fields
@@ -20,7 +20,7 @@ module behavior_msgs
         /**
          * Definition
          */
-        behavior_msgs::msg::dds::BehaviorActionSequenceDefinitionMessage definition;
+        behavior_msgs::msg::dds::ActionSequenceDefinitionMessage definition;
         /**
          * If the sequence is currently set to proceed automatically
          */

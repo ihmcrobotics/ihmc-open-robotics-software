@@ -14,15 +14,16 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> implements Settable<BehaviorTreeStateMessage>, EpsilonComparable<BehaviorTreeStateMessage>
 {
-   public static final byte ARM_JOINT_ANGLES_ACTION = (byte) 0;
-   public static final byte CHEST_ORIENTATION_ACTION = (byte) 1;
-   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 2;
-   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 3;
-   public static final byte HAND_POSE_ACTION = (byte) 4;
-   public static final byte HAND_WRENCH_ACTION = (byte) 5;
-   public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 6;
-   public static final byte WAIT_DURATION_ACTION = (byte) 7;
-   public static final byte WALK_ACTION = (byte) 8;
+   public static final byte ACTION_SEQUENCE = (byte) 0;
+   public static final byte ARM_JOINT_ANGLES_ACTION = (byte) 10;
+   public static final byte CHEST_ORIENTATION_ACTION = (byte) 11;
+   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 12;
+   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 13;
+   public static final byte HAND_POSE_ACTION = (byte) 14;
+   public static final byte HAND_WRENCH_ACTION = (byte) 15;
+   public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 16;
+   public static final byte WAIT_DURATION_ACTION = (byte) 17;
+   public static final byte WALK_ACTION = (byte) 18;
    /**
             * The ID to assign to the next instantiated node
             */

@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -14,7 +13,6 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public ArmJointAnglesActionExecutor(long id,
                                        DRCRobotModel robotModel,
@@ -58,17 +56,10 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
    @Override
    public void updateCurrentlyExecuting()
    {
+      state.setActionIndex(state.getActionIndex());
       state.setIsExecuting(executionTimer.isRunning(getDefinition().getTrajectoryDuration()));
-
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
+      state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
+      state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
    @Override

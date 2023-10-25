@@ -9,10 +9,6 @@ import us.ihmc.pubsub.TopicDataType;
 public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAnglesStatusMessage> implements Settable<HandPoseJointAnglesStatusMessage>, EpsilonComparable<HandPoseJointAnglesStatusMessage>
 {
    /**
-            * Used for syncing action sequences
-            */
-   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
-   /**
             * Specifies the side of the robot that this message refers to.
             */
    public byte robot_side_ = (byte) 255;
@@ -27,7 +23,6 @@ public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAngles
 
    public HandPoseJointAnglesStatusMessage()
    {
-      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       joint_angles_ = new double[7];
 
    }
@@ -40,7 +35,6 @@ public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAngles
 
    public void set(HandPoseJointAnglesStatusMessage other)
    {
-      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
 
       for(int i1 = 0; i1 < joint_angles_.length; ++i1)
@@ -51,15 +45,6 @@ public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAngles
 
       solution_quality_ = other.solution_quality_;
 
-   }
-
-
-   /**
-            * Used for syncing action sequences
-            */
-   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
-   {
-      return action_information_;
    }
 
    /**
@@ -119,7 +104,6 @@ public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAngles
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       for(int i3 = 0; i3 < joint_angles_.length; ++i3)
@@ -142,7 +126,6 @@ public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAngles
 
       HandPoseJointAnglesStatusMessage otherMyClass = (HandPoseJointAnglesStatusMessage) other;
 
-      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       for(int i5 = 0; i5 < joint_angles_.length; ++i5)
@@ -162,8 +145,6 @@ public class HandPoseJointAnglesStatusMessage extends Packet<HandPoseJointAngles
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandPoseJointAnglesStatusMessage {");
-      builder.append("action_information=");
-      builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("joint_angles=");

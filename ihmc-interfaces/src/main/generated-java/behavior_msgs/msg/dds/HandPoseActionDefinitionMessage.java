@@ -11,7 +11,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage action_definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -43,7 +43,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
    public HandPoseActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      action_definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -56,7 +56,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
    public void set(HandPoseActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       robot_side_ = other.robot_side_;
 
       parent_frame_name_.setLength(0);
@@ -77,7 +77,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getActionDefinition()
    {
       return action_definition_;
    }

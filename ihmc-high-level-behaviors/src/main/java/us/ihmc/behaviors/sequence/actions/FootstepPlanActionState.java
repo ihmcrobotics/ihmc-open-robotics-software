@@ -12,6 +12,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
+   private int totalNumberOfFootsteps;
+   private int numberOfIncompleteFootsteps;
 
    public FootstepPlanActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -43,6 +45,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    {
       super.toMessage(message.getActionState());
 
+      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
+      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps);
+
       message.getFootsteps().clear();
       for (FootstepPlanActionFootstepState footstep : footsteps)
       {
@@ -54,6 +59,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    {
       super.fromMessage(message.getActionState());
 
+      totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
+      numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();
+
       footsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
       {
@@ -64,5 +72,25 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
    {
       return footsteps;
+   }
+
+   public int getTotalNumberOfFootsteps()
+   {
+      return totalNumberOfFootsteps;
+   }
+
+   public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
+   {
+      this.totalNumberOfFootsteps = totalNumberOfFootsteps;
+   }
+
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return numberOfIncompleteFootsteps;
+   }
+
+   public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
+   {
+      this.numberOfIncompleteFootsteps = numberOfIncompleteFootsteps;
    }
 }

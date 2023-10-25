@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 
 /**
@@ -26,11 +25,5 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
    public void updateCurrentlyExecuting()
    {
 
-   }
-
-   /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return new ActionExecutionStatusMessage();
    }
 }

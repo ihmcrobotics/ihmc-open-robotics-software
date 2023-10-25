@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__BehaviorActionSequenceDefinitionMessage__idl__
-#define __behavior_msgs__msg__BehaviorActionSequenceDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__ActionSequenceDefinitionMessage__idl__
+#define __behavior_msgs__msg__ActionSequenceDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorActionSequenceDefinitionMessage_")
-      struct BehaviorActionSequenceDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::ActionSequenceDefinitionMessage_")
+      struct ActionSequenceDefinitionMessage
       {
         /**
          * Parent definition fields

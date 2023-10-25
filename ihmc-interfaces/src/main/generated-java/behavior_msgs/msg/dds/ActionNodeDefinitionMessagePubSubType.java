@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "BehaviorActionDefinitionMessage" defined in "BehaviorActionDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "ActionNodeDefinitionMessage" defined in "ActionNodeDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from BehaviorActionDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit BehaviorActionDefinitionMessage_.idl instead.
+* This file was automatically generated from ActionNodeDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ActionNodeDefinitionMessage_.idl instead.
 *
 */
-public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.BehaviorActionDefinitionMessage>
+public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ActionNodeDefinitionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::BehaviorActionDefinitionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::ActionNodeDefinitionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "42d75f1dfe12e2b6490e8d608079ff7299b51aa00cf18e0b105f27958802b377";
+   		return "86a80a37507d28b756590f5dd7713970e13beb444963b4fe352fc44132e2885b";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.ActionNodeDefinitionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -60,12 +60,12 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -78,14 +78,14 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getNodeDefinition(), cdr);
       cdr.write_type_7(data.getExecuteWithNextAction());
 
    }
 
-   public static void read(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getNodeDefinition(), cdr);	
       data.setExecuteWithNextAction(cdr.read_type_7());
@@ -94,7 +94,7 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("node_definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getNodeDefinition());
 
@@ -102,22 +102,22 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ActionNodeDefinitionMessage data)
    {
       ser.read_type_a("node_definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getNodeDefinition());
 
       data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage src, behavior_msgs.msg.dds.BehaviorActionDefinitionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.ActionNodeDefinitionMessage src, behavior_msgs.msg.dds.ActionNodeDefinitionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage createData()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage createData()
    {
-      return new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      return new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
    @Override
    public int getTypeSize()
@@ -131,24 +131,24 @@ public class BehaviorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.BehaviorActionDefinitionMessage src, behavior_msgs.msg.dds.BehaviorActionDefinitionMessage dest)
+   public void copy(behavior_msgs.msg.dds.ActionNodeDefinitionMessage src, behavior_msgs.msg.dds.ActionNodeDefinitionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public BehaviorActionDefinitionMessagePubSubType newInstance()
+   public ActionNodeDefinitionMessagePubSubType newInstance()
    {
-      return new BehaviorActionDefinitionMessagePubSubType();
+      return new ActionNodeDefinitionMessagePubSubType();
    }
 }

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
-import behavior_msgs.msg.dds.BehaviorActionDefinitionMessage;
+import behavior_msgs.msg.dds.ActionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
@@ -42,14 +42,14 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
          executeWitNextAction = false;
    }
 
-   public void toMessage(BehaviorActionDefinitionMessage message)
+   public void toMessage(ActionNodeDefinitionMessage message)
    {
       super.toMessage(message.getNodeDefinition());
 
       message.setExecuteWithNextAction(getExecuteWithNextAction());
    }
 
-   public void fromMessage(BehaviorActionDefinitionMessage message)
+   public void fromMessage(ActionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getNodeDefinition());
 

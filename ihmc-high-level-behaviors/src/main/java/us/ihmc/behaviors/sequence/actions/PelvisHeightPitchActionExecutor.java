@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -29,7 +28,6 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public PelvisHeightPitchActionExecutor(long id,
@@ -105,22 +103,16 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
                                                                executionTimer,
                                                                BehaviorActionCompletionComponent.TRANSLATION));
 
-         executionStatusMessage.setActionIndex(state.getActionIndex());
-         executionStatusMessage.setNominalExecutionDuration(definition.getTrajectoryDuration());
-         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-         executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
-         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.setActionIndex(state.getActionIndex());
+         state.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
    }
 
    @Override

@@ -11,7 +11,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage action_definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -35,7 +35,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
    public SakeHandCommandActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      action_definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
    public SakeHandCommandActionDefinitionMessage(SakeHandCommandActionDefinitionMessage other)
@@ -46,7 +46,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
    public void set(SakeHandCommandActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       robot_side_ = other.robot_side_;
 
       configuration_ = other.configuration_;
@@ -63,7 +63,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getActionDefinition()
    {
       return action_definition_;
    }

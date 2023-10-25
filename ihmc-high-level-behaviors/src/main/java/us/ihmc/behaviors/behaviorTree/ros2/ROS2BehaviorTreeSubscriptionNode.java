@@ -9,7 +9,7 @@ public class ROS2BehaviorTreeSubscriptionNode
 {
    private byte type;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
-   private BehaviorActionStateMessage behaviorActionStateMessage;
+   private ActionNodeStateMessage behaviorActionStateMessage;
    private ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
@@ -47,14 +47,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.behaviorTreeNodeStateMessage = behaviorTreeNodeStateMessage;
    }
 
-   public BehaviorActionStateMessage getBehaviorActionStateMessage()
+   public ActionNodeStateMessage getActionNodeStateMessage()
    {
       return behaviorActionStateMessage;
    }
 
-   public void setBehaviorActionStateMessage(BehaviorActionStateMessage behaviorActionStateMessage)
+   public void setActionNodeStateMessage(ActionNodeStateMessage actionNodeStateMessage)
    {
-      this.behaviorActionStateMessage = behaviorActionStateMessage;
+      this.behaviorActionStateMessage = actionNodeStateMessage;
    }
 
    public ArmJointAnglesActionStateMessage getArmJointAnglesActionStateMessage()

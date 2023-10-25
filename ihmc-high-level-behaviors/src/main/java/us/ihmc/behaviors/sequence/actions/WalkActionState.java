@@ -9,6 +9,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 {
    private final DetachableReferenceFrame goalFrame;
+   private int totalNumberOfFootsteps;
+   private int numberOfIncompleteFootsteps;
 
    public WalkActionState(long id, FootstepPlannerParametersBasics footstepPlannerParameters, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -27,15 +29,41 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
    public void toMessage(WalkActionStateMessage message)
    {
       super.toMessage(message.getActionState());
+
+      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
+      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps);
    }
 
    public void fromMessage(WalkActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
+
+      totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
+      numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();
    }
 
    public DetachableReferenceFrame getGoalFrame()
    {
       return goalFrame;
+   }
+
+   public int getTotalNumberOfFootsteps()
+   {
+      return totalNumberOfFootsteps;
+   }
+
+   public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
+   {
+      this.totalNumberOfFootsteps = totalNumberOfFootsteps;
+   }
+
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return numberOfIncompleteFootsteps;
+   }
+
+   public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
+   {
+      this.numberOfIncompleteFootsteps = numberOfIncompleteFootsteps;
    }
 }
