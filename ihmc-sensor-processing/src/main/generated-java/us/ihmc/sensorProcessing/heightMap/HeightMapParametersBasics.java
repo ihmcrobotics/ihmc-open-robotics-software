@@ -28,6 +28,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
    }
 
+   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
+   {
+      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
+   }
+
    default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
    {
       set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);

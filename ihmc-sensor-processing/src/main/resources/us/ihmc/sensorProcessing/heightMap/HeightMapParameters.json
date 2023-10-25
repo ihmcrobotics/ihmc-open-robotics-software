@@ -20,6 +20,11 @@
     "lowerBound": 0.01,
     "upperBound": 0.06
   },
+  "Robot collision cylinder radius": {
+    "value": 0.5,
+    "lowerBound": 0.1,
+    "upperBound": 0.8
+  },
   "Internal global width in meters": {
     "value": 30.0,
     "lowerBound": 20.0,

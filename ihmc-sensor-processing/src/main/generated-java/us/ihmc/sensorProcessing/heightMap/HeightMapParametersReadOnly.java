@@ -30,6 +30,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(globalCellSizeInMeters);
    }
 
+   default double getRobotCollisionCylinderRadius()
+   {
+      return get(robotCollisionCylinderRadius);
+   }
+
    default double getInternalGlobalWidthInMeters()
    {
       return get(internalGlobalWidthInMeters);

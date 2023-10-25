@@ -22,12 +22,9 @@ public class RapidHeightMapExtractor
 {
    public int sequenceNumber = 0;
 
-   public static float LOCAL_WIDTH_IN_METERS = 3.0f; // localWidthInMeters
-
    public static float GLOBAL_WIDTH_IN_METERS = 4.0f; // globalWidthInMeters
    public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
 
-   public static float HEIGHT_SCALE_FACTOR = 10000.0f;
    public static int CROP_WINDOW_SIZE = 201;
 
    private int centerIndex;
@@ -36,8 +33,7 @@ public class RapidHeightMapExtractor
    private int globalCenterIndex;
    private int globalCellsPerAxis;
 
-   private float robotCollisionCylinderRadius = 0.5f;
-   private float gridOffsetX = LOCAL_WIDTH_IN_METERS / 2.0f;
+   private float gridOffsetX;
 
    private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
@@ -97,6 +93,8 @@ public class RapidHeightMapExtractor
 
       centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
       localCellsPerAxis = 2 * centerIndex + 1;
+
+      gridOffsetX = (float) heightMapParameters.getLocalWidthInMeters() / 2.0f;
 
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(),
                                                             heightMapParameters.getInternalGlobalCellSizeInMeters());
@@ -245,12 +243,12 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
       parametersBuffer.setParameter((float) heightMapParameters.getGlobalCellSizeInMeters());
       parametersBuffer.setParameter((float) globalCenterIndex);
-      parametersBuffer.setParameter(robotCollisionCylinderRadius);
+      parametersBuffer.setParameter((float) heightMapParameters.getRobotCollisionCylinderRadius());
       parametersBuffer.setParameter(gridOffsetX);
       parametersBuffer.setParameter((float) heightMapParameters.getHeightFilterAlpha());
       parametersBuffer.setParameter(localCellsPerAxis);
       parametersBuffer.setParameter(globalCellsPerAxis);
-      parametersBuffer.setParameter(HEIGHT_SCALE_FACTOR);
+      parametersBuffer.setParameter((float) heightMapParameters.getHeightScaleFactor());
       parametersBuffer.setParameter((float) heightMapParameters.getMinHeightRegistration());
       parametersBuffer.setParameter((float) heightMapParameters.getMaxHeightRegistration());
       parametersBuffer.setParameter((float) heightMapParameters.getMinHeightDifference());
