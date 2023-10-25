@@ -12,6 +12,7 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
@@ -125,6 +126,15 @@ public class ROS2SceneGraphSubscription
             arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
             arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
          }
+         if (localNode instanceof CenterposeNode centerposeNode)
+         {
+            centerposeNode.setObjectID(subscriptionNode.getCenterposeNodeMessage().getObjectId());
+            centerposeNode.setConfidence(subscriptionNode.getCenterposeNodeMessage().getConfidence());
+            centerposeNode.setObjectType(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
+            centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
+            centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
+            centerposeNode.setBreakFrequency(subscriptionNode.getCenterposeNodeMessage().getBreakFrequency());
+         }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
@@ -194,6 +204,13 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setArUcoMarkerNodeMessage(arUcoMarkerNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.CENTERPOSE_NODE_TYPE ->
+         {
+            CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().get(indexInTypesList);
+            subscriptionNode.setCenterposeNodeMessage(centerposeNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
          {

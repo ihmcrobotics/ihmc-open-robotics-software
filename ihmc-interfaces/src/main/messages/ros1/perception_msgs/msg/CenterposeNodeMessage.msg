@@ -1,10 +1,11 @@
-# This message is part of the IHMC behavior module.
+# An perception scene node for an ArUco marker
+# The topic name identifies the node.
 
-# Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+# The detectable scene node information
+perception_msgs/DetectableSceneNodeMessage detectable_scene_node
 
 # Object ID
-int32 id
+int32 object_id
 
 # Position and Orientation of the object
 geometry_msgs/Pose pose
@@ -20,5 +21,8 @@ geometry_msgs/Point[] bounding_box_2d_vertices
 
 # 3d Vertices of the 3d object Bounding box
 geometry_msgs/Point[] bounding_box_vertices
+
+# Break frequency filter value for nodes that are alpha filtered
+float32 break_frequency
 
 
