@@ -77,7 +77,7 @@ public class RDXIterativeClosestPointReverseDemo
    private DMatrixRMaj zeroMatrixPoint = new DMatrixRMaj(1,3);
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
-
+   private int envSize = 600;
 
 
 
@@ -162,7 +162,7 @@ public class RDXIterativeClosestPointReverseDemo
 
             // Create point cloud and renderer for box points
             Random random = new Random(0);
-            random.nextDouble(-boxHalfSize, boxHalfSize);
+//            random.nextDouble(-boxHalfSize, boxHalfSize);
             for (int i = 0; i < 6; i++) {
                for (int j = 0; j < 100; j++) {
                   float x =(float)random.nextDouble(-boxHalfSize, boxHalfSize);
@@ -204,8 +204,8 @@ public class RDXIterativeClosestPointReverseDemo
             boxCentroid  = new DMatrixRMaj(1, 3);
             envCentroid  = new DMatrixRMaj(1, 3);
             boxCentroidSubtractedPoints = new DMatrixRMaj(boxModelPoints.size(), 3);
-            boxCorrespondencePoints = new DMatrixRMaj(boxModelPoints.size(), 3);
-            envCentroidSubtractedPoints = new DMatrixRMaj(boxModelPoints.size(), 3);
+            boxCorrespondencePoints = new DMatrixRMaj(envSize, 3);
+            envCentroidSubtractedPoints = new DMatrixRMaj(envSize, 3);
           }
 
 
@@ -213,7 +213,8 @@ public class RDXIterativeClosestPointReverseDemo
          private void ICPMainFunction(us.ihmc.rdx.input.ImGui3DViewInput input) {
             float cuttoffRange = .4f;
             pickPointInWorld = input.getPickPointInWorld();
-            LibGDXTools.toLibGDX(pickPointInWorld, mousePickSphere.transform);
+            Point3D testPointInWorld = new Point3D(1.0, -0.573, 0.932);
+            LibGDXTools.toLibGDX(testPointInWorld, mousePickSphere.transform);
             envPointCloud.clear();
 
             if (ICPToggle.get()) {
@@ -222,7 +223,7 @@ public class RDXIterativeClosestPointReverseDemo
                // Seclect env point cloud and filter based on distance
                for (int i = 0; i < depthData.size(); i++) {
                   Point3D envPoint = depthData.get(i);
-                  double pointDifferenceFromSelected = pickPointInWorld.distance(envPoint);
+                  double pointDifferenceFromSelected = testPointInWorld.distance(envPoint);
                   if (pointDifferenceFromSelected <= cuttoffRange)
                   {
                      envPointCloud.add().set(envPoint);
@@ -235,8 +236,7 @@ public class RDXIterativeClosestPointReverseDemo
                // Calc nearest neighbor env to object
                if (envPointCloud.size() >boxModelPoints.size()) {
                   envPointCloud.shuffle(new Random(0));
-                  double envSize = 300;
-                  for (int i = 0; i < boxModelPoints.size(); i++) {
+                  for (int i = 0; i < envSize; i++) {
                      ICPDistances.set(i, Float.MAX_VALUE);
                      ICPIndices.set(i, 0);
                   }
@@ -299,48 +299,48 @@ public class RDXIterativeClosestPointReverseDemo
 
 
                   // Initialize matrix variables
-                  DMatrixRMaj H = new DMatrixRMaj(3, 3);
-                  DMatrixRMaj U = new DMatrixRMaj(3, 3);
-                  DMatrixRMaj Vt = new DMatrixRMaj(3, 3);
-                  DMatrixRMaj R = new DMatrixRMaj(3, 3);
-                  DMatrixRMaj newBoxLocation = new DMatrixRMaj(1, 3);
+//                  DMatrixRMaj H = new DMatrixRMaj(3, 3);
+//                  DMatrixRMaj U = new DMatrixRMaj(3, 3);
+//                  DMatrixRMaj Vt = new DMatrixRMaj(3, 3);
+//                  DMatrixRMaj R = new DMatrixRMaj(3, 3);
+//                  DMatrixRMaj newBoxLocation = new DMatrixRMaj(1, 3);
                   DMatrixRMaj boxTranslation = new DMatrixRMaj(1, 3);
-                  DMatrixRMaj T = new DMatrixRMaj(4, 4);
-                  CommonOps_DDRM.setIdentity(T);
+//                  DMatrixRMaj T = new DMatrixRMaj(4, 4);
+//                  CommonOps_DDRM.setIdentity(T);
 
                   // Best Fit Transform
-                  CommonOps_DDRM.multTransA(boxCentroidSubtractedPoints, envCentroidSubtractedPoints, H);
+//                  CommonOps_DDRM.multTransA(boxCentroidSubtractedPoints, envCentroidSubtractedPoints, H);
 
-                  svdSolver.decompose(H);
-                  svdSolver.getU(U, false);
-                  svdSolver.getV(Vt, true);
+//                  svdSolver.decompose(H);
+//                  svdSolver.getU(U, false);
+//                  svdSolver.getV(Vt, true);
 
 
-                  CommonOps_DDRM.transpose(U);
-                  CommonOps_DDRM.transpose(Vt);
-                  CommonOps_DDRM.mult(Vt, U, R);
+//                  CommonOps_DDRM.transpose(U);
+//                  CommonOps_DDRM.transpose(Vt);
+//                  CommonOps_DDRM.mult(Vt, U, R);
 
                   // check if transform wants to reflect instead of rotate and fix it
-                  if (CommonOps_DDRM.det(R) < 0) {
-                     Vt.set(2,0,-Vt.get(2,0));
-                     Vt.set(2,1,-Vt.get(2,1));
-                     Vt.set(2,2,-Vt.get(2,2));
-                     CommonOps_DDRM.mult(Vt, U, R);
-                     System.out.println("flipped");
-                  }
-                  else{
-                     System.out.println("NOT");
-                  }
+//                  if (CommonOps_DDRM.det(R) < 0) {
+//                     Vt.set(2,0,-Vt.get(2,0));
+//                     Vt.set(2,1,-Vt.get(2,1));
+//                     Vt.set(2,2,-Vt.get(2,2));
+//                     CommonOps_DDRM.mult(Vt, U, R);
+//                     System.out.println("flipped");
+//                  }
+//                  else{
+//                     System.out.println("NOT");
+//                  }
 
-                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
-                  CommonOps_DDRM.transpose(newBoxLocation);
-                  CommonOps_DDRM.subtract(envCentroid, newBoxLocation, boxTranslation);
+//                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
+//                  CommonOps_DDRM.transpose(newBoxLocation);
+                  CommonOps_DDRM.subtract(envCentroid, boxCentroid, boxTranslation);
 
 
                   boxTransform.getTranslation().addX(boxTranslation.get(0,0));
                   boxTransform.getTranslation().addY(boxTranslation.get(0,1));
                   boxTransform.getTranslation().addZ(boxTranslation.get(0,2));
-                  boxTransform.getRotation().set(R);
+//                  boxTransform.getRotation().set(R);
 
 
 
