@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
@@ -11,6 +12,7 @@ import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 
 import java.util.function.Consumer;
 
@@ -124,7 +126,27 @@ public class ROS2BehaviorTreeSubscription
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
    private void buildSubscriptionTree(BehaviorTreeStateMessage behaviorTreeStateMessage, ROS2BehaviorTreeSubscriptionNode subscriptionNode)
    {
-      // TODO: This
+      byte nodeType = behaviorTreeStateMessage.getBehaviorTreeTypes().get(subscriptionNodeDepthFirstIndex.intValue());
+      int indexInTypesList = (int) behaviorTreeStateMessage.getBehaviorTreeIndices().get(subscriptionNodeDepthFirstIndex.intValue());
+      subscriptionNode.setType(nodeType);
+
+      switch (nodeType)
+      {
+         case BehaviorTreeStateMessage.ACTION_SEQUENCE ->
+         {
+            ActionSequenceStateMessage actionSequenceStateMessage = behaviorTreeStateMessage.getActionSequences().get(indexInTypesList);
+            subscriptionNode.setActionSequenceStateMessage(actionSequenceStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState()); // TODO: Where's definition come from? Draw on paper
+         }
+      }
+
+      for (int i = 0; i < subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getNumberOfChildren(); i++)
+      {
+         ROS2BehaviorTreeSubscriptionNode subscriptionTreeChildNode = new ROS2BehaviorTreeSubscriptionNode();
+         subscriptionNodeDepthFirstIndex.increment();
+         buildSubscriptionTree(behaviorTreeStateMessage, subscriptionTreeChildNode);
+         subscriptionNode.getChildren().add(subscriptionTreeChildNode);
+      }
    }
 
    public void destroy()

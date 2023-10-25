@@ -26,6 +26,8 @@ byte[<=1000] behavior_tree_types
 # it's type.
 uint32[<=1000] behavior_tree_indices
 
+behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
+
 behavior_msgs/ArmJointAnglesActionStateMessage[<=200] arm_joint_angles_actions
 
 behavior_msgs/ChestOrientationActionStateMessage[<=200] chest_orientation_actions
