@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class HandPoseActionState extends BehaviorActionState<HandPoseActionDefinition>
+public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
    private final DetachableReferenceFrame palmFrame;
 

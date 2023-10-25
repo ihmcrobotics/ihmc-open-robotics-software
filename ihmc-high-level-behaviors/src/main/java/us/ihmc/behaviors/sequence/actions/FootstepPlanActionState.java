@@ -2,12 +2,12 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class FootstepPlanActionState extends BehaviorActionState<FootstepPlanActionDefinition>
+public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;

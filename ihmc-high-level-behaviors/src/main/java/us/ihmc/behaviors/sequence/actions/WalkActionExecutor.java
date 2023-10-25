@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -28,7 +28,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.UUID;
 
-public class WalkActionExecutor extends BehaviorActionExecutor<WalkActionState, WalkActionDefinition>
+public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, WalkActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);

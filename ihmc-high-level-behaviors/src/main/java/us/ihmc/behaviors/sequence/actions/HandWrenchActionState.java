@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 
-public class HandWrenchActionState extends BehaviorActionState<HandWrenchActionDefinition>
+public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefinition>
 {
    public HandWrenchActionState(long id)
    {

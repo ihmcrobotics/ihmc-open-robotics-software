@@ -82,7 +82,7 @@ public class RDXBehaviorTree
    {
       if (nodesMenu.getLoadFileRequest().poll())
       {
-         RDXBehaviorTreeNode<?, ?> selectedNode = null; // TODO
+         RDXBehaviorTreeNode<?, ?> selectedNode = null; // TODO: Traverse tree for selected node, probably RDXBTNode
 
          behaviorTreeState.modifyTree(modificationQueue ->
          {

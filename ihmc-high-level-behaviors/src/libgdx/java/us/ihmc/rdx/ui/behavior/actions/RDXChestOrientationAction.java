@@ -21,7 +21,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -35,7 +35,7 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXChestOrientationAction extends RDXBehaviorAction<ChestOrientationActionState, ChestOrientationActionDefinition>
+public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
    private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

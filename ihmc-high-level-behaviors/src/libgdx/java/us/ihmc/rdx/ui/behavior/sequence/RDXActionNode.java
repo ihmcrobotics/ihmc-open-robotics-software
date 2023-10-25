@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -18,8 +18,8 @@ import us.ihmc.rdx.vr.RDXVRContext;
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
  */
-public abstract class RDXBehaviorAction<S extends BehaviorActionState<D>,
-                                        D extends BehaviorActionDefinition>
+public abstract class RDXActionNode<S extends ActionNodeState<D>,
+                                    D extends ActionNodeDefinition>
       extends RDXBehaviorTreeNode<S, D>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -27,7 +27,7 @@ public abstract class RDXBehaviorAction<S extends BehaviorActionState<D>,
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
 
-   public RDXBehaviorAction()
+   public RDXActionNode()
    {
 
    }

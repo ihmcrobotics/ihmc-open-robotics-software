@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WalkActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class WalkActionState extends BehaviorActionState<WalkActionDefinition>
+public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 {
    private final DetachableReferenceFrame goalFrame;
 

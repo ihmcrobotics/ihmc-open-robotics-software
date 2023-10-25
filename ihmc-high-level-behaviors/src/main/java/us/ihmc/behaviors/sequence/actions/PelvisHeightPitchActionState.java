@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class PelvisHeightPitchActionState extends BehaviorActionState<PelvisHeightPitchActionDefinition>
+public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPitchActionDefinition>
 {
    private final DetachableReferenceFrame pelvisFrame;
 

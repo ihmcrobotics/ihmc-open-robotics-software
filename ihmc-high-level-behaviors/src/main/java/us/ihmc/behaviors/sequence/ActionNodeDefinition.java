@@ -14,12 +14,12 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
  * or currently executing it. This is only the information that gets
  * saved to/from JSON.
  */
-public class BehaviorActionDefinition extends BehaviorTreeNodeDefinition
+public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 {
    // TODO: Is every action concurrent-able?
    private boolean executeWitNextAction = false;
 
-   public BehaviorActionDefinition()
+   public ActionNodeDefinition()
    {
       // Declared to use IDE to check usages
    }

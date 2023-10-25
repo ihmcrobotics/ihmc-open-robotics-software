@@ -9,9 +9,9 @@ import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionState;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 
-public class RDXArmJointAnglesAction extends RDXBehaviorAction<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
+public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
    private final DRCRobotModel robotModel;
    private final ArmJointAnglesActionState state;

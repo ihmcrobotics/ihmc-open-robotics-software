@@ -4,13 +4,13 @@ import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandWrenchActionExecutor extends BehaviorActionExecutor<HandWrenchActionState, HandWrenchActionDefinition>
+public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActionState, HandWrenchActionDefinition>
 {
    private final HandWrenchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;

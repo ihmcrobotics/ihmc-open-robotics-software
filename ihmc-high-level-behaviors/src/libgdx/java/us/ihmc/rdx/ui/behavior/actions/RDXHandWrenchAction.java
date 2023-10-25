@@ -5,9 +5,9 @@ import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 
-public class RDXHandWrenchAction extends RDXBehaviorAction<HandWrenchActionState, HandWrenchActionDefinition>
+public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, HandWrenchActionDefinition>
 {
    private final HandWrenchActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

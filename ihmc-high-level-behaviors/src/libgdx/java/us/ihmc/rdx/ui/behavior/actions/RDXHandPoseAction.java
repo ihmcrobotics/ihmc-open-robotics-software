@@ -34,7 +34,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -57,7 +57,7 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXHandPoseAction extends RDXBehaviorAction<HandPoseActionState, HandPoseActionDefinition>
+public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
 {
    public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
    public static final String BAD_QUALITY_COLOR = "0xD14B4B";

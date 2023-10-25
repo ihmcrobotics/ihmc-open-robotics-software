@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 
-public class ArmJointAnglesActionState extends BehaviorActionState<ArmJointAnglesActionDefinition>
+public class ArmJointAnglesActionState extends ActionNodeState<ArmJointAnglesActionDefinition>
 {
    public ArmJointAnglesActionState(long id)
    {

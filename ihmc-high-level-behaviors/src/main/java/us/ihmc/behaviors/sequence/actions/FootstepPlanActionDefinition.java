@@ -5,12 +5,12 @@ import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepPlanActionDefinition extends BehaviorActionDefinition
+public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;

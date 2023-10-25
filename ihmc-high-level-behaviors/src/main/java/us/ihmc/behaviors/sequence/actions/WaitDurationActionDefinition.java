@@ -3,9 +3,9 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 
-public class WaitDurationActionDefinition extends BehaviorActionDefinition
+public class WaitDurationActionDefinition extends ActionNodeDefinition
 {
    private double waitDuration = 4.0;
 

@@ -6,20 +6,20 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorActionSequenceDefinition>
+public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
-   private BehaviorActionExecutor<?, ?> lastCurrentlyExecutingAction = null;
+   private ActionNodeExecutor<?, ?> lastCurrentlyExecutingAction = null;
 
    // This node enforces that all it's children are of a certain type
-   private final List<BehaviorActionState<BehaviorActionDefinition>> actionChildren = new ArrayList<>();
+   private final List<ActionNodeState<ActionNodeDefinition>> actionChildren = new ArrayList<>();
    // TODO: Review this
-   private final List<BehaviorActionState<BehaviorActionDefinition>> currentlyExecutingActions = new ArrayList<>();
+   private final List<ActionNodeState<ActionNodeDefinition>> currentlyExecutingActions = new ArrayList<>();
 
-   public BehaviorActionSequenceState(long id)
+   public ActionSequenceState(long id)
    {
-      super(id, new BehaviorActionSequenceDefinition());
+      super(id, new ActionSequenceDefinition());
    }
 
    @Override
@@ -28,7 +28,7 @@ public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorA
       actionChildren.clear();
       for (BehaviorTreeNodeState<?> child : getChildren())
       {
-         actionChildren.add((BehaviorActionState<BehaviorActionDefinition>) child);
+         actionChildren.add((ActionNodeState<ActionNodeDefinition>) child);
       }
 
       for (int i = 0; i < getChildren().size(); i++)
@@ -41,7 +41,7 @@ public class BehaviorActionSequenceState extends BehaviorTreeNodeState<BehaviorA
    private boolean noCurrentActionIsExecuting()
    {
       boolean noCurrentActionIsExecuting = true;
-      for (BehaviorActionState currentlyExecutingAction : currentlyExecutingActions)
+      for (ActionNodeState currentlyExecutingAction : currentlyExecutingActions)
       {
          noCurrentActionIsExecuting &= !currentlyExecutingAction.getIsExecuting();
       }

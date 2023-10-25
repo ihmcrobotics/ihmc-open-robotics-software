@@ -1,6 +1,6 @@
 {
   "name" : "PickUpBox",
-  "actions" : [ {
+  "children" : [ {
     "type" : "HandPoseActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "parentFrame" : "Box",

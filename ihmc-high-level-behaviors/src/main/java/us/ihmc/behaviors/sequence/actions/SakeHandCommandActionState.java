@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 
-public class SakeHandCommandActionState extends BehaviorActionState<SakeHandCommandActionDefinition>
+public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandActionDefinition>
 {
    public SakeHandCommandActionState(long id)
    {

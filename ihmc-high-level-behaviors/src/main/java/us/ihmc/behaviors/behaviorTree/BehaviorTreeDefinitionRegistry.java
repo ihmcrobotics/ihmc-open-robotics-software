@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 
 public class BehaviorTreeDefinitionRegistry
@@ -9,6 +10,8 @@ public class BehaviorTreeDefinitionRegistry
 
    private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
    {
+      new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
+
       new RegistryRecord(ArmJointAnglesActionDefinition.class, BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION),
       new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
       new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
