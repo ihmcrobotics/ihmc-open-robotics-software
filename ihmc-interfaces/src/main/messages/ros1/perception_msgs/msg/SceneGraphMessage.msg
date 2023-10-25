@@ -11,9 +11,11 @@ int8 PREDEFINED_RIGID_BODY_NODE_TYPE=2
 
 int8 ARUCO_MARKER_NODE_TYPE=3
 
-int8 STATIC_RELATIVE_NODE_TYPE=4
+int8 CENTERPOSE_NODE_TYPE=4
 
-int8 PRIMITIVE_RIGID_BODY_NODE_TYPE=5
+int8 STATIC_RELATIVE_NODE_TYPE=5
+
+int8 PRIMITIVE_RIGID_BODY_NODE_TYPE=6
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -37,6 +39,9 @@ perception_msgs/PredefinedRigidBodySceneNodeMessage[] predefined_rigid_body_scen
 
 # ArUco marker scene nodes
 perception_msgs/ArUcoMarkerNodeMessage[] aruco_marker_scene_nodes
+
+# Centerpose scene nodes
+perception_msgs/CenterposeNodeMessage[] centerpose_scene_nodes
 
 # Static relative scene nodes
 perception_msgs/StaticRelativeSceneNodeMessage[] static_relative_scene_nodes

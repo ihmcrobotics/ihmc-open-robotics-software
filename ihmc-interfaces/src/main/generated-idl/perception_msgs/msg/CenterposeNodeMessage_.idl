@@ -1,8 +1,9 @@
-#ifndef __perception_msgs__msg__DetectedObjectPacket__idl__
-#define __perception_msgs__msg__DetectedObjectPacket__idl__
+#ifndef __perception_msgs__msg__CenterposeNodeMessage__idl__
+#define __perception_msgs__msg__CenterposeNodeMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -11,19 +12,20 @@ module perception_msgs
     {
 
       /**
-       * This message is part of the IHMC behavior module.
+       * An perception scene node for an ArUco marker
+       * The topic name identifies the node.
        */
-      @TypeCode(type="perception_msgs::msg::dds_::DetectedObjectPacket_")
-      struct DetectedObjectPacket
+      @TypeCode(type="perception_msgs::msg::dds_::CenterposeNodeMessage_")
+      struct CenterposeNodeMessage
       {
         /**
-         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         * The detectable scene node information
          */
-        unsigned long sequence_id;
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
         /**
          * Object ID
          */
-        long id;
+        long object_id;
         /**
          * Position and Orientation of the object
          */
@@ -44,6 +46,10 @@ module perception_msgs
          * 3d Vertices of the 3d object Bounding box
          */
         geometry_msgs::msg::dds::Point bounding_box_vertices[8];
+        /**
+         * Break frequency filter value for nodes that are alpha filtered
+         */
+        float break_frequency;
       };
     };
   };
