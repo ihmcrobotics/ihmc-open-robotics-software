@@ -5,13 +5,13 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class RDXAvailableBehaviorTreeFile
 {
-   private final WorkspaceResourceFile sequenceFile;
+   private final WorkspaceResourceFile treeFile;
    private String name;
 
-   public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile sequenceFile)
+   public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile treeFile)
    {
-      this.sequenceFile = sequenceFile;
-      JSONFileTools.load(sequenceFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
+      this.treeFile = treeFile;
+      JSONFileTools.load(treeFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
    }
 
    public String getName()
@@ -19,8 +19,8 @@ public class RDXAvailableBehaviorTreeFile
       return name;
    }
 
-   public WorkspaceResourceFile getSequenceFile()
+   public WorkspaceResourceFile getTreeFile()
    {
-      return sequenceFile;
+      return treeFile;
    }
 }
