@@ -80,7 +80,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private final ArrayList<KinematicsToolboxOutputStatus> kinematicsToolboxOutputStatusList = new ArrayList<>();
    private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
-   private int speedSplineAdjustmentFactor = 1;
+   private double speedSplineAdjustmentFactor = 1.0;
    private boolean play = false;
    private double joystickValue;
    private int blendingCounter = 0;
@@ -210,23 +210,21 @@ public class RDXVRAssistance implements TeleoperationAssistant
             splineGraphics.put(entryPartMotion.getKey(), new RDXSplineGraphic());
             // restart creating the spline from beginning
             splineGraphics.get(entryPartMotion.getKey()).createStart(entryPartMotion.getValue().get(0).getPosition(), Color.BLUE);
-            speedSplineAdjustmentFactor = (int) (Math.floor((1.0 * kinematicsToolboxOutputStatusList.size()) / (1.0 * entryPartMotion.getValue().size())));
-            if (speedSplineAdjustmentFactor <= 0)
-               speedSplineAdjustmentFactor = 1;
+            speedSplineAdjustmentFactor = 1.0 * kinematicsToolboxOutputStatusList.size() / (1.0 * entryPartMotion.getValue().size());
          }
       }
       else
       {
          for (Map.Entry<String, List<Pose3DReadOnly>> entryPartMotion : bodyPartReplayMotionMap.entrySet())
          {
-            // since update() method of kinematics streaming can be faster than processVRInput(), the spline size can be shorter than the status list of the ghost robot
+            // spline size can be shorter than the status list of the ghost robot
             // we do an approximate speed adjustment consisting in waiting before adding the next point of the spline
-            int speedAdjuster = replayPreviewCounter / speedSplineAdjustmentFactor;
+            int speedAdjuster = (int) Math.ceil(1.0 * replayPreviewCounter / speedSplineAdjustmentFactor);
             if (speedAdjuster < entryPartMotion.getValue().size() - 1)
             {
                splineGraphics.get(entryPartMotion.getKey()).createAdditionalPoint(entryPartMotion.getValue().get(speedAdjuster).getPosition(), Color.YELLOW);
             }
-            else if (speedAdjuster == entryPartMotion.getValue().size() - 1)
+            else
             {
                splineGraphics.get(entryPartMotion.getKey()).createEnd(Color.BLUE);
             }

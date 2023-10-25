@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 10; // TODO make this a fraction of the estimated timesteps
+   private static final int INTERPOLATION_SAMPLES = 5; // TODO make this a fraction of the estimated timesteps
    public static final int AFFORDANCE_BLENDING_SAMPLES = 25; // TODO make this a fraction of the estimated timesteps (1/3 or 1/4 could be good values)
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
@@ -63,6 +63,8 @@ public class ProMPAssistant
    private double isMovingThreshold = -1;
    private final HashMap<String, FramePose3D> previousObservedPose = new HashMap<>();
    private boolean useCustomSpeed;
+   private final int adjustVelocity = 2;
+   private int waitForEnd = 0;
 
    public ProMPAssistant()
    {
@@ -192,7 +194,7 @@ public class ProMPAssistant
                bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
          }
          // -- Get trajectory from ProMP
-         else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
+         else if (sampleCounter < generatedFramePoseTrajectory.size() - (1 * adjustVelocity))
          {
             // pack the frame using the trajectory generated from prediction
             FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter + 1);
@@ -222,7 +224,7 @@ public class ProMPAssistant
 
             // update sample from the trajectory to take next time
             if (play)
-               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + (1 * adjustVelocity));
          }
          // -- Motion is over
          else
@@ -245,8 +247,13 @@ public class ProMPAssistant
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
+            waitForEnd++;
             // exit assistance mode
-            doneCurrentTask = true;
+            if (waitForEnd > 10)
+            {
+               doneCurrentTask = true;
+               waitForEnd = 0;
+            }
          }
       }
    }
@@ -547,6 +554,7 @@ public class ProMPAssistant
          currentTask = "";
       }
       doneCurrentTask = false;
+      waitForEnd = 0;
       inEndZone = false;
       taskGoalPose = null;
       objectFrame = null;
