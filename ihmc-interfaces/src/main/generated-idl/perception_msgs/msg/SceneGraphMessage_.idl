@@ -2,6 +2,7 @@
 #define __perception_msgs__msg__SceneGraphMessage__idl__
 
 #include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
+#include "perception_msgs/msg/./CenterposeNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 #include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./PrimitiveRigidBodySceneNodeMessage_.idl"
@@ -25,11 +26,14 @@ module perception_msgs
       const octet ARUCO_MARKER_NODE_TYPE =
       3;
 
-      const octet STATIC_RELATIVE_NODE_TYPE =
+      const octet CENTERPOSE_NODE_TYPE =
       4;
 
-      const octet PRIMITIVE_RIGID_BODY_NODE_TYPE =
+      const octet STATIC_RELATIVE_NODE_TYPE =
       5;
+
+      const octet PRIMITIVE_RIGID_BODY_NODE_TYPE =
+      6;
 
 
       /**
@@ -71,6 +75,10 @@ module perception_msgs
          * ArUco marker scene nodes
          */
         sequence<perception_msgs::msg::dds::ArUcoMarkerNodeMessage, 200> aruco_marker_scene_nodes;
+        /**
+         * Centerpose scene nodes
+         */
+        sequence<perception_msgs::msg::dds::CenterposeNodeMessage, 200> centerpose_scene_nodes;
         /**
          * Static relative scene nodes
          */

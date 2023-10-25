@@ -7,18 +7,19 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC behavior module.
+       * An perception scene node for an ArUco marker
+       * The topic name identifies the node.
        */
-public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implements Settable<DetectedObjectPacket>, EpsilonComparable<DetectedObjectPacket>
+public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> implements Settable<CenterposeNodeMessage>, EpsilonComparable<CenterposeNodeMessage>
 {
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            * The detectable scene node information
             */
-   public long sequence_id_;
+   public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
    /**
             * Object ID
             */
-   public int id_;
+   public int object_id_;
    /**
             * Position and Orientation of the object
             */
@@ -39,9 +40,14 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
             * 3d Vertices of the 3d object Bounding box
             */
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_vertices_;
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float break_frequency_;
 
-   public DetectedObjectPacket()
+   public CenterposeNodeMessage()
    {
+      detectable_scene_node_ = new perception_msgs.msg.dds.DetectableSceneNodeMessage();
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
       object_type_ = new java.lang.StringBuilder(255);
       bounding_box_2d_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
@@ -58,17 +64,16 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       }
    }
 
-   public DetectedObjectPacket(DetectedObjectPacket other)
+   public CenterposeNodeMessage(CenterposeNodeMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(DetectedObjectPacket other)
+   public void set(CenterposeNodeMessage other)
    {
-      sequence_id_ = other.sequence_id_;
-
-      id_ = other.id_;
+      perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
+      object_id_ = other.object_id_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       confidence_ = other.confidence_;
@@ -84,36 +89,32 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       {
             geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_vertices_[i7], bounding_box_vertices_[i7]);}
 
+      break_frequency_ = other.break_frequency_;
+
    }
 
+
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            * The detectable scene node information
             */
-   public void setSequenceId(long sequence_id)
+   public perception_msgs.msg.dds.DetectableSceneNodeMessage getDetectableSceneNode()
    {
-      sequence_id_ = sequence_id;
-   }
-   /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
-   public long getSequenceId()
-   {
-      return sequence_id_;
+      return detectable_scene_node_;
    }
 
    /**
             * Object ID
             */
-   public void setId(int id)
+   public void setObjectId(int object_id)
    {
-      id_ = id;
+      object_id_ = object_id;
    }
    /**
             * Object ID
             */
-   public int getId()
+   public int getObjectId()
    {
-      return id_;
+      return object_id_;
    }
 
 
@@ -182,27 +183,41 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       return bounding_box_vertices_;
    }
 
-
-   public static Supplier<DetectedObjectPacketPubSubType> getPubSubType()
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public void setBreakFrequency(float break_frequency)
    {
-      return DetectedObjectPacketPubSubType::new;
+      break_frequency_ = break_frequency;
+   }
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float getBreakFrequency()
+   {
+      return break_frequency_;
+   }
+
+
+   public static Supplier<CenterposeNodeMessagePubSubType> getPubSubType()
+   {
+      return CenterposeNodeMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return DetectedObjectPacketPubSubType::new;
+      return CenterposeNodeMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(DetectedObjectPacket other, double epsilon)
+   public boolean epsilonEquals(CenterposeNodeMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
+      if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.object_id_, other.object_id_, epsilon)) return false;
 
       if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
@@ -219,6 +234,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
               if (!this.bounding_box_vertices_[i11].epsilonEquals(other.bounding_box_vertices_[i11], epsilon)) return false;
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
+
 
       return true;
    }
@@ -228,13 +245,12 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof DetectedObjectPacket)) return false;
+      if(!(other instanceof CenterposeNodeMessage)) return false;
 
-      DetectedObjectPacket otherMyClass = (DetectedObjectPacket) other;
+      CenterposeNodeMessage otherMyClass = (CenterposeNodeMessage) other;
 
-      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
-      if(this.id_ != otherMyClass.id_) return false;
+      if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
+      if(this.object_id_ != otherMyClass.object_id_) return false;
 
       if (!this.pose_.equals(otherMyClass.pose_)) return false;
       if(this.confidence_ != otherMyClass.confidence_) return false;
@@ -249,6 +265,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       {
                 if (!this.bounding_box_vertices_[i15].equals(otherMyClass.bounding_box_vertices_[i15])) return false;
       }
+      if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
+
 
       return true;
    }
@@ -258,11 +276,11 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("DetectedObjectPacket {");
-      builder.append("sequence_id=");
-      builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("id=");
-      builder.append(this.id_);      builder.append(", ");
+      builder.append("CenterposeNodeMessage {");
+      builder.append("detectable_scene_node=");
+      builder.append(this.detectable_scene_node_);      builder.append(", ");
+      builder.append("object_id=");
+      builder.append(this.object_id_);      builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);      builder.append(", ");
       builder.append("confidence=");
@@ -272,7 +290,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       builder.append("bounding_box_2d_vertices=");
       builder.append(java.util.Arrays.toString(this.bounding_box_2d_vertices_));      builder.append(", ");
       builder.append("bounding_box_vertices=");
-      builder.append(java.util.Arrays.toString(this.bounding_box_vertices_));
+      builder.append(java.util.Arrays.toString(this.bounding_box_vertices_));      builder.append(", ");
+      builder.append("break_frequency=");
+      builder.append(this.break_frequency_);
       builder.append("}");
       return builder.toString();
    }
