@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
-public class BytedecoRealsense
+public class RealsenseDevice
 {
    protected final int depthWidth;
    protected final int depthHeight;
@@ -69,7 +69,7 @@ public class BytedecoRealsense
    private CameraIntrinsics depthCameraIntrinsics;
    private CameraIntrinsics colorCameraIntrinsics;
 
-   public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
+   public RealsenseDevice(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
    {
       this.device = device;
       this.depthWidth = depthWidth;
