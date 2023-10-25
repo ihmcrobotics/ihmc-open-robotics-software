@@ -35,7 +35,7 @@ public class RapidHeightMapExtractor
 
    private float gridOffsetX;
 
-   private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
+   private int mode = 1; // 0 -> Ouster, 1 -> Realsense
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
@@ -271,9 +271,9 @@ public class RapidHeightMapExtractor
 
    public void reset()
    {
-      globalHeightMapImage.fill(openCLManager, (byte) 0);
       localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
       globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
+      globalHeightMapImage.writeOpenCLImage(openCLManager);
       sequenceNumber = 0;
    }
 

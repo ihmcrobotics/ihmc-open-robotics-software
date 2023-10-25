@@ -107,9 +107,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
 
-   float3 normal;
-   float3 centroid;
-
    float averageHeightZ = 0;
    float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
    cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
@@ -209,14 +206,14 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    if (count > 0)
    {
       averageHeightZ = averageHeightZ / (float)(count);
-      averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
+      averageHeightZ = clamp(averageHeightZ, -3.25f, 3.25f);
 
       //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
    else
    {
       // this is slightly below the floor height of what we'll accept
-      averageHeightZ = params[MIN_HEIGHT_REGISTRATION] - 0.05f;
+      averageHeightZ = -3.25f;
    }
    write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }

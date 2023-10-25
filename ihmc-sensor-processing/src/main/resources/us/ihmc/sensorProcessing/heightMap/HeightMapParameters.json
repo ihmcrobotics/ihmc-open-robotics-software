@@ -1,5 +1,41 @@
 {
   "title" : "HeightMapParameters",
+  "Reset Height Map" : false,
+  "Search window height": {
+    "value": 250,
+    "lowerBound": 100,
+    "upperBound": 800
+  },
+  "Search window width": {
+    "value": 140,
+    "lowerBound": 100,
+    "upperBound": 800
+  },
+  "Min height registration": {
+    "value": -0.01,
+    "lowerBound": -0.05,
+    "upperBound": 0.05
+  },
+  "Max height registration": {
+    "value": 0.7,
+    "lowerBound": 0.4,
+    "upperBound": 1.6
+  },
+  "Min height difference": {
+    "value": -0.05,
+    "lowerBound": -0.15,
+    "upperBound": 0.05
+  },
+  "Max height difference": {
+    "value": 0.1,
+    "lowerBound": 0.01,
+    "upperBound": 0.4
+  },
+  "Height filter alpha": {
+    "value": 0.65,
+    "lowerBound": 0.2,
+    "upperBound": 0.85
+  },
   "Local width in meters": {
     "value": 3.0,
     "lowerBound": 1.0,
@@ -45,41 +81,6 @@
     "lowerBound": 40,
     "upperBound": 300
   },
-  "Search window height": {
-    "value": 250,
-    "lowerBound": 100,
-    "upperBound": 800
-  },
-  "Search window width": {
-    "value": 140,
-    "lowerBound": 100,
-    "upperBound": 800
-  },
-  "Min height registration": {
-    "value": -0.01,
-    "lowerBound": -0.05,
-    "upperBound": 0.05
-  },
-  "Max height registration": {
-    "value": 0.7,
-    "lowerBound": 0.4,
-    "upperBound": 1.6
-  },
-  "Min height difference": {
-    "value": -0.05,
-    "lowerBound": -0.15,
-    "upperBound": 0.05
-  },
-  "Max height difference": {
-    "value": 0.1,
-    "lowerBound": 0.01,
-    "upperBound": 0.4
-  },
-  "Height filter alpha": {
-    "value": 0.65,
-    "lowerBound": 0.2,
-    "upperBound": 0.85
-  },
   "Grid resolution XY" : [ 0.03, "Resolution of the height map grid" ],
   "Grid size XY" : [ 5.0, "Length of the side of the square height map grid" ],
   "Max Z" : [ 0.6, "Max z relative to robot mid foot z. Points above this threshold are ignored." ],
@@ -89,6 +90,5 @@
   "Variance added when translating" : [ 0.1, "This is the variance added to all past measurements when a cell is translated" ],
   "Sensor variance when standing" : [ 0.01, "This is the measurement variance when the robot is standing" ],
   "Sensor variance when moving" : [ 0.1, "This is the measurement variance when the robot is moving" ],
-  "Estimate height with kalman filter" : true,
-  "Reset Height Map" : false
+  "Estimate height with kalman filter" : true
 }

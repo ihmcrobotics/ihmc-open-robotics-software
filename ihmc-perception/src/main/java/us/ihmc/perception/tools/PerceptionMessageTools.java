@@ -217,8 +217,6 @@ public class PerceptionMessageTools
                                              float widthInMeters,
                                              float cellSizeInMeters)
    {
-      float maxHeight = 2.0f;
-      float minHeight = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
@@ -229,11 +227,7 @@ public class PerceptionMessageTools
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            int heightIndex = xIndex * cellsPerAxis + yIndex;
             float cellHeight = (float) ((float) (heightMapPointer.ptr(xIndex, yIndex).getShort()) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
-            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
-            if (cellHeight > maxHeight - 0.01f)
-               cellHeight = 0.0f;
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
             heightMapData.setHeightAt(key, cellHeight);

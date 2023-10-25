@@ -97,12 +97,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      float maxHeight = 2.0f;
-      float minHeight = 0.0f;
-
       Point3D spritePoint = new Point3D();
-
-
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
@@ -114,10 +109,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor);
-            zPosition = (float) MathTools.clamp(zPosition, minHeight, maxHeight);
-            if (zPosition > maxHeight - 0.01f)
-               zPosition = 0.0f;
+            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor - 3.25f);
 
             spritePoint.set(xPosition, yPosition, zPosition);
             //spritePoint.applyTransform(zUpFrameToWorld);
