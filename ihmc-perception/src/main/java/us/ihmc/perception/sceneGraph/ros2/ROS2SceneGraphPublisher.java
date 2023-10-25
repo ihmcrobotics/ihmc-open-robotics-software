@@ -12,6 +12,7 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
@@ -43,6 +44,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getDetectableSceneNodes().clear();
       sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
+      sceneGraphMessage.getCenterposeSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
@@ -97,6 +99,20 @@ public class ROS2SceneGraphPublisher
             arUcoMarkerNodeMessage.setMarkerSize((float) arUcoMarkerNode.getMarkerSize());
             arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
             detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
+         }
+         else if (sceneNode instanceof CenterposeNode centerposeNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.CENTERPOSE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCenterposeSceneNodes().size());
+            CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().add();
+            centerposeNodeMessage.setObjectId(centerposeNode.getObjectID());
+            centerposeNodeMessage.setConfidence(centerposeNode.getConfidence());
+            for (int i = 0; i < centerposeNodeMessage.getBoundingBoxVertices().length; i++)
+            {
+               centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);
+            }
+            centerposeNodeMessage.setBreakFrequency((float) centerposeNode.getBreakFrequency());
+            detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
          }
          else
          {

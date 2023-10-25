@@ -22,6 +22,8 @@ import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,8 +31,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.Throttler;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -76,9 +78,17 @@ public class ZEDColorStereoDepthPublisher
    private final SideDependentList<FramePose3D> cameraPosesInDepthFrame = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private final Thread grabImageThread;
+   private final Object slGrabSync = new Object();
    private final Thread colorImagePublishThread;
    private final Thread depthImagePublishThread;
+   private final Thread centerposeUpdateThread;
    private volatile boolean running = true;
+
+   // Optional CenterPose/SceneGraph integration
+   @Nullable
+   private ROS2SceneGraph ros2SceneGraph;
+   @Nullable
+   private CenterposeDetectionManager centerposeDetectionManager;
 
    public ZEDColorStereoDepthPublisher(int cameraID,
                                        SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
@@ -166,6 +176,12 @@ public class ZEDColorStereoDepthPublisher
             // sl_grab processes the stereo images to create the depth image
             checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
+            // Notify other threads that the grab is done
+            synchronized (slGrabSync)
+            {
+               slGrabSync.notifyAll();
+            }
+
             // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
             leftCameraFramePose.setToZero(sensorFrameSupplier.get());
             leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
@@ -173,39 +189,73 @@ public class ZEDColorStereoDepthPublisher
          }
       }, "ZEDImageGrabThread");
 
-      colorImagePublishThread = new Thread(new Runnable()
+      colorImagePublishThread = new Thread(() ->
       {
-         private final Throttler colorImagePublishThrottler = new Throttler();
-
-         @Override
-         public void run()
+         while (running)
          {
-            colorImagePublishThrottler.setFrequency(CAMERA_FPS);
-
-            while (running)
+            // Wait for the sl_grab to finish
+            synchronized (slGrabSync)
             {
-               colorImagePublishThrottler.waitAndRun();
-               retrieveAndPublishColorImage();
+               try
+               {
+                  slGrabSync.wait();
+               }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
             }
+
+            retrieveAndPublishColorImage();
          }
       }, "ZEDColorImagePublishThread");
 
-      depthImagePublishThread = new Thread(new Runnable()
+      depthImagePublishThread = new Thread(() ->
       {
-         private final Throttler depthImagePublishThrottler = new Throttler();
-
-         @Override
-         public void run()
+         while (running)
          {
-            depthImagePublishThrottler.setFrequency(CAMERA_FPS);
-
-            while (running)
+            // Wait for the sl_grab to finish
+            synchronized (slGrabSync)
             {
-               depthImagePublishThrottler.waitAndRun();
-               retrieveAndPublishDepthImage();
+               try
+               {
+                  slGrabSync.wait();
+               }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
             }
+
+            retrieveAndPublishDepthImage();
          }
       }, "ZEDDepthImagePublishThread");
+
+      centerposeUpdateThread = new Thread(() ->
+      {
+         while (running)
+         {
+            // Wait for the sl_grab to finish
+            synchronized (slGrabSync)
+            {
+               try
+               {
+                  slGrabSync.wait();
+               }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+
+            if (centerposeDetectionManager != null && ros2SceneGraph != null)
+            {
+               ros2SceneGraph.updateSubscription(); // Receive overridden poses from operator
+               centerposeDetectionManager.updateSceneGraph(ros2SceneGraph);
+               ros2SceneGraph.updatePublication();
+            }
+         }
+      }, "CenterposeUpdateThread");
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
@@ -214,6 +264,7 @@ public class ZEDColorStereoDepthPublisher
       grabImageThread.start();
       colorImagePublishThread.start();
       depthImagePublishThread.start();
+      centerposeUpdateThread.start();
    }
 
    private void retrieveAndPublishColorImage()
@@ -318,6 +369,7 @@ public class ZEDColorStereoDepthPublisher
          grabImageThread.join();
          colorImagePublishThread.join();
          depthImagePublishThread.join();
+         centerposeUpdateThread.join();
       }
       catch (InterruptedException interruptedException)
       {
@@ -367,6 +419,12 @@ public class ZEDColorStereoDepthPublisher
             LogTools.error("Failed to associate model number with a ZED sensor model");
          }
       }
+   }
+
+   public void createCenterposeDetectionManager(ROS2SceneGraph ros2SceneGraph, CenterposeDetectionManager centerposeDetectionManager)
+   {
+      this.ros2SceneGraph = ros2SceneGraph;
+      this.centerposeDetectionManager = centerposeDetectionManager;
    }
 
    public static void main(String[] args)
