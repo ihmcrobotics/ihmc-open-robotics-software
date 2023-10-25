@@ -9,13 +9,9 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -68,8 +64,10 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private boolean usingColor;
 
-   ReferenceFrame depthFrame;
-   ReferenceFrame colorFrame;
+   private final ReferenceFrame depthFrame;
+   private final RigidBodyTransform depthToWorldTransform = new RigidBodyTransform();
+   private final ReferenceFrame colorFrame;
+   private final RigidBodyTransform colorToWorldTransform = new RigidBodyTransform();
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -83,13 +81,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       colorChannel = new RDXROS2ColoredPointCloudVisualizerColorChannel(colorTopic);
 
       depthFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("depthFrame",
-                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                   new RigidBodyTransform(depthChannel.getRotationMatrixToWorld(),
-                                                                                                          depthChannel.getTranslationToWorld()));
-      colorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("depthFrame",
-                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                   new RigidBodyTransform(colorChannel.getRotationMatrixToWorld(),
-                                                                                                          colorChannel.getTranslationToWorld()));
+                                                                                   ReferenceFrame.getWorldFrame(), depthToWorldTransform);
+      colorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("colorFrame",
+                                                                                   ReferenceFrame.getWorldFrame(), colorToWorldTransform);
    }
 
    private void subscribe()
@@ -192,10 +186,10 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       }
       else if (depthChannel.getCameraModel() == CameraModel.OUSTER) // Assuming color is equidistant fisheye if using it
       {
-         depthFrame.getTransformToParent().setTranslationAndIdentityRotation(depthChannel.getTranslationToWorld());
-         depthFrame.getTransformToParent().prependOrientation(depthChannel.getRotationMatrixToWorld());
-         colorFrame.getTransformToParent().setTranslationAndIdentityRotation(colorChannel.getTranslationToWorld());
-         colorFrame.getTransformToParent().prependOrientation(colorChannel.getRotationMatrixToWorld());
+         depthToWorldTransform.set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
+         depthFrame.update();
+         colorToWorldTransform.set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
+         colorFrame.update();
 
          RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
          depthFrame.getTransformToDesiredFrame(depthToColorTransform, colorFrame);

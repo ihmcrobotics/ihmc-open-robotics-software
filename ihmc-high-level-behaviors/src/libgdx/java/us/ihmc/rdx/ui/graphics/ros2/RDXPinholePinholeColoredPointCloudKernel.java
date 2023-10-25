@@ -4,11 +4,9 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -29,7 +27,9 @@ public class RDXPinholePinholeColoredPointCloudKernel
    private final OpenCLRigidBodyTransformParameter depthToColorTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final BytedecoImage placeholderColorImage;
    private final ReferenceFrame depthFrame;
+   private final RigidBodyTransform depthToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame colorFrame;
+   private final RigidBodyTransform colorToWorldTransform = new RigidBodyTransform();
 
    public RDXPinholePinholeColoredPointCloudKernel(OpenCLManager openCLManager)
    {
@@ -41,10 +41,10 @@ public class RDXPinholePinholeColoredPointCloudKernel
 
       depthFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("depthFrame",
                                                                                    ReferenceFrame.getWorldFrame(),
-                                                                                   new RigidBodyTransform());
+                                                                                   depthToWorldTransform);
       colorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("depthFrame",
                                                                                    ReferenceFrame.getWorldFrame(),
-                                                                                   new RigidBodyTransform());
+                                                                                   colorToWorldTransform);
    }
 
    public void computeVertexBuffer(RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel,
@@ -55,20 +55,13 @@ public class RDXPinholePinholeColoredPointCloudKernel
                                    float pointSize,
                                    OpenCLFloatBuffer pointCloudVertexBuffer)
    {
-      depthFrame.getTransformToParent().setTranslationAndIdentityRotation(depthChannel.getTranslationToWorld());
-      depthFrame.getTransformToParent().prependOrientation(depthChannel.getRotationMatrixToWorld());
-      colorFrame.getTransformToParent().setTranslationAndIdentityRotation(colorChannel.getTranslationToWorld());
-      colorFrame.getTransformToParent().prependOrientation(colorChannel.getRotationMatrixToWorld());
+      depthToWorldTransform.set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
+      depthFrame.update();
+      colorToWorldTransform.set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
+      colorFrame.update();
 
       RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
       depthFrame.getTransformToDesiredFrame(depthToColorTransform, colorFrame);
-
-//      RotationMatrix depthToColorRotation = colorChannel.getRotationMatrixToWorld();
-//      depthToColorRotation.invert();
-//      depthToColorRotation.multiply(depthChannel.getRotationMatrixToWorld());
-//
-//      Vector3D depthToColorTranslation = colorChannel.getTranslationToWorld();
-//      depthToColorTranslation.sub(depthChannel.getTranslationToWorld());
 
       parametersBuffer.setParameter(colorChannel.getFx());
       parametersBuffer.setParameter(colorChannel.getFy());
