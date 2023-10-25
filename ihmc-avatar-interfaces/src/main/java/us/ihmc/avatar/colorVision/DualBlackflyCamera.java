@@ -360,7 +360,7 @@ public class DualBlackflyCamera
 
       // Create arUco marker detection
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(humanoidReferenceFramesSupplier.get().getSituationalAwarenessCameraFrame(side));
+      arUcoMarkerDetection.create(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
       newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
       arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDToNodeMap());
