@@ -41,7 +41,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
-   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
+   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, true);
    private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
    private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
