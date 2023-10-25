@@ -109,7 +109,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor - 3.25f);
+            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor) - 3.25f;
 
             spritePoint.set(xPosition, yPosition, zPosition);
             //spritePoint.applyTransform(zUpFrameToWorld);

@@ -164,7 +164,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
             float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
 
             float3 queryPointInSensor;
-            float3 queryPointInWorld;
+            float3 queryPointInZUp;
             if (params[MODE] == 0) // Spherical
             {
                queryPointInSensor = back_project_spherical(yaw_count, pitch_count, depth, params);
@@ -174,7 +174,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
                queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), depth, params);
             }
 
-            queryPointInWorld = transformPoint3D32_2(
+            queryPointInZUp = transformPoint3D32_2(
             queryPointInSensor,
             (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
             (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
@@ -183,7 +183,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
             //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
             //   xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z, projectedPoint.x, projectedPoint.y,
-            //   yaw_count, pitch_count, depth, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
+            //   yaw_count, pitch_count, depth, queryPointInZUp.x, queryPointInZUp.y, queryPointInZUp.z, minX, maxX, minY, maxY);
 
 
             //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
@@ -191,11 +191,11 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
             //      cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z,
             //      projectedPoint.x, projectedPoint.y);
 
-            if (queryPointInWorld.x > minX && queryPointInWorld.x < maxX && queryPointInWorld.y > minY && queryPointInWorld.y < maxY)
+            if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
             {
-               //printf("HIT......: (%f, %f, %f), minX: %f, maxX: %f, minY: %f, maxY: %f\n", queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
+               //printf("HIT......: (%f, %f, %f), minX: %f, maxX: %f, minY: %f, maxY: %f\n", queryPointInZUp.x, queryPointInZUp.y, queryPointInZUp.z, minX, maxX, minY, maxY);
                count++;
-               averageHeightZ += queryPointInWorld.z;
+               averageHeightZ += queryPointInZUp.z;
             }
          }
       }
@@ -215,6 +215,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       // this is slightly below the floor height of what we'll accept
       averageHeightZ = -3.25f;
    }
+   averageHeightZ += 3.25f;
    write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
@@ -261,7 +262,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
 
    // Extract the height from the local map at the local cell index (if within bounds)
    float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR];
-   float height = params[MIN_HEIGHT_REGISTRATION] - 0.05f;
+   float height = -3.25f;
 
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
@@ -271,7 +272,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    float finalHeight = previousHeight;
 
    // Filter the height value if it is within the registration height range and not colliding with the robot
-   if (!isColliding && height > params[MIN_HEIGHT_REGISTRATION] && height < params[MAX_HEIGHT_REGISTRATION])
+   if (!isColliding)
    {
       // Apply a poor man's mahalanobis filter on the data
       float height_diff = height - previousHeight;
