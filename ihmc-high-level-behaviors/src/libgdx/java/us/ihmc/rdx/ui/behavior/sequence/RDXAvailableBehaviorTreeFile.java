@@ -3,12 +3,12 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-public class RDXAvailableActionSequence
+public class RDXAvailableBehaviorTreeFile
 {
    private final WorkspaceResourceFile sequenceFile;
    private String name;
 
-   public RDXAvailableActionSequence(WorkspaceResourceFile sequenceFile)
+   public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile sequenceFile)
    {
       this.sequenceFile = sequenceFile;
       JSONFileTools.load(sequenceFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());

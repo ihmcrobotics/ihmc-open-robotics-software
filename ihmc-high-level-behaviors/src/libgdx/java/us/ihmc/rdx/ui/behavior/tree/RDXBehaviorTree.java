@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
@@ -42,6 +43,7 @@ public class RDXBehaviorTree
     * back together.
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
+   private final RDXBehaviorTreeFileMenu fileMenu = new RDXBehaviorTreeFileMenu();
 
    public RDXBehaviorTree(DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
@@ -145,7 +147,10 @@ public class RDXBehaviorTree
 
    private void renderImGuiWidgets()
    {
+      ImGui.beginMenuBar();
+      fileMenu.renderFileMenu();
 
+      ImGui.endMenuBar();
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
