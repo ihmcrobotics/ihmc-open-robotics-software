@@ -149,22 +149,25 @@ class FootstepDataset(Dataset):
         footstep_plan_quaternions = self.footstep_plan_orientations[index*self.n_steps:(index+1)*self.n_steps, :]
         footstep_plan_yaws = np.arctan2(2 * (footstep_plan_quaternions[:, 0] * footstep_plan_quaternions[:, 1] + footstep_plan_quaternions[:, 3] * footstep_plan_quaternions[:, 2]),
                     1 - 2 * (footstep_plan_quaternions[:, 0]**2 + footstep_plan_quaternions[:, 3]**2))
+        footstep_plan_sides = self.footstep_plan_sides[index*self.n_steps:(index+1)*self.n_steps]
+        
         footstep_plan_poses = self.footstep_plan_positions[index*self.n_steps:(index+1)*self.n_steps, :] - sensor_pose
         footstep_plan_poses[:, 2] = footstep_plan_yaws
+        # stack such that footstep_plan_poses[:, 3] = footstep_plan_sides
+        footstep_plan_poses = np.column_stack((footstep_plan_poses, footstep_plan_sides))
         footstep_plan_poses = np.array(footstep_plan_poses, dtype=np.float32)
 
-        # get sides
-        footstep_plan_sides = self.footstep_plan_sides[index*self.n_steps:(index+1)*self.n_steps]
 
         # Inputs
         # --------- Image Inputs (float54)
         height_map_input = torch.Tensor(self.height_maps[index]).unsqueeze(0).to(device)
         
         # --------- Pose Inputs (X, Y, Yaw) with float 64
-        sensor_pose = torch.Tensor(sensor_pose).to(device)
+        start_side = torch.Tensor(start_side).to(device)
         start_pose = torch.Tensor(start_pose).to(device)
         goal_pose = torch.Tensor(goal_pose).to(device)
-        linear_input = torch.cat((start_pose, goal_pose), dim=0)
+        # linear_input = torch.cat((start_pose, goal_pose), dim=0) # without start side
+        linear_input = torch.cat((start_pose, goal_pose, start_side), dim=0) # with start side
 
         # Outputs
         # --------- 3D Pose Outputs
@@ -184,9 +187,9 @@ class FootstepPredictor(Module):
         print("FootstepPredictor (Model) -> Linear Input Size: ", input_size, "Linear Output Size: ", output_size)
 
         # convolutional layers given a 200x200 16-bit grayscale image
-        self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=5, stride=1, padding=1)
-        self.conv2d_2 = torch.nn.Conv2d(32, 48, kernel_size=5, stride=1, padding=1)
-        self.conv2d_3 = torch.nn.Conv2d(48, 64, kernel_size=7, stride=1, padding=1)
+        self.conv2d_1 = torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.conv2d_2 = torch.nn.Conv2d(32, 48, kernel_size=3, stride=1, padding=1)
+        self.conv2d_3 = torch.nn.Conv2d(48, 64, kernel_size=3, stride=1, padding=1)
         self.conv2d_4 = torch.nn.Conv2d(64, 96, kernel_size=3, stride=1, padding=1)
         self.conv2d_5 = torch.nn.Conv2d(96, 128, kernel_size=3, stride=1, padding=1)
         self.maxpool2d_22 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
@@ -211,6 +214,8 @@ class FootstepPredictor(Module):
 
 
     def forward(self, h1, l1):
+
+        print("\n\nForward Pass Input Shape: ", h1.shape, l1.shape, end=" ")
 
         # x1 is image 200x200 16-bit grayscale and x2 is the 3D pose
         h1 = self.conv2d_1(h1)
@@ -260,6 +265,8 @@ class FootstepPredictor(Module):
 
         x = self.fc6(x)
 
+        print("Forward Pass Output Shape: ", x.shape)
+
         return x
     
 
@@ -279,38 +286,39 @@ def train_store(train_dataset, val_dataset, batch_size, epochs, criterion):
         loop=tqdm(train_loader, bar_format='{l_bar}{bar:30}{r_bar}{bar:-30b}')
         running_loss=0
         for i, (x1, x2, y) in enumerate(loop):
-            
-            x1 = x1.to(device)
-            x2 = x2.to(device)
-            y = y.to(device)
+            if x1.shape[0] > 1:
+                x1 = x1.to(device)
+                x2 = x2.to(device)
+                y = y.to(device)
 
-            # Forward pass
-            y_pred = model(x1, x2)
-            loss = criterion(y_pred, y)
+                # Forward pass
+                y_pred = model(x1, x2)
+                loss = criterion(y_pred, y)
 
-            # Backward pass and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+                # Backward pass and optimize
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
-            # calculate running loss
-            running_loss+=loss.item()*y.size()[0]
-            average_loss = running_loss/(y.size(0)*(i+1))
-            loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
-            loop.set_postfix(loss=average_loss)
-            writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
+                # calculate running loss
+                running_loss+=loss.item()*y.size()[0]
+                average_loss = running_loss/(y.size(0)*(i+1))
+                loop.set_description(f'Epoch [{epoch+1}/{epochs}]')
+                loop.set_postfix(loss=average_loss)
+                writer.add_scalar('training loss', average_loss, epoch * len(train_loader) + i)
 
         for x1, x2, y in val_loader:
             # send data to gpu
-            x1 = x1.to(device)
-            x2 = x2.to(device)
-            y = y.to(device)
-            model.eval()
-            y_pred = model(x1, x2)
-            loss = criterion(y_pred,y)
-            valid_loss = loss.item()
-            print("Validiation loss - ",valid_loss,"\n")
-            writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
+            if x1.shape[0] > 1:
+                x1 = x1.to(device)
+                x2 = x2.to(device)
+                y = y.to(device)
+                model.eval()
+                y_pred = model(x1, x2)
+                loss = criterion(y_pred,y)
+                valid_loss = loss.item()
+                print("Validiation loss - ",valid_loss,"\n")
+                writer.add_scalar('validation loss', valid_loss, epoch * len(train_loader) + i)
 
     # save the model
     torch.save(model.state_dict(), 'footstep_predictor.pt')
@@ -361,7 +369,8 @@ def visualize_output(height_map_input, linear_input, final_output, i, val_datase
 
     start_pose = linear_input[0:3]
     goal_pose = linear_input[3:6]
-    plan_poses = output[0:3*n_steps].reshape((n_steps, 3))
+    start_side = linear_input[6]
+    plan_poses = output[0:4*n_steps].reshape((n_steps, 4))[:, 0:3]
 
     # visualize plan
     visualize_plan(height_map, plan_poses, 
@@ -412,7 +421,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
+    train = True
     visualize_raw = False
 
     if visualize_raw:
@@ -421,7 +430,7 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion=torch.nn.L1Loss()
-        train_store(train_dataset, val_dataset, batch_size=32, epochs=30, criterion=criterion)
+        train_store(train_dataset, val_dataset, batch_size=10, epochs=30, criterion=criterion)
 
     else:
         # load and validate model
