@@ -18,8 +18,9 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public static final byte DETECTABLE_SCENE_NODE_TYPE = (byte) 1;
    public static final byte PREDEFINED_RIGID_BODY_NODE_TYPE = (byte) 2;
    public static final byte ARUCO_MARKER_NODE_TYPE = (byte) 3;
-   public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 4;
-   public static final byte PRIMITIVE_RIGID_BODY_NODE_TYPE = (byte) 5;
+   public static final byte CENTERPOSE_NODE_TYPE = (byte) 4;
+   public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 5;
+   public static final byte PRIMITIVE_RIGID_BODY_NODE_TYPE = (byte) 6;
    /**
             * The ID to assign to the next instantiated node
             */
@@ -51,6 +52,10 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
             */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ArUcoMarkerNodeMessage>  aruco_marker_scene_nodes_;
    /**
+            * Centerpose scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.CenterposeNodeMessage>  centerpose_scene_nodes_;
+   /**
             * Static relative scene nodes
             */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage>  static_relative_scene_nodes_;
@@ -69,6 +74,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       detectable_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DetectableSceneNodeMessage> (200, new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType());
       predefined_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessagePubSubType());
       aruco_marker_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.ArUcoMarkerNodeMessage> (200, new perception_msgs.msg.dds.ArUcoMarkerNodeMessagePubSubType());
+      centerpose_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.CenterposeNodeMessage> (200, new perception_msgs.msg.dds.CenterposeNodeMessagePubSubType());
       static_relative_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage> (200, new perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType());
       primitive_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessagePubSubType());
 
@@ -90,6 +96,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       detectable_scene_nodes_.set(other.detectable_scene_nodes_);
       predefined_rigid_body_scene_nodes_.set(other.predefined_rigid_body_scene_nodes_);
       aruco_marker_scene_nodes_.set(other.aruco_marker_scene_nodes_);
+      centerpose_scene_nodes_.set(other.centerpose_scene_nodes_);
       static_relative_scene_nodes_.set(other.static_relative_scene_nodes_);
       primitive_rigid_body_scene_nodes_.set(other.primitive_rigid_body_scene_nodes_);
    }
@@ -167,6 +174,15 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
 
    /**
+            * Centerpose scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.CenterposeNodeMessage>  getCenterposeSceneNodes()
+   {
+      return centerpose_scene_nodes_;
+   }
+
+
+   /**
             * Static relative scene nodes
             */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage>  getStaticRelativeSceneNodes()
@@ -235,6 +251,13 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
          {  if (!this.aruco_marker_scene_nodes_.get(i).epsilonEquals(other.aruco_marker_scene_nodes_.get(i), epsilon)) return false; }
       }
 
+      if (this.centerpose_scene_nodes_.size() != other.centerpose_scene_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.centerpose_scene_nodes_.size(); i++)
+         {  if (!this.centerpose_scene_nodes_.get(i).epsilonEquals(other.centerpose_scene_nodes_.get(i), epsilon)) return false; }
+      }
+
       if (this.static_relative_scene_nodes_.size() != other.static_relative_scene_nodes_.size()) { return false; }
       else
       {
@@ -270,6 +293,7 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       if (!this.detectable_scene_nodes_.equals(otherMyClass.detectable_scene_nodes_)) return false;
       if (!this.predefined_rigid_body_scene_nodes_.equals(otherMyClass.predefined_rigid_body_scene_nodes_)) return false;
       if (!this.aruco_marker_scene_nodes_.equals(otherMyClass.aruco_marker_scene_nodes_)) return false;
+      if (!this.centerpose_scene_nodes_.equals(otherMyClass.centerpose_scene_nodes_)) return false;
       if (!this.static_relative_scene_nodes_.equals(otherMyClass.static_relative_scene_nodes_)) return false;
       if (!this.primitive_rigid_body_scene_nodes_.equals(otherMyClass.primitive_rigid_body_scene_nodes_)) return false;
 
@@ -296,6 +320,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       builder.append(this.predefined_rigid_body_scene_nodes_);      builder.append(", ");
       builder.append("aruco_marker_scene_nodes=");
       builder.append(this.aruco_marker_scene_nodes_);      builder.append(", ");
+      builder.append("centerpose_scene_nodes=");
+      builder.append(this.centerpose_scene_nodes_);      builder.append(", ");
       builder.append("static_relative_scene_nodes=");
       builder.append(this.static_relative_scene_nodes_);      builder.append(", ");
       builder.append("primitive_rigid_body_scene_nodes=");
