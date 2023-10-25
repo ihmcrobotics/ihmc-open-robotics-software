@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -9,7 +8,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
-import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,7 +31,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators;
-   private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
@@ -76,16 +73,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-         handPoseJointAnglesStatus.setRobotSide(getDefinition().getSide().toByte());
-         handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
+         state.setSolutionQuality(armIKSolver.getQuality());
          for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
          {
-            handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+            state.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
          }
-         if (getDefinition().getSide() == RobotSide.LEFT)
-            ros2ControllerHelper.publish(ROS2BehaviorActionSequence.LEFT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
-         else
-            ros2ControllerHelper.publish(ROS2BehaviorActionSequence.RIGHT_HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
       }
    }
 
