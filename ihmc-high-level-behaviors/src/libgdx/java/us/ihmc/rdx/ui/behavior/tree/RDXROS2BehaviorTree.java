@@ -10,21 +10,30 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXROS2BehaviorTree extends RDXBehaviorTree
 {
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
 
-   public RDXROS2BehaviorTree(DRCRobotModel robotModel,
+   public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
+                              DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
                               RobotCollisionModel selectionCollisionModel,
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
                               ReferenceFrameLibrary referenceFrameLibrary,
-                              FootstepPlannerParametersBasics footstepPlannerParametersBasics,
-                              ROS2ControllerPublishSubscribeAPI ros2)
+                              FootstepPlannerParametersBasics footstepPlannerParametersBasics, ROS2ControllerPublishSubscribeAPI ros2)
    {
-      super(robotModel, syncedRobot, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary, footstepPlannerParametersBasics, ros2);
+      super(treeFilesDirectory,
+            robotModel,
+            syncedRobot,
+            selectionCollisionModel,
+            baseUI,
+            panel3D,
+            referenceFrameLibrary,
+            footstepPlannerParametersBasics,
+            ros2);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2, ROS2ActorDesignation.OPERATOR);
 

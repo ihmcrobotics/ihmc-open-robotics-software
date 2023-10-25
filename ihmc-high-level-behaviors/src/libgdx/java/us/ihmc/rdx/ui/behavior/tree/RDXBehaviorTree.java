@@ -28,6 +28,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class RDXBehaviorTree
@@ -43,10 +44,11 @@ public class RDXBehaviorTree
     * back together.
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
-   private final RDXBehaviorTreeFileMenu fileMenu = new RDXBehaviorTreeFileMenu();
-   private final RDXBehaviorTreeNodesMenu nodesMenu = new RDXBehaviorTreeNodesMenu();
+   private final RDXBehaviorTreeFileMenu fileMenu;
+   private final RDXBehaviorTreeNodesMenu nodesMenu;
 
-   public RDXBehaviorTree(DRCRobotModel robotModel,
+   public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
+                          DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
@@ -64,6 +66,8 @@ public class RDXBehaviorTree
                                                    footstepPlannerParametersBasics,
                                                    ros2);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
+      fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
+      nodesMenu = new RDXBehaviorTreeNodesMenu(treeFilesDirectory);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
    }
