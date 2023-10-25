@@ -7,10 +7,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.IKRootCalculator;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
-import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
@@ -80,15 +78,13 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private final SideDependentList<Color> currentColor = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
-   private final IKRootCalculator rootCalculator;
 
    public RDXHandPoseAction(long id,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
                             FullHumanoidRobotModel syncedFullRobotModel,
                             RobotCollisionModel selectionCollisionModel,
-                            ReferenceFrameLibrary referenceFrameLibrary,
-                            ROS2ControllerPublishSubscribeAPI ros2)
+                            ReferenceFrameLibrary referenceFrameLibrary)
    {
       state = new HandPoseActionState(id, referenceFrameLibrary);
 
@@ -170,8 +166,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       tooltip = new RDX3DPanelTooltip(panel3D);
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
-
-      rootCalculator = new IKRootCalculator(ros2, syncedFullRobotModel, referenceFrameLibrary);
    }
 
    @Override
@@ -209,9 +203,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private void visualizeIK()
    {
       SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getDefinition().getSide()).getRigidBody().getChildrenJoints().get(0);
-      rootCalculator.getKinematicsInfo();
-      rootCalculator.computeRoot();
-      floatingJoint.getJointPose().set(rootCalculator.getRoot().getTransformToRoot());
+      floatingJoint.getJointPose().set(state.getGoalChestFrame().getReferenceFrame().getTransformToRoot());
 
       for (int i = 0; i < state.getJointAngles().length; i++)
       {

@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
-import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -9,8 +8,6 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionState;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,7 +28,6 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +51,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RDX3DPanelTooltip tooltip;
    private final FullHumanoidRobotModel syncedFullRobotModel;
-   private final ROS2PublishSubscribeAPI ros2;
-   private final BodyPartPoseStatusMessage pelvisPoseStatus = new BodyPartPoseStatusMessage();
-   private final Throttler throttler = new Throttler().setFrequency(10.0);
    private boolean wasConcurrent = false;
 
    public RDXPelvisHeightPitchAction(long id,
@@ -65,10 +58,8 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
                                      RobotCollisionModel selectionCollisionModel,
-                                     ReferenceFrameLibrary referenceFrameLibrary,
-                                     ROS2PublishSubscribeAPI ros2)
+                                     ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.ros2 = ros2;
       this.syncedFullRobotModel = syncedFullRobotModel;
 
       state = new PelvisHeightPitchActionState(id, referenceFrameLibrary);
@@ -135,8 +126,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
             highlightModel.setTransparency(0.5);
          }
 
-         pelvisPoseStatus.setParentFrameName(getDefinition().getParentFrameName());
-
          // compute transform variation from previous pose
          FramePose3D currentRobotPelvisPose = new FramePose3D(syncedFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
          if (state.getPelvisFrame().getReferenceFrame().getParent() != currentRobotPelvisPose.getReferenceFrame())
@@ -144,34 +133,18 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
          RigidBodyTransform transformVariation = new RigidBodyTransform();
          transformVariation.setAndInvert(currentRobotPelvisPose);
          getDefinition().getPelvisToParentTransform().transform(transformVariation);
-         MessageTools.toMessage(transformVariation, pelvisPoseStatus.getTransformToParent());
 
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
          if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
          {
             wasConcurrent = true;
-            pelvisPoseStatus.setCurrentAndConcurrent(true);
-            if (throttler.run())
-            {
-               if (state.getActionIndex() >= 0)
-                  ros2.publish(ROS2BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
-            }
          }
          else if (wasConcurrent)
          {
-            pelvisPoseStatus.setCurrentAndConcurrent(false);
-            ros2.publish(ROS2BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
             wasConcurrent = false;
          }
       }
-   }
-
-   @Override
-   public void updateBeforeRemoving()
-   {
-      pelvisPoseStatus.setCurrentAndConcurrent(false);
-      ros2.publish(ROS2BehaviorActionSequence.PELVIS_POSE_VARIATION_STATUS, pelvisPoseStatus);
    }
 
    @Override

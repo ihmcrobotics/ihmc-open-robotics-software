@@ -58,8 +58,7 @@ public class RDXBehaviorTree
                                                    baseUI,
                                                    panel3D,
                                                    referenceFrameLibrary,
-                                                   footstepPlannerParametersBasics,
-                                                   ros2);
+                                                   footstepPlannerParametersBasics);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
       nodesMenu = new RDXBehaviorTreeNodesMenu(treeFilesDirectory);

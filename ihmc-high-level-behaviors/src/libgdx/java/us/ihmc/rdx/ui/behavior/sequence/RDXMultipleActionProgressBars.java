@@ -39,8 +39,8 @@ public class RDXMultipleActionProgressBars
 
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         double elapsedTime = actionProgressBar.getActionExecutionStatusMessage().getElapsedExecutionTime();
-         double nominalDuration = actionProgressBar.getActionExecutionStatusMessage().getNominalExecutionDuration();
+         double elapsedTime = actionProgressBar.getActionNodeStateMessage().getElapsedExecutionTime();
+         double nominalDuration = actionProgressBar.getActionNodeStateMessage().getNominalExecutionDuration();
          double percentComplete = elapsedTime / nominalDuration;
          double percentLeft = 1.0 - percentComplete;
          ImGui.progressBar((float) percentLeft, dividedBarWidth, PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
@@ -50,9 +50,9 @@ public class RDXMultipleActionProgressBars
       widgetAligner.text("Position error (m):");
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         double currentPositionError = actionProgressBar.getActionExecutionStatusMessage().getCurrentPositionDistanceToGoal();
-         double startPositionError = actionProgressBar.getActionExecutionStatusMessage().getStartPositionDistanceToGoal();
-         double positionTolerance = actionProgressBar.getActionExecutionStatusMessage().getPositionDistanceToGoalTolerance();
+         double currentPositionError = actionProgressBar.getActionNodeStateMessage().getCurrentPositionDistanceToGoal();
+         double startPositionError = actionProgressBar.getActionNodeStateMessage().getStartPositionDistanceToGoal();
+         double positionTolerance = actionProgressBar.getActionNodeStateMessage().getPositionDistanceToGoalTolerance();
          double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
          double toleranceMarkPercent = positionTolerance / barEndValue;
          int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
@@ -69,9 +69,9 @@ public class RDXMultipleActionProgressBars
       widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         double currentOrientationError = actionProgressBar.getActionExecutionStatusMessage().getCurrentOrientationDistanceToGoal();
-         double startOrientationError = actionProgressBar.getActionExecutionStatusMessage().getStartOrientationDistanceToGoal();
-         double orientationTolerance = actionProgressBar.getActionExecutionStatusMessage().getOrientationDistanceToGoalTolerance();
+         double currentOrientationError = actionProgressBar.getActionNodeStateMessage().getCurrentOrientationDistanceToGoal();
+         double startOrientationError = actionProgressBar.getActionNodeStateMessage().getStartOrientationDistanceToGoal();
+         double orientationTolerance = actionProgressBar.getActionNodeStateMessage().getOrientationDistanceToGoalTolerance();
          double barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
          double toleranceMarkPercent = orientationTolerance / barEndValue;
          int barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
@@ -88,8 +88,8 @@ public class RDXMultipleActionProgressBars
       widgetAligner.text("Footstep completion:");
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         int incompleteFootsteps = actionProgressBar.getActionExecutionStatusMessage().getNumberOfIncompleteFootsteps();
-         int totalFootsteps = actionProgressBar.getActionExecutionStatusMessage().getTotalNumberOfFootsteps();
+         int incompleteFootsteps = actionProgressBar.getActionNodeStateMessage().getNumberOfIncompleteFootsteps();
+         int totalFootsteps = actionProgressBar.getActionNodeStateMessage().getTotalNumberOfFootsteps();
          double percentLeft = incompleteFootsteps / (double) totalFootsteps;
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
          ImGui.sameLine();
@@ -99,7 +99,7 @@ public class RDXMultipleActionProgressBars
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
          double limit = 20.0;
-         double force = actionProgressBar.getActionExecutionStatusMessage().getHandWrenchMagnitudeLinear();
+         double force = actionProgressBar.getActionNodeStateMessage().getHandWrenchMagnitudeLinear();
          int barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
          ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, dividedBarWidth, barColor, force / limit, 0.5, "%.2f".formatted(force));
          ImGui.sameLine();
