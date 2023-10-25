@@ -5,6 +5,9 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -25,6 +28,8 @@ public class RDXPinholePinholeColoredPointCloudKernel
    private final OpenCLRigidBodyTransformParameter depthToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final OpenCLRigidBodyTransformParameter depthToColorTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final BytedecoImage placeholderColorImage;
+   private final ReferenceFrame depthFrame;
+   private final ReferenceFrame colorFrame;
 
    public RDXPinholePinholeColoredPointCloudKernel(OpenCLManager openCLManager)
    {
@@ -33,6 +38,13 @@ public class RDXPinholePinholeColoredPointCloudKernel
       kernel = openCLManager.createKernel(openCLProgram, "computeVertexBuffer");
       placeholderColorImage = new BytedecoImage(1, 1, opencv_core.CV_8UC4);
       placeholderColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+
+      depthFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("depthFrame",
+                                                                                   ReferenceFrame.getWorldFrame(),
+                                                                                   new RigidBodyTransform());
+      colorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("depthFrame",
+                                                                                   ReferenceFrame.getWorldFrame(),
+                                                                                   new RigidBodyTransform());
    }
 
    public void computeVertexBuffer(RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel,
@@ -43,12 +55,20 @@ public class RDXPinholePinholeColoredPointCloudKernel
                                    float pointSize,
                                    OpenCLFloatBuffer pointCloudVertexBuffer)
    {
-      RotationMatrix depthToColorRotation = colorChannel.getRotationMatrixToWorld();
-      depthToColorRotation.invert();
-      depthToColorRotation.multiply(depthChannel.getRotationMatrixToWorld());
+      depthFrame.getTransformToParent().setTranslationAndIdentityRotation(depthChannel.getTranslationToWorld());
+      depthFrame.getTransformToParent().prependOrientation(depthChannel.getRotationMatrixToWorld());
+      colorFrame.getTransformToParent().setTranslationAndIdentityRotation(colorChannel.getTranslationToWorld());
+      colorFrame.getTransformToParent().prependOrientation(colorChannel.getRotationMatrixToWorld());
 
-      Vector3D depthToColorTranslation = colorChannel.getTranslationToWorld();
-      depthToColorTranslation.sub(depthChannel.getTranslationToWorld());
+      RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
+      depthFrame.getTransformToDesiredFrame(depthToColorTransform, colorFrame);
+
+//      RotationMatrix depthToColorRotation = colorChannel.getRotationMatrixToWorld();
+//      depthToColorRotation.invert();
+//      depthToColorRotation.multiply(depthChannel.getRotationMatrixToWorld());
+//
+//      Vector3D depthToColorTranslation = colorChannel.getTranslationToWorld();
+//      depthToColorTranslation.sub(depthChannel.getTranslationToWorld());
 
       parametersBuffer.setParameter(colorChannel.getFx());
       parametersBuffer.setParameter(colorChannel.getFy());
@@ -68,7 +88,7 @@ public class RDXPinholePinholeColoredPointCloudKernel
       parametersBuffer.setParameter(useSinusoidalGradientPattern);
       parametersBuffer.setParameter(pointSize);
       depthToWorldTransformParameter.setParameter(depthChannel.getTranslationToWorld(), depthChannel.getRotationMatrixToWorld());
-      depthToColorTransformParameter.setParameter(depthToColorTranslation, depthToColorRotation);
+      depthToColorTransformParameter.setParameter(depthToColorTransform.getTranslation(), depthToColorTransform.getRotation());
 
       // Upload the buffers to the OpenCL device (GPU)
       depthChannel.getDepth16UC1Image().writeOpenCLImage(openCLManager);
