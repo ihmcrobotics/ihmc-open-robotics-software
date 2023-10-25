@@ -4,15 +4,15 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 
 public class RDXSingleActionProgressBars
 {
-   private RDXBehaviorAction action;
+   private RDXActionNode action;
    private ActionExecutionStatusMessage actionExecutionStatusMessage;
 
-   public void setAction(RDXBehaviorAction action)
+   public void setAction(RDXActionNode action)
    {
       this.action = action;
    }
 
-   public RDXBehaviorAction getAction()
+   public RDXActionNode getAction()
    {
       return action;
    }

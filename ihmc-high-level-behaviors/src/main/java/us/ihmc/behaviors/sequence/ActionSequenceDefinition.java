@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.BehaviorActionSequenceDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 
-public class BehaviorActionSequenceDefinition extends BehaviorTreeNodeDefinition
+public class ActionSequenceDefinition extends BehaviorTreeNodeDefinition
 {
    // Seems to be nothing special here so far TODO Does that mean we delete it?
 

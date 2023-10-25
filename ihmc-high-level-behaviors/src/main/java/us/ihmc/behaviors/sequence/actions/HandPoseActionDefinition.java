@@ -3,14 +3,14 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.HandPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class HandPoseActionDefinition extends BehaviorActionDefinition implements SidedObject
+public class HandPoseActionDefinition extends ActionNodeDefinition implements SidedObject
 {
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;

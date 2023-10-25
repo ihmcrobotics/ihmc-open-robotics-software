@@ -4,10 +4,10 @@ import behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class SakeHandCommandActionDefinition extends BehaviorActionDefinition
+public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 {
    private RobotSide side = RobotSide.LEFT;
    private int handConfigurationIndex = SakeHandCommandOption.GOTO.ordinal();

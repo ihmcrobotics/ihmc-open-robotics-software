@@ -3,13 +3,13 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class PelvisHeightPitchActionDefinition extends BehaviorActionDefinition
+public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
 {
    private double trajectoryDuration = 4.0;
    private String parentFrameName;

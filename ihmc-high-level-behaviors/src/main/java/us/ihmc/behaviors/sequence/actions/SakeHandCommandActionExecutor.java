@@ -4,11 +4,11 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.tools.Timer;
 
-public class SakeHandCommandActionExecutor extends BehaviorActionExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
+public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
    /** TODO: Make this variable. */
    private static final double WAIT_TIME = 0.5;

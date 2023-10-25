@@ -8,8 +8,8 @@ import java.util.List;
 
 public class BehaviorActionSequenceTools
 {
-   public static <T extends BehaviorActionExecutor> void packActionSequenceUpdateMessage(List<T> actionSequence,
-                                                                                              ActionSequenceUpdateMessage actionSequenceUpdateMessage)
+   public static <T extends ActionNodeExecutor> void packActionSequenceUpdateMessage(List<T> actionSequence,
+                                                                                     ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
@@ -25,7 +25,7 @@ public class BehaviorActionSequenceTools
       for (T action : actionSequence)
       {
          BehaviorTreeNodeState state = action.getState(); // TODO Why doesn't this return BehaviorActionState?
-         if (state instanceof BehaviorActionState<?> actionState)
+         if (state instanceof ActionNodeState<?> actionState)
          {
             if (actionState instanceof ArmJointAnglesActionState armJointAnglesActionState)
             {

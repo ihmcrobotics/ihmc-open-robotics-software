@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.BehaviorActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
-public abstract class BehaviorActionState<D extends BehaviorActionDefinition>
+public abstract class ActionNodeState<D extends ActionNodeDefinition>
       extends BehaviorTreeNodeState<D>
 {
    private int actionIndex = -1;
@@ -12,7 +12,7 @@ public abstract class BehaviorActionState<D extends BehaviorActionDefinition>
    private boolean canExecute = true;
    private boolean isExecuting = false;
 
-   public BehaviorActionState(long id, D definition)
+   public ActionNodeState(long id, D definition)
    {
       super(id, definition);
    }
@@ -84,7 +84,7 @@ public abstract class BehaviorActionState<D extends BehaviorActionDefinition>
       this.isExecuting = isExecuting;
    }
 
-   /** Should return a precalculated value from {@link BehaviorActionExecutor#updateCurrentlyExecuting} */
+   /** Should return a precalculated value from {@link ActionNodeExecutor#updateCurrentlyExecuting} */
    public boolean getIsExecuting()
    {
       return isExecuting;

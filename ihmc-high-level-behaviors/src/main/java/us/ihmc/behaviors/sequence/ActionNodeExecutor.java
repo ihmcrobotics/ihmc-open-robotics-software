@@ -6,8 +6,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
-public abstract class BehaviorActionExecutor<S extends BehaviorActionState<D>,
-                                             D extends BehaviorActionDefinition>
+public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
+                                         D extends ActionNodeDefinition>
       extends BehaviorTreeNodeExecutor<S, D>
 {
    /** Called every tick. */

@@ -1,10 +1,10 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.tools.Timer;
 
-public class WaitDurationActionExecutor extends BehaviorActionExecutor<WaitDurationActionState, WaitDurationActionDefinition>
+public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationActionState, WaitDurationActionDefinition>
 {
    private final WaitDurationActionState state;
    private final Timer executionTimer = new Timer();

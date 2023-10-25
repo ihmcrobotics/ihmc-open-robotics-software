@@ -5,9 +5,9 @@ import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXBehaviorAction;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 
-public class RDXWaitDurationAction extends RDXBehaviorAction<WaitDurationActionState, WaitDurationActionDefinition>
+public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState, WaitDurationActionDefinition>
 {
    private final WaitDurationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

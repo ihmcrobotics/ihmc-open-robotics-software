@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
-public class ChestOrientationActionState extends BehaviorActionState<ChestOrientationActionDefinition>
+public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
    private final DetachableReferenceFrame chestFrame;
 

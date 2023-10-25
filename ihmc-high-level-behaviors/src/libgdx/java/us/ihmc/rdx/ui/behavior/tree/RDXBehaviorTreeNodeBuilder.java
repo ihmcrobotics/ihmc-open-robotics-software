@@ -3,12 +3,14 @@ package us.ihmc.rdx.ui.behavior.tree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
@@ -45,6 +47,13 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    @Override
    public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id)
    {
+      // Control nodes:
+      if (nodeType == ActionSequenceDefinition.class)
+      {
+         return new RDXActionSequence(id);
+      }
+
+      // Actions:
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
          return new RDXArmJointAnglesAction(id, robotModel);

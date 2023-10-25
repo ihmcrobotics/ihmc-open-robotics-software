@@ -4,11 +4,11 @@ import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sequence.BehaviorActionExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
 
-public class ArmJointAnglesActionExecutor extends BehaviorActionExecutor<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
+public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
    private final ArmJointAnglesActionState state;
    private final DRCRobotModel robotModel;

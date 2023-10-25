@@ -3,13 +3,13 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.BehaviorActionDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition extends BehaviorActionDefinition
+public class ChestOrientationActionDefinition extends ActionNodeDefinition
 {
    private double trajectoryDuration = 4.0;
    private boolean holdPoseInWorldLater = false;

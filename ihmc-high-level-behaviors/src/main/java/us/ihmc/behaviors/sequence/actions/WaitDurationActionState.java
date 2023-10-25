@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
-import us.ihmc.behaviors.sequence.BehaviorActionState;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 
-public class WaitDurationActionState extends BehaviorActionState<WaitDurationActionDefinition>
+public class WaitDurationActionState extends ActionNodeState<WaitDurationActionDefinition>
 {
    public WaitDurationActionState(long id)
    {
