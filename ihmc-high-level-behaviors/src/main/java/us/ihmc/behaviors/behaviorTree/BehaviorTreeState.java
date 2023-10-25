@@ -59,7 +59,12 @@ public class BehaviorTreeState
    public void checkTreeModified()
    {
       localTreeFrozen = false;
-      checkTreeModified(rootNodeSupplier.get().getState());
+
+      BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = rootNodeSupplier.get();
+      if (rootNode != null)
+      {
+         checkTreeModified(rootNode.getState());
+      }
    }
 
    private void checkTreeModified(BehaviorTreeNodeState<?> localNode)

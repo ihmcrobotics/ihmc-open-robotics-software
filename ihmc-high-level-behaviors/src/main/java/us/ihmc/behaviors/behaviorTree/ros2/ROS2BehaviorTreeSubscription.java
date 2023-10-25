@@ -56,11 +56,11 @@ public class ROS2BehaviorTreeSubscription
          if (!behaviorTreeState.getLocalTreeFrozen())
             behaviorTreeState.getNextID().setValue(latestBehaviorTreeMessage.getNextId());
 
-         if (!behaviorTreeState.getLocalTreeFrozen())
+         if (!behaviorTreeState.getLocalTreeFrozen() && behaviorTreeState.getRootNode() != null)
          {
             // First clear the tree, storing all nodes by ID in the map in the tree rebuilder
             behaviorTreeState.modifyTree(modificationQueue ->
-                                         modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
+                                               modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
          }
 
          behaviorTreeState.modifyTree(modificationQueue ->
@@ -124,7 +124,7 @@ public class ROS2BehaviorTreeSubscription
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
    private void buildSubscriptionTree(BehaviorTreeStateMessage behaviorTreeStateMessage, ROS2BehaviorTreeSubscriptionNode subscriptionNode)
    {
-
+      // TODO: This
    }
 
    public void destroy()
