@@ -27,6 +27,8 @@ public class RDXPinholePinholeColoredPointCloudKernel
    private final BytedecoImage placeholderColorImage;
    private final MutableReferenceFrame depthFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame colorFrame = new MutableReferenceFrame();
+   private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
+
 
    public RDXPinholePinholeColoredPointCloudKernel(OpenCLManager openCLManager)
    {
@@ -47,8 +49,6 @@ public class RDXPinholePinholeColoredPointCloudKernel
    {
       depthFrame.update(transformToWorld -> transformToWorld.set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld()));
       colorFrame.update(transformToWorld -> transformToWorld.set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld()));
-
-      RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
       depthFrame.getReferenceFrame().getTransformToDesiredFrame(depthToColorTransform, colorFrame.getReferenceFrame());
 
       parametersBuffer.setParameter(colorChannel.getFx());
