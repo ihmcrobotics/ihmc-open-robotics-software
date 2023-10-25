@@ -37,7 +37,7 @@ public class RapidHeightMapExtractor
 
    private static int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
-   private HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -385,7 +385,7 @@ public class RapidHeightMapExtractor
       return heightMapDataAvailable;
    }
 
-   public HeightMapParameters getHeightMapParameters()
+   public static HeightMapParameters getHeightMapParameters()
    {
       return heightMapParameters;
    }

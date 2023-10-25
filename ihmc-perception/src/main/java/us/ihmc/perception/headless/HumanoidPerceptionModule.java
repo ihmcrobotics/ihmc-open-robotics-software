@@ -181,7 +181,7 @@ public class HumanoidPerceptionModule
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          image.rows(),
                                                          image.cols(),
-                                                         RapidHeightMapExtractor.HEIGHT_SCALE_FACTOR);
+                                                         (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
    }
 
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
