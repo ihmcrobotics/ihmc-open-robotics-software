@@ -3,11 +3,18 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTreeFileMenu
 {
+   private final WorkspaceResourceDirectory treeFilesDirectory;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final Notification menuShouldClose = new Notification();
+
+   public RDXBehaviorTreeFileMenu(WorkspaceResourceDirectory treeFilesDirectory)
+   {
+      this.treeFilesDirectory = treeFilesDirectory;
+   }
 
    public void renderFileMenu()
    {
