@@ -16,8 +16,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.function.Supplier;
-
 /**
  * To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
  * the install script inside of it.
