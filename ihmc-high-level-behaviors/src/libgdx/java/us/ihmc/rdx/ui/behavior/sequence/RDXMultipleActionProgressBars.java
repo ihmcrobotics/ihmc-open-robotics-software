@@ -88,8 +88,8 @@ public class RDXMultipleActionProgressBars
       widgetAligner.text("Footstep completion:");
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
-         int incompleteFootsteps = actionProgressBar.getActionNodeStateMessage().getNumberOfIncompleteFootsteps();
-         int totalFootsteps = actionProgressBar.getActionNodeStateMessage().getTotalNumberOfFootsteps();
+         int incompleteFootsteps = actionProgressBar.getFootstepPlanActionState().getNumberOfIncompleteFootsteps();
+         int totalFootsteps = actionProgressBar.getFootstepPlanActionState().getTotalNumberOfFootsteps();
          double percentLeft = incompleteFootsteps / (double) totalFootsteps;
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
          ImGui.sameLine();
@@ -99,7 +99,7 @@ public class RDXMultipleActionProgressBars
       for (RDXSingleActionProgressBars actionProgressBar : actionProgressBars)
       {
          double limit = 20.0;
-         double force = actionProgressBar.getActionNodeStateMessage().getHandWrenchMagnitudeLinear();
+         double force = actionProgressBar.getHandPoseActionState().getHandWrenchMagnitudeLinear();
          int barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
          ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, dividedBarWidth, barColor, force / limit, 0.5, "%.2f".formatted(force));
          ImGui.sameLine();
