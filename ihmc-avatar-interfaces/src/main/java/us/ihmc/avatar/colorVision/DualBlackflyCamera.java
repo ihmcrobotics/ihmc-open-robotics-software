@@ -388,7 +388,7 @@ public class DualBlackflyCamera
       spinnakerBlackfly.getNextImage(spinImage);
 
       // Get camera pose
-      synchronized (humanoidReferenceFramesSupplier)
+      synchronized (cameraPose)
       {
          cameraPose.setToZero(humanoidReferenceFramesSupplier.get().getSituationalAwarenessCameraFrame(side));
          cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -476,7 +476,7 @@ public class DualBlackflyCamera
       CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
       imageMessage.setSequenceNumber(imageMessageSequenceNumber++);
       ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(imageMessage);
-      synchronized (humanoidReferenceFramesSupplier)
+      synchronized (cameraPose)
       {
          imageMessage.getPosition().set(cameraPose.getTranslation());
          imageMessage.getOrientation().set(cameraPose.getRotation());
@@ -520,7 +520,7 @@ public class DualBlackflyCamera
 
          sceneGraph.updateSubscription(); // Receive overridden poses from operator
          ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
-         synchronized (humanoidReferenceFramesSupplier)
+         synchronized (cameraPose)
          {
             sceneGraph.updateOnRobotOnly(cameraPose.getReferenceFrame());
          }
