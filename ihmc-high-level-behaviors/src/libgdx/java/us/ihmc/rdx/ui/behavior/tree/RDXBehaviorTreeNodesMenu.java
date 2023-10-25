@@ -48,7 +48,7 @@ public class RDXBehaviorTreeNodesMenu
          {
             if (ImGui.button(indexedTreeFile.getName()))
             {
-
+               loadFileRequest.set(indexedTreeFile);
             }
          }
 
