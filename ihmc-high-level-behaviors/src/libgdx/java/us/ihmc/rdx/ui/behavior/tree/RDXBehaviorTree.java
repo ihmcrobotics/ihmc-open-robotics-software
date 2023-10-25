@@ -44,6 +44,7 @@ public class RDXBehaviorTree
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXBehaviorTreeFileMenu fileMenu = new RDXBehaviorTreeFileMenu();
+   private final RDXBehaviorTreeNodesMenu nodesMenu = new RDXBehaviorTreeNodesMenu();
 
    public RDXBehaviorTree(DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
@@ -149,7 +150,7 @@ public class RDXBehaviorTree
    {
       ImGui.beginMenuBar();
       fileMenu.renderFileMenu();
-
+      nodesMenu.renderNodesMenu();
       ImGui.endMenuBar();
    }
 

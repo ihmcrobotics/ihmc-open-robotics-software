@@ -7,11 +7,11 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 public class RDXBehaviorTreeFileMenu
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final Notification fileMenuShouldClose = new Notification();
+   private final Notification menuShouldClose = new Notification();
 
    public void renderFileMenu()
    {
-      if (ImGui.beginMenu(labels.get("File"), !fileMenuShouldClose.poll()))
+      if (ImGui.beginMenu(labels.get("File"), !menuShouldClose.poll()))
       {
 
          // TODO: Iterate through tree finding nodes that coorespond to JSON files.
