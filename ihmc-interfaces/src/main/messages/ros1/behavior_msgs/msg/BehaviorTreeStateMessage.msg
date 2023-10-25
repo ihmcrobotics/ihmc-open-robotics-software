@@ -34,6 +34,8 @@ int8[] behavior_tree_types
 # it's type.
 uint32[] behavior_tree_indices
 
+behavior_msgs/ActionSequenceStateMessage[] action_sequences
+
 behavior_msgs/ArmJointAnglesActionStateMessage[] arm_joint_angles_actions
 
 behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
