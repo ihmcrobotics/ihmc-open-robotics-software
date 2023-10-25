@@ -20,11 +20,21 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
             * Linear hand wrench magnitude
             */
    public double hand_wrench_magnitude_linear_;
+   /**
+            * Joint angles
+            */
+   public double[] joint_angles_;
+   /**
+            * Quality of the IK solution
+            */
+   public double solution_quality_;
 
    public HandPoseActionStateMessage()
    {
       action_state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.HandPoseActionDefinitionMessage();
+      joint_angles_ = new double[7];
+
    }
 
    public HandPoseActionStateMessage(HandPoseActionStateMessage other)
@@ -38,6 +48,14 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       hand_wrench_magnitude_linear_ = other.hand_wrench_magnitude_linear_;
+
+      for(int i1 = 0; i1 < joint_angles_.length; ++i1)
+      {
+            joint_angles_[i1] = other.joint_angles_[i1];
+
+      }
+
+      solution_quality_ = other.solution_quality_;
 
    }
 
@@ -75,6 +93,30 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
    }
 
 
+   /**
+            * Joint angles
+            */
+   public double[] getJointAngles()
+   {
+      return joint_angles_;
+   }
+
+   /**
+            * Quality of the IK solution
+            */
+   public void setSolutionQuality(double solution_quality)
+   {
+      solution_quality_ = solution_quality;
+   }
+   /**
+            * Quality of the IK solution
+            */
+   public double getSolutionQuality()
+   {
+      return solution_quality_;
+   }
+
+
    public static Supplier<HandPoseActionStateMessagePubSubType> getPubSubType()
    {
       return HandPoseActionStateMessagePubSubType::new;
@@ -96,6 +138,13 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_wrench_magnitude_linear_, other.hand_wrench_magnitude_linear_, epsilon)) return false;
 
+      for(int i3 = 0; i3 < joint_angles_.length; ++i3)
+      {
+                if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_angles_[i3], other.joint_angles_[i3], epsilon)) return false;
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
+
 
       return true;
    }
@@ -113,6 +162,13 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.hand_wrench_magnitude_linear_ != otherMyClass.hand_wrench_magnitude_linear_) return false;
 
+      for(int i5 = 0; i5 < joint_angles_.length; ++i5)
+      {
+                if(this.joint_angles_[i5] != otherMyClass.joint_angles_[i5]) return false;
+
+      }
+      if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
+
 
       return true;
    }
@@ -128,7 +184,11 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("hand_wrench_magnitude_linear=");
-      builder.append(this.hand_wrench_magnitude_linear_);
+      builder.append(this.hand_wrench_magnitude_linear_);      builder.append(", ");
+      builder.append("joint_angles=");
+      builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
+      builder.append("solution_quality=");
+      builder.append(this.solution_quality_);
       builder.append("}");
       return builder.toString();
    }

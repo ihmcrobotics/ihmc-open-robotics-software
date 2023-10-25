@@ -25,6 +25,14 @@ module behavior_msgs
          * Linear hand wrench magnitude
          */
         double hand_wrench_magnitude_linear;
+        /**
+         * Joint angles
+         */
+        double joint_angles[7];
+        /**
+         * Quality of the IK solution
+         */
+        double solution_quality;
       };
     };
   };

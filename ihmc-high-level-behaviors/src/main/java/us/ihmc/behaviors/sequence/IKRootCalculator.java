@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.BodyPartPoseStatusMessage;
-import us.ihmc.behaviors.sequence.ros2.ROS2BehaviorActionSequence;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;

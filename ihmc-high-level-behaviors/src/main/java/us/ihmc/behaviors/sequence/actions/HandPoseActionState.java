@@ -9,6 +9,8 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 {
    private final DetachableReferenceFrame palmFrame;
    private double handWrenchMagnitudeLinear;
+   private double[] jointAngles = new double[7];
+   private double solutionQuality;
 
    public HandPoseActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -29,6 +31,11 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       super.toMessage(message.getActionState());
 
       message.setHandWrenchMagnitudeLinear(handWrenchMagnitudeLinear);
+      for (int i = 0; i < jointAngles.length; i++)
+      {
+         message.getJointAngles()[i] = jointAngles[i];
+      }
+      message.setSolutionQuality(solutionQuality);
    }
 
    public void fromMessage(HandPoseActionStateMessage message)
@@ -36,6 +43,8 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       super.fromMessage(message.getActionState());
 
       handWrenchMagnitudeLinear = message.getHandWrenchMagnitudeLinear();
+      jointAngles = message.getJointAngles();
+      solutionQuality = message.getSolutionQuality();
    }
 
    public DetachableReferenceFrame getPalmFrame()
@@ -51,5 +60,25 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    public void setHandWrenchMagnitudeLinear(double handWrenchMagnitudeLinear)
    {
       this.handWrenchMagnitudeLinear = handWrenchMagnitudeLinear;
+   }
+
+   public double[] getJointAngles()
+   {
+      return jointAngles;
+   }
+
+   public void setJointAngles(double[] jointAngles)
+   {
+      this.jointAngles = jointAngles;
+   }
+
+   public double getSolutionQuality()
+   {
+      return solutionQuality;
+   }
+
+   public void setSolutionQuality(double solutionQuality)
+   {
+      this.solutionQuality = solutionQuality;
    }
 }

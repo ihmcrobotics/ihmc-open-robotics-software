@@ -1,29 +1,29 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
+import behavior_msgs.msg.dds.ActionNodeStateMessage;
 
 public class RDXSingleActionProgressBars
 {
-   private RDXActionNode action;
-   private ActionExecutionStatusMessage actionExecutionStatusMessage;
+   private RDXActionNode<?, ?> action;
+   private ActionNodeStateMessage actionNodeStateMessage;
 
-   public void setAction(RDXActionNode action)
+   public void setAction(RDXActionNode<?, ?> action)
    {
       this.action = action;
    }
 
-   public RDXActionNode getAction()
+   public RDXActionNode<?, ?> getAction()
    {
       return action;
    }
 
-   public void setActionExecutionStatusMessage(ActionExecutionStatusMessage actionExecutionStatusMessage)
+   public ActionNodeStateMessage getActionNodeStateMessage()
    {
-      this.actionExecutionStatusMessage = actionExecutionStatusMessage;
+      return actionNodeStateMessage;
    }
 
-   public ActionExecutionStatusMessage getActionExecutionStatusMessage()
+   public void setActionNodeStateMessage(ActionNodeStateMessage actionNodeStateMessage)
    {
-      return actionExecutionStatusMessage;
+      this.actionNodeStateMessage = actionNodeStateMessage;
    }
 }

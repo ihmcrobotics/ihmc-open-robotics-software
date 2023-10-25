@@ -15,7 +15,7 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f72ec300a03ace38ee92703050cc7c0c7658c7d3377f066f68aadc61d98ee41e";
+   		return "267a1d1c7191131e1d34d2483d8258c02e0f8cb17c513969c1562a998b095441";
    }
    
    @Override
@@ -58,6 +58,10 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +82,10 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +96,13 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_6(data.getHandWrenchMagnitudeLinear());
 
+      for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
+      {
+        	cdr.write_type_6(data.getJointAngles()[i0]);	
+      }
+
+      cdr.write_type_6(data.getSolutionQuality());
+
    }
 
    public static void read(behavior_msgs.msg.dds.HandPoseActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -95,6 +110,14 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getActionState(), cdr);	
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setHandWrenchMagnitudeLinear(cdr.read_type_6());
+      	
+      for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
+      {
+        	data.getJointAngles()[i0] = cdr.read_type_6();
+        	
+      }
+      	
+      data.setSolutionQuality(cdr.read_type_6());
       	
 
    }
@@ -107,6 +130,8 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_a("definition", new behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_6("hand_wrench_magnitude_linear", data.getHandWrenchMagnitudeLinear());
+      ser.write_type_f("joint_angles", data.getJointAngles());
+      ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
    @Override
@@ -117,6 +142,8 @@ public class HandPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_a("definition", new behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setHandWrenchMagnitudeLinear(ser.read_type_6("hand_wrench_magnitude_linear"));
+      ser.read_type_f("joint_angles", data.getJointAngles());
+      data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.HandPoseActionStateMessage src, behavior_msgs.msg.dds.HandPoseActionStateMessage dest)
