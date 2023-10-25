@@ -29,7 +29,7 @@ testcolorY='olive'
 testcolorZ='teal'
 testcolorS='palevioletred'
 
-n_demos=5
+n_demos=81
 bodyParts = ['leftHand','rightHand','chest']
 # bodyParts = ['leftHand','rightHand']
 for bodyPart in bodyParts:

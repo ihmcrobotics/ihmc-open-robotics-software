@@ -2,7 +2,7 @@
   "testNumberUseOnlyForTesting": 1,
   "logging" : true,
   "numberBasisFunctions": 20,
-  "numberObservations": 20,
+  "numberObservations": 10,
   "conditionOnlyLastObservation": false,
   "conditioningStep": 2,
   "useCustomSpeed": false,
@@ -18,7 +18,8 @@
       "rotationGoalToEE": [0.0, 0.0, 0.0, 1.0],
       "customSpeed": 40,
       "bodyParts":[
-        { "name":"leftHand", "geometry":"Pose" }
+        { "name":"leftHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
       ]
     },
     {

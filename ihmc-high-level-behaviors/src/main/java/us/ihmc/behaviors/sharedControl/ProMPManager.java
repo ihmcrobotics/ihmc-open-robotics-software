@@ -49,7 +49,8 @@ public class ProMPManager
    private final int numberBasisFunctions;
    private final long speedFactor;
    private final int numberOfInferredSpeeds;
-   private double meanEndValueQS;
+   private final double[] meanStartValuesQuaternion = new double[4];
+   private final double[] meanEndValuesQuaternion = new double[4];
    private final boolean useCustomSpeed;
    private final int customSpeed;
 
@@ -133,18 +134,23 @@ public class ProMPManager
          {
             dofs.replaceAll(dof -> dof + 7L);
          }
-         if (entry.getKey().equals("leftForeArm"))
+         if (entry.getKey().equals("chest"))
          {
             dofs.replaceAll(dof -> dof + 14L);
          }
-         if (entry.getKey().equals("rightForeArm"))
-         {
-            dofs.replaceAll(dof -> dof + 21L);
-         }
-         if (entry.getKey().equals("chest"))
-         {
-            dofs.replaceAll(dof -> dof + 28L);
-         }
+         //TODO generalize based on segments used in config file and update test accordingly and plotter
+//         if (entry.getKey().equals("leftForeArm"))
+//         {
+//            dofs.replaceAll(dof -> dof + 14L);
+//         }
+//         if (entry.getKey().equals("rightForeArm"))
+//         {
+//            dofs.replaceAll(dof -> dof + 21L);
+//         }
+//         if (entry.getKey().equals("chest"))
+//         {
+//            dofs.replaceAll(dof -> dof + 28L);
+//         }
          TrajectoryGroup trainingTrajectory = new TrajectoryGroup();
          // training filelist
          StringVector fileListStringVectorTraining = new StringVector();
@@ -156,9 +162,15 @@ public class ProMPManager
          // make all training trajectories have the same length (= mean length)
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
          trainingTrajectories.put(entry.getKey(), trainingTrajectory);
-         // get mean end value of quaternion S, will be used to check and eventually change sign of observed goal quaternion
-         if (dofs.size() != 3)
-            meanEndValueQS = trainingTrajectory.get_mean_end_value(3);
+         // get mean end value of quaternion components, will be used to check and eventually change sign of observed goal quaternion
+         if (dofs.size() != 3) // if body part does not contain only position
+         {
+            for (int i = 0; i < 4; i++)
+            {
+               meanStartValuesQuaternion[i] = trainingTrajectory.get_mean_start_value(i);
+               meanEndValuesQuaternion[i] = trainingTrajectory.get_mean_end_value(i);
+            }
+         }
          // check if file with learned parameters already exists otherwise learn the promps
          if (isTaskLearned(demoTrainingDirAbs, entry.getKey()))
             loadPrelearnedTask(demoTrainingDirAbs, entry.getKey());
@@ -668,8 +680,28 @@ public class ProMPManager
       return learnedProMPs;
    }
 
+   public double getMeanStartValueQX()
+   {
+      return meanStartValuesQuaternion[0];
+   }
+
+   public double getMeanStartValueQY()
+   {
+      return meanStartValuesQuaternion[1];
+   }
+
+   public double getMeanStartValueQZ()
+   {
+      return meanStartValuesQuaternion[2];
+   }
+
+   public double getMeanStartValueQS()
+   {
+      return meanStartValuesQuaternion[3];
+   }
+
    public double getMeanEndValueQS()
    {
-      return meanEndValueQS;
+      return meanEndValuesQuaternion[3];
    }
 }

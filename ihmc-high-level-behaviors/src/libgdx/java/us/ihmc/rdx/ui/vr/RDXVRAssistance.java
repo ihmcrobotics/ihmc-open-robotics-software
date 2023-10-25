@@ -37,6 +37,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -123,7 +124,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
       armsFightingHome.put(RobotSide.LEFT, new double[] {0.333422, 0.08264014, 0.2183049, -2.35619});
       armsFightingHome.put(RobotSide.RIGHT, new double[] {0.6753323, 0.0591941, -0.024862368, -2.35619});
-      chestFightingHome = new YawPitchRoll(0.435, 0.0, 0.0);
+      chestFightingHome = new YawPitchRoll(0.340, 0.0, 0.0);
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
@@ -208,7 +209,9 @@ public class RDXVRAssistance implements TeleoperationAssistant
             splineGraphics.put(entryPartMotion.getKey(), new RDXSplineGraphic());
             // restart creating the spline from beginning
             splineGraphics.get(entryPartMotion.getKey()).createStart(entryPartMotion.getValue().get(0).getPosition(), Color.BLUE);
-            speedSplineAdjustmentFactor = (int) Math.floor((1.0 * kinematicsToolboxOutputStatusList.size()) / (1.0 * entryPartMotion.getValue().size()));
+            speedSplineAdjustmentFactor = (int) (Math.floor((1.0 * kinematicsToolboxOutputStatusList.size()) / (1.0 * entryPartMotion.getValue().size())));
+            if (speedSplineAdjustmentFactor < 0)
+               speedSplineAdjustmentFactor = 1;
          }
       }
       else
@@ -302,10 +305,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
-      {
-         enableStdDeviationVisualization(bodyPart);
-      }
+//      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
+//      {
+//         enableStdDeviationVisualization(bodyPart);
+//      }
 
       if (!objectName.isEmpty())
       {
@@ -493,8 +496,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                 !sceneNode.getName().contains("Frame") && !sceneNode.getName().contains("Knob") && !sceneNode.getName().contains("Bar"))
             {
                objectName = sceneNode.getName();
-               objectFrame = sceneNode.getNodeFrame();
-               LogTools.info(objectFrame);
+               objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), sceneNode.getNodeFrame().getTransformToWorldFrame());
                LogTools.info(objectFrame.getTransformToWorldFrame().getTranslationZ());
             }
          }

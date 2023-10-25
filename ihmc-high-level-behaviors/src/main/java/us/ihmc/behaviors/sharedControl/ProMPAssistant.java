@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 5;
+   private static final int INTERPOLATION_SAMPLES = 15; // TODO make this a fraction of the estimated timesteps
    public static final int AFFORDANCE_BLENDING_SAMPLES = 25; // TODO make this a fraction of the estimated timesteps (1/3 or 1/4 could be good values)
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
@@ -296,10 +296,31 @@ public class ProMPAssistant
          lastObservedPose.getOrientation().interpolate(previousQuaternion,quaternionToCheck, 1.0);
 
          previousObservedPose.get(bodyPart).set(lastObservedPose);
+
+         if (Math.abs(lastObservedPose.getOrientation().getX() - previousQuaternion.getX()) > 0.05 ||
+             Math.abs(lastObservedPose.getOrientation().getY() - previousQuaternion.getY()) > 0.05 ||
+             Math.abs(lastObservedPose.getOrientation().getZ() - previousQuaternion.getZ()) > 0.05 ||
+             Math.abs(lastObservedPose.getOrientation().getS() - previousQuaternion.getS()) > 0.05)
+         {
+            LogTools.error("Quaternion discontinuity asymmetric wrt zero. Check recorded part was not disconnected nor occluded during recording.");
+            lastObservedPose.getOrientation().set(previousQuaternion);
+         }
       }
       else
       {
-         if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * quaternionToCheck.getS()) == -1)
+         double x = proMPManagers.get(currentTask).getMeanStartValueQX();
+         double y = proMPManagers.get(currentTask).getMeanStartValueQY();
+         double z = proMPManagers.get(currentTask).getMeanStartValueQZ();
+         double s = proMPManagers.get(currentTask).getMeanStartValueQS();
+
+         // Calculate the maximum absolute value
+         double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.max(Math.abs(z), Math.abs(s))));
+
+         // Check if the maximum absolute value is flipped in sign wrt to learned promp
+         if ((Math.abs(x) == max && Math.signum(x * quaternionToCheck.getX()) == -1) ||
+             (Math.abs(y) == max && Math.signum(y * quaternionToCheck.getY()) == -1) ||
+             (Math.abs(z) == max && Math.signum(z * quaternionToCheck.getZ()) == -1) ||
+             (Math.abs(s) == max && Math.signum(s * quaternionToCheck.getS()) == -1))
          {
             lastObservedPose.getOrientation().negate();
          }
