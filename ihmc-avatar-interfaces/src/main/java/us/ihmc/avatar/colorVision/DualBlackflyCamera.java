@@ -387,6 +387,13 @@ public class DualBlackflyCamera
       spinImage spinImage = new spinImage(); // Release at the end
       spinnakerBlackfly.getNextImage(spinImage);
 
+      // Get camera frame
+      synchronized (blackflyFrameForSceneNodeUpdate)
+      {
+         blackflyFrameForSceneNodeUpdate.update(transformToParent ->
+            transformToParent.set(humanoidReferenceFramesSupplier.get().getSituationalAwarenessCameraFrame(side).getTransformToWorldFrame()));
+      }
+
       // Get camera pose
       synchronized (cameraPose)
       {
@@ -520,9 +527,9 @@ public class DualBlackflyCamera
 
          sceneGraph.updateSubscription(); // Receive overridden poses from operator
          ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
-         synchronized (cameraPose)
+         synchronized (blackflyFrameForSceneNodeUpdate)
          {
-            sceneGraph.updateOnRobotOnly(cameraPose.getReferenceFrame());
+            sceneGraph.updateOnRobotOnly(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
          }
          sceneGraph.updatePublication();
       }
