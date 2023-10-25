@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
-import behavior_msgs.msg.dds.BehaviorActionSequenceStateMessage;
+import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       currentlyExecutingActions.clear();
    }
 
-   public void toMessage(BehaviorActionSequenceStateMessage message)
+   public void toMessage(ActionSequenceStateMessage message)
    {
       super.toMessage(message.getState());
 
@@ -63,7 +63,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       message.setExecutionNextIndex(executionNextIndex);
    }
 
-   public void fromMessage(BehaviorActionSequenceStateMessage message)
+   public void fromMessage(ActionSequenceStateMessage message)
    {
       super.fromMessage(message.getState());
 

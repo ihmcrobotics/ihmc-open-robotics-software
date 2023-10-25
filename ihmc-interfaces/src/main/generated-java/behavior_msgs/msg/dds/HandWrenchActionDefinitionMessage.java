@@ -11,7 +11,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage action_definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -27,7 +27,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
 
    public HandWrenchActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      action_definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
    public HandWrenchActionDefinitionMessage(HandWrenchActionDefinitionMessage other)
@@ -38,7 +38,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
 
    public void set(HandWrenchActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       robot_side_ = other.robot_side_;
 
       trajectory_duration_ = other.trajectory_duration_;
@@ -51,7 +51,7 @@ public class HandWrenchActionDefinitionMessage extends Packet<HandWrenchActionDe
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getActionDefinition()
    {
       return action_definition_;
    }

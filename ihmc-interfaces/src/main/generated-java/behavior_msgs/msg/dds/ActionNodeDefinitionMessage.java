@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefinitionMessage> implements Settable<BehaviorActionDefinitionMessage>, EpsilonComparable<BehaviorActionDefinitionMessage>
+public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMessage> implements Settable<ActionNodeDefinitionMessage>, EpsilonComparable<ActionNodeDefinitionMessage>
 {
    /**
             * Parent definition fields
@@ -17,18 +17,18 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
             */
    public boolean execute_with_next_action_;
 
-   public BehaviorActionDefinitionMessage()
+   public ActionNodeDefinitionMessage()
    {
       node_definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
    }
 
-   public BehaviorActionDefinitionMessage(BehaviorActionDefinitionMessage other)
+   public ActionNodeDefinitionMessage(ActionNodeDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(BehaviorActionDefinitionMessage other)
+   public void set(ActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.node_definition_, node_definition_);
       execute_with_next_action_ = other.execute_with_next_action_;
@@ -60,19 +60,19 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
    }
 
 
-   public static Supplier<BehaviorActionDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<ActionNodeDefinitionMessagePubSubType> getPubSubType()
    {
-      return BehaviorActionDefinitionMessagePubSubType::new;
+      return ActionNodeDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return BehaviorActionDefinitionMessagePubSubType::new;
+      return ActionNodeDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(BehaviorActionDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(ActionNodeDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -89,9 +89,9 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof BehaviorActionDefinitionMessage)) return false;
+      if(!(other instanceof ActionNodeDefinitionMessage)) return false;
 
-      BehaviorActionDefinitionMessage otherMyClass = (BehaviorActionDefinitionMessage) other;
+      ActionNodeDefinitionMessage otherMyClass = (ActionNodeDefinitionMessage) other;
 
       if (!this.node_definition_.equals(otherMyClass.node_definition_)) return false;
       if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
@@ -105,7 +105,7 @@ public class BehaviorActionDefinitionMessage extends Packet<BehaviorActionDefini
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("BehaviorActionDefinitionMessage {");
+      builder.append("ActionNodeDefinitionMessage {");
       builder.append("node_definition=");
       builder.append(this.node_definition_);      builder.append(", ");
       builder.append("execute_with_next_action=");

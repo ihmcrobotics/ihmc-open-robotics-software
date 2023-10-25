@@ -3,15 +3,17 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-byte ARM_JOINT_ANGLES_ACTION = 0
-byte CHEST_ORIENTATION_ACTION =1
-byte FOOTSTEP_PLAN_ACTION = 2
-byte SAKE_HAND_COMMAND_ACTION = 3
-byte HAND_POSE_ACTION = 4
-byte HAND_WRENCH_ACTION = 5
-byte PELVIS_HEIGHT_PITCH_ACTION = 6
-byte WAIT_DURATION_ACTION = 7
-byte WALK_ACTION = 8
+byte ACTION_SEQUENCE = 0
+
+byte ARM_JOINT_ANGLES_ACTION = 10
+byte CHEST_ORIENTATION_ACTION = 11
+byte FOOTSTEP_PLAN_ACTION = 12
+byte SAKE_HAND_COMMAND_ACTION = 13
+byte HAND_POSE_ACTION = 14
+byte HAND_WRENCH_ACTION = 15
+byte PELVIS_HEIGHT_PITCH_ACTION = 16
+byte WAIT_DURATION_ACTION = 17
+byte WALK_ACTION = 18
 
 # The ID to assign to the next instantiated node
 uint32 next_id

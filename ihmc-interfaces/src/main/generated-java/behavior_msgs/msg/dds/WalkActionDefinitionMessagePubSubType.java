@@ -15,7 +15,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "556d0add48fec778ceb3d8fb9f68ed27bbe0c25e2767034913c4177ca9013863";
+   		return "de0cd886b81196d6b5d5e799974b0df090c0367bc219210bafb4b46e8bd13d6a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -78,7 +78,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
 
@@ -100,7 +100,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(behavior_msgs.msg.dds.WalkActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
           throw new RuntimeException("parent_frame_name field exceeds the maximum length");
@@ -116,7 +116,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(behavior_msgs.msg.dds.WalkActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
       cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getLeftGoalFootTransformToGizmo(), cdr);	
@@ -131,7 +131,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(behavior_msgs.msg.dds.WalkActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
 
       ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
@@ -147,7 +147,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WalkActionDefinitionMessage data)
    {
-      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
 
       ser.read_type_d("parent_frame_name", data.getParentFrameName());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());

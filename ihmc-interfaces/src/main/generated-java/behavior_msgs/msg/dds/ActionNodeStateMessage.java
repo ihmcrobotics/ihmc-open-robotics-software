@@ -6,15 +6,40 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-/**
-       * This message is meant to communicate the status of a currently executing action
-       */
-public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMessage> implements Settable<ActionExecutionStatusMessage>, EpsilonComparable<ActionExecutionStatusMessage>
+public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> implements Settable<ActionNodeStateMessage>, EpsilonComparable<ActionNodeStateMessage>
 {
    /**
-            * Executing action index
+            * Parent state fields
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage state_;
+   /**
+            * Definition
+            */
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
+   /**
+            * The action's unique ID
+            */
+   public long id_;
+   /**
+            * The action's index in the sequence
             */
    public int action_index_;
+   /**
+            * If the action is next for execution
+            */
+   public boolean is_next_for_execution_;
+   /**
+            * If the action is to be executed concurrently
+            */
+   public boolean is_to_be_executed_concurrently_;
+   /**
+            * If the node is able to execution
+            */
+   public boolean can_execute_;
+   /**
+            * If the node is currently executing
+            */
+   public boolean is_executing_;
    /**
             * Nominal execution duration
             */
@@ -23,14 +48,6 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
             * Time since execution started
             */
    public double elapsed_execution_time_;
-   /**
-            * Total number of footsteps; used for walking actions
-            */
-   public int total_number_of_footsteps_;
-   /**
-            * Incomplete footsteps; used for walking actions
-            */
-   public int number_of_incomplete_footsteps_;
    /**
             * Current position distance to goal
             */
@@ -55,32 +72,38 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
             * Orientation distance to goal tolerance
             */
    public double orientation_distance_to_goal_tolerance_;
-   /**
-            * Linear hand wrench magnitude
-            */
-   public double hand_wrench_magnitude_linear_;
 
-   public ActionExecutionStatusMessage()
+   public ActionNodeStateMessage()
    {
+      state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
-   public ActionExecutionStatusMessage(ActionExecutionStatusMessage other)
+   public ActionNodeStateMessage(ActionNodeStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(ActionExecutionStatusMessage other)
+   public void set(ActionNodeStateMessage other)
    {
+      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      id_ = other.id_;
+
       action_index_ = other.action_index_;
+
+      is_next_for_execution_ = other.is_next_for_execution_;
+
+      is_to_be_executed_concurrently_ = other.is_to_be_executed_concurrently_;
+
+      can_execute_ = other.can_execute_;
+
+      is_executing_ = other.is_executing_;
 
       nominal_execution_duration_ = other.nominal_execution_duration_;
 
       elapsed_execution_time_ = other.elapsed_execution_time_;
-
-      total_number_of_footsteps_ = other.total_number_of_footsteps_;
-
-      number_of_incomplete_footsteps_ = other.number_of_incomplete_footsteps_;
 
       current_position_distance_to_goal_ = other.current_position_distance_to_goal_;
 
@@ -94,23 +117,114 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       orientation_distance_to_goal_tolerance_ = other.orientation_distance_to_goal_tolerance_;
 
-      hand_wrench_magnitude_linear_ = other.hand_wrench_magnitude_linear_;
+   }
 
+
+   /**
+            * Parent state fields
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getState()
+   {
+      return state_;
+   }
+
+
+   /**
+            * Definition
+            */
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
+   {
+      return definition_;
    }
 
    /**
-            * Executing action index
+            * The action's unique ID
+            */
+   public void setId(long id)
+   {
+      id_ = id;
+   }
+   /**
+            * The action's unique ID
+            */
+   public long getId()
+   {
+      return id_;
+   }
+
+   /**
+            * The action's index in the sequence
             */
    public void setActionIndex(int action_index)
    {
       action_index_ = action_index;
    }
    /**
-            * Executing action index
+            * The action's index in the sequence
             */
    public int getActionIndex()
    {
       return action_index_;
+   }
+
+   /**
+            * If the action is next for execution
+            */
+   public void setIsNextForExecution(boolean is_next_for_execution)
+   {
+      is_next_for_execution_ = is_next_for_execution;
+   }
+   /**
+            * If the action is next for execution
+            */
+   public boolean getIsNextForExecution()
+   {
+      return is_next_for_execution_;
+   }
+
+   /**
+            * If the action is to be executed concurrently
+            */
+   public void setIsToBeExecutedConcurrently(boolean is_to_be_executed_concurrently)
+   {
+      is_to_be_executed_concurrently_ = is_to_be_executed_concurrently;
+   }
+   /**
+            * If the action is to be executed concurrently
+            */
+   public boolean getIsToBeExecutedConcurrently()
+   {
+      return is_to_be_executed_concurrently_;
+   }
+
+   /**
+            * If the node is able to execution
+            */
+   public void setCanExecute(boolean can_execute)
+   {
+      can_execute_ = can_execute;
+   }
+   /**
+            * If the node is able to execution
+            */
+   public boolean getCanExecute()
+   {
+      return can_execute_;
+   }
+
+   /**
+            * If the node is currently executing
+            */
+   public void setIsExecuting(boolean is_executing)
+   {
+      is_executing_ = is_executing;
+   }
+   /**
+            * If the node is currently executing
+            */
+   public boolean getIsExecuting()
+   {
+      return is_executing_;
    }
 
    /**
@@ -141,36 +255,6 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
    public double getElapsedExecutionTime()
    {
       return elapsed_execution_time_;
-   }
-
-   /**
-            * Total number of footsteps; used for walking actions
-            */
-   public void setTotalNumberOfFootsteps(int total_number_of_footsteps)
-   {
-      total_number_of_footsteps_ = total_number_of_footsteps;
-   }
-   /**
-            * Total number of footsteps; used for walking actions
-            */
-   public int getTotalNumberOfFootsteps()
-   {
-      return total_number_of_footsteps_;
-   }
-
-   /**
-            * Incomplete footsteps; used for walking actions
-            */
-   public void setNumberOfIncompleteFootsteps(int number_of_incomplete_footsteps)
-   {
-      number_of_incomplete_footsteps_ = number_of_incomplete_footsteps;
-   }
-   /**
-            * Incomplete footsteps; used for walking actions
-            */
-   public int getNumberOfIncompleteFootsteps()
-   {
-      return number_of_incomplete_footsteps_;
    }
 
    /**
@@ -263,48 +347,41 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       return orientation_distance_to_goal_tolerance_;
    }
 
-   /**
-            * Linear hand wrench magnitude
-            */
-   public void setHandWrenchMagnitudeLinear(double hand_wrench_magnitude_linear)
-   {
-      hand_wrench_magnitude_linear_ = hand_wrench_magnitude_linear;
-   }
-   /**
-            * Linear hand wrench magnitude
-            */
-   public double getHandWrenchMagnitudeLinear()
-   {
-      return hand_wrench_magnitude_linear_;
-   }
 
-
-   public static Supplier<ActionExecutionStatusMessagePubSubType> getPubSubType()
+   public static Supplier<ActionNodeStateMessagePubSubType> getPubSubType()
    {
-      return ActionExecutionStatusMessagePubSubType::new;
+      return ActionNodeStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return ActionExecutionStatusMessagePubSubType::new;
+      return ActionNodeStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(ActionExecutionStatusMessage other, double epsilon)
+   public boolean epsilonEquals(ActionNodeStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_next_for_execution_, other.is_next_for_execution_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_to_be_executed_concurrently_, other.is_to_be_executed_concurrently_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.can_execute_, other.can_execute_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_executing_, other.is_executing_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nominal_execution_duration_, other.nominal_execution_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elapsed_execution_time_, other.elapsed_execution_time_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_incomplete_footsteps_, other.number_of_incomplete_footsteps_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_distance_to_goal_, other.current_position_distance_to_goal_, epsilon)) return false;
 
@@ -318,8 +395,6 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_distance_to_goal_tolerance_, other.orientation_distance_to_goal_tolerance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_wrench_magnitude_linear_, other.hand_wrench_magnitude_linear_, epsilon)) return false;
-
 
       return true;
    }
@@ -329,19 +404,27 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ActionExecutionStatusMessage)) return false;
+      if(!(other instanceof ActionNodeStateMessage)) return false;
 
-      ActionExecutionStatusMessage otherMyClass = (ActionExecutionStatusMessage) other;
+      ActionNodeStateMessage otherMyClass = (ActionNodeStateMessage) other;
+
+      if (!this.state_.equals(otherMyClass.state_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.id_ != otherMyClass.id_) return false;
 
       if(this.action_index_ != otherMyClass.action_index_) return false;
+
+      if(this.is_next_for_execution_ != otherMyClass.is_next_for_execution_) return false;
+
+      if(this.is_to_be_executed_concurrently_ != otherMyClass.is_to_be_executed_concurrently_) return false;
+
+      if(this.can_execute_ != otherMyClass.can_execute_) return false;
+
+      if(this.is_executing_ != otherMyClass.is_executing_) return false;
 
       if(this.nominal_execution_duration_ != otherMyClass.nominal_execution_duration_) return false;
 
       if(this.elapsed_execution_time_ != otherMyClass.elapsed_execution_time_) return false;
-
-      if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
-
-      if(this.number_of_incomplete_footsteps_ != otherMyClass.number_of_incomplete_footsteps_) return false;
 
       if(this.current_position_distance_to_goal_ != otherMyClass.current_position_distance_to_goal_) return false;
 
@@ -355,8 +438,6 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if(this.orientation_distance_to_goal_tolerance_ != otherMyClass.orientation_distance_to_goal_tolerance_) return false;
 
-      if(this.hand_wrench_magnitude_linear_ != otherMyClass.hand_wrench_magnitude_linear_) return false;
-
 
       return true;
    }
@@ -366,17 +447,27 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("ActionExecutionStatusMessage {");
+      builder.append("ActionNodeStateMessage {");
+      builder.append("state=");
+      builder.append(this.state_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("id=");
+      builder.append(this.id_);      builder.append(", ");
       builder.append("action_index=");
       builder.append(this.action_index_);      builder.append(", ");
+      builder.append("is_next_for_execution=");
+      builder.append(this.is_next_for_execution_);      builder.append(", ");
+      builder.append("is_to_be_executed_concurrently=");
+      builder.append(this.is_to_be_executed_concurrently_);      builder.append(", ");
+      builder.append("can_execute=");
+      builder.append(this.can_execute_);      builder.append(", ");
+      builder.append("is_executing=");
+      builder.append(this.is_executing_);      builder.append(", ");
       builder.append("nominal_execution_duration=");
       builder.append(this.nominal_execution_duration_);      builder.append(", ");
       builder.append("elapsed_execution_time=");
       builder.append(this.elapsed_execution_time_);      builder.append(", ");
-      builder.append("total_number_of_footsteps=");
-      builder.append(this.total_number_of_footsteps_);      builder.append(", ");
-      builder.append("number_of_incomplete_footsteps=");
-      builder.append(this.number_of_incomplete_footsteps_);      builder.append(", ");
       builder.append("current_position_distance_to_goal=");
       builder.append(this.current_position_distance_to_goal_);      builder.append(", ");
       builder.append("start_position_distance_to_goal=");
@@ -388,9 +479,7 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       builder.append("start_orientation_distance_to_goal=");
       builder.append(this.start_orientation_distance_to_goal_);      builder.append(", ");
       builder.append("orientation_distance_to_goal_tolerance=");
-      builder.append(this.orientation_distance_to_goal_tolerance_);      builder.append(", ");
-      builder.append("hand_wrench_magnitude_linear=");
-      builder.append(this.hand_wrench_magnitude_linear_);
+      builder.append(this.orientation_distance_to_goal_tolerance_);
       builder.append("}");
       return builder.toString();
    }

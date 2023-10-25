@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.tools.Timer;
 
@@ -8,7 +7,6 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
 {
    private final WaitDurationActionState state;
    private final Timer executionTimer = new Timer();
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public WaitDurationActionExecutor(long id)
    {
@@ -32,15 +30,9 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    {
       state.setIsExecuting(executionTimer.isRunning(getDefinition().getWaitDuration()));
 
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(getDefinition().getWaitDuration());
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
+      state.setActionIndex(state.getActionIndex());
+      state.setNominalExecutionDuration(getDefinition().getWaitDuration());
+      state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
    @Override

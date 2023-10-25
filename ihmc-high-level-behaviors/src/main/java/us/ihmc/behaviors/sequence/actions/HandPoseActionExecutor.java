@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
@@ -36,7 +35,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
@@ -78,7 +76,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-         handPoseJointAnglesStatus.getActionInformation().setActionIndex(state.getActionIndex());
          handPoseJointAnglesStatus.setRobotSide(getDefinition().getSide().toByte());
          handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
          for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
@@ -170,16 +167,16 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                BehaviorActionCompletionComponent.TRANSLATION,
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 
-         executionStatusMessage.setActionIndex(state.getActionIndex());
-         executionStatusMessage.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-         executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
-         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
+         state.setActionIndex(state.getActionIndex());
+         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
+         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.setHandWrenchMagnitudeLinear(handWrenchCalculators.get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
          if (!state.getIsExecuting() && wasExecuting && !getDefinition().getJointSpaceControl() && !getDefinition().getHoldPoseInWorldLater())
          {
             disengageHoldPoseInWorld();
@@ -203,12 +200,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                                                   jointAngles);
       armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
    }
 
    @Override

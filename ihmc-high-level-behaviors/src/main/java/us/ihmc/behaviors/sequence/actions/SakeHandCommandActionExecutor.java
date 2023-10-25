@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
@@ -16,7 +15,6 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private final SakeHandCommandActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public SakeHandCommandActionExecutor(long id, ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -50,15 +48,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    {
       state.setIsExecuting(executionTimer.isRunning(WAIT_TIME));
 
-      executionStatusMessage.setActionIndex(state.getActionIndex());
-      executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
-      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
+      state.setActionIndex(state.getActionIndex());
+      state.setNominalExecutionDuration(WAIT_TIME);
+      state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 
    @Override

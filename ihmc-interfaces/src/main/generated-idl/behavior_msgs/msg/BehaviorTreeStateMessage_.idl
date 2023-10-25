@@ -16,32 +16,35 @@ module behavior_msgs
   {
     module dds
     {
-      const octet ARM_JOINT_ANGLES_ACTION =
+      const octet ACTION_SEQUENCE =
       0;
 
+      const octet ARM_JOINT_ANGLES_ACTION =
+      10;
+
       const octet CHEST_ORIENTATION_ACTION =
-      1;
+      11;
 
       const octet FOOTSTEP_PLAN_ACTION =
-      2;
+      12;
 
       const octet SAKE_HAND_COMMAND_ACTION =
-      3;
+      13;
 
       const octet HAND_POSE_ACTION =
-      4;
+      14;
 
       const octet HAND_WRENCH_ACTION =
-      5;
+      15;
 
       const octet PELVIS_HEIGHT_PITCH_ACTION =
-      6;
+      16;
 
       const octet WAIT_DURATION_ACTION =
-      7;
+      17;
 
       const octet WALK_ACTION =
-      8;
+      18;
 
 
       /**

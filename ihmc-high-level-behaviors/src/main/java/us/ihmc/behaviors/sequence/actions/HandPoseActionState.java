@@ -8,6 +8,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
    private final DetachableReferenceFrame palmFrame;
+   private double handWrenchMagnitudeLinear;
 
    public HandPoseActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -26,15 +27,29 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    public void toMessage(HandPoseActionStateMessage message)
    {
       super.toMessage(message.getActionState());
+
+      message.setHandWrenchMagnitudeLinear(handWrenchMagnitudeLinear);
    }
 
    public void fromMessage(HandPoseActionStateMessage message)
    {
       super.fromMessage(message.getActionState());
+
+      handWrenchMagnitudeLinear = message.getHandWrenchMagnitudeLinear();
    }
 
    public DetachableReferenceFrame getPalmFrame()
    {
       return palmFrame;
+   }
+
+   public double getHandWrenchMagnitudeLinear()
+   {
+      return handWrenchMagnitudeLinear;
+   }
+
+   public void setHandWrenchMagnitudeLinear(double handWrenchMagnitudeLinear)
+   {
+      this.handWrenchMagnitudeLinear = handWrenchMagnitudeLinear;
    }
 }

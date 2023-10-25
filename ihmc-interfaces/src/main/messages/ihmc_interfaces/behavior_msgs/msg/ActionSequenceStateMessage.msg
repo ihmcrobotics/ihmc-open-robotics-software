@@ -1,14 +1,11 @@
-
 # Parent state fields
 behavior_msgs/BehaviorTreeNodeStateMessage state
 
 # Definition
-behavior_msgs/BehaviorActionSequenceDefinitionMessage definition
+behavior_msgs/ActionSequenceDefinitionMessage definition
 
 # If the sequence is currently set to proceed automatically
 bool automatic_execution
 
 # The index of the action that is set to execute next
 uint16 execution_next_index
-
-

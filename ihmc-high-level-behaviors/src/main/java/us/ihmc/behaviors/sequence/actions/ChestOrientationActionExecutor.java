@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -28,7 +27,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private double startOrientationDistanceToGoal;
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public ChestOrientationActionExecutor(long id,
@@ -95,12 +93,12 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                                                executionTimer,
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 
-         executionStatusMessage.setActionIndex(state.getActionIndex());
-         executionStatusMessage.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.setActionIndex(state.getActionIndex());
+         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
+         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
          if (!state.getIsExecuting() && wasExecuting && !getDefinition().getHoldPoseInWorldLater())
          {
@@ -124,12 +122,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
       ros2ControllerHelper.publishToController(message);
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
    }
 
    @Override

@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -45,7 +44,6 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
-   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
@@ -208,24 +206,18 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
 
          state.setIsExecuting(!isComplete);
 
-         executionStatusMessage.setActionIndex(state.getActionIndex());
-         executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
-         executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
-         executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
-         executionStatusMessage.setCurrentOrientationDistanceToGoal(
+         state.setActionIndex(state.getActionIndex());
+         state.setNominalExecutionDuration(nominalExecutionDuration);
+         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
+         state.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
+         state.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+         state.setCurrentOrientationDistanceToGoal(
                completionCalculator.get(RobotSide.LEFT).getRotationError() + completionCalculator.get(RobotSide.RIGHT).getRotationError());
-         executionStatusMessage.setCurrentPositionDistanceToGoal(
+         state.setCurrentPositionDistanceToGoal(
                completionCalculator.get(RobotSide.LEFT).getTranslationError() + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
-         executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-   }
-
-   @Override
-   public ActionExecutionStatusMessage getExecutionStatusMessage()
-   {
-      return executionStatusMessage;
    }
 
    @Override

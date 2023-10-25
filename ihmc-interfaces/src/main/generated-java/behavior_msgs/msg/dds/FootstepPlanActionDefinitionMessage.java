@@ -11,7 +11,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage action_definition_;
    /**
             * Name of the parent frame the footsteps are expressed in
             */
@@ -31,7 +31,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
    public FootstepPlanActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.BehaviorActionDefinitionMessage();
+      action_definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
 
@@ -45,7 +45,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
    public void set(FootstepPlanActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorActionDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
       parent_frame_name_.setLength(0);
       parent_frame_name_.append(other.parent_frame_name_);
 
@@ -60,7 +60,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorActionDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getActionDefinition()
    {
       return action_definition_;
    }

@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSequenceStateMessage> implements Settable<BehaviorActionSequenceStateMessage>, EpsilonComparable<BehaviorActionSequenceStateMessage>
+public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessage> implements Settable<ActionSequenceStateMessage>, EpsilonComparable<ActionSequenceStateMessage>
 {
    /**
             * Parent state fields
@@ -15,7 +15,7 @@ public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSeq
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.BehaviorActionSequenceDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.ActionSequenceDefinitionMessage definition_;
    /**
             * If the sequence is currently set to proceed automatically
             */
@@ -25,22 +25,22 @@ public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSeq
             */
    public int execution_next_index_;
 
-   public BehaviorActionSequenceStateMessage()
+   public ActionSequenceStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.BehaviorActionSequenceDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionSequenceDefinitionMessage();
    }
 
-   public BehaviorActionSequenceStateMessage(BehaviorActionSequenceStateMessage other)
+   public ActionSequenceStateMessage(ActionSequenceStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(BehaviorActionSequenceStateMessage other)
+   public void set(ActionSequenceStateMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.BehaviorActionSequenceDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.ActionSequenceDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       automatic_execution_ = other.automatic_execution_;
 
       execution_next_index_ = other.execution_next_index_;
@@ -60,7 +60,7 @@ public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSeq
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.BehaviorActionSequenceDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.ActionSequenceDefinitionMessage getDefinition()
    {
       return definition_;
    }
@@ -96,19 +96,19 @@ public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSeq
    }
 
 
-   public static Supplier<BehaviorActionSequenceStateMessagePubSubType> getPubSubType()
+   public static Supplier<ActionSequenceStateMessagePubSubType> getPubSubType()
    {
-      return BehaviorActionSequenceStateMessagePubSubType::new;
+      return ActionSequenceStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return BehaviorActionSequenceStateMessagePubSubType::new;
+      return ActionSequenceStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(BehaviorActionSequenceStateMessage other, double epsilon)
+   public boolean epsilonEquals(ActionSequenceStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -128,9 +128,9 @@ public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSeq
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof BehaviorActionSequenceStateMessage)) return false;
+      if(!(other instanceof ActionSequenceStateMessage)) return false;
 
-      BehaviorActionSequenceStateMessage otherMyClass = (BehaviorActionSequenceStateMessage) other;
+      ActionSequenceStateMessage otherMyClass = (ActionSequenceStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
@@ -147,7 +147,7 @@ public class BehaviorActionSequenceStateMessage extends Packet<BehaviorActionSeq
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("BehaviorActionSequenceStateMessage {");
+      builder.append("ActionSequenceStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
