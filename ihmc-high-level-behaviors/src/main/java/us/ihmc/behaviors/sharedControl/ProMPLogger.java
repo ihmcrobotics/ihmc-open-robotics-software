@@ -39,11 +39,12 @@ public class ProMPLogger
       ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviation" + updateName + ".csv");
    }
 
-   public void addViaPoint(String bodyPart, ProMPInfoMapper.EigenVectorXd viaPoint)
+   public void addViaPoint(String bodyPart, ProMPInfoMapper.EigenVectorXd viaPoint, int step)
    {
       if (!bodyPartViaPoints.containsKey(bodyPart))
          bodyPartViaPoints.put(bodyPart, new ArrayList<>());
-      bodyPartViaPoints.get(bodyPart).add(viaPoint);
+      for (int i = 0; i < step; i ++)
+         bodyPartViaPoints.get(bodyPart).add(viaPoint);
    }
 
    public void saveViaPoints(String bodyPart)

@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -210,7 +211,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             // restart creating the spline from beginning
             splineGraphics.get(entryPartMotion.getKey()).createStart(entryPartMotion.getValue().get(0).getPosition(), Color.BLUE);
             speedSplineAdjustmentFactor = (int) (Math.floor((1.0 * kinematicsToolboxOutputStatusList.size()) / (1.0 * entryPartMotion.getValue().size())));
-            if (speedSplineAdjustmentFactor < 0)
+            if (speedSplineAdjustmentFactor <= 0)
                speedSplineAdjustmentFactor = 1;
          }
       }
@@ -385,7 +386,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                      for (RobotSide side : RobotSide.values())
                      {
                         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                                    2.0,
+                                                                                                                    1.0,
                                                                                                                     armsFightingHome.get(side));
                         ros2ControllerHelper.publishToController(armTrajectoryMessage);
                      }
@@ -395,7 +396,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                      frameChestYawPitchRoll.set(chestFightingHome);
                      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
                      chestTrajectoryMessage.getSo3Trajectory()
-                                           .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+                                           .set(HumanoidMessageTools.createSO3TrajectoryMessage(1.0,
                                                                                                 frameChestYawPitchRoll,
                                                                                                 EuclidCoreTools.zeroVector3D,
                                                                                                 syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
@@ -403,6 +404,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
                      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setYSelected(true);
                      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
                      ros2ControllerHelper.publishToController(chestTrajectoryMessage);
+
+                     ros2ControllerHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, 2.0));
                   }
                }
                if (proMPAssistant.isCurrentTaskDone())

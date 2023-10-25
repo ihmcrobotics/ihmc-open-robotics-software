@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 15; // TODO make this a fraction of the estimated timesteps
+   private static final int INTERPOLATION_SAMPLES = 10; // TODO make this a fraction of the estimated timesteps
    public static final int AFFORDANCE_BLENDING_SAMPLES = 25; // TODO make this a fraction of the estimated timesteps (1/3 or 1/4 could be good values)
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
@@ -130,6 +130,7 @@ public class ProMPAssistant
                               new ProMPManager(taskNames[i],
                                                bodyPartsGeometries[i],
                                                logEnabled,
+                                               conditioningStep,
                                                isLastViaPoint,
                                                numberBasisFunctions,
                                                speedFactor,
@@ -293,14 +294,14 @@ public class ProMPAssistant
 
          QuaternionReadOnly previousQuaternion = previousObservedPose.get(bodyPart).getOrientation();
          // Check that quaternion is not changing 2pi range. Even if q = -q, the observed motion has to be continuous
-         lastObservedPose.getOrientation().interpolate(previousQuaternion,quaternionToCheck, 1.0);
+         lastObservedPose.getOrientation().interpolate(previousQuaternion, quaternionToCheck, 1.0);
 
          previousObservedPose.get(bodyPart).set(lastObservedPose);
 
-         if (Math.abs(lastObservedPose.getOrientation().getX() - previousQuaternion.getX()) > 0.05 ||
-             Math.abs(lastObservedPose.getOrientation().getY() - previousQuaternion.getY()) > 0.05 ||
-             Math.abs(lastObservedPose.getOrientation().getZ() - previousQuaternion.getZ()) > 0.05 ||
-             Math.abs(lastObservedPose.getOrientation().getS() - previousQuaternion.getS()) > 0.05)
+         if (Math.abs(lastObservedPose.getOrientation().getX() - previousQuaternion.getX()) > 0.05
+             || Math.abs(lastObservedPose.getOrientation().getY() - previousQuaternion.getY()) > 0.05
+             || Math.abs(lastObservedPose.getOrientation().getZ() - previousQuaternion.getZ()) > 0.05
+             || Math.abs(lastObservedPose.getOrientation().getS() - previousQuaternion.getS()) > 0.05)
          {
             LogTools.error("Quaternion discontinuity asymmetric wrt zero. Check recorded part was not disconnected nor occluded during recording.");
             lastObservedPose.getOrientation().set(previousQuaternion);
@@ -317,15 +318,13 @@ public class ProMPAssistant
          double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.max(Math.abs(z), Math.abs(s))));
 
          // Check if the maximum absolute value is flipped in sign wrt to learned promp
-         if ((Math.abs(x) == max && Math.signum(x * quaternionToCheck.getX()) == -1) ||
-             (Math.abs(y) == max && Math.signum(y * quaternionToCheck.getY()) == -1) ||
-             (Math.abs(z) == max && Math.signum(z * quaternionToCheck.getZ()) == -1) ||
-             (Math.abs(s) == max && Math.signum(s * quaternionToCheck.getS()) == -1))
+         if ((Math.abs(x) == max && Math.signum(x * quaternionToCheck.getX()) == -1) || (Math.abs(y) == max && Math.signum(y * quaternionToCheck.getY()) == -1)
+             || (Math.abs(z) == max && Math.signum(z * quaternionToCheck.getZ()) == -1) || (Math.abs(s) == max && Math.signum(s * quaternionToCheck.getS()) == -1))
          {
             lastObservedPose.getOrientation().negate();
          }
 
-         previousObservedPose.put(bodyPart,new FramePose3D(lastObservedPose));
+         previousObservedPose.put(bodyPart, new FramePose3D(lastObservedPose));
       }
    }
 
@@ -418,10 +417,8 @@ public class ProMPAssistant
                for (Map.Entry<String, String> entryPart : proMPManagers.get(currentTask).getBodyPartsGeometry().entrySet())
                {
                   // store stdDeviation trajectories for informing user through graphics
-                  priorStdDeviations.put(entryPart.getKey(),
-                                         proMPManagers.get(currentTask).generateStdDeviationTrajectory(entryPart.getKey()));
-                  priorMeans.put(entryPart.getKey(),
-                                 proMPManagers.get(currentTask).generateMeanTrajectory(entryPart.getKey(), objectFrame));
+                  priorStdDeviations.put(entryPart.getKey(), proMPManagers.get(currentTask).generateStdDeviationTrajectory(entryPart.getKey()));
+                  priorMeans.put(entryPart.getKey(), proMPManagers.get(currentTask).generateMeanTrajectory(entryPart.getKey(), objectFrame));
                }
                if (useCustomSpeed)
                {
@@ -502,7 +499,7 @@ public class ProMPAssistant
          }
          else
          {
-            for (int i = 0; i < observedTrajectory.size(); i+=conditioningStep)
+            for (int i = 0; i < observedTrajectory.size(); i += conditioningStep)
             {
                if (i >= observedTrajectory.size() - conditioningStep)
                   isLastViaPoint.set(true);

@@ -45,6 +45,7 @@ public class ProMPManager
    private final HashMap<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
    private final ProMPLogger logger = new ProMPLogger();
    private boolean logEnabled = false;
+   private final int conditioningStep;
    private final AtomicBoolean isLastViaPoint;
    private final int numberBasisFunctions;
    private final long speedFactor;
@@ -63,6 +64,7 @@ public class ProMPManager
    public ProMPManager(String taskName,
                        HashMap<String, String> bodyPartsGeometry,
                        boolean logEnabled,
+                       int conditioningStep,
                        AtomicBoolean isLastViaPoint,
                        int numberBasisFunctions,
                        long speedFactor,
@@ -73,6 +75,7 @@ public class ProMPManager
       this.taskName = taskName;
       this.bodyPartsGeometry = bodyPartsGeometry;
       this.logEnabled = logEnabled;
+      this.conditioningStep = conditioningStep;
       this.isLastViaPoint = isLastViaPoint;
       this.numberBasisFunctions = numberBasisFunctions; // 20 rbf functions seems to generalize well
       this.speedFactor = speedFactor;
@@ -517,7 +520,7 @@ public class ProMPManager
       myProMP.condition_via_point(conditioningTimestep, viaPoint);
       if (logEnabled)
       {
-         logger.addViaPoint(bodyPart, viaPoint);
+         logger.addViaPoint(bodyPart, viaPoint, conditioningStep);
          if (isLastViaPoint.get())
          {
             logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
