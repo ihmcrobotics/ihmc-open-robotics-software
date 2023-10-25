@@ -313,15 +313,15 @@ public class RDXIterativeClosestPointReverseDemo
                   CommonOps_DDRM.setIdentity(T);
 
                   // Best Fit Transform
-                  CommonOps_DDRM.multTransA(boxCentroidSubtractedPoints, envCentroidSubtractedPoints, H);
+                  CommonOps_DDRM.multTransA(envCentroidSubtractedPoints, boxCentroidSubtractedPoints, H);
 
                   svdSolver.decompose(H);
                   svdSolver.getU(U, false);
                   svdSolver.getV(Vt, true);
 
 
-                  CommonOps_DDRM.transpose(U);
-                  CommonOps_DDRM.transpose(Vt);
+//                  CommonOps_DDRM.transpose(U);
+//                  CommonOps_DDRM.transpose(Vt);
                   CommonOps_DDRM.mult(Vt, U, R);
 
                   // check if transform wants to reflect instead of rotate and fix it
@@ -336,15 +336,15 @@ public class RDXIterativeClosestPointReverseDemo
                      System.out.println("NOT");
                   }
 
-                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
-                  CommonOps_DDRM.transpose(newBoxLocation);
+//                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
+//                  CommonOps_DDRM.transpose(newBoxLocation);
                   CommonOps_DDRM.subtract(envCentroid, boxCentroid, boxTranslation);
 
 
                   boxTransform.getTranslation().addX(boxTranslation.get(0,0));
                   boxTransform.getTranslation().addY(boxTranslation.get(0,1));
                   boxTransform.getTranslation().addZ(boxTranslation.get(0,2));
-//                  boxTransform.getRotation().set(R);
+                  boxTransform.getRotation().set(R);
 
 
 
@@ -368,6 +368,11 @@ public class RDXIterativeClosestPointReverseDemo
          {
             DecimalFormat df = new DecimalFormat("#.###");
             ImGui.text("Mouse x: " + df.format(pickPointInWorld.getX()) + " y: " + df.format(pickPointInWorld.getY()) + " z: " + df.format(pickPointInWorld.getZ()));
+            ImGui.text("Translation x: " + df.format(boxTransform.getTranslation().getX()) + " y: " + df.format(boxTransform.getTranslation().getY()) + " z: " + df.format(boxTransform.getTranslation().getZ()));
+            ImGui.text("Rotation Matrix");
+            ImGui.text(df.format(boxTransform.getRotation().getM00()) + "  " + df.format(boxTransform.getRotation().getM01()) + "  " + df.format(boxTransform.getRotation().getM02()));
+            ImGui.text(df.format(boxTransform.getRotation().getM10()) + "  " + df.format(boxTransform.getRotation().getM11()) + "  " + df.format(boxTransform.getRotation().getM12()));
+            ImGui.text(df.format(boxTransform.getRotation().getM20()) + "  " + df.format(boxTransform.getRotation().getM21()) + "  " + df.format(boxTransform.getRotation().getM22()));
             ImGui.checkbox("Select ICP point", ICPToggle);
          }
 
