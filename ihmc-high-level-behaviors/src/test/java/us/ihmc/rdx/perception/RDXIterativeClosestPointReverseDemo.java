@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -163,14 +164,17 @@ public class RDXIterativeClosestPointReverseDemo
             // Create point cloud and renderer for box points
             Random random = new Random(0);
 //            random.nextDouble(-boxHalfSize, boxHalfSize);
+            float halfBoxWidth = (float)RigidBodySceneObjectDefinitions.BOX_WIDTH/2.0f;
+            float halfBoxDepth = (float)RigidBodySceneObjectDefinitions.BOX_DEPTH/2.0f;
+            float halfBoxHeight = (float)RigidBodySceneObjectDefinitions.BOX_HEIGHT/2.0f;
             for (int i = 0; i < 6; i++) {
                for (int j = 0; j < 100; j++) {
-                  float x =(float)random.nextDouble(-boxHalfSize, boxHalfSize);
-                  float y =(float)random.nextDouble(-boxHalfSize, boxHalfSize);
-                  float z =(float)random.nextDouble(-boxHalfSize, boxHalfSize);
-                  if (i==0 | i==1) {x = (-((i >> 0)&1)*boxSize)+boxHalfSize;}
-                  if (i==2 | i==3) {y = (-((i >> 0)&1)*boxSize)+boxHalfSize;}
-                  if (i==4 | i==5) {z = (-((i >> 0)&1)*boxSize)+boxHalfSize;}
+                  float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
+                  float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
+                  float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
+                  if (i==0 | i==1) {x = (-((i >> 0)&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
+                  if (i==2 | i==3) {y = (-((i >> 0)&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
+                  if (i==4 | i==5) {z = (-((i >> 0)&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
                   pointA.setToZero(boxReferenceFrame);
                   pointA.set(x,y,z);
                   FramePoint3D worldFramePoint = boxModelPoints.add();
@@ -299,41 +303,41 @@ public class RDXIterativeClosestPointReverseDemo
 
 
                   // Initialize matrix variables
-//                  DMatrixRMaj H = new DMatrixRMaj(3, 3);
-//                  DMatrixRMaj U = new DMatrixRMaj(3, 3);
-//                  DMatrixRMaj Vt = new DMatrixRMaj(3, 3);
-//                  DMatrixRMaj R = new DMatrixRMaj(3, 3);
-//                  DMatrixRMaj newBoxLocation = new DMatrixRMaj(1, 3);
+                  DMatrixRMaj H = new DMatrixRMaj(3, 3);
+                  DMatrixRMaj U = new DMatrixRMaj(3, 3);
+                  DMatrixRMaj Vt = new DMatrixRMaj(3, 3);
+                  DMatrixRMaj R = new DMatrixRMaj(3, 3);
+                  DMatrixRMaj newBoxLocation = new DMatrixRMaj(1, 3);
                   DMatrixRMaj boxTranslation = new DMatrixRMaj(1, 3);
-//                  DMatrixRMaj T = new DMatrixRMaj(4, 4);
-//                  CommonOps_DDRM.setIdentity(T);
+                  DMatrixRMaj T = new DMatrixRMaj(4, 4);
+                  CommonOps_DDRM.setIdentity(T);
 
                   // Best Fit Transform
-//                  CommonOps_DDRM.multTransA(boxCentroidSubtractedPoints, envCentroidSubtractedPoints, H);
+                  CommonOps_DDRM.multTransA(boxCentroidSubtractedPoints, envCentroidSubtractedPoints, H);
 
-//                  svdSolver.decompose(H);
-//                  svdSolver.getU(U, false);
-//                  svdSolver.getV(Vt, true);
+                  svdSolver.decompose(H);
+                  svdSolver.getU(U, false);
+                  svdSolver.getV(Vt, true);
 
 
-//                  CommonOps_DDRM.transpose(U);
-//                  CommonOps_DDRM.transpose(Vt);
-//                  CommonOps_DDRM.mult(Vt, U, R);
+                  CommonOps_DDRM.transpose(U);
+                  CommonOps_DDRM.transpose(Vt);
+                  CommonOps_DDRM.mult(Vt, U, R);
 
                   // check if transform wants to reflect instead of rotate and fix it
-//                  if (CommonOps_DDRM.det(R) < 0) {
-//                     Vt.set(2,0,-Vt.get(2,0));
-//                     Vt.set(2,1,-Vt.get(2,1));
-//                     Vt.set(2,2,-Vt.get(2,2));
-//                     CommonOps_DDRM.mult(Vt, U, R);
-//                     System.out.println("flipped");
-//                  }
-//                  else{
-//                     System.out.println("NOT");
-//                  }
+                  if (CommonOps_DDRM.det(R) < 0) {
+                     Vt.set(2,0,-Vt.get(2,0));
+                     Vt.set(2,1,-Vt.get(2,1));
+                     Vt.set(2,2,-Vt.get(2,2));
+                     CommonOps_DDRM.mult(Vt, U, R);
+                     System.out.println("flipped");
+                  }
+                  else{
+                     System.out.println("NOT");
+                  }
 
-//                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
-//                  CommonOps_DDRM.transpose(newBoxLocation);
+                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
+                  CommonOps_DDRM.transpose(newBoxLocation);
                   CommonOps_DDRM.subtract(envCentroid, boxCentroid, boxTranslation);
 
 
