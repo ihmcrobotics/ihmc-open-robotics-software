@@ -11,7 +11,7 @@ public class RDXAvailableBehaviorTreeFile
    public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile treeFile)
    {
       this.treeFile = treeFile;
-      JSONFileTools.load(treeFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
+      JSONFileTools.load(treeFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("description").asText());
    }
 
    public String getName()
