@@ -3,19 +3,16 @@ package us.ihmc.rdx.ui.behavior.tree;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -26,10 +23,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class RDXBehaviorTree
 {
@@ -46,6 +40,7 @@ public class RDXBehaviorTree
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodesMenu nodesMenu;
+   private final RDXBehaviorTreeFileLoader fileLoader;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -70,6 +65,7 @@ public class RDXBehaviorTree
       nodesMenu = new RDXBehaviorTreeNodesMenu(treeFilesDirectory);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
+      fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
@@ -82,46 +78,23 @@ public class RDXBehaviorTree
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
-   public void loadFromFile()
-   {
-      WorkspaceResourceFile file = null; // FIXME
-
-      // Delete the entire tree. We are starting over
-      behaviorTreeState.modifyTree(modificationQueue ->
-      {
-         modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(rootNode));
-
-         JSONFileTools.load(file, jsonNode ->
-         {
-            rootNode = loadFromFile(jsonNode, null, modificationQueue);
-         });
-      });
-   }
-
-   public RDXBehaviorTreeNode<?, ?> loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeModificationQueue modificationQueue)
-   {
-      String typeName = jsonNode.get("type").textValue();
-
-      RDXBehaviorTreeNode<?, ?> node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
-                                                              behaviorTreeState.getNextID().getAndIncrement());
-
-      node.getDefinition().loadFromFile(jsonNode);
-
-      if (parentNode != null)
-      {
-         modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze<>(node, parentNode));
-      }
-
-      JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
-      {
-         loadFromFile(childJsonNode, node, modificationQueue);
-      });
-
-      return node;
-   }
-
    public void update()
    {
+      if (nodesMenu.getLoadFileRequest().poll())
+      {
+         RDXBehaviorTreeNode<?, ?> selectedNode = null; // TODO
+
+         behaviorTreeState.modifyTree(modificationQueue ->
+         {
+            BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = fileLoader.loadFromFile(nodesMenu.getLoadFileRequest().read(), modificationQueue);
+
+            if (selectedNode == null)
+               modificationQueue.accept(new BehaviorTreeNodeSetRoot(loadedNode, newRootNode -> rootNode = (RDXBehaviorTreeNode<?, ?>) newRootNode));
+            else
+               modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze(loadedNode, selectedNode));
+         });
+      }
+
       idToNodeMap.clear();
 
       if (rootNode != null)

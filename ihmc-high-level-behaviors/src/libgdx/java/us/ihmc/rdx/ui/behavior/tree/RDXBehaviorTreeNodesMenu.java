@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -16,6 +17,7 @@ public class RDXBehaviorTreeNodesMenu
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final Notification menuShouldClose = new Notification();
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
+   private final TypedNotification<RDXAvailableBehaviorTreeFile> loadFileRequest = new TypedNotification<>();
 
    public RDXBehaviorTreeNodesMenu(WorkspaceResourceDirectory treeFilesDirectory)
    {
@@ -63,5 +65,10 @@ public class RDXBehaviorTreeNodesMenu
 
          ImGui.endMenu();
       }
+   }
+
+   public TypedNotification<RDXAvailableBehaviorTreeFile> getLoadFileRequest()
+   {
+      return loadFileRequest;
    }
 }
