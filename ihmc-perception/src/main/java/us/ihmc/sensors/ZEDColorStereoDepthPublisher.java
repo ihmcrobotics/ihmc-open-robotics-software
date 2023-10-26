@@ -300,7 +300,7 @@ public class ZEDColorStereoDepthPublisher
          colorImageMessage.setPrincipalPointYPixels(cameraPrincipalPointY.get(side));
          colorImageMessage.setImageWidth(imageWidth);
          colorImageMessage.setImageHeight(imageHeight);
-         colorImageMessage.getPosition().set(cameraFramePoses.get(side).getTranslation());
+         colorImageMessage.getPosition().set(cameraFramePoses.get(side).getPosition());
          colorImageMessage.getOrientation().set(cameraFramePoses.get(side).getOrientation());
          colorImageMessage.setSequenceNumber(colorImageSequenceNumber.get(side));
          colorImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
