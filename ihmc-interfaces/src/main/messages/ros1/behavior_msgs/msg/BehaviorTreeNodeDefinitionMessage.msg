@@ -7,4 +7,7 @@
 # A human readable description of what the node does
 string description
 
+# Number of children
+uint16 number_of_children
+
 

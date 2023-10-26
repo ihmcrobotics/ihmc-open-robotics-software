@@ -8,7 +8,8 @@ import java.util.List;
 public class ROS2BehaviorTreeSubscriptionNode
 {
    private byte type;
-   private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage; // TODO: Needed?
+   private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
+   private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage;
@@ -36,6 +37,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setType(byte type)
    {
       this.type = type;
+   }
+
+   public BehaviorTreeNodeDefinitionMessage getBehaviorTreeNodeDefinitionMessage()
+   {
+      return behaviorTreeNodeDefinitionMessage;
+   }
+
+   public void setBehaviorTreeNodeDefinitionMessage(BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage)
+   {
+      this.behaviorTreeNodeDefinitionMessage = behaviorTreeNodeDefinitionMessage;
    }
 
    public BehaviorTreeNodeStateMessage getBehaviorTreeNodeStateMessage()

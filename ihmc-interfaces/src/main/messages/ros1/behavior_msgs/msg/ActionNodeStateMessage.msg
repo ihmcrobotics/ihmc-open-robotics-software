@@ -2,9 +2,6 @@
 # Parent state fields
 behavior_msgs/BehaviorTreeNodeStateMessage state
 
-# Definition
-behavior_msgs/ActionNodeDefinitionMessage definition
-
 # The action's unique ID
 uint32 id
 

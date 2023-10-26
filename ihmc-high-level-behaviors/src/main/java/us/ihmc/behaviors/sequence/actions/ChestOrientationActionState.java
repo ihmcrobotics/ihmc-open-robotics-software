@@ -33,14 +33,14 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
    public void toMessage(ChestOrientationActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      super.toMessage(message.getState());
 
       MessageTools.toMessage(goalPelvisFrame.getTransformToParent(), message.getGoalPelvisTransformToWorld());
    }
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
       MessageTools.toEuclid(message.getGoalPelvisTransformToWorld(), goalPelvisFrame.getTransformToParent());
       goalPelvisFrame.getReferenceFrame().update();

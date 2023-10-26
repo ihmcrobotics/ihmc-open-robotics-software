@@ -1,7 +1,6 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -12,10 +11,6 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeStateMessage_")
       struct BehaviorTreeNodeStateMessage
       {
-        /**
-         * Node description
-         */
-        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
          * The node's unique ID
          */

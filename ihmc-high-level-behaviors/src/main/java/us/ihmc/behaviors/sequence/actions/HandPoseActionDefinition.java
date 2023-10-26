@@ -52,7 +52,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
    public void toMessage(HandPoseActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setParentFrameName(palmParentFrameName);
       MessageTools.toMessage(palmTransformToParent, message.getTransformToParent());
@@ -65,7 +65,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
    public void fromMessage(HandPoseActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
       palmParentFrameName = message.getParentFrameNameAsString();
       MessageTools.toEuclid(message.getTransformToParent(), palmTransformToParent);

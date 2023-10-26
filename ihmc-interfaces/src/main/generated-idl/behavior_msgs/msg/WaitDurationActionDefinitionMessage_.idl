@@ -15,7 +15,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::ActionNodeDefinitionMessage action_definition;
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
          * Wait duration
          */

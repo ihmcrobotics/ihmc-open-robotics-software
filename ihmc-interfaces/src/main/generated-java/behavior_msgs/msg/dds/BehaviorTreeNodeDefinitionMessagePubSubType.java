@@ -15,7 +15,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ec52f2b0959f4244328ace512607d80c0d3511b4cd49cef82744ea2d5b1f497f";
+   		return "8bdd51b4d51420bfdefbfdf76d23fb1e7a7a09b1d33592b9847f2dc4b6851f60";
    }
    
    @Override
@@ -53,6 +53,9 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -67,6 +70,10 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDescription().length() + 1;
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -76,11 +83,15 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       cdr.write_type_d(data.getDescription());else
           throw new RuntimeException("description field exceeds the maximum length");
 
+      cdr.write_type_3(data.getNumberOfChildren());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getDescription());	
+      data.setNumberOfChildren(cdr.read_type_3());
+      	
 
    }
 
@@ -88,12 +99,14 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("description", data.getDescription());
+      ser.write_type_3("number_of_children", data.getNumberOfChildren());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data)
    {
       ser.read_type_d("description", data.getDescription());
+      data.setNumberOfChildren(ser.read_type_3("number_of_children"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage dest)

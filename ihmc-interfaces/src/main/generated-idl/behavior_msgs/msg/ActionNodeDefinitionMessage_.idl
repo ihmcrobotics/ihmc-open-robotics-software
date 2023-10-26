@@ -15,7 +15,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage node_definition;
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
          * Execute with next action
          */

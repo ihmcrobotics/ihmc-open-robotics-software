@@ -1,7 +1,6 @@
 #ifndef __behavior_msgs__msg__ActionNodeStateMessage__idl__
 #define __behavior_msgs__msg__ActionNodeStateMessage__idl__
 
-#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
 module behavior_msgs
 {
@@ -17,10 +16,6 @@ module behavior_msgs
          * Parent state fields
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
-        /**
-         * Definition
-         */
-        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
          * The action's unique ID
          */

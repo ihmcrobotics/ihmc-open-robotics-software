@@ -16,7 +16,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::ActionNodeDefinitionMessage action_definition;
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
          * Specifies the side of the robot that this message refers to.
          */

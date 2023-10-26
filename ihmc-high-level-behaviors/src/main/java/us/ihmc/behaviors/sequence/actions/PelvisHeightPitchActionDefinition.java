@@ -42,7 +42,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
 
    public void toMessage(PelvisHeightPitchActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setTrajectoryDuration(trajectoryDuration);
       message.setParentFrameName(parentFrameName);
@@ -51,7 +51,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
 
    public void fromMessage(PelvisHeightPitchActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
       trajectoryDuration = message.getTrajectoryDuration();
       parentFrameName = message.getParentFrameNameAsString();

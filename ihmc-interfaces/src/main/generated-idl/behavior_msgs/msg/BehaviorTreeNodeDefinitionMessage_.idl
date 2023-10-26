@@ -22,6 +22,10 @@ module behavior_msgs
          * A human readable description of what the node does
          */
         string description;
+        /**
+         * Number of children
+         */
+        unsigned short number_of_children;
       };
     };
   };

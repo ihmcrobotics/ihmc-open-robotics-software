@@ -44,14 +44,14 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
    public void toMessage(ActionNodeDefinitionMessage message)
    {
-      super.toMessage(message.getNodeDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setExecuteWithNextAction(getExecuteWithNextAction());
    }
 
    public void fromMessage(ActionNodeDefinitionMessage message)
    {
-      super.fromMessage(message.getNodeDefinition());
+      super.fromMessage(message.getDefinition());
 
       executeWitNextAction = message.getExecuteWithNextAction();
    }

@@ -54,7 +54,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
    public void toMessage(FootstepPlanActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
@@ -71,7 +71,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
