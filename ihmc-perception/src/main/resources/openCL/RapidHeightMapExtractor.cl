@@ -283,8 +283,8 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    if (!isColliding && localHeight > params[MIN_HEIGHT_REGISTRATION] && localHeight < params[MAX_HEIGHT_REGISTRATION])
    {
       // Apply a poor man's mahalanobis filter on the data
-      float height_diff = localHeight - previousHeight;
-      if (height_diff > params[MIN_HEIGHT_DIFFERENCE] && height_diff < params[MAX_HEIGHT_DIFFERENCE])
+      float height_diff = fabs(localHeight - previousHeight);
+      if (height_diff < params[MAX_HEIGHT_DIFFERENCE])
       {
          finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + localHeight * (1.0f - params[HEIGHT_FILTER_ALPHA]);
       }

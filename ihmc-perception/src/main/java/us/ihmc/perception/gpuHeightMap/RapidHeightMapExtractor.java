@@ -276,9 +276,9 @@ public class RapidHeightMapExtractor
 
    public void reset()
    {
-      localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
+      localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(32768));
       localHeightMapImage.writeOpenCLImage(openCLManager);
-      globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
+      globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(32768));
       globalHeightMapImage.writeOpenCLImage(openCLManager);
       sequenceNumber = 0;
    }

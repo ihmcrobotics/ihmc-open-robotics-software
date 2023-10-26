@@ -2,22 +2,22 @@
   "title": "GPU Height Map Parameters",
   "Reset Height Map" : false,
   "Search window height": {
-    "value": 250,
+    "value": 500,
     "lowerBound": 100,
     "upperBound": 800
   },
   "Search window width": {
-    "value": 140,
+    "value": 350,
     "lowerBound": 100,
     "upperBound": 800
   },
   "Min height registration": {
-    "value": -0.01,
+    "value": -3.25,
     "lowerBound": -0.05,
     "upperBound": 0.05
   },
   "Max height registration": {
-    "value": 0.7,
+    "value": 3.25,
     "lowerBound": 0.4,
     "upperBound": 1.6
   },
@@ -28,8 +28,8 @@
   },
   "Max height difference": {
     "value": 0.1,
-    "lowerBound": 0.01,
-    "upperBound": 0.4
+    "lowerBound": 0.0,
+    "upperBound": 0.5
   },
   "Height filter alpha": {
     "value": 0.65,
