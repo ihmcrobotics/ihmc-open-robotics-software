@@ -50,6 +50,7 @@ public class RDXInteractableObject implements RenderableProvider
    private final ImFloat xRadius = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
+   private List<Float> readResizablePrimitiveSize;
 
    public RDXInteractableObject(RDXBaseUI baseUI)
    {
@@ -204,14 +205,9 @@ public class RDXInteractableObject implements RenderableProvider
       return new ArrayList<>(Arrays.asList(xLength.get(), yLength.get(), zLength.get(), xRadius.get(), yRadius.get(), zRadius.get()));
    }
 
-   public void setResizablePrimitiveSize(List<Float> newSize)
+   public void setReadResizablePrimitiveSize(List<Float> newSize)
    {
-      xLength.set(newSize.get(0));
-      yLength.set(newSize.get(1));
-      zLength.set(newSize.get(2));
-      xRadius.set(newSize.get(3));
-      yRadius.set(newSize.get(4));
-      zRadius.set(newSize.get(5));
+      this.readResizablePrimitiveSize = newSize;
    }
 
    public void clear()
