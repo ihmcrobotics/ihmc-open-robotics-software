@@ -1,0 +1,15 @@
+The model is subdivision ready.
+This is just the base mesh,
+Use a subdivision surface to get smother geometry.
+
+I use the spec gloss texture work flow and i have added those textures. 
+The texture files were created in substance painter but later modified in Photoshop.
+Creating new textures will be a long process for another texture workflow.
+Look online if you want to use the spec gloss workflow. It is quite simple.
+
+If you like the model please do leave a like or comment on the model.
+Any constructive criticism is welcome.
+Feel free to use the model if you want but please "Do mention my name if you use it".
+Thnx for reading.
+
+Dil Afroze Ahmad.

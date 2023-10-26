@@ -14,6 +14,7 @@ ihmc {
 }
 
 mainDependencies {
+   api("com.github.stephengold:Minie:7.6.0")
    api("us.ihmc:euclid-frame:0.20.0")
    api("us.ihmc:euclid-frame-shape:0.20.0")
    api("us.ihmc:euclid-shape:0.20.0")
