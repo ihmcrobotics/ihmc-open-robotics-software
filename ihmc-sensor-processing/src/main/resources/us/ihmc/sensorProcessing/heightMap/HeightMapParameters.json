@@ -36,6 +36,21 @@
     "lowerBound": 0.2,
     "upperBound": 0.85
   },
+  "Height offset": {
+    "value": 3.25,
+    "lowerBound": -10.0,
+    "upperBound": 10.0
+  },
+  "Min Clamp Height": {
+    "value": -3.25,
+    "lowerBound": -8.0,
+    "upperBound": 8.0
+  },
+  "Max Clamp Height": {
+      "value": 3.25,
+      "lowerBound": -8.0,
+      "upperBound": 8.0
+  },
   "Local width in meters": {
     "value": 3.0,
     "lowerBound": 1.0,

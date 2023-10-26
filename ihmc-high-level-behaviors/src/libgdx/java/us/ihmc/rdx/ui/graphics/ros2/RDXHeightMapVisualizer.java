@@ -219,6 +219,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          if (heightMapImage.ptr(0) != null)
          {
+            //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 10);
             heightMapRenderer.update(zUpToWorldTransform,
                                      heightMapImage.ptr(0),
                                      zUpToWorldTransform.getTranslation().getX32(),

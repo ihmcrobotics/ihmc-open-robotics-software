@@ -238,7 +238,7 @@ public class PerceptionDebugTools
             if (image.type() == opencv_core.CV_8UC1)
                matString.append(image.ptr(i, j).get() & 0xFF).append(" ");
             if (image.type() == opencv_core.CV_16UC1)
-               matString.append(image.ptr(i, j).getShort()).append("\t");
+               matString.append(((int)image.ptr(i, j).getShort()) & 0xFFFF).append("\t");
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
             if (image.type() == opencv_core.CV_32FC2)

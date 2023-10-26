@@ -10,6 +10,61 @@ import static us.ihmc.sensorProcessing.heightMap.HeightMapParameters.*;
  */
 public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default boolean getResetHeightMap()
+   {
+      return get(resetHeightMap);
+   }
+
+   default int getSearchWindowHeight()
+   {
+      return get(searchWindowHeight);
+   }
+
+   default int getSearchWindowWidth()
+   {
+      return get(searchWindowWidth);
+   }
+
+   default double getMinHeightRegistration()
+   {
+      return get(minHeightRegistration);
+   }
+
+   default double getMaxHeightRegistration()
+   {
+      return get(maxHeightRegistration);
+   }
+
+   default double getMinHeightDifference()
+   {
+      return get(minHeightDifference);
+   }
+
+   default double getMaxHeightDifference()
+   {
+      return get(maxHeightDifference);
+   }
+
+   default double getHeightFilterAlpha()
+   {
+      return get(heightFilterAlpha);
+   }
+
+   default double getHeightOffset()
+   {
+      return get(heightOffset);
+   }
+
+   default double getMinClampHeight()
+   {
+      return get(minClampHeight);
+   }
+
+   default double getMaxClampHeight()
+   {
+      return get(maxClampHeight);
+   }
+
    default double getLocalWidthInMeters()
    {
       return get(localWidthInMeters);
@@ -53,41 +108,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default int getCropWindowSize()
    {
       return get(cropWindowSize);
-   }
-
-   default int getSearchWindowHeight()
-   {
-      return get(searchWindowHeight);
-   }
-
-   default int getSearchWindowWidth()
-   {
-      return get(searchWindowWidth);
-   }
-
-   default double getMinHeightRegistration()
-   {
-      return get(minHeightRegistration);
-   }
-
-   default double getMaxHeightRegistration()
-   {
-      return get(maxHeightRegistration);
-   }
-
-   default double getMinHeightDifference()
-   {
-      return get(minHeightDifference);
-   }
-
-   default double getMaxHeightDifference()
-   {
-      return get(maxHeightDifference);
-   }
-
-   default double getHeightFilterAlpha()
-   {
-      return get(heightFilterAlpha);
    }
 
    /**
@@ -165,10 +185,5 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default boolean getEstimateHeightWithKalmanFilter()
    {
       return get(estimateHeightWithKalmanFilter);
-   }
-
-   default boolean getResetHeightMap()
-   {
-      return get(resetHeightMap);
    }
 }

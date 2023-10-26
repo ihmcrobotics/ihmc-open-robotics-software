@@ -24,6 +24,9 @@
 #define SEARCH_WINDOW_HEIGHT 23
 #define SEARCH_WINDOW_WIDTH 24
 #define CROPPED_WINDOW_CENTER_INDEX 25
+#define MIN_CLAMP_HEIGHT 26
+#define MAX_CLAMP_HEIGHT 27
+#define HEIGHT_OFFSET 28
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -206,16 +209,21 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    if (count > 0)
    {
       averageHeightZ = averageHeightZ / (float)(count);
-      averageHeightZ = clamp(averageHeightZ, -3.25f, 3.25f);
+
 
       //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
    else
    {
       // this is slightly below the floor height of what we'll accept
-      averageHeightZ = -3.25f;
+      averageHeightZ = -params[HEIGHT_OFFSET];
    }
-   averageHeightZ += 3.25f;
+   averageHeightZ = clamp(averageHeightZ, params[MIN_CLAMP_HEIGHT], params[MAX_CLAMP_HEIGHT]);
+   averageHeightZ += params[HEIGHT_OFFSET];
+
+//   averageHeightZ = params[HEIGHT_OFFSET];
+//   averageHeightZ += xIndex * 0.05f;
+
    write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
@@ -261,12 +269,12 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    int localCellsPerAxis = (int) params[LOCAL_CELLS_PER_AXIS];
 
    // Extract the height from the local map at the local cell index (if within bounds)
-   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR];
-   float height = -3.25f;
+   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+   float localHeight = 0.0f;
 
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
-      height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / params[HEIGHT_SCALING_FACTOR];
+      localHeight = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
    }
 
    float finalHeight = previousHeight;
@@ -275,17 +283,20 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    if (!isColliding)
    {
       // Apply a poor man's mahalanobis filter on the data
-      float height_diff = height - previousHeight;
+      float height_diff = localHeight - previousHeight;
       if (height_diff > params[MIN_HEIGHT_DIFFERENCE] && height_diff < params[MAX_HEIGHT_DIFFERENCE])
       {
-         finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + height * (1.0f - params[HEIGHT_FILTER_ALPHA]);
+         finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + localHeight * (1.0f - params[HEIGHT_FILTER_ALPHA]);
       }
       else
       {
          // the difference between the incoming data and the old data was too much, reset it to the incoming data completely
-         finalHeight = height;
+         finalHeight = localHeight;
       }
    }
+
+   finalHeight = clamp(finalHeight, params[MIN_HEIGHT_REGISTRATION], params[MAX_HEIGHT_REGISTRATION]);
+   finalHeight += params[HEIGHT_OFFSET];
 
    // Put the height value in the global map at the global cell index
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));

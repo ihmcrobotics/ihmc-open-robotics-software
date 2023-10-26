@@ -227,7 +227,8 @@ public class PerceptionMessageTools
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            float cellHeight = (float) ((float) (heightMapPointer.ptr(xIndex, yIndex).getShort()) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+            int height = ((int)heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
+            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor()) - 3.25f;
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
             heightMapData.setHeightAt(key, cellHeight);

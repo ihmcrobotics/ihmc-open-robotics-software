@@ -137,6 +137,8 @@ public class RapidHeightMapExtractor
       croppingKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "croppingKernel");
       terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
       contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
+      
+      reset();
    }
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
@@ -256,6 +258,9 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) heightMapParameters.getSearchWindowHeight());
       parametersBuffer.setParameter((float) heightMapParameters.getSearchWindowWidth());
       parametersBuffer.setParameter((float) CROP_WINDOW_SIZE / 2);
+      parametersBuffer.setParameter((float) heightMapParameters.getMinClampHeight());
+      parametersBuffer.setParameter((float) heightMapParameters.getMaxClampHeight());
+      parametersBuffer.setParameter((float) heightMapParameters.getHeightOffset());
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -272,6 +277,7 @@ public class RapidHeightMapExtractor
    public void reset()
    {
       localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
+      localHeightMapImage.writeOpenCLImage(openCLManager);
       globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(0));
       globalHeightMapImage.writeOpenCLImage(openCLManager);
       sequenceNumber = 0;

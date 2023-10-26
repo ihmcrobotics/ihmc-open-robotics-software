@@ -8,6 +8,61 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setResetHeightMap(boolean resetHeightMap)
+   {
+      set(HeightMapParameters.resetHeightMap, resetHeightMap);
+   }
+
+   default void setSearchWindowHeight(int searchWindowHeight)
+   {
+      set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
+   }
+
+   default void setSearchWindowWidth(int searchWindowWidth)
+   {
+      set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
+   }
+
+   default void setMinHeightRegistration(double minHeightRegistration)
+   {
+      set(HeightMapParameters.minHeightRegistration, minHeightRegistration);
+   }
+
+   default void setMaxHeightRegistration(double maxHeightRegistration)
+   {
+      set(HeightMapParameters.maxHeightRegistration, maxHeightRegistration);
+   }
+
+   default void setMinHeightDifference(double minHeightDifference)
+   {
+      set(HeightMapParameters.minHeightDifference, minHeightDifference);
+   }
+
+   default void setMaxHeightDifference(double maxHeightDifference)
+   {
+      set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
+   }
+
+   default void setHeightFilterAlpha(double heightFilterAlpha)
+   {
+      set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
+   }
+
+   default void setHeightOffset(double heightOffset)
+   {
+      set(HeightMapParameters.heightOffset, heightOffset);
+   }
+
+   default void setMinClampHeight(double minClampHeight)
+   {
+      set(HeightMapParameters.minClampHeight, minClampHeight);
+   }
+
+   default void setMaxClampHeight(double maxClampHeight)
+   {
+      set(HeightMapParameters.maxClampHeight, maxClampHeight);
+   }
+
    default void setLocalWidthInMeters(double localWidthInMeters)
    {
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
@@ -51,41 +106,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setCropWindowSize(int cropWindowSize)
    {
       set(HeightMapParameters.cropWindowSize, cropWindowSize);
-   }
-
-   default void setSearchWindowHeight(int searchWindowHeight)
-   {
-      set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
-   }
-
-   default void setSearchWindowWidth(int searchWindowWidth)
-   {
-      set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
-   }
-
-   default void setMinHeightRegistration(double minHeightRegistration)
-   {
-      set(HeightMapParameters.minHeightRegistration, minHeightRegistration);
-   }
-
-   default void setMaxHeightRegistration(double maxHeightRegistration)
-   {
-      set(HeightMapParameters.maxHeightRegistration, maxHeightRegistration);
-   }
-
-   default void setMinHeightDifference(double minHeightDifference)
-   {
-      set(HeightMapParameters.minHeightDifference, minHeightDifference);
-   }
-
-   default void setMaxHeightDifference(double maxHeightDifference)
-   {
-      set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
-   }
-
-   default void setHeightFilterAlpha(double heightFilterAlpha)
-   {
-      set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
    }
 
    /**
@@ -163,10 +183,5 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
    {
       set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
-   }
-
-   default void setResetHeightMap(boolean resetHeightMap)
-   {
-      set(HeightMapParameters.resetHeightMap, resetHeightMap);
    }
 }
