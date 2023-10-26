@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense;
+package us.ihmc.perception.realsense.example;
 
 import static org.bytedeco.librealsense2.global.realsense2.RS2_EXTENSION_DEPTH_FRAME;
 import static org.bytedeco.librealsense2.global.realsense2.rs2_is_frame_extendable_to;
@@ -18,7 +18,6 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
