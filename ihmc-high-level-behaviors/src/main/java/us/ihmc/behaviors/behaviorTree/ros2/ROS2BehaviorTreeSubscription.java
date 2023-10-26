@@ -95,9 +95,6 @@ public class ROS2BehaviorTreeSubscription
                                                 BehaviorTreeNodeExtension<?, ?, ?, ?> localParentNode,
                                                 BehaviorTreeModificationQueue modificationQueue)
    {
-      // Set fields only modifiable by the robot
-      localNode.getState().setIsActive(subscriptionNode.getBehaviorTreeNodeStateMessage().getIsActive());
-
       // If the node was recently modified by the operator, the node does not accept
       // updates of these values. This is to allow the operator's changes to propagate
       // and so it doesn't get overriden immediately by an out of date message coming from the robot.
@@ -108,6 +105,8 @@ public class ROS2BehaviorTreeSubscription
             modificationQueue.accept(new BehaviorTreeNodeSetRoot(localNode, rootNodeSetter));
          else
             modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getReplacementModification(localNode.getState().getID(), localParentNode));
+
+         ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
       }
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
@@ -128,79 +127,7 @@ public class ROS2BehaviorTreeSubscription
       int indexInTypesList = (int) behaviorTreeStateMessage.getBehaviorTreeIndices().get(subscriptionNodeDepthFirstIndex.intValue());
       subscriptionNode.setType(nodeType);
 
-      switch (nodeType)
-      {
-         case BehaviorTreeStateMessage.ACTION_SEQUENCE ->
-         {
-            ActionSequenceStateMessage actionSequenceStateMessage = behaviorTreeStateMessage.getActionSequences().get(indexInTypesList);
-            subscriptionNode.setActionSequenceStateMessage(actionSequenceStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(actionSequenceStateMessage.getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION ->
-         {
-            ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage = behaviorTreeStateMessage.getArmJointAnglesActions().get(indexInTypesList);
-            subscriptionNode.setArmJointAnglesActionStateMessage(armJointAnglesActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(armJointAnglesActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(armJointAnglesActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
-         {
-            ChestOrientationActionStateMessage chestOrientationActionStateMessage = behaviorTreeStateMessage.getChestOrientationActions().get(indexInTypesList);
-            subscriptionNode.setChestOrientationActionStateMessage(chestOrientationActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(chestOrientationActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(chestOrientationActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION ->
-         {
-            FootstepPlanActionStateMessage footstepPlanActionStateMessage = behaviorTreeStateMessage.getFootstepPlanActions().get(indexInTypesList);
-            subscriptionNode.setFootstepPlanActionStateMessage(footstepPlanActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(footstepPlanActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footstepPlanActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.HAND_POSE_ACTION ->
-         {
-            HandPoseActionStateMessage handPoseActionStateMessage = behaviorTreeStateMessage.getHandPoseActions().get(indexInTypesList);
-            subscriptionNode.setHandPoseActionStateMessage(handPoseActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(handPoseActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handPoseActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.HAND_WRENCH_ACTION ->
-         {
-            HandWrenchActionStateMessage handWrenchActionStateMessage = behaviorTreeStateMessage.getHandWrenchActions().get(indexInTypesList);
-            subscriptionNode.setHandWrenchActionStateMessage(handWrenchActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(handWrenchActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handWrenchActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.PELVIS_HEIGHT_PITCH_ACTION ->
-         {
-            PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage = behaviorTreeStateMessage.getPelvisHeightActions().get(indexInTypesList);
-            subscriptionNode.setPelvisHeightPitchActionStateMessage(pelvisHeightPitchActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(pelvisHeightPitchActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(pelvisHeightPitchActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION ->
-         {
-            SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage = behaviorTreeStateMessage.getSakeHandCommandActions().get(indexInTypesList);
-            subscriptionNode.setSakeHandCommandActionStateMessage(sakeHandCommandActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(sakeHandCommandActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sakeHandCommandActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.WAIT_DURATION_ACTION ->
-         {
-            WaitDurationActionStateMessage waitDurationActionStateMessage = behaviorTreeStateMessage.getWaitDurationActions().get(indexInTypesList);
-            subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.WALK_ACTION ->
-         {
-            WalkActionStateMessage walkActionStateMessage = behaviorTreeStateMessage.getWalkActions().get(indexInTypesList);
-            subscriptionNode.setWalkActionStateMessage(walkActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(walkActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(walkActionStateMessage.getDefinition().getDefinition().getDefinition());
-         }
-      }
+      ROS2BehaviorTreeMessageTools.packSubscriptionNode(nodeType, indexInTypesList, behaviorTreeStateMessage, subscriptionNode);
 
       for (int i = 0; i < subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getNumberOfChildren(); i++)
       {

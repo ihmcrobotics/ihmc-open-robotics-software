@@ -28,6 +28,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
    public void toMessage(WalkActionStateMessage message)
    {
+      getDefinition().toMessage(message.getDefinition());
+
       super.toMessage(message.getState());
 
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
@@ -36,6 +38,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
    public void fromMessage(WalkActionStateMessage message)
    {
+      getDefinition().fromMessage(message.getDefinition());
+
       super.fromMessage(message.getState());
 
       totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();

@@ -12,11 +12,15 @@ public class ArmJointAnglesActionState extends ActionNodeState<ArmJointAnglesAct
 
    public void toMessage(ArmJointAnglesActionStateMessage message)
    {
+      getDefinition().toMessage(message.getDefinition());
+
       super.toMessage(message.getState());
    }
 
    public void fromMessage(ArmJointAnglesActionStateMessage message)
    {
+      getDefinition().fromMessage(message.getDefinition());
+
       super.fromMessage(message.getState());
    }
 }

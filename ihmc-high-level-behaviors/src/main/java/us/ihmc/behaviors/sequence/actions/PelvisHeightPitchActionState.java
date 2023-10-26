@@ -25,11 +25,15 @@ public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPi
 
    public void toMessage(PelvisHeightPitchActionStateMessage message)
    {
+      getDefinition().toMessage(message.getDefinition());
+
       super.toMessage(message.getState());
    }
 
    public void fromMessage(PelvisHeightPitchActionStateMessage message)
    {
+      getDefinition().fromMessage(message.getDefinition());
+
       super.fromMessage(message.getState());
    }
 
