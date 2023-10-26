@@ -11,7 +11,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage action_state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
    /**
             * Definition
             */
@@ -31,7 +31,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
    public FootstepPlanActionStateMessage()
    {
-      action_state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage();
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType());
 
@@ -45,7 +45,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
    public void set(FootstepPlanActionStateMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       footsteps_.set(other.footsteps_);
       total_number_of_footsteps_ = other.total_number_of_footsteps_;
@@ -58,9 +58,9 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage getActionState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
-      return action_state_;
+      return state_;
    }
 
 
@@ -129,7 +129,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_state_.epsilonEquals(other.action_state_, epsilon)) return false;
+      if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
       else
@@ -155,7 +155,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
       FootstepPlanActionStateMessage otherMyClass = (FootstepPlanActionStateMessage) other;
 
-      if (!this.action_state_.equals(otherMyClass.action_state_)) return false;
+      if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
       if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
@@ -172,8 +172,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanActionStateMessage {");
-      builder.append("action_state=");
-      builder.append(this.action_state_);      builder.append(", ");
+      builder.append("state=");
+      builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("footsteps=");

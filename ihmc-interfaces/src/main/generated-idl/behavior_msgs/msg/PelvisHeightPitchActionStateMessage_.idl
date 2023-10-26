@@ -16,7 +16,7 @@ module behavior_msgs
         /**
          * Parent state fields
          */
-        behavior_msgs::msg::dds::ActionNodeStateMessage action_state;
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
         /**
          * Definition
          */

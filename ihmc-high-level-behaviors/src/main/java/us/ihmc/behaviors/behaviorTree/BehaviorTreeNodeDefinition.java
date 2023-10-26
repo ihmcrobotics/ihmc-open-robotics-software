@@ -49,6 +49,7 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
       message.setDescription(description);
+      message.setNumberOfChildren(children.size());
    }
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)

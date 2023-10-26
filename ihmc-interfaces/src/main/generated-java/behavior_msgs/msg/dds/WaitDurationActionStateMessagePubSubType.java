@@ -15,7 +15,7 @@ public class WaitDurationActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "61289d20c01f6eab3a50a4b138d2ab9b797662e0924e45234ce2ffcca0853281";
+   		return "fed94a75ab3ff5c753d288aaae42f3320a8a14705d58b23ea36c89fea1c4c291";
    }
    
    @Override
@@ -69,7 +69,7 @@ public class WaitDurationActionStateMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
@@ -79,13 +79,13 @@ public class WaitDurationActionStateMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(behavior_msgs.msg.dds.WaitDurationActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getActionState(), cdr);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.WaitDurationActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getActionState(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
@@ -93,7 +93,7 @@ public class WaitDurationActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(behavior_msgs.msg.dds.WaitDurationActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
+      ser.write_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -102,7 +102,7 @@ public class WaitDurationActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WaitDurationActionStateMessage data)
    {
-      ser.read_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
+      ser.read_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.WaitDurationActionDefinitionMessagePubSubType(), data.getDefinition());
 

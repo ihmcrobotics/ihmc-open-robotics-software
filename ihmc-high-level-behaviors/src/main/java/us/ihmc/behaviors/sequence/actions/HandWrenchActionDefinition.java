@@ -40,7 +40,7 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
    public void toMessage(HandWrenchActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setRobotSide(side.toByte());
       message.setTrajectoryDuration(trajectoryDuration);
@@ -49,7 +49,7 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
    public void fromMessage(HandWrenchActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();

@@ -12,11 +12,11 @@ public class WaitDurationActionState extends ActionNodeState<WaitDurationActionD
 
    public void toMessage(WaitDurationActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      super.toMessage(message.getState());
    }
 
    public void fromMessage(WaitDurationActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
    }
 }

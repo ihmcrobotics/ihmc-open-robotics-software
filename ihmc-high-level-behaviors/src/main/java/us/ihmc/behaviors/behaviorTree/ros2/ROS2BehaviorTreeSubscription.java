@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.ActionSequenceStateMessage;
-import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
@@ -12,7 +11,6 @@ import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 
 import java.util.function.Consumer;
 
@@ -136,7 +134,71 @@ public class ROS2BehaviorTreeSubscription
          {
             ActionSequenceStateMessage actionSequenceStateMessage = behaviorTreeStateMessage.getActionSequences().get(indexInTypesList);
             subscriptionNode.setActionSequenceStateMessage(actionSequenceStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState()); // TODO: Where's definition come from? Draw on paper
+            subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(actionSequenceStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION ->
+         {
+            ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage = behaviorTreeStateMessage.getArmJointAnglesActions().get(indexInTypesList);
+            subscriptionNode.setArmJointAnglesActionStateMessage(armJointAnglesActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(armJointAnglesActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(armJointAnglesActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
+         {
+            ChestOrientationActionStateMessage chestOrientationActionStateMessage = behaviorTreeStateMessage.getChestOrientationActions().get(indexInTypesList);
+            subscriptionNode.setChestOrientationActionStateMessage(chestOrientationActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(chestOrientationActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(chestOrientationActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION ->
+         {
+            FootstepPlanActionStateMessage footstepPlanActionStateMessage = behaviorTreeStateMessage.getFootstepPlanActions().get(indexInTypesList);
+            subscriptionNode.setFootstepPlanActionStateMessage(footstepPlanActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(footstepPlanActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footstepPlanActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.HAND_POSE_ACTION ->
+         {
+            HandPoseActionStateMessage handPoseActionStateMessage = behaviorTreeStateMessage.getHandPoseActions().get(indexInTypesList);
+            subscriptionNode.setHandPoseActionStateMessage(handPoseActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(handPoseActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handPoseActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.HAND_WRENCH_ACTION ->
+         {
+            HandWrenchActionStateMessage handWrenchActionStateMessage = behaviorTreeStateMessage.getHandWrenchActions().get(indexInTypesList);
+            subscriptionNode.setHandWrenchActionStateMessage(handWrenchActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(handWrenchActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handWrenchActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.PELVIS_HEIGHT_PITCH_ACTION ->
+         {
+            PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage = behaviorTreeStateMessage.getPelvisHeightActions().get(indexInTypesList);
+            subscriptionNode.setPelvisHeightPitchActionStateMessage(pelvisHeightPitchActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(pelvisHeightPitchActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(pelvisHeightPitchActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION ->
+         {
+            SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage = behaviorTreeStateMessage.getSakeHandCommandActions().get(indexInTypesList);
+            subscriptionNode.setSakeHandCommandActionStateMessage(sakeHandCommandActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(sakeHandCommandActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sakeHandCommandActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.WAIT_DURATION_ACTION ->
+         {
+            WaitDurationActionStateMessage waitDurationActionStateMessage = behaviorTreeStateMessage.getWaitDurationActions().get(indexInTypesList);
+            subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.WALK_ACTION ->
+         {
+            WalkActionStateMessage walkActionStateMessage = behaviorTreeStateMessage.getWalkActions().get(indexInTypesList);
+            subscriptionNode.setWalkActionStateMessage(walkActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(walkActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(walkActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
       }
 

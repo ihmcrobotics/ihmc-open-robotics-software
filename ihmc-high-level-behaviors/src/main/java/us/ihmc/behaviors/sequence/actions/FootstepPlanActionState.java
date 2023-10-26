@@ -43,7 +43,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public void toMessage(FootstepPlanActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      super.toMessage(message.getState());
 
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
       message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps);
@@ -57,7 +57,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
       totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
       numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();

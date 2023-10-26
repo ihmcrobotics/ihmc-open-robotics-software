@@ -15,7 +15,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "326c6af7f401cd3da40710ae24634f7336f0c36960cd9fc3fea391ff0da12576";
+   		return "202e0ecb116b88ff8a2b5ec792f12c877e0c5510a5a693f1d2e4f246f705800d";
    }
    
    @Override
@@ -74,7 +74,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
 
@@ -92,7 +92,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
 
    public static void write(behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
           throw new RuntimeException("parent_frame_name field exceeds the maximum length");
@@ -106,7 +106,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
 
    public static void read(behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getChestTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
@@ -119,7 +119,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    @Override
    public final void serialize(behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_a("chest_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getChestTransformToParent());
@@ -131,7 +131,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage data)
    {
-      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_d("parent_frame_name", data.getParentFrameName());
       ser.read_type_a("chest_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getChestTransformToParent());

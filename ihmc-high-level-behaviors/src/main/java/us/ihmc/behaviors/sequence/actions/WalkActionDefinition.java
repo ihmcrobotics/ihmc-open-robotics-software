@@ -63,7 +63,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
 
    public void toMessage(WalkActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
@@ -75,7 +75,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
 
    public void fromMessage(WalkActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();

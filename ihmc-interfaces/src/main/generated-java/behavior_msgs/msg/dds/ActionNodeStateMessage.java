@@ -13,10 +13,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage state_;
    /**
-            * Definition
-            */
-   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
-   /**
             * The action's unique ID
             */
    public long id_;
@@ -76,7 +72,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public ActionNodeStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
    public ActionNodeStateMessage(ActionNodeStateMessage other)
@@ -88,7 +83,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public void set(ActionNodeStateMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       id_ = other.id_;
 
       action_index_ = other.action_index_;
@@ -126,15 +120,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getState()
    {
       return state_;
-   }
-
-
-   /**
-            * Definition
-            */
-   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
-   {
-      return definition_;
    }
 
    /**
@@ -366,7 +351,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       if(other == this) return true;
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
-      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
@@ -409,7 +393,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       ActionNodeStateMessage otherMyClass = (ActionNodeStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
-      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.id_ != otherMyClass.id_) return false;
 
       if(this.action_index_ != otherMyClass.action_index_) return false;
@@ -450,8 +433,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append("ActionNodeStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
-      builder.append("definition=");
-      builder.append(this.definition_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
       builder.append("action_index=");

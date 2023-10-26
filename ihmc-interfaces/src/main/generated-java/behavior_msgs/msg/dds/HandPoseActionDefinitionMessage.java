@@ -11,7 +11,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage action_definition_;
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
             * Specifies the side of the robot that this message refers to.
             */
@@ -43,7 +43,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
    public HandPoseActionDefinitionMessage()
    {
-      action_definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -56,7 +56,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
    public void set(HandPoseActionDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.action_definition_, action_definition_);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
 
       parent_frame_name_.setLength(0);
@@ -77,9 +77,9 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getActionDefinition()
+   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
-      return action_definition_;
+      return definition_;
    }
 
    /**
@@ -208,7 +208,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_definition_.epsilonEquals(other.action_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
@@ -235,7 +235,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       HandPoseActionDefinitionMessage otherMyClass = (HandPoseActionDefinitionMessage) other;
 
-      if (!this.action_definition_.equals(otherMyClass.action_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
@@ -259,8 +259,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandPoseActionDefinitionMessage {");
-      builder.append("action_definition=");
-      builder.append(this.action_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("parent_frame_name=");

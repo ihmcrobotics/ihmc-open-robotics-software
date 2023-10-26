@@ -11,7 +11,7 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage action_state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
    /**
             * Definition
             */
@@ -27,7 +27,7 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
    public WalkActionStateMessage()
    {
-      action_state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.WalkActionDefinitionMessage();
    }
 
@@ -39,7 +39,7 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
    public void set(WalkActionStateMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.action_state_, action_state_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.WalkActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       total_number_of_footsteps_ = other.total_number_of_footsteps_;
 
@@ -51,9 +51,9 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage getActionState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
-      return action_state_;
+      return state_;
    }
 
 
@@ -113,7 +113,7 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.action_state_.epsilonEquals(other.action_state_, epsilon)) return false;
+      if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
 
@@ -132,7 +132,7 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
 
       WalkActionStateMessage otherMyClass = (WalkActionStateMessage) other;
 
-      if (!this.action_state_.equals(otherMyClass.action_state_)) return false;
+      if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
 
@@ -148,8 +148,8 @@ public class WalkActionStateMessage extends Packet<WalkActionStateMessage> imple
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkActionStateMessage {");
-      builder.append("action_state=");
-      builder.append(this.action_state_);      builder.append(", ");
+      builder.append("state=");
+      builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("total_number_of_footsteps=");

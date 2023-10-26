@@ -15,7 +15,7 @@ public class PelvisHeightPitchActionStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "52fe2591c0e785852e000b124ebceaf5197b99f678f6768856b414e7846cf97e";
+   		return "84e1f580a0da6ce44f167cea8e2c0ca5dd552e514cb58fc489ade1ea0b741172";
    }
    
    @Override
@@ -69,7 +69,7 @@ public class PelvisHeightPitchActionStateMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
@@ -79,13 +79,13 @@ public class PelvisHeightPitchActionStateMessagePubSubType implements us.ihmc.pu
 
    public static void write(behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getActionState(), cdr);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getActionState(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
@@ -93,7 +93,7 @@ public class PelvisHeightPitchActionStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
+      ser.write_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -102,7 +102,7 @@ public class PelvisHeightPitchActionStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage data)
    {
-      ser.read_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
+      ser.read_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessagePubSubType(), data.getDefinition());
 

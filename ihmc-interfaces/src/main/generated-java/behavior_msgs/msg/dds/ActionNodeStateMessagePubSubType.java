@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d53e408fbcbf051df915bd99d448c48bf32a6ceb3ae97ba8251c268aaafb039e";
+   		return "b321feb8939c0eed09cb941af4f0a16eee330d6de063647920923fbc568af1bf";
    }
    
    @Override
@@ -53,8 +53,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       int initial_alignment = current_alignment;
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -98,8 +96,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       int initial_alignment = current_alignment;
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
-
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -150,7 +146,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public static void write(behavior_msgs.msg.dds.ActionNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getState(), cdr);
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_4(data.getId());
 
       cdr.write_type_2(data.getActionIndex());
@@ -184,7 +179,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public static void read(behavior_msgs.msg.dds.ActionNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setId(cdr.read_type_4());
       	
       data.setActionIndex(cdr.read_type_2());
@@ -221,8 +215,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.write_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
 
-      ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
-
       ser.write_type_4("id", data.getId());
       ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
@@ -243,8 +235,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ActionNodeStateMessage data)
    {
       ser.read_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
-
-      ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setId(ser.read_type_4("id"));
       data.setActionIndex(ser.read_type_2("action_index"));

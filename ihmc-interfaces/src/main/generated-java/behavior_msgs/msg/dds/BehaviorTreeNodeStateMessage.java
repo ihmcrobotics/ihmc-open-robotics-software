@@ -9,10 +9,6 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMessage> implements Settable<BehaviorTreeNodeStateMessage>, EpsilonComparable<BehaviorTreeNodeStateMessage>
 {
    /**
-            * Node description
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
-   /**
             * The node's unique ID
             */
    public long id_;
@@ -23,7 +19,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
    public BehaviorTreeNodeStateMessage()
    {
-      definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
    }
 
    public BehaviorTreeNodeStateMessage(BehaviorTreeNodeStateMessage other)
@@ -34,20 +29,10 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
    public void set(BehaviorTreeNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       id_ = other.id_;
 
       is_active_ = other.is_active_;
 
-   }
-
-
-   /**
-            * Node description
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
-   {
-      return definition_;
    }
 
    /**
@@ -98,7 +83,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_active_, other.is_active_, epsilon)) return false;
@@ -116,7 +100,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       BehaviorTreeNodeStateMessage otherMyClass = (BehaviorTreeNodeStateMessage) other;
 
-      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.id_ != otherMyClass.id_) return false;
 
       if(this.is_active_ != otherMyClass.is_active_) return false;
@@ -131,8 +114,6 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorTreeNodeStateMessage {");
-      builder.append("definition=");
-      builder.append(this.definition_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
       builder.append("is_active=");

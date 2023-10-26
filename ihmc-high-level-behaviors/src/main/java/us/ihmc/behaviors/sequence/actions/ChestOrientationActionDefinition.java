@@ -45,7 +45,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
 
    public void toMessage(ChestOrientationActionDefinitionMessage message)
    {
-      super.toMessage(message.getActionDefinition());
+      super.toMessage(message.getDefinition());
 
       message.setTrajectoryDuration(trajectoryDuration);
       message.setHoldPoseInWorld(holdPoseInWorldLater);
@@ -55,7 +55,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
 
    public void fromMessage(ChestOrientationActionDefinitionMessage message)
    {
-      super.fromMessage(message.getActionDefinition());
+      super.fromMessage(message.getDefinition());
 
       trajectoryDuration = message.getTrajectoryDuration();
       holdPoseInWorldLater = message.getHoldPoseInWorld();

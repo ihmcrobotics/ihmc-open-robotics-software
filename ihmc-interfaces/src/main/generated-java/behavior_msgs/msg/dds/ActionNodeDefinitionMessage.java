@@ -11,7 +11,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage node_definition_;
+   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
             * Execute with next action
             */
@@ -19,7 +19,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
 
    public ActionNodeDefinitionMessage()
    {
-      node_definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
    }
 
    public ActionNodeDefinitionMessage(ActionNodeDefinitionMessage other)
@@ -30,7 +30,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
 
    public void set(ActionNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.node_definition_, node_definition_);
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       execute_with_next_action_ = other.execute_with_next_action_;
 
    }
@@ -39,9 +39,9 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getNodeDefinition()
+   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
    {
-      return node_definition_;
+      return definition_;
    }
 
    /**
@@ -77,7 +77,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.node_definition_.epsilonEquals(other.node_definition_, epsilon)) return false;
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
 
 
@@ -93,7 +93,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
 
       ActionNodeDefinitionMessage otherMyClass = (ActionNodeDefinitionMessage) other;
 
-      if (!this.node_definition_.equals(otherMyClass.node_definition_)) return false;
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
 
 
@@ -106,8 +106,8 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       StringBuilder builder = new StringBuilder();
 
       builder.append("ActionNodeDefinitionMessage {");
-      builder.append("node_definition=");
-      builder.append(this.node_definition_);      builder.append(", ");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("execute_with_next_action=");
       builder.append(this.execute_with_next_action_);
       builder.append("}");

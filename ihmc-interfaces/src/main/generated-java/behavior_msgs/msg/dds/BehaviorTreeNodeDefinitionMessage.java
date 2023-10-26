@@ -19,6 +19,10 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
             * A human readable description of what the node does
             */
    public java.lang.StringBuilder description_;
+   /**
+            * Number of children
+            */
+   public int number_of_children_;
 
    public BehaviorTreeNodeDefinitionMessage()
    {
@@ -35,6 +39,9 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
    {
       description_.setLength(0);
       description_.append(other.description_);
+
+      number_of_children_ = other.number_of_children_;
+
    }
 
    /**
@@ -61,6 +68,21 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       return description_;
    }
 
+   /**
+            * Number of children
+            */
+   public void setNumberOfChildren(int number_of_children)
+   {
+      number_of_children_ = number_of_children;
+   }
+   /**
+            * Number of children
+            */
+   public int getNumberOfChildren()
+   {
+      return number_of_children_;
+   }
+
 
    public static Supplier<BehaviorTreeNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -81,6 +103,9 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.description_, other.description_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -95,6 +120,9 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       if (!us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_)) return false;
 
+      if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
+
+
       return true;
    }
 
@@ -105,7 +133,9 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       builder.append("BehaviorTreeNodeDefinitionMessage {");
       builder.append("description=");
-      builder.append(this.description_);
+      builder.append(this.description_);      builder.append(", ");
+      builder.append("number_of_children=");
+      builder.append(this.number_of_children_);
       builder.append("}");
       return builder.toString();
    }

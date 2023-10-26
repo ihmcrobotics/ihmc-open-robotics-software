@@ -1,5 +1,5 @@
 # Parent state fields
-behavior_msgs/ActionNodeStateMessage action_state
+behavior_msgs/ActionNodeStateMessage state
 
 # Definition
 behavior_msgs/FootstepPlanActionDefinitionMessage definition

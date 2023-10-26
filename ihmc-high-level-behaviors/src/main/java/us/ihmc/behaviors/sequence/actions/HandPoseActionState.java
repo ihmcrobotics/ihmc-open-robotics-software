@@ -36,7 +36,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public void toMessage(HandPoseActionStateMessage message)
    {
-      super.toMessage(message.getActionState());
+      super.toMessage(message.getState());
 
       message.setHandWrenchMagnitudeLinear(handWrenchMagnitudeLinear);
       for (int i = 0; i < jointAngles.length; i++)
@@ -49,7 +49,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public void fromMessage(HandPoseActionStateMessage message)
    {
-      super.fromMessage(message.getActionState());
+      super.fromMessage(message.getState());
 
       handWrenchMagnitudeLinear = message.getHandWrenchMagnitudeLinear();
       jointAngles = message.getJointAngles();

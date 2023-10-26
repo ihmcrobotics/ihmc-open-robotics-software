@@ -15,7 +15,7 @@ public class ArmJointAnglesActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "60ec2ccbbf37cd167dc4c9460e324a546739c3b0c605badc9fb2f28770b3d7d4";
+   		return "3d9fb22af7edbf2857248e14191e99b69c538d9c2dd8625b1de1b910122e6f26";
    }
    
    @Override
@@ -75,7 +75,7 @@ public class ArmJointAnglesActionDefinitionMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -93,7 +93,7 @@ public class ArmJointAnglesActionDefinitionMessagePubSubType implements us.ihmc.
 
    public static void write(behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       cdr.write_type_2(data.getPreset());
@@ -109,7 +109,7 @@ public class ArmJointAnglesActionDefinitionMessagePubSubType implements us.ihmc.
 
    public static void read(behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
       data.setPreset(cdr.read_type_2());
@@ -128,7 +128,7 @@ public class ArmJointAnglesActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_2("preset", data.getPreset());
@@ -139,7 +139,7 @@ public class ArmJointAnglesActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ArmJointAnglesActionDefinitionMessage data)
    {
-      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setPreset(ser.read_type_2("preset"));

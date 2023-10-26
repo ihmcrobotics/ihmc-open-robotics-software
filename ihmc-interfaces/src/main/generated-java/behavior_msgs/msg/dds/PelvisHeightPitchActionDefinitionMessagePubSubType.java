@@ -15,7 +15,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "cb27a6c77dd903dffe4dc90943705f44a0a0251b8d44509a9da9082b9aca3a5e";
+   		return "2906849f1b31c195d790df5c75753e0fa9bd6fc8b6de024f715e220b92bb4abe";
    }
    
    @Override
@@ -72,7 +72,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getActionDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
 
@@ -87,7 +87,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
 
    public static void write(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getActionDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
           throw new RuntimeException("parent_frame_name field exceeds the maximum length");
@@ -99,7 +99,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
 
    public static void read(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getActionDefinition(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_d(data.getParentFrameName());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getPelvisTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
@@ -110,7 +110,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    @Override
    public final void serialize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_a("pelvis_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getPelvisTransformToParent());
@@ -121,7 +121,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data)
    {
-      ser.read_type_a("action_definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getActionDefinition());
+      ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_d("parent_frame_name", data.getParentFrameName());
       ser.read_type_a("pelvis_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getPelvisTransformToParent());

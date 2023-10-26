@@ -15,7 +15,7 @@ public class HandWrenchActionStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1023fe32a0e9bd67235c1485f52040bd3742b1a12f8e68d6d841a6356ddc4d27";
+   		return "a245e484382c5ade61c12abcae9350ef2f459c46caa5fb20486cbc69f2851748";
    }
    
    @Override
@@ -69,7 +69,7 @@ public class HandWrenchActionStateMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getActionState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
@@ -79,13 +79,13 @@ public class HandWrenchActionStateMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(behavior_msgs.msg.dds.HandWrenchActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getActionState(), cdr);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.HandWrenchActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getActionState(), cdr);	
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
@@ -93,7 +93,7 @@ public class HandWrenchActionStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(behavior_msgs.msg.dds.HandWrenchActionStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
+      ser.write_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -102,7 +102,7 @@ public class HandWrenchActionStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandWrenchActionStateMessage data)
    {
-      ser.read_type_a("action_state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getActionState());
+      ser.read_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.HandWrenchActionDefinitionMessagePubSubType(), data.getDefinition());
 

@@ -1,6 +1,3 @@
-# Node description
-behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
-
 # The node's unique ID
 uint32 id
 
