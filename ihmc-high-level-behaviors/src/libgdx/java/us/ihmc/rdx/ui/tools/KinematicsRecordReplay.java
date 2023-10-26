@@ -123,7 +123,7 @@ public class KinematicsRecordReplay
       QuaternionReadOnly quaternionToCheck = frameToCheck.getOrientation();
       if (previousFramePose.containsKey(frameName))
       {
-
+         if (sceneNodeFrame != null)
             previousFramePose.get(frameName).changeFrame(sceneNodeFrame);
 
          QuaternionReadOnly previousQuaternion = previousFramePose.get(frameName).getOrientation();
