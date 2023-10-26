@@ -270,7 +270,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
 
    // Extract the height from the local map at the local cell index (if within bounds)
    float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-   float localHeight = 0.0f;
+   float localHeight = previousHeight;
 
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
