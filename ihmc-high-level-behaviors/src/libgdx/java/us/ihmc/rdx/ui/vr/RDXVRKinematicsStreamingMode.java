@@ -325,16 +325,6 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
 
-      if (segment.getName().contains("TORSO"))
-      {
-         LogTools.info("Desired orientation yaw in world: " + tempFramePose.getOrientation().getYaw());
-
-//         tempFramePose.setToZero(segment.getBodyFixedFrame());
-//         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-
-//         LogTools.info("Actual orientation yaw in world: " + tempFramePose.getOrientation().getYaw());
-      }
-
       if (!Double.isNaN(positionWeight))
       {
          if (positionWeight == 0.0)
