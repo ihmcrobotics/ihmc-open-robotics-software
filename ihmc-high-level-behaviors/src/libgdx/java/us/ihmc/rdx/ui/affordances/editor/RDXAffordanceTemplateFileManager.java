@@ -504,13 +504,17 @@ public class RDXAffordanceTemplateFileManager
             }
             if (objectBuilder.getSelectedObject().shape != null)
             {
-               jsonNode.put("Resizable Primitive Shape", objectBuilder.getSelectedObject().shape.toString());
+               jsonNode.put("resizablePrimitiveShape", objectBuilder.getSelectedObject().shape.toString());
                jsonNode.put("xLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(0));
                jsonNode.put("yLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(1));
                jsonNode.put("zLength", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(2));
                jsonNode.put("xRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(3));
                jsonNode.put("yRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(4));
                jsonNode.put("zRadius", objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(5));
+            }
+            else
+            {
+               jsonNode.put("resizablePrimitiveShape", "NULL");
             }
          });
          LogTools.info("SAVED to file {}", extraFile.getFileName());
@@ -609,17 +613,16 @@ public class RDXAffordanceTemplateFileManager
             }
 
             String resizablePrimitiveShape = jsonNode.get("resizablePrimitiveShape").asText();
-            if (!resizablePrimitiveShape.isEmpty())
+            if (!resizablePrimitiveShape.equals("NULL"))
             {
-               List<Float> myList = new ArrayList<Float>();
-               myList.add(jsonNode.get("xLength").floatValue());
-               myList.add(jsonNode.get("yLength").floatValue());
-               myList.add(jsonNode.get("zLength").floatValue());
-               myList.add(jsonNode.get("xRadius").floatValue());
-               myList.add(jsonNode.get("yRadius").floatValue());
-               myList.add(jsonNode.get("zRadius").floatValue());
-               objectBuilder.getSelectedObject().setResizablePrimitiveSize(myList);
-               objectBuilder.getSelectedObject().setVisuals();
+               List<Float> readPrimitiveSize = new ArrayList<Float>();
+               readPrimitiveSize.add(jsonNode.get("xLength").floatValue());
+               readPrimitiveSize.add(jsonNode.get("yLength").floatValue());
+               readPrimitiveSize.add(jsonNode.get("zLength").floatValue());
+               readPrimitiveSize.add(jsonNode.get("xRadius").floatValue());
+               readPrimitiveSize.add(jsonNode.get("yRadius").floatValue());
+               readPrimitiveSize.add(jsonNode.get("zRadius").floatValue());
+               objectBuilder.getSelectedObject().setReadResizablePrimitiveSize(readPrimitiveSize);
             }
          });
          LogTools.info("Loaded file {}", filePath);

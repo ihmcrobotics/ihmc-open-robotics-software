@@ -1,0 +1,96 @@
+{
+  "name" : "ResizableBox",
+  "preGraspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : -0.038,
+    "y" : 0.31,
+    "z" : 0.5055,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : -0.038,
+    "y" : -0.31,
+    "z" : 0.5055,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : 0.035,
+    "y" : 0.278,
+    "z" : 0.1545,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.035,
+    "y" : -0.278,
+    "z" : 0.1545,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  } ],
+  "graspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : 0.035,
+    "y" : 0.2255,
+    "z" : 0.1545,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.035,
+    "y" : -0.2255,
+    "z" : 0.1545,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  } ],
+  "postGraspFrames" : [ {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : 0.107,
+    "y" : 0.2255,
+    "z" : 0.4125,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.107,
+    "y" : -0.2255,
+    "z" : 0.4125,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -75.38,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "left",
+    "isPoseSet" : true,
+    "x" : 0.107,
+    "y" : 0.2255,
+    "z" : 1.018,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -87.12,
+    "yawInDegrees" : 0.0
+  }, {
+    "side" : "right",
+    "isPoseSet" : true,
+    "x" : 0.107,
+    "y" : -0.2255,
+    "z" : 1.018,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -87.12,
+    "yawInDegrees" : 0.0
+  } ]
+}

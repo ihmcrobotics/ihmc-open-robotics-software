@@ -475,6 +475,7 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
+            rescaleAffordanceTemplate();
          }
       }
       else
@@ -484,6 +485,11 @@ public class RDXAffordanceTemplateEditorUI
          ImGui.popStyleColor();
       }
 
+   }
+
+   private void rescaleAffordanceTemplate()
+   {
+      // TODO
    }
 
    private void reset()
