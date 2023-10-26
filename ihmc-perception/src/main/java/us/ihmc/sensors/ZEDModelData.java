@@ -1,5 +1,10 @@
 package us.ihmc.sensors;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
+
 public enum ZEDModelData
 {
    /**
@@ -39,5 +44,15 @@ public enum ZEDModelData
    public float getMaximumDepthDistance()
    {
       return maximumDepthDistance;
+   }
+
+   public static ReferenceFrame createCameraReferenceFrame(RobotSide cameraSide, ReferenceFrame zed2CenterFrame)
+   {
+      RigidBodyTransform zed2LeftCameraToCenterTransform = new RigidBodyTransform();
+      zed2LeftCameraToCenterTransform.getTranslation().set(0.0, cameraSide.negateIfRightSide(0.06), 0.0);
+
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("ZED2%sCameraFrame".formatted(cameraSide.getPascalCaseName()),
+                                                                               zed2CenterFrame,
+                                                                               zed2LeftCameraToCenterTransform);
    }
 }

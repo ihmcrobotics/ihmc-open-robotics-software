@@ -6,8 +6,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,8 +24,8 @@ public class RDXRealsenseD435UI
    private RDXInteractableRealsenseD435 d435Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsense d435;
+   private RealsenseDeviceManager realsenseDeviceManager;
+   private RealsenseDevice d435;
    private RDXBytedecoImagePanel depthImagePanel;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
@@ -46,9 +46,9 @@ public class RDXRealsenseD435UI
 
             d435Interactable = new RDXInteractableRealsenseD435(baseUI.getPrimary3DPanel());
 
-            realSenseHardwareManager = new RealSenseHardwareManager(yoRegistry, yoGraphicsListRegistry);
+            realsenseDeviceManager = new RealsenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
 
-            d435 = realSenseHardwareManager.createBytedecoRealsenseDevice("752112070330", 1280, 720, 30);
+            d435 = realsenseDeviceManager.createBytedecoRealsenseDevice("752112070330", 1280, 720, 30);
             //                  d435.enableColor(1920, 1080, 30);
             d435.initialize();
          }
@@ -135,7 +135,7 @@ public class RDXRealsenseD435UI
          {
             baseUI.dispose();
             d435.deleteDevice();
-            realSenseHardwareManager.deleteContext();
+            realsenseDeviceManager.deleteContext();
          }
       });
    }

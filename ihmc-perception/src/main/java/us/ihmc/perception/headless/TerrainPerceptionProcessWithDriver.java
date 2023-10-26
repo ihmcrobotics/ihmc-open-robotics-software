@@ -22,8 +22,8 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -74,9 +74,9 @@ public class TerrainPerceptionProcessWithDriver
 
    private final OpenCLManager openCLManager;
    private final ROS2Helper ros2Helper;
-   private final RealSenseHardwareManager realSenseHardwareManager;
+   private final RealsenseDeviceManager realsenseDeviceManager;
    private final RealsenseConfiguration realsenseConfiguration;
-   private final BytedecoRealsense realsense;
+   private final RealsenseDevice realsense;
    private final BytedecoImage depthBytedecoImage;
    private final Runnable syncedRobotUpdater;
    private final RobotConfigurationData robotConfigurationData;
@@ -133,10 +133,10 @@ public class TerrainPerceptionProcessWithDriver
       openCLManager = new OpenCLManager();
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
-      realSenseHardwareManager = new RealSenseHardwareManager();
+      realsenseDeviceManager = new RealsenseDeviceManager();
 
       LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);
-      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
       if (realsense.getDevice() == null)
       {
          destroy();
@@ -191,7 +191,7 @@ public class TerrainPerceptionProcessWithDriver
 
       if (realsense != null)
          realsense.deleteDevice();
-      realSenseHardwareManager.deleteContext();
+      realsenseDeviceManager.deleteContext();
 
       destroyedNotification.set();
    }
