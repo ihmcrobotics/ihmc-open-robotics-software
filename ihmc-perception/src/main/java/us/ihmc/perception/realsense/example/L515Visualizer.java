@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense;
+package us.ihmc.perception.realsense.example;
 
 import java.nio.ShortBuffer;
 import java.util.ArrayList;

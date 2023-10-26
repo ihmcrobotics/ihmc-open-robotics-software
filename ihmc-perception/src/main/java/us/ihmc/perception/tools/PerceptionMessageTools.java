@@ -23,7 +23,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.realsense.BytedecoRealsense;
+import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
 
 public class PerceptionMessageTools
 {
-   public static void setDepthIntrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
+   public static void setDepthIntrinsicsFromRealsense(RealsenseDevice sensor, ImageMessage imageMessageToPack)
    {
       imageMessageToPack.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
       imageMessageToPack.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
@@ -44,7 +44,7 @@ public class PerceptionMessageTools
       imageMessageToPack.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public static void setColorIntrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
+   public static void setColorIntrinsicsFromRealsense(RealsenseDevice sensor, ImageMessage imageMessageToPack)
    {
       imageMessageToPack.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
       imageMessageToPack.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
