@@ -78,7 +78,6 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
-   private final Map<String, RigidBodyTransform> trackedSegmentTransform = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private double userHeightChangeRate = 0.0;
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
@@ -270,9 +269,10 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
              {
                 MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(vrContext.getTracker(segmentType.getSegmentName()).getXForwardZUpTrackerFrame());
                 trackerDesiredControlFrame.getTransformToParent().appendOrientation(segmentType.getTrackerToSegmentRotation());
+                trackerDesiredControlFrame.getReferenceFrame().update();
                 trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
              }
-             trackerFrameGraphics.get(segmentType.getSegmentName()).setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
+             trackerFrameGraphics.get(segmentType.getSegmentName()).setToReferenceFrame(tracker.getXForwardZUpTrackerFrame());
              RigidBodyBasics controlledSegment = switch (segmentType)
              {
                 case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
