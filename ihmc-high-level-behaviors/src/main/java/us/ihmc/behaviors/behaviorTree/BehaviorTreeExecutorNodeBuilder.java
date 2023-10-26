@@ -3,6 +3,8 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
@@ -48,6 +50,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    @Override
    public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id)
    {
+      if (nodeType == ActionSequenceDefinition.class)
+      {
+         return new ActionSequenceExecutor(id);
+      }
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
          return new ArmJointAnglesActionExecutor(id, robotModel, ros2ControllerHelper);
