@@ -1,0 +1,91 @@
+{
+  "name" : "ResizableBox",
+  "object" : "ResizableBox",
+  "x" : 0.0,
+  "y" : 0.0,
+  "z" : 0.0,
+  "rollInDegrees" : 0.0,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : 0.0,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : ""
+    }, {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : ""
+    }, {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : ""
+    }, {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.072,
+    "y" : 0.0,
+    "z" : 0.258,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : ""
+    }, {
+      "side" : "right",
+      "type" : ""
+    } ]
+  }, {
+    "x" : 0.072,
+    "y" : 0.0,
+    "z" : 0.8635,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "configuration" : [ {
+      "side" : "left",
+      "type" : ""
+    }, {
+      "side" : "right",
+      "type" : ""
+    } ]
+  } ],
+  "activeSides" : 2,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 2,
+  "resizablePrimitiveShape" : "BOX",
+  "xLength" : 0.4,
+  "yLength" : 0.4,
+  "zLength" : 0.4,
+  "xRadius" : 0.1,
+  "yRadius" : 0.1,
+  "zRadius" : 0.1
+}
