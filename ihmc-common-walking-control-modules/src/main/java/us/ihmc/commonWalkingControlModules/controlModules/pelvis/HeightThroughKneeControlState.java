@@ -95,7 +95,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
          kneeJoints.put(robotSide, kneeJoint);
 
          YoDouble desiredSupportKneeAngle = new YoDouble(robotSide.getCamelCaseName() + "DesiredSupportKneeAngle", registry);
-         desiredSupportKneeAngle.set(0.5);
+         desiredSupportKneeAngle.set(walkingControllerParameters.nominalSupportKneeAngle());
          desiredSupportKneeAngles.put(robotSide, desiredSupportKneeAngle);
 
          OneDoFJointFeedbackControlCommand kneeControlCommand = new OneDoFJointFeedbackControlCommand();
