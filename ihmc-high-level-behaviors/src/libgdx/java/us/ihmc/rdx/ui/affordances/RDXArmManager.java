@@ -206,7 +206,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Wide " + side.getPascalCaseName())))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME_WIDE, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.WIDE_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Walking Arms:");
@@ -215,7 +215,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME_UP_FOR_WALKING, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.WALKING_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Door avoidance arms:");
@@ -307,11 +307,11 @@ public class RDXArmManager
       // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
       // i.e. when the fingers are more than 30 degrees apart from each other
       // This is an arbitrary value
-      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
-      {
-         showWarningNotification.set(side);
-      }
-      else
+//      if ( syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
+//      {
+//         showWarningNotification.set(side);
+//      }
+//      else
       {
          executeArmAngles(side, PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
       }
