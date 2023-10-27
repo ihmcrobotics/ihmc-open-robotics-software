@@ -4,6 +4,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
@@ -34,18 +35,17 @@ public class RealsenseColorDepthImageRetriever
    public RealsenseColorDepthImageRetriever(RealsenseDevice realsense, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
-
       this.realsense = realsense;
+      realsenseGrabThread = new RestartableThrottledThread("RealsenseImageGrabber", OUTPUT_FREQUENCY, this::updateImages);
 
       if (realsense.getDevice() == null)
       {
          // Find something else to do here
-         System.exit(1);
+         LogTools.error("RealSense device is NULL");
       }
+
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();
-
-      realsenseGrabThread = new RestartableThrottledThread("RealsenseImageGrabber", OUTPUT_FREQUENCY, this::updateImages);
    }
 
    private void updateImages()
