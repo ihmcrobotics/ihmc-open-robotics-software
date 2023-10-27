@@ -48,12 +48,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
 
    public BehaviorTreeNodeExtension<?, ?, ?, ?> getReplacementNode(long id)
    {
-      return idToNodesMap.get(id);
-   }
-
-   public BehaviorTreeModification getReplacementModification(long id, BehaviorTreeNodeExtension<?, ?, ?, ?> parent)
-   {
-      return new BehaviorTreeNodeAdd(idToNodesMap.remove(id), parent);
+      return idToNodesMap.remove(id);
    }
 
    public BehaviorTreeModification getClearSubtreeModification()
