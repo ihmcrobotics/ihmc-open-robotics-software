@@ -9,6 +9,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -21,6 +22,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
@@ -60,6 +62,11 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    private RDXPinholePinholeColoredPointCloudKernel pinholePinholeKernel;
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private boolean usingColor;
+
+   private final MutableReferenceFrame depthFrame = new MutableReferenceFrame();
+   private final MutableReferenceFrame colorFrame = new MutableReferenceFrame();
+   private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
+
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -173,9 +180,12 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       }
       else if (depthChannel.getCameraModel() == CameraModel.OUSTER) // Assuming color is equidistant fisheye if using it
       {
+         depthFrame.update(transformToWorld -> transformToWorld.set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld()));
+         colorFrame.update(transformToWorld -> transformToWorld.set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld()));
+         depthFrame.getReferenceFrame().getTransformToDesiredFrame(depthToColorTransform, colorFrame.getReferenceFrame());
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
-         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
+         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(depthToColorTransform.getRotation(), depthToColorTransform.getTranslation());
          ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterBeamAltitudeAnglesBuffer(), depthChannel.getOusterBeamAzimuthAnglesBuffer());
          ousterFisheyeKernel.runKernel(0.0f,
                                        pointSize,
