@@ -25,9 +25,9 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -155,8 +155,8 @@ public class RealsenseColorAndDepthPublisher
          depthPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          colorPose.setToZero(cameraFrame);
-         colorPose.appendOrientation(realsense.getDepthToColorRotation());
-         colorPose.appendTranslation(realsense.getDepthToColorTranslation());
+         colorPose.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+         colorPose.invert();
          colorPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
