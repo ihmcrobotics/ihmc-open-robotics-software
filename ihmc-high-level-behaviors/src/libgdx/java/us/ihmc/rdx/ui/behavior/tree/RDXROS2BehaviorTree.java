@@ -11,10 +11,13 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.thread.Throttler;
 
 public class RDXROS2BehaviorTree extends RDXBehaviorTree
 {
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
+   /** Reduce the communication update rate. */
+   private final Throttler communicationThrottler = new Throttler().setFrequency(30.0);
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
@@ -41,11 +44,13 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
    public void update()
    {
-      ros2BehaviorTreeState.updateSubscription();
+      boolean updateComms = communicationThrottler.run();
+      if (updateComms)
+         ros2BehaviorTreeState.updateSubscription();
 
       super.update();
 
-      if (getRootNode() != null)
+      if (getRootNode() != null && updateComms)
          ros2BehaviorTreeState.updatePublication();
    }
 
