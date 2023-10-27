@@ -15,9 +15,11 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
@@ -65,7 +67,7 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
    private final ROS2HeartbeatMonitor realsenseDepthHeartbeat;
    private final ROS2HeartbeatMonitor realsenseColorHeartbeat;
-   private RealSenseHardwareManager realSenseManager;
+   private RealsenseDeviceManager realSenseManager;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
    private RealsenseColorDepthImageRetriever realsenseImageRetriever;
@@ -265,9 +267,9 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeRealsense()
    {
-      realSenseManager = new RealSenseHardwareManager();
-      BytedecoRealsense realsense = realSenseManager.createBytedecoRealsenseDevice(REALSENSE_SERIAL_NUMBER,
-                                                                                   RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
+      realSenseManager = new RealsenseDeviceManager();
+      RealsenseDevice realsense = realSenseManager.createBytedecoRealsenseDevice(REALSENSE_SERIAL_NUMBER,
+                                                                                 RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(realsense,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                       realsenseFrameSupplier);
