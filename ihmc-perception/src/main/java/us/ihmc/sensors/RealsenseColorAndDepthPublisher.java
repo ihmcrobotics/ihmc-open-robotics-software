@@ -154,8 +154,7 @@ public class RealsenseColorAndDepthPublisher
          depthPose.setToZero(cameraFrame);
          depthPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         colorPose.setToZero(cameraFrame);
-         colorPose.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+         colorPose.setIncludingFrame(cameraFrame, realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
          colorPose.invert();
          colorPose.changeFrame(ReferenceFrame.getWorldFrame());
 
