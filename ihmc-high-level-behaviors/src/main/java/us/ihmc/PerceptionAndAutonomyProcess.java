@@ -346,9 +346,7 @@ public class PerceptionAndAutonomyProcess
    {
       blackflyManager = new SpinnakerBlackflyManager();
       SpinnakerBlackfly blackfly = blackflyManager.createSpinnakerBlackfly(LEFT_BLACKFLY_SERIAL_NUMBER);
-      RigidBodyTransform ousterToBlackflyTransform = new RigidBodyTransform();
-      ousterFrameSupplier.get().getTransformToDesiredFrame(ousterToBlackflyTransform, blackflyFrameSupplier.get());
-      blackflyImageRetriever = new BlackflyImageRetriever(blackfly, BLACKFLY_LENS, RobotSide.RIGHT, ousterToBlackflyTransform);
+      blackflyImageRetriever = new BlackflyImageRetriever(blackfly, BLACKFLY_LENS, RobotSide.RIGHT, blackflyFrameSupplier);
       blackflyImagePublisher = new BlackflyImagePublisher(BLACKFLY_LENS, blackflyFrameSupplier, BLACKFLY_IMAGE_TOPIC);
       blackflyProcessAndPublishThread = new RestartableThrottledThread("BlackflyProcessAndPublish", BLACKFLY_FPS, this::processAndPublishBlackfly);
    }
