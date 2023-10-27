@@ -25,8 +25,8 @@ import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -61,8 +61,8 @@ public class RealsenseColorAndDepthPublisher
    private final ROS2Helper ros2Helper;
    private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
-   private final RealSenseHardwareManager realSenseHardwareManager;
-   private final BytedecoRealsense realsense;
+   private final RealsenseDeviceManager realsenseDeviceManager;
+   private final RealsenseDevice realsense;
 
    // Pre-allocations for update loop
    private final ImageMessage colorImageMessage = new ImageMessage();
@@ -91,8 +91,8 @@ public class RealsenseColorAndDepthPublisher
       this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      realSenseHardwareManager = new RealSenseHardwareManager();
-      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      realsenseDeviceManager = new RealsenseDeviceManager();
+      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
       if (realsense.getDevice() == null)
       {
          destroy();
@@ -131,7 +131,7 @@ public class RealsenseColorAndDepthPublisher
 
       if (realsense != null)
          realsense.deleteDevice();
-      realSenseHardwareManager.deleteContext();
+      realsenseDeviceManager.deleteContext();
       perceptionDataLogger.closeLogFile();
 
       destroyedNotification.set();

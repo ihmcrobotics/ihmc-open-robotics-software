@@ -13,8 +13,8 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -42,8 +42,8 @@ public class RealsenseColorAndDepthLogger
 
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
 
-   private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsense sensor;
+   private RealsenseDeviceManager realsenseDeviceManager;
+   private RealsenseDevice sensor;
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
 
@@ -83,8 +83,8 @@ public class RealsenseColorAndDepthLogger
       perceptionDataLogger.addImageChannel(depthChannelName);
       perceptionDataLogger.setChannelEnabled(depthChannelName, true);
 
-      realSenseHardwareManager = new RealSenseHardwareManager();
-      sensor = realSenseHardwareManager.createBytedecoRealsenseDevice(this.serialNumber, this.depthWidth, this.depthHeight, this.depthFPS);
+      realsenseDeviceManager = new RealsenseDeviceManager();
+      sensor = realsenseDeviceManager.createBytedecoRealsenseDevice(this.serialNumber, this.depthWidth, this.depthHeight, this.depthFPS);
 
       if (sensor.getDevice() == null)
       {
@@ -145,7 +145,7 @@ public class RealsenseColorAndDepthLogger
       // Release and close all resources
       running = false;
       sensor.deleteDevice();
-      realSenseHardwareManager.deleteContext();
+      realsenseDeviceManager.deleteContext();
       perceptionDataLogger.closeLogFile();
    }
 
