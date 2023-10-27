@@ -98,8 +98,7 @@ public class PerceptionAPI
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
                                                                                   .withType(BigVideoPacket.class)
                                                                                   .withSuffix("debug_extraction");
-   public static final ROS2Topic<Empty> PUBLISH_REALSENSE_COLOR = PERCEPTION_MODULE.withSuffix("publish_realsense_color").withType(Empty.class);
-   public static final ROS2Topic<Empty> PUBLISH_REALSENSE_DEPTH = PERCEPTION_MODULE.withSuffix("publish_realsense_depth").withType(Empty.class);
+   public static final ROS2Topic<Empty> PUBLISH_REALSENSE_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("publish_realsense_point_cloud").withType(Empty.class);
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left")
                                                                                                                       .withType(BigVideoPacket.class)
                                                                                                                       .withSuffix("video"),
@@ -116,6 +115,7 @@ public class PerceptionAPI
    public static final SideDependentList<ROS2Topic<Empty>> PUBLISH_BLACKFLY_COLOR_IMAGE
          = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("publish_left_blackfly_color").withType(Empty.class),
                                    PERCEPTION_MODULE.withSuffix("publish_right_blackfly_color").withType(Empty.class));
+
    public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
@@ -124,6 +124,7 @@ public class PerceptionAPI
 
    public static final ROS2Topic<Empty> PUBLISH_ZED_COLOR = PERCEPTION_MODULE.withSuffix("publish_zed_color").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("publish_zed_depth").withType(Empty.class);
+   public static final ROS2Topic<Empty> PUBLISH_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("publish_zed_point_cloud").withType(Empty.class);
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
    public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(IHMC_ROOT.withModule(ZED2_NAME)
