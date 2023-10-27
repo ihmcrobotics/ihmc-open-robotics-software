@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * It has been tested to be garbage free and is required to be garbage free to run properly within a real time thread
  * Please profile if you make any changes. Most of the Realsense2 pointer methods return a new pointer and are not real time compatible
  */
-public class RealSenseHardwareManager
+public class RealsenseDeviceManager
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -31,12 +31,12 @@ public class RealSenseHardwareManager
    private final rs2_device_list devices;
    private final rs2_error error = new rs2_error();
 
-   public RealSenseHardwareManager()
+   public RealsenseDeviceManager()
    {
       this(null, null);
    }
 
-   public RealSenseHardwareManager(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public RealsenseDeviceManager(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.graphicsListRegistry = graphicsListRegistry;
 
@@ -55,13 +55,7 @@ public class RealSenseHardwareManager
          parentRegistry.addChild(registry);
    }
 
-   public RealtimeL515 createRealtimeL515(String prefix, String serialNumberToFind)
-   {
-      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new RealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
-   }
-
-   public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
+   public RealsenseDevice createFullFeaturedL515(String serialNumberToFind)
    {
       return createBytedecoRealsenseDevice(serialNumberToFind, RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ);
    }
@@ -73,7 +67,7 @@ public class RealSenseHardwareManager
     *  @param configuration The requested device settings
     *  @return BytedecoRealsense device object for accessing sensor data and config information
     */
-   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, RealsenseConfiguration configuration)
+   public RealsenseDevice createBytedecoRealsenseDevice(String serialNumberToFind, RealsenseConfiguration configuration)
    {
       return createBytedecoRealsenseDevice(serialNumberToFind,
                                            configuration.getDepthWidth(),
@@ -90,10 +84,10 @@ public class RealSenseHardwareManager
    *  @param fps Frames Per Second which is the frequency of update to be requested from the sensor firmware
    *  @return BytedecoRealsense device object for accessing sensor data and config information
    */
-   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
+   public RealsenseDevice createBytedecoRealsenseDevice(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
+      return new RealsenseDevice(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
    }
 
    public rs2_device createDevice(String serialNumberToFind)

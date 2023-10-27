@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense;
+package us.ihmc.perception.realsense.example;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
