@@ -54,8 +54,8 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<RawImage> colorImages = new SideDependentList<>(null, null);
    private RawImage depthImage = null;
 
-   private final FramePose3D leftCameraFramePose = new FramePose3D();
-   private final SideDependentList<FramePose3D> cameraPosesInDepthFrame = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   // Frame poses of left and right cameras of ZED. Depth is always in the left pose.
+   private final SideDependentList<FramePose3D> cameraFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final RestartableThread zedGrabThread;
 
    public ZEDColorDepthImageRetriever(int cameraID, Supplier<ReferenceFrame> sensorFrameSupplier)
@@ -119,17 +119,18 @@ public class ZEDColorDepthImageRetriever
       colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
 
-      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * zedModelData.getCenterToCameraDistance());
-
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
          // sl_grab is blocking, and will wait for next frame available. No need to use throttler
          checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
-         // update sensor position
-         leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-         leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
-         leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
+         for (RobotSide side : RobotSide.values)
+         {
+            cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
+            cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
+            cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         }
 
          retrieveAndSaveDepthImage();
          retrieveAndSaveColorImage(RobotSide.LEFT);
@@ -175,8 +176,8 @@ public class ZEDColorDepthImageRetriever
                                    cameraFocalLengthY.get(side),
                                    cameraPrincipalPointX.get(side),
                                    cameraPrincipalPointY.get(side),
-                                   cameraPosesInDepthFrame.get(side).getPosition(),
-                                   cameraPosesInDepthFrame.get(side).getOrientation()));
+                                   cameraFramePoses.get(side).getPosition(),
+                                   cameraFramePoses.get(side).getOrientation()));
 
       // Close stuff
       colorImageBGRA.close();
@@ -210,8 +211,8 @@ public class ZEDColorDepthImageRetriever
                                 cameraFocalLengthY.get(RobotSide.LEFT),
                                 cameraPrincipalPointX.get(RobotSide.LEFT),
                                 cameraPrincipalPointY.get(RobotSide.LEFT),
-                                leftCameraFramePose.getPosition(),
-                                leftCameraFramePose.getOrientation());
+                                cameraFramePoses.get(RobotSide.LEFT).getPosition(),
+                                cameraFramePoses.get(RobotSide.LEFT).getOrientation());
    }
 
    public RawImage getLatestRawDepthImage()

@@ -72,10 +72,8 @@ public class ZEDColorStereoDepthPublisher
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final ROS2Node ros2Node;
    private final CUDAImageEncoder imageEncoder;
-   // Frame pose of left camera on the ZED 2i sensor. Left color and depth image comes from this frame pose.
-   private final FramePose3D leftCameraFramePose = new FramePose3D();
-   // Frame poses of each side's camera in the depth frame (i.e. left camera frame).
-   private final SideDependentList<FramePose3D> cameraPosesInDepthFrame = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   // Frame poses of left and right cameras of ZED. Depth is always in the left pose.
+   private final SideDependentList<FramePose3D> cameraFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private final Thread grabImageThread;
    private final Object slGrabSync = new Object();
@@ -164,7 +162,6 @@ public class ZEDColorStereoDepthPublisher
 
       // Setup other things
       imageEncoder = new CUDAImageEncoder();
-      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * zedModelData.getCenterToCameraDistance());
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
 
@@ -183,9 +180,12 @@ public class ZEDColorStereoDepthPublisher
             }
 
             // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
-            leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-            leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
-            leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            for (RobotSide side : RobotSide.values)
+            {
+               cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
+               cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
+               cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            }
          }
       }, "ZEDImageGrabThread");
 
@@ -300,8 +300,8 @@ public class ZEDColorStereoDepthPublisher
          colorImageMessage.setPrincipalPointYPixels(cameraPrincipalPointY.get(side));
          colorImageMessage.setImageWidth(imageWidth);
          colorImageMessage.setImageHeight(imageHeight);
-         colorImageMessage.getPosition().set(cameraPosesInDepthFrame.get(side).getPosition());
-         colorImageMessage.getOrientation().set(cameraPosesInDepthFrame.get(side).getOrientation());
+         colorImageMessage.getPosition().set(cameraFramePoses.get(side).getPosition());
+         colorImageMessage.getOrientation().set(cameraFramePoses.get(side).getOrientation());
          colorImageMessage.setSequenceNumber(colorImageSequenceNumber.get(side));
          colorImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
@@ -346,8 +346,8 @@ public class ZEDColorStereoDepthPublisher
       depthImageMessage.setPrincipalPointYPixels(cameraPrincipalPointY.get(RobotSide.LEFT));
       depthImageMessage.setImageWidth(imageWidth);
       depthImageMessage.setImageHeight(imageHeight);
-      depthImageMessage.getPosition().set(leftCameraFramePose.getPosition());
-      depthImageMessage.getOrientation().set(leftCameraFramePose.getOrientation());
+      depthImageMessage.getPosition().set(cameraFramePoses.get(RobotSide.LEFT).getPosition());
+      depthImageMessage.getOrientation().set(cameraFramePoses.get(RobotSide.LEFT).getOrientation());
       depthImageMessage.setSequenceNumber(depthImageSequenceNumber++);
       depthImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);

@@ -26,8 +26,8 @@ public class RealsenseColorDepthImageRetriever
    private Mat depthMat16UC1;
    private Mat colorMatRGB;
 
-   private final FramePose3D cameraFramePose = new FramePose3D();
-   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
+   private final FramePose3D depthPose = new FramePose3D();
+   private final FramePose3D colorPose = new FramePose3D();
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final RestartableThrottledThread realsenseGrabThread;
 
@@ -55,8 +55,13 @@ public class RealsenseColorDepthImageRetriever
          realsense.updateDataBytePointers();
          Instant acquisitionTime = Instant.now();
 
-         cameraFramePose.setToZero(sensorFrameSupplier.get());
-         cameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         ReferenceFrame cameraFrame = sensorFrameSupplier.get();
+         depthPose.setToZero(sensorFrameSupplier.get());
+         depthPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         colorPose.setIncludingFrame(cameraFrame, realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+         colorPose.invert();
+         colorPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          if (depthMat16UC1 != null)
             depthMat16UC1.close();
@@ -73,10 +78,8 @@ public class RealsenseColorDepthImageRetriever
                                    (float) realsense.getDepthFocalLengthPixelsY(),
                                    (float) realsense.getDepthPrincipalOffsetXPixels(),
                                    (float) realsense.getDepthPrincipalOffsetYPixels(),
-                                   cameraFramePose.getPosition(),
-                                   cameraFramePose.getOrientation());
-
-         colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+                                   depthPose.getPosition(),
+                                   depthPose.getOrientation());
 
          if (colorMatRGB != null)
             colorMatRGB.close();
@@ -93,8 +96,8 @@ public class RealsenseColorDepthImageRetriever
                                    (float) realsense.getColorFocalLengthPixelsY(),
                                    (float) realsense.getColorPrincipalOffsetXPixels(),
                                    (float) realsense.getColorPrincipalOffsetYPixels(),
-                                   colorPoseInDepthFrame.getPosition(),
-                                   colorPoseInDepthFrame.getOrientation());
+                                   colorPose.getPosition(),
+                                   colorPose.getOrientation());
 
          grabSequenceNumber++;
       }
