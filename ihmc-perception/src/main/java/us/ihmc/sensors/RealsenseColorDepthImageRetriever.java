@@ -5,10 +5,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.time.Instant;
@@ -18,7 +16,7 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final BytedecoRealsense realsense;
+   private final RealsenseDevice realsense;
 
    private long grabSequenceNumber = 0L;
 
@@ -33,7 +31,7 @@ public class RealsenseColorDepthImageRetriever
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final RestartableThrottledThread realsenseGrabThread;
 
-   public RealsenseColorDepthImageRetriever(BytedecoRealsense realsense, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
+   public RealsenseColorDepthImageRetriever(RealsenseDevice realsense, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
 
