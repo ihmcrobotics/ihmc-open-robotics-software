@@ -18,16 +18,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -69,7 +69,8 @@ public class RealsenseColorAndDepthPublisher
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
    private final Quaternion cameraQuaternion = new Quaternion();
-   private final FramePose3D cameraPose = new FramePose3D();
+   private final FramePose3D depthPose = new FramePose3D();
+   private final FramePose3D colorPose = new FramePose3D();
    private final Point3D cameraPosition = new Point3D();
    private final Throttler throttler = new Throttler();
 
@@ -150,8 +151,12 @@ public class RealsenseColorAndDepthPublisher
 
          // Important not to store as a field, as update() needs to be called each frame
          ReferenceFrame cameraFrame = sensorFrameUpdater.get();
-         cameraPose.setToZero(cameraFrame);
-         cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+         depthPose.setToZero(cameraFrame);
+         depthPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         colorPose.setIncludingFrame(cameraFrame, realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+         colorPose.invert();
+         colorPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
          BytePointer compressedColorPointer = new BytePointer(); // deallocate later
@@ -173,7 +178,7 @@ public class RealsenseColorAndDepthPublisher
                                                                depthTopic,
                                                                depthImageMessage,
                                                                ros2Helper,
-                                                               cameraPose,
+                                                               depthPose,
                                                                acquisitionTime,
                                                                depthSequenceNumber++,
                                                                realsense.getDepthHeight(),
@@ -204,7 +209,7 @@ public class RealsenseColorAndDepthPublisher
                                                                   colorTopic,
                                                                   colorImageMessage,
                                                                   ros2Helper,
-                                                                  colorPoseInDepthFrame,
+                                                                  colorPose,
                                                                   acquisitionTime,
                                                                   colorSequenceNumber++,
                                                                   realsense.getColorHeight(),
@@ -217,8 +222,8 @@ public class RealsenseColorAndDepthPublisher
 
          if (parameters.getLoggingEnabled())
          {
-            cameraPosition.set(cameraPose.getPosition());
-            cameraQuaternion.set(cameraPose.getOrientation());
+            cameraPosition.set(depthPose.getPosition());
+            cameraQuaternion.set(depthPose.getOrientation());
 
             if (!loggerInitialized)
             {
