@@ -26,7 +26,20 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void clear()
    {
       type = -1;
+      behaviorTreeNodeDefinitionMessage = null;
+      behaviorTreeNodeStateMessage = null;
+      actionSequenceStateMessage = null;
+      actionNodeStateMessage = null;
       armJointAnglesActionStateMessage = null;
+      chestOrientationActionStateMessage = null;
+      footstepPlanActionStateMessage = null;
+      sakeHandCommandActionStateMessage = null;
+      handPoseActionStateMessage = null;
+      handWrenchActionStateMessage = null;
+      pelvisHeightPitchActionStateMessage = null;
+      waitDurationActionStateMessage = null;
+      walkActionStateMessage = null;
+      children.clear();
    }
 
    public byte getType()
