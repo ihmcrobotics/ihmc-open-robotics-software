@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeAdd;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAdd;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
@@ -105,7 +106,7 @@ public class ROS2BehaviorTreeSubscription
          if (localParentNode == null)
             modificationQueue.accept(new BehaviorTreeNodeSetRoot(localNode, rootNodeSetter));
          else
-            modificationQueue.accept(new BehaviorTreeNodeAdd(localNode, localParentNode));
+            modificationQueue.accept(new BehaviorTreeNodeExtensionAdd(localNode, localParentNode));
 
          ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
       }
