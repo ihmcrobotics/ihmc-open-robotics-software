@@ -261,6 +261,9 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) heightMapParameters.getMinClampHeight());
       parametersBuffer.setParameter((float) heightMapParameters.getMaxClampHeight());
       parametersBuffer.setParameter((float) heightMapParameters.getHeightOffset());
+      parametersBuffer.setParameter((float) heightMapParameters.getSteppingCosineThreshold());
+      parametersBuffer.setParameter((float) heightMapParameters.getSteppingContactThreshold());
+      parametersBuffer.setParameter((float) heightMapParameters.getContactWindowSize());
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }

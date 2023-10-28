@@ -110,6 +110,21 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(cropWindowSize);
    }
 
+   default int getSteppingContactThreshold()
+   {
+      return get(steppingContactThreshold);
+   }
+
+   default int getContactWindowSize()
+   {
+      return get(contactWindowSize);
+   }
+
+   default double getSteppingCosineThreshold()
+   {
+      return get(steppingCosineThreshold);
+   }
+
    /**
     * Resolution of the height map grid
     */

@@ -96,6 +96,21 @@
     "lowerBound": 40,
     "upperBound": 300
   },
+  "Stepping contact threshold" : {
+    "value": 0,
+    "lowerBound": 0,
+    "upperBound": 255
+  },
+  "Contact window size" : {
+      "value": 8,
+      "lowerBound": 2,
+      "upperBound": 64
+  },
+  "Stepping cosine threshold" : {
+    "value": 0.8,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
+  },
   "Grid resolution XY" : [ 0.03, "Resolution of the height map grid" ],
   "Grid size XY" : [ 5.0, "Length of the side of the square height map grid" ],
   "Max Z" : [ 0.6, "Max z relative to robot mid foot z. Points above this threshold are ignored." ],

@@ -233,6 +233,36 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
             heightMapVisualizer.renderImGuiWidgets();
             heightMapUI.renderImGuiWidgets();
             ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
+            if (ImGui.button("Print Local Height Map"))
+            {
+               PerceptionDebugTools.printMat("Local Height Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),4);
+            }
+            if (ImGui.button("Print Cropped Height Map"))
+            {
+               PerceptionDebugTools.printMat("Cropped Height Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),4);
+            }
+            if (ImGui.button("Print Sensor Cropped Height Map"))
+            {
+               PerceptionDebugTools.printMat("Sensor Cropped Height Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat(),4);
+            }
+            if (ImGui.button("Print Internal Height Map"))
+            {
+               PerceptionDebugTools.printMat("Internal Height Map",
+                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat(),32);
+            }
+            if (ImGui.button("Print Terrain Cost Image"))
+            {
+               PerceptionDebugTools.printMat("Terrain Cost Image",
+                                             humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage(),4);
+            }
+            if (ImGui.button("Print Contact Map Image"))
+            {
+               PerceptionDebugTools.printMat("Contact Map Image",
+                                             humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(),4);
+            }
          }
 
          ImGui.unindent();

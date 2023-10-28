@@ -96,6 +96,21 @@
     "lowerBound": 40,
     "upperBound": 300
   },
+  "Stepping contact threshold" : {
+    "value": 0,
+    "lowerBound": 0,
+    "upperBound": 255
+  },
+  "Contact window size" : {
+    "value": 8,
+    "lowerBound": 2,
+    "upperBound": 64
+  },
+  "Stepping cosine threshold" : {
+    "value": 0.94,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
+  },
   "Grid resolution XY": {
     "value": 0.03,
     "lowerBound": 0.01,

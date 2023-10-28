@@ -7,7 +7,11 @@ void kernel heatMapKernel(read_write image2d_t inputValueImage,
 
    uint value = read_imageui(inputValueImage, (int2)(xIndex, yIndex)).x;
 
-   write_imageui(heatMap, (int2)(xIndex, yIndex), (uint4)(0, 0, 255 - value, 255));
+   uint green = (uint) clamp((uint)((value) * 30), (uint) 0, (uint) 255);
+   uint red = 0;
+   uint blue = 0;
+
+   write_imageui(heatMap, (int2)(xIndex, yIndex), (uint4)(red, green, blue, 255));
 
 
 }

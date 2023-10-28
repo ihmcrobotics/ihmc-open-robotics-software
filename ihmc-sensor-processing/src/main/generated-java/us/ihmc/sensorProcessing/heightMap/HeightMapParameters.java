@@ -38,6 +38,9 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey internalGlobalCellSizeInMeters = keys.addDoubleKey("Internal global cell size in meters");
    public static final DoubleStoredPropertyKey heightScaleFactor = keys.addDoubleKey("Height scale factor");
    public static final IntegerStoredPropertyKey cropWindowSize = keys.addIntegerKey("Crop window size");
+   public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
+   public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
+   public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
    /**
     * Resolution of the height map grid
     */

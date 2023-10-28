@@ -27,6 +27,9 @@
 #define MIN_CLAMP_HEIGHT 26
 #define MAX_CLAMP_HEIGHT 27
 #define HEIGHT_OFFSET 28
+#define STEPPING_COSINE_THRESHOLD 29
+#define STEPPING_CONTACT_THRESHOLD 30
+#define CONTACT_WINDOW_SIZE 31
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -397,7 +400,7 @@ void kernel terrainCostKernel(read_write image2d_t heightMap,
    // Scale-map the dot product to [0, 255] into the cost map in that order
    uint cost = (uint) (dotProduct * 255);
 
-   if (dotProduct < 0.85)
+   if (dotProduct < params[STEPPING_COSINE_THRESHOLD])
       cost = 0;
 
    write_imageui(costMap, (int2)(yIndex, xIndex), (uint4)(cost, 0, 0, 0));
@@ -413,20 +416,20 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
    // Set the contact map at the current cell to be the sum of the 16x16 neighborhood of the terrain cost map
    uint score = 0;
    uint closestDistance = 1000000;
-   for (int i = -8; i < 8; i++)
+   for (int i = -params[CONTACT_WINDOW_SIZE]; i < params[CONTACT_WINDOW_SIZE]; i++)
    {
-      for (int j = -8; j < 8; j++)
+      for (int j = -params[CONTACT_WINDOW_SIZE]; j < params[CONTACT_WINDOW_SIZE]; j++)
       {
          if (xIndex + i >= 0 && xIndex + i < params[GLOBAL_CELLS_PER_AXIS] && yIndex + j >= 0 && yIndex + j < params[GLOBAL_CELLS_PER_AXIS])
          {
             uint steppability = read_imageui(terrainCost, (int2) (yIndex + j, xIndex + i)).x;
-            if (steppability == 0)
+            if (steppability <= params[STEPPING_CONTACT_THRESHOLD])
             {
                // Chebyshev distance
-               uint distance = max(abs(i), abs(j));
+//               uint distance = max(abs(i), abs(j));
 
                // Euclidean distance
-//               uint distance = sqrt((float)(i * i + j * j));
+               uint distance = sqrt((float)(i * i + j * j));
 
                if (distance < closestDistance)
                {
