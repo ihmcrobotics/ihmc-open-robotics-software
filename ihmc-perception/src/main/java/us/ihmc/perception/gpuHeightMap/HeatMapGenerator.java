@@ -8,6 +8,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
 public class HeatMapGenerator
 {
@@ -38,7 +42,11 @@ public class HeatMapGenerator
          inputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       }
 
-      inputImage.getBytedecoOpenCVMat().put(inputValueImage);
+      inputValueImage.copyTo(inputImage.getBytedecoOpenCVMat());
+      inputImage.writeOpenCLImage(openCLManager);
+
+      //PerceptionDebugTools.printMat("Input Image", inputValueImage, 8);
+      //PerceptionDebugTools.printMat("Heat Map Buffer", inputImage.getBytedecoOpenCVMat(), 8);
 
 //      if (heatMapImage.getImageWidth() != inputValueImage.getImageWidth() || heatMapImage.getImageHeight() != inputValueImage.getImageHeight())
 //      {
@@ -59,6 +67,9 @@ public class HeatMapGenerator
       openCLManager.execute2D(heatMapKernel, inputValueImage.rows(), inputValueImage.cols());
 
       heatMapImage.readOpenCLImage(openCLManager);
+
+      imshow("HeatMap", heatMapImage.getBytedecoOpenCVMat());
+      waitKey(1);
 
       return heatMapImage.getBytedecoOpenCVMat();
    }

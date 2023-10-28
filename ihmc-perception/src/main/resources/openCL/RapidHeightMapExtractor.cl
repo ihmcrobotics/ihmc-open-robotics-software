@@ -422,7 +422,12 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
             uint steppability = read_imageui(terrainCost, (int2) (yIndex + j, xIndex + i)).x;
             if (steppability == 0)
             {
+               // Chebyshev distance
                uint distance = max(abs(i), abs(j));
+
+               // Euclidean distance
+//               uint distance = sqrt((float)(i * i + j * j));
+
                if (distance < closestDistance)
                {
                   closestDistance = distance;
@@ -432,6 +437,6 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
          }
       }
    }
-   score = closestDistance * 255 / 8;
+   score = closestDistance;
    write_imageui(contactMap, (int2)(yIndex, xIndex), (uint4)(score, 0, 0, 0));
 }

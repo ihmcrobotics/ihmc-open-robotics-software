@@ -14,6 +14,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -147,6 +148,8 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
       if (humanoidPerception != null)
       {
+         //PerceptionDebugTools.printMat("Contact Map", humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(), 4);
+
          Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage());
 
          depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());

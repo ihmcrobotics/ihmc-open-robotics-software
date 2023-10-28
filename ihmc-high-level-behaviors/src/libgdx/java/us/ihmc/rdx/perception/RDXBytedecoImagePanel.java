@@ -74,13 +74,13 @@ public class RDXBytedecoImagePanel
    }
 
    /**
-    * @param singleChannelImage Can be float, unsigned integer, etc
+    * @param colorImage Color image to display
     */
-   public void drawColorImage(Mat singleChannelImage)
+   public void drawColorImage(Mat colorImage)
    {
       if (imagePanel.getIsShowing().get())
       {
-         opencv_imgproc.cvtColor(singleChannelImage, bytedecoImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
+         opencv_imgproc.cvtColor(colorImage, bytedecoImage.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGRA2RGBA);
          draw();
       }
    }
