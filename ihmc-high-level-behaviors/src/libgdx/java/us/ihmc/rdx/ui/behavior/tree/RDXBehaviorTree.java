@@ -99,6 +99,7 @@ public class RDXBehaviorTree
       if (rootNode != null)
       {
          updateCaches(rootNode);
+         update(rootNode);
       }
    }
 
@@ -112,14 +113,46 @@ public class RDXBehaviorTree
       }
    }
 
+   private void update(RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.update();
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         update(child);
+      }
+   }
+
    private void calculateVRPick(RDXVRContext vrContext)
    {
+      if (rootNode != null)
+         calculateVRPick(vrContext, rootNode);
+   }
 
+   private void calculateVRPick(RDXVRContext vrContext, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.calculateVRPick(vrContext);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         calculateVRPick(vrContext, child);
+      }
    }
 
    private void processVRInput(RDXVRContext vrContext)
    {
+      if (rootNode != null)
+         processVRInput(vrContext, rootNode);
+   }
 
+   private void processVRInput(RDXVRContext vrContext, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.processVRInput(vrContext);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         processVRInput(vrContext, child);
+      }
    }
 
    private void renderImGuiWidgets()
@@ -128,26 +161,76 @@ public class RDXBehaviorTree
       fileMenu.renderFileMenu();
       nodesMenu.renderNodesMenu();
       ImGui.endMenuBar();
+
+      if (rootNode != null)
+         renderImGuiWidgets(rootNode);
+   }
+
+   private void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.renderImGuiWidgets();
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         renderImGuiWidgets(child);
+      }
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
    {
+      if (rootNode != null)
+         calculate3DViewPick(input, rootNode);
+   }
 
+   private void calculate3DViewPick(ImGui3DViewInput input, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.calculate3DViewPick(input);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         calculate3DViewPick(input, child);
+      }
    }
 
    private void process3DViewInput(ImGui3DViewInput input)
    {
+      if (rootNode != null)
+         process3DViewInput(input, rootNode);
+   }
 
+   private void process3DViewInput(ImGui3DViewInput input, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.process3DViewInput(input);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         process3DViewInput(input, child);
+      }
    }
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      if (rootNode != null)
+         getRenderables(renderables, pool, rootNode);
+   }
 
+   private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.getRenderables(renderables, pool);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         getRenderables(renderables, pool, child);
+      }
    }
 
    public void destroy()
    {
-
+      RDXBaseUI.getInstance().getPrimaryScene().removeRenderable(this);
+//      RDXBaseUI.getInstance().getVRManager().getContext().removeVRPickCalculator(this);
+//      RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);
+      RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewPickCalculator(this);
+      RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
    }
 
    public BehaviorTreeState getBehaviorTreeState()
