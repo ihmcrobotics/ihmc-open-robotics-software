@@ -27,7 +27,7 @@ public class RDX3DScene
 {
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final Set<RDXRenderableAdapter> renderables = new HashSet<>();
-   private final Map<Object, RDXRenderableAdapter> renderableObjectMap = new HashMap<>();
+   private final Map<Object, RDXRenderableAdapter> renderableOwnerKeyMap = new HashMap<>();
 
    private TreeSet<RDXSceneLevel> sceneLevelsToRender;
    private float ambientLight = 0.4f;
@@ -216,22 +216,22 @@ public class RDX3DScene
       return renderableAdapter;
    }
 
-   public void addRenderableProvider(Object supplier, RDXRenderableProvider renderableProvider)
+   public void addRenderableProvider(Object ownerKey, RDXRenderableProvider renderableProvider)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
-      renderableObjectMap.put(supplier, renderableAdapter);
+      renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
       renderables.add(renderableAdapter);
    }
 
-   public void addRenderableProvider(Object supplier, RenderableProvider renderableProvider)
+   public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider)
    {
-      addRenderableProvider(supplier, renderableProvider, RDXSceneLevel.MODEL);
+      addRenderableProvider(ownerKey, renderableProvider, RDXSceneLevel.MODEL);
    }
 
-   public void addRenderableProvider(Object supplier, RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
+   public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
-      renderableObjectMap.put(supplier, renderableAdapter);
+      renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
       renderables.add(renderableAdapter);
    }
 
@@ -240,10 +240,9 @@ public class RDX3DScene
       renderables.add(renderableAdapter);
    }
 
-   public void removeRenderable(Object supplier)
+   public void removeRenderable(Object ownerKey)
    {
-      RDXRenderableAdapter item = renderableObjectMap.remove(supplier);
-      renderables.remove(item);
+      renderables.remove(renderableOwnerKeyMap.remove(ownerKey));
    }
 
    public void removeRenderableAdapter(RDXRenderableAdapter renderableAdapter)
