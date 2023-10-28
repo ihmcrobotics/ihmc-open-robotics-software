@@ -18,11 +18,9 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -55,6 +53,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static us.ihmc.rdx.ui.vr.RDXVRPelvisControlState.*;
+
 public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
    private static final int NUMBER_OF_PARTS_TO_RECORD = 3;
@@ -79,12 +79,14 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
-   private double userHeightChangeRate = 0.0;
+   private double pelvisFrameChangeRate = 0.0;
+   private final RDXVRPelvisControlState pelvisControlState = new RDXVRPelvisControlState();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
-   private FixedReferenceFrame initialPelvisFrame;
+   private ReferenceFrame pelvisFrame;
+   private RigidBodyTransform pelvisTransformToWorld = new RigidBodyTransform();
    private RDXVRAssistance vrAssistant;
    private final SceneGraph sceneGraph;
 
@@ -192,10 +194,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          }
 
          // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
-         // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
-//         userHeightChangeRate = -controller.getJoystickActionData().y();
+         pelvisFrameChangeRate = -controller.getJoystickActionData().y();
 //         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(userHeightChangeRate * 0.01));
-
       });
       vrAssistant.processInput(vrContext);
 
@@ -206,16 +206,63 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
+         // handle non-tracked body segments
          if (enabled.get())
          {
-            if (initialPelvisFrame == null)
+            // control pelvis height and pitch with right joystick
+            if (pelvisFrame == null)
             {
-               initialPelvisFrame = new FixedReferenceFrame("initialPelvisFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame()));
+               pelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+               pelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), pelvisTransformToWorld);
+            }
+
+            double newPelvisHeightReference = pelvisTransformToWorld.getTranslationZ();
+            if (pelvisControlState.isHeightControlled())
+            {
+               newPelvisHeightReference += pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO;
+               if (newPelvisHeightReference < UPPER_LIMIT_PELVIS_HEIGHT && newPelvisHeightReference > LOWER_LIMIT_PELVIS_HEIGHT)
+               {
+                  if (newPelvisHeightReference < LOWER_LIMIT_PELVIS_HEIGHT_WITH_BACK_BENDING)
+                  {
+                     LogTools.info("Z {}", pelvisTransformToWorld.getTranslationZ());
+                     double currentChestPitchReference = ghostFullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame().getRotation().getPitch();
+                     if (currentChestPitchReference > 0.75 && pelvisTransformToWorld.getTranslationZ() >= LOWER_LIMIT_PELVIS_HEIGHT_WITH_BACK_BENDING)
+                        pelvisControlState.switchToPitchControl();
+                     else
+                     {
+                        pelvisTransformToWorld.getTranslation().addZ(pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO);
+                        pelvisFrame.update();
+                     }
+                  }
+                  else
+                  {
+                     pelvisTransformToWorld.getTranslation().addZ(pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO);
+                     pelvisFrame.update();
+                     LogTools.info("Z {}", pelvisTransformToWorld.getTranslationZ());
+                  }
+               }
+            }
+            else
+            {
+               double newPelvisPitchReference = pelvisTransformToWorld.getRotation().getPitch() - pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO;
+               if (newPelvisPitchReference < UPPER_LIMIT_PELVIS_PITCH && newPelvisPitchReference > 0.0)
+               {
+                  pelvisTransformToWorld.getRotation().appendPitchRotation(-pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO);
+                  pelvisFrame.update();
+                  LogTools.info(pelvisTransformToWorld.getRotation().getPitch());
+               }
+               else if (newPelvisPitchReference < 0.0)
+               {
+                  pelvisTransformToWorld.getRotation().setToPitchOrientation(0.0);
+                  pelvisFrame.update();
+                  LogTools.info(pelvisTransformToWorld.getRotation().getPitch());
+                  pelvisControlState.switchToHeightControl();
+               }
             }
 
             KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
             message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
-            tempFramePose.setToZero(initialPelvisFrame);
+            tempFramePose.setToZero(pelvisFrame);
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
             message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
@@ -494,7 +541,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       else
       {
          vrAssistant.setEnabled(false);
-         initialPelvisFrame = null;
+         pelvisFrame = null;
       }
    }
 
