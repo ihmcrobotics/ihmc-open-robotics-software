@@ -199,6 +199,7 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, globalHeightVarianceImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 4, worldToGroundTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 5, sensorToGroundTransformBuffer.getOpenCLBufferObject());
 
          // Set kernel arguments for the cropping kernel
          openCLManager.setKernelArgument(croppingKernel, 0, globalHeightMapImage.getOpenCLImageObject());

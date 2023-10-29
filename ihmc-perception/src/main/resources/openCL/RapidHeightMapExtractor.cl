@@ -105,7 +105,7 @@ float get_height_on_plane(float x, float y, global float *plane)
    return height;
 }
 
-float get_spatial_filtered_height(int xIndex, int yIndex, float finalHeight, read_write image2d_t globalMap, global float *params)
+float get_spatial_average(int xIndex, int yIndex, read_write image2d_t globalMap, global float *params)
 {
    // perform a smoothing over neighboring cells
    float heightSum = 0.0f;
@@ -122,7 +122,43 @@ float get_spatial_filtered_height(int xIndex, int yIndex, float finalHeight, rea
       }
    }
    float heightAverage = heightSum / (float)count;
-   finalHeight = heightAverage * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
+   return heightAverage;
+}
+
+float get_spatial_stddev(int xIndex, int yIndex, float average, read_write image2d_t globalMap, global float *params)
+{
+   float totalDeviation = 0.0f;
+   int count = 0;
+   for (int i = -1; i < 2; i++)
+   {
+      for (int j = -1; j < 2; j++)
+      {
+         if (xIndex + i >= 0 && xIndex + i < params[GLOBAL_CELLS_PER_AXIS] && yIndex + j >= 0 && yIndex + j < params[GLOBAL_CELLS_PER_AXIS])
+         {
+            float height = read_imageui(globalMap, (int2) (yIndex + j, xIndex + i)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+            totalDeviation += (height - average) * (height - average);
+            count++;
+         }
+      }
+   }
+   float heightStddev = sqrt(totalDeviation / (float)count);
+   return heightStddev;
+}
+
+float get_spatial_filtered_height(int xIndex, int yIndex, float height, read_write image2d_t globalMap, global float *params)
+{
+   float averageHeightZ = get_spatial_average(xIndex, yIndex, globalMap, params);
+   float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalMap, params);
+   float finalHeight = height;
+
+   if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
+   {
+      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
+   }
+   else
+   {
+      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] * 0.01f + finalHeight * (1.0f - params[SPATIAL_ALPHA] * 0.01f);
+   }
 
    return finalHeight;
 }
@@ -176,12 +212,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
    }
 
-   //printf("xIndex: %d, yIndex: %d\tcellCenterWorld: (%f, %f, %f)\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\n",
-   //       xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z,
-   //       cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
-
    int count = 0;
-
    for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=3)
    {
       for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=3)
@@ -192,11 +223,10 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
             float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
-
-            if (depth > 2.0f)
-            {
-               continue;
-            }
+//            if (depth > 2.0f || depth < 0.75f)
+//            {
+//               continue;
+//            }
 
             float3 queryPointInSensor;
             float3 queryPointInZUp;
@@ -218,6 +248,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
             if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
             {
+               // remove outliers before averaging for a single cell
                if (count > 1)
                {
                   currentAverageHeight = averageHeightZ / (float)(count);
@@ -254,7 +285,8 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                         read_write image2d_t globalMap,
                                         read_write image2d_t globalVariance,
                                         global float *params,
-                                        global float *worldToZUpFrameTf)
+                                        global float *worldToZUpFrameTf,
+                                        global float *sensorToGroundTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -293,6 +325,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    int localCellsPerAxis = (int) params[LOCAL_CELLS_PER_AXIS];
 
    // Extract the height from the local map at the local cell index (if within bounds)
+   float sensorHeight = sensorToGroundTf[11] - 1.5f;
    float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
    float localHeight = previousHeight;
 
@@ -304,7 +337,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    float finalHeight = previousHeight;
 
    // Filter the height value if it is within the registration height range and not colliding with the robot
-   if (!isColliding && localHeight > params[MIN_HEIGHT_REGISTRATION] && localHeight < params[MAX_HEIGHT_REGISTRATION])
+   if (!isColliding && (localHeight - sensorHeight) > params[MIN_HEIGHT_REGISTRATION] && (localHeight - sensorHeight) < params[MAX_HEIGHT_REGISTRATION])
    {
       // Apply a poor man's mahalanobis filter on the data
       float height_diff = fabs(localHeight - previousHeight);
@@ -316,11 +349,12 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
       {
          // the difference between the incoming data and the old data was too much, reset it to the incoming data completely
          finalHeight = localHeight;
-         finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
+
       }
+//      finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
    }
 
-   finalHeight = clamp(finalHeight, params[MIN_HEIGHT_REGISTRATION], params[MAX_HEIGHT_REGISTRATION]);
+//   finalHeight = clamp(finalHeight, params[MIN_HEIGHT_REGISTRATION], params[MAX_HEIGHT_REGISTRATION]);
    finalHeight += params[HEIGHT_OFFSET];
 
    // Put the height value in the global map at the global cell index
