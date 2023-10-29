@@ -15,6 +15,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddA
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.rdx.imgui.ImGuiTreeRenderer;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -41,6 +42,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodesMenu nodesMenu;
    private final RDXBehaviorTreeFileLoader fileLoader;
+   private final ImGuiTreeRenderer treeRenderer = new ImGuiTreeRenderer();
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -163,17 +165,20 @@ public class RDXBehaviorTree
       ImGui.endMenuBar();
 
       if (rootNode != null)
-         renderImGuiWidgets(rootNode);
+         renderImGuiWidgetsAsTree(rootNode);
    }
 
-   private void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
+   private void renderImGuiWidgetsAsTree(RDXBehaviorTreeNode<?, ?> node)
    {
-      node.renderImGuiWidgets();
-
-      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      treeRenderer.render(node.getState().getID(), node.getDefinition().getDescription(), () ->
       {
-         renderImGuiWidgets(child);
-      }
+         node.renderImGuiWidgets();
+
+         for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+         {
+            renderImGuiWidgetsAsTree(child);
+         }
+      });
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
