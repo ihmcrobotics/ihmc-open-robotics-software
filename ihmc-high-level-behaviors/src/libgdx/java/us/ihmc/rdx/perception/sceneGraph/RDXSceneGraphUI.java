@@ -15,10 +15,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -44,6 +41,7 @@ public class RDXSceneGraphUI
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean viewAsTree = new ImBoolean(false);
    private final Map<SceneNode, RDXSceneNode> uiSceneNodes = new ConcurrentHashMap<>(); // Use addUISceneNode() and removeUISceneNode() to modify
+   private final ImGuiTreeRenderer treeRenderer = new ImGuiTreeRenderer();
 
    private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
@@ -261,28 +259,14 @@ public class RDXSceneGraphUI
       {
          RDXSceneNode uiSceneNode = uiSceneNodes.get(sceneNode);
 
-         float indentReduction = 10.0f; // Less indent to take less space
-         ImGui.unindent(indentReduction);
-
-         boolean expanded = false;
-         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-         if (ImGui.treeNode("##sceneNode-" + sceneNode.getID(), sceneNode.getName()))
+         treeRenderer.render(sceneNode.getID(), sceneNode.getName(), () ->
          {
-            expanded = true;
-            ImGui.popFont();
-
             uiSceneNode.renderImGuiWidgets(modificationQueue, sceneGraph);
             for (SceneNode child : sceneNode.getChildren())
             {
                renderSceneNodesAsTree(modificationQueue, child);
             }
-            ImGui.treePop();
-         }
-
-         if (!expanded)
-            ImGui.popFont();
-
-         ImGui.indent(indentReduction);
+         });
       }
    }
 
