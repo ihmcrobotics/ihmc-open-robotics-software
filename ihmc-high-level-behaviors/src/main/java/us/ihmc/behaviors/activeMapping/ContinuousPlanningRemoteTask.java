@@ -194,7 +194,6 @@ public class ContinuousPlanningRemoteTask
       else if (!continuousPlanningParameters.getPauseContinuousWalking())
       {
          // The state machine will always run this method if the continuous planner is initialized and not paused
-         System.out.println("----- Do Continuous Planning Loop -----");
          planAndSendFootsteps();
       }
    }

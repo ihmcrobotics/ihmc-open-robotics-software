@@ -68,9 +68,6 @@ public class HeatMapGenerator
 
       heatMapImage.readOpenCLImage(openCLManager);
 
-      imshow("HeatMap", heatMapImage.getBytedecoOpenCVMat());
-      waitKey(1);
-
       return heatMapImage.getBytedecoOpenCVMat();
    }
 

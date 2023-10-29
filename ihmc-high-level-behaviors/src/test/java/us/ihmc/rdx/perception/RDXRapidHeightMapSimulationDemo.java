@@ -395,7 +395,7 @@ public class RDXRapidHeightMapSimulationDemo
             request.setHeightMapData(latestHeightMapData);
             request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
             request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
-            request.setTimeout(1.0);
+            request.setTimeout(0.5);
             request.setPlanBodyPath(false);
             request.setSnapGoalSteps(true);
             request.setPerformAStarSearch(true);
@@ -435,7 +435,7 @@ public class RDXRapidHeightMapSimulationDemo
             {
                if (planLogged)
                {
-                  humanoidPerception.getRapidHeightMapExtractor().reset();
+                  //humanoidPerception.getRapidHeightMapExtractor().reset();
                   setToRandomPose(l515PoseGizmo.getTransformToParent());
                   l515PoseGizmo.update();
                   planLogged = false;
@@ -449,18 +449,22 @@ public class RDXRapidHeightMapSimulationDemo
 
                if (footstepPlannerOutput != null)
                {
-                  if (footstepPlannerOutput.getFootstepPlanningResult() != FootstepPlanningResult.FOUND_SOLUTION)
+                  if (footstepPlannerOutput.getFootstepPlanningResult() != FootstepPlanningResult.FOUND_SOLUTION &&
+                      footstepPlannerOutput.getFootstepPlanningResult() != FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION)
                   {
                      LogTools.warn("Failed to find a solution. Not logging.");
                   }
                   else
                   {
-                     // assertively log the height map, start and goal poses, and the footstep plan (assuming plan is valid)
-                     logFootsteps(footstepPlannerOutput);
-                     logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
-                                  PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
-                     logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat(),
-                                  PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);
+                     if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() >= 4)
+                     {
+                        // assertively log the height map, start and goal poses, and the footstep plan (assuming plan is valid)
+                        logFootsteps(footstepPlannerOutput);
+                        logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
+                                     PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
+                        logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat(),
+                                     PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);
+                     }
                   }
                }
 
@@ -484,8 +488,36 @@ public class RDXRapidHeightMapSimulationDemo
             }
          }
 
+         public void printFootstepPlan(FootstepPlannerOutput plannerOutput)
+         {
+            FootstepPlan plan = plannerOutput.getFootstepPlan();
+            Point3D footstepPosition = new Point3D();
+            Quaternion footstepOrientation = new Quaternion();
+
+            LogTools.info("\n\n  -------------  Plan Details: Side - {}, Number of Steps - {}", sidednessBit, plan.getNumberOfSteps());
+
+            float sideValue = 0.0f;
+            for (int i = 0; i < PerceptionLoggerConstants.LEGACY_BLOCK_SIZE; i++)
+            {
+               if (i < plan.getNumberOfSteps())
+               {
+                  PlannedFootstep footstep = plan.getFootstep(i);
+                  footstepPosition.set(footstep.getFootstepPose().getTranslation());
+                  footstepOrientation.set(footstep.getFootstepPose().getOrientation());
+                  sideValue = footstep.getRobotSide() == RobotSide.LEFT ? 0.0f : 1.0f;
+               }
+               else
+               {
+                  footstepPosition.set(0.0, 0.0, 0.0);
+                  sideValue = 0.0f;
+               }
+               LogTools.info("\t ------------- Footstep: {} {} {}", footstepPosition, footstepOrientation, sideValue);
+            }
+         }
+
          public void logFootsteps(FootstepPlannerOutput plannerOutput)
          {
+            printFootstepPlan(plannerOutput);
             LogTools.info("Logging Plan No. {}", plansLoggedSoFar++);
 
             FootstepPlan plan = plannerOutput.getFootstepPlan();

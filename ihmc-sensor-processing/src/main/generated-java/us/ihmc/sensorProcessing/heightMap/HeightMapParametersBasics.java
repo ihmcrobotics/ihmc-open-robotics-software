@@ -48,6 +48,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
    }
 
+   default void setSpatialAlpha(double spatialAlpha)
+   {
+      set(HeightMapParameters.spatialAlpha, spatialAlpha);
+   }
+
    default void setHeightOffset(double heightOffset)
    {
       set(HeightMapParameters.heightOffset, heightOffset);

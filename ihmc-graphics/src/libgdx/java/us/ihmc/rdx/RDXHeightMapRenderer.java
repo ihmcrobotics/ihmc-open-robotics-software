@@ -112,7 +112,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
             int height = heightMapPointer.getShort(heightIndex * 2L) & 0xFFFF;
             float zPosition = ((float) height / heightScalingFactor);
 
-            zPosition -= 3.25f;
+            zPosition -= 3.2768f;
 
             spritePoint.set(xPosition, yPosition, zPosition);
             //spritePoint.applyTransform(zUpFrameToWorld);

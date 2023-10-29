@@ -388,8 +388,9 @@ def load_dataset(validation_split):
         # '20231015_183228_PerceptionLog.hdf5', 
         # '20231015_234600_PerceptionLog.hdf5', 
         # '20231016_025456_PerceptionLog.hdf5',
-        '20231023_131517_PerceptionLog.hdf5',
-        '20231023_160823_PerceptionLog.hdf5'
+        # '20231023_131517_PerceptionLog.hdf5',
+        # '20231023_160823_PerceptionLog.hdf5',
+        '20231028_171524_PerceptionLog.hdf5',
     ]
     
     datasets = []
@@ -421,11 +422,12 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = True
-    visualize_raw = False
+    train = False
+    visualize_raw = True
 
     if visualize_raw:
         visualize_dataset(train_dataset)    
+        exit()
 
     if train:
         # train and store model

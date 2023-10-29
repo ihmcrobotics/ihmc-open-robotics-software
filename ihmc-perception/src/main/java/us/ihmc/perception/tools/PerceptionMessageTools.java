@@ -211,13 +211,8 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(Mat heightMapPointer,
-                                             HeightMapData heightMapData,
-                                             Point3D gridCenter,
-                                             float widthInMeters,
-                                             float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapData, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
-
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
 
@@ -227,8 +222,9 @@ public class PerceptionMessageTools
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            int height = ((int)heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
-            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor()) - 3.25f;
+            int height = ((int) heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
+            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                               - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
             heightMapData.setHeightAt(key, cellHeight);
@@ -237,10 +233,10 @@ public class PerceptionMessageTools
    }
 
    public static void convertToHeightMapImage(ImageMessage imageMessage,
-                                             Mat heightMapImageToPack,
-                                             ByteBuffer compressedByteBuffer,
-                                             BytePointer byteBufferAccessPointer,
-                                             Mat compressedBytesMat)
+                                              Mat heightMapImageToPack,
+                                              ByteBuffer compressedByteBuffer,
+                                              BytePointer byteBufferAccessPointer,
+                                              Mat compressedBytesMat)
    {
       int numberOfBytes = imageMessage.getData().size();
       compressedByteBuffer.rewind();

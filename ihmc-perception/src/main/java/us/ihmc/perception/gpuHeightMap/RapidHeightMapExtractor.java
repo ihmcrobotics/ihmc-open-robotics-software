@@ -70,6 +70,7 @@ public class RapidHeightMapExtractor
    private BytedecoImage inputDepthImage;
    private BytedecoImage localHeightMapImage;
    private BytedecoImage globalHeightMapImage;
+   private BytedecoImage globalHeightVarianceImage;
    private BytedecoImage sensorCroppedHeightMapImage;
    private BytedecoImage terrainCostImage;
    private BytedecoImage contactMapImage;
@@ -122,6 +123,9 @@ public class RapidHeightMapExtractor
 
       globalHeightMapImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
       globalHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
+      globalHeightVarianceImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
+      globalHeightVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       sensorCroppedHeightMapImage = new BytedecoImage(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
       sensorCroppedHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -192,8 +196,9 @@ public class RapidHeightMapExtractor
          // Set kernel arguments for the height map registration kernel
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 0, localHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 1, globalHeightMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, worldToGroundTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, globalHeightVarianceImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 4, worldToGroundTransformBuffer.getOpenCLBufferObject());
 
          // Set kernel arguments for the cropping kernel
          openCLManager.setKernelArgument(croppingKernel, 0, globalHeightMapImage.getOpenCLImageObject());
@@ -264,6 +269,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) heightMapParameters.getSteppingCosineThreshold());
       parametersBuffer.setParameter((float) heightMapParameters.getSteppingContactThreshold());
       parametersBuffer.setParameter((float) heightMapParameters.getContactWindowSize());
+      parametersBuffer.setParameter((float) heightMapParameters.getSpatialAlpha());
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }

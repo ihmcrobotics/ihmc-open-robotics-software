@@ -50,6 +50,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(heightFilterAlpha);
    }
 
+   default double getSpatialAlpha()
+   {
+      return get(spatialAlpha);
+   }
+
    default double getHeightOffset()
    {
       return get(heightOffset);

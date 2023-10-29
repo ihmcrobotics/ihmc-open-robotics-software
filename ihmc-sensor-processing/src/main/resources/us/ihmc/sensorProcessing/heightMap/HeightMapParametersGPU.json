@@ -12,14 +12,14 @@
     "upperBound": 800
   },
   "Min height registration": {
-    "value": -3.25,
-    "lowerBound": -0.05,
-    "upperBound": 0.05
+    "value": -1.0,
+    "lowerBound": -5.0,
+    "upperBound": 5.0
   },
   "Max height registration": {
-    "value": 3.25,
-    "lowerBound": 0.4,
-    "upperBound": 1.6
+    "value": 1.0,
+    "lowerBound": -5.0,
+    "upperBound": 5.0
   },
   "Min height difference": {
     "value": -0.05,
@@ -27,27 +27,32 @@
     "upperBound": 0.05
   },
   "Max height difference": {
-    "value": 0.1,
+    "value": 1.0,
     "lowerBound": 0.0,
-    "upperBound": 0.5
+    "upperBound": 2.0
   },
   "Height filter alpha": {
     "value": 0.65,
-    "lowerBound": 0.2,
-    "upperBound": 0.85
+    "lowerBound": 0.0,
+    "upperBound": 1.0
+  },
+  "Spatial alpha": {
+    "value": 0.5,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
   },
   "Height offset": {
-    "value": 3.25,
+    "value": 3.2768,
     "lowerBound": -10.0,
     "upperBound": 10.0
   },
   "Min Clamp Height": {
-    "value": -3.25,
+    "value": -3.2768,
     "lowerBound": -5.0,
     "upperBound": 5.0
   },
   "Max Clamp Height": {
-    "value": 3.25,
+    "value": 3.2768,
     "lowerBound": -5.0,
     "upperBound": 5.0
   },

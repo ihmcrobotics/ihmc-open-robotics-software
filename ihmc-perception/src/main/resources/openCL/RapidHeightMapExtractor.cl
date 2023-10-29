@@ -30,6 +30,7 @@
 #define STEPPING_COSINE_THRESHOLD 29
 #define STEPPING_CONTACT_THRESHOLD 30
 #define CONTACT_WINDOW_SIZE 31
+#define SPATIAL_ALPHA 32
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -104,6 +105,28 @@ float get_height_on_plane(float x, float y, global float *plane)
    return height;
 }
 
+float get_spatial_filtered_height(int xIndex, int yIndex, float finalHeight, read_write image2d_t globalMap, global float *params)
+{
+   // perform a smoothing over neighboring cells
+   float heightSum = 0.0f;
+   int count = 0;
+   for (int i = -1; i < 2; i++)
+   {
+      for (int j = -1; j < 2; j++)
+      {
+         if (xIndex + i >= 0 && xIndex + i < params[GLOBAL_CELLS_PER_AXIS] && yIndex + j >= 0 && yIndex + j < params[GLOBAL_CELLS_PER_AXIS])
+         {
+            heightSum += read_imageui(globalMap, (int2) (yIndex + j, xIndex + i)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+            count++;
+         }
+      }
+   }
+   float heightAverage = heightSum / (float)count;
+   finalHeight = heightAverage * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
+
+   return finalHeight;
+}
+
 void kernel heightMapUpdateKernel(read_write image2d_t in,
                                   read_write image2d_t out,
                                   global float *params,
@@ -113,7 +136,8 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
 
-   float averageHeightZ = 0;
+   float currentAverageHeight = 0.0f;
+   float averageHeightZ = 0.0f;
    float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
    cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
@@ -169,6 +193,11 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
          {
             float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
 
+            if (depth > 2.0f)
+            {
+               continue;
+            }
+
             float3 queryPointInSensor;
             float3 queryPointInZUp;
             if (params[MODE] == 0) // Spherical
@@ -187,19 +216,16 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
             (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
             (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
 
-            //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
-            //   xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z, projectedPoint.x, projectedPoint.y,
-            //   yaw_count, pitch_count, depth, queryPointInZUp.x, queryPointInZUp.y, queryPointInZUp.z, minX, maxX, minY, maxY);
-
-
-            //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
-            //      cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z,
-            //      cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z,
-            //      projectedPoint.x, projectedPoint.y);
-
             if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
             {
-               //printf("HIT......: (%f, %f, %f), minX: %f, maxX: %f, minY: %f, maxY: %f\n", queryPointInZUp.x, queryPointInZUp.y, queryPointInZUp.z, minX, maxX, minY, maxY);
+               if (count > 1)
+               {
+                  currentAverageHeight = averageHeightZ / (float)(count);
+                  if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.05)
+                  {
+                     continue;
+                  }
+               }
                count++;
                averageHeightZ += queryPointInZUp.z;
             }
@@ -212,9 +238,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    if (count > 0)
    {
       averageHeightZ = averageHeightZ / (float)(count);
-
-
-      //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
    else
    {
@@ -224,14 +247,12 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    averageHeightZ = clamp(averageHeightZ, params[MIN_CLAMP_HEIGHT], params[MAX_CLAMP_HEIGHT]);
    averageHeightZ += params[HEIGHT_OFFSET];
 
-//   averageHeightZ = params[HEIGHT_OFFSET];
-//   averageHeightZ += xIndex * 0.05f;
-
    write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
 void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                         read_write image2d_t globalMap,
+                                        read_write image2d_t globalVariance,
                                         global float *params,
                                         global float *worldToZUpFrameTf)
 {
@@ -295,6 +316,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
       {
          // the difference between the incoming data and the old data was too much, reset it to the incoming data completely
          finalHeight = localHeight;
+         finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
       }
    }
 
