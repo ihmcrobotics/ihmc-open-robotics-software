@@ -249,7 +249,7 @@ if __name__ == "__main__":
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = False
+    train = True
     visualize_raw = False
 
     if visualize_raw:
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     if train:
         # train and store model
         criterion=torch.nn.L1Loss()
-        train_store(train_dataset, val_dataset, batch_size=10, epochs=50, criterion=criterion)
+        train_store(train_dataset, val_dataset, batch_size=10, epochs=200, criterion=criterion)
 
     else:
         # load and validate model
