@@ -3,10 +3,12 @@ package us.ihmc.simulationConstructionSetTools.util.ground;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.jme3.asset.DesktopAssetManager;
 import com.jme3.asset.plugins.ClasspathLocator;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
@@ -100,9 +102,10 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
       if (this.parameters.isShowDecomposedMeshGraphics())
       {
+         Random random = new Random(83432);
          for (ConvexPolytope3D convexPolytope : convexPolytopes)
          {
-            linkGraphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), YoAppearance.Transparent());
+            linkGraphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), YoAppearance.randomColor(random));
          }
       }
 
@@ -111,6 +114,12 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
    private Collection<? extends ConvexPolytope3D> doDecomposition(String filename)
    {
       Spatial model = loadOBJFromPath(filename);
+
+      if (decompositionType == ConvexDecomposition.NO_DECOMPOSITION)
+      {
+         makeConvexPolytopeFromHullCollissionShape(CollisionShapeFactory.createMergedHullShape(model));
+         return null;
+      }
 
       CompoundCollisionShape compundShapes = null;
 
@@ -122,35 +131,28 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       {
          compundShapes = CollisionShapeFactory.createVhacdShape(model, parameters.getVhacdParameters(), null);
       }
-
-      else if (decompositionType == ConvexDecomposition.NO_DECOMPOSITION)
+      for (ChildCollisionShape childshape : compundShapes.listChildren())
       {
-
+         makeConvexPolytopeFromHullCollissionShape((HullCollisionShape) childshape.getShape());
       }
-      addConvexPolytopesToList(compundShapes);
 
       return null;
    }
 
-   private void addConvexPolytopesToList(CompoundCollisionShape compundShapes)
+   private void makeConvexPolytopeFromHullCollissionShape(HullCollisionShape hullShape)
    {
-      for (ChildCollisionShape childshape : compundShapes.listChildren())
+      float[] hullVertices = hullShape.copyHullVertices();
+      ArrayList<Point3D> verticesList = new ArrayList<Point3D>();
+
+      for (int vertexID = 0; vertexID < hullVertices.length; vertexID += 3)
       {
-         HullCollisionShape hullShape = (HullCollisionShape) childshape.getShape();
-         float[] hullVertices = hullShape.copyHullVertices();
-         ArrayList<Point3D> verticesList = new ArrayList<Point3D>();
-
-         for (int vertexID = 0; vertexID < hullVertices.length; vertexID += 3)
-         {
-            Point3D vertex = new Point3D(hullVertices[vertexID], hullVertices[vertexID + 1], hullVertices[vertexID + 2]);
-            verticesList.add(vertex);
-         }
-
-         ConvexPolytope3D convexPolytope3D = new ConvexPolytope3D(Vertex3DSupplier.asVertex3DSupplier(verticesList));
-         convexPolytopes.add(convexPolytope3D);
+         Point3D vertex = new Point3D(hullVertices[vertexID], hullVertices[vertexID + 1], hullVertices[vertexID + 2]);
+         verticesList.add(vertex);
       }
-   }
 
+      ConvexPolytope3D convexPolytope3D = new ConvexPolytope3D(Vertex3DSupplier.asVertex3DSupplier(verticesList));
+      convexPolytopes.add(convexPolytope3D);
+   }
    private Spatial loadOBJFromPath(String objAssetPath)
    {
       // TODO Auto-generated method stub
@@ -240,6 +242,19 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return (z < heightAt);
    }
 
+   /**
+    * This method finds the closest face to the point by looping through all the faces of all the convex hulls 
+    * <p>
+    * I initially tried using a 
+    * 
+    * </p>
+    *
+    * @param A combined list of all faces in all the decomposed convex hulls
+    * @param The point that is being queried
+    * @return The closest face
+    * @see This i
+    * @author Khizar
+    */
    private Face3D iterateAndGetClosestFace(List<Face3D> closesFacesList, Point3D query)
    {
       if (closesFacesList.size() == 0)
