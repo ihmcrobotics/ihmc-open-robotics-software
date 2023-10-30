@@ -12,12 +12,15 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 public class RDXVisualizerWrapper
@@ -26,12 +29,19 @@ public class RDXVisualizerWrapper
    @Nullable
    private ROS2Heartbeat heartbeat = null;
 
+   // List of heartbeats that should be set alive when this class's heartbeat is alive
+   private final List<RDXVisualizerWrapper> dependentVisualizers;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean isAlive = new ImBoolean(false);
 
-   public RDXVisualizerWrapper(ROS2Node node, @Nullable ROS2Topic<Empty> heartbeatTopic, RDXVisualizer visualizer)
+   public RDXVisualizerWrapper(@Nullable ROS2Node node,
+                               @Nullable ROS2Topic<Empty> heartbeatTopic,
+                               RDXVisualizer visualizer,
+                               RDXVisualizerWrapper... dependentVisualizers)
    {
       this.visualizer = visualizer;
+      this.dependentVisualizers = Arrays.asList(dependentVisualizers);
       if (heartbeatTopic != null)
          heartbeat = new ROS2Heartbeat(node, heartbeatTopic);
    }
@@ -43,26 +53,25 @@ public class RDXVisualizerWrapper
 
    public void renderImGuiWidgets()
    {
-      if (visualizer instanceof RDXROS2ImageMessageVisualizer || visualizer instanceof RDXROS2ColoredPointCloudVisualizer)
+      if (heartbeat != null)
       {
          if (ImGui.checkbox(labels.get(visualizer.getTitle()), isAlive))
          {
+            heartbeat.setAlive(isAlive.get());
             visualizer.setActive(isAlive.get());
-            if (heartbeat != null)
-               heartbeat.setAlive(isAlive());
-
-            if (visualizer instanceof RDXROS2ImageMessageVisualizer)
-            {
-               ((RDXROS2ImageMessageVisualizer) visualizer).setSubscribed(isAlive.get());
-            }
-            else if (visualizer instanceof RDXROS2ColoredPointCloudVisualizer)
-            {
-               ((RDXROS2ColoredPointCloudVisualizer) visualizer).setSubscribed(isAlive.get());
-            }
          }
          ImGuiTools.previousWidgetTooltip("Active");
 
          renderImGuiWidgetsByType();
+
+         // FIXME: I don't like checking every render loop
+         for (RDXVisualizerWrapper dependentVisualizer : dependentVisualizers)
+         {
+            if (dependentVisualizer.getHeartbeat() != null && !dependentVisualizer.isAlive())
+            {
+               dependentVisualizer.getHeartbeat().setAlive(isAlive.get());
+            }
+         }
       }
       else
       {
@@ -93,6 +102,11 @@ public class RDXVisualizerWrapper
       visualizer.getRenderables(renderables, pool, sceneLevels);
    }
 
+   public ROS2Heartbeat getHeartbeat()
+   {
+      return heartbeat;
+   }
+
    public void destroy()
    {
       visualizer.destroy();
@@ -102,9 +116,9 @@ public class RDXVisualizerWrapper
 
    private void renderImGuiWidgetsByType()
    {
-      if (visualizer instanceof RDXROS2ImageMessageVisualizer)
+      if (visualizer instanceof RDXROS2ImageMessageVisualizer imageMessageVisualizer)
       {
-         RDXROS2ImageMessageVisualizer imageMessageVisualizer = (RDXROS2ImageMessageVisualizer) visualizer;
+         imageMessageVisualizer.setSubscribed(isAlive.get());
 
          ImGui.text(imageMessageVisualizer.getTitle());
          if (imageMessageVisualizer.getHasReceivedOne())
@@ -112,9 +126,9 @@ public class RDXVisualizerWrapper
             imageMessageVisualizer.renderStatistics();
          }
       }
-      else if (visualizer instanceof RDXROS2ColoredPointCloudVisualizer)
+      else if (visualizer instanceof RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer)
       {
-         RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer = (RDXROS2ColoredPointCloudVisualizer) visualizer;
+         pointCloudVisualizer.setSubscribed(isAlive.get());
 
          ImGui.text(pointCloudVisualizer.getTitle());
 
@@ -134,6 +148,16 @@ public class RDXVisualizerWrapper
          {
             ImGui.sliderInt(labels.get("Level of color detail"), pointCloudVisualizer.getLevelOfColorDetail().getData(), 0, 3);
          }
+      }
+      else if (visualizer instanceof RDXROS2ArUcoMarkerPosesVisualizer arUcoVisualizer)
+      {
+         imgui.internal.ImGui.text(arUcoVisualizer.getTitle());
+         arUcoVisualizer.getFrequencyPlot().renderImGuiWidgets();
+         arUcoVisualizer.getNumberOfMarkersPlot().render(arUcoVisualizer.getNumberOfArUcoMarkers());
+      }
+      else
+      {
+         visualizer.renderImGuiWidgets();
       }
    }
 }

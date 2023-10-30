@@ -126,7 +126,7 @@ public class OusterDepthImagePublisher
          depthPublishLock.unlock();
       }
       publishDepthThread.blockingStop();
-
+      // TODO: Add null checks
       nextCpuDepthImage.destroy();
 
       ros2DepthImagePublisher.destroy();
