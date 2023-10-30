@@ -124,14 +124,13 @@ public class SpinnakerBlackfly
 
    public boolean getNextImage(spinImage spinImageToPack)
    {
-      Spinnaker_C.spinCameraGetNextImage(spinCamera, spinImageToPack);
-      Spinnaker_C.spinImageIsIncomplete(spinImageToPack, isIncomplete);
-      boolean incomplete = isIncomplete.getBool();
-      if (incomplete)
+      Spinnaker_C.spinError error = Spinnaker_C.spinCameraGetNextImage(spinCamera, spinImageToPack);
+
+      if (error != Spinnaker_C.spinError.SPINNAKER_ERR_SUCCESS)
       {
-         LogTools.warn("Camera " + serialNumber + " returned incomplete image");
+         LogTools.warn("Camera " + serialNumber + " returned error: " + error);
       }
-      return !incomplete;
+      return error == Spinnaker_C.spinError.SPINNAKER_ERR_SUCCESS;
    }
 
    public void releaseImage(spinImage spinImage)
