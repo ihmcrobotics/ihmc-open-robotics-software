@@ -747,7 +747,7 @@ public abstract class WalkingControllerParameters
     */
    public double nominalSupportKneeAngle()
    {
-      return 0.0;
+      return 0.5;
    }
 
    /**
