@@ -75,7 +75,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
             if (isAnyObjectSelected())
                selectedObject.clear();
             selectedObject.setShape(primitiveRigidBodySceneNode.getShape());
-            selectedObject.setVisuals();
+            selectedObject.createVisuals();
             // Notify that the object selection has been updated
             selectedObjectName = primitiveRigidBodySceneNode.getName();
             selectedObjectChanged.set(selectedObjectName);

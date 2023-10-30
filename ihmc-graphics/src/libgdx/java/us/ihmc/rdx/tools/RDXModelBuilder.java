@@ -157,6 +157,11 @@ public class RDXModelBuilder
 
    public static ModelInstance createBox(float lx, float ly, float lz, Color color)
    {
+      return createBoxOffset(lx, ly, lz, new Point3D(0, 0, 0), color);
+   }
+
+   public static ModelInstance createBoxOffset(float lx, float ly, float lz, Point3D offset, Color color)
+   {
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, new Point3D(0, 0, lz/2), color), "box");
    }
 
