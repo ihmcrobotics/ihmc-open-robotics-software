@@ -15,13 +15,14 @@ import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRenderableProvider
 {
    private static final String WINDOW_NAME = "Perception Visualizers";
 
-   private final ArrayList<RDXVisualizerWrapper> visualizers = new ArrayList<>();
+   private final LinkedHashMap<RDXVisualizer, RDXVisualizerWrapper> visualizers = new LinkedHashMap<>();
    private final ROS2Node heartbeatNode;
 
    private boolean created = false;
@@ -38,10 +39,20 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       addVisualizer(visualizer, null);
    }
 
-   public void addVisualizer(RDXVisualizer visualizer, @Nullable ROS2Topic<Empty> visualizerHearbeatTopic)
+   public void addVisualizer(RDXVisualizer visualizer, @Nullable ROS2Topic<Empty> visualizerHearbeatTopic, RDXVisualizer ... dependentVisualizers)
    {
-      RDXVisualizerWrapper wrappedVisualizer = new RDXVisualizerWrapper(heartbeatNode, visualizerHearbeatTopic, visualizer);
-      visualizers.add(wrappedVisualizer);
+      ArrayList<RDXVisualizerWrapper> dependentVisualizerWrappers = new ArrayList<>();
+      for (RDXVisualizer dependentVisualizer : dependentVisualizers)
+      {
+         if (visualizers.get(dependentVisualizer) != null)
+            dependentVisualizerWrappers.add(visualizers.get(dependentVisualizer));
+      }
+
+      RDXVisualizerWrapper wrappedVisualizer = new RDXVisualizerWrapper(heartbeatNode,
+                                                                        visualizerHearbeatTopic,
+                                                                        visualizer,
+                                                                        dependentVisualizerWrappers.toArray(new RDXVisualizerWrapper[0]));
+      visualizers.put(visualizer, wrappedVisualizer);
       RDXPanel panel = visualizer.getPanel();
       if (panel != null)
          addChild(panel);
@@ -51,7 +62,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void create()
    {
-      for (RDXVisualizerWrapper visualizer : visualizers)
+      for (RDXVisualizerWrapper visualizer : visualizers.values())
       {
          visualizer.create();
       }
@@ -60,7 +71,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void update()
    {
-      for (RDXVisualizerWrapper visualizer : visualizers)
+      for (RDXVisualizerWrapper visualizer : visualizers.values())
       {
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isAlive());
@@ -71,7 +82,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void renderImGuiWidgets()
    {
-      for (RDXVisualizerWrapper visualizer : visualizers)
+      for (RDXVisualizerWrapper visualizer : visualizers.values())
       {
          visualizer.renderImGuiWidgets();
          ImGui.separator();
@@ -81,7 +92,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      for (RDXVisualizerWrapper visualizer : visualizers)
+      for (RDXVisualizerWrapper visualizer : visualizers.values())
       {
          if (visualizer.isAlive())
          {
@@ -92,7 +103,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void destroy()
    {
-      for (RDXVisualizerWrapper visualizer : visualizers)
+      for (RDXVisualizerWrapper visualizer : visualizers.values())
       {
          visualizer.destroy();
       }
