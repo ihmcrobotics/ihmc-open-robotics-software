@@ -10,10 +10,13 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.ResizablePrimitiveRigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -81,11 +84,18 @@ public class RDXAffordanceTemplateEditorUI
                                RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureShoeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureThinkPadNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableBoxNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizablePrismNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableCylinderNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableEllipsoidNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               ResizablePrimitiveRigidBodySceneObjectDefinitions.ensureResizableConeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               for (PrimitiveRigidBodyShape primitiveShape : PrimitiveRigidBodyShape.values())
+                               {
+                                  String primitiveShapename = Character.toUpperCase(primitiveShape.name().charAt(0)) + primitiveShape.name().substring(1).toLowerCase();
+                                  PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode = new PrimitiveRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                                                                            "Resizable" + primitiveShapename,
+                                                                                                                            sceneGraph.getIDToNodeMap(),
+                                                                                                                            sceneGraph.getRootNode().getID(),
+                                                                                                                            new RigidBodyTransform(),
+                                                                                                                            primitiveShape);
+                                  LogTools.info("Adding Resizable " + primitiveShapename + " Node to scene graph.");
+                                  modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNode, sceneGraph.getRootNode()));
+                               }
                             });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
