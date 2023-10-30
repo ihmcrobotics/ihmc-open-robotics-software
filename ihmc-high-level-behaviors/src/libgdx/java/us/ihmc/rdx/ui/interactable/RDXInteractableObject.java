@@ -210,6 +210,11 @@ public class RDXInteractableObject implements RenderableProvider
       this.readResizablePrimitiveSize = newSize;
    }
 
+   public List<Float> getReadResizablePrimitiveSize()
+   {
+      return readResizablePrimitiveSize;
+   }
+
    public void clear()
    {
       shape = null;

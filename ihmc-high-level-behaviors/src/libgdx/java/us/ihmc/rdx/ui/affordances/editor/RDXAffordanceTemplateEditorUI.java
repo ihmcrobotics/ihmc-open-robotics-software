@@ -489,7 +489,18 @@ public class RDXAffordanceTemplateEditorUI
 
    private void rescaleAffordanceTemplate()
    {
-      // TODO
+      for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
+      {
+         float objectScale = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i)/objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
+         if (i<=2 && objectScale>1.0)
+         {
+            // TODO
+         }
+         if (i>2 && objectScale>1.0)
+         {
+            // TODO
+         }
+      }
    }
 
    private void reset()

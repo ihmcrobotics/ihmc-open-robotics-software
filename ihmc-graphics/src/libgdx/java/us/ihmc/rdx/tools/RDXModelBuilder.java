@@ -157,7 +157,7 @@ public class RDXModelBuilder
 
    public static ModelInstance createBox(float lx, float ly, float lz, Color color)
    {
-      return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
+      return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, new Point3D(0, 0, lz/2), color), "box");
    }
 
    public static ModelInstance createCylinder(float height, float radius, Color color)
