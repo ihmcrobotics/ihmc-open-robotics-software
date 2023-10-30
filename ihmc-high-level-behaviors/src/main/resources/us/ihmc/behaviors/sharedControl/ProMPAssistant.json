@@ -8,14 +8,24 @@
   "useCustomSpeed": true,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
+  "postProcessingVelocityAdjuster": 1,
   "tasks":[
     {
       "context": "Target",
       "name": "LeftPunch",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "translationGoalToEE": [0.0, 0.0, 0.0],
-      "rotationGoalToEE": [0.0, 0.0, 0.0, 1.0],
+      "customSpeed": 70,
+      "bodyParts":[
+        { "name":"leftHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "Target",
+      "name": "LeftPunch0",
+      "bodyPartForInference": "leftHand",
+      "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 70,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
@@ -27,8 +37,6 @@
       "name": "ReachHandle",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
-      "translationGoalToEE": [0.135, -0.027,  0.174],
-      "rotationGoalToEE": [-0.158, -0.691,  0.681, -0.185],
       "customSpeed": 30,
       "bodyParts":[
         { "name":"rightHand", "geometry":"Pose" }
