@@ -374,11 +374,10 @@ public class SwingTrajectoryCalculator
    }
 
    private void setWaypointsFromCustomMidpoints(Footstep footstep)
-   {
-      // This is somehow working, TODO fix it and not make this so hacky
+   {  // Stairs and slopes use these waypoints for its swing trajectory
       for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
-      {
-         footstep.getCustomPositionWaypoints().get(0).addZ(1.0);
+      { // This raises the first trajectory swing waypoint by 2 centimeters. Could be tuned for future URDFs
+         footstep.getCustomPositionWaypoints().get(0).addZ(0.02);
       }
 
       List<FramePoint3D> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
