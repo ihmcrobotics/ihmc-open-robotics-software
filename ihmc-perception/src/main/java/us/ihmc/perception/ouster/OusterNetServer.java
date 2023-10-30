@@ -330,6 +330,17 @@ public class OusterNetServer extends Thread
 
    public void destroy()
    {
+      running = false;
+
+      try
+      {
+         join();
+      }
+      catch (InterruptedException e)
+      {
+         LogTools.error(e);
+      }
+
       udpSocket.close();
    }
 
