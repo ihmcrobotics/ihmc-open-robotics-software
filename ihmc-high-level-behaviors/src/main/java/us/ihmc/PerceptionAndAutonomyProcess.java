@@ -11,10 +11,9 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.ouster.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
-import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -64,7 +63,6 @@ public class PerceptionAndAutonomyProcess
 
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
    private final ROS2HeartbeatMonitor realsenseHeartbeat;
-   private RealsenseDeviceManager realSenseManager;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
    private RealsenseColorDepthImageRetriever realsenseImageRetriever;
@@ -75,7 +73,7 @@ public class PerceptionAndAutonomyProcess
    private final ROS2HeartbeatMonitor ousterDepthHeartbeat;
    private final ROS2HeartbeatMonitor lidarScanHeartbeat;
    private final ROS2HeartbeatMonitor heightMapHeartbeat;
-   private NettyOuster ouster;
+   private OusterNetServer ouster;
    private RawImage ousterDepthImage;
    private OusterDepthImageRetriever ousterDepthImageRetriever;
    private OusterDepthImagePublisher ousterDepthImagePublisher;
@@ -178,7 +176,7 @@ public class PerceptionAndAutonomyProcess
          zedImageRetriever.destroy();
       }
 
-      if (realSenseManager != null)
+      if (realsenseImageRetriever != null)
       {
          realsenseProcessAndPublishThread.stop();
          realsenseImagePublisher.destroy();
@@ -325,10 +323,8 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeRealsense()
    {
-      realSenseManager = new RealsenseDeviceManager();
-      RealsenseDevice realsense = realSenseManager.createBytedecoRealsenseDevice(REALSENSE_SERIAL_NUMBER,
-                                                                                 RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
-      realsenseImageRetriever = new RealsenseColorDepthImageRetriever(realsense,
+      realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
+                                                                      REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                       realsenseFrameSupplier);
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
@@ -342,7 +338,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (realSenseManager == null)
+            if (realsenseImageRetriever == null)
                initializeRealsense();
             realsenseImageRetriever.start();
             realsenseImagePublisher.startAll();
@@ -357,8 +353,8 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeOuster()
    {
-      ouster = new NettyOuster();
-      ouster.bind();
+      ouster = new OusterNetServer();
+      ouster.start();
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster, ousterFrameSupplier, lidarScanHeartbeat::isAlive, heightMapHeartbeat::isAlive);
       ousterDepthImagePublisher = new OusterDepthImagePublisher(ouster, OUSTER_DEPTH_TOPIC);
       ousterProcessAndPublishThread = new RestartableThrottledThread("OusterProcessAndPublish", OUSTER_FPS, this::processAndPublishOuster);
