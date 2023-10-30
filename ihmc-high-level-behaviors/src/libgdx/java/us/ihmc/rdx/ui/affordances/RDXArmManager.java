@@ -190,30 +190,30 @@ public class RDXArmManager
    {
       handManager.renderImGuiWidgets();
 
-      ImGui.text("Arms:");
+      ImGui.text("Arms Home:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
             executeArmAngles(side, PresetArmConfiguration.HOME, teleoperationParameters.getTrajectoryTime());
          }
       }
 
-      ImGui.text("Wide Arms:");
+      ImGui.text("Arms Wide:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Wide " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
             executeArmAngles(side, PresetArmConfiguration.WIDE_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
-      ImGui.text("Walking Arms:");
+      ImGui.text("Arms Up:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
             executeArmAngles(side, PresetArmConfiguration.WALKING_ARMS, teleoperationParameters.getTrajectoryTime());
          }
