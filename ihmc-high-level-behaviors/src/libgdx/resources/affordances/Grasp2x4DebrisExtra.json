@@ -43,5 +43,6 @@
   } ],
   "activeSides" : 1,
   "numberPreGraspFrames" : 2,
-  "numberPostGraspFrames" : 0
+  "numberPostGraspFrames" : 0,
+  "resizablePrimitiveShape" : "NULL"
 }
