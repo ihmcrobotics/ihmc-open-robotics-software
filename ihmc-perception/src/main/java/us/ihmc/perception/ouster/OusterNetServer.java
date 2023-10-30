@@ -267,20 +267,18 @@ public class OusterNetServer
       performQuery("get_lidar_intrinsics", rootNode ->
       {
          JsonNode lidarToSensorTransformNode = rootNode.get("lidar_to_sensor_transform");
-         spindleCenterToBaseTransform.getRotation()
-                                     .setAndNormalize(lidarToSensorTransformNode.get(0).asDouble(),
-                                                      lidarToSensorTransformNode.get(1).asDouble(),
-                                                      lidarToSensorTransformNode.get(2).asDouble(),
-                                                      lidarToSensorTransformNode.get(4).asDouble(),
-                                                      lidarToSensorTransformNode.get(5).asDouble(),
-                                                      lidarToSensorTransformNode.get(6).asDouble(),
-                                                      lidarToSensorTransformNode.get(8).asDouble(),
-                                                      lidarToSensorTransformNode.get(9).asDouble(),
-                                                      lidarToSensorTransformNode.get(10).asDouble());
-         spindleCenterToBaseTransform.getTranslation()
-                                     .set(lidarToSensorTransformNode.get(3).asDouble(),
-                                          lidarToSensorTransformNode.get(7).asDouble(),
-                                          lidarToSensorTransformNode.get(11).asDouble());
+         spindleCenterToBaseTransform.getRotation().setAndNormalize(lidarToSensorTransformNode.get(0).asDouble(),
+                                                                    lidarToSensorTransformNode.get(1).asDouble(),
+                                                                    lidarToSensorTransformNode.get(2).asDouble(),
+                                                                    lidarToSensorTransformNode.get(4).asDouble(),
+                                                                    lidarToSensorTransformNode.get(5).asDouble(),
+                                                                    lidarToSensorTransformNode.get(6).asDouble(),
+                                                                    lidarToSensorTransformNode.get(8).asDouble(),
+                                                                    lidarToSensorTransformNode.get(9).asDouble(),
+                                                                    lidarToSensorTransformNode.get(10).asDouble());
+         spindleCenterToBaseTransform.getTranslation().set(lidarToSensorTransformNode.get(3).asDouble(),
+                                                           lidarToSensorTransformNode.get(7).asDouble(),
+                                                           lidarToSensorTransformNode.get(11).asDouble());
       });
 
       LogTools.info("Ouster is initialized.");
