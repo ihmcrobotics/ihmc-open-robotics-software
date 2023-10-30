@@ -30,7 +30,7 @@ public class OusterDriverAndDepthPublisher
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
    private final Runnable asynchronousCompressAndPublish = this::asynchronousCompressAndPublish;
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
-   private final NettyOuster ouster;
+   private final OusterNetServer ouster;
    private final OusterDepthPublisher depthPublisher;
    private final OusterHeightMapUpdater heightMapUpdater;
    private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
@@ -50,8 +50,8 @@ public class OusterDriverAndDepthPublisher
       publishSteppableRegionsMonitor = new ROS2HeartbeatMonitor(ros2, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
       publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
 
-      ouster = new NettyOuster();
-      ouster.bind();
+      ouster = new OusterNetServer();
+      ouster.start();
 
       depthPublisher = new OusterDepthPublisher(imageMessageTopic, lidarScanTopic, publishLidarScanMonitor::isAlive);
       heightMapUpdater = new OusterHeightMapUpdater(ros2);
