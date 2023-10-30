@@ -4,7 +4,7 @@ public enum PresetArmConfiguration
 {
    HOME,
    WIDE_ARMS,
-   WALKING_ARMS,
+   TUCKED_UP_ARMS,
    DOOR_AVOIDANCE,
    SHIELD_HOLDING,
 }

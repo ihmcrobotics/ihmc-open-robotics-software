@@ -215,7 +215,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
-            executeArmAngles(side, PresetArmConfiguration.WALKING_ARMS, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.TUCKED_UP_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Door avoidance arms:");
