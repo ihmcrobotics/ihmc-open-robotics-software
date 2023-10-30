@@ -131,7 +131,7 @@ public class OusterNetServer extends Thread
 
       try
       {
-         LogTools.info("Binding to port: " + UDP_PORT);
+         LogTools.info("Binding to UDP port: " + UDP_PORT);
          udpSocket = new DatagramSocket(UDP_PORT);
       }
       catch (SocketException e)
@@ -285,7 +285,7 @@ public class OusterNetServer extends Thread
       LogTools.info("Attempting to query host " + sanitizededHostAddress + " with command " + command);
 
       String jsonResponse = "";
-      LogTools.info("Binding to TCP port " + TCP_PORT);
+      LogTools.info("Binding to TCP port: " + TCP_PORT);
       try (Socket socket = new Socket(sanitizededHostAddress, TCP_PORT))
       {
          OutputStream output = socket.getOutputStream();
@@ -308,7 +308,7 @@ public class OusterNetServer extends Thread
       }
       finally
       {
-         LogTools.info("Unbound from TCP port " + TCP_PORT);
+         LogTools.info("Unbound from TCP port: " + TCP_PORT);
       }
 
       try
