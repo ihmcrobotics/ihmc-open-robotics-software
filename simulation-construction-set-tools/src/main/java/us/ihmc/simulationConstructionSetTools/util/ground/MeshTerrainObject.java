@@ -1,16 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.jme3.asset.DesktopAssetManager;
 import com.jme3.asset.plugins.ClasspathLocator;
 import com.jme3.asset.plugins.FileLocator;
-import com.jme3.bullet.NativePhysicsObject;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
@@ -19,7 +15,6 @@ import com.jme3.material.plugins.J3MLoader;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.plugins.MTLLoader;
 import com.jme3.scene.plugins.OBJLoader;
-import com.jme3.system.NativeLibraryLoader;
 import com.jme3.texture.plugins.AWTLoader;
 
 import us.ihmc.euclid.Axis3D;
@@ -34,20 +29,17 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.physics.CollidableVisualizer;
+import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerranObjectParameters.ConvexDecomposition;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import vhacd.VHACDParameters;
-import vhacd4.Vhacd4Parameters;
 
 /**
- * MeshTerrain Object creates a terrain Object that decomposes a concave mesh into convex parts
- * using Khaled Mamou's VHACD algorithm The covex parts are then combined together to make a
+ * MeshTerrain Object creates a terrain Object that decomposes a Concave mesh into convex parts
+ * using Khaled Mamou's VHACD algorithm The convex parts are then combined together to make a
  * MeshTerrainObject.
  * 
  * @author Khizar Mohammed Amjed Mohamed
@@ -55,70 +47,31 @@ import vhacd4.Vhacd4Parameters;
 public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
 
-   public enum ConvexDecomposition
-   {
-      VHACD, VHACD4, NO_DECOMPOSITION
-   };
-   
-   public class DecompositionParameters
-   {
-      public double maxNoOfHulls;
-      public double MaxNoOfVerticesPerHull;
-      public double maxAllowableError;
-      
-      DecompositionParameters(double a, double b)
-      {
-         this.maxNoOfHulls=a;
-      }
-      public double geta(){
-         return maxNoOfHulls;
-      }
-   }
-
+   private static final double EPSILON = 1.0e-12;
    private final BoundingBox3D boundingBox = new BoundingBox3D();
    private final List<ConvexPolytope3D> convexPolytopes = new ArrayList<>();
    private final Graphics3DObject linkGraphics;
    private final ConvexDecomposition decompositionType;
 
-   private boolean useOriginalMeshGraphics = false;
-   private AppearanceDefinition meshAppearance = YoAppearance.Transparent();
-
-   private int maxHulls = 20;
-   private int maxVerticesPerHull = 64;
-   private double maxError = 0.01;
-   private int VoxelResolution = 100000;
-
-   private double maxConcavity = 0.5;
-
-   private static final double EPSILON = 1.0e-12;
+   private final MeshTerranObjectParameters parameters;
 
    public MeshTerrainObject(String filename)
    {
-      this(filename, ConvexDecomposition.VHACD4);
+      this(filename, new MeshTerranObjectParameters());
    }
 
-   public MeshTerrainObject(String filename, ConvexDecomposition convexDecomposition)
+   public MeshTerrainObject(String filename, MeshTerranObjectParameters parameters)
    {
-      this(filename, convexDecomposition, new RigidBodyTransform());
+      this(filename, parameters, new RigidBodyTransform());
    }
 
    public MeshTerrainObject(String filename, RigidBodyTransformReadOnly transform)
    {
-      this(filename, ConvexDecomposition.VHACD4, transform);
-   }
-   public MeshTerrainObject(String filename, ConvexDecomposition convexDecomposition, DecompositionParameters params)
-   {
-      this(filename, convexDecomposition, new RigidBodyTransform());
+      this(filename, new MeshTerranObjectParameters(), transform);
    }
 
-   public MeshTerrainObject(String filename, ConvexDecomposition convexDecomposition, RigidBodyTransformReadOnly transform)
+   public MeshTerrainObject(String filename, MeshTerranObjectParameters parameters, RigidBodyTransformReadOnly transform)
    {
-      // Example for loading file from the resources folder
-      // getClass().getClassLoader().getResource("fiducials/png/fiducial100.png");
-
-      // String sampleFileName = "models/IronMan/IronMan.obj";
-      // String sampleFileName = "models/Doorway/doorway.obj";
-
       RigidBodyTransformReadOnly pose;
       if (transform == null)
       {
@@ -130,7 +83,8 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       }
 
       linkGraphics = new Graphics3DObject();
-      decompositionType = convexDecomposition;
+      this.parameters = parameters;
+      decompositionType = parameters.getDecompositionType();
 
       doDecomposition(filename);
 
@@ -138,29 +92,41 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       boundingBox.setToNaN();
       convexPolytopes.forEach(polytope -> boundingBox.combine(polytope.getBoundingBox()));
 
-      if (useOriginalMeshGraphics)
+      if (this.parameters.isShowUndecomposedMeshGraphics())
       {
          linkGraphics.transform(pose);
          linkGraphics.addModelFile(filename);
       }
 
-      else
+      if (this.parameters.isShowDecomposedMeshGraphics())
       {
          for (ConvexPolytope3D convexPolytope : convexPolytopes)
          {
-            linkGraphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), (AppearanceDefinition) meshAppearance);
+            linkGraphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), YoAppearance.Transparent());
          }
       }
+
    }
 
    private Collection<? extends ConvexPolytope3D> doDecomposition(String filename)
    {
-      // filename.toExternalForm(); // That should be the absolute path to file
-      NativeLibraryLoader.loadNativeLibrary("bulletjme", true);
       Spatial model = loadOBJFromPath(filename);
 
-      CompoundCollisionShape compundShapes = decompose(model);
+      CompoundCollisionShape compundShapes = null;
 
+      if (decompositionType == ConvexDecomposition.VHACD4)
+      {
+         compundShapes = CollisionShapeFactory.createVhacdShape(model, parameters.getVhacd4Parameters(), null);
+      }
+      else if (decompositionType == ConvexDecomposition.VHACD)
+      {
+         compundShapes = CollisionShapeFactory.createVhacdShape(model, parameters.getVhacdParameters(), null);
+      }
+
+      else if (decompositionType == ConvexDecomposition.NO_DECOMPOSITION)
+      {
+
+      }
       addConvexPolytopesToList(compundShapes);
 
       return null;
@@ -185,29 +151,11 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       }
    }
 
-   private CompoundCollisionShape decompose(Spatial model)
-   {
-      // TODO Auto-generated method stub
-      switch (decompositionType)
-      {
-         case VHACD:
-            return CollisionShapeFactory.createVhacdShape(model, getVHACDParameters(), null);
-
-         case VHACD4:
-            return CollisionShapeFactory.createVhacdShape(model, getVhacd4Parameters(), null);
-         case NO_DECOMPOSITION:
-            break;
-      }
-      return null;
-
-   }
-
    private Spatial loadOBJFromPath(String objAssetPath)
    {
       // TODO Auto-generated method stub
 
       DesktopAssetManager assetManager = new DesktopAssetManager();
-      // assetManager.registerLoader(, null);
       assetManager.registerLoader(AWTLoader.class, "jpg", "png");
       assetManager.registerLoader(OBJLoader.class, "obj");
       assetManager.registerLoader(MTLLoader.class, "mtl");
@@ -217,25 +165,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
       Spatial model = assetManager.loadModel(objAssetPath);
       return model;
-   }
-
-   private Vhacd4Parameters getVhacd4Parameters()
-   {
-      Vhacd4Parameters paramters = new Vhacd4Parameters();
-      paramters.setMaxVerticesPerHull(maxVerticesPerHull);
-      paramters.setVoxelResolution(VoxelResolution);
-      paramters.setVolumePercentError(maxError);
-      paramters.setMaxHulls(maxHulls);
-      return paramters;
-   }
-
-   private VHACDParameters getVHACDParameters()
-   {
-      VHACDParameters paramters = new VHACDParameters();
-      paramters.setMaxConcavity(maxConcavity);
-      paramters.setMaxVerticesPerHull(maxVerticesPerHull);
-      paramters.setVoxelResolution(VoxelResolution);
-      return paramters;
    }
 
    @Override
@@ -373,25 +302,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return (Face3D) closestFace;
    }
 
-   public boolean isUseOriginalMeshGraphics()
-   {
-      return useOriginalMeshGraphics;
-   }
-
-   public void setUseOriginalMeshGraphics(boolean useOriginalMeshGraphics)
-   {
-      this.useOriginalMeshGraphics = useOriginalMeshGraphics;
-   }
-
-   public AppearanceDefinition getMeshAppearance()
-   {
-      return meshAppearance;
-   }
-
-   public void setMeshAppearance(AppearanceDefinition meshAppearance)
-   {
-      this.meshAppearance = meshAppearance;
-   }
 
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
