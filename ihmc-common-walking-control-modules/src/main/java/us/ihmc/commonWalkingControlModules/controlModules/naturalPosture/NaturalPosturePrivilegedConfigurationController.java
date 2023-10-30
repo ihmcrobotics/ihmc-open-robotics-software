@@ -50,16 +50,8 @@ public class NaturalPosturePrivilegedConfigurationController
                                                                                          registry);
 
    private final ArrayList<YoJointPrivilegedConfigurationParameters> yoJointPrivilegedConfigurationParametersList = new ArrayList<>();
-
-   //TODO These weren't used anywhere, do we need to keep them?
-   //   private final YoDouble pPoseHipKp = new YoDouble("pPoseHipKp", registry);
-   //   private final YoDouble pPoseHipKdFactor = new YoDouble("pPoseHipKdFactor", registry);
-   //   private final YoDouble pPoseKneeKp = new YoDouble("pPoseKneeKp", registry);
-   //   private final YoDouble pPoseKneeKdFactor = new YoDouble("pPoseKneeKdFactor", registry);
-
    private final OneDoFJointPrivilegedConfigurationParameters jointParameters = new OneDoFJointPrivilegedConfigurationParameters();
 
-   private final OneDoFJointFeedbackControlCommand controlCommand = new OneDoFJointFeedbackControlCommand();
    private final ArrayList<OneDoFJointFeedbackControlCommand> primaryTaskCommandList = new ArrayList<>();
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -78,13 +70,6 @@ public class NaturalPosturePrivilegedConfigurationController
          OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
          primaryTaskCommandList.add(command);
       }
-
-      //TODO These weren't used anywhere, do we need to keep them?
-      // privileged configuration for lower body
-      //      pPoseHipKp.set(100);
-      //      pPoseHipKdFactor.set(0.2);
-      //      pPoseKneeKp.set(100);
-      //      pPoseKneeKdFactor.set(0.2);
 
       OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
       OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);

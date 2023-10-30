@@ -186,9 +186,6 @@ public class NaturalPostureController
       Dnp.set(2, 1, -sal);
       Dnp.set(2, 2, 0.0);
 
-      //      double[] kp = gains.getProportionalGains();
-      //      double[] kp = new double[] {100.0, 0.0, 0.0};
-
       yoDirectProportionalFeedback.set(comAngleDesired.getRoll(), comAngleDesired.getPitch(), comAngleDesired.getYaw());
       yoDirectProportionalFeedback.sub(comAngle.getRoll(), comAngle.getPitch(), comAngle.getYaw());
       yoDirectProportionalFeedback.scale(kpComAngle.getRoll(), kpComAngle.getPitch(), kpComAngle.getYaw());
@@ -212,15 +209,13 @@ public class NaturalPostureController
       feedbackNPAcceleration.add(yoProportionalFeedback, yoDerivativeFeedback);
 
       // TODO use these if you want to use the axis angle feedback controller
-      //            yprDDot.set(0, 0, feedbackNPAcceleration.getZ());
-      //            yprDDot.set(1, 0, feedbackNPAcceleration.getY());
-      //            yprDDot.set(2, 0, feedbackNPAcceleration.getX());
+      //      yawPitchRollDoubleDot.set(0, 0, feedbackNPAcceleration.getZ());
+      //      yawPitchRollDoubleDot.set(1, 0, feedbackNPAcceleration.getY());
+      //      yawPitchRollDoubleDot.set(2, 0, feedbackNPAcceleration.getX());
 
       yawPitchRollDoubleDot.set(0, 0, comAngularAcceleration.getYaw());
       yawPitchRollDoubleDot.set(1, 0, comAngularAcceleration.getPitch());
       yawPitchRollDoubleDot.set(2, 0, comAngularAcceleration.getRoll());
-
-      // GMN: derivative terms???
 
       CommonOps_DDRM.mult(Dnp, yawPitchRollDoubleDot, qpObjective); // GMN: missing D-dot term (since InvDyn takes accels)
 
