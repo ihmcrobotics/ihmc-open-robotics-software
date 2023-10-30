@@ -6,9 +6,11 @@ import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
@@ -28,7 +30,7 @@ public class BlackflyImageRetriever
 
    private final String blackflySerialNumber;
    private SpinnakerBlackflyManager blackflyManager;
-   private final SpinnakerBlackfly blackfly;
+   private SpinnakerBlackfly blackfly;
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final Supplier<ReferenceFrame> cameraFrameSupplier;
@@ -39,6 +41,7 @@ public class BlackflyImageRetriever
    private int imageHeight = 0;
    private RawImage distortedImage = null;
    private final RestartableThrottledThread imageGrabThread;
+   private int numberOfFailedReads = 0;
 
    public BlackflyImageRetriever(String blackflySerialNumber,
                                  BlackflyLensProperties lensProperties,
@@ -49,14 +52,16 @@ public class BlackflyImageRetriever
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
       this.cameraFrameSupplier = cameraFrameSupplier;
 
-      blackflyManager = new SpinnakerBlackflyManager();
-      blackfly = blackflyManager.createSpinnakerBlackfly(blackflySerialNumber);
-
       imageGrabThread = new RestartableThrottledThread(side.getCamelCaseName() + "BlackflyImageGrabber", BLACKFLY_FPS, this::grabImage);
    }
 
    private void grabImage()
    {
+      while (blackfly == null || numberOfFailedReads > 30)
+      {
+         if (!initializeBlackfly())
+            ThreadTools.sleep(3000);
+      }
       // grab image
       spinImage spinImage = new spinImage();
       if (blackfly.getNextImage(spinImage))
@@ -108,7 +113,7 @@ public class BlackflyImageRetriever
       }
       else
       {
-
+         numberOfFailedReads++;
       }
       blackfly.releaseImage(spinImage);
    }
@@ -133,5 +138,30 @@ public class BlackflyImageRetriever
       stop();
       blackfly.stopAcquiringImages();
       blackflyManager.destroy();
+   }
+
+   private boolean initializeBlackfly()
+   {
+      LogTools.info("Initializing Blackfly: " + blackflySerialNumber);
+      if (blackfly != null)
+      {
+         blackfly.stopAcquiringImages();
+         blackflyManager.destroy();
+      }
+
+      blackflyManager = new SpinnakerBlackflyManager();
+      blackfly = blackflyManager.createSpinnakerBlackfly(blackflySerialNumber);
+
+      if (blackfly == null)
+      {
+         LogTools.error("Failed to initialize Blackfly: " + blackflySerialNumber);
+      }
+      else
+      {
+         LogTools.info("Initialized Blackfly: " + blackflySerialNumber);
+         numberOfFailedReads = 0;
+      }
+
+      return blackfly != null;
    }
 }

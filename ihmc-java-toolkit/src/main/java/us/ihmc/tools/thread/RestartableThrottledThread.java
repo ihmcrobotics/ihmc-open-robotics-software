@@ -81,7 +81,8 @@ public class RestartableThrottledThread
    public void blockingStop()
    {
       stop();
-      ExceptionTools.handle((RunnableThatThrows) thread::join, exceptionHandler);
+      if (thread != null)
+         ExceptionTools.handle((RunnableThatThrows) thread::join, exceptionHandler);
    }
 
    public boolean isRunning()
