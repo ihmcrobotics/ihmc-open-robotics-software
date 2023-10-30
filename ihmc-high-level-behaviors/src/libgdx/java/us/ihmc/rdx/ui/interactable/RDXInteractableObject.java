@@ -13,6 +13,7 @@ import imgui.type.ImFloat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -82,109 +83,44 @@ public class RDXInteractableObject implements RenderableProvider
       selectablePose3DGizmo.getSelected().set(true);
    }
 
-   public void setVisuals()
-   {
+   public void createVisuals() {
 //      , RigidBodyTransform visualModelTransform
-      switch (shape)
-      {
-         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
+      if (modelInstance != null)
+         modelInstance.model.dispose();
+      switch (shape) {
+         case BOX -> modelInstance = new RDXModelInstance(RDXModelBuilder.createBoxOffset(xLength.get(), yLength.get(), zLength.get(), new Point3D(0, 0, zLength.get()/2), Color.WHITE));
          case PRISM -> modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
          case CYLINDER -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
-         case ELLIPSOID ->
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
          case CONE -> modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
+         case ELLIPSOID -> modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
       }
       modelInstance.setColor(GHOST_COLOR);
       modelInstanceFrame = objectFrame;
-//            ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(objectFrame, visualModelTransform);
+//      ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(objectFrame, visualModelTransform);
       selectablePose3DGizmo.getSelected().set(true);
    }
 
-   public void updateVisuals()
-   {
+   public void updateVisuals() {
       ImGui.text("Modify shape:");
-
-      switch (shape)
-      {
-         case BOX ->
-         {
-            boolean reshaped = false;
-            if (ImGuiTools.volatileInputFloat(labels.get("depth"), xLength))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("width"), yLength))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
-               reshaped = true;
-            if (reshaped)
-            {
-               if (modelInstance != null)
-                  modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createBox(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
-               modelInstance.setColor(GHOST_COLOR);
+      switch (shape) {
+         case BOX, PRISM -> {
+            if (ImGuiTools.volatileInputFloat(labels.get("depth"), xLength) ||
+                ImGuiTools.volatileInputFloat(labels.get("width"), yLength) ||
+                ImGuiTools.volatileInputFloat(labels.get("height"), zLength)) {
+               createVisuals();
             }
          }
-         case PRISM ->
-         {
-            boolean reshaped = false;
-            if (ImGuiTools.volatileInputFloat(labels.get("depth"), xLength))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("width"), yLength))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
-               reshaped = true;
-            if (reshaped)
-            {
-               if (modelInstance != null)
-                  modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createPrism(xLength.get(), yLength.get(), zLength.get(), Color.WHITE));
-               modelInstance.setColor(GHOST_COLOR);
+         case CYLINDER, CONE -> {
+            if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius) ||
+                ImGuiTools.volatileInputFloat(labels.get("height"), zLength)) {
+               createVisuals();
             }
          }
-         case CYLINDER ->
-         {
-            boolean reshaped = false;
-            if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
-               reshaped = true;
-            if (reshaped)
-            {
-               if (modelInstance != null)
-                  modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createCylinder(zLength.get(), xRadius.get(), Color.WHITE));
-               modelInstance.setColor(GHOST_COLOR);
-            }
-         }
-         case ELLIPSOID ->
-         {
-            boolean reshaped = false;
-            if (ImGuiTools.volatileInputFloat(labels.get("xRadius"), xRadius))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("yRadius"), yRadius))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("zRadius"), zRadius))
-               reshaped = true;
-            if (reshaped)
-            {
-               if (modelInstance != null)
-                  modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createEllipsoid(xRadius.get(), yRadius.get(), zRadius.get(), Color.WHITE));
-               modelInstance.setColor(GHOST_COLOR);
-            }
-         }
-         case CONE ->
-         {
-            boolean reshaped = false;
-            if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius))
-               reshaped = true;
-            if (ImGuiTools.volatileInputFloat(labels.get("height"), zLength))
-               reshaped = true;
-            if (reshaped)
-            {
-               if (modelInstance != null)
-                  modelInstance.model.dispose();
-               modelInstance = new RDXModelInstance(RDXModelBuilder.createCone(zLength.get(), xRadius.get(), Color.WHITE));
-               modelInstance.setColor(GHOST_COLOR);
+         case ELLIPSOID -> {
+            if (ImGuiTools.volatileInputFloat(labels.get("xRadius"), xRadius) ||
+                ImGuiTools.volatileInputFloat(labels.get("yRadius"), yRadius) ||
+                ImGuiTools.volatileInputFloat(labels.get("zRadius"), zRadius)) {
+               createVisuals();
             }
          }
       }
