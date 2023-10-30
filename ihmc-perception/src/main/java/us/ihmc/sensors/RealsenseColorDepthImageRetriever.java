@@ -51,10 +51,10 @@ public class RealsenseColorDepthImageRetriever
 
    private void updateImages()
    {
-      while (realsense == null ||realsense.getDevice() == null || numberOfFailedReads > 30)
+      while (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
       {
-         startRealsense();
-         ThreadTools.sleep(3000);
+         if (!startRealsense())
+            ThreadTools.sleep(3000);
       }
 
       if (realsense.readFrameData())
