@@ -194,7 +194,7 @@ public class RDXArmManager
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Home")))
          {
             executeArmAngles(side, PresetArmConfiguration.HOME, teleoperationParameters.getTrajectoryTime());
          }
@@ -204,16 +204,16 @@ public class RDXArmManager
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Wide")))
          {
             executeArmAngles(side, PresetArmConfiguration.WIDE_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
-      ImGui.text("Arms Up:");
+      ImGui.text("Arms Tucked Up:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Tucked Up")))
          {
             executeArmAngles(side, PresetArmConfiguration.TUCKED_UP_ARMS, teleoperationParameters.getTrajectoryTime());
          }
