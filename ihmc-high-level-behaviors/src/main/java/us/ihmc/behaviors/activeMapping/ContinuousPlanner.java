@@ -165,6 +165,7 @@ public class ContinuousPlanner
 
       FootstepPlannerOutput plannerOutput;
       plannerOutput = footstepPlanner.handleRequest(request);
+      this.plannerOutput = plannerOutput;
 
       if (plannerOutput != null)
       {
@@ -181,13 +182,13 @@ public class ContinuousPlanner
    public FootstepPlannerRequest createFootstepPlannerRequest(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setTimeout(0.15);
       request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalPose.get(RobotSide.LEFT), goalPose.get(RobotSide.RIGHT));
-      request.setPlanBodyPath(false);
+      request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
-      request.setSwingPlannerType(SwingPlannerType.NONE);
+      request.setPlanBodyPath(false);
+      request.setTimeout(0.15);
       return request;
    }
 
@@ -230,6 +231,11 @@ public class ContinuousPlanner
    public FootstepPlanningResult getFootstepPlanningResult()
    {
       return footstepPlanningResult;
+   }
+
+   public FootstepPlannerOutput getPlannerOutput()
+   {
+      return plannerOutput;
    }
 
    public FootstepPlan getFootstepPlan()
