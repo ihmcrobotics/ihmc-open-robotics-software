@@ -153,11 +153,11 @@ float get_spatial_filtered_height(int xIndex, int yIndex, float height, read_wri
 
    if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
    {
-      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
+//      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
    }
    else
    {
-      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] * 0.01f + finalHeight * (1.0f - params[SPATIAL_ALPHA] * 0.01f);
+      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] * 0.0001f + finalHeight * (1.0f - params[SPATIAL_ALPHA] * 0.0001f);
    }
 
    return finalHeight;
@@ -351,7 +351,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
          finalHeight = localHeight;
 
       }
-//      finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
+      finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
    }
 
 //   finalHeight = clamp(finalHeight, params[MIN_HEIGHT_REGISTRATION], params[MAX_HEIGHT_REGISTRATION]);

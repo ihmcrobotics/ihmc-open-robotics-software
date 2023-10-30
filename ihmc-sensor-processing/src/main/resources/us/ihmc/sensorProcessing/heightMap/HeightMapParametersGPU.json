@@ -12,7 +12,7 @@
     "upperBound": 800
   },
   "Min height registration": {
-    "value": -1.0,
+    "value": -0.5,
     "lowerBound": -5.0,
     "upperBound": 5.0
   },
