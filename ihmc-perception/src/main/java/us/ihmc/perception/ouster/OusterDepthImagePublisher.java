@@ -29,14 +29,14 @@ public class OusterDepthImagePublisher
 
    private long lastSequenceNumber = -1L;
    private RawImage nextCpuDepthImage;
-   private final NettyOuster ouster;
+   private final OusterNetServer ouster;
 
    private final RestartableThread publishDepthThread;
    private final Lock depthPublishLock = new ReentrantLock();
    private final Condition newDepthImageAvailable = depthPublishLock.newCondition();
    private boolean destroying = false;
 
-   public OusterDepthImagePublisher(NettyOuster ouster, ROS2Topic<ImageMessage> depthTopic)
+   public OusterDepthImagePublisher(OusterNetServer ouster, ROS2Topic<ImageMessage> depthTopic)
    {
       this.ouster = ouster;
 

@@ -17,7 +17,7 @@ public class OusterDepthImageRetriever
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final FramePose3D sensorFramePose = new FramePose3D();
 
-   private final NettyOuster ouster;
+   private final OusterNetServer ouster;
 
    private OpenCLManager openCLManager;
    private OusterDepthExtractionKernel depthExtractionKernel;
@@ -26,7 +26,7 @@ public class OusterDepthImageRetriever
    private final Supplier<Boolean> computeLidarScan;
    private final Supplier<Boolean> computeHeightMap;
 
-   public OusterDepthImageRetriever(NettyOuster ouster,
+   public OusterDepthImageRetriever(OusterNetServer ouster,
                                     Supplier<ReferenceFrame> sensorFrameSupplier,
                                     Supplier<Boolean> computeLidarScan,
                                     Supplier<Boolean> computeHeightMap)

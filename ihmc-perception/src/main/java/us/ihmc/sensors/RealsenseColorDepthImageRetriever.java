@@ -2,12 +2,14 @@ package us.ihmc.sensors;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.time.Instant;
@@ -17,7 +19,10 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final RealsenseDevice realsense;
+   private final String realsenseSerialNumber;
+   private final RealsenseConfiguration realsenseConfiguration;
+   private RealsenseDeviceManager realsenseManager;
+   private RealsenseDevice realsense = null;
 
    private long grabSequenceNumber = 0L;
 
@@ -32,24 +37,26 @@ public class RealsenseColorDepthImageRetriever
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final RestartableThrottledThread realsenseGrabThread;
 
-   public RealsenseColorDepthImageRetriever(RealsenseDevice realsense, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
+   private int numberOfFailedReads = 0;
+
+   public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager, String realsenseSerialNumber, RealsenseConfiguration realsenseConfiguration, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
-      this.realsense = realsense;
+      this.realsenseManager = realsenseManager;
+      this.realsenseSerialNumber = realsenseSerialNumber;
+      this.realsenseConfiguration = realsenseConfiguration;
+
       realsenseGrabThread = new RestartableThrottledThread("RealsenseImageGrabber", OUTPUT_FREQUENCY, this::updateImages);
-
-      if (realsense.getDevice() == null)
-      {
-         // Find something else to do here
-         LogTools.error("RealSense device is NULL");
-      }
-
-      realsense.enableColor(realsenseConfiguration);
-      realsense.initialize();
    }
 
    private void updateImages()
    {
+      while (realsense == null ||realsense.getDevice() == null || numberOfFailedReads > 30)
+      {
+         startRealsense();
+         ThreadTools.sleep(3000);
+      }
+
       if (realsense.readFrameData())
       {
          realsense.updateDataBytePointers();
@@ -101,6 +108,10 @@ public class RealsenseColorDepthImageRetriever
 
          grabSequenceNumber++;
       }
+      else
+      {
+         numberOfFailedReads++;
+      }
    }
 
    public RawImage getLatestRawDepthImage()
@@ -129,5 +140,34 @@ public class RealsenseColorDepthImageRetriever
       depthImage.destroy();
       colorImage.destroy();
       realsense.deleteDevice();
+      realsenseManager.deleteContext();
+   }
+
+   private boolean startRealsense()
+   {
+      LogTools.info("Starting Realsense...");
+      if (realsense != null)
+      {
+         realsense.deleteDevice();
+         realsenseManager.deleteContext();
+      }
+
+      realsenseManager = new RealsenseDeviceManager();
+      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
+
+      if (realsense != null)
+      {
+         LogTools.info("Initializing Realsense...");
+         realsense.enableColor(realsenseConfiguration);
+         realsense.initialize();
+
+         numberOfFailedReads = 0;
+      }
+      else
+      {
+         LogTools.error("Failed to initialize Realsense");
+      }
+
+      return realsense != null;
    }
 }
