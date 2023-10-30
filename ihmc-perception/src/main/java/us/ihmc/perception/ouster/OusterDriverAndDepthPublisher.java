@@ -77,15 +77,18 @@ public class OusterDriverAndDepthPublisher
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
+         ouster.setOnFrameReceived(null);
+         ouster.destroy();
+
          publishLidarScanMonitor.destroy();
          publishHeightMapMonitor.destroy();
          depthPublisher.destroy();
          heightMapUpdater.stop();
          heightMapUpdater.destroy();
-         ouster.setOnFrameReceived(null);
-         ouster.destroy();
-         ThreadTools.sleepSeconds(0.5);
+
          extractCompressAndPublishThread.destroy();
+
+         System.out.println("Ouster driver/publisher shutting down...");
       }, getClass().getSimpleName() + "Shutdown"));
    }
 
