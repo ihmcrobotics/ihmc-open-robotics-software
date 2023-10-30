@@ -17,7 +17,6 @@ import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
-import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,7 +45,7 @@ public class PerceptionAndAutonomyProcess
    private static final double OUSTER_FPS = 10.0;
    private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
 
-   private static final String LEFT_BLACKFLY_SERIAL_NUMBER = "17403057";
+   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = "17403057";
    private static final double BLACKFLY_FPS = 30.0;
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
@@ -82,7 +81,6 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> blackflyFrameSupplier;
    private final ROS2HeartbeatMonitor blackflyImageHeartbeat;
    private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
-   private SpinnakerBlackflyManager blackflyManager;
    private RawImage blackflyImage;
    private BlackflyImageRetriever blackflyImageRetriever;
    private BlackflyImagePublisher blackflyImagePublisher;
@@ -191,12 +189,11 @@ public class PerceptionAndAutonomyProcess
          ousterDepthImageRetriever.destroy();
       }
 
-      if (blackflyManager != null)
+      if (blackflyImageRetriever != null)
       {
          blackflyProcessAndPublishThread.stop();
          blackflyImagePublisher.destroy();
          blackflyImageRetriever.destroy();
-         blackflyManager.destroy();
       }
    }
 
@@ -383,9 +380,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeBlackfly()
    {
-      blackflyManager = new SpinnakerBlackflyManager();
-      SpinnakerBlackfly blackfly = blackflyManager.createSpinnakerBlackfly(LEFT_BLACKFLY_SERIAL_NUMBER);
-      blackflyImageRetriever = new BlackflyImageRetriever(blackfly, BLACKFLY_LENS, RobotSide.RIGHT, blackflyFrameSupplier);
+      blackflyImageRetriever = new BlackflyImageRetriever(RIGHT_BLACKFLY_SERIAL_NUMBER, BLACKFLY_LENS, RobotSide.RIGHT, blackflyFrameSupplier);
       blackflyImagePublisher = new BlackflyImagePublisher(BLACKFLY_LENS, blackflyFrameSupplier, BLACKFLY_IMAGE_TOPIC);
       blackflyProcessAndPublishThread = new RestartableThrottledThread("BlackflyProcessAndPublish", BLACKFLY_FPS, this::processAndPublishBlackfly);
       blackflyProcessAndPublishThread.start();
@@ -397,7 +392,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (blackflyManager == null)
+            if (blackflyImageRetriever == null)
                initializeBlackfly();
             blackflyImageRetriever.start();
             blackflyImagePublisher.startImagePublishing();
@@ -415,7 +410,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (blackflyManager == null)
+            if (blackflyImageRetriever == null)
                initializeBlackfly();
             blackflyImageRetriever.start();
             blackflyImagePublisher.startArUcoDetection();

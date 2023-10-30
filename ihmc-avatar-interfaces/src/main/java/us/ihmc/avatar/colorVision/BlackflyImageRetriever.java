@@ -15,6 +15,7 @@ import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
+import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
@@ -25,6 +26,8 @@ public class BlackflyImageRetriever
 {
    private static final double BLACKFLY_FPS = 30.0;
 
+   private final String blackflySerialNumber;
+   private SpinnakerBlackflyManager blackflyManager;
    private final SpinnakerBlackfly blackfly;
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
@@ -37,14 +40,17 @@ public class BlackflyImageRetriever
    private RawImage distortedImage = null;
    private final RestartableThrottledThread imageGrabThread;
 
-   public BlackflyImageRetriever(SpinnakerBlackfly blackfly,
+   public BlackflyImageRetriever(String blackflySerialNumber,
                                  BlackflyLensProperties lensProperties,
                                  RobotSide side,
                                  Supplier<ReferenceFrame> cameraFrameSupplier)
    {
-      this.blackfly = blackfly;
+      this.blackflySerialNumber = blackflySerialNumber;
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
       this.cameraFrameSupplier = cameraFrameSupplier;
+
+      blackflyManager = new SpinnakerBlackflyManager();
+      blackfly = blackflyManager.createSpinnakerBlackfly(blackflySerialNumber);
 
       imageGrabThread = new RestartableThrottledThread(side.getCamelCaseName() + "BlackflyImageGrabber", BLACKFLY_FPS, this::grabImage);
    }
@@ -53,51 +59,57 @@ public class BlackflyImageRetriever
    {
       // grab image
       spinImage spinImage = new spinImage();
-      blackfly.getNextImage(spinImage);
-      Instant acquisitionTime = Instant.now();
-      cameraPose.setToZero(cameraFrameSupplier.get());
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      // Initialize image dimensions from first image
-      if (imageWidth == 0 || imageHeight == 0)
+      if (blackfly.getNextImage(spinImage))
       {
-         this.imageWidth = blackfly.getWidth(spinImage);
-         this.imageHeight = blackfly.getHeight(spinImage);
+         Instant acquisitionTime = Instant.now();
+         cameraPose.setToZero(cameraFrameSupplier.get());
+         cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // Initialize image dimensions from first image
+         if (imageWidth == 0 || imageHeight == 0)
+         {
+            this.imageWidth = blackfly.getWidth(spinImage);
+            this.imageHeight = blackfly.getHeight(spinImage);
+         }
+
+         // Get image data
+         BytePointer spinImageData = new BytePointer((long) imageWidth * imageHeight);
+         blackfly.setPointerToSpinImageData(spinImage, spinImageData);
+         BytedecoImage sourceByedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+         sourceByedecoImage.changeAddress(spinImageData.address());
+
+         // Upload image to GPU
+         GpuMat deviceSourceImage = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+         deviceSourceImage.upload(sourceByedecoImage.getBytedecoOpenCVMat());
+
+         // Convert from BayerRG8 to BGR
+         GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+         opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
+
+         distortedImage = new RawImage(sequenceNumber++,
+                                       acquisitionTime,
+                                       imageWidth,
+                                       imageHeight,
+                                       0,
+                                       null,
+                                       sourceImageBGR.clone(),
+                                       opencv_core.CV_8UC3,
+                                       (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
+                                       (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
+                                       (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
+                                       (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
+                                       cameraPose.getPosition(),
+                                       cameraPose.getOrientation());
+
+         // close stuff
+         spinImageData.close();
+         deviceSourceImage.close();
+         sourceImageBGR.close();
       }
+      else
+      {
 
-      // Get image data
-      BytePointer spinImageData = new BytePointer((long) imageWidth * imageHeight);
-      blackfly.setPointerToSpinImageData(spinImage, spinImageData);
-      BytedecoImage sourceByedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-      sourceByedecoImage.changeAddress(spinImageData.address());
-
-      // Upload image to GPU
-      GpuMat deviceSourceImage = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC1);
-      deviceSourceImage.upload(sourceByedecoImage.getBytedecoOpenCVMat());
-
-      // Convert from BayerRG8 to BGR
-      GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-      opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
-
-      distortedImage = new RawImage(sequenceNumber++,
-                                    acquisitionTime,
-                                    imageWidth,
-                                    imageHeight,
-                                    0,
-                                    null,
-                                    sourceImageBGR.clone(),
-                                    opencv_core.CV_8UC3,
-                                    (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
-                                    (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
-                                    (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
-                                    (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
-                                    cameraPose.getPosition(),
-                                    cameraPose.getOrientation());
-
-      // close stuff
-      spinImageData.close();
-      deviceSourceImage.close();
-      sourceImageBGR.close();
+      }
       blackfly.releaseImage(spinImage);
    }
 
@@ -120,5 +132,6 @@ public class BlackflyImageRetriever
    {
       stop();
       blackfly.stopAcquiringImages();
+      blackflyManager.destroy();
    }
 }
