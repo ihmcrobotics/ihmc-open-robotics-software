@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.*;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImStringWrapper;
@@ -19,6 +20,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImStringWrapper descriptionWrapper;
+   private final TypedNotification<Boolean> expandCollapseRequest = new TypedNotification<>();
 
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
 
@@ -71,6 +73,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public ImStringWrapper getDescriptionWrapper()
    {
       return descriptionWrapper;
+   }
+
+   public TypedNotification<Boolean> getExpandCollapseRequest()
+   {
+      return expandCollapseRequest;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()

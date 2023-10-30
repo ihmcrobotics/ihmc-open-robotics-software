@@ -16,6 +16,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiTreeRenderer;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -28,6 +29,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTree
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final BehaviorTreeState behaviorTreeState;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
@@ -164,8 +166,24 @@ public class RDXBehaviorTree
       nodesMenu.renderNodesMenu();
       ImGui.endMenuBar();
 
+      if (ImGui.button(labels.get("Expand all")))
+         expandCollapseAll(true, rootNode);
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Collapse all")))
+         expandCollapseAll(false, rootNode);
+
       if (rootNode != null)
          renderImGuiWidgetsAsTree(rootNode);
+   }
+
+   private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.getExpandCollapseRequest().set(expandOrCollapse);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         expandCollapseAll(expandOrCollapse, child);
+      }
    }
 
    private void renderImGuiWidgetsAsTree(RDXBehaviorTreeNode<?, ?> node)
@@ -178,7 +196,7 @@ public class RDXBehaviorTree
          {
             renderImGuiWidgetsAsTree(child);
          }
-      });
+      }, node.getExpandCollapseRequest());
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
