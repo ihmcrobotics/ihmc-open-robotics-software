@@ -32,8 +32,17 @@ public class MeshTerrainObjectTest
          scs = null;
       }
    }
-   
+
    @Test
+   /**
+    * This method is used for visual inspection of a MeshTerrainObject
+    * <p>
+    * Red is the point being tested - it will be a cube if heightAt is negative infinity, otherwise it
+    * will be a sphere. Yellow ball is heightAt value if it exists
+    * </p>
+    * 
+    * @author Khizar
+    */
    public void testWithVisualization()
    {
       if (SHOW_VISUALIZATION)
@@ -42,16 +51,13 @@ public class MeshTerrainObjectTest
          RigidBodyTransform configuration = new RigidBodyTransform();
          configuration.setRotationEulerAndZeroTranslation(new Vector3D(0.0, 0.0, -Math.PI / 2.0));
 
-//         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/SmallWalkway/Walkway.obj", configuration);
+         //         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/SmallWalkway/Walkway.obj", configuration);
          MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/Walkway/Walkway.obj", configuration);
-//         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/Valley/Valley.obj", configuration);
+         //         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/Valley/Valley.obj", configuration);
 
          scs = new SimulationConstructionSet(new Robot("dummy"));
          scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
 
-         // Red is the point being tested - it will be a cube if heightAt is negative
-         // infinity, otherwise it will be a sphere
-         // Yellow ball is heightAt value if it exists
          Graphics3DObject viz = new Graphics3DObject();
 
          // Adding testing points
@@ -78,6 +84,15 @@ public class MeshTerrainObjectTest
    }
 
    @Test
+   /**
+    * This method is used to test the method heightAt() of a MeshTerrainObject
+    * <p>
+    * Red is the point being tested - it will be a cube if heightAt is negative infinity, otherwise it
+    * will be a sphere. Yellow ball is heightAt value if it exists.
+    * </p>
+    * 
+    * @author Khizar
+    */
    public void testHeightAt()
    {
 
@@ -161,6 +176,10 @@ public class MeshTerrainObjectTest
 
    }
 
+   /**
+    * This method is used to visualize the heightat value of a MeshTerrainObject at a given point.
+    * @author Khizar
+    */
    public static void addArrowForNormal(Double xPoint, Double yPoint, Double heightAt, Vector3D normal)
    {
 
@@ -179,7 +198,10 @@ public class MeshTerrainObjectTest
       scs.addYoGraphic(surfaceNormalGraphic);
 
    }
-
+   /**
+    * This method is used to draw arrows that align with the normal to the surface    * 
+    * @author Khizar
+    */
    private static void addGraphicWithTestPoints(Graphics3DObject viz,
                                                 MeshTerrainObject convexPolytopeTerrainObject,
                                                 Point3D point,
