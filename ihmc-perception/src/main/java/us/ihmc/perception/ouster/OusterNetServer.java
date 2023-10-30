@@ -124,6 +124,11 @@ public class OusterNetServer extends Thread
 
    private volatile boolean running = false;
 
+   public OusterNetServer()
+   {
+      super("OusterNetServer");
+   }
+
    @Override
    public void run()
    {
