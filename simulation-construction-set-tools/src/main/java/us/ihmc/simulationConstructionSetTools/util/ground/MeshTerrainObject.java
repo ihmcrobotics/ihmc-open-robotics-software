@@ -245,14 +245,13 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
    /**
     * This method finds the closest face to the point by looping through all the faces of all the convex hulls 
     * <p>
-    * I initially tried using a 
-    * 
+    * This method was based on {@link AbstractConvexPolytope3D#getClosestFace(Point3DReadOnly)}
     * </p>
     *
     * @param A combined list of all faces in all the decomposed convex hulls
     * @param The point that is being queried
     * @return The closest face
-    * @see This i
+    * @see AbstractConvexPolytope3D#getClosestFace()
     * @author Khizar
     */
    private Face3D iterateAndGetClosestFace(List<Face3D> closesFacesList, Point3D query)
