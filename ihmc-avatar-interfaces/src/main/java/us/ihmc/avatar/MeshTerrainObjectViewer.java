@@ -9,14 +9,15 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerrainObject;
 import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerranObjectParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerranObjectParameters.ConvexDecomposition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MeshTerrainObjectViewer
 {
-
    private final YoInteger maxNoOfHulls;
    private final YoInteger maxNoOfVertices;
    private final YoInteger maxVoxelResolution;
@@ -26,20 +27,22 @@ public class MeshTerrainObjectViewer
 
    private final YoBoolean showOriginalMeshGraphics;
    private final YoBoolean showDecomposedMeshGraphics;
-
-   private final YoBoolean updateObject;
+   private final YoEnum<ConvexDecomposition> decompositionType; 
+   
+   private final YoBoolean updateVisuals;
 
    private MeshTerranObjectParameters parameters;
    private MeshTerrainObject meshTerrainObject;
-
+   
    private static SimulationConstructionSet2 scs = null;
    private final YoRegistry registry = new YoRegistry("DecomopsitionParameters");
 
+   private List<VisualDefinition> visuals = null;
+
    private String relativeFilePath;
 
-   MeshTerrainObjectViewer()
+   public MeshTerrainObjectViewer()
    {
-
 
       MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
 
@@ -50,9 +53,11 @@ public class MeshTerrainObjectViewer
       maxVolumePercentError = new YoDouble("MaxVolumePercentError", registry);
       maxConcavity = new YoDouble("MaxConcavity", registry);
 
-      showOriginalMeshGraphics = new YoBoolean("ShowOriginalMeshGrtaphics", registry);
+      showOriginalMeshGraphics = new YoBoolean("ShowOriginalMeshGraphics", registry);
       showDecomposedMeshGraphics = new YoBoolean("ShowDecomposedMeshGraphics", registry);
-      updateObject = new YoBoolean("UpdateObject", registry);
+      decompositionType = new YoEnum<>("DecompositionType", registry, ConvexDecomposition.class);
+      
+      updateVisuals = new YoBoolean("UpdateVisuals", registry);
 
       maxNoOfHulls.set(parameters.getMaxNoOfHulls());
       maxNoOfVertices.set(parameters.getMaxNoOfVertices());
@@ -61,16 +66,21 @@ public class MeshTerrainObjectViewer
       maxVolumePercentError.set(parameters.getMaxVolumePercentError());
       maxConcavity.set(parameters.getMaxConvacity());
 
-      showOriginalMeshGraphics.set(parameters.isShowDecomposedMeshGraphics());
-      showDecomposedMeshGraphics.set(parameters.isShowUndecomposedMeshGraphics());
-
+      showOriginalMeshGraphics.set(parameters.isShowUndecomposedMeshGraphics());
+      showDecomposedMeshGraphics.set(parameters.isShowDecomposedMeshGraphics());
+      decompositionType.set(parameters.getDecompositionType());
+      
       scs = new SimulationConstructionSet2("MeshTerrainObjectViewer");
       scs.addRegistry(registry);
-      scs.startSimulationThread();
 
       this.relativeFilePath = "models/Stool/Stool.obj";
       this.parameters = new MeshTerranObjectParameters();
 
+      updateParameters();
+      makeMeshTerrainObject();
+      updateGraphics();
+
+      scs.startSimulationThread();
    }
 
    private void makeMeshTerrainObject()
@@ -80,8 +90,6 @@ public class MeshTerrainObjectViewer
       meshTerrainObject = new MeshTerrainObject(relativeFilePath, parameters);
    }
 
-   List<VisualDefinition> visuals = null;
-   
    private void updateGraphics()
    {
       if (visuals != null)
@@ -102,29 +110,29 @@ public class MeshTerrainObjectViewer
 
       this.parameters.setShowDecomposedMeshGraphics(showDecomposedMeshGraphics.getValue());
       this.parameters.setShowUndecomposedMeshGraphics(showOriginalMeshGraphics.getValue());
+      
+      this.parameters.setDecompositionType(decompositionType.getValue());
 
    }
 
    public static void main(String[] args)
    {
       MeshTerrainObjectViewer viewer = new MeshTerrainObjectViewer();
-      System.out.println("Simulating");
       scs.addAfterPhysicsCallback(time ->
       {
-         System.out.println("Updating Graphics");
-         if (viewer.updateObject.getValue())
+         if (viewer.updateVisuals.getValue())
          {
-            System.out.println("Updating Graphics");
-            viewer.updateObject.set(false);
+            viewer.updateVisuals.set(false);
             viewer.updateParameters();
             viewer.makeMeshTerrainObject();
             viewer.updateGraphics();
          }
       });
-      
-      scs.initializeBufferSize(10);
+
+      scs.initializeBufferSize(1000);
       scs.setRealTimeRateSimulation(true);
       scs.start(true, false, false);
+      scs.simulate();
    }
 
 }

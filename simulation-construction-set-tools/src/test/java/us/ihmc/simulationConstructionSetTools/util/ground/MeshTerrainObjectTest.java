@@ -32,7 +32,7 @@ public class MeshTerrainObjectTest
          scs = null;
       }
    }
-
+   
    @Test
    public void testWithVisualization()
    {
