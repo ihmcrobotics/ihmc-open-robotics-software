@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  *
  * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800">
  */
-public class OusterNetServer extends Thread
+public class OusterNetServer
 {
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
@@ -97,6 +97,7 @@ public class OusterNetServer extends Thread
    // A channel data block is one part of a measurement block, containing 1 pixel
    // It's 12 bytes
    private int pixelsPerColumn;
+   private int columnsPerPacket;
    private int columnsPerFrame;
    public static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
    private ByteBuffer pixelShiftBuffer;
@@ -120,20 +121,17 @@ public class OusterNetServer extends Thread
    private boolean printedWarning = false;
 
    private DatagramSocket udpSocket;
-   private final byte[] ousterBuffer = new byte[3186688 + 10000]; // Max size the ouster OS1-128 publishes plus some wiggle room
-
-   private volatile boolean running = false;
+   private byte[] udpBuffer = new byte[0];
+   private final Thread udpServerThread;
+   private volatile boolean udpServerRunning = false;
 
    public OusterNetServer()
    {
-      super("OusterNetServer");
+      udpServerThread = new Thread(this::run, getClass().getSimpleName());
    }
 
-   @Override
    public void run()
    {
-      running = true;
-
       try
       {
          LogTools.info("Binding to UDP port: " + UDP_PORT);
@@ -144,9 +142,9 @@ public class OusterNetServer extends Thread
          LogTools.error(e);
       }
 
-      while (running)
+      while (udpServerRunning)
       {
-         DatagramPacket packet = new DatagramPacket(ousterBuffer, ousterBuffer.length);
+         DatagramPacket packet = new DatagramPacket(udpBuffer, udpBuffer.length);
          try
          {
             udpSocket.receive(packet);
@@ -164,7 +162,10 @@ public class OusterNetServer extends Thread
             // Blocking
             configureTCP();
 
-            // Ignore the current packet and keep moving since it's probably old
+            int bufferSize = (columnsPerPacket + (udpDatagramsPerFrame * 12) + 4) * columnsPerFrame;
+            udpBuffer = new byte[bufferSize];
+
+            // Ignore the current packet and keep moving since we recreated the buffer
             continue;
          }
 
@@ -206,6 +207,7 @@ public class OusterNetServer extends Thread
       performQuery("get_lidar_data_format", rootNode ->
       {
          pixelsPerColumn = rootNode.get("pixels_per_column").asInt();
+         columnsPerPacket = rootNode.get("columns_per_packet").asInt();
          columnsPerFrame = rootNode.get("columns_per_frame").asInt();
          measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
          udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
@@ -265,20 +267,18 @@ public class OusterNetServer extends Thread
       performQuery("get_lidar_intrinsics", rootNode ->
       {
          JsonNode lidarToSensorTransformNode = rootNode.get("lidar_to_sensor_transform");
-         spindleCenterToBaseTransform.getRotation()
-                                     .setAndNormalize(lidarToSensorTransformNode.get(0).asDouble(),
-                                                      lidarToSensorTransformNode.get(1).asDouble(),
-                                                      lidarToSensorTransformNode.get(2).asDouble(),
-                                                      lidarToSensorTransformNode.get(4).asDouble(),
-                                                      lidarToSensorTransformNode.get(5).asDouble(),
-                                                      lidarToSensorTransformNode.get(6).asDouble(),
-                                                      lidarToSensorTransformNode.get(8).asDouble(),
-                                                      lidarToSensorTransformNode.get(9).asDouble(),
-                                                      lidarToSensorTransformNode.get(10).asDouble());
-         spindleCenterToBaseTransform.getTranslation()
-                                     .set(lidarToSensorTransformNode.get(3).asDouble(),
-                                          lidarToSensorTransformNode.get(7).asDouble(),
-                                          lidarToSensorTransformNode.get(11).asDouble());
+         spindleCenterToBaseTransform.getRotation().setAndNormalize(lidarToSensorTransformNode.get(0).asDouble(),
+                                                                    lidarToSensorTransformNode.get(1).asDouble(),
+                                                                    lidarToSensorTransformNode.get(2).asDouble(),
+                                                                    lidarToSensorTransformNode.get(4).asDouble(),
+                                                                    lidarToSensorTransformNode.get(5).asDouble(),
+                                                                    lidarToSensorTransformNode.get(6).asDouble(),
+                                                                    lidarToSensorTransformNode.get(8).asDouble(),
+                                                                    lidarToSensorTransformNode.get(9).asDouble(),
+                                                                    lidarToSensorTransformNode.get(10).asDouble());
+         spindleCenterToBaseTransform.getTranslation().set(lidarToSensorTransformNode.get(3).asDouble(),
+                                                           lidarToSensorTransformNode.get(7).asDouble(),
+                                                           lidarToSensorTransformNode.get(11).asDouble());
       });
 
       LogTools.info("Ouster is initialized.");
@@ -328,13 +328,20 @@ public class OusterNetServer extends Thread
       }
    }
 
+   public void start()
+   {
+      udpServerRunning = true;
+
+      udpServerThread.start();
+   }
+
    public void destroy()
    {
-      running = false;
+      udpServerRunning = false;
 
       try
       {
-         join();
+         udpServerThread.join();
       }
       catch (InterruptedException e)
       {
