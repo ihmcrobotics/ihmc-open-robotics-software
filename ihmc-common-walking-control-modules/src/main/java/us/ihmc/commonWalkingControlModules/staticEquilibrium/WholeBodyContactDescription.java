@@ -60,6 +60,8 @@ public class WholeBodyContactDescription
 
       RigidBodyBasics elevator = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
       this.gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(elevator, false);
+      gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-9.81);
+
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
 
       torqueLowerBound = new DMatrixRMaj(oneDoFJoints.length, 1);
