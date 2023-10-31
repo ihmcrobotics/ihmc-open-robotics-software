@@ -7,13 +7,13 @@ import vhacd4.Vhacd4Parameters;
 
 public class MeshTerranObjectParameters
 {
-   private int maxNoOfHulls = 20;
-   private int maxNoOfVerticesPerHull = 64;
-   private double maxVolumePercentError = 0.01;
-   private int voxelResolution = 100000;
-   private double maxConvacity = 0.5;
+   private int maximumNumberOfHulls = 20;
+   private int maximumNumberOfVerticesPerHull = 64;
+   private double maximumVolumePercentError = 0.01;
+   private int maximumVoxelResolution = 100000;
+   private double maximumConvacity = 0.5;
 
-   private boolean showUndecomposedMeshGraphics = true;
+   private boolean showOriginalMeshGraphics = true;
    private boolean showDecomposedMeshGraphics = false;
 
    private VHACDParameters vhacdParameters;
@@ -38,75 +38,75 @@ public class MeshTerranObjectParameters
       this.vhacd4Parameters = new Vhacd4Parameters();
       
       // Setting VHACD4 parameters
-      this.vhacd4Parameters.setMaxVerticesPerHull(this.maxNoOfVerticesPerHull);
-      this.vhacd4Parameters.setVoxelResolution(this.voxelResolution);
-      this.vhacd4Parameters.setVolumePercentError(this.maxVolumePercentError);
-      this.vhacd4Parameters.setMaxHulls(this.maxNoOfHulls);
+      this.vhacd4Parameters.setMaxVerticesPerHull(this.maximumNumberOfVerticesPerHull);
+      this.vhacd4Parameters.setVoxelResolution(this.maximumVoxelResolution);
+      this.vhacd4Parameters.setVolumePercentError(this.maximumVolumePercentError);
+      this.vhacd4Parameters.setMaxHulls(this.maximumNumberOfHulls);
 
       // Setting VHACD parameters
-      this.vhacdParameters.setMaxConcavity(this.maxConvacity);
-      this.vhacdParameters.setMaxVerticesPerHull(this.maxNoOfVerticesPerHull);
-      this.vhacdParameters.setVoxelResolution(this.voxelResolution);
+      this.vhacdParameters.setMaxConcavity(this.maximumConvacity);
+      this.vhacdParameters.setMaxVerticesPerHull(this.maximumNumberOfVerticesPerHull);
+      this.vhacdParameters.setVoxelResolution(this.maximumVoxelResolution);
    }
 
    public int getMaxNoOfHulls()
    {
-      return maxNoOfHulls;
+      return maximumNumberOfHulls;
    }
 
    public void setMaxNoOfHulls(int maxNoOfHulls)
    {
-      this.maxNoOfHulls = maxNoOfHulls;
+      this.maximumNumberOfHulls = maxNoOfHulls;
    }
 
    public int getMaxNoOfVertices()
    {
-      return maxNoOfVerticesPerHull;
+      return maximumNumberOfVerticesPerHull;
    }
 
    public void setMaxNoOfVertices(int maxNoOfVertices)
    {
-      this.maxNoOfVerticesPerHull = maxNoOfVertices;
+      this.maximumNumberOfVerticesPerHull = maxNoOfVertices;
    }
 
    public double getMaxVolumePercentError()
    {
-      return maxVolumePercentError;
+      return maximumVolumePercentError;
    }
 
    public void setMaxVolumePercentError(double maxVolumePercentError)
    {
-      this.maxVolumePercentError = maxVolumePercentError;
+      this.maximumVolumePercentError = maxVolumePercentError;
    }
 
    public int getVoxelResolution()
    {
-      return voxelResolution;
+      return maximumVoxelResolution;
    }
 
    public void setVoxelResolution(int voxelResolution)
    {
-      this.voxelResolution = voxelResolution;
+      this.maximumVoxelResolution = voxelResolution;
    }
 
    public double getMaxConvacity()
    {
-      return maxConvacity;
+      return maximumConvacity;
    }
 
    public void setMaxConvacity(double maxConvacity)
    {
-      this.maxConvacity = maxConvacity;
+      this.maximumConvacity = maxConvacity;
    }
 
    public boolean isShowUndecomposedMeshGraphics()
    {
-      return showUndecomposedMeshGraphics;
+      return showOriginalMeshGraphics;
    }
 
    public void setShowUndecomposedMeshGraphics(boolean showUndecomposedMeshGraphics)
    {
-      this.showUndecomposedMeshGraphics = showUndecomposedMeshGraphics;
+      this.showOriginalMeshGraphics = showUndecomposedMeshGraphics;
    }
 
    public boolean isShowDecomposedMeshGraphics()
@@ -121,6 +121,7 @@ public class MeshTerranObjectParameters
 
    public VHACDParameters getVhacdParameters()
    {
+      updateParameters();
       return vhacdParameters;
    }
 
@@ -131,6 +132,7 @@ public class MeshTerranObjectParameters
 
    public Vhacd4Parameters getVhacd4Parameters()
    {
+      updateParameters();
       return vhacd4Parameters;
    }
 
