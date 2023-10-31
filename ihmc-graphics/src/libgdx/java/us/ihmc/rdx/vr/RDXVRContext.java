@@ -67,6 +67,8 @@ public class RDXVRContext
    private int height;
    private final ArrayList<Consumer<RDXVRContext>> vrPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<RDXVRContext>> vrInputProcessors = new ArrayList<>();
+   private final Map<Object, Consumer<RDXVRContext>> vrPickCalculatorOwnerKeyMap = new HashMap<>();
+   private final Map<Object, Consumer<RDXVRContext>> vrInputProcessorOwnerKeyMap = new HashMap<>();
 
    // ReferenceFrame.getWorldFrame() is Z-up frame
    // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
@@ -291,6 +293,28 @@ public class RDXVRContext
    public void addVRInputProcessor(Consumer<RDXVRContext> processVRInput)
    {
       vrInputProcessors.add(processVRInput);
+   }
+
+   public void addVRPickCalculator(Object ownerKey, Consumer<RDXVRContext> calculateVRPick)
+   {
+      vrPickCalculatorOwnerKeyMap.put(ownerKey, calculateVRPick);
+      vrPickCalculators.add(calculateVRPick);
+   }
+
+   public void addVRInputProcessor(Object ownerKey, Consumer<RDXVRContext> processVRInput)
+   {
+      vrInputProcessorOwnerKeyMap.put(ownerKey, processVRInput);
+      vrInputProcessors.add(processVRInput);
+   }
+
+   public void removeVRPickCalculator(Object ownerKey)
+   {
+      vrPickCalculators.remove(vrPickCalculatorOwnerKeyMap.remove(ownerKey));
+   }
+
+   public void removeVRInputProcessor(Object ownerKey)
+   {
+      vrInputProcessors.remove(vrInputProcessorOwnerKeyMap.remove(ownerKey));
    }
 
    public void getHeadsetRenderable(Array<Renderable> renderables, Pool<Renderable> pool)

@@ -3,22 +3,14 @@ package us.ihmc.perception.ouster;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollDatagramChannel;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.socket.DatagramPacket;
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
+import io.netty.buffer.Unpooled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.io.*;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.function.Consumer;
@@ -28,16 +20,16 @@ import java.util.function.Consumer;
  * It just lines the incoming data up into a single buffer representing one full frame. It also
  * does so on the event that the UDP datagrams are received by Netty for the fastest possible
  * response. All operations on this data should be done externally by OpenCL kernels.
- *
+ * <p>
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
  * Software User Manual: https://data.ouster.io/downloads/software-user-manual/software-user-manual-v2p0.pdf
- *
+ * <p>
  * To connect to the Ouster, type in os-122221003063.local into the browser, finding the serial number
  * from the Confluence page: https://confluence.ihmc.us/display/PER/In-House+Perception+Sensors+Tracker
- *
+ * <p>
  * Apparently it is better to use this magical command from the user manual:
  * avahi-browse -lrt _roger._tcp
- *
+ * <p>
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
@@ -46,14 +38,15 @@ import java.util.function.Consumer;
  * </p>
  *
  * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800">
- *
  */
-public class NettyOuster
+public class OusterNetServer
 {
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
 
-   /** Ouster produces ranges as unsigned integers in millimeters, so this is just a conversion to meters. */
+   /**
+    * Ouster produces ranges as unsigned integers in millimeters, so this is just a conversion to meters.
+    */
    public static final float DISCRETE_RESOLUTION = 0.001f;
    public static final int MAX_POINTS_PER_COLUMN = 128;
 
@@ -104,6 +97,7 @@ public class NettyOuster
    // A channel data block is one part of a measurement block, containing 1 pixel
    // It's 12 bytes
    private int pixelsPerColumn;
+   private int columnsPerPacket;
    private int columnsPerFrame;
    public static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
    private ByteBuffer pixelShiftBuffer;
@@ -115,12 +109,9 @@ public class NettyOuster
    private int lidarFrameSizeBytes;
    private final RigidBodyTransform spindleCenterToBaseTransform = new RigidBodyTransform();
 
-   private volatile boolean tryingTCP = false;
    private volatile boolean tcpInitialized = false;
    private String sanitizededHostAddress;
 
-   private final EventLoopGroup group;
-   private final Bootstrap bootstrap;
    private Runnable onFrameReceived = null;
    private Instant aquisitionInstant;
    private ByteBuffer lidarFrameByteBuffer;
@@ -129,91 +120,103 @@ public class NettyOuster
 
    private boolean printedWarning = false;
 
-   public NettyOuster()
+   private DatagramSocket udpSocket;
+   private byte[] udpBuffer = new byte[0];
+   private final Thread udpServerThread;
+   private volatile boolean udpServerRunning = false;
+
+   public OusterNetServer()
    {
-      /*
-       * We require Epoll to be available to avoid high CPU in ROS2Node instances.
-       * This service will only work on Linux.
-       * https://netty.io/wiki/native-transports.html
-       */
-      if (!Epoll.isAvailable())
+      udpServerThread = new Thread(this::run, getClass().getSimpleName());
+   }
+
+   public void run()
+   {
+      try
       {
-         throw new RuntimeException("Netty native transport (Epoll) is not available. Epoll is required to avoid high CPU in certain situations.");
+         LogTools.info("Binding to UDP port: " + UDP_PORT);
+         udpSocket = new DatagramSocket(UDP_PORT);
+      }
+      catch (SocketException e)
+      {
+         LogTools.error(e);
       }
 
-      group = new EpollEventLoopGroup();
-      bootstrap = new Bootstrap();
-      bootstrap.group(group).channel(EpollDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
+      while (udpServerRunning)
       {
-         @Override
-         protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)
+         DatagramPacket packet = new DatagramPacket(udpBuffer, udpBuffer.length);
+         try
          {
-            aquisitionInstant = Instant.now();
-
-            if (!tryingTCP && !tcpInitialized)
-            {
-               tryingTCP = true;
-               // Address looks like "/192.168.x.x" so we just discard the '/'
-               sanitizededHostAddress = packet.sender().getAddress().toString().substring(1);
-               // Do this on a thread so we don't hang up the UDP thread.
-               ThreadTools.startAsDaemon(() ->
-               {
-                  configureTCP();
-                  tryingTCP = false;
-               }, "TCPConfiguration");
-            }
-            if (tcpInitialized)
-            {
-               ByteBuf content = packet.content();
-
-               // Ouster data is little endian
-               int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
-               if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID && !printedWarning)
-               {
-                  printedWarning = true;
-                  LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}. Skipping this warning in the future", nextExpectedMeasurementID, measurementID);
-               }
-               nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
-
-               // Copying UDP datagram content into correct position in whole frame buffer.
-               lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
-               content.getBytes(0, lidarFrameByteBuffer);
-
-               boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
-               if (isLastBlockInFrame && onFrameReceived != null)
-               {
-                  onFrameReceived.run();
-               }
-            }
+            udpSocket.receive(packet);
          }
-      });
+         catch (IOException e)
+         {
+            LogTools.error(e);
+         }
 
-      // Ouster OS0-128 at 2048x10 sends 3,186,688 bytes per revolution, at 10 Hz, is ~31.9 MB/s (~255 Mb/s)
-      // We tried lots of options, including lower and higher sizes, 4 MB seemed to be a sweet spot.
-      // Lower values resulted in the beginning part of the image being cut off.
-      // Higher values resulted in intermitent dropouts of parts of the scan lines throughout the entire image.
-      // We tried the AdaptiveRecvByteBufAllocator, but depending on the initial values, we see the same behavior.
-      // The AdaptiveRecvByteBufAllocator never seemed to adapt at all. 
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(4)));
+         if (!tcpInitialized)
+         {
+            // Address looks like "/192.168.x.x" so we just discard the '/'
+            sanitizededHostAddress = packet.getAddress().toString().substring(1);
+
+            // Blocking
+            configureTCP();
+
+            int bufferSize = measurementBlockSize * columnsPerFrame;
+            udpBuffer = new byte[bufferSize];
+
+            lidarFrameByteBuffer = ByteBuffer.allocateDirect(bufferSize);
+
+            // Ignore the current packet and keep moving since we recreated the buffer
+            continue;
+         }
+
+         aquisitionInstant = Instant.now();
+
+         ByteBuf content = Unpooled.wrappedBuffer(packet.getData());
+
+         // Ouster data is little endian
+         int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
+         if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID && !printedWarning)
+         {
+            printedWarning = true;
+            LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}. Skipping this warning in the future",
+                          nextExpectedMeasurementID,
+                          measurementID);
+         }
+         nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
+
+         // Copying UDP datagram content into correct position in whole frame buffer.
+         lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
+         content.getBytes(0, lidarFrameByteBuffer);
+
+         boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
+         if (isLastBlockInFrame && onFrameReceived != null)
+         {
+            onFrameReceived.run();
+         }
+
+         content.release();
+      }
+
+      udpSocket.close();
    }
 
    private void configureTCP()
    {
+      LogTools.info("Querying Ouster parameters...");
+
       performQuery("get_lidar_data_format", rootNode ->
       {
          pixelsPerColumn = rootNode.get("pixels_per_column").asInt();
+         columnsPerPacket = rootNode.get("columns_per_packet").asInt();
          columnsPerFrame = rootNode.get("columns_per_frame").asInt();
          measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
          udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
          lidarFrameSizeBytes = MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM * measurementBlockSize * udpDatagramsPerFrame;
 
-         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}",
-                       pixelsPerColumn,
-                       columnsPerFrame,
-                       udpDatagramsPerFrame);
+         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}", pixelsPerColumn, columnsPerFrame, udpDatagramsPerFrame);
          LogTools.info("Measurement block size (B): {}, Lidar frame size (B): {}", measurementBlockSize, lidarFrameSizeBytes);
-
-         lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
 
          JsonNode pixelShiftNode = rootNode.get("pixel_shift_by_row");
          pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
@@ -287,7 +290,7 @@ public class NettyOuster
       LogTools.info("Attempting to query host " + sanitizededHostAddress + " with command " + command);
 
       String jsonResponse = "";
-      LogTools.info("Binding to TCP port " + TCP_PORT);
+      LogTools.info("Binding to TCP port: " + TCP_PORT);
       try (Socket socket = new Socket(sanitizededHostAddress, TCP_PORT))
       {
          OutputStream output = socket.getOutputStream();
@@ -310,7 +313,7 @@ public class NettyOuster
       }
       finally
       {
-         LogTools.info("Unbound from TCP port " + TCP_PORT);
+         LogTools.info("Unbound from TCP port: " + TCP_PORT);
       }
 
       try
@@ -325,19 +328,27 @@ public class NettyOuster
       }
    }
 
-   /**
-    * Bind to UDP and begin receiving data.
-    */
-   public void bind()
+   public void start()
    {
-      LogTools.info("Binding to UDP port " + UDP_PORT);
-      bootstrap.bind(UDP_PORT);
+      udpServerRunning = true;
+
+      udpServerThread.start();
    }
 
    public void destroy()
    {
-      LogTools.info("Unbinding from UDP port " + UDP_PORT);
-      group.shutdownGracefully();
+      udpServerRunning = false;
+
+      try
+      {
+         udpServerThread.join();
+      }
+      catch (InterruptedException e)
+      {
+         LogTools.error(e);
+      }
+
+      udpSocket.close();
    }
 
    public boolean isInitialized()
