@@ -742,6 +742,15 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
+    * Parameter for the nominal angle of the support knee when controlling CoM height through
+    * knee angle.
+    */
+   public double nominalSupportKneeAngle()
+   {
+      return 0.5;
+   }
+
+   /**
     * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the
     * exchange phase to the height trajectory when the robot is stepping down
     */
@@ -871,5 +880,13 @@ public abstract class WalkingControllerParameters
    public boolean enableJointOfflineControl()
    {
       return false;
+   }
+
+   /**
+    * Returns parameters related to joints going offline (becoming uncontrollable)
+    */
+   public JointOfflineParameters getJointOfflineParameters()
+   {
+      return null;
    }
 }
