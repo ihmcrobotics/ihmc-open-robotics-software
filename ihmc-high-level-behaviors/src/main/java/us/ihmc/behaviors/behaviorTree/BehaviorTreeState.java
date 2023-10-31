@@ -1,9 +1,11 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.communication.crdt.Freezable;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -17,15 +19,15 @@ import java.util.function.Supplier;
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
  */
-public class BehaviorTreeState
+public class BehaviorTreeState extends Freezable
 {
    private final MutableLong nextID = new MutableLong(0);
    private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier;
-   private boolean localTreeFrozen = false;
    private int numberOfNodes = 0;
+   private int numberOfFrozenNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
@@ -39,16 +41,19 @@ public class BehaviorTreeState
    public void update()
    {
       numberOfNodes = 0;
+      numberOfFrozenNodes = 0;
       update(rootNodeSupplier.get());
    }
 
-   private void update(BehaviorTreeNode<?> node)
+   private void update(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
    {
       ++numberOfNodes;
+      if (node.getState().isFrozenFromModification())
+         ++numberOfFrozenNodes;
 
-      for (BehaviorTreeNode<?> child : node.getChildren())
+      for (Object child : node.getChildren())
       {
-         update(child);
+         update((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
       }
    }
 
@@ -68,9 +73,9 @@ public class BehaviorTreeState
          update();
    }
 
-   public void checkTreeModified()
+   public void countFrozenNodes()
    {
-      localTreeFrozen = false;
+      numberOfFrozenNodes = 0;
 
       BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = rootNodeSupplier.get();
       if (rootNode != null)
@@ -81,7 +86,8 @@ public class BehaviorTreeState
 
    private void checkTreeModified(BehaviorTreeNodeState<?> localNode)
    {
-      localTreeFrozen |= localNode.isFrozenFromModification();
+      if (localNode.isFrozenFromModification())
+         ++numberOfFrozenNodes;
 
       for (BehaviorTreeNodeState<?> child : localNode.getChildren())
       {
@@ -89,9 +95,26 @@ public class BehaviorTreeState
       }
    }
 
-   public MutableLong getNextID()
+   public void toMessage(BehaviorTreeStateMessage message)
    {
-      return nextID;
+      message.setNextId(nextID.longValue());
+   }
+
+   public void fromMessage(BehaviorTreeStateMessage message)
+   {
+      if (!isFrozenFromModification())
+         nextID.setValue(message.getNextId());
+   }
+
+   public long getAndIncrementNextID()
+   {
+      freezeFromModification();
+      return nextID.getAndIncrement();
+   }
+
+   public long getNextID()
+   {
+      return nextID.longValue();
    }
 
    public BehaviorTreeNodeExtension<?, ?, ?, ?> getRootNode()
@@ -109,9 +132,9 @@ public class BehaviorTreeState
       return treeRebuilder;
    }
 
-   public boolean getLocalTreeFrozen()
+   public int getNumberOfFrozenNodes()
    {
-      return localTreeFrozen;
+      return numberOfFrozenNodes;
    }
 
    public int getNumberOfNodes()

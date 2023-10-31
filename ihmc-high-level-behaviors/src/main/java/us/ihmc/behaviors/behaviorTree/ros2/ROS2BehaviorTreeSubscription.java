@@ -52,12 +52,11 @@ public class ROS2BehaviorTreeSubscription
 
          // If the tree was recently modified by the operator, we do not accept
          // updates the structure of the tree.
-         behaviorTreeState.checkTreeModified();
+         behaviorTreeState.countFrozenNodes();
 
-         if (!behaviorTreeState.getLocalTreeFrozen())
-            behaviorTreeState.getNextID().setValue(latestBehaviorTreeMessage.getNextId());
+         behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
 
-         if (!behaviorTreeState.getLocalTreeFrozen() && behaviorTreeState.getRootNode() != null)
+         if (behaviorTreeState.getRootNode() != null && )
          {
             // First clear the tree, storing all nodes by ID in the map in the tree rebuilder
             behaviorTreeState.modifyTree(modificationQueue ->
@@ -66,23 +65,24 @@ public class ROS2BehaviorTreeSubscription
 
          behaviorTreeState.modifyTree(modificationQueue ->
          {
-            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = recallNodeByIDOrCreate(subscriptionRootNode);
+            // When the root node is swapped out, we freeze the reference to the new one
+            boolean treeRootReferenceFrozen = behaviorTreeState.isFrozenFromModification();
 
-            updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, modificationQueue);
+            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
 
-            if (!behaviorTreeState.getLocalTreeFrozen())
-            {
-               modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
-            }
+            // The root node's parent is "null"
+            updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, modificationQueue, treeRootReferenceFrozen);
+
+            modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
          });
       }
    }
 
-   private BehaviorTreeNodeExtension<?, ?, ?, ?> recallNodeByIDOrCreate(ROS2BehaviorTreeSubscriptionNode subscriptionNode)
+   private BehaviorTreeNodeExtension<?, ?, ?, ?> recallNodeByIDOrCreate(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean anAncestorIsFrozen)
    {
       long nodeID = subscriptionNode.getBehaviorTreeNodeStateMessage().getId();
       BehaviorTreeNodeExtension<?, ?, ?, ?> localNode = behaviorTreeState.getTreeRebuilder().getReplacementNode(nodeID);
-      if (localNode == null && !behaviorTreeState.getLocalTreeFrozen()) // New node that wasn't in the local tree
+      if (localNode == null && !anAncestorIsFrozen) // New node that wasn't in the local tree
       {
          Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
          localNode = behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID);
@@ -94,29 +94,30 @@ public class ROS2BehaviorTreeSubscription
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
                                                 BehaviorTreeNodeExtension<?, ?, ?, ?> localNode,
                                                 BehaviorTreeNodeExtension<?, ?, ?, ?> localParentNode,
-                                                BehaviorTreeModificationQueue modificationQueue)
+                                                BehaviorTreeModificationQueue modificationQueue,
+                                                boolean anAncestorIsFrozen)
    {
-      // If the node was recently modified by the operator, the node does not accept
-      // updates of these values. This is to allow the operator's changes to propagate
-      // and so it doesn't get overriden immediately by an out of date message coming from the robot.
-      // On the robot side, this will always get updated because there is no operator.
-      if (!behaviorTreeState.getLocalTreeFrozen())
+      // We just add nodes if they would not be part of a frozen subtree.
+      if (!anAncestorIsFrozen)
       {
          if (localParentNode == null)
             modificationQueue.accept(new BehaviorTreeNodeSetRoot(localNode, rootNodeSetter));
          else
             modificationQueue.accept(new BehaviorTreeNodeExtensionAdd(localNode, localParentNode));
-
-         ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
       }
+
+      // Each state handles which fields it updates based on its frozen status
+      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
-         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = recallNodeByIDOrCreate(subscriptionChildNode);
+         anAncestorIsFrozen |= localNode.getState().isFrozenFromModification();
+
+         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = recallNodeByIDOrCreate(subscriptionChildNode, !anAncestorIsFrozen);
 
          if (localChildNode != null)
          {
-            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
+            updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue, anAncestorIsFrozen);
          }
       }
    }
