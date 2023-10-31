@@ -162,8 +162,10 @@ public class OusterNetServer
             // Blocking
             configureTCP();
 
-            int bufferSize = (columnsPerPacket + (udpDatagramsPerFrame * 12) + 4) * columnsPerFrame;
+            int bufferSize = measurementBlockSize * columnsPerFrame;
             udpBuffer = new byte[bufferSize];
+
+            lidarFrameByteBuffer = ByteBuffer.allocateDirect(bufferSize);
 
             // Ignore the current packet and keep moving since we recreated the buffer
             continue;
@@ -215,8 +217,6 @@ public class OusterNetServer
 
          LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}", pixelsPerColumn, columnsPerFrame, udpDatagramsPerFrame);
          LogTools.info("Measurement block size (B): {}, Lidar frame size (B): {}", measurementBlockSize, lidarFrameSizeBytes);
-
-         lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
 
          JsonNode pixelShiftNode = rootNode.get("pixel_shift_by_row");
          pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
