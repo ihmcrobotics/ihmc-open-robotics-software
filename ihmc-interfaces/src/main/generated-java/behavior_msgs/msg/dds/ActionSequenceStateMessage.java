@@ -24,11 +24,20 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
             * The index of the action that is set to execute next
             */
    public int execution_next_index_;
+   /**
+            * Next action rejection tooltip
+            */
+   public java.lang.StringBuilder next_action_rejection_tooltip_;
+   /**
+            * Request manual execution of the next action
+            */
+   public boolean manual_execution_requested_;
 
    public ActionSequenceStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ActionSequenceDefinitionMessage();
+      next_action_rejection_tooltip_ = new java.lang.StringBuilder(255);
    }
 
    public ActionSequenceStateMessage(ActionSequenceStateMessage other)
@@ -44,6 +53,11 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       automatic_execution_ = other.automatic_execution_;
 
       execution_next_index_ = other.execution_next_index_;
+
+      next_action_rejection_tooltip_.setLength(0);
+      next_action_rejection_tooltip_.append(other.next_action_rejection_tooltip_);
+
+      manual_execution_requested_ = other.manual_execution_requested_;
 
    }
 
@@ -95,6 +109,45 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       return execution_next_index_;
    }
 
+   /**
+            * Next action rejection tooltip
+            */
+   public void setNextActionRejectionTooltip(java.lang.String next_action_rejection_tooltip)
+   {
+      next_action_rejection_tooltip_.setLength(0);
+      next_action_rejection_tooltip_.append(next_action_rejection_tooltip);
+   }
+
+   /**
+            * Next action rejection tooltip
+            */
+   public java.lang.String getNextActionRejectionTooltipAsString()
+   {
+      return getNextActionRejectionTooltip().toString();
+   }
+   /**
+            * Next action rejection tooltip
+            */
+   public java.lang.StringBuilder getNextActionRejectionTooltip()
+   {
+      return next_action_rejection_tooltip_;
+   }
+
+   /**
+            * Request manual execution of the next action
+            */
+   public void setManualExecutionRequested(boolean manual_execution_requested)
+   {
+      manual_execution_requested_ = manual_execution_requested;
+   }
+   /**
+            * Request manual execution of the next action
+            */
+   public boolean getManualExecutionRequested()
+   {
+      return manual_execution_requested_;
+   }
+
 
    public static Supplier<ActionSequenceStateMessagePubSubType> getPubSubType()
    {
@@ -119,6 +172,10 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_next_index_, other.execution_next_index_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.next_action_rejection_tooltip_, other.next_action_rejection_tooltip_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manual_execution_requested_, other.manual_execution_requested_, epsilon)) return false;
+
 
       return true;
    }
@@ -138,6 +195,10 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if(this.execution_next_index_ != otherMyClass.execution_next_index_) return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.next_action_rejection_tooltip_, otherMyClass.next_action_rejection_tooltip_)) return false;
+
+      if(this.manual_execution_requested_ != otherMyClass.manual_execution_requested_) return false;
+
 
       return true;
    }
@@ -155,7 +216,11 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       builder.append("automatic_execution=");
       builder.append(this.automatic_execution_);      builder.append(", ");
       builder.append("execution_next_index=");
-      builder.append(this.execution_next_index_);
+      builder.append(this.execution_next_index_);      builder.append(", ");
+      builder.append("next_action_rejection_tooltip=");
+      builder.append(this.next_action_rejection_tooltip_);      builder.append(", ");
+      builder.append("manual_execution_requested=");
+      builder.append(this.manual_execution_requested_);
       builder.append("}");
       return builder.toString();
    }
