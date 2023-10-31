@@ -13,7 +13,7 @@ public class ROS2BehaviorTreePublisher
 
    public void publish(BehaviorTreeState behaviorTreeState, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, ROS2IOTopicQualifier outgoingQualifier)
    {
-      behaviorTreeMessage.setNextId(behaviorTreeState.getNextID().intValue());
+      behaviorTreeState.toMessage(behaviorTreeMessage);
       ROS2BehaviorTreeMessageTools.clearLists(behaviorTreeMessage);
 
       packTreeToMessage(behaviorTreeState.getRootNode().getState());

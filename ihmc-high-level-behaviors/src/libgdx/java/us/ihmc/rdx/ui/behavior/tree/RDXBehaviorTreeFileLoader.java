@@ -40,7 +40,7 @@ public class RDXBehaviorTreeFileLoader
       String typeName = jsonNode.get("type").textValue();
 
       RDXBehaviorTreeNode<?, ?> node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
-                                                              behaviorTreeState.getNextID().getAndIncrement());
+                                                              behaviorTreeState.getAndIncrementNextID());
 
       node.getDefinition().loadFromFile(jsonNode);
 
