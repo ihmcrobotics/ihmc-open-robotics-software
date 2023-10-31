@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
+import imgui.ImVec2;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
@@ -13,11 +14,10 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
-import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiTreeRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -30,7 +30,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXBehaviorTree
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final BehaviorTreeState behaviorTreeState;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
@@ -44,6 +43,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodesMenu nodesMenu;
    private final RDXBehaviorTreeFileLoader fileLoader;
+   private final ImVec2 expandButtonSize = new ImVec2();
    private final ImGuiTreeRenderer treeRenderer = new ImGuiTreeRenderer();
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
@@ -53,8 +53,7 @@ public class RDXBehaviorTree
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
                           ReferenceFrameLibrary referenceFrameLibrary,
-                          FootstepPlannerParametersBasics footstepPlannerParametersBasics,
-                          ROS2ControllerPublishSubscribeAPI ros2)
+                          FootstepPlannerParametersBasics footstepPlannerParametersBasics)
    {
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel,
                                                    syncedRobot,
@@ -73,7 +72,6 @@ public class RDXBehaviorTree
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
    {
-      baseUI.getImGuiPanelManager().addPanel(panel);
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables, RDXSceneLevel.VIRTUAL);
       baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
@@ -159,19 +157,26 @@ public class RDXBehaviorTree
       }
    }
 
-   private void renderImGuiWidgets()
+   protected void renderImGuiWidgetsPre()
    {
       ImGui.beginMenuBar();
       fileMenu.renderFileMenu();
       nodesMenu.renderNodesMenu();
       ImGui.endMenuBar();
 
-      if (ImGui.button(labels.get("Expand all")))
+      if (ImGui.button(labels.get("[+]")))
          expandCollapseAll(true, rootNode);
+      ImGuiTools.previousWidgetTooltip("Expand all nodes");
+      ImGui.getItemRectSize(expandButtonSize);
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Collapse all")))
+      if (ImGui.button(labels.get("[-]"), expandButtonSize.x, expandButtonSize.y))
          expandCollapseAll(false, rootNode);
+      ImGuiTools.previousWidgetTooltip("Collapse all nodes");
+      ImGui.sameLine();
+   }
 
+   protected void renderImGuiWidgetsPost()
+   {
       if (rootNode != null)
          renderImGuiWidgetsAsTree(rootNode);
    }
@@ -250,8 +255,8 @@ public class RDXBehaviorTree
    public void destroy()
    {
       RDXBaseUI.getInstance().getPrimaryScene().removeRenderable(this);
-//      RDXBaseUI.getInstance().getVRManager().getContext().removeVRPickCalculator(this);
-//      RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);
+      RDXBaseUI.getInstance().getVRManager().getContext().removeVRPickCalculator(this);
+      RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewPickCalculator(this);
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
    }
