@@ -49,26 +49,6 @@ public class SCS2RobotRigidBodyMutator implements Controller
 
       private final RigidBodyBasics rigidBody;
 
-      private final double defaultMass;
-      private final double[] defaultInertiaDiagonals;
-
-      /**
-       * When mutating mass, the associated {@link #massMutator} is used to generate a percentage plus/minus difference in the default mass of the rigid body.
-       * This YoDouble controls the minimum (maximum) percentage.
-       */
-      private final YoDouble massPercentageMinMax;
-      /**
-       * When mutating center of mass offset, the default offset is nearly always zero. It is difficult to set bounds on the CoM offset for a rigid body without
-       * detailed knowledge of its geometric properties. This YoDouble controls the  minimum (maximum) CoM offset bound in each of x, y, z that the associated
-       * {@link #comOffsetMutators} can generate.
-       */
-      private final YoDouble comOffsetMinMax;
-      /**
-       * When mutating moment of inertia, only the diagonal entries (Ixx, Iyy, Izz) are modified. The associated {@link #comOffsetMutators} are used to generate
-       * a percentage plus/minus difference in the default inertial diagonal entries. This YoDouble controls the minimum (maximum) percentage.
-       */
-      private final YoDouble momentOfInertiaPercentageMinMax;
-
       private final YoFunctionGenerator massMutator;
       private final YoFunctionGenerator[] comOffsetMutators;
       private final YoFunctionGenerator[] momentOfInertiaMutators;
@@ -77,25 +57,21 @@ public class SCS2RobotRigidBodyMutator implements Controller
       {
          this.rigidBody = rigidBody;
 
-         defaultMass = rigidBody.getInertia().getMass();
-         massPercentageMinMax = new YoDouble(rigidBody.getName() + "_MassPercentageMinMax", registry);
-         massPercentageMinMax.set(DEFAULT_MASS_PERCENTAGE_MIN_MAX);
          massMutator = new YoFunctionGenerator(rigidBody.getName() + "_MassMutator", time, registry, false, dt);
-         massMutator.setOffset(rigidBody.getInertia().getMass());
+         double defaultMass = rigidBody.getInertia().getMass();
+         massMutator.setOffset(defaultMass);
+         massMutator.setAmplitude(defaultMass * DEFAULT_MASS_PERCENTAGE_MIN_MAX);
 
-         comOffsetMinMax = new YoDouble(rigidBody.getName() + "_CoMOffsetMinMax", registry);
-         comOffsetMinMax.set(DEFAULT_COM_OFFSET_MIN_MAX);
          comOffsetMutators = new YoFunctionGenerator[3];
          comOffsetMutators[0] = new YoFunctionGenerator(YoGeometryNameTools.createXName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
          comOffsetMutators[1] = new YoFunctionGenerator(YoGeometryNameTools.createYName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
          comOffsetMutators[2] = new YoFunctionGenerator(YoGeometryNameTools.createZName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
+         for (YoFunctionGenerator mutator : comOffsetMutators)
+         {
+            mutator.setOffset(0.0);  // CoM offsets are nearly always default zero
+            mutator.setAmplitude(DEFAULT_COM_OFFSET_MIN_MAX);
+         }
 
-         defaultInertiaDiagonals = new double[3];
-         defaultInertiaDiagonals[0] = rigidBody.getInertia().getMomentOfInertia().getM00();
-         defaultInertiaDiagonals[1] = rigidBody.getInertia().getMomentOfInertia().getM11();
-         defaultInertiaDiagonals[2] = rigidBody.getInertia().getMomentOfInertia().getM22();
-         momentOfInertiaPercentageMinMax = new YoDouble(rigidBody.getName() + "_MomentOfInertiaPercentageMinMax", registry);
-         momentOfInertiaPercentageMinMax.set(DEFAULT_INERTIA_PERCENTAGE_MIN_MAX);
          momentOfInertiaMutators = new YoFunctionGenerator[3];
          momentOfInertiaMutators[0] = new YoFunctionGenerator(rigidBody.getName() + "_MomentOfInertiaIxxMutator", time, registry, false, dt);
          momentOfInertiaMutators[0].setOffset(rigidBody.getInertia().getMomentOfInertia().getM00());
@@ -103,22 +79,25 @@ public class SCS2RobotRigidBodyMutator implements Controller
          momentOfInertiaMutators[1].setOffset(rigidBody.getInertia().getMomentOfInertia().getM11());
          momentOfInertiaMutators[2] = new YoFunctionGenerator(rigidBody.getName() + "_MomentOfInertiaIzzMutator", time, registry, false, dt);
          momentOfInertiaMutators[2].setOffset(rigidBody.getInertia().getMomentOfInertia().getM22());
-
+         double[] defaultInertiaDiagonals = new double[3];
+         defaultInertiaDiagonals[0] = rigidBody.getInertia().getMomentOfInertia().getM00();
+         defaultInertiaDiagonals[1] = rigidBody.getInertia().getMomentOfInertia().getM11();
+         defaultInertiaDiagonals[2] = rigidBody.getInertia().getMomentOfInertia().getM22();
+         for (int i = 0; i < 3; ++i)
+         {
+            momentOfInertiaMutators[i].setOffset(defaultInertiaDiagonals[i]);
+            momentOfInertiaMutators[i].setAmplitude(DEFAULT_INERTIA_PERCENTAGE_MIN_MAX);
+         }
       }
 
       void mutate()
       {
-         massMutator.setAmplitude(defaultMass * massPercentageMinMax.getDoubleValue());
          rigidBody.getInertia().setMass(massMutator.getValue());
 
-         for (YoFunctionGenerator mutator : comOffsetMutators)
-            mutator.setAmplitude(comOffsetMinMax.getDoubleValue());
          rigidBody.getInertia().setCenterOfMassOffset(comOffsetMutators[0].getValue(),
                                                       comOffsetMutators[1].getValue(),
                                                       comOffsetMutators[2].getValue());
 
-         for (int i = 0; i < 3; ++i)
-            momentOfInertiaMutators[i].setAmplitude(defaultInertiaDiagonals[i] * momentOfInertiaPercentageMinMax.getDoubleValue());
          // Only mutating the diagonals of the moment of inertia: Ixx, Iyy, Izz
          rigidBody.getInertia().setMomentOfInertia(momentOfInertiaMutators[0].getValue(),
                                                    momentOfInertiaMutators[1].getValue(),
