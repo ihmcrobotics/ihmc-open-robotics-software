@@ -156,7 +156,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
-         sensorCroppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat());
+         //sensorCroppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          terrainCostImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
 
@@ -246,7 +246,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
             if (ImGui.button("Print Sensor Cropped Height Map"))
             {
                PerceptionDebugTools.printMat("Sensor Cropped Height Map",
-                                             humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat(),4);
+                                             humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage(),4);
             }
             if (ImGui.button("Print Internal Height Map"))
             {
@@ -324,10 +324,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().cols(),
                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage().rows(),
                                                            RDXImagePanel.FLIP_Y);
-         sensorCroppedHeightMapPanel = new RDXBytedecoImagePanel("Sensor Cropped Height Map",
-                                                                 humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getImageWidth(),
-                                                                 humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getImageHeight(),
-                                                                 RDXImagePanel.DO_NOT_FLIP_Y);
+         //sensorCroppedHeightMapPanel = new RDXBytedecoImagePanel("Sensor Cropped Height Map",
+         //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().cols(),
+         //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().rows(),
+         //                                                        RDXImagePanel.DO_NOT_FLIP_Y);
          terrainCostImagePanel = new RDXBytedecoImagePanel("Terrain Cost Image",
                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage().cols(),
                                                            humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage().rows(),
@@ -338,7 +338,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                           RDXImagePanel.FLIP_Y);
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());
-         addChild(sensorCroppedHeightMapPanel.getImagePanel());
+         //addChild(sensorCroppedHeightMapPanel.getImagePanel());
          addChild(depthImagePanel.getImagePanel());
          addChild(internalHeightMapPanel.getImagePanel());
          addChild(terrainCostImagePanel.getImagePanel());

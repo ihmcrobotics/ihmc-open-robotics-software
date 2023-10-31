@@ -23,7 +23,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,16 +43,14 @@ public class ContinuousPlanningRemoteTask
 
    private enum ContinuousWalkingState
    {
-      NOT_STARTED,
-      FOOTSTEP_STARTED,
-      PLANNING_FAILED
+      NOT_STARTED, FOOTSTEP_STARTED, PLANNING_FAILED
    }
 
    private ContinuousWalkingState continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
-                                                                   getClass(),
-                                                                   ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+                                                                                                          getClass(),
+                                                                                                          ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
 
@@ -97,7 +94,7 @@ public class ContinuousPlanningRemoteTask
       this.referenceFrames = referenceFrames;
       this.continuousPlanningParameters = continuousPlanningParameters;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.MAX_COVERAGE);
+      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
@@ -106,11 +103,12 @@ public class ContinuousPlanningRemoteTask
 
       robotModel.getLookAndStepParameters();
 
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepStatusReceived);
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()), this::footstepQueueStatusReceived);
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()),
+                                      this::footstepStatusReceived);
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()),
+                                      this::footstepQueueStatusReceived);
 
-      executorService.scheduleWithFixedDelay(this::updateContinuousPlanner, 1500,
-                                             CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS, TimeUnit.MILLISECONDS);
+      executorService.scheduleWithFixedDelay(this::updateContinuousPlanner, 1500, CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS, TimeUnit.MILLISECONDS);
    }
 
    /**
@@ -118,15 +116,19 @@ public class ContinuousPlanningRemoteTask
     */
    public void initializeContinuousPlanner()
    {
-      originalReferenceFrameToBaseGoalPoseDirectionFrom = new FixedReferenceFrame("Original Reference Frame", ReferenceFrame.getWorldFrame(), referenceFrames.getMidFeetZUpFrame().getTransformToParent());
+      originalReferenceFrameToBaseGoalPoseDirectionFrom = new FixedReferenceFrame("Original Reference Frame",
+                                                                                  ReferenceFrame.getWorldFrame(),
+                                                                                  referenceFrames.getMidFeetZUpFrame().getTransformToParent());
 
       for (RobotSide side : RobotSide.values)
       {
-         startPoseForFootstepPlanner.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side)) ;
+         startPoseForFootstepPlanner.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
          originalPoseToBaseGoalPoseFrom.get(side).getPosition().setX(startPoseForFootstepPlanner.get(side).getPosition().getX());
          originalPoseToBaseGoalPoseFrom.get(side).getPosition().setY(startPoseForFootstepPlanner.get(side).getPosition().getY());
          originalPoseToBaseGoalPoseFrom.get(side).getPosition().setZ(startPoseForFootstepPlanner.get(side).getPosition().getZ());
-         originalPoseToBaseGoalPoseFrom.get(side).getOrientation().setToYawOrientation(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getRotation().getYaw());
+         originalPoseToBaseGoalPoseFrom.get(side)
+                                       .getOrientation()
+                                       .setToYawOrientation(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getRotation().getYaw());
       }
       continuousPlanner.setInitialized(true);
    }
@@ -148,20 +150,22 @@ public class ContinuousPlanningRemoteTask
       if (continuousPlanningParameters.getOnlyDoPlanning())
       {
          getImminentStanceFromLatestStatus();
-         startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
-         ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
-                 multiplierForGoalPoseDistance,
-                 originalPoseToBaseGoalPoseFrom,
-                 startPoseForFootstepPlanner,
-                 goalPoseForFootstepPlanner,
-                 (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
-                 (float) continuousPlanningParameters.getGoalPoseUpDistance());
-         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
+         startPoseForFootstepPlanner = continuousPlanner.updateImminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
+         continuousPlanner.getGoalWaypointPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
+                                                originalPoseToBaseGoalPoseFrom,
+                                                startPoseForFootstepPlanner,
+                                                goalPoseForFootstepPlanner,
+                                                continuousPlanningParameters,
+                                                multiplierForGoalPoseDistance);
+         plannerOutput = continuousPlanner.planToGoalWithHeightMap(latestHeightMapData,
+                                                                   startPoseForFootstepPlanner,
+                                                                   goalPoseForFootstepPlanner,
+                                                                   secondImminentFootstepSide);
 
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(plannerOutput,
-                 continuousPlanningParameters.getNumberOfStepsToSend(),
-                 (float) continuousPlanningParameters.getSwingTime(),
-                 (float) continuousPlanningParameters.getTransferTime());
+                                                                                                        continuousPlanningParameters.getNumberOfStepsToSend(),
+                                                                                                        (float) continuousPlanningParameters.getSwingTime(),
+                                                                                                        (float) continuousPlanningParameters.getTransferTime());
 
          footstepDataList.getQueueingProperties().setExecutionMode(executionMode.toByte());
 
@@ -177,15 +181,17 @@ public class ContinuousPlanningRemoteTask
       {
          initializeContinuousPlanner();
          getImminentStanceFromLatestStatus();
-         startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
-         ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
-                                                 multiplierForGoalPoseDistance,
-                                                 originalPoseToBaseGoalPoseFrom,
-                                                 startPoseForFootstepPlanner,
-                                                 goalPoseForFootstepPlanner,
-                                                 (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
-                                                 (float) continuousPlanningParameters.getGoalPoseUpDistance());
-         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
+         startPoseForFootstepPlanner = continuousPlanner.updateImminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
+         continuousPlanner.getGoalWaypointPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
+                                                originalPoseToBaseGoalPoseFrom,
+                                                startPoseForFootstepPlanner,
+                                                goalPoseForFootstepPlanner,
+                                                continuousPlanningParameters,
+                                                multiplierForGoalPoseDistance);
+         plannerOutput = continuousPlanner.planToGoalWithHeightMap(latestHeightMapData,
+                                                                   startPoseForFootstepPlanner,
+                                                                   goalPoseForFootstepPlanner,
+                                                                   secondImminentFootstepSide);
          if (continuousPlanner.getFootstepPlanningResult() != FootstepPlanningResult.INVALID_GOAL)
             continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
          else
@@ -202,10 +208,10 @@ public class ContinuousPlanningRemoteTask
    {
       // A foot is in swing, plan another step
       if ((footstepStatusMessage.get().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED
-          && continuousPlannerState != ContinuousWalkingState.FOOTSTEP_STARTED) || continuousPlannerState == ContinuousWalkingState.PLANNING_FAILED)
+           && continuousPlannerState != ContinuousWalkingState.FOOTSTEP_STARTED) || continuousPlannerState == ContinuousWalkingState.PLANNING_FAILED)
       {
          getImminentStanceFromLatestStatus();
-         startPoseForFootstepPlanner = continuousPlanner.updateimminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
+         startPoseForFootstepPlanner = continuousPlanner.updateImminentStance(firstImminentFootstep, secondImminentFootstep, secondImminentFootstepSide);
 
          // TODO adjust this so that it doesn't consider the Z of the poses at all, otherwise there will be bugs in the future
          // Only update the goal poses if the robot gets within some distance of them
@@ -213,16 +219,18 @@ public class ContinuousPlanningRemoteTask
          if (distance < continuousPlanningParameters.getDistanceToGoalPose())
          {
             multiplierForGoalPoseDistance += 1;
-            ActiveMappingTools.setStraightGoalPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
-                                                    multiplierForGoalPoseDistance,
-                                                    originalPoseToBaseGoalPoseFrom,
-                                                    startPoseForFootstepPlanner,
-                                                    goalPoseForFootstepPlanner,
-                                                    (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
-                                                    (float) continuousPlanningParameters.getGoalPoseUpDistance());
+            continuousPlanner.getGoalWaypointPoses(originalReferenceFrameToBaseGoalPoseDirectionFrom,
+                                                   originalPoseToBaseGoalPoseFrom,
+                                                   startPoseForFootstepPlanner,
+                                                   goalPoseForFootstepPlanner,
+                                                   continuousPlanningParameters,
+                                                   multiplierForGoalPoseDistance);
          }
 
-         plannerOutput = continuousPlanner.updatePlan(latestHeightMapData, startPoseForFootstepPlanner, goalPoseForFootstepPlanner, secondImminentFootstepSide);
+         plannerOutput = continuousPlanner.planToGoalWithHeightMap(latestHeightMapData,
+                                                                   startPoseForFootstepPlanner,
+                                                                   goalPoseForFootstepPlanner,
+                                                                   secondImminentFootstepSide);
 
          if (continuousPlanner.getFootstepPlanningResult() != FootstepPlanningResult.INVALID_GOAL)
             continuousPlannerState = ContinuousWalkingState.FOOTSTEP_STARTED;
@@ -314,34 +322,34 @@ public class ContinuousPlanningRemoteTask
 
    public void onHeightMapReceived(ImageMessage imageMessage)
    {
-        if (heightMapImage == null)
-        {
-           int compressedBufferDefaultSize = 100000;
-           heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
-           compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-           incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
-           incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-           LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
-        }
+      if (heightMapImage == null)
+      {
+         int compressedBufferDefaultSize = 100000;
+         heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
+         compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+         incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
+         incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+         LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
+      }
 
-        PerceptionMessageTools.convertToHeightMapImage(imageMessage,
-                                                       heightMapImage,
-                                                       incomingCompressedImageBuffer,
-                                                       incomingCompressedImageBytePointer,
-                                                       compressedBytesMat);
+      PerceptionMessageTools.convertToHeightMapImage(imageMessage,
+                                                     heightMapImage,
+                                                     incomingCompressedImageBuffer,
+                                                     incomingCompressedImageBytePointer,
+                                                     compressedBytesMat);
 
-        if (latestHeightMapData == null)
-        {
-           latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                                   RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                   imageMessage.getPosition().getX(),
-                                                   imageMessage.getPosition().getY());
-        }
-        PerceptionMessageTools.convertToHeightMapData(heightMapImage,
-                                                      latestHeightMapData,
-                                                      imageMessage.getPosition(),
-                                                      RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                      RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+      if (latestHeightMapData == null)
+      {
+         latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                                 RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                 imageMessage.getPosition().getX(),
+                                                 imageMessage.getPosition().getY());
+      }
+      PerceptionMessageTools.convertToHeightMapData(heightMapImage,
+                                                    latestHeightMapData,
+                                                    imageMessage.getPosition(),
+                                                    RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                                                    RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
    }
 
    public void setLatestHeightMapData(HeightMapData heightMapData)

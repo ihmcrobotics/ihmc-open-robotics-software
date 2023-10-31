@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ActiveMappingTools
 {
    public static void setStraightGoalPoses(FixedReferenceFrame originalReferenceFrame,
-                                           int segment,
+                                           int multiplier,
                                            SideDependentList<FramePose3D> originalPoseToPlanFrom,
                                            SideDependentList<FramePose3D> startPose,
                                            SideDependentList<FramePose3D> goalPose,
@@ -30,7 +30,7 @@ public class ActiveMappingTools
          tempPose.get(side).getPosition().set(originalPoseToPlanFrom.get(side).getPosition());
          tempPose.get(side).getOrientation().set(originalPoseToPlanFrom.get(side).getOrientation());
          tempPose.get(side).changeFrame(originalReferenceFrame);
-         tempPose.get(side).getTranslation().addX(xDistance * segment);
+         tempPose.get(side).getTranslation().addX(xDistance * multiplier);
          tempPose.get(side).getTranslation().addZ(startPose.get(side).getPosition().getZ() + zDistance);
          tempPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
 

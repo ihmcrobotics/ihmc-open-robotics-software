@@ -7,6 +7,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -28,32 +29,30 @@ public class ContinuousPlanner
 {
    public enum PlanningMode
    {
-      EXECUTE_AND_PAUSE, WALK_STRAIGHT, MAX_COVERAGE, ACTIVE_SEARCH
+      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL
    }
+
+   private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
+
+   private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private final Mat gridColor = new Mat();
 
-   private final FootstepPlanningModule footstepPlanner;
-   private final HumanoidReferenceFrames referenceFrames;
-   private MonteCarloPlanner monteCarloPlanner;
-
-   private FootstepPlannerOutput plannerOutput;
-
-   private Point2D gridOrigin = new Point2D(0.0, -1.0);
-
-   private SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-
+   private final Point2D gridOrigin = new Point2D(0.0, -1.0);
    private final Point2D goalPosition = new Point2D();
    private final Point2D goalPositionIndices = new Point2D();
-
    private final Point2D agentPosition = new Point2D();
    private final Point2D agentPositionIndices = new Point2D();
-
    private final Point2D robotLocation = new Point2D();
    private final Point2D robotLocationIndices = new Point2D();
 
+   private HumanoidReferenceFrames referenceFrames;
+   private FootstepPlanningModule footstepPlanner;
+   private MonteCarloPlanner monteCarloPlanner;
+   private FootstepPlannerOutput plannerOutput;
    private FootstepPlanningResult footstepPlanningResult;
+
    private boolean initialized = false;
    private boolean planAvailable = false;
    private boolean active;
@@ -64,92 +63,99 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
-      footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
 
       active = true;
 
       switch (mode)
       {
-         case MAX_COVERAGE:
+         case FRONTIER_EXPANSION:
             monteCarloPlanner = new MonteCarloPlanner(offset);
+            break;
+         case WALK_TO_GOAL:
+            footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
             break;
       }
    }
 
-   public void updatePlan(PlanarRegionMap planarRegionMap)
+   public void generatePlanWithPlanarRegionMap(PlanarRegionMap planarRegionMap)
    {
-      MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
-      MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
-      MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
-
-      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
-
-      if (active)
+      if (mode == PlanningMode.FRONTIER_EXPANSION)
       {
-         LogTools.info("Footstep Planning Request");
+         MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
+         MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
+         MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
 
-         startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
-         startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
-         goalPose.get(RobotSide.LEFT).setToZero();
-         goalPose.get(RobotSide.RIGHT).setToZero();
+         PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
 
-         robotLocation.set((startPose.get(RobotSide.LEFT).getX() + startPose.get(RobotSide.RIGHT).getX()) / 2.0f, (startPose.get(RobotSide.LEFT).getY() + startPose.get(RobotSide.RIGHT).getY()) / 2.0f);
-
-         //Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
-         //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, goalPose.get(RobotSide.LEFT, goalPose.get(RobotSide.RIGHT), 0.6f);
-         //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
-
-         monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
-
-
-         agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
-
-         robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
-                                  ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
-
-         double error = agentPositionIndices.distance(robotLocationIndices);
-
-         LogTools.info("Error: {}, Robot Position: {}, Agent Position: {}", error, robotLocationIndices, agentPositionIndices);
-
-         if (error < 10.0f)
+         if (active)
          {
-            goalPositionIndices.set(monteCarloPlanner.plan());
-            goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
-                             ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+            LogTools.info("Footstep Planning Request");
 
-            monteCarloPlanner.updateState(goalPositionIndices);
+            startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
+            startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+            goalPose.get(RobotSide.LEFT).setToZero();
+            goalPose.get(RobotSide.RIGHT).setToZero();
+
+            robotLocation.set((startPose.get(RobotSide.LEFT).getX() + startPose.get(RobotSide.RIGHT).getX()) / 2.0f,
+                              (startPose.get(RobotSide.LEFT).getY() + startPose.get(RobotSide.RIGHT).getY()) / 2.0f);
+
+            //Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
+            //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, goalPose.get(RobotSide.LEFT, goalPose.get(RobotSide.RIGHT), 0.6f);
+            //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
+
+            monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
+
+            agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
+
+            robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
+                                     ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
+
+            double error = agentPositionIndices.distance(robotLocationIndices);
+
+            LogTools.info("Error: {}, Robot Position: {}, Agent Position: {}", error, robotLocationIndices, agentPositionIndices);
+
+            if (error < 10.0f)
+            {
+               goalPositionIndices.set(monteCarloPlanner.plan());
+               goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                                ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+
+               monteCarloPlanner.updateState(goalPositionIndices);
+            }
+
+            float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
+
+            LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
+
+            Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
+            goalPose.get(RobotSide.LEFT).set(goalPoseToUse);
+            goalPose.get(RobotSide.RIGHT).set(goalPoseToUse);
+            goalPose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
+            goalPose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
+
+            FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
+            request.setPlanarRegionsList(planarRegionMap.getMapRegions());
+            plannerOutput = footstepPlanner.handleRequest(request);
+
+            if (plannerOutput != null)
+            {
+               FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+               LogTools.info("Footstep Planning Result: {}", footstepPlanningResult);
+               LogTools.info(String.format("Planar Regions: %d\t, First Area: %.2f\t Plan Length: %d\n",
+                                           planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
+                                           planarRegionMap.getMapRegions().getPlanarRegion(0).getArea(),
+                                           footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps()));
+
+               planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
+            }
          }
-
-         float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
-
-         LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
-
-         Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
-         goalPose.get(RobotSide.LEFT).set(goalPoseToUse);
-         goalPose.get(RobotSide.RIGHT).set(goalPoseToUse);
-         goalPose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
-         goalPose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
-
-         FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
-         request.setPlanarRegionsList(planarRegionMap.getMapRegions());
-         plannerOutput = footstepPlanner.handleRequest(request);
-
-         if (plannerOutput != null)
-         {
-            FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
-            LogTools.info("Footstep Planning Result: {}", footstepPlanningResult);
-            LogTools.info(String.format("Planar Regions: %d\t, First Area: %.2f\t Plan Length: %d\n",
-                                        planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
-                                        planarRegionMap.getMapRegions().getPlanarRegion(0).getArea(),
-                                        footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps()));
-
-            planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
-         }
-
       }
    }
 
-   public FootstepPlannerOutput updatePlan(HeightMapData heightMapData, SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose, RobotSide stanceSide)
+   public FootstepPlannerOutput planToGoalWithHeightMap(HeightMapData heightMapData,
+                                                        SideDependentList<FramePose3D> startPose,
+                                                        SideDependentList<FramePose3D> goalPose,
+                                                        RobotSide stanceSide)
    {
       if (footstepPlanner.isPlanning())
       {
@@ -172,10 +178,40 @@ public class ContinuousPlanner
          footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
          planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
 
-         LogTools.info(String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s", footstepPlanningResult,
-                                     footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(), planAvailable, stanceSide));
+         LogTools.info(String.format("Plan Result: %s, Steps: %d, Result: %s, Initial Stance: %s",
+                                     footstepPlanningResult,
+                                     footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(),
+                                     planAvailable,
+                                     stanceSide));
       }
 
+      return plannerOutput;
+   }
+
+   public FootstepPlannerOutput planToExploreWithHeightMap(HeightMapData heightMapData)
+   {
+      MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
+      MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
+      MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
+
+      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+
+      if (active)
+      {
+         LogTools.info("Footstep Planning Request");
+
+         FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
+         request.setHeightMapData(heightMapData);
+         plannerOutput = footstepPlanner.handleRequest(request);
+
+         if (plannerOutput != null)
+         {
+            FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+            LogTools.info("Footstep Planning Result: {}", footstepPlanningResult);
+            LogTools.info(String.format("Plan Length: %d\n", footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps()));
+            planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
+         }
+      }
       return plannerOutput;
    }
 
@@ -218,7 +254,62 @@ public class ContinuousPlanner
       return footstepDataListMessage;
    }
 
-   public SideDependentList<FramePose3D> updateimminentStance(FramePose3D firstImminentFootstep,
+   public void getGoalWaypointPoses(FixedReferenceFrame originalReferenceFrame,
+                                    SideDependentList<FramePose3D> originalPoseToPlanFrom,
+                                    SideDependentList<FramePose3D> startPose,
+                                    SideDependentList<FramePose3D> goalPoseToPack,
+                                    ContinuousPlanningParameters continuousPlanningParameters,
+                                    int multiiplier)
+   {
+      switch (this.mode)
+      {
+         case WALK_TO_GOAL:
+            ActiveMappingTools.setStraightGoalPoses(originalReferenceFrame,
+                                                    multiiplier,
+                                                    originalPoseToPlanFrom,
+                                                    startPose,
+                                                    goalPoseToPack,
+                                                    (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
+                                                    (float) continuousPlanningParameters.getGoalPoseUpDistance());
+            break;
+         case FRONTIER_EXPANSION:
+            //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
+            break;
+         case ACTIVE_SEARCH:
+         {
+            robotLocation.set((startPose.get(RobotSide.LEFT).getX() + startPose.get(RobotSide.RIGHT).getX()) / 2.0f,
+                              (startPose.get(RobotSide.LEFT).getY() + startPose.get(RobotSide.RIGHT).getY()) / 2.0f);
+
+            monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
+            agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
+            robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
+                                     ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
+
+            double error = agentPositionIndices.distance(robotLocationIndices);
+
+            if (error < 10.0f)
+            {
+               goalPositionIndices.set(monteCarloPlanner.plan());
+               goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                                ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+
+               monteCarloPlanner.updateState(goalPositionIndices);
+            }
+
+            float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
+
+            LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
+
+            Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
+            goalPoseToPack.get(RobotSide.LEFT).set(goalPoseToUse);
+            goalPoseToPack.get(RobotSide.RIGHT).set(goalPoseToUse);
+            goalPoseToPack.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
+            goalPoseToPack.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
+         }
+      }
+   }
+
+   public SideDependentList<FramePose3D> updateImminentStance(FramePose3D firstImminentFootstep,
                                                               FramePose3D secondImminentFootstep,
                                                               RobotSide secondImminentFootstepSide)
    {

@@ -9,7 +9,6 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;

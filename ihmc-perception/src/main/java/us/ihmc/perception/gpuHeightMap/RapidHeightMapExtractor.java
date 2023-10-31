@@ -138,7 +138,7 @@ public class RapidHeightMapExtractor
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
-      croppingKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "croppingKernel");
+      //croppingKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "croppingKernel");
       terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
       contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
       
@@ -202,10 +202,10 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 5, sensorToGroundTransformBuffer.getOpenCLBufferObject());
 
          // Set kernel arguments for the cropping kernel
-         openCLManager.setKernelArgument(croppingKernel, 0, globalHeightMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(croppingKernel, 1, sensorCroppedHeightMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(croppingKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(croppingKernel, 3, groundToWorldTransformBuffer.getOpenCLBufferObject());
+         //openCLManager.setKernelArgument(croppingKernel, 0, globalHeightMapImage.getOpenCLImageObject());
+         //openCLManager.setKernelArgument(croppingKernel, 1, sensorCroppedHeightMapImage.getOpenCLImageObject());
+         //openCLManager.setKernelArgument(croppingKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         //openCLManager.setKernelArgument(croppingKernel, 3, groundToWorldTransformBuffer.getOpenCLBufferObject());
 
          // Set kernel arguments for the terrain cost kernel
          openCLManager.setKernelArgument(terrainCostKernel, 0, globalHeightMapImage.getOpenCLImageObject());
@@ -220,14 +220,14 @@ public class RapidHeightMapExtractor
          // Execute kernels with length and width parameters
          openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
          openCLManager.execute2D(heightMapRegistrationKernel, globalCellsPerAxis, globalCellsPerAxis);
-         openCLManager.execute2D(croppingKernel, CROP_WINDOW_SIZE, CROP_WINDOW_SIZE);
+         //openCLManager.execute2D(croppingKernel, CROP_WINDOW_SIZE, CROP_WINDOW_SIZE);
          openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
          openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
 
          // Read height map image into CPU memory
          localHeightMapImage.readOpenCLImage(openCLManager);
          globalHeightMapImage.readOpenCLImage(openCLManager);
-         sensorCroppedHeightMapImage.readOpenCLImage(openCLManager);
+         //sensorCroppedHeightMapImage.readOpenCLImage(openCLManager);
          terrainCostImage.readOpenCLImage(openCLManager);
          contactMapImage.readOpenCLImage(openCLManager);
 
@@ -328,9 +328,9 @@ public class RapidHeightMapExtractor
       return getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
    }
 
-   public BytedecoImage getSensorCroppedHeightMapImage()
+   public Mat getSensorCroppedHeightMapImage()
    {
-      return sensorCroppedHeightMapImage;
+      return getCroppedGlobalHeightMapImage();
    }
 
    public Mat getCroppedTerrainCostImage()
