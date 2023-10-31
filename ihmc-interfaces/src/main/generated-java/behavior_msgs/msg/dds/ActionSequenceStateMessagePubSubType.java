@@ -15,7 +15,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3122c1ed4d9b3677d142dc5d1ca268579f1db3ba75354daeb631af75781e5344";
+   		return "10bbc8d0405e20bbaf0e9a06df0f1ccad02d19f415e022a1d5917a3ce8442d81";
    }
    
    @Override
@@ -60,6 +60,9 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,6 +86,11 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getNextActionRejectionTooltip().length() + 1;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +103,12 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_3(data.getExecutionNextIndex());
 
+      if(data.getNextActionRejectionTooltip().length() <= 255)
+      cdr.write_type_d(data.getNextActionRejectionTooltip());else
+          throw new RuntimeException("next_action_rejection_tooltip field exceeds the maximum length");
+
+      cdr.write_type_7(data.getManualExecutionRequested());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ActionSequenceStateMessage data, us.ihmc.idl.CDR cdr)
@@ -104,6 +118,9 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setAutomaticExecution(cdr.read_type_7());
       	
       data.setExecutionNextIndex(cdr.read_type_3());
+      	
+      cdr.read_type_d(data.getNextActionRejectionTooltip());	
+      data.setManualExecutionRequested(cdr.read_type_7());
       	
 
    }
@@ -117,6 +134,8 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_7("automatic_execution", data.getAutomaticExecution());
       ser.write_type_3("execution_next_index", data.getExecutionNextIndex());
+      ser.write_type_d("next_action_rejection_tooltip", data.getNextActionRejectionTooltip());
+      ser.write_type_7("manual_execution_requested", data.getManualExecutionRequested());
    }
 
    @Override
@@ -128,6 +147,8 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       data.setAutomaticExecution(ser.read_type_7("automatic_execution"));
       data.setExecutionNextIndex(ser.read_type_3("execution_next_index"));
+      ser.read_type_d("next_action_rejection_tooltip", data.getNextActionRejectionTooltip());
+      data.setManualExecutionRequested(ser.read_type_7("manual_execution_requested"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionSequenceStateMessage src, behavior_msgs.msg.dds.ActionSequenceStateMessage dest)

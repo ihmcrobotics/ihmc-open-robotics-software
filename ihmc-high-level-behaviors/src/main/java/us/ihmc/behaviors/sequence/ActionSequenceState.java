@@ -11,6 +11,8 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
    private ActionNodeExecutor<?, ?> lastCurrentlyExecutingAction = null;
+   private String nextActionRejectionTooltip = "";
+   private boolean manualExecutionRequested = false;
 
    // This node enforces that all it's children are of a certain type
    private final List<ActionNodeState<ActionNodeDefinition>> actionChildren = new ArrayList<>();
@@ -63,6 +65,8 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       message.setAutomaticExecution(automaticExecution);
       message.setExecutionNextIndex(executionNextIndex);
+      message.setNextActionRejectionTooltip(nextActionRejectionTooltip);
+      message.setManualExecutionRequested(manualExecutionRequested);
    }
 
    public void fromMessage(ActionSequenceStateMessage message)
@@ -73,5 +77,64 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       automaticExecution = message.getAutomaticExecution();
       executionNextIndex = message.getExecutionNextIndex();
+      nextActionRejectionTooltip = message.getNextActionRejectionTooltipAsString();
+      manualExecutionRequested = message.getManualExecutionRequested();
+   }
+
+   public void stepBackNextExecutionIndex()
+   {
+      if (executionNextIndex > 0)
+         --executionNextIndex;
+   }
+
+   public void stepForwardNextExecutionIndex()
+   {
+      if (executionNextIndex < getChildren().size())
+         ++executionNextIndex;
+   }
+
+   public void setExecutionNextIndex(int executionNextIndex)
+   {
+      this.executionNextIndex = executionNextIndex;
+   }
+
+   public int getExecutionNextIndex()
+   {
+      return executionNextIndex;
+   }
+
+   public void setNextActionRejectionTooltip(String nextActionRejectionTooltip)
+   {
+      this.nextActionRejectionTooltip = nextActionRejectionTooltip;
+   }
+
+   public String getNextActionRejectionTooltip()
+   {
+      return nextActionRejectionTooltip;
+   }
+
+   public boolean getAutomaticExecution()
+   {
+      return automaticExecution;
+   }
+
+   public void setAutomaticExecution(boolean automaticExecution)
+   {
+      this.automaticExecution = automaticExecution;
+   }
+
+   public void setManualExecutionRequested(boolean manualExecutionRequested)
+   {
+      this.manualExecutionRequested = manualExecutionRequested;
+   }
+
+   public boolean getManualExecutionRequested()
+   {
+      return manualExecutionRequested;
+   }
+
+   public List<ActionNodeState<ActionNodeDefinition>> getCurrentlyExecutingActions()
+   {
+      return currentlyExecutingActions;
    }
 }
