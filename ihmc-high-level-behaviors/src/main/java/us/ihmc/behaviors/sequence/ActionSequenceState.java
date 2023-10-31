@@ -75,10 +75,19 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       super.fromMessage(message.getState());
 
-      automaticExecution = message.getAutomaticExecution();
-      executionNextIndex = message.getExecutionNextIndex();
+      // Only modified by robot
       nextActionRejectionTooltip = message.getNextActionRejectionTooltipAsString();
+
+      // Only modified by operator
+
+      if (isFrozenFromModification()) // Can be modified by either
+      {
+         automaticExecution = message.getAutomaticExecution();
+      }
+
+      // TODO: Special cases
       manualExecutionRequested = message.getManualExecutionRequested();
+      executionNextIndex = message.getExecutionNextIndex();
    }
 
    public void stepBackNextExecutionIndex()
