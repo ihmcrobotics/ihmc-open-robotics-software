@@ -1,12 +1,32 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
+import java.io.File;
+import java.nio.file.Path;
+
+import javax.swing.UIManager;
+
+import org.lwjgl.glfw.GLFW;
+
 import com.jme3.system.NativeLibraryLoader;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import vhacd.VHACDParameters;
 import vhacd4.Vhacd4Parameters;
 
 public class MeshTerranObjectParameters
 {
+   static
+   {
+      Path scsCachePath = PathTools.systemTemporaryDirectory().resolve("SCSCache");
+
+      FileTools.ensureDirectoryExists(scsCachePath, DefaultExceptionHandler.PRINT_STACKTRACE);
+
+      System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + scsCachePath.toString());
+      NativeLibraryLoader.setCustomExtractionFolder(scsCachePath.toString());
+
+   }
    private int maximumNumberOfHulls = 20;
    private int maximumNumberOfVerticesPerHull = 64;
    private double maximumVolumePercentError = 0.01;
@@ -33,6 +53,7 @@ public class MeshTerranObjectParameters
 
    public void updateParameters()
    {
+      
       NativeLibraryLoader.loadNativeLibrary("bulletjme", true);
       this.vhacdParameters = new VHACDParameters();
       this.vhacd4Parameters = new Vhacd4Parameters();
