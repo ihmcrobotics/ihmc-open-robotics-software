@@ -1,6 +1,6 @@
 # File units = meters
-mtllib Walkway - SmallWalkway.mtl
-g SmallWalkway
+mtllib smallWalkway.mtl
+g smallWalkway
 v 1.25 1.43534 -0.275 
 v 1.25 -0.5 -0.275 
 v -1.25 -0.5 -0.275 

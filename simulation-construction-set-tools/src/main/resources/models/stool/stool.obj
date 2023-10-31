@@ -1,6 +1,6 @@
 # File units = meters
-mtllib Stool.mtl
-g Stool
+mtllib stool.mtl
+g stool
 v 0.075 0.375 0 
 v 0.075 0.3 0 
 v 0 0.3 0 

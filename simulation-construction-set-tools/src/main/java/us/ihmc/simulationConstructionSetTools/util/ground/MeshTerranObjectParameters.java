@@ -27,6 +27,7 @@ public class MeshTerranObjectParameters
       NativeLibraryLoader.setCustomExtractionFolder(scsCachePath.toString());
 
    }
+   
    private int maximumNumberOfHulls = 20;
    private int maximumNumberOfVerticesPerHull = 64;
    private double maximumVolumePercentError = 0.01;
@@ -48,13 +49,12 @@ public class MeshTerranObjectParameters
 
    public MeshTerranObjectParameters()
    {
+      NativeLibraryLoader.loadNativeLibrary("bulletjme", true);
       updateParameters();
    }
 
    public void updateParameters()
    {
-      
-      NativeLibraryLoader.loadNativeLibrary("bulletjme", true);
       this.vhacdParameters = new VHACDParameters();
       this.vhacd4Parameters = new Vhacd4Parameters();
       
