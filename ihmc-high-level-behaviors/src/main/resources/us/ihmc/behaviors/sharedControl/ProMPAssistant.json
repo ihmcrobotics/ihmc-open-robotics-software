@@ -1,12 +1,12 @@
 {
   "testNumberUseOnlyForTesting": 0,
   "taskToTest": "LeftPunch1",
-  "logging" : true,
+  "logging" : false,
   "numberBasisFunctions": 20,
-  "numberObservations": 50,
+  "numberObservations": 20,
   "conditionOnlyLastObservation": false,
   "conditioningStep": 4,
-  "useCustomSpeed": false,
+  "useCustomSpeed": true,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "postProcessingVelocityAdjuster": 1,
@@ -16,7 +16,7 @@
       "name": "LeftPunch0",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 70,
+      "customSpeed": 80,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }

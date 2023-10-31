@@ -238,7 +238,6 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
                   {
                      pelvisTransformToWorld.getTranslation().addZ(pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO);
                      pelvisFrame.update();
-                     LogTools.info("Z {}", pelvisTransformToWorld.getTranslationZ());
                   }
                }
             }
@@ -249,13 +248,11 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
                {
                   pelvisTransformToWorld.getRotation().appendPitchRotation(-pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO);
                   pelvisFrame.update();
-                  LogTools.info(pelvisTransformToWorld.getRotation().getPitch());
                }
                else if (newPelvisPitchReference < 0.0)
                {
                   pelvisTransformToWorld.getRotation().setToPitchOrientation(0.0);
                   pelvisFrame.update();
-                  LogTools.info(pelvisTransformToWorld.getRotation().getPitch());
                   pelvisControlState.switchToHeightControl();
                }
             }

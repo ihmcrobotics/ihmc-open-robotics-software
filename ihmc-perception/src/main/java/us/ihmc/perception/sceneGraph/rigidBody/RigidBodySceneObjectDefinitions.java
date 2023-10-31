@@ -75,7 +75,7 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform TARGET_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    static
    {
-      TARGET_TRANSFORM_TO_MARKER.getTranslation().set(-0.1, -TARGET_MARKER_WIDTH/2, TARGET_MARKER_WIDTH/2);
+      TARGET_TRANSFORM_TO_MARKER.getTranslation().set(0.0, -TARGET_MARKER_WIDTH/2, TARGET_MARKER_WIDTH/2);
    }
    public static final String TARGET_VISUAL_MODEL_FILE_PATH = "environmentObjects/target/target.g3dj";
    public static final RigidBodyTransform TARGET_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();

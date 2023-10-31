@@ -28,7 +28,6 @@ public class RDXVRPelvisControlState
 
     public boolean isHeightControlled()
     {
-        LogTools.info(state);
         return state == ControlState.HEIGHT;
     }
 
