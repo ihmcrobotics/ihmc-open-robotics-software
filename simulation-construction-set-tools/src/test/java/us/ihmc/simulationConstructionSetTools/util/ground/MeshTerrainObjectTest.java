@@ -160,19 +160,19 @@ public class MeshTerrainObjectTest
    @Test
    public void testCheckIfInside()
    {
-      // METHOD NOTR YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
+      // METHOD NOT YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
    }
 
    @Test
    public void testHeightAndNormalAt()
    {
-      // METHOD NOTR YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
+      // METHOD NOT YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
    }
 
    @Test
    public void testIsClose()
    {
-      // METHOD NOTR YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
+      // METHOD NOT YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
 
    }
 
