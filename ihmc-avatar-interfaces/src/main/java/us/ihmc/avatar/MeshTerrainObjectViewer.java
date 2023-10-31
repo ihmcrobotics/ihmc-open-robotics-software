@@ -15,15 +15,22 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-
+/**
+ * This class can be used to view convex decomposition results
+ *<p> Convex decomposition parameters can be tuned via YoVariables and once updateVisuals boolean is checked, the updated results will be shown
+ * Note: Not all the Convex Decompsoition parameters are available to tune currently. I have only included the one that would make the most impact.
+ * They can be added later
+ *</p>
+ * @author Khizar Mohammed Amjed Mohamed
+ */
 public class MeshTerrainObjectViewer
 {
-   private final YoInteger maxNoOfHulls;
-   private final YoInteger maxNoOfVertices;
-   private final YoInteger maxVoxelResolution;
+   private final YoInteger maximumNumberOfHulls;
+   private final YoInteger maximumNumberOfVerticesPerHull;
+   private final YoInteger maximumVoxelResolution;
 
-   private final YoDouble maxVolumePercentError;
-   private final YoDouble maxConcavity;
+   private final YoDouble maximumVolumetricPercentError;
+   private final YoDouble maximumConcavity;
 
    private final YoBoolean showOriginalMeshGraphics;
    private final YoBoolean showDecomposedMeshGraphics;
@@ -39,19 +46,19 @@ public class MeshTerrainObjectViewer
 
    private List<VisualDefinition> visuals = null;
 
-   private String relativeFilePath;
+   private String relativeFilePath = "models/Stool/Stool.obj";
 
    public MeshTerrainObjectViewer()
    {
 
       MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
 
-      maxNoOfHulls = new YoInteger("maxNoOfHulls", registry);
-      maxNoOfVertices = new YoInteger("maxNoOfVertices", registry);
-      maxVoxelResolution = new YoInteger("maxVoxelResolution", registry);
+      maximumNumberOfHulls = new YoInteger("maxNoOfHulls", registry);
+      maximumNumberOfVerticesPerHull = new YoInteger("maxNoOfVertices", registry);
+      maximumVoxelResolution = new YoInteger("maxVoxelResolution", registry);
 
-      maxVolumePercentError = new YoDouble("MaxVolumePercentError", registry);
-      maxConcavity = new YoDouble("MaxConcavity", registry);
+      maximumVolumetricPercentError = new YoDouble("MaxVolumePercentError", registry);
+      maximumConcavity = new YoDouble("MaxConcavity", registry);
 
       showOriginalMeshGraphics = new YoBoolean("ShowOriginalMeshGraphics", registry);
       showDecomposedMeshGraphics = new YoBoolean("ShowDecomposedMeshGraphics", registry);
@@ -59,12 +66,12 @@ public class MeshTerrainObjectViewer
       
       updateVisuals = new YoBoolean("UpdateVisuals", registry);
 
-      maxNoOfHulls.set(parameters.getMaxNoOfHulls());
-      maxNoOfVertices.set(parameters.getMaxNoOfVertices());
-      maxVoxelResolution.set(parameters.getVoxelResolution());
+      maximumNumberOfHulls.set(parameters.getMaxNoOfHulls());
+      maximumNumberOfVerticesPerHull.set(parameters.getMaxNoOfVertices());
+      maximumVoxelResolution.set(parameters.getVoxelResolution());
 
-      maxVolumePercentError.set(parameters.getMaxVolumePercentError());
-      maxConcavity.set(parameters.getMaxConvacity());
+      maximumVolumetricPercentError.set(parameters.getMaxVolumePercentError());
+      maximumConcavity.set(parameters.getMaxConvacity());
 
       showOriginalMeshGraphics.set(parameters.isShowUndecomposedMeshGraphics());
       showDecomposedMeshGraphics.set(parameters.isShowDecomposedMeshGraphics());
@@ -73,7 +80,7 @@ public class MeshTerrainObjectViewer
       scs = new SimulationConstructionSet2("MeshTerrainObjectViewer");
       scs.addRegistry(registry);
 
-      this.relativeFilePath = "models/Stool/Stool.obj";
+      
       this.parameters = new MeshTerranObjectParameters();
 
       updateParameters();
@@ -90,6 +97,7 @@ public class MeshTerrainObjectViewer
       meshTerrainObject = new MeshTerrainObject(relativeFilePath, parameters);
    }
 
+
    private void updateGraphics()
    {
       if (visuals != null)
@@ -101,12 +109,12 @@ public class MeshTerrainObjectViewer
    private void updateParameters()
    {
       // TODO Auto-generated method stub
-      this.parameters.setMaxNoOfHulls(maxNoOfHulls.getValue());
-      this.parameters.setMaxNoOfVertices(maxNoOfVertices.getValue());
-      this.parameters.setVoxelResolution(maxVoxelResolution.getValue());
+      this.parameters.setMaxNoOfHulls(maximumNumberOfHulls.getValue());
+      this.parameters.setMaxNoOfVertices(maximumNumberOfVerticesPerHull.getValue());
+      this.parameters.setVoxelResolution(maximumVoxelResolution.getValue());
 
-      this.parameters.setMaxVolumePercentError(maxVolumePercentError.getValue());
-      this.parameters.setMaxConvacity(maxConcavity.getValue());
+      this.parameters.setMaxVolumePercentError(maximumVolumetricPercentError.getValue());
+      this.parameters.setMaxConvacity(maximumConcavity.getValue());
 
       this.parameters.setShowDecomposedMeshGraphics(showDecomposedMeshGraphics.getValue());
       this.parameters.setShowUndecomposedMeshGraphics(showOriginalMeshGraphics.getValue());
