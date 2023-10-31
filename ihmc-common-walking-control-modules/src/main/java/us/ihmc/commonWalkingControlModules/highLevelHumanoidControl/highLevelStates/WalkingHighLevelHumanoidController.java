@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -27,21 +28,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.SingleSupportToTransferToCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartFlamingoCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartWalkingCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopFlamingoCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopWalkingFromSingleSupportCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopWalkingFromTransferCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.FlamingoStanceState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.StandingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToFlamingoStanceState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToStandingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToWalkingSingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -63,7 +51,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.nadia.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -83,6 +70,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider, SCS2YoGraphicHolder
 {
    private static final boolean ENABLE_LEG_ELASTICITY_DEBUGGATOR = false;
@@ -95,6 +87,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
+   private final NaturalPostureManager naturalPostureManager;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
@@ -168,6 +161,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
+      this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
@@ -265,7 +259,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
       {
-         // This guy can be used to add shearing forces to the feet while measuring the distance between them. Really useful to debug and identify elasticity in the legs.
+         /*
+          This guy can be used to add shearing forces to the feet while measuring the distance between them.
+          Really useful to debug and identify elasticity in the legs.
+         */
          legElasticityDebuggator = new LegElasticityDebuggator(controllerToolbox.getReferenceFrames(),
                                                                new SideDependentList<>(side -> feet.get(side).getRigidBody()),
                                                                yoTime,
@@ -515,18 +512,21 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFlamingoCommands();
 
-      privilegedConfigurationCommand.clear();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-
-      for (RobotSide robotSide : RobotSide.values)
+      if (naturalPostureManager == null || !naturalPostureManager.isEnabled())
       {
-         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
-         for (int i = 0; i < armJointNames.length; i++)
-            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+         privilegedConfigurationCommand.clear();
+         privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
-         OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+            for (int i = 0; i < armJointNames.length; i++)
+               privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
 
-         privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+            OneDoFJointBasics kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+            privilegedConfigurationCommand.addJoint(kneeJoint, walkingControllerParameters.getKneePrivilegedConfigurationParameters());
+         }
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -564,7 +564,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.initialize();
-      //      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
+      // balanceManager.initialize(); // already initialized, so don't run it again or else the state machine gets reset.
       feetManager.initialize();
       comHeightManager.initialize();
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
@@ -676,7 +676,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
 
-
       updateAndPublishFootstepQueueStatus();
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
@@ -759,11 +758,19 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.compute();
+      if (naturalPostureManager != null && naturalPostureManager.isEnabled())
+      {
+         naturalPostureManager.compute();
+      }
 
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
-      // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
+      /*
+       * The comHeightManager can control the pelvis with a feedback controller and doesn't always need
+       * the z component of the momentum command. It would be better to remove the coupling between these
+       * two modules.
+       */
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
@@ -869,7 +876,20 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       planeContactStateCommandPool.clear();
 
-      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      if (naturalPostureManager != null && naturalPostureManager.isEnabled())
+      {
+         //TODO could this be cleaner?
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPrivilegedConfigurationController()
+                                                                              .getInverseDynamicsCommand());
+         controllerCoreCommand.addFeedbackControlCommand(naturalPostureManager.getPrivilegedConfigurationController()
+                                                                              .getFeedbackControlCommand());
+      }
+      else
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      }
+
+      // Joint limits:
       if (!limitCommandSent.getBooleanValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
@@ -878,6 +898,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       boolean isHighCoPDampingNeeded = controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
+      // Foot control:
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
@@ -891,22 +912,46 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
-      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      // Body managers:
+      if (naturalPostureManager == null || naturalPostureManager.getUseBodyManagerCommands())
       {
-         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
-         if (bodyManager != null)
+         for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
          {
-            controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
-            controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
-
-            if (bodyManager.getJointDesiredData() != null)
+            RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+            if (bodyManager != null)
             {
-               controllerCoreCommand.completeLowLevelJointData(bodyManager.getJointDesiredData());
+               controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
+               controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
+
+               if (bodyManager.getJointDesiredData() != null)
+               {
+                  controllerCoreCommand.completeLowLevelJointData(bodyManager.getJointDesiredData());
+               }
             }
          }
       }
 
-      controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
+      // Natural posture:
+      if (naturalPostureManager != null && naturalPostureManager.isEnabled())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getJointLimitEnforcementCommand());
+         limitCommandSent.set(false);
+      }
+
+      // Privileged pelvis control:
+      if (naturalPostureManager != null && naturalPostureManager.getUsePelvisPrivilegedPoseCommand())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getPelvisPrivilegedPoseCommand());
+      }
+
+      // Higher-level pelvis control:
+      if (naturalPostureManager == null || naturalPostureManager.getUsePelvisOrientationCommand())
+      {
+         controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
+      }
+
+      // CoM height control:
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
