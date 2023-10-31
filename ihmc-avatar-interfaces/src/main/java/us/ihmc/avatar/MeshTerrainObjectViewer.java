@@ -46,7 +46,8 @@ public class MeshTerrainObjectViewer
 
    private List<VisualDefinition> visuals = null;
 
-   private String relativeFilePath = "models/Stool/Stool.obj";
+   //private String relativeFilePath = "models/stool/stool.obj";
+   private String relativeFilePath = "models/valley/valley.obj";
 
    public MeshTerrainObjectViewer()
    {
