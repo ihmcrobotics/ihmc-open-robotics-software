@@ -71,6 +71,11 @@ public class ROS2BehaviorTreeState
       behaviorTreeSubscription.destroy();
    }
 
+   public BehaviorTreeState getBehaviorTreeState()
+   {
+      return behaviorTreeState;
+   }
+
    public ROS2BehaviorTreeSubscription getBehaviorTreeSubscription()
    {
       return behaviorTreeSubscription;

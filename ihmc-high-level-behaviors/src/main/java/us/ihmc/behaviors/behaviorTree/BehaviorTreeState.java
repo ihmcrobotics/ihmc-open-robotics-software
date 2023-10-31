@@ -25,6 +25,7 @@ public class BehaviorTreeState
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier;
    private boolean localTreeFrozen = false;
+   private int numberOfNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
@@ -37,7 +38,18 @@ public class BehaviorTreeState
 
    public void update()
    {
+      numberOfNodes = 0;
+      update(rootNodeSupplier.get());
+   }
 
+   private void update(BehaviorTreeNode<?> node)
+   {
+      ++numberOfNodes;
+
+      for (BehaviorTreeNode<?> child : node.getChildren())
+      {
+         update(child);
+      }
    }
 
    public void modifyTree(Consumer<BehaviorTreeModificationQueue> modifier)
@@ -100,5 +112,10 @@ public class BehaviorTreeState
    public boolean getLocalTreeFrozen()
    {
       return localTreeFrozen;
+   }
+
+   public int getNumberOfNodes()
+   {
+      return numberOfNodes;
    }
 }
