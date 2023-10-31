@@ -16,7 +16,8 @@ public class ProMPLogger
       ProMPNativeLibrary.load();
    }
 
-   public void saveDemosAndLearnedTrajectories(String bodyPart, ProMP learnedProMP, TrajectoryGroup trainingTrajectories)
+   public void
+   saveDemosAndLearnedTrajectories(String bodyPart, ProMP learnedProMP, TrajectoryGroup trainingTrajectories)
    {
       TrajectoryVector demoTrajectories = trainingTrajectories.trajectories();
       for (int i = 0; i < demoTrajectories.size(); i++)

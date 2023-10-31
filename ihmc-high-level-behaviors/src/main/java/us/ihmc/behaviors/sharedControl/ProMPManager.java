@@ -90,7 +90,7 @@ public class ProMPManager
     * Load prelearned or learn the ProMPs for the task based on the demo training trajectories stored in .../promp/etc/demos
     * load/learn a ProMP for each bodyPart specified in the constructor of this class
     */
-   public void loadTaskFromDemos()
+   public void loadTaskFromDemos(boolean logThisTask)
    {
       String demoDirAbs = ProMPUtil.getDemosDirectory().toString();
       String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
@@ -182,7 +182,7 @@ public class ProMPManager
             learnedProMPs.put(entry.getKey(), new ProMP(trainingTrajectory, numberBasisFunctions));
             saveLearnedTask(demoTrainingDirAbs, entry.getKey());
          }
-         if (logEnabled)
+         if (logEnabled && logThisTask)
          {
             logger.saveDemosAndLearnedTrajectories(entry.getKey(), learnedProMPs.get(entry.getKey()), trainingTrajectory);
          }
