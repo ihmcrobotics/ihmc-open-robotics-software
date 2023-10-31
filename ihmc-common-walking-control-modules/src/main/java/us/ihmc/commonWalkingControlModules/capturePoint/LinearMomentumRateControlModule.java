@@ -116,8 +116,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
 
-   private boolean controlHeightWithMomentum;
-
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
 
@@ -137,6 +135,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoDesiredCoP = new YoFramePoint2D("desiredCoP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
@@ -145,6 +144,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
+   private final BooleanProvider useCenterOfPressureCommandOnly = new BooleanParameter("useCenterOfPressureCommandOnly", registry, false);
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
@@ -241,7 +241,10 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
+      /*
+       * TODO: The following is not being visualized since it is a duplicate for now.
+       */
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null);
 
       ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
 
@@ -297,7 +300,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
-      this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
+      this.controlHeightWithMomentum.set(input.getControlHeightWithMomentum());
       this.initializeOnStateChange = input.getInitializeOnStateChange();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
@@ -387,20 +390,18 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       success = success && computeDesiredLinearMomentumRateOfChange();
 
       selectionMatrix.setToLinearSelectionOnly();
-      selectionMatrix.selectLinearZ(controlHeightWithMomentum);
+      selectionMatrix.selectLinearX(!useCenterOfPressureCommandOnly.getValue());
+      selectionMatrix.selectLinearY(!useCenterOfPressureCommandOnly.getValue());
+      selectionMatrix.selectLinearZ(controlHeightWithMomentum.getBooleanValue());
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
-      centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP,
-                                                                       contactStateCommands,
-                                                                       bipedSupportPolygons.getFootPolygonsInSoleFrame());
-      centerOfPressureCommand.set(centerOfPressureCommandCalculator.getCenterOfPressureCommand());
+      centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP, contactStateCommands, bipedSupportPolygons.getFootPolygonsInSoleFrame());
 
       return success;
    }
-
 
    /**
     * Computes the achieved CMP location.
