@@ -21,7 +21,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,7 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ContinuousPlanningRemoteTask
+public class ContinuousPlannerSchedulingTask
 {
    private final static long CONTINUOUS_PLANNING_DELAY_BEFORE_NEXT_LOOP_MS = 50;
 
@@ -86,10 +85,10 @@ public class ContinuousPlanningRemoteTask
    IHMCROS2Publisher<RigidBodyTransformMessage> publisherForGoalPoses;
    IHMCROS2Publisher<RigidBodyTransformMessage> publisherForStartPoses;
 
-   public ContinuousPlanningRemoteTask(DRCRobotModel robotModel,
-                                       ROS2Node ros2Node,
-                                       HumanoidReferenceFrames referenceFrames,
-                                       ContinuousPlanningParameters continuousPlanningParameters)
+   public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
+                                          ROS2Node ros2Node,
+                                          HumanoidReferenceFrames referenceFrames,
+                                          ContinuousPlanningParameters continuousPlanningParameters)
    {
       this.referenceFrames = referenceFrames;
       this.continuousPlanningParameters = continuousPlanningParameters;

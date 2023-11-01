@@ -9,7 +9,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -30,19 +30,19 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
    private final ImBoolean pauseContinuousWalking = new ImBoolean(false);
    private final ImBoolean renderEnabled = new ImBoolean(true);
-   private final ContinuousPlanningRemoteTask continuousPlanningRemoteTask;
+   private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
    private final ContinuousPlanningParameters continuousPlanningParameters;
    private final RDXPanel panel;
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
    public RDXContinuousPlanningPanel(String name,
-                                     ContinuousPlanningRemoteTask continuousPlanningRemoteTask,
+                                     ContinuousPlannerSchedulingTask continuousPlanningRemoteTask,
                                      ContinuousPlanningParameters continuousPlanningParameters,
                                      ROS2SyncedRobotModel syncedRobot)
    {
       panel = new RDXPanel(name, this::renderImGuiWidgets);
-      this.continuousPlanningRemoteTask = continuousPlanningRemoteTask;
+      this.continuousPlannerSchedulingTask = continuousPlanningRemoteTask;
       this.continuousPlanningParameters = continuousPlanningParameters;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
@@ -66,7 +66,7 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    public void generateSwingGraphics()
    {
-      FootstepPlannerOutput plannerOutput = continuousPlanningRemoteTask.getContinuousPlanner().getPlannerOutput();
+      FootstepPlannerOutput plannerOutput = continuousPlannerSchedulingTask.getContinuousPlanner().getPlannerOutput();
 
       if (plannerOutput != null)
       {
@@ -92,8 +92,8 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       generateSwingGraphics();
       for (RobotSide side : RobotSide.values)
       {
-         startFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getStartPoseForFootstepPlanner().get(side));
-         goalFootstepGraphics.get(side).setPose(continuousPlanningRemoteTask.getGoalPoseForFootstepPlanner().get(side));
+         startFootstepGraphics.get(side).setPose(continuousPlannerSchedulingTask.getStartPoseForFootstepPlanner().get(side));
+         goalFootstepGraphics.get(side).setPose(continuousPlannerSchedulingTask.getGoalPoseForFootstepPlanner().get(side));
       }
    }
 

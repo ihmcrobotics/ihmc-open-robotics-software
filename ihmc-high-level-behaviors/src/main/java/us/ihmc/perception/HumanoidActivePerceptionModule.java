@@ -4,7 +4,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
@@ -28,7 +28,7 @@ public class HumanoidActivePerceptionModule
    private final Mat gridColor = new Mat();
 
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
-   private ContinuousPlanningRemoteTask continuousPlanningRemoteThread;
+   private ContinuousPlannerSchedulingTask continuousPlannerSchedulingThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private final ContinuousPlanningParameters continuousPlanningParameters;
@@ -52,7 +52,7 @@ public class HumanoidActivePerceptionModule
 
    public void initializeContinuousElevationMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousPlanningRemoteThread = new ContinuousPlanningRemoteTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
+      continuousPlannerSchedulingThread = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -108,12 +108,12 @@ public class HumanoidActivePerceptionModule
       if (activePlaneMappingRemoteThread != null)
          activePlaneMappingRemoteThread.destroy();
 
-      if (continuousPlanningRemoteThread != null)
-         continuousPlanningRemoteThread.destroy();
+      if (continuousPlannerSchedulingThread != null)
+         continuousPlannerSchedulingThread.destroy();
    }
 
-   public ContinuousPlanningRemoteTask getContinuousMappingRemoteThread()
+   public ContinuousPlannerSchedulingTask getContinuousMappingRemoteThread()
    {
-      return continuousPlanningRemoteThread;
+      return continuousPlannerSchedulingThread;
    }
 }
