@@ -158,9 +158,17 @@ public class ContinuousPlanner
       request.setHeightMapData(heightMapData);
       request.setAbortIfGoalStepSnappingFails(true);
 
-      FootstepPlannerOutput plannerOutput;
+      if (plannerOutput != null)
+      {
+         FootstepPlan previousFootstepPlan = plannerOutput.getFootstepPlan();
+         if (imminentFootstepSide == previousFootstepPlan.getFootstep(0).getRobotSide())
+         {
+            previousFootstepPlan.remove(0);
+         }
+         request.setReferencePlan(plannerOutput.getFootstepPlan());
+      }
+
       plannerOutput = footstepPlanner.handleRequest(request);
-      this.plannerOutput = plannerOutput;
 
       if (plannerOutput != null)
       {
@@ -289,11 +297,7 @@ public class ContinuousPlanner
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
-      request.setTimeout(0.15);
-
-      if (plannerOutput != null)
-         request.setReferencePlan(plannerOutput.getFootstepPlan());
-
+      request.setTimeout(0.25);
       return request;
    }
 
