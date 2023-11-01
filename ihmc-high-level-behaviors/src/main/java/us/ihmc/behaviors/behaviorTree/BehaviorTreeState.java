@@ -73,28 +73,6 @@ public class BehaviorTreeState extends Freezable
          update();
    }
 
-   public void countFrozenNodes()
-   {
-      numberOfFrozenNodes = 0;
-
-      BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = rootNodeSupplier.get();
-      if (rootNode != null)
-      {
-         checkTreeModified(rootNode.getState());
-      }
-   }
-
-   private void checkTreeModified(BehaviorTreeNodeState<?> localNode)
-   {
-      if (localNode.isFrozenFromModification())
-         ++numberOfFrozenNodes;
-
-      for (BehaviorTreeNodeState<?> child : localNode.getChildren())
-      {
-         checkTreeModified(child);
-      }
-   }
-
    public void toMessage(BehaviorTreeStateMessage message)
    {
       message.setNextId(nextID.longValue());

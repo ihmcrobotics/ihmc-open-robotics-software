@@ -50,10 +50,6 @@ public class ROS2BehaviorTreeSubscription
          subscriptionNodeDepthFirstIndex.setValue(0);
          buildSubscriptionTree(latestBehaviorTreeMessage, subscriptionRootNode);
 
-         // If the tree was recently modified by the operator, we do not accept
-         // updates the structure of the tree.
-         behaviorTreeState.countFrozenNodes();
-
          behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
 
          if (behaviorTreeState.getRootNode() != null)
