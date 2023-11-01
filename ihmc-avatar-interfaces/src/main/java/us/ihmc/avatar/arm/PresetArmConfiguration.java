@@ -6,5 +6,4 @@ public enum PresetArmConfiguration
    WIDE_ARMS,
    TUCKED_UP_ARMS,
    DOOR_AVOIDANCE,
-   SHIELD_HOLDING,
 }
