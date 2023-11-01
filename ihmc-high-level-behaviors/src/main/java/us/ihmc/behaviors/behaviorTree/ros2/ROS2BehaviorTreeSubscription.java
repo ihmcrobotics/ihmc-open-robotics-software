@@ -56,7 +56,7 @@ public class ROS2BehaviorTreeSubscription
 
          behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
 
-         if (behaviorTreeState.getRootNode() != null && )
+         if (behaviorTreeState.getRootNode() != null)
          {
             // First clear the tree, storing all nodes by ID in the map in the tree rebuilder
             behaviorTreeState.modifyTree(modificationQueue ->
@@ -86,6 +86,9 @@ public class ROS2BehaviorTreeSubscription
       {
          Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
          localNode = behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID);
+         // Set basic fields just to help in debugging and possibly reducing bugs
+         localNode.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
+         localNode.getState().fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
       }
 
       return localNode;
@@ -113,7 +116,7 @@ public class ROS2BehaviorTreeSubscription
       {
          anAncestorIsFrozen |= localNode.getState().isFrozenFromModification();
 
-         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = recallNodeByIDOrCreate(subscriptionChildNode, !anAncestorIsFrozen);
+         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = recallNodeByIDOrCreate(subscriptionChildNode, anAncestorIsFrozen);
 
          if (localChildNode != null)
          {
