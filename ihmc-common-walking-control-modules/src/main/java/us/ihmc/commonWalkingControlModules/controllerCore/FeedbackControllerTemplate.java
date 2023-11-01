@@ -150,6 +150,36 @@ public class FeedbackControllerTemplate
       this.allowDynamicControllerConstruction = allowDynamicControllerConstruction;
    }
 
+   public void enableControllersFromOtherTemplate(FeedbackControllerTemplate template)
+   {
+      for (RigidBodyBasics rigidBodyBasics : template.getSpatialFeedbackControllerTemplate().keySet())
+      {
+         Integer otherSize = template.getSpatialFeedbackControllerTemplate().get(rigidBodyBasics);
+         Integer currentSize = spatialFeedbackControllerTemplate.get(rigidBodyBasics);
+         if (currentSize == null || otherSize > currentSize)
+            spatialFeedbackControllerTemplate.put(rigidBodyBasics, otherSize);
+      }
+
+      for (RigidBodyBasics rigidBodyBasics : template.getOrientationFeedbackControllerTemplate().keySet())
+      {
+         Integer otherSize = template.getOrientationFeedbackControllerTemplate().get(rigidBodyBasics);
+         Integer currentSize = orientationFeedbackControllerTemplate.get(rigidBodyBasics);
+         if (currentSize == null || otherSize > currentSize)
+            orientationFeedbackControllerTemplate.put(rigidBodyBasics, otherSize);
+      }
+
+      for (RigidBodyBasics rigidBodyBasics : template.getPointFeedbackControllerTemplate().keySet())
+      {
+         Integer otherSize = template.getPointFeedbackControllerTemplate().get(rigidBodyBasics);
+         Integer currentSize = pointFeedbackControllerTemplate.get(rigidBodyBasics);
+         if (currentSize == null || otherSize > currentSize)
+            pointFeedbackControllerTemplate.put(rigidBodyBasics, otherSize);
+      }
+
+      oneDoFJointFeedbackControllerTemplate.addAll(template.getOneDoFJointFeedbackControllerTemplate());
+      enableCenterOfMassFeedbackController |= template.isCenterOfMassFeedbackControllerEnabled();
+   }
+
    /**
     * Requests a single spatial feedback controller for the given end-effector.
     * 

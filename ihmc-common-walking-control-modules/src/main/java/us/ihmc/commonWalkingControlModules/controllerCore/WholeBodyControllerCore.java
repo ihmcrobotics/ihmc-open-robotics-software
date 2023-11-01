@@ -139,6 +139,11 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       parentRegistry.addChild(registry);
    }
 
+   public void registerAdditionalControllers(FeedbackControllerTemplate template)
+   {
+      feedbackController.registerControllers(template);
+   }
+
    public void initialize()
    {
       feedbackController.initialize();
