@@ -2,6 +2,8 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.communication.crdt.CRDTNotification;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,16 +14,18 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private int executionNextIndex = 0;
    private ActionNodeExecutor<?, ?> lastCurrentlyExecutingAction = null;
    private String nextActionRejectionTooltip = "";
-   private boolean manualExecutionRequested = false;
+   private CRDTNotification manualExecutionRequested;
 
    // This node enforces that all it's children are of a certain type
    private final List<ActionNodeState<ActionNodeDefinition>> actionChildren = new ArrayList<>();
    // TODO: Review this
    private final List<ActionNodeState<ActionNodeDefinition>> currentlyExecutingActions = new ArrayList<>();
 
-   public ActionSequenceState(long id)
+   public ActionSequenceState(long id, ROS2ActorDesignation actorDesignation)
    {
       super(id, new ActionSequenceDefinition());
+
+      manualExecutionRequested = new CRDTNotification(ROS2ActorDesignation.OPERATOR, actorDesignation);
    }
 
    @Override
@@ -66,7 +70,8 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       message.setAutomaticExecution(automaticExecution);
       message.setExecutionNextIndex(executionNextIndex);
       message.setNextActionRejectionTooltip(nextActionRejectionTooltip);
-      message.setManualExecutionRequested(manualExecutionRequested);
+
+      manualExecutionRequested.toMessage(message.getManualExecutionRequested());
    }
 
    public void fromMessage(ActionSequenceStateMessage message)
@@ -85,8 +90,8 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
          automaticExecution = message.getAutomaticExecution();
       }
 
-      // TODO: Special cases
-      manualExecutionRequested = message.getManualExecutionRequested();
+      // Special cases
+      manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       executionNextIndex = message.getExecutionNextIndex();
    }
 
@@ -132,12 +137,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       this.automaticExecution = automaticExecution;
    }
 
-   public void setManualExecutionRequested(boolean manualExecutionRequested)
-   {
-      this.manualExecutionRequested = manualExecutionRequested;
-   }
-
-   public boolean getManualExecutionRequested()
+   public CRDTNotification getManualExecutionRequested()
    {
       return manualExecutionRequested;
    }
