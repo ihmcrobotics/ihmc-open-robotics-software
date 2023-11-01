@@ -150,7 +150,10 @@ public class FeedbackControllerTemplate
       this.allowDynamicControllerConstruction = allowDynamicControllerConstruction;
    }
 
-   public void enableControllersFromOtherTemplate(FeedbackControllerTemplate template)
+   /**
+    * Merges this template with another template. It essentially takes the largest number of feedback controllers for a given rigid body.
+    */
+   public void mergeWithOtherTemplate(FeedbackControllerTemplate template)
    {
       for (RigidBodyBasics rigidBodyBasics : template.getSpatialFeedbackControllerTemplate().keySet())
       {
