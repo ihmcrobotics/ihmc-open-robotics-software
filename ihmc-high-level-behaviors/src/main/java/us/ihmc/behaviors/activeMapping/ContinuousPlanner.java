@@ -50,11 +50,14 @@ public class ContinuousPlanner
    private final Point2D robotLocation = new Point2D();
    private final Point2D robotLocationIndices = new Point2D();
 
+   private FootstepPlan previouslySentPlanForReference;
    private HumanoidReferenceFrames referenceFrames;
    private FootstepPlanningModule footstepPlanner;
    private MonteCarloPlanner monteCarloPlanner;
    private FootstepPlannerOutput plannerOutput;
    private FootstepPlanningResult footstepPlanningResult;
+
+   private ContinuousPlanningParameters continuousPlanningParameters;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
@@ -82,8 +85,12 @@ public class ContinuousPlanner
 
    public void initialize()
    {
+      footstepPlanner.clearCustomTerminationConditions();
+      footstepPlanner.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize >= continuousPlanningParameters.getNumberOfStepsToSend());
+
       for (RobotSide side : RobotSide.values)
       {
+         startPose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
          goalPose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
          originalPoseToBaseGoalPoseFrom.get(side).getPosition().setX(goalPose.get(side).getPosition().getX());
          originalPoseToBaseGoalPoseFrom.get(side).getPosition().setY(goalPose.get(side).getPosition().getY());
@@ -98,6 +105,8 @@ public class ContinuousPlanner
 
    public void setGoalWaypointPoses(ContinuousPlanningParameters continuousPlanningParameters)
    {
+      this.continuousPlanningParameters = continuousPlanningParameters;
+
       switch (this.mode)
       {
          case WALK_TO_GOAL:
@@ -144,6 +153,11 @@ public class ContinuousPlanner
       }
    }
 
+   public void setPreviouslySentPlanForReference()
+   {
+      this.previouslySentPlanForReference = plannerOutput.getFootstepPlan();
+   }
+
    public FootstepPlannerOutput planToGoalWithHeightMap(HeightMapData heightMapData)
    {
       if (footstepPlanner.isPlanning())
@@ -165,7 +179,12 @@ public class ContinuousPlanner
          {
             previousFootstepPlan.remove(0);
          }
-         request.setReferencePlan(plannerOutput.getFootstepPlan());
+         request.setReferencePlan(previouslySentPlanForReference);
+         request.setTimeout(continuousPlanningParameters.getPlanningWithReferenceTimeout());
+      }
+      else
+      {
+         request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
       }
 
       plannerOutput = footstepPlanner.handleRequest(request);
@@ -297,7 +316,6 @@ public class ContinuousPlanner
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
-      request.setTimeout(0.25);
       return request;
    }
 
@@ -327,10 +345,11 @@ public class ContinuousPlanner
       return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 2.0, 1.0);
    }
 
-   public void updateImminentStance(FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
+   public void updateImminentStance(FramePose3D realRobotStancePose, FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
    {
       this.imminentFootstepPose.set(imminentFootstepPose);
       this.imminentFootstepSide = imminentFootstepSide;
+      startPose.get(imminentFootstepSide.getOppositeSide()).set(realRobotStancePose);
       startPose.get(imminentFootstepSide).set(imminentFootstepPose);
    }
 

@@ -43,11 +43,6 @@ public interface ContinuousPlanningParametersBasics extends ContinuousPlanningPa
       set(ContinuousPlanningParameters.goalPoseUpDistance, goalPoseUpDistance);
    }
 
-   default void setDistanceToGoalPose(double distanceToGoalPose)
-   {
-      set(ContinuousPlanningParameters.distanceToGoalPose, distanceToGoalPose);
-   }
-
    default void setSwingTime(double swingTime)
    {
       set(ContinuousPlanningParameters.swingTime, swingTime);
@@ -56,5 +51,15 @@ public interface ContinuousPlanningParametersBasics extends ContinuousPlanningPa
    default void setTransferTime(double transferTime)
    {
       set(ContinuousPlanningParameters.transferTime, transferTime);
+   }
+
+   default void setPlanningWithReferenceTimeout(double planningWithReferenceTimeout)
+   {
+      set(ContinuousPlanningParameters.planningWithReferenceTimeout, planningWithReferenceTimeout);
+   }
+
+   default void setInitialPlanningTimeout(double initialPlanningTimeout)
+   {
+      set(ContinuousPlanningParameters.initialPlanningTimeout, initialPlanningTimeout);
    }
 }

@@ -5,9 +5,10 @@
   "Only do planning" : false,
   "Number of steps to send" : 3,
   "Max number of steps to hold in controller queue" : 3,
-  "Goal pose forward distance" : 0.7,
+  "Goal pose forward distance" : 1.2,
   "Goal pose up distance" : 0.25,
-  "Distance to goal pose" : 0.7,
-  "Swing time" : 0.8,
-  "Transfer time" : 0.4
+  "Swing time" : 1.6,
+  "Transfer time" : 1.0,
+  "Planning with reference timeout" : 0.15,
+  "Initial planning timeout" : 0.5
 }

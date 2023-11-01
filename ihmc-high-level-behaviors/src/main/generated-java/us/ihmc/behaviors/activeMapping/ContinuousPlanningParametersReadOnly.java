@@ -45,11 +45,6 @@ public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetR
       return get(goalPoseUpDistance);
    }
 
-   default double getDistanceToGoalPose()
-   {
-      return get(distanceToGoalPose);
-   }
-
    default double getSwingTime()
    {
       return get(swingTime);
@@ -58,5 +53,15 @@ public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetR
    default double getTransferTime()
    {
       return get(transferTime);
+   }
+
+   default double getPlanningWithReferenceTimeout()
+   {
+      return get(planningWithReferenceTimeout);
+   }
+
+   default double getInitialPlanningTimeout()
+   {
+      return get(initialPlanningTimeout);
    }
 }

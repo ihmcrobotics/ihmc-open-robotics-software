@@ -20,8 +20,8 @@ public class ActiveMappingTools
                                                      float xDistance,
                                                      float zDistance)
    {
-      float offsetX = (float) (Math.random() * 0.3 - 0.15);
-      float offsetY = (float) (Math.random() * 0.3 - 0.15);
+      float offsetX = (float) (Math.random() * 0.1 - 0.05);
+      float offsetY = (float) (Math.random() * 0.1 - 0.05);
 
       for (RobotSide side : RobotSide.values)
       {
