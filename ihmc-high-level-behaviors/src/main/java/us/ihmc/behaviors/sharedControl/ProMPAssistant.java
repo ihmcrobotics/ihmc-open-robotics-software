@@ -318,10 +318,10 @@ public class ProMPAssistant
       }
       else
       {
-         double x = proMPManagers.get(currentTask).getMeanStartValueQX();
-         double y = proMPManagers.get(currentTask).getMeanStartValueQY();
-         double z = proMPManagers.get(currentTask).getMeanStartValueQZ();
-         double s = proMPManagers.get(currentTask).getMeanStartValueQS();
+         double x = proMPManagers.get(currentTask).getMeanStartValueQX(bodyPart);
+         double y = proMPManagers.get(currentTask).getMeanStartValueQY(bodyPart);
+         double z = proMPManagers.get(currentTask).getMeanStartValueQZ(bodyPart);
+         double s = proMPManagers.get(currentTask).getMeanStartValueQS(bodyPart);
 
          // Calculate the maximum absolute value
          double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.max(Math.abs(z), Math.abs(s))));
@@ -331,6 +331,7 @@ public class ProMPAssistant
              || (Math.abs(z) == max && Math.signum(z * quaternionToCheck.getZ()) == -1) || (Math.abs(s) == max && Math.signum(s * quaternionToCheck.getS()) == -1))
          {
             lastObservedPose.getOrientation().negate();
+            LogTools.warn("Negating quaternion of observations to match learned model");
          }
 
          previousObservedPose.put(bodyPart, new FramePose3D(lastObservedPose));
@@ -355,7 +356,7 @@ public class ProMPAssistant
                   {
                      taskGoalPose = new FramePose3D(objectPose);
                      // check resulting frame is not in the wrong 2pi range of quaternion [-2pi,2pi]. q = -q but the ProMPs do not know that
-                     if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * taskGoalPose.getOrientation().getS()) == -1)
+                     if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS(bodyPart) * taskGoalPose.getOrientation().getS()) == -1)
                         taskGoalPose.getOrientation().negate();
                   }
                   updateTask();

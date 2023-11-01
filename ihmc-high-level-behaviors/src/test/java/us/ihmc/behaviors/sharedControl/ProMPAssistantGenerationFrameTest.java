@@ -100,7 +100,7 @@ public class ProMPAssistantGenerationFrameTest
                                                                                      + "", objectFrame);
                if (proMPAssistant.startedProcessing() && !updatedSpeed.get(bodyPart))
                {
-                  proMPAssistant.setCustomSpeed(numberOfSamples);
+//                  proMPAssistant.setCustomSpeed(numberOfSamples);
                   updatedSpeed.replace(bodyPart, true);
                }
             }

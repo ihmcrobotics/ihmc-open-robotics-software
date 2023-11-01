@@ -39,10 +39,10 @@ import static us.ihmc.promp.presets.ProMPInfoMapper.EigenVectorXd;
 public class ProMPManager
 {
    private final String taskName;
-   private final HashMap<String, String> bodyPartsGeometry;
+   private final Map<String, String> bodyPartsGeometry;
    // learnedProMPs stores a set of multi-D (e.g., for pose D=6, for position D=3) proMPs. We have a multi-D proMP for each body part
-   private final HashMap<String, ProMP> learnedProMPs = new HashMap<>();
-   private final HashMap<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
+   private final Map<String, ProMP> learnedProMPs = new HashMap<>();
+   private final Map<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
    private final ProMPLogger logger = new ProMPLogger();
    private boolean logEnabled = false;
    private final int conditioningStep;
@@ -50,8 +50,8 @@ public class ProMPManager
    private final int numberBasisFunctions;
    private final long speedFactor;
    private final int numberOfInferredSpeeds;
-   private final double[] meanStartValuesQuaternion = new double[4];
-   private final double[] meanEndValuesQuaternion = new double[4];
+   private final Map<String, double[]> meanStartValuesQuaternion = new HashMap<>();
+   private final Map<String, double[]> meanEndValuesQuaternion = new HashMap<>();
    private final boolean useCustomSpeed;
    private final int customSpeed;
 
@@ -166,12 +166,14 @@ public class ProMPManager
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
          trainingTrajectories.put(entry.getKey(), trainingTrajectory);
          // get mean end value of quaternion components, will be used to check and eventually change sign of observed goal quaternion
+         meanStartValuesQuaternion.put(entry.getKey(), new double[4]);
+         meanEndValuesQuaternion.put(entry.getKey(), new double[4]);
          if (dofs.size() != 3) // if body part does not contain only position
          {
             for (int i = 0; i < 4; i++)
             {
-               meanStartValuesQuaternion[i] = trainingTrajectory.get_mean_start_value(i);
-               meanEndValuesQuaternion[i] = trainingTrajectory.get_mean_end_value(i);
+               meanStartValuesQuaternion.get(entry.getKey())[i] = trainingTrajectory.get_mean_start_value(i);
+               meanEndValuesQuaternion.get(entry.getKey())[i] = trainingTrajectory.get_mean_end_value(i);
             }
          }
          // check if file with learned parameters already exists otherwise learn the promps
@@ -673,38 +675,38 @@ public class ProMPManager
       return pointArray;
    }
 
-   public HashMap<String, String> getBodyPartsGeometry()
+   public Map<String, String> getBodyPartsGeometry()
    {
       return bodyPartsGeometry;
    }
 
-   public HashMap<String,ProMP> getLearnedProMPs()
+   public Map<String,ProMP> getLearnedProMPs()
    {
       return learnedProMPs;
    }
 
-   public double getMeanStartValueQX()
+   public double getMeanStartValueQX(String bodyPart)
    {
-      return meanStartValuesQuaternion[0];
+      return meanStartValuesQuaternion.get(bodyPart)[0];
    }
 
-   public double getMeanStartValueQY()
+   public double getMeanStartValueQY(String bodyPart)
    {
-      return meanStartValuesQuaternion[1];
+      return meanStartValuesQuaternion.get(bodyPart)[1];
    }
 
-   public double getMeanStartValueQZ()
+   public double getMeanStartValueQZ(String bodyPart)
    {
-      return meanStartValuesQuaternion[2];
+      return meanStartValuesQuaternion.get(bodyPart)[2];
    }
 
-   public double getMeanStartValueQS()
+   public double getMeanStartValueQS(String bodyPart)
    {
-      return meanStartValuesQuaternion[3];
+      return meanStartValuesQuaternion.get(bodyPart)[3];
    }
 
-   public double getMeanEndValueQS()
+   public double getMeanEndValueQS(String bodyPart)
    {
-      return meanEndValuesQuaternion[3];
+      return meanEndValuesQuaternion.get(bodyPart)[3];
    }
 }
