@@ -26,7 +26,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       {
          for (BehaviorTreeNodeExtension<?, ?, ?, ?> leftover : idToNodesMap.values())
          {
-            LogTools.info("DESTORY");
+            LogTools.info("Destroying node: {}:{}", leftover.getState().getDefinition().getDescription(), leftover.getState().getID());
             leftover.getState().destroy();
             if (leftover.getExtendedNode() != leftover.getState()) // FIXME Kinda weird
                leftover.destroy();

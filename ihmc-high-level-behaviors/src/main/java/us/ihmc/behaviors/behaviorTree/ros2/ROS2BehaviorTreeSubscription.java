@@ -70,8 +70,11 @@ public class ROS2BehaviorTreeSubscription
 
             BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
 
-            // The root node's parent is "null"
-            updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, modificationQueue, treeRootReferenceFrozen);
+            if (rootNode != null)
+            {
+               // The root node's parent is "null"
+               updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, modificationQueue, treeRootReferenceFrozen);
+            }
 
             modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
          });
@@ -86,9 +89,6 @@ public class ROS2BehaviorTreeSubscription
       {
          Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
          localNode = behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID);
-         // Set basic fields just to help in debugging and possibly reducing bugs
-         localNode.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
-         localNode.getState().fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
       }
 
       return localNode;
@@ -100,6 +100,9 @@ public class ROS2BehaviorTreeSubscription
                                                 BehaviorTreeModificationQueue modificationQueue,
                                                 boolean anAncestorIsFrozen)
    {
+      // Each state handles which fields it updates based on its frozen status
+      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
+
       // We just add nodes if they would not be part of a frozen subtree.
       if (!anAncestorIsFrozen)
       {
@@ -108,9 +111,6 @@ public class ROS2BehaviorTreeSubscription
          else
             modificationQueue.accept(new BehaviorTreeNodeExtensionAdd(localNode, localParentNode));
       }
-
-      // Each state handles which fields it updates based on its frozen status
-      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
