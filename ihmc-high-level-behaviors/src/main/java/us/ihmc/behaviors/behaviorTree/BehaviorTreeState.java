@@ -48,7 +48,7 @@ public class BehaviorTreeState extends Freezable
    private void update(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
    {
       ++numberOfNodes;
-      if (node.getState().isFrozenFromModification())
+      if (node.getState().isFrozen())
          ++numberOfFrozenNodes;
 
       for (Object child : node.getChildren())
@@ -80,13 +80,13 @@ public class BehaviorTreeState extends Freezable
 
    public void fromMessage(BehaviorTreeStateMessage message)
    {
-      if (!isFrozenFromModification())
+      if (!isFrozen())
          nextID.setValue(message.getNextId());
    }
 
    public long getAndIncrementNextID()
    {
-      freezeFromModification();
+      freeze();
       return nextID.getAndIncrement();
    }
 

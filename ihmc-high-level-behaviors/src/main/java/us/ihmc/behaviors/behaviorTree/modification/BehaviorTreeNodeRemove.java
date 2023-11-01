@@ -29,7 +29,7 @@ public class BehaviorTreeNodeRemove<T extends BehaviorTreeNode<T>> implements Be
       {
          if (parentNode instanceof Freezable freezableNode)
          {
-            freezableNode.freezeFromModification();
+            freezableNode.freeze();
          }
       }
       else

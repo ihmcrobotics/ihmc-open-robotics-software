@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WalkActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -12,9 +13,12 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
    private int totalNumberOfFootsteps;
    private int numberOfIncompleteFootsteps;
 
-   public WalkActionState(long id, FootstepPlannerParametersBasics footstepPlannerParameters, ReferenceFrameLibrary referenceFrameLibrary)
+   public WalkActionState(long id,
+                          ROS2ActorDesignation actorDesignation,
+                          FootstepPlannerParametersBasics footstepPlannerParameters,
+                          ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new WalkActionDefinition(footstepPlannerParameters));
+      super(id, new WalkActionDefinition(footstepPlannerParameters), actorDesignation);
 
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform());
    }

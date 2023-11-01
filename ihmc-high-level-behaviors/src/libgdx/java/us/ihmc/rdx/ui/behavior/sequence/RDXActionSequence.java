@@ -48,7 +48,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       if (ImGui.button(labels.get("<")))
       {
          getState().stepBackNextExecutionIndex();
-         getState().freezeFromModification();
+         getState().freeze();
       }
       ImGuiTools.previousWidgetTooltip("Go to previous action");
       ImGui.sameLine();
@@ -57,7 +57,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       if (ImGui.button(labels.get(">")))
       {
          getState().stepForwardNextExecutionIndex();
-         getState().freezeFromModification();
+         getState().freeze();
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
@@ -75,7 +75,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             ImGui.beginDisabled();
          automaticExecutionCheckbox.renderImGuiWidget();
          if (automaticExecutionCheckbox.changed())
-            getState().freezeFromModification();
+            getState().freeze();
          if (!canExecuteNextAction)
             ImGui.endDisabled();
 
@@ -87,14 +87,15 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             if (!canExecuteNextAction)
             ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
             boolean confirmationState = manualExecutionOverrideTimer.isRunning(5.0);
-            boolean disableManuallyExecuteButton = getState().getManualExecutionRequested().peek();
+            boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
             if (disableManuallyExecuteButton)
                ImGui.beginDisabled();
             if (ImGui.button(labels.get(confirmationState ? "Manually (confirm)" : "Manually")))
             {
                if (canExecuteNextAction || confirmationState)
                {
-                  getState().getManualExecutionRequested().set();
+                  getState().setManualExecutionRequested(true);
+                  getState().freeze();
                }
                else
                {

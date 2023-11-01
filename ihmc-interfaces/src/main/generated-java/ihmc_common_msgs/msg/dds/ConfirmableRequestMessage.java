@@ -7,40 +7,39 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * A way of sending a notification via CRDT synced state messages.
-       * By using 3 values, we can set a notification and receive a
-       * confirmation that the other side polled it without sync errors.
+       * A way of avoiding local data get overriden before
+       * it is received by peers.
        */
-public class CRDTNotificationMessage extends Packet<CRDTNotificationMessage> implements Settable<CRDTNotificationMessage>, EpsilonComparable<CRDTNotificationMessage>
+public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage> implements Settable<ConfirmableRequestMessage>, EpsilonComparable<ConfirmableRequestMessage>
 {
    /**
-          * Nothing special has happened. This should have no effect of subscribers.
+          * Nothing special has happened. This should trigger no effects.
           */
    public static final byte NOOP = (byte) 0;
    /**
-          * A set of the notification on the other side has been requested.
+          * This message is a request to change something.
           */
-   public static final byte SET_REQUEST = (byte) 1;
+   public static final byte REQUEST = (byte) 1;
    /**
-          * Confirmation that the notification has been polled by the other side.
+          * Confirmation that the request has been received by the other side.
           */
-   public static final byte POLL_CONFIRMED = (byte) 2;
+   public static final byte CONFIRMATION = (byte) 2;
    /**
             * Holds one of the above constant values.
             */
    public int value_;
 
-   public CRDTNotificationMessage()
+   public ConfirmableRequestMessage()
    {
    }
 
-   public CRDTNotificationMessage(CRDTNotificationMessage other)
+   public ConfirmableRequestMessage(ConfirmableRequestMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(CRDTNotificationMessage other)
+   public void set(ConfirmableRequestMessage other)
    {
       value_ = other.value_;
 
@@ -62,19 +61,19 @@ public class CRDTNotificationMessage extends Packet<CRDTNotificationMessage> imp
    }
 
 
-   public static Supplier<CRDTNotificationMessagePubSubType> getPubSubType()
+   public static Supplier<ConfirmableRequestMessagePubSubType> getPubSubType()
    {
-      return CRDTNotificationMessagePubSubType::new;
+      return ConfirmableRequestMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return CRDTNotificationMessagePubSubType::new;
+      return ConfirmableRequestMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(CRDTNotificationMessage other, double epsilon)
+   public boolean epsilonEquals(ConfirmableRequestMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -89,9 +88,9 @@ public class CRDTNotificationMessage extends Packet<CRDTNotificationMessage> imp
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof CRDTNotificationMessage)) return false;
+      if(!(other instanceof ConfirmableRequestMessage)) return false;
 
-      CRDTNotificationMessage otherMyClass = (CRDTNotificationMessage) other;
+      ConfirmableRequestMessage otherMyClass = (ConfirmableRequestMessage) other;
 
       if(this.value_ != otherMyClass.value_) return false;
 
@@ -104,7 +103,7 @@ public class CRDTNotificationMessage extends Packet<CRDTNotificationMessage> imp
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("CRDTNotificationMessage {");
+      builder.append("ConfirmableRequestMessage {");
       builder.append("value=");
       builder.append(this.value_);
       builder.append("}");

@@ -18,6 +18,6 @@ public class BehaviorTreeNodeAddAndFreeze<T extends BehaviorTreeNode<T>> extends
    {
       super.performOperation();
       if (getParent() instanceof Freezable freezableParent)
-         freezableParent.freezeFromModification();
+         freezableParent.freeze();
    }
 }

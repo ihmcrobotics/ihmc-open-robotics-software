@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.tools.Timer;
+import us.ihmc.commons.Conversions;
 
 /**
  * Part of a simple CRDT algorithm where something is frozen when modified
@@ -17,19 +17,28 @@ public class Freezable
     */
    public static final double FREEZE_DURATION_ON_MODIFICATION = 1.0;
    /**
-    * This timer is used in the case that an operator can "mark modified" this node's
+    * This time is used as a time of modification of this node's
     * data so it won't accept updates from other sources for a short period of time.
     * This is to allow the changes to propagate elsewhere.
+    *
+    * Setting it to MIN_VALUE effectively unfreezes the node.
     */
-   private final Timer modifiedTimer = new Timer();
+   private double freezeTime = Double.MIN_VALUE;
 
-   public void freezeFromModification()
+   public void freeze()
    {
-      modifiedTimer.reset();
+      freezeTime = Conversions.nanosecondsToSeconds(System.nanoTime());
    }
 
-   public boolean isFrozenFromModification()
+   public boolean isFrozen()
    {
-      return modifiedTimer.isRunning(FREEZE_DURATION_ON_MODIFICATION);
+      double now = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      return now - freezeTime < FREEZE_DURATION_ON_MODIFICATION;
+   }
+
+   public void unfreeze()
+   {
+      freezeTime = Double.MIN_VALUE;
    }
 }

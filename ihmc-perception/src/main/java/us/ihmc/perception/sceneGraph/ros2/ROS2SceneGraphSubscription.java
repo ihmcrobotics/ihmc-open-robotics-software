@@ -160,7 +160,7 @@ public class ROS2SceneGraphSubscription
 
    private void checkTreeModified(SceneNode localNode)
    {
-      localTreeFrozen |= localNode.isFrozenFromModification();
+      localTreeFrozen |= localNode.isFrozen();
 
       for (SceneNode child : localNode.getChildren())
       {

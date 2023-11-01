@@ -27,13 +27,13 @@ public class BehaviorTreeNodeMove<T extends BehaviorTreeNode<T>> implements Beha
    {
       previousParent.getChildren().remove(nodeToMove);
       if (previousParent instanceof Freezable freezableParent)
-         freezableParent.freezeFromModification();
+         freezableParent.freeze();
    }
 
    protected void doAddPart()
    {
       newParent.getChildren().add(nodeToMove);
       if (newParent instanceof Freezable freezableParent)
-         freezableParent.freezeFromModification();
+         freezableParent.freeze();
    }
 }

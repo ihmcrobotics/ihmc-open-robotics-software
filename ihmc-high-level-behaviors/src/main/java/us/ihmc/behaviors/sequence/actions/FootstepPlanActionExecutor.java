@@ -9,6 +9,7 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -57,7 +58,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new FootstepPlanActionState(id, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, ROS2ActorDesignation.ROBOT, referenceFrameLibrary);
    }
 
    @Override

@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.actions;
 import imgui.ImGui;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -15,7 +16,7 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
 
    public RDXWaitDurationAction(long id)
    {
-      state = new WaitDurationActionState(id);
+      state = new WaitDurationActionState(id, ROS2ActorDesignation.OPERATOR);
 
       waitDurationWidget = new ImDoubleWrapper(getDefinition()::getWaitDuration,
                                                getDefinition()::setWaitDuration,

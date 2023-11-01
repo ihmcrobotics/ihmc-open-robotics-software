@@ -31,14 +31,13 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
    /**
             * Request manual execution of the next action
             */
-   public ihmc_common_msgs.msg.dds.CRDTNotificationMessage manual_execution_requested_;
+   public boolean manual_execution_requested_;
 
    public ActionSequenceStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ActionSequenceDefinitionMessage();
       next_action_rejection_tooltip_ = new java.lang.StringBuilder(255);
-      manual_execution_requested_ = new ihmc_common_msgs.msg.dds.CRDTNotificationMessage();
    }
 
    public ActionSequenceStateMessage(ActionSequenceStateMessage other)
@@ -58,7 +57,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       next_action_rejection_tooltip_.setLength(0);
       next_action_rejection_tooltip_.append(other.next_action_rejection_tooltip_);
 
-      ihmc_common_msgs.msg.dds.CRDTNotificationMessagePubSubType.staticCopy(other.manual_execution_requested_, manual_execution_requested_);
+      manual_execution_requested_ = other.manual_execution_requested_;
+
    }
 
 
@@ -133,11 +133,17 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       return next_action_rejection_tooltip_;
    }
 
-
    /**
             * Request manual execution of the next action
             */
-   public ihmc_common_msgs.msg.dds.CRDTNotificationMessage getManualExecutionRequested()
+   public void setManualExecutionRequested(boolean manual_execution_requested)
+   {
+      manual_execution_requested_ = manual_execution_requested;
+   }
+   /**
+            * Request manual execution of the next action
+            */
+   public boolean getManualExecutionRequested()
    {
       return manual_execution_requested_;
    }
@@ -168,7 +174,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.next_action_rejection_tooltip_, other.next_action_rejection_tooltip_, epsilon)) return false;
 
-      if (!this.manual_execution_requested_.epsilonEquals(other.manual_execution_requested_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manual_execution_requested_, other.manual_execution_requested_, epsilon)) return false;
+
 
       return true;
    }
@@ -190,7 +197,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if (!us.ihmc.idl.IDLTools.equals(this.next_action_rejection_tooltip_, otherMyClass.next_action_rejection_tooltip_)) return false;
 
-      if (!this.manual_execution_requested_.equals(otherMyClass.manual_execution_requested_)) return false;
+      if(this.manual_execution_requested_ != otherMyClass.manual_execution_requested_) return false;
+
 
       return true;
    }

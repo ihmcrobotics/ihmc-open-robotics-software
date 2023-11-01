@@ -14,4 +14,4 @@ uint16 execution_next_index
 string next_action_rejection_tooltip
 
 # Request manual execution of the next action
-ihmc_common_msgs/CRDTNotificationMessage manual_execution_requested
+bool manual_execution_requested

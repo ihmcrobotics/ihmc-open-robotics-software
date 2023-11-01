@@ -16,9 +16,14 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
             * A node is active if it lies on the path of the current tree tick.
             */
    public boolean is_active_;
+   /**
+            * A mechanism for confirming and ending a freeze early
+            */
+   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage confirmable_request_;
 
    public BehaviorTreeNodeStateMessage()
    {
+      confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
    }
 
    public BehaviorTreeNodeStateMessage(BehaviorTreeNodeStateMessage other)
@@ -33,6 +38,7 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       is_active_ = other.is_active_;
 
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
    }
 
    /**
@@ -66,6 +72,15 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
    }
 
 
+   /**
+            * A mechanism for confirming and ending a freeze early
+            */
+   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage getConfirmableRequest()
+   {
+      return confirmable_request_;
+   }
+
+
    public static Supplier<BehaviorTreeNodeStateMessagePubSubType> getPubSubType()
    {
       return BehaviorTreeNodeStateMessagePubSubType::new;
@@ -87,6 +102,7 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_active_, other.is_active_, epsilon)) return false;
 
+      if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
 
       return true;
    }
@@ -104,6 +120,7 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
 
       if(this.is_active_ != otherMyClass.is_active_) return false;
 
+      if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
 
       return true;
    }
@@ -117,7 +134,9 @@ public class BehaviorTreeNodeStateMessage extends Packet<BehaviorTreeNodeStateMe
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
       builder.append("is_active=");
-      builder.append(this.is_active_);
+      builder.append(this.is_active_);      builder.append(", ");
+      builder.append("confirmable_request=");
+      builder.append(this.confirmable_request_);
       builder.append("}");
       return builder.toString();
    }
