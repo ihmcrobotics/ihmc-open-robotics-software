@@ -1,7 +1,7 @@
 {
   "testNumberUseOnlyForTesting": 0,
   "taskToTest": "LeftPunch1",
-  "logging" : false,
+  "logging" : true,
   "numberBasisFunctions": 20,
   "numberObservations": 20,
   "conditionOnlyLastObservation": false,

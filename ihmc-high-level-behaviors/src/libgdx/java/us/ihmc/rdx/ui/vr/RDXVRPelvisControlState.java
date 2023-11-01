@@ -4,7 +4,7 @@ import us.ihmc.log.LogTools;
 
 public class RDXVRPelvisControlState
 {
-    public static final double UPPER_LIMIT_PELVIS_PITCH = 0.28;
+    public static final double UPPER_LIMIT_PELVIS_PITCH = 0.30;
     public static final double UPPER_LIMIT_PELVIS_HEIGHT = 1.051;
     public static final double LOWER_LIMIT_PELVIS_HEIGHT = 0.65;
     public static final double LOWER_LIMIT_PELVIS_HEIGHT_WITH_BACK_BENDING = 0.84;

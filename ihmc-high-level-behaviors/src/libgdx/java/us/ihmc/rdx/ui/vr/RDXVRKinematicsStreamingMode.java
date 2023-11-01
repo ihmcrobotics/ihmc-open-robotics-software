@@ -219,12 +219,12 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
             double newPelvisHeightReference = pelvisTransformToWorld.getTranslationZ();
             if (pelvisControlState.isHeightControlled())
             {
+               LogTools.info("Z {}", pelvisTransformToWorld.getTranslationZ());
                newPelvisHeightReference += pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO;
                if (newPelvisHeightReference < UPPER_LIMIT_PELVIS_HEIGHT && newPelvisHeightReference > LOWER_LIMIT_PELVIS_HEIGHT)
                {
                   if (newPelvisHeightReference < LOWER_LIMIT_PELVIS_HEIGHT_WITH_BACK_BENDING)
                   {
-                     LogTools.info("Z {}", pelvisTransformToWorld.getTranslationZ());
                      double currentChestPitchReference = ghostFullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame().getRotation().getPitch();
                      if (currentChestPitchReference > 0.75 && pelvisTransformToWorld.getTranslationZ() >= LOWER_LIMIT_PELVIS_HEIGHT_WITH_BACK_BENDING)
                         pelvisControlState.switchToPitchControl();
