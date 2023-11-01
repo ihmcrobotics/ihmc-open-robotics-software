@@ -1,0 +1,46 @@
+#ifndef __ihmc_common_msgs__msg__CRDTNotificationMessage__idl__
+#define __ihmc_common_msgs__msg__CRDTNotificationMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * Nothing special has happened. This should have no effect of subscribers.
+       */
+      const octet NOOP =
+      0;
+
+      /**
+       * A set of the notification on the other side has been requested.
+       */
+      const octet SET_REQUEST =
+      1;
+
+      /**
+       * Confirmation that the notification has been polled by the other side.
+       */
+      const octet POLL_CONFIRMED =
+      2;
+
+
+      /**
+       * A way of sending a notification via CRDT synced state messages.
+       * By using 3 values, we can set a notification and receive a
+       * confirmation that the other side polled it without sync errors.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::CRDTNotificationMessage_")
+      struct CRDTNotificationMessage
+      {
+        /**
+         * Holds one of the above constant values.
+         */
+        unsigned short value;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSequenceState, ActionSequenceDefinition>
 {
@@ -8,7 +9,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
    public ActionSequenceExecutor(long id)
    {
-      state = new ActionSequenceState(id);
+      state = new ActionSequenceState(id, ROS2ActorDesignation.ROBOT);
    }
 
    @Override

@@ -7,6 +7,7 @@ import imgui.flag.ImGuiCol;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -28,7 +29,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
 
    public RDXActionSequence(long id)
    {
-      state = new ActionSequenceState(id);
+      state = new ActionSequenceState(id, ROS2ActorDesignation.OPERATOR);
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -86,15 +87,14 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             if (!canExecuteNextAction)
             ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
             boolean confirmationState = manualExecutionOverrideTimer.isRunning(5.0);
-            boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
+            boolean disableManuallyExecuteButton = getState().getManualExecutionRequested().peek();
             if (disableManuallyExecuteButton)
                ImGui.beginDisabled();
             if (ImGui.button(labels.get(confirmationState ? "Manually (confirm)" : "Manually")))
             {
                if (canExecuteNextAction || confirmationState)
                {
-                  getState().setManualExecutionRequested(true);
-                  getState().freezeFromModification();
+                  getState().getManualExecutionRequested().set();
                }
                else
                {

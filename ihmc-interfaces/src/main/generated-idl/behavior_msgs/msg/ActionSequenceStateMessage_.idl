@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionSequenceDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "ihmc_common_msgs/msg/./CRDTNotificationMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -36,7 +37,7 @@ module behavior_msgs
         /**
          * Request manual execution of the next action
          */
-        boolean manual_execution_requested;
+        ihmc_common_msgs::msg::dds::CRDTNotificationMessage manual_execution_requested;
       };
     };
   };
