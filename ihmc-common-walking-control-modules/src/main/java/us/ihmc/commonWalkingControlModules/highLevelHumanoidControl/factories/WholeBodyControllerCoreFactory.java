@@ -73,7 +73,7 @@ public class WholeBodyControllerCoreFactory
    public void setFeedbackControllerTemplate(FeedbackControllerTemplate template)
    {
       if (controllerCore == null)
-         this.template.enableControllersFromOtherTemplate(template);
+         this.template.mergeWithOtherTemplate(template);
       else
          controllerCore.registerAdditionalControllers(template);
    }
