@@ -93,7 +93,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
          {
             if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
             {
-               activeMappingModule.generatePlanWithPlanarRegionMap(planarRegionMap);
+               activeMappingModule.planToGoalWithPlanarRegionMap(planarRegionMap);
             }
          }
 
