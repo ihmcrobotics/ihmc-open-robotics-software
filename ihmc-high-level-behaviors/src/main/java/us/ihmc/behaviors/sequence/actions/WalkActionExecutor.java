@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
@@ -63,7 +64,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new WalkActionState(id, footstepPlannerParameters, referenceFrameLibrary);
+      state = new WalkActionState(id, ROS2ActorDesignation.ROBOT, footstepPlannerParameters, referenceFrameLibrary);
    }
 
    @Override

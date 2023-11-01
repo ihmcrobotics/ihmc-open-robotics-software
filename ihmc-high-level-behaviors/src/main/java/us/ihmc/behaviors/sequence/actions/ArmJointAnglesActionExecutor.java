@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
 
@@ -21,7 +22,7 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      state = new ArmJointAnglesActionState(id);
+      state = new ArmJointAnglesActionState(id, ROS2ActorDesignation.ROBOT);
    }
 
    @Override

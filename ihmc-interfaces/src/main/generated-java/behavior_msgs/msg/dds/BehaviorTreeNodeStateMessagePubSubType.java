@@ -15,7 +15,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e8183d0b13f0d0ee216184faab53c28b481968df2c283a08cdcbd1cca503a9ca";
+   		return "34cd92b59024d8201f6d23961b8426e89c0d51b416b37570947c0f58a402f327";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,6 +77,8 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +89,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_7(data.getIsActive());
 
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -93,6 +98,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       	
       data.setIsActive(cdr.read_type_7());
       	
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
 
    }
 
@@ -101,6 +107,8 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    {
       ser.write_type_4("id", data.getId());
       ser.write_type_7("is_active", data.getIsActive());
+      ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
    }
 
    @Override
@@ -108,6 +116,8 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    {
       data.setId(ser.read_type_4("id"));
       data.setIsActive(ser.read_type_7("is_active"));
+      ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage dest)

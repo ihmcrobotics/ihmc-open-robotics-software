@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.Timer;
 
 public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationActionState, WaitDurationActionDefinition>
@@ -10,7 +11,7 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
 
    public WaitDurationActionExecutor(long id)
    {
-      state = new WaitDurationActionState(id);
+      state = new WaitDurationActionState(id, ROS2ActorDesignation.ROBOT);
    }
 
    @Override

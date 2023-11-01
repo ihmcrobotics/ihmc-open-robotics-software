@@ -92,7 +92,7 @@ public class RDXBehaviorTree
             if (selectedNode == null)
             {
                modificationQueue.accept(new BehaviorTreeNodeSetRoot(loadedNode, newRootNode -> rootNode = (RDXBehaviorTreeNode<?, ?>) newRootNode));
-               behaviorTreeState.freezeFromModification();
+               behaviorTreeState.freeze();
             }
             else
                modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze(loadedNode, selectedNode));

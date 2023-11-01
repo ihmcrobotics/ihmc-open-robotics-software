@@ -9,6 +9,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.*;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -47,7 +48,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculators = handWrenchCalculators;
 
-      state = new HandPoseActionState(id, referenceFrameLibrary);
+      state = new HandPoseActionState(id, ROS2ActorDesignation.ROBOT, referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {

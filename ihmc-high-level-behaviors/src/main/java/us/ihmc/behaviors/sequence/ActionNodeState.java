@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition>
       extends BehaviorTreeNodeState<D>
@@ -20,9 +21,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    private double startOrientationDistanceToGoal;
    private double orientationDistanceToGoalTolerance;
 
-   public ActionNodeState(long id, D definition)
+   public ActionNodeState(long id, D definition, ROS2ActorDesignation actorDesignation)
    {
-      super(id, definition);
+      super(id, definition, actorDesignation);
    }
 
    public void toMessage(ActionNodeStateMessage message)

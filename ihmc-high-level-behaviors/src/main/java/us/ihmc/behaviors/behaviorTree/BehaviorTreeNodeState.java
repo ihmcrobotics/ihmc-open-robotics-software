@@ -1,7 +1,8 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
-import us.ihmc.communication.crdt.Freezable;
+import us.ihmc.communication.crdt.Confirmable;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
 public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
-      extends Freezable
+      extends Confirmable
       implements BehaviorTreeNodeExtension<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
 {
    private final D definition;
@@ -27,22 +28,28 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
     * and disabling active elements automatically.
     */
    private boolean isActive = false;
+   /**
+    * Whether this node exists in the robot process or and operator process.
+    */
+   private final ROS2ActorDesignation actorDesignation;
 
    /**
     * The state's children. They can be any type that is a BehaviorTreeNodeState.
     */
    private final List<BehaviorTreeNodeState<?>> children = new ArrayList<>();
 
-   public BehaviorTreeNodeState(long id, D definition)
+   public BehaviorTreeNodeState(long id, D definition, ROS2ActorDesignation actorDesignation)
    {
       this.id = id;
       this.definition = definition;
+      this.actorDesignation = actorDesignation;
    }
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
       message.setId(id);
       message.setIsActive(isActive);
+      toMessage(message.getConfirmableRequest());
    }
 
    public void fromMessage(BehaviorTreeNodeStateMessage message)
@@ -51,6 +58,7 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
       isActive = message.getIsActive();
+      fromMessage(message.getConfirmableRequest());
    }
 
    public void update()
@@ -78,6 +86,11 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
    public boolean getIsActive()
    {
       return isActive;
+   }
+
+   public ROS2ActorDesignation getActorDesignation()
+   {
+      return actorDesignation;
    }
 
    @Override

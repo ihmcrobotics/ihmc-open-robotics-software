@@ -9,6 +9,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
@@ -86,7 +87,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
-      state = new HandPoseActionState(id, referenceFrameLibrary);
+      state = new HandPoseActionState(id, ROS2ActorDesignation.OPERATOR, referenceFrameLibrary);
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent(), getSelected());
       poseGizmo.create(panel3D);

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -20,9 +21,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private double[] jointAngles = new double[7];
    private double solutionQuality;
 
-   public HandPoseActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
+   public HandPoseActionState(long id, ROS2ActorDesignation actorDesignation, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new HandPoseActionDefinition());
+      super(id, new HandPoseActionDefinition(), actorDesignation);
 
       palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPalmTransformToParent());
    }

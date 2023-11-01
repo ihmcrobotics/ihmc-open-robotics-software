@@ -12,6 +12,7 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -49,7 +50,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      state = new FootstepPlanActionState(id, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, ROS2ActorDesignation.OPERATOR, referenceFrameLibrary);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,

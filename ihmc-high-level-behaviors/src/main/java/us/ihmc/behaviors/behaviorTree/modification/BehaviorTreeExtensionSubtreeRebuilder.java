@@ -38,7 +38,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
    {
       idToNodesMap.put(localNode.getState().getID(), localNode);
 
-      if (!localNode.getState().isFrozenFromModification()) // Disassemble non-frozen parts
+      if (!localNode.getState().isFrozen()) // Disassemble non-frozen parts
       {
          for (BehaviorTreeNode<?> child : localNode.getChildren())
          {

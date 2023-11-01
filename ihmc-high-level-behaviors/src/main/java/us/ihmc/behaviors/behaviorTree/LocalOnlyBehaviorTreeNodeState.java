@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+
 /**
  * This is currently around to keep older behavior tree nodes
  * compiling without them fully adhering to the newer standards.
@@ -11,7 +13,7 @@ public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState<Behavi
 
    public LocalOnlyBehaviorTreeNodeState()
    {
-      super(0, new BehaviorTreeNodeDefinition());
+      super(0, new BehaviorTreeNodeDefinition(), ROS2ActorDesignation.ROBOT);
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)

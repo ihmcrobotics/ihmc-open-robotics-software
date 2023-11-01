@@ -1,0 +1,45 @@
+#ifndef __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
+#define __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * Nothing special has happened. This should trigger no effects.
+       */
+      const octet NOOP =
+      0;
+
+      /**
+       * This message is a request to change something.
+       */
+      const octet REQUEST =
+      1;
+
+      /**
+       * Confirmation that the request has been received by the other side.
+       */
+      const octet CONFIRMATION =
+      2;
+
+
+      /**
+       * A way of avoiding local data get overriden before
+       * it is received by peers.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::ConfirmableRequestMessage_")
+      struct ConfirmableRequestMessage
+      {
+        /**
+         * Holds one of the above constant values.
+         */
+        unsigned short value;
+      };
+    };
+  };
+};
+
+#endif

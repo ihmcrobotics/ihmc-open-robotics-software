@@ -3,6 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -17,9 +18,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
     */
    private final MutableReferenceFrame goalPelvisFrame = new MutableReferenceFrame();
 
-   public ChestOrientationActionState(long id, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, ROS2ActorDesignation actorDesignation, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new ChestOrientationActionDefinition());
+      super(id, new ChestOrientationActionDefinition(), actorDesignation);
 
       chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform());
    }

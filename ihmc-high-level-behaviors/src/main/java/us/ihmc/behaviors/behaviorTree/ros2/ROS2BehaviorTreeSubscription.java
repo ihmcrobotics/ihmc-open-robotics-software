@@ -62,7 +62,7 @@ public class ROS2BehaviorTreeSubscription
          behaviorTreeState.modifyTree(modificationQueue ->
          {
             // When the root node is swapped out, we freeze the reference to the new one
-            boolean treeRootReferenceFrozen = behaviorTreeState.isFrozenFromModification();
+            boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
 
             BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
 
@@ -110,7 +110,7 @@ public class ROS2BehaviorTreeSubscription
 
       for (ROS2BehaviorTreeSubscriptionNode subscriptionChildNode : subscriptionNode.getChildren())
       {
-         anAncestorIsFrozen |= localNode.getState().isFrozenFromModification();
+         anAncestorIsFrozen |= localNode.getState().isFrozen();
 
          BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = recallNodeByIDOrCreate(subscriptionChildNode, anAncestorIsFrozen);
 
