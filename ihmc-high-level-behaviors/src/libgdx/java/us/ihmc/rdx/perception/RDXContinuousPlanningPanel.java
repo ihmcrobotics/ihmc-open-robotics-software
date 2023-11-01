@@ -92,8 +92,8 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       generateSwingGraphics();
       for (RobotSide side : RobotSide.values)
       {
-         startFootstepGraphics.get(side).setPose(continuousPlannerSchedulingTask.getContinuousPlanner().getStartPose().get(side));
-         goalFootstepGraphics.get(side).setPose(continuousPlannerSchedulingTask.getContinuousPlanner().getGoalPose().get(side));
+         startFootstepGraphics.get(side).setPose(continuousPlannerSchedulingTask.getContinuousPlanner().getStartingStancePose().get(side));
+         goalFootstepGraphics.get(side).setPose(continuousPlannerSchedulingTask.getContinuousPlanner().getGoalStancePose().get(side));
       }
    }
 

@@ -1,11 +1,14 @@
 package us.ihmc.perception.tools;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -14,8 +17,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ActiveMappingTools
 {
-   public static void setRandomizedStraightGoalPoses(SideDependentList<FramePose3D> originalPoseToPlanFrom,
-                                                     SideDependentList<FramePose3D> startPose,
+   public static void setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
+                                                     SideDependentList<FramePose3D> stancePose,
                                                      SideDependentList<FramePose3D> goalPose,
                                                      float xDistance,
                                                      float zDistance)
@@ -23,16 +26,31 @@ public class ActiveMappingTools
       float offsetX = (float) (Math.random() * 0.1 - 0.05);
       float offsetY = (float) (Math.random() * 0.1 - 0.05);
 
+      FramePose3D finalGoalMidPose = new FramePose3D();
+      finalGoalMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
+
       for (RobotSide side : RobotSide.values)
       {
-         goalPose.get(side).getPosition().set(startPose.get(side).getPosition());
-         goalPose.get(side).getOrientation().set(originalPoseToPlanFrom.get(side).getOrientation());
-         goalPose.get(side).getTranslation().setX(startPose.get(side).getPosition().getX() + xDistance + offsetX);
-         goalPose.get(side).getTranslation().setY(originalPoseToPlanFrom.get(side).getPosition().getY() + offsetY);
-         goalPose.get(side).getTranslation().setZ(startPose.get(side).getPosition().getZ() + zDistance);
+         RigidBodyTransform stanceToWalkingFrameTransform = new RigidBodyTransform();
+         RigidBodyTransform worldToWalkingFrameTransform = new RigidBodyTransform();
 
-         goalPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         stanceToWalkingFrameTransform.set(finalGoalMidPose);
+         worldToWalkingFrameTransform.set(walkingStartPose);
+         worldToWalkingFrameTransform.invert();
+         stanceToWalkingFrameTransform.multiply(worldToWalkingFrameTransform);
+
+         LogTools.info("Walking Start Pose: {}", walkingStartPose.getTranslation());
+         LogTools.info("Final Goal Mid Pose: {}", finalGoalMidPose.getTranslation());
+         LogTools.info("Stance to Walking Frame Transform: {}", stanceToWalkingFrameTransform.getTranslation());
+
+         double xWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
+         goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
+         goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
+         goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, offsetY, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
+
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.11, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.11, 0.0);
    }
 
    public static void setStraightGoalPoses(SideDependentList<FramePose3D> originalPoseToPlanFrom,

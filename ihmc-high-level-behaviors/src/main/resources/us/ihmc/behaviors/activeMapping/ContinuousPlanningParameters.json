@@ -6,7 +6,7 @@
   "Number of steps to send" : 3,
   "Max number of steps to hold in controller queue" : 3,
   "Goal pose forward distance" : 1.2,
-  "Goal pose up distance" : 0.25,
+  "Goal pose up distance" : 0.6,
   "Swing time" : 1.6,
   "Transfer time" : 1.0,
   "Planning with reference timeout" : 0.15,

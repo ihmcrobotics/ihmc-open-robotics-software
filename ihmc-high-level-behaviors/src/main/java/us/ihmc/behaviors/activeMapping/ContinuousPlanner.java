@@ -33,9 +33,9 @@ public class ContinuousPlanner
 
    private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
 
-   private SideDependentList<FramePose3D> originalPoseToBaseGoalPoseFrom = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private FramePose3D walkingStartMidPose = new FramePose3D();
+   private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<FramePose3D> startingStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private FramePose3D imminentFootstepPose = new FramePose3D();
    private RobotSide imminentFootstepSide = RobotSide.LEFT;
@@ -90,15 +90,21 @@ public class ContinuousPlanner
 
       for (RobotSide side : RobotSide.values)
       {
-         startPose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
-         goalPose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
-         originalPoseToBaseGoalPoseFrom.get(side).getPosition().setX(goalPose.get(side).getPosition().getX());
-         originalPoseToBaseGoalPoseFrom.get(side).getPosition().setY(goalPose.get(side).getPosition().getY());
-         originalPoseToBaseGoalPoseFrom.get(side).getPosition().setZ(goalPose.get(side).getPosition().getZ());
-         originalPoseToBaseGoalPoseFrom.get(side)
-                                       .getOrientation()
-                                       .setToYawOrientation(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getRotation().getYaw());
+         startingStancePose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
+         goalStancePose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
+
       }
+
+      FramePose3D finalGoalMidPose = new FramePose3D();
+      finalGoalMidPose.interpolate(startingStancePose.get(RobotSide.LEFT), startingStancePose.get(RobotSide.RIGHT), 0.5);
+
+      walkingStartMidPose.getPosition().setX(finalGoalMidPose.getPosition().getX());
+      walkingStartMidPose.getPosition().setY(finalGoalMidPose.getPosition().getY());
+      walkingStartMidPose.getPosition().setZ(finalGoalMidPose.getPosition().getZ());
+      walkingStartMidPose
+                         .getOrientation()
+                         .setToYawOrientation(finalGoalMidPose.getRotation().getYaw());
+
 
       initialized = true;
    }
@@ -110,9 +116,7 @@ public class ContinuousPlanner
       switch (this.mode)
       {
          case WALK_TO_GOAL:
-            ActiveMappingTools.setRandomizedStraightGoalPoses(originalPoseToBaseGoalPoseFrom,
-                                                              startPose,
-                                                              goalPose,
+            ActiveMappingTools.setRandomizedStraightGoalPoses(walkingStartMidPose, startingStancePose, goalStancePose,
                                                               (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
                                                               (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
@@ -121,8 +125,8 @@ public class ContinuousPlanner
             break;
          case ACTIVE_SEARCH:
          {
-            robotLocation.set((startPose.get(RobotSide.LEFT).getX() + startPose.get(RobotSide.RIGHT).getX()) / 2.0f,
-                              (startPose.get(RobotSide.LEFT).getY() + startPose.get(RobotSide.RIGHT).getY()) / 2.0f);
+            robotLocation.set((startingStancePose.get(RobotSide.LEFT).getX() + startingStancePose.get(RobotSide.RIGHT).getX()) / 2.0f,
+                              (startingStancePose.get(RobotSide.LEFT).getY() + startingStancePose.get(RobotSide.RIGHT).getY()) / 2.0f);
 
             monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
             agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
@@ -145,17 +149,12 @@ public class ContinuousPlanner
             LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
 
             Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
-            goalPose.get(RobotSide.LEFT).set(goalPoseToUse);
-            goalPose.get(RobotSide.RIGHT).set(goalPoseToUse);
-            goalPose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
-            goalPose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
+            goalStancePose.get(RobotSide.LEFT).set(goalPoseToUse);
+            goalStancePose.get(RobotSide.RIGHT).set(goalPoseToUse);
+            goalStancePose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
+            goalStancePose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
          }
       }
-   }
-
-   public void setPreviouslySentPlanForReference()
-   {
-      this.previouslySentPlanForReference = plannerOutput.getFootstepPlan();
    }
 
    public FootstepPlannerOutput planToGoalWithHeightMap(HeightMapData heightMapData)
@@ -166,7 +165,7 @@ public class ContinuousPlanner
          return null;
       }
 
-      FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
+      FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
       request.setRequestedInitialStanceSide(imminentFootstepSide);
       request.setSnapGoalSteps(true);
       request.setHeightMapData(heightMapData);
@@ -216,7 +215,7 @@ public class ContinuousPlanner
       {
          LogTools.info("Footstep Planning Request");
 
-         FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
+         FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
          request.setHeightMapData(heightMapData);
          plannerOutput = footstepPlanner.handleRequest(request);
 
@@ -245,13 +244,13 @@ public class ContinuousPlanner
          {
             LogTools.info("Footstep Planning Request");
 
-            startPose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
-            startPose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
-            goalPose.get(RobotSide.LEFT).setToZero();
-            goalPose.get(RobotSide.RIGHT).setToZero();
+            startingStancePose.get(RobotSide.LEFT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT));
+            startingStancePose.get(RobotSide.RIGHT).setFromReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+            goalStancePose.get(RobotSide.LEFT).setToZero();
+            goalStancePose.get(RobotSide.RIGHT).setToZero();
 
-            robotLocation.set((startPose.get(RobotSide.LEFT).getX() + startPose.get(RobotSide.RIGHT).getX()) / 2.0f,
-                              (startPose.get(RobotSide.LEFT).getY() + startPose.get(RobotSide.RIGHT).getY()) / 2.0f);
+            robotLocation.set((startingStancePose.get(RobotSide.LEFT).getX() + startingStancePose.get(RobotSide.RIGHT).getX()) / 2.0f,
+                              (startingStancePose.get(RobotSide.LEFT).getY() + startingStancePose.get(RobotSide.RIGHT).getY()) / 2.0f);
 
             //Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
             //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, goalPose.get(RobotSide.LEFT, goalPose.get(RobotSide.RIGHT), 0.6f);
@@ -282,12 +281,12 @@ public class ContinuousPlanner
             LogTools.info("Next Goal: Position:{}, Yaw{}", goalPosition, yawRobotToGoal);
 
             Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
-            goalPose.get(RobotSide.LEFT).set(goalPoseToUse);
-            goalPose.get(RobotSide.RIGHT).set(goalPoseToUse);
-            goalPose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
-            goalPose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
+            goalStancePose.get(RobotSide.LEFT).set(goalPoseToUse);
+            goalStancePose.get(RobotSide.RIGHT).set(goalPoseToUse);
+            goalStancePose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
+            goalStancePose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
 
-            FootstepPlannerRequest request = createFootstepPlannerRequest(startPose, goalPose);
+            FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
             request.setPlanarRegionsList(planarRegionMap.getMapRegions());
             plannerOutput = footstepPlanner.handleRequest(request);
 
@@ -349,8 +348,13 @@ public class ContinuousPlanner
    {
       this.imminentFootstepPose.set(imminentFootstepPose);
       this.imminentFootstepSide = imminentFootstepSide;
-      startPose.get(imminentFootstepSide.getOppositeSide()).set(realRobotStancePose);
-      startPose.get(imminentFootstepSide).set(imminentFootstepPose);
+      startingStancePose.get(imminentFootstepSide.getOppositeSide()).set(realRobotStancePose);
+      startingStancePose.get(imminentFootstepSide).set(imminentFootstepPose);
+   }
+
+   public void setPreviouslySentPlanForReference()
+   {
+      this.previouslySentPlanForReference = plannerOutput.getFootstepPlan();
    }
 
    public FootstepPlanningResult getFootstepPlanningResult()
@@ -428,13 +432,13 @@ public class ContinuousPlanner
       return footstepPlanner.getFootstepPlannerParameters();
    }
 
-   public SideDependentList<FramePose3D> getGoalPose()
+   public SideDependentList<FramePose3D> getGoalStancePose()
    {
-      return goalPose;
+      return goalStancePose;
    }
 
-   public SideDependentList<FramePose3D> getStartPose()
+   public SideDependentList<FramePose3D> getStartingStancePose()
    {
-      return startPose;
+      return startingStancePose;
    }
 }
