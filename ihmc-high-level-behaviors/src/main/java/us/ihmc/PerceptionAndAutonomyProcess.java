@@ -11,6 +11,7 @@ import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
@@ -45,7 +46,8 @@ public class PerceptionAndAutonomyProcess
    private static final double OUSTER_FPS = 10.0;
    private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
 
-   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = "17403057";
+   private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
+   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17403057");
    private static final double BLACKFLY_FPS = 30.0;
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
@@ -78,19 +80,20 @@ public class PerceptionAndAutonomyProcess
    private OusterDepthImagePublisher ousterDepthImagePublisher;
    private RestartableThrottledThread ousterProcessAndPublishThread;
 
-   private final Supplier<ReferenceFrame> blackflyFrameSupplier;
-   private final ROS2HeartbeatMonitor blackflyImageHeartbeat;
+   private final SideDependentList<Supplier<ReferenceFrame>> blackflyFrameSuppliers = new SideDependentList<>();
+   private final SideDependentList<ROS2HeartbeatMonitor> blackflyImageHeartbeats = new SideDependentList<>();
    private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
-   private RawImage blackflyImage;
-   private BlackflyImageRetriever blackflyImageRetriever;
-   private BlackflyImagePublisher blackflyImagePublisher;
+   private final SideDependentList<RawImage> blackflyImages = new SideDependentList<>();
+   private final SideDependentList<BlackflyImageRetriever> blackflyImageRetrievers = new SideDependentList<>();
+   private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private RestartableThrottledThread blackflyProcessAndPublishThread;
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
-                                Supplier<ReferenceFrame> zedFrameSupplier,
-                                Supplier<ReferenceFrame> realsenseFrameSupplier,
-                                Supplier<ReferenceFrame> ousterFrameSupplier,
-                                Supplier<ReferenceFrame> blackflyFrameSupplier)
+                                       Supplier<ReferenceFrame> zedFrameSupplier,
+                                       Supplier<ReferenceFrame> realsenseFrameSupplier,
+                                       Supplier<ReferenceFrame> ousterFrameSupplier,
+                                       Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
+                                       Supplier<ReferenceFrame> rightBlackflyFrameSupplier)
    {
       this.zedFrameSupplier = zedFrameSupplier;
       zedPointCloudHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_POINT_CLOUD);
@@ -108,8 +111,10 @@ public class PerceptionAndAutonomyProcess
       heightMapHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
       initializeOusterHeartbeatCallbacks();
 
-      this.blackflyFrameSupplier = blackflyFrameSupplier;
-      blackflyImageHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
+      blackflyFrameSuppliers.put(RobotSide.LEFT, leftBlackflyFrameSupplier);
+      blackflyFrameSuppliers.put(RobotSide.RIGHT, rightBlackflyFrameSupplier);
+      blackflyImageHeartbeats.put(RobotSide.LEFT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT)));
+      blackflyImageHeartbeats.put(RobotSide.RIGHT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT)));
       arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ARUCO);
       initializeBlackflyHeartbeatCallbacks();
 
@@ -139,12 +144,16 @@ public class PerceptionAndAutonomyProcess
          ousterDepthImagePublisher.startDepth();
       }
 
-      if (blackflyImageHeartbeat.isAlive())
+      for (RobotSide side : RobotSide.values)
       {
-         initializeBlackfly();
-         blackflyImageRetriever.start();
-         blackflyImagePublisher.startAll();
+         if (blackflyImageHeartbeats.get(side).isAlive())
+         {
+            initializeBlackfly(side);
+            blackflyImageRetrievers.get(side).start();
+            blackflyImagePublishers.get(side).startAll();
+         }
       }
+
 
       ThreadTools.sleepForever();
    }
@@ -173,11 +182,14 @@ public class PerceptionAndAutonomyProcess
          ousterDepthImageRetriever.destroy();
       }
 
-      if (blackflyImageRetriever != null)
-      {
+      if (blackflyProcessAndPublishThread != null)
          blackflyProcessAndPublishThread.stop();
-         blackflyImagePublisher.destroy();
-         blackflyImageRetriever.destroy();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (blackflyImagePublishers.get(side) != null)
+            blackflyImagePublishers.get(side).destroy();
+         if (blackflyImageRetrievers.get(side) != null)
+            blackflyImageRetrievers.get(side).destroy();
       }
    }
 
@@ -218,9 +230,12 @@ public class PerceptionAndAutonomyProcess
 
    private void processAndPublishBlackfly()
    {
-      blackflyImage = blackflyImageRetriever.getLatestRawImage();
+      for (RobotSide side : RobotSide.values)
+      {
+         blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
 
-      blackflyImagePublisher.setNextDistortedImage(blackflyImage);
+         blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side));
+      }
    }
 
    private void initializeZED()
@@ -362,31 +377,57 @@ public class PerceptionAndAutonomyProcess
    }
 
 
-   private void initializeBlackfly()
+   private void initializeBlackfly(RobotSide side)
    {
-      blackflyImageRetriever = new BlackflyImageRetriever(RIGHT_BLACKFLY_SERIAL_NUMBER, BLACKFLY_LENS, RobotSide.RIGHT, blackflyFrameSupplier);
-      blackflyImagePublisher = new BlackflyImagePublisher(BLACKFLY_LENS, blackflyFrameSupplier, BLACKFLY_IMAGE_TOPIC);
-      blackflyProcessAndPublishThread = new RestartableThrottledThread("BlackflyProcessAndPublish", BLACKFLY_FPS, this::processAndPublishBlackfly);
-      blackflyProcessAndPublishThread.start();
+      String serialNumber = side == RobotSide.LEFT ? LEFT_BLACKFLY_SERIAL_NUMBER : RIGHT_BLACKFLY_SERIAL_NUMBER;
+      if (serialNumber.equals("00000000"))
+      {
+         LogTools.error("Blackfly with serial number {} was not found", serialNumber);
+         return;
+      }
+
+      blackflyImageRetrievers.put(side, new BlackflyImageRetriever(serialNumber, BLACKFLY_LENS, RobotSide.RIGHT, blackflyFrameSuppliers.get(side)));
+      blackflyImagePublishers.put(side, new BlackflyImagePublisher(BLACKFLY_LENS, blackflyFrameSuppliers.get(side), BLACKFLY_IMAGE_TOPIC));
+      if (blackflyProcessAndPublishThread == null)
+      {
+         blackflyProcessAndPublishThread = new RestartableThrottledThread("BlackflyProcessAndPublish", BLACKFLY_FPS, this::processAndPublishBlackfly);
+         blackflyProcessAndPublishThread.start();
+      }
    }
 
    private void initializeBlackflyHeartbeatCallbacks()
    {
-      blackflyImageHeartbeat.setAlivenessChangedCallback(isAlive ->
+      blackflyImageHeartbeats.get(RobotSide.LEFT).setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
-            if (blackflyImageRetriever == null)
-               initializeBlackfly();
-            blackflyImageRetriever.start();
-            blackflyImagePublisher.startImagePublishing();
+            if (blackflyImageRetrievers.get(RobotSide.LEFT) == null)
+               initializeBlackfly(RobotSide.LEFT);
+            blackflyImageRetrievers.get(RobotSide.LEFT).start();
+            blackflyImagePublishers.get(RobotSide.LEFT).startImagePublishing();
          }
          else
          {
-            blackflyImagePublisher.stopImagePublishing();
+            blackflyImagePublishers.get(RobotSide.LEFT).stopImagePublishing();
+            blackflyImageRetrievers.get(RobotSide.LEFT).stop();
+         }
+      });
+
+      blackflyImageHeartbeats.get(RobotSide.RIGHT).setAlivenessChangedCallback(isAlive ->
+      {
+         if (isAlive)
+         {
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) == null)
+               initializeBlackfly(RobotSide.RIGHT);
+            blackflyImageRetrievers.get(RobotSide.RIGHT).start();
+            blackflyImagePublishers.get(RobotSide.RIGHT).startImagePublishing();
+         }
+         else
+         {
+            blackflyImagePublishers.get(RobotSide.RIGHT).stopImagePublishing();
 
             if (!arUcoDetectionHeartbeat.isAlive())
-               blackflyImageRetriever.stop();
+               blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
          }
       });
 
@@ -394,17 +435,17 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (blackflyImageRetriever == null)
-               initializeBlackfly();
-            blackflyImageRetriever.start();
-            blackflyImagePublisher.startArUcoDetection();
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) == null)
+               initializeBlackfly(RobotSide.RIGHT);
+            blackflyImageRetrievers.get(RobotSide.RIGHT).start();
+            blackflyImagePublishers.get(RobotSide.RIGHT).startArUcoDetection();
          }
          else
          {
-            blackflyImagePublisher.stopArUcoDetection();
+            blackflyImagePublishers.get(RobotSide.RIGHT).stopArUcoDetection();
 
-            if (!blackflyImageHeartbeat.isAlive())
-               blackflyImageRetriever.stop();
+            if (!blackflyImageHeartbeats.get(RobotSide.RIGHT).isAlive())
+               blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
          }
       });
    }
@@ -415,6 +456,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
