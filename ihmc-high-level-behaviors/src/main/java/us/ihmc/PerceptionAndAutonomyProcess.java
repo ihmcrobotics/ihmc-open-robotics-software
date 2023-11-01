@@ -19,6 +19,7 @@ import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -154,7 +155,6 @@ public class PerceptionAndAutonomyProcess
          }
       }
 
-
       ThreadTools.sleepForever();
    }
 
@@ -232,9 +232,12 @@ public class PerceptionAndAutonomyProcess
    {
       for (RobotSide side : RobotSide.values)
       {
-         blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
+         if (blackflyImageRetrievers.get(side) != null && blackflyImagePublishers.get(side) != null)
+         {
+            blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
 
-         blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side));
+            blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side));
+         }
       }
    }
 
@@ -376,13 +379,12 @@ public class PerceptionAndAutonomyProcess
       });
    }
 
-
    private void initializeBlackfly(RobotSide side)
    {
       String serialNumber = side == RobotSide.LEFT ? LEFT_BLACKFLY_SERIAL_NUMBER : RIGHT_BLACKFLY_SERIAL_NUMBER;
       if (serialNumber.equals("00000000"))
       {
-         LogTools.error("Blackfly with serial number {} was not found", serialNumber);
+         LogTools.error("{} blackfly with serial number was not provided", side.getPascalCaseName());
          return;
       }
 
@@ -403,13 +405,19 @@ public class PerceptionAndAutonomyProcess
          {
             if (blackflyImageRetrievers.get(RobotSide.LEFT) == null)
                initializeBlackfly(RobotSide.LEFT);
-            blackflyImageRetrievers.get(RobotSide.LEFT).start();
-            blackflyImagePublishers.get(RobotSide.LEFT).startImagePublishing();
+            if (blackflyImageRetrievers.get(RobotSide.LEFT) != null && blackflyImagePublishers.get(RobotSide.LEFT) != null)
+            {
+               blackflyImageRetrievers.get(RobotSide.LEFT).start();
+               blackflyImagePublishers.get(RobotSide.LEFT).startImagePublishing();
+            }
          }
          else
          {
-            blackflyImagePublishers.get(RobotSide.LEFT).stopImagePublishing();
-            blackflyImageRetrievers.get(RobotSide.LEFT).stop();
+            if (blackflyImageRetrievers.get(RobotSide.LEFT) != null && blackflyImagePublishers.get(RobotSide.LEFT) != null)
+            {
+               blackflyImagePublishers.get(RobotSide.LEFT).stopImagePublishing();
+               blackflyImageRetrievers.get(RobotSide.LEFT).stop();
+            }
          }
       });
 
@@ -419,15 +427,22 @@ public class PerceptionAndAutonomyProcess
          {
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) == null)
                initializeBlackfly(RobotSide.RIGHT);
-            blackflyImageRetrievers.get(RobotSide.RIGHT).start();
-            blackflyImagePublishers.get(RobotSide.RIGHT).startImagePublishing();
+
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
+            {
+               blackflyImageRetrievers.get(RobotSide.RIGHT).start();
+               blackflyImagePublishers.get(RobotSide.RIGHT).startImagePublishing();
+            }
          }
          else
          {
-            blackflyImagePublishers.get(RobotSide.RIGHT).stopImagePublishing();
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
+            {
+               blackflyImagePublishers.get(RobotSide.RIGHT).stopImagePublishing();
 
-            if (!arUcoDetectionHeartbeat.isAlive())
-               blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
+               if (!arUcoDetectionHeartbeat.isAlive())
+                  blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
+            }
          }
       });
 
@@ -437,15 +452,22 @@ public class PerceptionAndAutonomyProcess
          {
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) == null)
                initializeBlackfly(RobotSide.RIGHT);
-            blackflyImageRetrievers.get(RobotSide.RIGHT).start();
-            blackflyImagePublishers.get(RobotSide.RIGHT).startArUcoDetection();
+
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
+            {
+               blackflyImageRetrievers.get(RobotSide.RIGHT).start();
+               blackflyImagePublishers.get(RobotSide.RIGHT).startArUcoDetection();
+            }
          }
          else
          {
-            blackflyImagePublishers.get(RobotSide.RIGHT).stopArUcoDetection();
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
+            {
+               blackflyImagePublishers.get(RobotSide.RIGHT).stopArUcoDetection();
 
-            if (!blackflyImageHeartbeats.get(RobotSide.RIGHT).isAlive())
-               blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
+               if (!blackflyImageHeartbeats.get(RobotSide.RIGHT).isAlive())
+                  blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
+            }
          }
       });
    }
