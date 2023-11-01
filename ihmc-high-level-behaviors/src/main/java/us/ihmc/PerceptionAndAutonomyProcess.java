@@ -3,6 +3,7 @@ package us.ihmc;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -14,10 +15,9 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
-import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -86,10 +86,7 @@ public class PerceptionAndAutonomyProcess
    private BlackflyImagePublisher blackflyImagePublisher;
    private RestartableThrottledThread blackflyProcessAndPublishThread;
 
-   // temporary solution to keep process running when no sensors start on beginning
-   private RestartableThrottledThread stayAliveThread;
-
-   PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
+   public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                 Supplier<ReferenceFrame> zedFrameSupplier,
                                 Supplier<ReferenceFrame> realsenseFrameSupplier,
                                 Supplier<ReferenceFrame> ousterFrameSupplier,
@@ -149,24 +146,11 @@ public class PerceptionAndAutonomyProcess
          blackflyImagePublisher.startAll();
       }
 
-      stayAliveThread = new RestartableThrottledThread("KeepingPerceptionAlive", 1, () ->
-      {
-         try
-         {
-            Thread.sleep(1000);
-         }
-         catch (InterruptedException exception)
-         {
-            exception.printStackTrace();
-         }
-      });
-      stayAliveThread.start();
+      ThreadTools.sleepForever();
    }
 
    public void destroy()
    {
-      stayAliveThread.stop();
-
       if (zedImageRetriever != null)
       {
          zedProcessAndPublishThread.stop();
