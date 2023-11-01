@@ -124,13 +124,8 @@ public class SpinnakerBlackfly
 
    public boolean getNextImage(spinImage spinImageToPack)
    {
-      Spinnaker_C.spinError error = Spinnaker_C.spinCameraGetNextImage(spinCamera, spinImageToPack);
-
-      if (error.value != Spinnaker_C.spinError.SPINNAKER_ERR_SUCCESS.value)
-      {
-         LogTools.warn("Camera " + serialNumber + " returned error: " + error);
-      }
-      return error.value == Spinnaker_C.spinError.SPINNAKER_ERR_SUCCESS.value;
+      return printOnError(Spinnaker_C.spinCameraGetNextImage(spinCamera, spinImageToPack), "Grabbing Image").value
+             == Spinnaker_C.spinError.SPINNAKER_ERR_SUCCESS.value;
    }
 
    public void releaseImage(spinImage spinImage)
