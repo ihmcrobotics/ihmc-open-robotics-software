@@ -851,6 +851,11 @@ public abstract class WalkingControllerParameters
       return Double.POSITIVE_INFINITY;
    }
 
+   public NaturalPostureParameters getNaturalPostureParameters()
+   {
+      return null;
+   }
+
    /**
     * When there's less than this fraction of swing remaining, the robot joints in swing should switch
     * to "load bearing". Essentially, for hydraulic robots, this switches them from velocity to
