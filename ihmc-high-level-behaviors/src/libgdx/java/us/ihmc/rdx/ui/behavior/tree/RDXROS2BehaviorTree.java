@@ -77,7 +77,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       ImGui.text("Nodes: UI: %d   On-Robot: %d   State: ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
       ImGui.sameLine();
       int numberOfFrozenNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfFrozenNodes();
-      if (numberOfFrozenNodes > 0)
+      if (ros2BehaviorTreeState.getBehaviorTreeState().isFrozenFromModification() || numberOfFrozenNodes > 0)
          ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen (%d)".formatted(numberOfFrozenNodes));
       else
          ImGui.text("Normal");
