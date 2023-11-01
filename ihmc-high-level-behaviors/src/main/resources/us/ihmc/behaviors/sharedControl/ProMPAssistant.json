@@ -3,7 +3,7 @@
   "taskToTest": "LeftPunch0",
   "logging" : true,
   "numberBasisFunctions": 20,
-  "numberObservations": 1,
+  "numberObservations": 15,
   "conditionOnlyLastObservation": true,
   "conditioningStep": 2,
   "useCustomSpeed": false,

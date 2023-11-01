@@ -304,10 +304,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-//      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
-//      {
-//         enableStdDeviationVisualization(bodyPart);
-//      }
+      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
+      {
+         enableStdDeviationVisualization(bodyPart);
+      }
 
       if (!objectName.isEmpty())
       {
