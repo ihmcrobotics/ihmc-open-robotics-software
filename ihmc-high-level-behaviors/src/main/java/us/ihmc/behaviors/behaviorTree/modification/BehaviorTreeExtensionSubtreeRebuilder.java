@@ -44,10 +44,10 @@ public class BehaviorTreeExtensionSubtreeRebuilder
    {
       if (localNode != null) // In the case of a null root node
       {
-         LogTools.info("Putting ID: %s:%d. Children: %d Actor: %s".formatted(localNode.getDefinition().getDescription(),
-                                                                             localNode.getState().getID(),
-                                                                             localNode.getChildren().size(),
-                                                                             crdtInfo.getActorDesignation()));
+//         LogTools.info("Putting ID: %s:%d. Children: %d Actor: %s".formatted(localNode.getDefinition().getDescription(),
+//                                                                             localNode.getState().getID(),
+//                                                                             localNode.getChildren().size(),
+//                                                                             crdtInfo.getActorDesignation()));
          idToNodesMap.put(localNode.getState().getID(), localNode);
 
          if (!localNode.getState().isFrozen()) // Disassemble non-frozen parts
