@@ -144,7 +144,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
       pluginFactories.forEach(this::addControllerPluginFactory);
 
-      inertialParameterEstimator = new InertialParameterEstimator(controllerToolbox, controllerCoreFactory.getOrCreateWholeBodyControllerCoreToolbox(), registry);
+      inertialParameterEstimator = new InertialParameterEstimator(controllerToolbox, registry);
    }
 
    /**
