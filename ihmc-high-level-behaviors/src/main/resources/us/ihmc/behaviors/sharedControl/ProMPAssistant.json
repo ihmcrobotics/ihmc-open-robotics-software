@@ -3,13 +3,13 @@
   "taskToTest": "LeftPunch0",
   "logging" : true,
   "numberBasisFunctions": 20,
-  "numberObservations": 15,
+  "numberObservations": 5,
   "conditionOnlyLastObservation": true,
   "conditioningStep": 2,
   "useCustomSpeed": false,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
-  "postProcessingVelocityAdjuster": 1,
+  "postProcessingVelocityAdjuster": 4,
   "tasks":[
     {
       "context": "Target",

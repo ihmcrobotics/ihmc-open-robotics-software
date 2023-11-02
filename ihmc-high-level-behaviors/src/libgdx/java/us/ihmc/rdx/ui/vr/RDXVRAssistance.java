@@ -37,7 +37,6 @@ import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -65,7 +64,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private final AffordanceAssistant affordanceAssistant;
-   private final SideDependentList<RigidBodyTransform> affordanceToVRHandControlFrameTransforms = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransforms = new SideDependentList<>();
    private String objectName = "";
    private ReferenceFrame objectFrame;
    private boolean previewValidated = false;
@@ -88,7 +87,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
    boolean sentInitialHandConfiguration = false;
    private final SideDependentList<double[]> armsFightingHome = new SideDependentList<>();
    private final YawPitchRoll chestFightingHome;
-   private final SideDependentList<double[]> armsHome = new SideDependentList<>();
 
    public RDXVRAssistance(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2ControllerHelper, SceneGraph sceneGraph, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -115,13 +113,21 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
       for (RobotSide side: RobotSide.values)
       {
-         ReferenceFrame afterLastWristJointFrame = ghostRobotModel.getEndEffectorFrame(side, LimbName.ARM);
-         ReferenceFrame VRHandControlFrame = ghostRobotModel.getHand(side).getBodyFixedFrame();
-         RigidBodyTransform affordanceToVRHandControlFrameTransform = new RigidBodyTransform(VRHandControlFrame.getTransformToDesiredFrame(afterLastWristJointFrame));
-         affordanceToVRHandControlFrameTransform.invert();
-         affordanceToVRHandControlFrameTransforms.put(side, affordanceToVRHandControlFrameTransform);
+         RigidBodyTransform  affordanceToHandControlFrameTransform = new RigidBodyTransform();
+         affordanceToHandControlFrameTransform.appendPitchRotation(-Math.PI/2);
+         if (side == RobotSide.LEFT)
+         {
+            affordanceToHandControlFrameTransform.appendOrientation(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentRotation());
+            affordanceToHandControlFrameTransform.appendTranslation(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentTranslation());
+         }
+         else
+         {
+            affordanceToHandControlFrameTransform.appendOrientation(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentRotation());
+            affordanceToHandControlFrameTransform.appendTranslation(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentTranslation());
+         }
+         this.affordanceToHandControlFrameTransforms.put(side, affordanceToHandControlFrameTransform);
       }
-      affordanceAssistant= new AffordanceAssistant(affordanceToVRHandControlFrameTransforms);
+      affordanceAssistant= new AffordanceAssistant(affordanceToHandControlFrameTransforms);
 
       armsFightingHome.put(RobotSide.LEFT, new double[] {0.333422, 0.08264014, 0.2183049, -2.35619});
       armsFightingHome.put(RobotSide.RIGHT, new double[] {0.6753323, 0.0591941, -0.024862368, -2.35619});
@@ -251,10 +257,12 @@ public class RDXVRAssistance implements TeleoperationAssistant
          // these indices are derived from how the edges are created in createStdDeviationEdges() and are always the same
          int[][] patchStartIndices = {{1, 2, 3, 0}, {0, 3, 4, 7}, {7, 4, 5, 6}};
          int[][] patchEndIndices = {{2, 3, 4, 5}, {0, 1, 6, 7}};
-         for (int[] indices : patchStartIndices) {
+         for (int[] indices : patchStartIndices)
+         {
             stdDeviationGraphic.addRectangularPatch(startPoints[indices[0]], startPoints[indices[1]], startPoints[indices[2]], startPoints[indices[3]]);
          }
-         for (int[] indices : patchEndIndices) {
+         for (int[] indices : patchEndIndices)
+         {
             stdDeviationGraphic.addRectangularPatch(endPoints[indices[0]], endPoints[indices[1]], endPoints[indices[2]], endPoints[indices[3]]);
          }
 
@@ -304,10 +312,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
-      {
-         enableStdDeviationVisualization(bodyPart);
-      }
+//      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
+//      {
+//         enableStdDeviationVisualization(bodyPart);
+//      }
 
       if (!objectName.isEmpty())
       {
@@ -321,7 +329,19 @@ public class RDXVRAssistance implements TeleoperationAssistant
                if (!bodyPartReplayMotionMap.containsKey(bodyPart))
                   bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
                else
-                  bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
+               {
+                  //TODO remove once added the hands back on robot
+                  if (bodyPart.equals("rightHand"))
+                  {
+                     FramePose3D observedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), observedPose);
+                     observedFramePose.changeFrame(syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT));
+                     observedFramePose.appendTranslation(0.0, 0.0, -0.350);
+                     observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                     bodyPartReplayMotionMap.get(bodyPart).add(observedFramePose);
+                  }
+                  else
+                     bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
+               }
             }
          }
       }
@@ -364,7 +384,19 @@ public class RDXVRAssistance implements TeleoperationAssistant
                { // if first preview
                   // keep storing current frames for replay preview with splines
                   if (bodyPartReplayMotionMap.containsKey(bodyPart))
-                     bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+                  {
+                     //TODO remove this once hand is added
+                     if (bodyPart.equals("rightHand"))
+                     {
+                        FramePose3D observedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), framePose);
+                        observedFramePose.changeFrame(syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT));
+                        observedFramePose.appendTranslation(0.0, 0.0, -0.350);
+                        observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                        bodyPartReplayMotionMap.get(bodyPart).add(observedFramePose);
+                     }
+                     else
+                        bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+                  }
                }
             }
             else // -- If user did not use the preview or preview has been validated
@@ -421,6 +453,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       else if (status.getAssistancePhase() == AssistancePhase.BLENDING)
       {
+         LogTools.info("BLENDING");
          if (!affordanceAssistant.isActive())
          {
             affordanceAssistant.loadAffordance(objectName, objectFrame);
@@ -457,6 +490,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       else if (status.getAssistancePhase() == AssistancePhase.AFFORDANCE)
       {
+         LogTools.info("AFFORDANCE");
          if(!affordanceAssistant.isAffordanceOver())
          {
             if (containsBodyPart(bodyPart))
