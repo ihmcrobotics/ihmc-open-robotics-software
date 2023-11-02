@@ -28,7 +28,7 @@ public class ContinuousPlanner
 {
    public enum PlanningMode
    {
-      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL
+      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL, RANDOM_WALK
    }
 
    private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
@@ -69,6 +69,7 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
+      this.mode = mode;
 
       active = true;
 
@@ -77,7 +78,7 @@ public class ContinuousPlanner
          case FRONTIER_EXPANSION:
             monteCarloPlanner = new MonteCarloPlanner(offset);
             break;
-         case WALK_TO_GOAL:
+         case WALK_TO_GOAL, RANDOM_WALK:
             footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
             break;
       }
@@ -120,6 +121,11 @@ public class ContinuousPlanner
                                                               (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
                                                               (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
+         case RANDOM_WALK:
+            ActiveMappingTools.setRandomGoalWithinBounds(startingStancePose, goalStancePose,
+                                                         (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
+                                                         (float) continuousPlanningParameters.getGoalPoseUpDistance());
+            break;
          case FRONTIER_EXPANSION:
             //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
             break;
@@ -157,12 +163,12 @@ public class ContinuousPlanner
       }
    }
 
-   public FootstepPlannerOutput planToGoalWithHeightMap(HeightMapData heightMapData)
+   public void planToGoalWithHeightMap(HeightMapData heightMapData)
    {
       if (footstepPlanner.isPlanning())
       {
          LogTools.warn("Footstep Planner is Busy!");
-         return null;
+         return;
       }
 
       FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
@@ -179,7 +185,7 @@ public class ContinuousPlanner
 
          if (previousFootstepPlan.getNumberOfSteps() < continuousPlanningParameters.getNumberOfStepsToSend())
          {
-            LogTools.warn("Previous Plan for Reference: Steps: {}", previousFootstepPlan.getNumberOfSteps());
+            LogTools.error("Previous Plan for Reference: Not Enough Steps: {}!", previousFootstepPlan.getNumberOfSteps());
          }
          else
          {
@@ -188,8 +194,8 @@ public class ContinuousPlanner
                previousFootstepPlan.remove(0);
             }
             request.setReferencePlan(previouslySentPlanForReference);
+            request.setTimeout(continuousPlanningParameters.getPlanningWithReferenceTimeout());
          }
-         request.setTimeout(continuousPlanningParameters.getPlanningWithReferenceTimeout());
       }
       else
       {
@@ -209,8 +215,6 @@ public class ContinuousPlanner
                                      planAvailable,
                                      imminentFootstepSide));
       }
-
-      return plannerOutput;
    }
 
    public FootstepPlannerOutput planToExploreWithHeightMap(HeightMapData heightMapData)

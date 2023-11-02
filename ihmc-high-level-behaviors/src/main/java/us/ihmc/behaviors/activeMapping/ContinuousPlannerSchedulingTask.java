@@ -89,12 +89,10 @@ public class ContinuousPlannerSchedulingTask
     */
    private void tickStateMachine()
    {
-      if (state != ContinuousWalkingState.NOT_STARTED && state != ContinuousWalkingState.WAITING_TO_LAND)
-         LogTools.info("Continuous Planning State: " + state);
-
       if (!continuousPlanningParameters.getActiveMapping())
       {
          continuousPlanner.setInitialized(false);
+         state = ContinuousWalkingState.NOT_STARTED;
          return;
       }
 
@@ -124,6 +122,7 @@ public class ContinuousPlannerSchedulingTask
    {
       if (state == ContinuousWalkingState.READY_TO_PLAN || state == ContinuousWalkingState.PLANNING_FAILED)
       {
+         LogTools.info("State: " + state);
          getImminentStanceFromLatestStatus();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
          continuousPlanner.planToGoalWithHeightMap(latestHeightMapData);
@@ -136,6 +135,7 @@ public class ContinuousPlannerSchedulingTask
 
       if (state == ContinuousWalkingState.PLAN_AVAILABLE)
       {
+         LogTools.info("State: " + state);
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousPlanningParameters.getNumberOfStepsToSend(),
                                                                                                         (float) continuousPlanningParameters.getSwingTime(),
                                                                                                         (float) continuousPlanningParameters.getTransferTime());

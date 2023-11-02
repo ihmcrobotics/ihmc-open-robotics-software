@@ -462,7 +462,7 @@ public class RDXRapidHeightMapSimulationDemo
                         logFootsteps(footstepPlannerOutput);
                         logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
                                      PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME);
-                        logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().getBytedecoOpenCVMat(),
+                        logHeightMap(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage(),
                                      PerceptionLoggerConstants.SENSOR_CROPPED_HEIGHT_MAP_NAME);
                      }
                   }

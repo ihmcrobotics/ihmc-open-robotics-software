@@ -1,14 +1,11 @@
 package us.ihmc.perception.tools;
 
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -49,22 +46,50 @@ public class ActiveMappingTools
       goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.11, 0.0);
    }
 
-   public static void setStraightGoalPoses(SideDependentList<FramePose3D> originalPoseToPlanFrom,
-                                           SideDependentList<FramePose3D> startPose,
-                                           SideDependentList<FramePose3D> goalPose,
-                                           float xDistance,
-                                           float zDistance)
+   public static void setRandomGoalWithinBounds(SideDependentList<FramePose3D> startPose,
+                                                SideDependentList<FramePose3D> goalPose,
+                                                float xDistance,
+                                                float offsetZ)
    {
+
+      FramePose3D startMidPose = new FramePose3D();
+      startMidPose.interpolate(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT), 0.5);
+
+      double offsetX = 0.0;
+      double offsetY = 0.0;
+
+      // if start is outside bounds, reflect the dimension about the boundary
+      if (startMidPose.getX() < 1.0)
+      {
+         offsetX = -startMidPose.getX() * 2.0;;
+      }
+      if (startMidPose.getY() < 0.0)
+      {
+         offsetY = -startMidPose.getY() * 2.0;
+      }
+      if (startMidPose.getX() > 4.0)
+      {
+         offsetX = (4.0 - startMidPose.getX()) * 2.0;
+      }
+      if (startMidPose.getY() > 4.0)
+      {
+         offsetY = (4.0 - startMidPose.getY()) * 2.0;
+      }
+
+      // compute yaw as direction from start to goal
+      double offsetYaw = Math.atan2(goalPose.get(RobotSide.LEFT).getY() - startPose.get(RobotSide.LEFT).getY(),
+                                    goalPose.get(RobotSide.LEFT).getX() - startPose.get(RobotSide.LEFT).getX()) + Math.random() * 0.2 - 0.1;
+
       for (RobotSide side : RobotSide.values)
       {
-         goalPose.get(side).getPosition().set(startPose.get(side).getPosition());
-         goalPose.get(side).getOrientation().set(originalPoseToPlanFrom.get(side).getOrientation());
-         goalPose.get(side).getTranslation().setX(startPose.get(side).getPosition().getX() + xDistance);
-         goalPose.get(side).getTranslation().setY(originalPoseToPlanFrom.get(side).getPosition().getY());
-         goalPose.get(side).getTranslation().setZ(startPose.get(side).getPosition().getZ() + zDistance);
-
-         goalPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         goalPose.get(side).getPosition().set(startMidPose.getPosition());
+         goalPose.get(side).getOrientation().set(startMidPose.getOrientation());
+         goalPose.get(side).appendTranslation(offsetX + xDistance, offsetY, offsetZ);
+         goalPose.get(side).getOrientation().setYawPitchRoll(offsetYaw, 0, 0);
       }
+
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.11, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.11, 0.0);
    }
 
    public static Pose2D getNearestUnexploredNode(PlanarRegionsList planarRegionMap,
