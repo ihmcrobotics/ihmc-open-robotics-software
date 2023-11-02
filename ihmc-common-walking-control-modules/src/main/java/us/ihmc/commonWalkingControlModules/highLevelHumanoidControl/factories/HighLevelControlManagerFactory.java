@@ -241,6 +241,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
+      boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -255,6 +256,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspacePositionGains,
                                                                     contactableBody,
                                                                     defaultControlMode,
+                                                                    enableFunctionGenerators,
                                                                     yoTime,
                                                                     graphicsListRegistry,
                                                                     registry);
