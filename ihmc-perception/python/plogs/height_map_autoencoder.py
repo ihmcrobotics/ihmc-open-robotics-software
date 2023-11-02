@@ -171,7 +171,7 @@ def visualize_dataset(dataset):
 
         visualize_height_map(height_map)
 
-def visualize_height_map(height_map):
+def visualize_height_map(height_map, target_height_map=None):
     height_map = cv2.convertScaleAbs(height_map, alpha=(255.0/65535.0))
     height_map = np.minimum(height_map * 10, 255)
 
@@ -179,8 +179,17 @@ def visualize_height_map(height_map):
     height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
     height_map_display = cv2.resize(height_map_display, (1000, 1000))
 
+    # if target is not None, stack the target next to the input
+    if target_height_map is not None:
+        target_height_map = cv2.convertScaleAbs(target_height_map, alpha=(255.0/65535.0))
+        target_height_map = np.minimum(target_height_map * 10, 255)
+        target_height_map_display = target_height_map.copy()
+        target_height_map_display = cv2.cvtColor(target_height_map_display, cv2.COLOR_GRAY2RGB)
+        target_height_map_display = cv2.resize(target_height_map_display, (1000, 1000))
+        height_map_display = np.hstack((height_map_display, target_height_map_display))
+
     cv2.namedWindow("Footstep Plan", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Footstep Plan", 1000, 1000)
+    # cv2.resizeWindow("Footstep Plan", 1000, 1000)
     cv2.imshow("Footstep Plan", height_map_display)
     code = cv2.waitKeyEx(0)
 
@@ -242,14 +251,17 @@ def load_validate(val_dataset):
             predict_output = np.array(predict_output.cpu().numpy() * 10000.0, dtype=np.uint16)
             predict_output = predict_output.reshape((201, 201))      
 
-            visualize_height_map(predict_output)
+            target_output = np.array(target_output.cpu().numpy() * 10000.0, dtype=np.uint16)
+            target_output = target_output.reshape((201, 201))
+
+            visualize_height_map(predict_output, target_output)
 
 if __name__ == "__main__":
 
     # load dataset
     train_dataset, val_dataset = load_dataset(validation_split=0.05)
    
-    train = True
+    train = False
     visualize_raw = False
 
     if visualize_raw:
