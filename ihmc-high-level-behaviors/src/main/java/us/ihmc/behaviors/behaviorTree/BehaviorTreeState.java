@@ -88,9 +88,10 @@ public class BehaviorTreeState extends Confirmable
 
    public void fromMessage(BehaviorTreeStateMessage message)
    {
+      fromMessage(message.getConfirmableRequest());
+
       if (!isFrozen())
          nextID.setValue(message.getNextId());
-      fromMessage(message.getConfirmableRequest());
    }
 
    public long getAndIncrementNextID()
