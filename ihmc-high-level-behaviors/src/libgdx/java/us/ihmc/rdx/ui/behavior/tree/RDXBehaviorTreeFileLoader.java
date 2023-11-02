@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
@@ -16,8 +17,7 @@ public class RDXBehaviorTreeFileLoader
    private final BehaviorTreeState behaviorTreeState;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
 
-   public RDXBehaviorTreeFileLoader(BehaviorTreeState behaviorTreeState,
-                                    RDXBehaviorTreeNodeBuilder nodeBuilder)
+   public RDXBehaviorTreeFileLoader(BehaviorTreeState behaviorTreeState, RDXBehaviorTreeNodeBuilder nodeBuilder)
    {
       this.behaviorTreeState = behaviorTreeState;
       this.nodeBuilder = nodeBuilder;
@@ -41,8 +41,8 @@ public class RDXBehaviorTreeFileLoader
 
       RDXBehaviorTreeNode<?, ?> node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
                                                               behaviorTreeState.getAndIncrementNextID());
-
       node.getDefinition().loadFromFile(jsonNode);
+      LogTools.info("Creating node: {}:{}", node.getDefinition().getDescription(), node.getState().getID());
 
       if (parentNode != null)
       {
