@@ -36,7 +36,7 @@ public class ContinuousPlannerSchedulingTask
 
    private enum ContinuousWalkingState
    {
-      NOT_STARTED, READY_TO_PLAN, PLANNING_FAILED, PLANNING, PLAN_AVAILABLE, WAITING_TO_LAND
+      NOT_STARTED, READY_TO_PLAN, PLANNING_FAILED, PLAN_AVAILABLE, WAITING_TO_LAND
    }
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
