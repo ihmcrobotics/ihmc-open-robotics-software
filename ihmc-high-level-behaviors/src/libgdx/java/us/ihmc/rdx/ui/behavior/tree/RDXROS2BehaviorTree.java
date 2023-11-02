@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import imgui.ImGui;
+import imgui.ImVec2;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
@@ -27,6 +28,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
+   private final transient ImVec2 statusTextSize = new ImVec2();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
@@ -56,6 +58,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       baseUI.getImGuiPanelManager().addPanel(panel);
       super.createAndSetupDefault(baseUI);
+
    }
 
    public void update()
@@ -74,20 +77,32 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       super.renderImGuiWidgetsPre();
 
+      // Prevent jumping around when it changes
+      ImGui.calcTextSize(statusTextSize, "Nodes: UI: 999   On-Robot: 999   ");
+      float nodeCountsTextWidth = statusTextSize.x;
+      ImGui.calcTextSize(statusTextSize, "State: Frozen (999)");
+      float frozenStatusTextWidth = statusTextSize.x;
+      ImGui.calcTextSize(statusTextSize, "999 Hz");
+      float frequencyTextWidth = statusTextSize.x;
+      float rightMargin = 20.0f;
+
+      ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyTextWidth - rightMargin);
       int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
       BehaviorTreeStateMessage latestBehaviorTreeMessage = ros2BehaviorTreeState.getBehaviorTreeSubscription().getLatestBehaviorTreeMessage();
       int numberOfOnRobotNodes = latestBehaviorTreeMessage == null ? 0 : latestBehaviorTreeMessage.getBehaviorTreeIndices().size();
-      ImGui.text("Nodes: UI: %d   On-Robot: %d   State: ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
-      ImGui.sameLine();
+      ImGui.text("Nodes: UI: %3d  On-Robot: %3d  ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
+
+      ImGui.sameLine(ImGui.getWindowSizeX() - frozenStatusTextWidth - frequencyTextWidth - rightMargin);
       int numberOfFrozenNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfFrozenNodes();
+      ImGui.text("State: ");
+      ImGui.sameLine();
       if (ros2BehaviorTreeState.getBehaviorTreeState().isFrozen() || numberOfFrozenNodes > 0)
          ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen (%d)".formatted(numberOfFrozenNodes));
       else
          ImGui.text("Normal");
-      ImGui.pushItemWidth(100.0f);
-      ImGui.sameLine();
+
+      ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - rightMargin);
       subscriptionFrequencyText.render();
-      ImGui.popItemWidth();
 
       super.renderImGuiWidgetsPost();
    }

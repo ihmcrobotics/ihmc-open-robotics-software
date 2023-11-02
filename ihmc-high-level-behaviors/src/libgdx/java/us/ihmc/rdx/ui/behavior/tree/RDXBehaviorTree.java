@@ -188,10 +188,11 @@ public class RDXBehaviorTree
       ImGui.beginMenuBar();
       fileMenu.renderFileMenu();
       nodesMenu.renderNodesMenu();
-      ImGui.endMenuBar();
+   }
 
-      for (int i = 0; i < 100; i++)
-         ImGui.spacing();
+   protected void renderImGuiWidgetsPost()
+   {
+      ImGui.endMenuBar();
 
       if (ImGui.button(labels.get("[+]")))
          expandCollapseAll(true, rootNode);
@@ -201,11 +202,7 @@ public class RDXBehaviorTree
       if (ImGui.button(labels.get("[-]"), expandButtonSize.x, expandButtonSize.y))
          expandCollapseAll(false, rootNode);
       ImGuiTools.previousWidgetTooltip("Collapse all nodes");
-      ImGui.sameLine();
-   }
 
-   protected void renderImGuiWidgetsPost()
-   {
       if (rootNode != null)
          renderImGuiWidgetsAsTree(rootNode);
    }
