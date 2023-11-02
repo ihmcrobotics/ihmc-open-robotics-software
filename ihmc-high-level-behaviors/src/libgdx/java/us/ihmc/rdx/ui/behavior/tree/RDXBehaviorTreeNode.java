@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImStringWrapper;
@@ -67,7 +68,8 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public void destroy()
    {
-
+      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getDescription(), getState().getID());
+      getState().destroy();
    }
 
    public ImStringWrapper getDescriptionWrapper()

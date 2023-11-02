@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.log.LogTools;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +33,8 @@ public abstract class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D
    @Override
    public void destroy()
    {
-
+      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getDescription(), getState().getID());
+      getState().destroy();
    }
 
    public List<BehaviorTreeNodeExecutor<?, ?>> getChildren()

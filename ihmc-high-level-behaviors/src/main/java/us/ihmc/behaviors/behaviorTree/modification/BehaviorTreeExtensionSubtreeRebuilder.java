@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.modification;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtensionSupplier;
-import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
 
@@ -26,28 +25,28 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       {
          for (BehaviorTreeNodeExtension<?, ?, ?, ?> leftover : idToNodesMap.values())
          {
-            LogTools.info("Destroying node: {}:{}", leftover.getState().getDefinition().getDescription(), leftover.getState().getID());
-            leftover.getState().destroy();
-            if (leftover.getExtendedNode() != leftover.getState()) // FIXME Kinda weird
-               leftover.destroy();
+            leftover.destroy();
          }
       };
    }
 
    private void clearChildren(BehaviorTreeNodeExtension<?, ?, ?, ?> localNode)
    {
-      idToNodesMap.put(localNode.getState().getID(), localNode);
-
-      if (!localNode.getState().isFrozen()) // Disassemble non-frozen parts
+      if (localNode != null) // In the case of a null root node
       {
-         for (BehaviorTreeNode<?> child : localNode.getChildren())
-         {
-            clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
-         }
+         idToNodesMap.put(localNode.getState().getID(), localNode);
 
-         localNode.getDefinition().getChildren().clear(); // FIXME This is kinda weird
-         localNode.getState().getChildren().clear();
-         localNode.getChildren().clear();
+         if (!localNode.getState().isFrozen()) // Disassemble non-frozen parts
+         {
+            for (BehaviorTreeNode<?> child : localNode.getChildren())
+            {
+               clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
+            }
+
+            localNode.getDefinition().getChildren().clear(); // FIXME This is kinda weird
+            localNode.getState().getChildren().clear();
+            localNode.getChildren().clear();
+         }
       }
    }
 

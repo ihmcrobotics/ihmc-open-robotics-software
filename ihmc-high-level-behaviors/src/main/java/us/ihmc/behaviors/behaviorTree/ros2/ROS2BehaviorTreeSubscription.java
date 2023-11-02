@@ -5,14 +5,14 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAdd;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.log.LogTools;
 
 import java.util.function.Consumer;
 
@@ -21,6 +21,7 @@ public class ROS2BehaviorTreeSubscription
    private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;
    private final BehaviorTreeState behaviorTreeState;
    private final Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter;
+   private final ROS2ActorDesignation actorDesignation;
    private long numberOfMessagesReceived = 0;
    private BehaviorTreeStateMessage latestBehaviorTreeMessage;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
@@ -32,12 +33,13 @@ public class ROS2BehaviorTreeSubscription
    public ROS2BehaviorTreeSubscription(BehaviorTreeState behaviorTreeState,
                                        Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                       ROS2IOTopicQualifier ioQualifier)
+                                       ROS2ActorDesignation actorDesignation)
    {
       this.behaviorTreeState = behaviorTreeState;
       this.rootNodeSetter = rootNodeSetter;
+      this.actorDesignation = actorDesignation;
 
-      behaviorTreeSubscription = ros2PublishSubscribeAPI.subscribe(AutonomyAPI.BEAVIOR_TREE.getTopic(ioQualifier));
+      behaviorTreeSubscription = ros2PublishSubscribeAPI.subscribe(AutonomyAPI.BEAVIOR_TREE.getTopic(actorDesignation.getIncomingQualifier()));
    }
 
    public void update()
@@ -49,17 +51,16 @@ public class ROS2BehaviorTreeSubscription
 
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);
-         boolean rootIsNull = latestBehaviorTreeMessage.getBehaviorTreeTypes().isEmpty();
-         if (!rootIsNull)
+         boolean subscriptionRootIsNull = latestBehaviorTreeMessage.getBehaviorTreeTypes().isEmpty();
+         if (!subscriptionRootIsNull)
             buildSubscriptionTree(latestBehaviorTreeMessage, subscriptionRootNode);
 
          behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
 
-         if (behaviorTreeState.getRootNode() != null)
+         if (!behaviorTreeState.isFrozen())
          {
             // Clears all unfrozen nodes
-            behaviorTreeState.modifyTree(modificationQueue ->
-                                               modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
+            behaviorTreeState.modifyTree(modificationQueue -> modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
          }
 
          behaviorTreeState.modifyTree(modificationQueue ->
@@ -67,7 +68,7 @@ public class ROS2BehaviorTreeSubscription
             // When the root node is swapped out, we freeze the reference to the new one
             boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
 
-            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = rootIsNull ? null : recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
+            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = subscriptionRootIsNull ? null : recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
 
             if (rootNode != null)
             {
@@ -91,6 +92,10 @@ public class ROS2BehaviorTreeSubscription
       if (localNode == null && !anAncestorIsFrozen) // New node that wasn't in the local tree
       {
          Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
+         LogTools.info("Duplicating node: {}:{} Actor: {}",
+                       subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getDescription(),
+                       nodeID,
+                       actorDesignation.name());
          localNode = behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID);
       }
 

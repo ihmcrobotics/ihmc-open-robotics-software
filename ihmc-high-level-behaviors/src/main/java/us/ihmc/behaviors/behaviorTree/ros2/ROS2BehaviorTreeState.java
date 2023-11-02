@@ -38,7 +38,7 @@ public class ROS2BehaviorTreeState
       behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(behaviorTreeState,
                                                                   rootNodeSetter,
                                                                   ros2PublishSubscribeAPI,
-                                                                  ros2ActorDesignation.getIncomingQualifier());
+                                                                  ros2ActorDesignation);
    }
 
    /**

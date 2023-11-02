@@ -7,7 +7,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.log.LogTools;
 
 public class ROS2BehaviorTreePublisher
 {
@@ -30,11 +29,7 @@ public class ROS2BehaviorTreePublisher
       }
 
       BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = behaviorTreeState.getRootNode();
-      if (rootNode == null)
-      {
-         LogTools.info("Root node null");
-      }
-      else
+      if (rootNode != null)
       {
          packTreeToMessage(rootNode.getState());
       }
