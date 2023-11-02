@@ -8,7 +8,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -55,6 +55,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private boolean wasConcurrent = false;
 
    public RDXPelvisHeightPitchAction(long id,
+                                     CRDTInfo crdtInfo,
                                      RDX3DPanel panel3D,
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
@@ -63,7 +64,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    {
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      state = new PelvisHeightPitchActionState(id, ROS2ActorDesignation.OPERATOR, referenceFrameLibrary);
+      state = new PelvisHeightPitchActionState(id, crdtInfo, referenceFrameLibrary);
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform());
       poseGizmo.create(panel3D);

@@ -2,8 +2,8 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -18,9 +18,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
     */
    private final MutableReferenceFrame goalPelvisFrame = new MutableReferenceFrame();
 
-   public ChestOrientationActionState(long id, ROS2ActorDesignation actorDesignation, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new ChestOrientationActionDefinition(), actorDesignation);
+      super(id, new ChestOrientationActionDefinition(), crdtInfo);
 
       chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform());
    }
@@ -43,9 +43,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
 
       MessageTools.toEuclid(message.getGoalPelvisTransformToWorld(), goalPelvisFrame.getTransformToParent());
       goalPelvisFrame.getReferenceFrame().update();

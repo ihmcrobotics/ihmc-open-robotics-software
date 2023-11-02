@@ -15,7 +15,7 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5161e392560e9abe322d7ae1871b835afa721e9b6cbb22ec3dced0d553e3ce44";
+   		return "6ad7669ae99495429aa58b65854267e54a671108ed8ae80d647065d78c419982";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -72,7 +72,8 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
-      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getRequestUuid(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       return current_alignment - initial_alignment;
@@ -82,14 +83,16 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       cdr.write_type_3(data.getValue());
 
-      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getRequestUuid(), cdr);
+      cdr.write_type_4(data.getRequestNumber());
+
    }
 
    public static void read(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setValue(cdr.read_type_3());
       	
-      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getRequestUuid(), cdr);	
+      data.setRequestNumber(cdr.read_type_4());
+      	
 
    }
 
@@ -97,16 +100,14 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void serialize(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_3("value", data.getValue());
-      ser.write_type_a("request_uuid", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getRequestUuid());
-
+      ser.write_type_4("request_number", data.getRequestNumber());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data)
    {
       data.setValue(ser.read_type_3("value"));
-      ser.read_type_a("request_uuid", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getRequestUuid());
-
+      data.setRequestNumber(ser.read_type_4("request_number"));
    }
 
    public static void staticCopy(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage src, ihmc_common_msgs.msg.dds.ConfirmableRequestMessage dest)

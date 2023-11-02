@@ -5,8 +5,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.Confirmable;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -33,9 +33,9 @@ public class BehaviorTreeState extends Confirmable
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
                             Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier,
-                            ROS2ActorDesignation actorDesignation)
+                            CRDTInfo crdtInfo)
    {
-      super(actorDesignation);
+      super(crdtInfo);
 
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;

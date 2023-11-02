@@ -5,7 +5,7 @@ import imgui.internal.ImGui;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -28,9 +28,9 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
    private final ImBooleanWrapper executeWithNextActionWrapper;
 
-   public RDXSakeHandCommandAction(long id)
+   public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo)
    {
-      state = new SakeHandCommandActionState(id, ROS2ActorDesignation.OPERATOR);
+      state = new SakeHandCommandActionState(id, crdtInfo);
 
       sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));
       handCommandOptionIndex = new ImIntegerWrapper(getDefinition()::getHandConfigurationIndex,

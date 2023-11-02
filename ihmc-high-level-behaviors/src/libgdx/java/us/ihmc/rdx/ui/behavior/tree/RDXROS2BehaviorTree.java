@@ -5,7 +5,6 @@ import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -18,11 +17,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * Top level class for the operator's behavior tree.
+ */
 public class RDXROS2BehaviorTree extends RDXBehaviorTree
 {
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
    /** Reduce the communication update rate. */
-   private final Throttler communicationThrottler = new Throttler().setFrequency(30.0);
+   private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
 
@@ -33,7 +35,8 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
                               ReferenceFrameLibrary referenceFrameLibrary,
-                              FootstepPlannerParametersBasics footstepPlannerParametersBasics, ROS2ControllerPublishSubscribeAPI ros2)
+                              FootstepPlannerParametersBasics footstepPlannerParametersBasics,
+                              ROS2ControllerPublishSubscribeAPI ros2)
    {
       super(treeFilesDirectory,
             robotModel,
@@ -44,7 +47,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
             referenceFrameLibrary,
             footstepPlannerParametersBasics);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2, ROS2ActorDesignation.OPERATOR);
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2);
 
       ros2BehaviorTreeState.getBehaviorTreeSubscription().getBehaviorTreeSubscription().addCallback(message -> subscriptionFrequencyText.ping());
    }

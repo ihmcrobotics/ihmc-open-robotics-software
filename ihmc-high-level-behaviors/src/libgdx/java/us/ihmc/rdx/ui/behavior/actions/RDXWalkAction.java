@@ -8,7 +8,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.WalkActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WalkActionState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -42,12 +42,13 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    private final RDX3DPanelTooltip tooltip;
 
    public RDXWalkAction(long id,
+                        CRDTInfo crdtInfo,
                         RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
                         ReferenceFrameLibrary referenceFrameLibrary,
                         FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      state = new WalkActionState(id, ROS2ActorDesignation.OPERATOR, footstepPlannerParameters, referenceFrameLibrary);
+      state = new WalkActionState(id, crdtInfo, footstepPlannerParameters, referenceFrameLibrary);
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
                                                                        getDefinition().getGoalToParentTransform(),

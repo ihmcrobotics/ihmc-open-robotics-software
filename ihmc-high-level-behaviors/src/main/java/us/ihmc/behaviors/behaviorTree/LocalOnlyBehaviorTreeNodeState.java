@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 /**
@@ -13,7 +14,7 @@ public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState<Behavi
 
    public LocalOnlyBehaviorTreeNodeState()
    {
-      super(0, new BehaviorTreeNodeDefinition(), ROS2ActorDesignation.ROBOT);
+      super(0, new BehaviorTreeNodeDefinition(), new CRDTInfo(ROS2ActorDesignation.ROBOT, 5));
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)

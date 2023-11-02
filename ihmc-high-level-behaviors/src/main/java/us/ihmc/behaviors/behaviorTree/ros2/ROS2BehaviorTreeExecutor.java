@@ -13,6 +13,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+/**
+ * Top level class for the robot's behavior tree.
+ */
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
    private final ROS2BehaviorTreeState ros2BehaviorTreeState;
@@ -38,7 +41,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
             walkingControllerParameters,
             ros2ControllerHelper);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper, ros2ActorDesignation);
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
    }
 
    public void update()

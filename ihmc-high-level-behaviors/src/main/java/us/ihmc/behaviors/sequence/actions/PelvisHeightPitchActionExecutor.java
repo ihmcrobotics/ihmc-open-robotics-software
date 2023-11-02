@@ -6,8 +6,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -32,6 +32,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public PelvisHeightPitchActionExecutor(long id,
+                                          CRDTInfo crdtInfo,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
@@ -39,7 +40,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new PelvisHeightPitchActionState(id, ROS2ActorDesignation.ROBOT, referenceFrameLibrary);
+      state = new PelvisHeightPitchActionState(id, crdtInfo, referenceFrameLibrary);
    }
 
    @Override

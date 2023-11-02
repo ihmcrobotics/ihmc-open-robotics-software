@@ -1,7 +1,6 @@
 #ifndef __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
 #define __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
 
-#include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
 module ihmc_common_msgs
 {
   module msg
@@ -39,9 +38,9 @@ module ihmc_common_msgs
          */
         unsigned short value;
         /**
-         * UUID of the request
+         * Request number, monotonically increasing
          */
-        ihmc_common_msgs::msg::dds::UUIDMessage request_uuid;
+        unsigned long request_number;
       };
     };
   };

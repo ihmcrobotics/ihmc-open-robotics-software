@@ -12,7 +12,7 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -41,6 +41,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private boolean frameIsChildOfWorld = false;
 
    public RDXFootstepPlanAction(long id,
+                                CRDTInfo crdtInfo,
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
@@ -50,7 +51,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      state = new FootstepPlanActionState(id, ROS2ActorDesignation.OPERATOR, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, crdtInfo, referenceFrameLibrary);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,

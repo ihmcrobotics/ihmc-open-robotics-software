@@ -3,15 +3,13 @@ package us.ihmc.communication.crdt;
 import ihmc_common_msgs.msg.dds.ConfirmableRequestMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
-
-import java.util.UUID;
 
 /**
  * A freezable node that has a mechanism for the freeze
  * to end early if we know the change has propagated.
+ *
+ * We assume messages are not dropped and do not arrive out of order.
  */
 public class Confirmable extends Freezable
 {
@@ -19,14 +17,14 @@ public class Confirmable extends Freezable
 
    private final Notification needToSendRequest = new Notification();
    private final Notification needToSendConfirmation = new Notification();
-   private final ROS2ActorDesignation actorDesignation;
+   private final CRDTInfo crdtInfo;
 
-   //   private UUID requestUUID;
-   private long requestUUID;
+   private long requestNumber;
+   private long updateNumberToUnfreeze = 0;
 
-   public Confirmable(ROS2ActorDesignation actorDesignation)
+   public Confirmable(CRDTInfo crdtInfo)
    {
-      this.actorDesignation = actorDesignation;
+      this.crdtInfo = crdtInfo;
    }
 
    @Override
@@ -34,14 +32,27 @@ public class Confirmable extends Freezable
    {
       super.freeze();
 
+      updateNumberToUnfreeze = crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration();
+
       if (!needToSendRequest.peek()) // Avoid sending multiple requests in one tick
       {
          needToSendRequest.set();
 
-         //      requestUUID = UUID.randomUUID();
-         requestUUID = nextRequestID.getAndIncrement();
-         LogTools.info("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestUUID, actorDesignation.name());
+         requestNumber = nextRequestID.getAndIncrement();
+         LogTools.info("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
       }
+   }
+
+   @Override
+   public void unfreeze()
+   {
+      updateNumberToUnfreeze = crdtInfo.getUpdateNumber();
+   }
+
+   @Override
+   public boolean isFrozen()
+   {
+      return crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
    }
 
    public void toMessage(ConfirmableRequestMessage message)
@@ -49,16 +60,14 @@ public class Confirmable extends Freezable
       if (needToSendRequest.poll())
       {
          message.setValue(ConfirmableRequestMessage.REQUEST);
-//         MessageTools.toMessage(requestUUID, message.getRequestUuid());
-         message.getRequestUuid().setLeastSignificantBits(requestUUID);
+         message.setRequestNumber(requestNumber);
       }
       else if (needToSendConfirmation.poll())
       {
          message.setValue(ConfirmableRequestMessage.CONFIRMATION);
-//         MessageTools.toMessage(requestUUID, message.getRequestUuid());
-         message.getRequestUuid().setLeastSignificantBits(requestUUID);
+         message.setRequestNumber(requestNumber);
 
-         LogTools.info("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), requestUUID, actorDesignation.name());
+         LogTools.info("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
       }
       else
       {
@@ -71,23 +80,25 @@ public class Confirmable extends Freezable
       if (message.getValue() == ConfirmableRequestMessage.REQUEST)
       {
          needToSendConfirmation.set();
-//         requestUUID = MessageTools.toUUID(message.getRequestUuid());
-         requestUUID = message.getRequestUuid().getLeastSignificantBits();
+         requestNumber = message.getRequestNumber();
       }
       else if (message.getValue() == ConfirmableRequestMessage.CONFIRMATION)
       {
-//         UUID confirmationsRequestUUID = MessageTools.toUUID(message.getRequestUuid());
-//         if (confirmationsRequestUUID.compareTo(requestUUID) == 0)
-         long confirmationsRequestUUID = message.getRequestUuid().getLeastSignificantBits();
-         if (confirmationsRequestUUID == requestUUID)
+         long confirmationsRequestUUID = message.getRequestNumber();
+         if (confirmationsRequestUUID == requestNumber)
          {
-            LogTools.info("Confirmed: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationsRequestUUID, actorDesignation.name());
+            LogTools.info("Confirmed: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationsRequestUUID, crdtInfo.getActorDesignation().name());
             unfreeze();
          }
          else
          {
-            LogTools.error("The heck man");
+            LogTools.error("Received a different request ID than sent. Sent: {} Recieved: {}", requestNumber, confirmationsRequestUUID);
          }
       }
+   }
+
+   public CRDTInfo getCRDTInfo()
+   {
+      return crdtInfo;
    }
 }
