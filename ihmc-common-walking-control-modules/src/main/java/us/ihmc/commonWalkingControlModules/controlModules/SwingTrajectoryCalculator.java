@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -211,7 +212,7 @@ public class SwingTrajectoryCalculator
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
-         setWaypointsFromCustomMidpoints(footstep.getCustomPositionWaypoints());
+         setWaypointsFromCustomMidpoints(footstep);
       }
       else if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
@@ -372,10 +373,19 @@ public class SwingTrajectoryCalculator
       }
    }
 
-   private void setWaypointsFromCustomMidpoints(List<FramePoint3D> positionWaypointsForSole)
-   {
+   private void setWaypointsFromCustomMidpoints(Footstep footstep)
+   {  // Stairs and slopes use these waypoints for its swing trajectory
+      for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
+      { // This raises the first trajectory swing waypoint by 2 centimeters. Could be tuned for future URDFs
+         footstep.getCustomPositionWaypoints().get(0).addZ(0.02);
+      }
+
+      List<FramePoint3D> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
+
       for (int i = 0; i < positionWaypointsForSole.size(); i++)
+      {
          this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
+      }
    }
 
    private void setWaypointsFromExternal(List<FrameSE3TrajectoryPoint> swingWaypoints)
