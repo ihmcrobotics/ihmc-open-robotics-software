@@ -11,6 +11,7 @@
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WalkActionStateMessage_.idl"
+#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -61,6 +62,10 @@ module behavior_msgs
          * The ID to assign to the next instantiated node
          */
         unsigned long next_id;
+        /**
+         * A mechanism for confirming and ending a freeze early
+         */
+        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
         /**
          * A depth first ordered list of types.
          */

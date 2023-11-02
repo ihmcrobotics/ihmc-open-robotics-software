@@ -15,6 +15,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeD
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiTreeRenderer;
@@ -67,7 +68,7 @@ public class RDXBehaviorTree
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
       nodesMenu = new RDXBehaviorTreeNodesMenu(treeFilesDirectory);
 
-      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
+      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, ROS2ActorDesignation.OPERATOR);
       fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
    }
 
@@ -100,7 +101,7 @@ public class RDXBehaviorTree
          });
       }
 
-      if (rootNode != null && nodesMenu.getDeleteRootNode().poll())
+      if (nodesMenu.getDeleteRootNode().poll() && rootNode != null) // poll must be first to get cleared every time
       {
          behaviorTreeState.modifyTree(modificationQueue ->
          {
