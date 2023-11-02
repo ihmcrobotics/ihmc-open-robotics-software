@@ -18,12 +18,22 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       super.tick();
 
       // TODO: Tick children
+
+
    }
 
+   @Override
    public void update()
    {
+      super.update();
+
       // TODO: Go through next for execution concurrent children and set chest action's goal pelvis frames
       //   and the hand pose actions chest frames
+
+      for (BehaviorTreeNodeExecutor<?, ?> child : getChildren())
+      {
+
+      }
    }
 
    @Override

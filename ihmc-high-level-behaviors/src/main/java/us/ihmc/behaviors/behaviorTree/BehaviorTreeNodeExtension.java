@@ -20,5 +20,11 @@ public interface BehaviorTreeNodeExtension<T extends BehaviorTreeNode<T>,
 
    D getDefinition();
 
+   default void update()
+   {
+      if (getState() != getExtendedNode())
+         getState().update();
+   }
+
    void destroy();
 }

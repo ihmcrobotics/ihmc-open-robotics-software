@@ -28,14 +28,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    }
 
    @Override
-   public void update()
-   {
-      super.update();
-
-      getState().update();
-   }
-
-   @Override
    public void renderImGuiWidgets()
    {
       if (expanded.get())

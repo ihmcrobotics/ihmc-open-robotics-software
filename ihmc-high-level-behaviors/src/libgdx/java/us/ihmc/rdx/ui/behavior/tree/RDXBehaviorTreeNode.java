@@ -25,8 +25,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
 
+   @Override
    public void update()
    {
+      BehaviorTreeNodeExtension.super.update();
+
       if (descriptionWrapper == null)
       {
          descriptionWrapper = new ImStringWrapper(getDefinition()::getDescription,
