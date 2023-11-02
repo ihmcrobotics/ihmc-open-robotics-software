@@ -18,6 +18,7 @@ public class RDXBehaviorTreeNodesMenu
    private final Notification menuShouldClose = new Notification();
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
    private final TypedNotification<RDXAvailableBehaviorTreeFile> loadFileRequest = new TypedNotification<>();
+   private final Notification deleteRootNode = new Notification();
 
    public RDXBehaviorTreeNodesMenu(WorkspaceResourceDirectory treeFilesDirectory)
    {
@@ -42,6 +43,12 @@ public class RDXBehaviorTreeNodesMenu
    {
       if (ImGui.beginMenu(labels.get("Nodes"), !menuShouldClose.poll()))
       {
+         // TODO: Replace with being able to delete any node
+         if (ImGui.button(labels.get("Delete Root Node")))
+         {
+            deleteRootNode.set();
+         }
+
          ImGui.text("From File:");
 
          for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
@@ -70,5 +77,10 @@ public class RDXBehaviorTreeNodesMenu
    public TypedNotification<RDXAvailableBehaviorTreeFile> getLoadFileRequest()
    {
       return loadFileRequest;
+   }
+
+   public Notification getDeleteRootNode()
+   {
+      return deleteRootNode;
    }
 }

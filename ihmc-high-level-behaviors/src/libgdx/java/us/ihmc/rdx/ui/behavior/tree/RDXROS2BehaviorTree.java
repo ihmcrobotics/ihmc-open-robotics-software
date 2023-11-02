@@ -63,7 +63,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       super.update();
 
-      if (getRootNode() != null && updateComms)
+      if (updateComms)
          ros2BehaviorTreeState.updatePublication();
    }
 

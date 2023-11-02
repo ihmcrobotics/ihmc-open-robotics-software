@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAdd;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
@@ -48,13 +49,15 @@ public class ROS2BehaviorTreeSubscription
 
          subscriptionRootNode.clear();
          subscriptionNodeDepthFirstIndex.setValue(0);
-         buildSubscriptionTree(latestBehaviorTreeMessage, subscriptionRootNode);
+         boolean rootIsNull = latestBehaviorTreeMessage.getBehaviorTreeTypes().isEmpty();
+         if (!rootIsNull)
+            buildSubscriptionTree(latestBehaviorTreeMessage, subscriptionRootNode);
 
          behaviorTreeState.fromMessage(latestBehaviorTreeMessage);
 
          if (behaviorTreeState.getRootNode() != null)
          {
-            // First clear the tree, storing all nodes by ID in the map in the tree rebuilder
+            // Clears all unfrozen nodes
             behaviorTreeState.modifyTree(modificationQueue ->
                                                modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
          }
@@ -64,12 +67,16 @@ public class ROS2BehaviorTreeSubscription
             // When the root node is swapped out, we freeze the reference to the new one
             boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
 
-            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
+            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode = rootIsNull ? null : recallNodeByIDOrCreate(subscriptionRootNode, treeRootReferenceFrozen);
 
             if (rootNode != null)
             {
                // The root node's parent is "null"
                updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, modificationQueue, treeRootReferenceFrozen);
+            }
+            else if (!treeRootReferenceFrozen)
+            {
+               rootNodeSetter.accept(null);
             }
 
             modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());

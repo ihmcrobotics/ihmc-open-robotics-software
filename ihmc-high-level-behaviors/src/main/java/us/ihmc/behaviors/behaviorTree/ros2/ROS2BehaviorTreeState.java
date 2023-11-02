@@ -63,7 +63,7 @@ public class ROS2BehaviorTreeState
    public void updatePublication()
    {
       if (publishThrottler.run())
-         behaviorTreePublisher.publish(behaviorTreeState, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
+         behaviorTreePublisher.publish(behaviorTreeState, ros2PublishSubscribeAPI, ros2ActorDesignation);
    }
 
    public void destroy()

@@ -47,13 +47,16 @@ public class BehaviorTreeState extends Freezable
 
    private void update(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
    {
-      ++numberOfNodes;
-      if (node.getState().isFrozen())
-         ++numberOfFrozenNodes;
-
-      for (Object child : node.getChildren())
+      if (node != null)
       {
-         update((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
+         ++numberOfNodes;
+         if (node.getState().isFrozen())
+            ++numberOfFrozenNodes;
+
+         for (Object child : node.getChildren())
+         {
+            update((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
+         }
       }
    }
 

@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
@@ -99,6 +100,17 @@ public class RDXBehaviorTree
          });
       }
 
+      if (rootNode != null && nodesMenu.getDeleteRootNode().poll())
+      {
+         behaviorTreeState.modifyTree(modificationQueue ->
+         {
+            modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(rootNode));
+         });
+
+         setRootNode(null);
+         behaviorTreeState.freeze();
+      }
+
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -166,6 +178,9 @@ public class RDXBehaviorTree
       fileMenu.renderFileMenu();
       nodesMenu.renderNodesMenu();
       ImGui.endMenuBar();
+
+      for (int i = 0; i < 100; i++)
+         ImGui.spacing();
 
       if (ImGui.button(labels.get("[+]")))
          expandCollapseAll(true, rootNode);
