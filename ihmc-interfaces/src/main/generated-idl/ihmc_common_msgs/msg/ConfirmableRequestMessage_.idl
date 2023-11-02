@@ -1,6 +1,7 @@
 #ifndef __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
 #define __ihmc_common_msgs__msg__ConfirmableRequestMessage__idl__
 
+#include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
 module ihmc_common_msgs
 {
   module msg
@@ -37,6 +38,10 @@ module ihmc_common_msgs
          * Holds one of the above constant values.
          */
         unsigned short value;
+        /**
+         * UUID of the request
+         */
+        ihmc_common_msgs::msg::dds::UUIDMessage request_uuid;
       };
     };
   };

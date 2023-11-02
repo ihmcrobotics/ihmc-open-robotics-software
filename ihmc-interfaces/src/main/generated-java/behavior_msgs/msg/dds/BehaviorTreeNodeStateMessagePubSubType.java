@@ -15,7 +15,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "34cd92b59024d8201f6d23961b8426e89c0d51b416b37570947c0f58a402f327";
+   		return "5d31a4207e925c5cd470394f7cb36e03bab4d2d9cf4ec9c60d8b337f58d094b3";
    }
    
    @Override
