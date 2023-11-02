@@ -190,32 +190,32 @@ public class RDXArmManager
    {
       handManager.renderImGuiWidgets();
 
-      ImGui.text("Arms:");
+      ImGui.text("Arms Home:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Home")))
          {
             executeArmAngles(side, PresetArmConfiguration.HOME, teleoperationParameters.getTrajectoryTime());
          }
       }
 
-      ImGui.text("Wide Arms:");
+      ImGui.text("Arms Wide:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Wide " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Wide")))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME_WIDE, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.WIDE_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
-      ImGui.text("Walking Arms:");
+      ImGui.text("Arms Tucked Up:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Tucked Up")))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME_UP_FOR_WALKING, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.TUCKED_UP_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Door avoidance arms:");
@@ -225,16 +225,6 @@ public class RDXArmManager
          if (ImGui.button(labels.get(side.getPascalCaseName(), "Door avoidance")))
          {
             executeDoorAvoidanceArmAngles(side);
-         }
-      }
-      ImGui.sameLine();
-      ImGui.text("Shield holding arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName(), "Shield holding")))
-         {
-            executeShieldHoldingArmAngles(side);
          }
       }
 
@@ -307,7 +297,8 @@ public class RDXArmManager
       // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
       // i.e. when the fingers are more than 30 degrees apart from each other
       // This is an arbitrary value
-      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
+      if (syncedRobot.getRobotModel().getHandModels().toString().contains("SakeHand") &&
+           syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
       {
          showWarningNotification.set(side);
       }
@@ -315,11 +306,6 @@ public class RDXArmManager
       {
          executeArmAngles(side, PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
       }
-   }
-
-   public void executeShieldHoldingArmAngles(RobotSide side)
-   {
-      executeArmAngles(side, PresetArmConfiguration.SHIELD_HOLDING, 3.0);
    }
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
