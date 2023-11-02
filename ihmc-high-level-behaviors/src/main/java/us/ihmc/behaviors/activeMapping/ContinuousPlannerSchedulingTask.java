@@ -4,24 +4,33 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,8 +63,7 @@ public class ContinuousPlannerSchedulingTask
    private int controllerFootstepQueueSize = 0;
 
    IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
-   IHMCROS2Publisher<RigidBodyTransformMessage> publisherForGoalPoses;
-   IHMCROS2Publisher<RigidBodyTransformMessage> publisherForStartPoses;
+   IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
 
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
@@ -71,6 +79,7 @@ public class ContinuousPlannerSchedulingTask
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
       publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
+      startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()),
                                       this::footstepStatusReceived);
@@ -151,7 +160,7 @@ public class ContinuousPlannerSchedulingTask
                                                                                                         (float) continuousPlanningParameters.getTransferTime());
          LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
          publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-         publisherForUI.publish(footstepDataList);
+         publishForVisualization(footstepDataList);
          continuousPlanner.setPreviouslySentPlanForReference();
 
          continuousPlannerState = ContinuousWalkingState.NOT_STARTED;
@@ -187,6 +196,21 @@ public class ContinuousPlannerSchedulingTask
       if (controllerFootstepQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
          LogTools.warn("Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
       controllerFootstepQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
+   }
+
+   public void publishForVisualization(FootstepDataListMessage footstepDataList)
+   {
+      List<Pose3D> poses = new ArrayList<>();
+      poses.add(new Pose3D(continuousPlanner.getStartingStancePose().get(RobotSide.LEFT)));
+      poses.add(new Pose3D(continuousPlanner.getStartingStancePose().get(RobotSide.RIGHT)));
+      poses.add(new Pose3D(continuousPlanner.getGoalStancePose().get(RobotSide.LEFT)));
+      poses.add(new Pose3D(continuousPlanner.getGoalStancePose().get(RobotSide.RIGHT)));
+
+      PoseListMessage poseListMessage = new PoseListMessage();
+      MessageTools.packPoseListMessage(poses, poseListMessage);
+
+      startAndGoalPublisherForUI.publish(poseListMessage);
+      publisherForUI.publish(footstepDataList);
    }
 
    public void setLatestHeightMapData(HeightMapData heightMapData)

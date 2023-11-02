@@ -2,6 +2,7 @@ package us.ihmc.communication.video;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -23,4 +24,5 @@ public class ContinuousPlanningAPI
     );
 
     public static final ROS2Topic<FootstepDataListMessage> PLANNED_FOOTSTEPS = IHMC_ROOT.withModule("continuous_planning").withType(FootstepDataListMessage.class).withSuffix("planned_footsteps");
+    public static final ROS2Topic<PoseListMessage> START_AND_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_planning").withType(PoseListMessage.class).withSuffix("start_and_goal");
 }
