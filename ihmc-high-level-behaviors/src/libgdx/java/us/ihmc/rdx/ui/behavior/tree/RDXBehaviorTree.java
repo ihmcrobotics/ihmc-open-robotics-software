@@ -96,11 +96,18 @@ public class RDXBehaviorTree
 
             if (selectedNode == null)
             {
+               if (rootNode != null)
+                  modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(rootNode));
+
                modificationQueue.accept(new BehaviorTreeNodeSetRoot(loadedNode, newRootNode -> rootNode = (RDXBehaviorTreeNode<?, ?>) newRootNode));
                behaviorTreeState.freeze();
             }
             else
+            {
+               modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(selectedNode));
+
                modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze(loadedNode, selectedNode));
+            }
          });
       }
 
