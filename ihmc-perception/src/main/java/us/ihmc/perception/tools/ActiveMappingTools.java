@@ -23,8 +23,8 @@ public class ActiveMappingTools
                                                      float xDistance,
                                                      float zDistance)
    {
-      float offsetX = (float) (Math.random() * 0.1 - 0.05);
-      float offsetY = (float) (Math.random() * 0.1 - 0.05);
+      float offsetX = (float) (Math.random() * 0.2 - 0.1);
+      float offsetY = (float) (Math.random() * 0.2 - 0.1);
 
       FramePose3D finalGoalMidPose = new FramePose3D();
       finalGoalMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
@@ -38,10 +38,6 @@ public class ActiveMappingTools
          worldToWalkingFrameTransform.set(walkingStartPose);
          worldToWalkingFrameTransform.invert();
          stanceToWalkingFrameTransform.multiply(worldToWalkingFrameTransform);
-
-         LogTools.info("Walking Start Pose: {}", walkingStartPose.getTranslation());
-         LogTools.info("Final Goal Mid Pose: {}", finalGoalMidPose.getTranslation());
-         LogTools.info("Stance to Walking Frame Transform: {}", stanceToWalkingFrameTransform.getTranslation());
 
          double xWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
          goalPose.get(side).getPosition().set(walkingStartPose.getPosition());

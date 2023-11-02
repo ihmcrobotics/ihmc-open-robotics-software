@@ -171,19 +171,29 @@ public class ContinuousPlanner
       request.setHeightMapData(heightMapData);
       request.setAbortIfGoalStepSnappingFails(true);
 
+      request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
       if (plannerOutput != null)
       {
+         LogTools.info("Setting Previous Plan as Reference in the Request");
          FootstepPlan previousFootstepPlan = plannerOutput.getFootstepPlan();
-         if (imminentFootstepSide == previousFootstepPlan.getFootstep(0).getRobotSide())
+
+         if (previousFootstepPlan.getNumberOfSteps() < continuousPlanningParameters.getNumberOfStepsToSend())
          {
-            previousFootstepPlan.remove(0);
+            LogTools.warn("Previous Plan for Reference: Steps: {}", previousFootstepPlan.getNumberOfSteps());
          }
-         request.setReferencePlan(previouslySentPlanForReference);
+         else
+         {
+            if (imminentFootstepSide == previousFootstepPlan.getFootstep(0).getRobotSide())
+            {
+               previousFootstepPlan.remove(0);
+            }
+            request.setReferencePlan(previouslySentPlanForReference);
+         }
          request.setTimeout(continuousPlanningParameters.getPlanningWithReferenceTimeout());
       }
       else
       {
-         request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
+         LogTools.warn("No Reference Plan Available");
       }
 
       plannerOutput = footstepPlanner.handleRequest(request);
@@ -354,6 +364,7 @@ public class ContinuousPlanner
 
    public void setPreviouslySentPlanForReference()
    {
+      LogTools.info("Setting Previously Sent Plan for Reference");
       this.previouslySentPlanForReference = plannerOutput.getFootstepPlan();
    }
 
