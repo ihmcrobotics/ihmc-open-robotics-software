@@ -39,7 +39,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
@@ -49,8 +48,8 @@ import java.util.function.Supplier;
 
 public class DualBlackflyCamera
 {
+   private static final boolean ENABLE_ARUCO_MARKER_DETECTION = true;
    private static final boolean DEBUG_SHUTDOWN = false;
-   private static final int MAX_IMAGE_READ_FREQUENCY = 30;
 
    private final RobotSide side;
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
@@ -156,14 +155,11 @@ public class DualBlackflyCamera
       // Camera read thread
       cameraReadThread = new Thread(() ->
       {
-         Throttler throttler = new Throttler();
-         throttler.setFrequency(MAX_IMAGE_READ_FREQUENCY);
-
          printCameraReadRateTimer.reset();
 
          while (!destroyed)
          {
-            throttler.waitAndRun();
+            // Do not sleep in this thread, read as fast as the camera can supply frames
             cameraRead();
 
             // Calculate read frequency (maybe it's lower than MAX_IMAGE_READ_FREQUENCY)
@@ -284,7 +280,8 @@ public class DualBlackflyCamera
 
       cameraReadThread.start();
       imageEncodeAndPublishThread.start();
-      imageUndistortAndUpdateArUcoThread.start();
+      if (ENABLE_ARUCO_MARKER_DETECTION)
+         imageUndistortAndUpdateArUcoThread.start();
       imageDeallocationThread.start();
    }
 
@@ -557,7 +554,8 @@ public class DualBlackflyCamera
       {
          cameraReadThread.join();
          imageEncodeAndPublishThread.join();
-         imageUndistortAndUpdateArUcoThread.join();
+         if (ENABLE_ARUCO_MARKER_DETECTION)
+            imageUndistortAndUpdateArUcoThread.join();
          imageDeallocationThread.join();
       }
       catch (InterruptedException interruptedException)
