@@ -106,9 +106,6 @@ public class ROS2BehaviorTreeSubscription
                                                 BehaviorTreeModificationQueue modificationQueue,
                                                 boolean anAncestorIsFrozen)
    {
-      // Each state handles which fields it updates based on its frozen status
-      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
-
       // We just add nodes if they would not be part of a frozen subtree.
       if (!anAncestorIsFrozen)
       {
@@ -137,6 +134,10 @@ public class ROS2BehaviorTreeSubscription
             updateLocalTreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, localNode, modificationQueue, anAncestorIsFrozen);
          }
       }
+
+      // Update the state after iterating over children, because node can unfreeze at this time
+      // Each state handles which fields it updates based on its frozen status
+      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
    }
 
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
