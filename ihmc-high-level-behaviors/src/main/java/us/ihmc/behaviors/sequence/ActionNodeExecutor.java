@@ -9,12 +9,6 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
                                          D extends ActionNodeDefinition>
       extends BehaviorTreeNodeExecutor<S, D>
 {
-   /** Called every tick. */
-   public void update()
-   {
-      getState().update();
-   }
-
    /** Trigger the action to begin executing. Called once per execution. */
    public void triggerActionExecution()
    {

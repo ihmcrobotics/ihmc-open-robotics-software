@@ -60,11 +60,6 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
       isActive = message.getIsActive();
    }
 
-   public void update()
-   {
-
-   }
-
    @Override
    public void destroy()
    {
