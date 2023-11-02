@@ -50,7 +50,6 @@ public class DualBlackflyCamera
 {
    private static final boolean ENABLE_ARUCO_MARKER_DETECTION = true;
    private static final boolean DEBUG_SHUTDOWN = false;
-   private static final int MAX_IMAGE_READ_FREQUENCY = 30;
 
    private final RobotSide side;
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
