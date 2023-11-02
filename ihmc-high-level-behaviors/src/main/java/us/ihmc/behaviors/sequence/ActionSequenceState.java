@@ -2,7 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,9 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    // TODO: Review this
    private final List<ActionNodeState<ActionNodeDefinition>> currentlyExecutingActions = new ArrayList<>();
 
-   public ActionSequenceState(long id, ROS2ActorDesignation actorDesignation)
+   public ActionSequenceState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new ActionSequenceDefinition(), actorDesignation);
+      super(id, new ActionSequenceDefinition(), crdtInfo);
    }
 
    @Override
@@ -72,9 +72,9 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public void fromMessage(ActionSequenceStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
 
       // Only modified by robot
       nextActionRejectionTooltip = message.getNextActionRejectionTooltipAsString();

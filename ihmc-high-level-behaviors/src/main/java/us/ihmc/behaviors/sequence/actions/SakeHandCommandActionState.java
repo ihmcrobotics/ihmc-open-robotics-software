@@ -2,13 +2,13 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 
 public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandActionDefinition>
 {
-   public SakeHandCommandActionState(long id, ROS2ActorDesignation actorDesignation)
+   public SakeHandCommandActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new SakeHandCommandActionDefinition(), actorDesignation);
+      super(id, new SakeHandCommandActionDefinition(), crdtInfo);
    }
 
    public void toMessage(SakeHandCommandActionStateMessage message)
@@ -20,8 +20,8 @@ public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandA
 
    public void fromMessage(SakeHandCommandActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
    }
 }

@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
@@ -16,9 +16,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private int totalNumberOfFootsteps;
    private int numberOfIncompleteFootsteps;
 
-   public FootstepPlanActionState(long id, ROS2ActorDesignation actorDesignation, ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new FootstepPlanActionDefinition(), actorDesignation);
+      super(id, new FootstepPlanActionDefinition(), crdtInfo);
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 
@@ -60,9 +60,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
 
       totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
       numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();

@@ -29,13 +29,12 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
             */
    public int value_;
    /**
-            * UUID of the request
+            * Request number, monotonically increasing
             */
-   public ihmc_common_msgs.msg.dds.UUIDMessage request_uuid_;
+   public long request_number_;
 
    public ConfirmableRequestMessage()
    {
-      request_uuid_ = new ihmc_common_msgs.msg.dds.UUIDMessage();
    }
 
    public ConfirmableRequestMessage(ConfirmableRequestMessage other)
@@ -48,7 +47,8 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
    {
       value_ = other.value_;
 
-      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.staticCopy(other.request_uuid_, request_uuid_);
+      request_number_ = other.request_number_;
+
    }
 
    /**
@@ -66,13 +66,19 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
       return value_;
    }
 
-
    /**
-            * UUID of the request
+            * Request number, monotonically increasing
             */
-   public ihmc_common_msgs.msg.dds.UUIDMessage getRequestUuid()
+   public void setRequestNumber(long request_number)
    {
-      return request_uuid_;
+      request_number_ = request_number;
+   }
+   /**
+            * Request number, monotonically increasing
+            */
+   public long getRequestNumber()
+   {
+      return request_number_;
    }
 
 
@@ -95,7 +101,8 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.value_, other.value_, epsilon)) return false;
 
-      if (!this.request_uuid_.epsilonEquals(other.request_uuid_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.request_number_, other.request_number_, epsilon)) return false;
+
 
       return true;
    }
@@ -111,7 +118,8 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
       if(this.value_ != otherMyClass.value_) return false;
 
-      if (!this.request_uuid_.equals(otherMyClass.request_uuid_)) return false;
+      if(this.request_number_ != otherMyClass.request_number_) return false;
+
 
       return true;
    }
@@ -124,8 +132,8 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
       builder.append("ConfirmableRequestMessage {");
       builder.append("value=");
       builder.append(this.value_);      builder.append(", ");
-      builder.append("request_uuid=");
-      builder.append(this.request_uuid_);
+      builder.append("request_number=");
+      builder.append(this.request_number_);
       builder.append("}");
       return builder.toString();
    }

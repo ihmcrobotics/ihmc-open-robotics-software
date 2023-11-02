@@ -2,13 +2,13 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 
 public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefinition>
 {
-   public HandWrenchActionState(long id, ROS2ActorDesignation actorDesignation)
+   public HandWrenchActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new HandWrenchActionDefinition(), actorDesignation);
+      super(id, new HandWrenchActionDefinition(), crdtInfo);
    }
 
    public void toMessage(HandWrenchActionStateMessage message)
@@ -20,8 +20,8 @@ public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefin
 
    public void fromMessage(HandWrenchActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
    }
 }

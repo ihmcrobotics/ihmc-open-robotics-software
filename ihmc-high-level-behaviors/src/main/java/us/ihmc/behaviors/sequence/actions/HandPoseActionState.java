@@ -2,8 +2,8 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -21,9 +21,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private double[] jointAngles = new double[7];
    private double solutionQuality;
 
-   public HandPoseActionState(long id, ROS2ActorDesignation actorDesignation, ReferenceFrameLibrary referenceFrameLibrary)
+   public HandPoseActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new HandPoseActionDefinition(), actorDesignation);
+      super(id, new HandPoseActionDefinition(), crdtInfo);
 
       palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPalmTransformToParent());
    }
@@ -52,9 +52,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public void fromMessage(HandPoseActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
 
       handWrenchMagnitudeLinear = message.getHandWrenchMagnitudeLinear();
       jointAngles = message.getJointAngles();

@@ -5,7 +5,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.Timer;
 
 public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
@@ -17,11 +17,11 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
 
-   public SakeHandCommandActionExecutor(long id, ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(long id, CRDTInfo crdtInfo, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      state = new SakeHandCommandActionState(id, ROS2ActorDesignation.ROBOT);
+      state = new SakeHandCommandActionState(id, crdtInfo);
    }
 
    @Override

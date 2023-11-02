@@ -7,7 +7,7 @@ import imgui.flag.ImGuiCol;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -27,9 +27,9 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
 
-   public RDXActionSequence(long id)
+   public RDXActionSequence(long id, CRDTInfo crdtInfo)
    {
-      state = new ActionSequenceState(id, ROS2ActorDesignation.OPERATOR);
+      state = new ActionSequenceState(id, crdtInfo);
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,

@@ -9,7 +9,7 @@ import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -49,23 +49,24 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    }
 
    @Override
-   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id)
+   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo)
    {
       if (nodeType == ActionSequenceDefinition.class)
       {
-         return new ActionSequenceExecutor(id);
+         return new ActionSequenceExecutor(id, crdtInfo);
       }
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(id, robotModel, ros2ControllerHelper);
+         return new ArmJointAnglesActionExecutor(id, crdtInfo, robotModel, ros2ControllerHelper);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
-         return new ChestOrientationActionExecutor(id, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+         return new ChestOrientationActionExecutor(id, crdtInfo, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
          return new FootstepPlanActionExecutor(id,
+                                               crdtInfo,
                                                ros2ControllerHelper,
                                                syncedRobot,
                                                footstepTracker,
@@ -74,27 +75,28 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
-         return new HandPoseActionExecutor(id, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
+         return new HandPoseActionExecutor(id, crdtInfo, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
-         return new HandWrenchActionExecutor(id, ros2ControllerHelper);
+         return new HandWrenchActionExecutor(id, crdtInfo, ros2ControllerHelper);
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
-         return new PelvisHeightPitchActionExecutor(id, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+         return new PelvisHeightPitchActionExecutor(id, crdtInfo, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
-         return new SakeHandCommandActionExecutor(id, ros2ControllerHelper);
+         return new SakeHandCommandActionExecutor(id, crdtInfo, ros2ControllerHelper);
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {
-         return new WaitDurationActionExecutor(id);
+         return new WaitDurationActionExecutor(id, crdtInfo);
       }
       if (nodeType == WalkActionDefinition.class)
       {
          return new WalkActionExecutor(id,
+                                       crdtInfo,
                                        ros2ControllerHelper,
                                        syncedRobot,
                                        footstepTracker,

@@ -10,6 +10,7 @@ import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -49,6 +50,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
    public WalkActionExecutor(long id,
+                             CRDTInfo crdtInfo,
                              ROS2ControllerHelper ros2ControllerHelper,
                              ROS2SyncedRobotModel syncedRobot,
                              WalkingFootstepTracker footstepTracker,
@@ -64,7 +66,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new WalkActionState(id, ROS2ActorDesignation.ROBOT, footstepPlannerParameters, referenceFrameLibrary);
+      state = new WalkActionState(id, crdtInfo, footstepPlannerParameters, referenceFrameLibrary);
    }
 
    @Override

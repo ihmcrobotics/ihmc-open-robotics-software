@@ -15,6 +15,8 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeD
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -31,10 +33,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTree
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final BehaviorTreeState behaviorTreeState;
+   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
+   private final BehaviorTreeState behaviorTreeState;
    private RDXBehaviorTreeNode<?, ?> rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -42,6 +44,7 @@ public class RDXBehaviorTree
     * back together.
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodesMenu nodesMenu;
    private final RDXBehaviorTreeFileLoader fileLoader;
@@ -64,11 +67,11 @@ public class RDXBehaviorTree
                                                    panel3D,
                                                    referenceFrameLibrary,
                                                    footstepPlannerParametersBasics);
-      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
+      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
       nodesMenu = new RDXBehaviorTreeNodesMenu(treeFilesDirectory);
 
-      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, ROS2ActorDesignation.OPERATOR);
+      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo);
       fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
    }
 

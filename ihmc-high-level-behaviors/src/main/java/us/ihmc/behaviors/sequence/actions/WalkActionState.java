@@ -2,7 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WalkActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -14,11 +14,11 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
    private int numberOfIncompleteFootsteps;
 
    public WalkActionState(long id,
-                          ROS2ActorDesignation actorDesignation,
+                          CRDTInfo crdtInfo,
                           FootstepPlannerParametersBasics footstepPlannerParameters,
                           ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new WalkActionDefinition(footstepPlannerParameters), actorDesignation);
+      super(id, new WalkActionDefinition(footstepPlannerParameters), crdtInfo);
 
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform());
    }
@@ -42,9 +42,9 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
    public void fromMessage(WalkActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
 
       totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
       numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();

@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.tools.thread.Throttler;
 
@@ -14,13 +13,14 @@ import java.util.function.Consumer;
  */
 public class ROS2BehaviorTreeState
 {
+   public static final double SYNC_FREQUENCY = 3.0;
+
    private final BehaviorTreeState behaviorTreeState;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
-   private final ROS2ActorDesignation ros2ActorDesignation;
+   private final ROS2BehaviorTreePublisher behaviorTreePublisher;
    private final ROS2BehaviorTreeSubscription behaviorTreeSubscription;
-   private final ROS2BehaviorTreePublisher behaviorTreePublisher = new ROS2BehaviorTreePublisher();
 
-   private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
+   private final Throttler publishThrottler = new Throttler().setFrequency(SYNC_FREQUENCY);
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
@@ -28,17 +28,13 @@ public class ROS2BehaviorTreeState
     */
    public ROS2BehaviorTreeState(BehaviorTreeState behaviorTreeState,
                                 Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter,
-                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                ROS2ActorDesignation ros2ActorDesignation)
+                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
-      this.ros2ActorDesignation = ros2ActorDesignation;
 
-      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(behaviorTreeState,
-                                                                  rootNodeSetter,
-                                                                  ros2PublishSubscribeAPI,
-                                                                  ros2ActorDesignation);
+      behaviorTreePublisher = new ROS2BehaviorTreePublisher(behaviorTreeState, ros2PublishSubscribeAPI);
+      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(behaviorTreeState, rootNodeSetter, ros2PublishSubscribeAPI);
    }
 
    /**
@@ -52,6 +48,7 @@ public class ROS2BehaviorTreeState
     */
    public void updateSubscription()
    {
+      behaviorTreeState.getCRDTInfo().startNextUpdate();
       behaviorTreeSubscription.update();
    }
 
@@ -63,7 +60,7 @@ public class ROS2BehaviorTreeState
    public void updatePublication()
    {
       if (publishThrottler.run())
-         behaviorTreePublisher.publish(behaviorTreeState, ros2PublishSubscribeAPI, ros2ActorDesignation);
+         behaviorTreePublisher.publish();
    }
 
    public void destroy()

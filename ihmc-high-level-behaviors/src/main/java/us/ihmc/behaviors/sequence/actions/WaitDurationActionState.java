@@ -2,13 +2,13 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 
 public class WaitDurationActionState extends ActionNodeState<WaitDurationActionDefinition>
 {
-   public WaitDurationActionState(long id, ROS2ActorDesignation actorDesignation)
+   public WaitDurationActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new WaitDurationActionDefinition(), actorDesignation);
+      super(id, new WaitDurationActionDefinition(), crdtInfo);
    }
 
    public void toMessage(WaitDurationActionStateMessage message)
@@ -20,8 +20,8 @@ public class WaitDurationActionState extends ActionNodeState<WaitDurationActionD
 
    public void fromMessage(WaitDurationActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
    }
 }

@@ -6,8 +6,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,6 +31,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public ChestOrientationActionExecutor(long id,
+                                         CRDTInfo crdtInfo,
                                          ROS2ControllerHelper ros2ControllerHelper,
                                          ROS2SyncedRobotModel syncedRobot,
                                          ReferenceFrameLibrary referenceFrameLibrary)
@@ -38,7 +39,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new ChestOrientationActionState(id, ROS2ActorDesignation.ROBOT, referenceFrameLibrary);
+      state = new ChestOrientationActionState(id, crdtInfo, referenceFrameLibrary);
    }
 
    @Override

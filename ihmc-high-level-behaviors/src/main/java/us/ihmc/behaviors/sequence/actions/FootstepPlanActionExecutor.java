@@ -8,8 +8,8 @@ import us.ihmc.behaviors.sequence.BehaviorActionCompletionComponent;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -46,6 +46,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private double startOrientationDistanceToGoal;
 
    public FootstepPlanActionExecutor(long id,
+                                     CRDTInfo crdtInfo,
                                      ROS2ControllerHelper ros2ControllerHelper,
                                      ROS2SyncedRobotModel syncedRobot,
                                      WalkingFootstepTracker footstepTracker,
@@ -58,7 +59,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new FootstepPlanActionState(id, ROS2ActorDesignation.ROBOT, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, crdtInfo, referenceFrameLibrary);
    }
 
    @Override

@@ -5,9 +5,11 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -16,9 +18,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class BehaviorTreeExecutor
 {
-   private final BehaviorTreeState behaviorTreeState;
+   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
+   private final BehaviorTreeState behaviorTreeState;
    private BehaviorTreeNodeExecutor<?, ?> rootNode;
 
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
@@ -40,9 +43,9 @@ public class BehaviorTreeExecutor
                                                         footstepPlannerParameters,
                                                         walkingControllerParameters,
                                                         ros2ControllerHelper);
-      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
+      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
-      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, ROS2ActorDesignation.ROBOT);
+      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo);
    }
 
    public void update()
@@ -73,5 +76,10 @@ public class BehaviorTreeExecutor
    public BehaviorTreeState getState()
    {
       return behaviorTreeState;
+   }
+
+   public CRDTInfo getCrdtInfo()
+   {
+      return crdtInfo;
    }
 }

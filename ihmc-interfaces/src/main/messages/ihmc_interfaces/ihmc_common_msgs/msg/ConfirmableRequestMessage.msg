@@ -11,5 +11,5 @@ byte CONFIRMATION = 2
 # Holds one of the above constant values.
 uint16 value
 
-# UUID of the request
-ihmc_common_msgs/UUIDMessage request_uuid
+# Request number, monotonically increasing
+uint32 request_number

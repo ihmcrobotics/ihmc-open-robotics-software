@@ -2,13 +2,13 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTInfo;
 
 public class ArmJointAnglesActionState extends ActionNodeState<ArmJointAnglesActionDefinition>
 {
-   public ArmJointAnglesActionState(long id, ROS2ActorDesignation actorDesignation)
+   public ArmJointAnglesActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new ArmJointAnglesActionDefinition(), actorDesignation);
+      super(id, new ArmJointAnglesActionDefinition(), crdtInfo);
    }
 
    public void toMessage(ArmJointAnglesActionStateMessage message)
@@ -20,8 +20,8 @@ public class ArmJointAnglesActionState extends ActionNodeState<ArmJointAnglesAct
 
    public void fromMessage(ArmJointAnglesActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
    }
 }
