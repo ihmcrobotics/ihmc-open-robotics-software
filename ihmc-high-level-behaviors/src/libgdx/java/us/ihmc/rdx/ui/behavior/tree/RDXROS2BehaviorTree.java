@@ -78,7 +78,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       super.renderImGuiWidgetsPre();
 
       // Prevent jumping around when it changes
-      ImGui.calcTextSize(statusTextSize, "Nodes: UI: 999   On-Robot: 999   ");
+      ImGui.calcTextSize(statusTextSize, "Operator: 999 Robot: 999 ");
       float nodeCountsTextWidth = statusTextSize.x;
       ImGui.calcTextSize(statusTextSize, "State: Frozen (999)");
       float frozenStatusTextWidth = statusTextSize.x;
@@ -90,11 +90,11 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
       BehaviorTreeStateMessage latestBehaviorTreeMessage = ros2BehaviorTreeState.getBehaviorTreeSubscription().getLatestBehaviorTreeMessage();
       int numberOfOnRobotNodes = latestBehaviorTreeMessage == null ? 0 : latestBehaviorTreeMessage.getBehaviorTreeIndices().size();
-      ImGui.text("Nodes: UI: %3d  On-Robot: %3d  ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
+      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frozenStatusTextWidth - frequencyTextWidth - rightMargin);
       int numberOfFrozenNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfFrozenNodes();
-      ImGui.text("State: ");
+      ImGui.text("State:");
       ImGui.sameLine();
       if (ros2BehaviorTreeState.getBehaviorTreeState().isFrozen() || numberOfFrozenNodes > 0)
          ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen (%d)".formatted(numberOfFrozenNodes));
