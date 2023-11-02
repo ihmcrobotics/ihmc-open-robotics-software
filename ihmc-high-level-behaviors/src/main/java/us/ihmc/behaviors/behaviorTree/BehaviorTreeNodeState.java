@@ -40,6 +40,8 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
 
    public BehaviorTreeNodeState(long id, D definition, ROS2ActorDesignation actorDesignation)
    {
+      super(actorDesignation);
+
       this.id = id;
       this.definition = definition;
       this.actorDesignation = actorDesignation;

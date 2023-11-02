@@ -18,6 +18,9 @@ byte WALK_ACTION = 18
 # The ID to assign to the next instantiated node
 uint32 next_id
 
+# A mechanism for confirming and ending a freeze early
+ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+
 # A depth first ordered list of types.
 byte[<=1000] behavior_tree_types
 

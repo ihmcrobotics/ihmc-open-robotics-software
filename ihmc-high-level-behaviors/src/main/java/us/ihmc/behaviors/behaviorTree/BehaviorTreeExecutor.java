@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeR
 import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -41,7 +42,7 @@ public class BehaviorTreeExecutor
                                                         ros2ControllerHelper);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode);
 
-      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode);
+      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, ROS2ActorDesignation.ROBOT);
    }
 
    public void update()

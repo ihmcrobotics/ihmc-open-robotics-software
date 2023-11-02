@@ -5,7 +5,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
-import us.ihmc.communication.crdt.Freezable;
+import us.ihmc.communication.crdt.Confirmable;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
  */
-public class BehaviorTreeState extends Freezable
+public class BehaviorTreeState extends Confirmable
 {
    private final MutableLong nextID = new MutableLong(0);
    private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
@@ -31,8 +32,11 @@ public class BehaviorTreeState extends Freezable
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
-                            Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier)
+                            Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier,
+                            ROS2ActorDesignation actorDesignation)
    {
+      super(actorDesignation);
+
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;
       this.rootNodeSupplier = rootNodeSupplier;
@@ -79,12 +83,14 @@ public class BehaviorTreeState extends Freezable
    public void toMessage(BehaviorTreeStateMessage message)
    {
       message.setNextId(nextID.longValue());
+      toMessage(message.getConfirmableRequest());
    }
 
    public void fromMessage(BehaviorTreeStateMessage message)
    {
       if (!isFrozen())
          nextID.setValue(message.getNextId());
+      fromMessage(message.getConfirmableRequest());
    }
 
    public long getAndIncrementNextID()
