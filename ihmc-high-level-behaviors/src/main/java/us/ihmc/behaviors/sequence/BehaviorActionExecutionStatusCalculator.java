@@ -4,9 +4,9 @@ import java.util.List;
 
 public class BehaviorActionExecutionStatusCalculator
 {
-   public static void update(List<ActionNodeState<ActionNodeDefinition>> actionSequence, int actionIndex, int executionNextIndex)
+   public static void update(List<ActionNodeExecutor<?, ?>> actionSequence, int actionIndex, int executionNextIndex)
    {
-      ActionNodeState<ActionNodeDefinition> actionNode = actionSequence.get(actionIndex);
+      ActionNodeExecutor<?, ?> actionNode = actionSequence.get(actionIndex);
 
       boolean executeWithNextAction = actionNode.getDefinition().getExecuteWithNextAction();
       boolean executeWithPreviousAction;
@@ -38,9 +38,9 @@ public class BehaviorActionExecutionStatusCalculator
          isNextForExecution = executionNextIndex >= actionIndex - numberOfImmediatelyPriorConcurrentActions;
       }
 
-      actionNode.setActionIndex(actionIndex);
-      actionNode.setIsNextForExecution(isNextForExecution);
-      actionNode.setIsToBeExecutedConcurrently(executeWithPreviousAction || executeWithNextAction);
+      actionNode.getState().setActionIndex(actionIndex);
+      actionNode.getState().setIsNextForExecution(isNextForExecution);
+      actionNode.getState().setIsToBeExecutedConcurrently(executeWithPreviousAction || executeWithNextAction);
       actionNode.update();
    }
 }

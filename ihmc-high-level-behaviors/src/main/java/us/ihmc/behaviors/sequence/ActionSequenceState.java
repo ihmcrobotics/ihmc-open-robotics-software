@@ -4,58 +4,16 @@ import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
    private boolean automaticExecution = false;
    private int executionNextIndex = 0;
-   private ActionNodeExecutor<?, ?> lastCurrentlyExecutingAction = null;
    private String nextActionRejectionTooltip = "";
    private boolean manualExecutionRequested = false;
-
-   // This node enforces that all it's children are of a certain type
-   private final List<ActionNodeState<ActionNodeDefinition>> actionChildren = new ArrayList<>();
-   // TODO: Review this
-   private final List<ActionNodeState<ActionNodeDefinition>> currentlyExecutingActions = new ArrayList<>();
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo)
    {
       super(id, new ActionSequenceDefinition(), crdtInfo);
-   }
-
-   @Override
-   public void update()
-   {
-      actionChildren.clear();
-      for (BehaviorTreeNodeState<?> child : getChildren())
-      {
-         actionChildren.add((ActionNodeState<ActionNodeDefinition>) child);
-      }
-
-      for (int i = 0; i < getChildren().size(); i++)
-      {
-         BehaviorActionExecutionStatusCalculator.update(actionChildren, i, executionNextIndex);
-      }
-
-   }
-
-   private boolean noCurrentActionIsExecuting()
-   {
-      boolean noCurrentActionIsExecuting = true;
-      for (ActionNodeState currentlyExecutingAction : currentlyExecutingActions)
-      {
-         noCurrentActionIsExecuting &= !currentlyExecutingAction.getIsExecuting();
-      }
-      return noCurrentActionIsExecuting;
-   }
-
-   // TODO: Where to put this
-   public void onExecutionIndexChanged()
-   {
-      lastCurrentlyExecutingAction = null; // Set to null so we don't wait for that action to complete
-      currentlyExecutingActions.clear();
    }
 
    public void toMessage(ActionSequenceStateMessage message)
@@ -93,17 +51,20 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    {
       if (executionNextIndex > 0)
          --executionNextIndex;
+      freeze();
    }
 
    public void stepForwardNextExecutionIndex()
    {
       if (executionNextIndex < getChildren().size())
          ++executionNextIndex;
+      freeze();
    }
 
    public void setExecutionNextIndex(int executionNextIndex)
    {
       this.executionNextIndex = executionNextIndex;
+      freeze();
    }
 
    public int getExecutionNextIndex()
@@ -129,6 +90,14 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    public void setAutomaticExecution(boolean automaticExecution)
    {
       this.automaticExecution = automaticExecution;
+      freeze();
+   }
+
+   public boolean pollManualExecutionRequested()
+   {
+      boolean previousValue = manualExecutionRequested;
+      setManualExecutionRequested(false);
+      return previousValue;
    }
 
    public boolean getManualExecutionRequested()
@@ -139,10 +108,6 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    public void setManualExecutionRequested(boolean manualExecutionRequested)
    {
       this.manualExecutionRequested = manualExecutionRequested;
-   }
-
-   public List<ActionNodeState<ActionNodeDefinition>> getCurrentlyExecutingActions()
-   {
-      return currentlyExecutingActions;
+      freeze();
    }
 }
