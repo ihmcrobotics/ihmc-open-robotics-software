@@ -402,7 +402,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                   {
                      homingNeeded = true;
                   }
-                  setEnabled(false);
+
                   if (homingNeeded)
                   {
                      LogTools.info("Homing from Punch");
@@ -429,6 +429,13 @@ public class RDXVRAssistance implements TeleoperationAssistant
                      ros2ControllerHelper.publishToController(chestTrajectoryMessage);
 
                      ros2ControllerHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, 2.0));
+                  }
+
+                  finalCounter++;
+                  if (finalCounter >10)
+                  {
+                     finalCounter = 0;
+                     setEnabled(false);
                   }
                }
                if (proMPAssistant.isCurrentTaskDone())

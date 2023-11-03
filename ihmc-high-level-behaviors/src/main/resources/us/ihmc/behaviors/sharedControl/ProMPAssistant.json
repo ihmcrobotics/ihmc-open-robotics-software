@@ -1,22 +1,22 @@
 {
-  "testNumberUseOnlyForTesting": 3,
-  "taskToTest": "LeftPunch0",
-  "logging" : true,
+  "testNumberUseOnlyForTesting": 1,
+  "taskToTest": "Left0",
+  "logging" : false,
   "numberBasisFunctions": 20,
   "numberObservations": 5,
   "conditionOnlyLastObservation": true,
   "conditioningStep": 2,
-  "useCustomSpeed": false,
+  "useCustomSpeed": true,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
-  "postProcessingVelocityAdjuster": 4,
+  "postProcessingVelocityAdjuster": 1,
   "tasks":[
     {
       "context": "Target",
-      "name": "LeftPunch0",
+      "name": "Left0",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 80,
+      "customSpeed": 40,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
@@ -24,10 +24,10 @@
     },
     {
       "context": "Target",
-      "name": "LeftPunch1",
+      "name": "Left1",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 80,
+      "customSpeed": 40,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
@@ -35,10 +35,10 @@
     },
     {
       "context": "Target",
-      "name": "LeftPunch2",
+      "name": "Left2",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 80,
+      "customSpeed": 40,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
@@ -46,10 +46,10 @@
     },
     {
       "context": "Target",
-      "name": "LeftPunch3",
+      "name": "Left3",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 80,
+      "customSpeed": 40,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
@@ -57,10 +57,10 @@
     },
     {
       "context": "Target",
-      "name": "LeftPunch4",
+      "name": "Left4",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 80,
+      "customSpeed": 40,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
@@ -68,23 +68,13 @@
     },
     {
       "context": "Target",
-      "name": "LeftPunch5",
+      "name": "Left5",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
-      "customSpeed": 80,
+      "customSpeed": 40,
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
-      ]
-    },
-    {
-      "context": "RightDoorLeverHandle",
-      "name": "ReachHandle",
-      "bodyPartForInference": "rightHand",
-      "bodyPartWithObservableGoal": "rightHand",
-      "customSpeed": 30,
-      "bodyParts":[
-        { "name":"rightHand", "geometry":"Pose" }
       ]
     }
   ]

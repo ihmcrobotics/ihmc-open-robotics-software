@@ -251,7 +251,7 @@ public class ProMPAssistant
             }
             waitForEnd++;
             // exit assistance mode
-            if (waitForEnd > 10) // wait just a bit so that you can visualize preview of end for enough time
+            if (waitForEnd > 20) // wait just a bit so that you can visualize preview of end for enough time
             {
                doneCurrentTask = true;
                waitForEnd = 0;
