@@ -55,6 +55,18 @@ public class BehaviorTreeExecutor
          rootNode.clock();
 
          rootNode.tick();
+
+         update(rootNode);
+      }
+   }
+
+   private void update(BehaviorTreeNodeExecutor<?, ?> node)
+   {
+      node.update();
+
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
+      {
+         update(child);
       }
    }
 
