@@ -58,7 +58,7 @@ import static us.ihmc.rdx.ui.vr.RDXVRPelvisControlState.*;
 
 public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
-   private static final int NUMBER_OF_PARTS_TO_RECORD = 2;
+   private static final int NUMBER_OF_PARTS_TO_RECORD = 1;
    private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;

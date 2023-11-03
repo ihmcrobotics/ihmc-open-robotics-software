@@ -37,10 +37,17 @@ public class AffordanceAssistant
       Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".csv");
       affordancePlayer = new TrajectoryRecordReplay(filePath.toString(), 1); // each row has now the transform matrix of 16 elements
 
+      FramePose3D initialBodyPartPose = new FramePose3D(objectFrame);
       double[] initialData = affordancePlayer.play();
-      RigidBodyTransform initialTransform = new RigidBodyTransform(initialData);
-      FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
+      // Read file with stored trajectories: read set point per timestep until file is over
+      initialBodyPartPose.getOrientation().set(initialData);
+      initialBodyPartPose.getPosition().set(4, initialData);
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+//double[] initialData = affordancePlayer.play();
+//      RigidBodyTransform initialTransform = new RigidBodyTransform(initialData);
+//      FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
+//      initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPartPreviousFrameMap.put("rightHand", new FramePose3D(initialBodyPartPose));
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
 
@@ -56,25 +63,30 @@ public class AffordanceAssistant
          {
             // Read file with stored trajectories: read set point per timestep until file is over
             double[] dataPoint = affordancePlayer.play(false); //play split data (a body part per time)
-            isHandConfigurationCommand = true;
-            for (int i = 1; i < dataPoint.length; i++)
-               isHandConfigurationCommand &= dataPoint[i] == 0.0;
-
-            if (!isHandConfigurationCommand)
-            {
+//            isHandConfigurationCommand = true;
+//            for (int i = 1; i < dataPoint.length; i++)
+//               isHandConfigurationCommand &= dataPoint[i] == 0.0;
+//
+//            if (!isHandConfigurationCommand)
+//            {
                affordanceStarted = true;
-               RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
-               FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
+               FramePose3D affordancePose = new FramePose3D(objectFrame);
+               affordancePose.getOrientation().set(dataPoint);
+               affordancePose.getPosition().set(4, dataPoint);
                affordancePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.set(affordancePose);
+//               RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
+//               FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
+//               affordancePose.changeFrame(ReferenceFrame.getWorldFrame());
+//               framePose.set(affordancePose);
 
                bodyPartPreviousFrameMap.replace(bodyPart, new FramePose3D(framePose));
-            }
-            else
-            {
-               framePose.set(bodyPartPreviousFrameMap.get(bodyPart));
-               handConfigurationToSend = Pair.of(RobotSide.getSideFromName(bodyPart), HandConfiguration.values[(int) dataPoint[0]]);
-            }
+//            }
+//            else
+//            {
+//               framePose.set(bodyPartPreviousFrameMap.get(bodyPart));
+//               handConfigurationToSend = Pair.of(RobotSide.getSideFromName(bodyPart), HandConfiguration.values[(int) dataPoint[0]]);
+//            }
          }
          else
          {

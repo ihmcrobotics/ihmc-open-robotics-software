@@ -44,7 +44,7 @@
     "x" : 0.0,
     "y" : 0.0,
     "z" : 0.0,
-    "rollInDegrees" : 19.58,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -55,7 +55,7 @@
     "x" : 0.0,
     "y" : 0.0,
     "z" : 0.0,
-    "rollInDegrees" : 27.36,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -65,8 +65,8 @@
   }, {
     "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 42.94,
+    "z" : -0.01,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -76,8 +76,8 @@
   }, {
     "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 57.56,
+    "z" : -0.02,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -87,8 +87,8 @@
   }, {
     "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 67.24,
+    "z" : -0.03,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -98,8 +98,8 @@
   }, {
     "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 73.32,
+    "z" : -0.04,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -109,8 +109,8 @@
   }, {
     "x" : 0.0,
     "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 76.68,
+    "z" : -0.05,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -119,9 +119,9 @@
     } ]
   }, {
     "x" : 0.0,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "y" : -0.006,
+    "z" : -0.051,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -130,9 +130,9 @@
     } ]
   }, {
     "x" : 0.0,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "y" : -0.006,
+    "z" : -0.061,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -141,20 +141,9 @@
     } ]
   }, {
     "x" : 0.0,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 78.54,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.005,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "y" : -0.006,
+    "z" : -0.071,
+    "rollInDegrees" : 0.0,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -163,20 +152,9 @@
     } ]
   }, {
     "x" : 0.01,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.015,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -185,20 +163,9 @@
     } ]
   }, {
     "x" : 0.02,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.025,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -207,20 +174,9 @@
     } ]
   }, {
     "x" : 0.03,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.035,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -229,20 +185,9 @@
     } ]
   }, {
     "x" : 0.04,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.045,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -251,20 +196,9 @@
     } ]
   }, {
     "x" : 0.05,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.055,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -273,20 +207,9 @@
     } ]
   }, {
     "x" : 0.06,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.065,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -295,20 +218,9 @@
     } ]
   }, {
     "x" : 0.07,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
-    "pitchInDegrees" : 0.0,
-    "yawInDegrees" : 180.0,
-    "configuration" : [ {
-      "side" : "right",
-      "type" : ""
-    } ]
-  }, {
-    "x" : 0.075,
-    "y" : 0.0,
-    "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -317,9 +229,9 @@
     } ]
   }, {
     "x" : 0.08,
-    "y" : 0.0,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -327,10 +239,10 @@
       "type" : ""
     } ]
   }, {
-    "x" : 0.085,
-    "y" : 0.0,
+    "x" : 0.09,
+    "y" : -0.006,
     "z" : 0.0,
-    "rollInDegrees" : 77.04,
+    "rollInDegrees" : 65.98,
     "pitchInDegrees" : 0.0,
     "yawInDegrees" : 180.0,
     "configuration" : [ {
@@ -339,6 +251,6 @@
     } ]
   } ],
   "activeSides" : 1,
-  "numberPreGraspFrames" : 1,
-  "numberPostGraspFrames" : 28
+  "numberPreGraspFrames" : 3,
+  "numberPostGraspFrames" : 18
 }
