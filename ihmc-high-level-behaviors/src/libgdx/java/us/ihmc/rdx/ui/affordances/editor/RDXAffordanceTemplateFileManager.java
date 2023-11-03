@@ -144,7 +144,13 @@ public class RDXAffordanceTemplateFileManager
                      actionNode.put("holdPoseInWorldLater", true);
 
                      double[] dataTrajectories = new double[16];
-                     transformToParent.get(dataTrajectories);
+                     FramePose3D VRPreGraspPose = new FramePose3D(preGraspPoses.get(side).get(i));
+                     VRPreGraspPose.changeFrame(preGraspFrames.getPoseFrames().get(side).get(i));
+                     VRPreGraspPose.appendYawRotation(side.negateIfRightSide(Math.PI/4));
+                     VRPreGraspPose.appendTranslation(0.0, 0.0, 0.35);
+                     VRPreGraspPose.changeFrame(affordanceFrame.getReferenceFrame());
+                     RigidBodyTransform VRTransformToParent = new RigidBodyTransform(VRPreGraspPose);
+                     VRTransformToParent.get(dataTrajectories);
                      csvDataMatrices.get(side).add(dataTrajectories);
 
                      if (preGraspHandConfigurations.get(side).get(i) != null)
@@ -203,7 +209,13 @@ public class RDXAffordanceTemplateFileManager
                   actionNode.put("holdPoseInWorldLater", true);
 
                   double[] dataTrajectories = new double[16];
-                  transformToParent.get(dataTrajectories);
+                  FramePose3D VRPreGraspPose = new FramePose3D(graspPoses.get(side));
+                  VRPreGraspPose.changeFrame(graspFrame.getPoseFrames().get(side));
+                  VRPreGraspPose.appendYawRotation(side.negateIfRightSide(Math.PI/4));
+                  VRPreGraspPose.appendTranslation(0.0, 0.0, 0.35);
+                  VRPreGraspPose.changeFrame(affordanceFrame.getReferenceFrame());
+                  RigidBodyTransform VRTransformToParent = new RigidBodyTransform(VRPreGraspPose);
+                  VRTransformToParent.get(dataTrajectories);
                   csvDataMatrices.get(side).add(dataTrajectories);
 
                   if (graspFrame.getHandConfiguration(side) != null)
@@ -269,7 +281,13 @@ public class RDXAffordanceTemplateFileManager
                      actionNode.put("holdPoseInWorldLater", (i != numberOfPostGraspFrames - 1));
 
                      double[] dataTrajectories = new double[16];
-                     transformToParent.get(dataTrajectories);
+                     FramePose3D VRPostGraspPose = new FramePose3D(postGraspPoses.get(side).get(i));
+                     VRPostGraspPose.changeFrame(postGraspFrames.getPoseFrames().get(side).get(i));
+                     VRPostGraspPose.appendYawRotation(side.negateIfRightSide(Math.PI/4));
+                     VRPostGraspPose.appendTranslation(0.0, 0.0, 0.35);
+                     VRPostGraspPose.changeFrame(affordanceFrame.getReferenceFrame());
+                     RigidBodyTransform VRTransformToParent = new RigidBodyTransform(VRPostGraspPose);
+                     VRTransformToParent.get(dataTrajectories);
                      csvDataMatrices.get(side).add(dataTrajectories);
 
                      if (postGraspHandConfigurations.get(side).get(i) != null)

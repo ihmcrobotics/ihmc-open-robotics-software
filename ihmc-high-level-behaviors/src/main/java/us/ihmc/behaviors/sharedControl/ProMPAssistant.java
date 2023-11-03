@@ -32,8 +32,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 20; // TODO make this a fraction of the estimated timesteps
-   public static final int AFFORDANCE_BLENDING_SAMPLES = 10; // TODO make this a fraction of the estimated timesteps (1/3 or 1/4 could be good values)
+   private static final int INTERPOLATION_SAMPLES = 35; // TODO make this a fraction of the estimated timesteps
+   public static final int AFFORDANCE_BLENDING_SAMPLES = 40; // TODO make this a fraction of the estimated timesteps (1/3 or 1/4 could be good values)
 
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)

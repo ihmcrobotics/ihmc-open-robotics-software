@@ -19,7 +19,6 @@ import java.util.HashMap;
 
 public class AffordanceAssistant
 {
-   private final SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransform;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(),
                                                                                                      "/us/ihmc/behaviors/sharedControl/affordances");
    private TrajectoryRecordReplay affordancePlayer;
@@ -31,11 +30,6 @@ public class AffordanceAssistant
    private ReferenceFrame objectFrame;
    private boolean affordanceStarted = false;
 
-   public AffordanceAssistant(SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransform)
-   {
-      this.affordanceToHandControlFrameTransform = affordanceToHandControlFrameTransform;
-   }
-
    public void loadAffordance(String fileName, ReferenceFrame objectFrame)
    {
       //TODO generalize for multiple body parts
@@ -45,8 +39,6 @@ public class AffordanceAssistant
 
       double[] initialData = affordancePlayer.play();
       RigidBodyTransform initialTransform = new RigidBodyTransform(initialData);
-//      initialTransform.appendOrientation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getRotation());
-//      initialTransform.appendTranslation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getTranslation());
       FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPartPreviousFrameMap.put("rightHand", new FramePose3D(initialBodyPartPose));
@@ -72,8 +64,6 @@ public class AffordanceAssistant
             {
                affordanceStarted = true;
                RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
-               transform.appendOrientation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getRotation());
-               transform.appendTranslation(affordanceToHandControlFrameTransform.get(RobotSide.RIGHT).getTranslation());
                FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
                affordancePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.set(affordancePose);
@@ -113,7 +103,6 @@ public class AffordanceAssistant
       {
          if (file.getName().contains(affordanceName))
          {
-            LogTools.info("Found affordance! {}", affordanceName);
             return true;
          }
       }

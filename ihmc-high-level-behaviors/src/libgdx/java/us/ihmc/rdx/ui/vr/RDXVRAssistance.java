@@ -63,7 +63,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
-   private final AffordanceAssistant affordanceAssistant;
+   private final AffordanceAssistant affordanceAssistant = new AffordanceAssistant();
    private final SideDependentList<RigidBodyTransform> affordanceToHandControlFrameTransforms = new SideDependentList<>();
    private String objectName = "";
    private ReferenceFrame objectFrame;
@@ -87,6 +87,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
    boolean sentInitialHandConfiguration = false;
    private final SideDependentList<double[]> armsFightingHome = new SideDependentList<>();
    private final YawPitchRoll chestFightingHome;
+   private final double[] leftArmOpenDoor;
+   private int finalCounter = 0;
 
    public RDXVRAssistance(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2ControllerHelper, SceneGraph sceneGraph, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -111,27 +113,11 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
       status = new RDXVRAssistanceStatus(AssistancePhase.DISABLED, RDXVRAssistanceMenuMode.OFF);
 
-      for (RobotSide side: RobotSide.values)
-      {
-         RigidBodyTransform  affordanceToHandControlFrameTransform = new RigidBodyTransform();
-         affordanceToHandControlFrameTransform.appendPitchRotation(-Math.PI/2);
-         if (side == RobotSide.LEFT)
-         {
-            affordanceToHandControlFrameTransform.appendOrientation(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentRotation());
-            affordanceToHandControlFrameTransform.appendTranslation(VRTrackedSegmentType.LEFT_HAND.getTrackerToSegmentTranslation());
-         }
-         else
-         {
-            affordanceToHandControlFrameTransform.appendOrientation(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentRotation());
-            affordanceToHandControlFrameTransform.appendTranslation(VRTrackedSegmentType.RIGHT_HAND.getTrackerToSegmentTranslation());
-         }
-         this.affordanceToHandControlFrameTransforms.put(side, affordanceToHandControlFrameTransform);
-      }
-      affordanceAssistant= new AffordanceAssistant(affordanceToHandControlFrameTransforms);
-
       armsFightingHome.put(RobotSide.LEFT, new double[] {0.333422, 0.08264014, 0.2183049, -2.35619});
       armsFightingHome.put(RobotSide.RIGHT, new double[] {0.6753323, 0.0591941, -0.024862368, -2.35619});
       chestFightingHome = new YawPitchRoll(0.340, 0.0, 0.0);
+
+      leftArmOpenDoor = new double[] {-0.58924145,0.8350978,0.73808664,-0.73651123};
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
@@ -398,11 +384,18 @@ public class RDXVRAssistance implements TeleoperationAssistant
                         bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
                   }
                }
+               if (proMPAssistant.inEndZone())
+               {
+                  if (affordanceAssistant.hasAffordance(objectName))
+                     status.setAssistancePhase(AssistancePhase.BLENDING);
+               }
             }
             else // -- If user did not use the preview or preview has been validated
             {
+               if (isAffordanceActive())
+                  affordanceAssistant.reset();
                // exit assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-               if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
+               if (!enabledIKStreaming.get()) //prevent jump by first disabling streaming to controller below and then shared control here
                {
                   boolean homingNeeded = false;
                   if (proMPAssistant.getCurrentTask().contains("Punch"))
@@ -485,6 +478,28 @@ public class RDXVRAssistance implements TeleoperationAssistant
                framePose.set(bodyPartInitialAffordancePoseMap.get(bodyPart));
                status.setAssistancePhase(AssistancePhase.AFFORDANCE);
             }
+
+            if (previewSetToActive && !previewValidated)
+            {
+               if (firstPreview)
+               {
+                  // keep storing current frames for replay preview with splines
+                  if (bodyPartReplayMotionMap.containsKey(bodyPart))
+                  {
+                     //TODO remove this once hand is added
+                     if (bodyPart.equals("rightHand"))
+                     {
+                        FramePose3D observedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), framePose);
+                        observedFramePose.changeFrame(syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT));
+                        observedFramePose.appendTranslation(0.0, 0.0, -0.350);
+                        observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                        bodyPartReplayMotionMap.get(bodyPart).add(observedFramePose);
+                     }
+                     else
+                        bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+                  }
+               }
+            }
          }
 
       }
@@ -497,11 +512,61 @@ public class RDXVRAssistance implements TeleoperationAssistant
             {
                affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
             }
+            if (previewSetToActive && !previewValidated)
+            {
+               if (firstPreview)
+               {
+                  proMPAssistant.setStartTrajectories(0);
+                  blendingCounter = 0;
+                  // keep storing current frames for replay preview with splines
+                  if (bodyPartReplayMotionMap.containsKey(bodyPart))
+                  {
+                     //TODO remove this once hand is added
+                     if (bodyPart.equals("rightHand"))
+                     {
+                        FramePose3D observedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), framePose);
+                        observedFramePose.changeFrame(syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT));
+                        observedFramePose.appendTranslation(0.0, 0.0, -0.350);
+                        observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                        bodyPartReplayMotionMap.get(bodyPart).add(observedFramePose);
+                     }
+                     else
+                        bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+                  }
+               }
+            }
+         }
+         else if (previewSetToActive && !previewValidated)
+         {
+            firstPreview = false;
+            status.setAssistancePhase(AssistancePhase.PROMP);
          }
          else
          {
-            enabledIKStreaming.set(false);
-            setEnabled(false);
+            if (!enabledIKStreaming.get()) //prevent jump by first disabling streaming to controller below and then shared control here
+            {
+               boolean homingNeeded = false;
+               if (proMPAssistant.getCurrentTask().contains("Handle"))
+               {
+                  homingNeeded = true;
+               }
+
+               if (homingNeeded)
+               {
+                  LogTools.info("Opening Door");
+                  ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 1.0, leftArmOpenDoor);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+               }
+               finalCounter++;
+               if (finalCounter >10)
+               {
+                  finalCounter =0;
+                  setEnabled(false);
+               }
+            }
+
+            enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+            LogTools.info("Exiting Assistance");
          }
       }
    }
@@ -532,7 +597,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
             {
                objectName = sceneNode.getName();
                objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), sceneNode.getNodeFrame().getTransformToWorldFrame());
-               LogTools.info(objectFrame.getTransformToWorldFrame().getTranslationZ());
             }
          }
       }
@@ -624,7 +688,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       else // deactivated
       {
-         LogTools.info("Disabled Assistance");
          // reset promp assistance
          proMPAssistant.reset();
          objectName = "";

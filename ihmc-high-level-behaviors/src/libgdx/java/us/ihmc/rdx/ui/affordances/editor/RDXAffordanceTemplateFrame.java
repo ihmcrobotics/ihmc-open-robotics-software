@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import geometry_msgs.Pose;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -212,6 +213,11 @@ public class RDXAffordanceTemplateFrame
    public SideDependentList<FramePose3D> getPoses()
    {
       return poses;
+   }
+
+   public SideDependentList<PoseReferenceFrame> getPoseFrames()
+   {
+      return poseFrames;
    }
 
    public String getHandConfiguration(RobotSide side)

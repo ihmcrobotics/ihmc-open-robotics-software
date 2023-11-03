@@ -38,6 +38,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,6 +78,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final ImBoolean wakeUpThreadRunning = new ImBoolean(false);
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
+   private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private double pelvisFrameChangeRate = 0.0;
@@ -123,6 +125,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
       for (RobotSide side : RobotSide.values)
       {
+         handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          MutableReferenceFrame handDesiredControlFrame = new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
          {
@@ -262,8 +265,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
             message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(POSITION_WEIGHT));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(ORIENTATION_WEIGHT));
 
             toolboxInputMessage.getInputs().add().set(message);
          }
@@ -323,6 +326,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          {
            controllerFrameGraphics.get(segmentType.getSegmentSide())
                                   .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+           handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM));
            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
                                                                                     segmentType.getSegmentSide()),
                                                                               handDesiredControlFrames.get(
@@ -580,7 +584,10 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       if (showReferenceFrameGraphics.get())
       {
          for (RobotSide side : RobotSide.values)
+         {
             controllerFrameGraphics.get(side).getRenderables(renderables, pool);
+            handFrameGraphics.get(side).getRenderables(renderables, pool);
+         }
          for (var trackerGraphics : trackerFrameGraphics.entrySet())
             trackerGraphics.getValue().getRenderables(renderables, pool);
       }
@@ -593,6 +600,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       for (RobotSide side : RobotSide.values)
       {
          controllerFrameGraphics.get(side).dispose();
+         handFrameGraphics.get(side).dispose();
       }
    }
 
