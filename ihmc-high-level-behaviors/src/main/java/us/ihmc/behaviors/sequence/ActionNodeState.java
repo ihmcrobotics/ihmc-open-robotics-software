@@ -79,7 +79,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    public void setIsNextForExecution(boolean isNextForExecution)
    {
       this.isNextForExecution = isNextForExecution;
-      freeze();
    }
 
    public boolean getIsNextForExecution()
@@ -101,7 +100,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    public void setCanExecute(boolean canExecute)
    {
       this.canExecute = canExecute;
-      freeze();
    }
 
    public boolean getCanExecute()
@@ -112,13 +110,11 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    public void setIsExecuting(boolean isExecuting)
    {
       this.isExecuting = isExecuting;
-      freeze();
    }
 
    public void setNominalExecutionDuration(double nominalExecutionDuration)
    {
       this.nominalExecutionDuration = nominalExecutionDuration;
-      freeze();
    }
 
    public double getNominalExecutionDuration()
@@ -129,7 +125,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    public void setElapsedExecutionTime(double elapsedExecutionTime)
    {
       this.elapsedExecutionTime = elapsedExecutionTime;
-      freeze();
    }
 
    public double getElapsedExecutionTime()

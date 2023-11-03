@@ -63,10 +63,10 @@ public class BehaviorTreeExtensionSubtreeRebuilder
          }
          else
          {
-            LogTools.info("Rejecting frozen %s:%d. Children: %d Actor: %s".formatted(localNode.getDefinition().getDescription(),
-                                                                                    localNode.getState().getID(),
-                                                                                    localNode.getChildren().size(),
-                                                                                    crdtInfo.getActorDesignation()));
+//            LogTools.info("Rejecting frozen %s:%d. Children: %d Actor: %s".formatted(localNode.getDefinition().getDescription(),
+//                                                                                    localNode.getState().getID(),
+//                                                                                    localNode.getChildren().size(),
+//                                                                                    crdtInfo.getActorDesignation()));
          }
       }
    }
