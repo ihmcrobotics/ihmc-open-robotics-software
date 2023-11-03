@@ -51,6 +51,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    {
       super.fromMessage(message.getState());
 
+      // Only updated by the robot
       actionIndex = message.getActionIndex();
       isNextForExecution = message.getIsNextForExecution();
       isToBeExecutedConcurrently = message.getIsToBeExecutedConcurrently();
@@ -89,7 +90,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
    public void setIsToBeExecutedConcurrently(boolean isToBeExecutedConcurrently)
    {
       this.isToBeExecutedConcurrently = isToBeExecutedConcurrently;
-      freeze();
    }
 
    public boolean getIsToBeExecutedConcurrently()
