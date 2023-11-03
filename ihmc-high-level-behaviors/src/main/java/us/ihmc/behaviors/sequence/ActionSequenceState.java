@@ -25,7 +25,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       message.setAutomaticExecution(automaticExecution);
       message.setExecutionNextIndex(executionNextIndex);
       message.setNextActionRejectionTooltip(nextActionRejectionTooltip);
-      message.setManualExecutionRequested(message.getManualExecutionRequested());
+      message.setManualExecutionRequested(manualExecutionRequested);
    }
 
    public void fromMessage(ActionSequenceStateMessage message)
@@ -39,7 +39,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       // Only modified by operator
 
-      if (isFrozen()) // Can be modified by either
+      if (!isFrozen()) // Can be modified by either
       {
          automaticExecution = message.getAutomaticExecution();
          manualExecutionRequested = message.getManualExecutionRequested();
