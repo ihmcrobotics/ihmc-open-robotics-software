@@ -138,7 +138,7 @@ public class ZEDColorDepthImagePublisher
 
          // Close GpuMat
          depthPNGPointer.close();
-         depthImageToPublish.destroy();
+         depthImageToPublish.release();
       }
    }
 
@@ -179,7 +179,7 @@ public class ZEDColorDepthImagePublisher
 
          // Close stuff
          colorJPEGPointer.close();
-         colorImageToPublish.destroy();
+         colorImageToPublish.release();
       }
    }
 
@@ -234,7 +234,7 @@ public class ZEDColorDepthImagePublisher
          depthPublishLock.unlock();
       }
       publishDepthThread.blockingStop();
-      nextGpuDepthImage.destroy();
+      nextGpuDepthImage.release();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -249,7 +249,7 @@ public class ZEDColorDepthImagePublisher
          }
          publishColorThreads.get(side).blockingStop();
          imageEncoders.get(side).destroy();
-         nextGpuColorImages.get(side).destroy();
+         nextGpuColorImages.get(side).release();
          ros2ColorImagePublishers.get(side).destroy();
       }
 

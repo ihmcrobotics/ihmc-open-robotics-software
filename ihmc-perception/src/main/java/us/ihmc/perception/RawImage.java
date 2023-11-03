@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RawImage
 {
@@ -30,6 +31,8 @@ public class RawImage
    private final float principalPointY;
    private final FixedFramePoint3DBasics position;
    private final FixedFrameQuaternionBasics orientation;
+
+   private AtomicInteger numberOfReferences = new AtomicInteger(1);
 
    public RawImage(long sequenceNumber,
                    Instant acquisitionTime,
@@ -116,7 +119,7 @@ public class RawImage
       {
          throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
-      else if (cpuImageMatrix == null && gpuImageMatrix != null)
+      else if (cpuImageMatrix == null && gpuImageMatrix != null && !gpuImageMatrix.isNull())
       {
          cpuImageMatrix = new Mat(imageHeight, imageWidth, openCVType);
          gpuImageMatrix.download(cpuImageMatrix);
@@ -131,7 +134,7 @@ public class RawImage
       {
          throw new NullPointerException("Neither CPU nor GPU matrices were initialized");
       }
-      else if (gpuImageMatrix == null && cpuImageMatrix != null)
+      else if (gpuImageMatrix == null && cpuImageMatrix != null && !cpuImageMatrix.isNull())
       {
          gpuImageMatrix = new GpuMat(imageHeight, imageWidth, openCVType);
          gpuImageMatrix.upload(cpuImageMatrix);
@@ -180,7 +183,19 @@ public class RawImage
       return cpuImageMatrix == null && gpuImageMatrix == null;
    }
 
-   public void destroy()
+   public RawImage get()
+   {
+      numberOfReferences.incrementAndGet();
+      return this;
+   }
+
+   public void release()
+   {
+      if (numberOfReferences.decrementAndGet() <= 0)
+         destroy();
+   }
+
+   private void destroy()
    {
       if (cpuImageMatrix != null)
          cpuImageMatrix.close();
