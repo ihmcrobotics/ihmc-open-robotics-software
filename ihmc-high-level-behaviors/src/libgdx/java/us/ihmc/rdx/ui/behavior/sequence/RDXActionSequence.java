@@ -31,6 +31,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
+   private final RDXMultipleActionProgressBars multipleActionProgressBars = new RDXMultipleActionProgressBars();
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo)
    {
@@ -145,6 +146,14 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             }
          }
       }
+
+      multipleActionProgressBars.getActionProgressBars().clear();
+      for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
+      {
+         RDXSingleActionProgressBars actionProgressBars = multipleActionProgressBars.getActionProgressBars().add();
+         actionProgressBars.setAction(currentlyExecutingAction);
+      }
+      multipleActionProgressBars.render();
    }
 
    @Override
