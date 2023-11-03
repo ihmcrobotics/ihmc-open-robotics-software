@@ -22,7 +22,8 @@ public interface BehaviorTreeNodeExtension<T extends BehaviorTreeNode<T>,
 
    default void update()
    {
-      if (getState() != getExtendedNode())
+      // Update state only if this instance extends State
+      if (getState() == getExtendedNode())
          getState().update();
    }
 
