@@ -40,7 +40,7 @@ public class RapidHeightMapExtractor
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
-   private HeightMapAutoencoder heightMapAutoencoder;
+   private HeightMapAutoencoder denoiser;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
 
@@ -97,7 +97,7 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
 
-      heightMapAutoencoder = new HeightMapAutoencoder();
+      denoiser = new HeightMapAutoencoder();
 
       centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
       localCellsPerAxis = 2 * centerIndex + 1;
@@ -242,7 +242,7 @@ public class RapidHeightMapExtractor
          contactMapImage.readOpenCLImage(openCLManager);
 
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
-         denoisedHeightMap = heightMapAutoencoder.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
+         //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
 
          sequenceNumber++;
       }
@@ -337,6 +337,11 @@ public class RapidHeightMapExtractor
    }
 
    public Mat getCroppedGlobalHeightMapImage()
+   {
+      return croppedHeightMapImage;
+   }
+
+   public Mat getDenoisedHeightMap()
    {
       return denoisedHeightMap;
    }

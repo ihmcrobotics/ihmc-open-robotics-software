@@ -15,6 +15,8 @@ import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -29,8 +31,8 @@ public class HeightMapAutoencoder
    private static final int IMAGE_HEIGHT = 201;
    private static final int IMAGE_WIDTH = 201;
 
-   private String modelFilePath = "/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
-   private String onnxFileName = "height_map_autoencoder.onnx";
+   private WorkspaceResourceDirectory modelDirectory = new WorkspaceResourceDirectory(this.getClass(), "/weights/");
+   private WorkspaceFile onnxFile = new WorkspaceFile(modelDirectory, "height_map_autoencoder.onnx");
 
    private OrtEnvironment environment = OrtEnvironment.getEnvironment();
    private OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
@@ -40,7 +42,7 @@ public class HeightMapAutoencoder
    {
       try
       {
-         session = environment.createSession(modelFilePath + onnxFileName, sessionOptions);
+         session = environment.createSession(onnxFile.getFilesystemFile().toString(), sessionOptions);
 
          for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getInputInfo().entrySet())
          {
@@ -76,7 +78,7 @@ public class HeightMapAutoencoder
          denoisedHeightMapImage = predict(heightMap, offset);
 
          long endTime = System.nanoTime();
-         LogTools.info("Inference time: {} ms", (endTime - startTime) / 1000000.0);
+         LogTools.debug("Inference time: {} ms", (endTime - startTime) / 1000000.0);
 
       }
       catch (OrtException e)

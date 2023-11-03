@@ -14,6 +14,8 @@ import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -31,8 +33,8 @@ public class FootstepPredictor
    private static final int IMAGE_INPUT_HEIGHT = 201;
    private static final int IMAGE_INPUT_WIDTH = 201;
 
-   private String modelFilePath = "/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/python/plogs/";
-   private String onnxFileName = "footstep_predictor.onnx";
+   private WorkspaceResourceDirectory modelDirectory = new WorkspaceResourceDirectory(this.getClass(), "/weights/");
+   private WorkspaceFile onnxFile = new WorkspaceFile(modelDirectory, "footstep_predictor.onnx");
 
    private OrtEnvironment environment = OrtEnvironment.getEnvironment();
    private OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
@@ -42,7 +44,7 @@ public class FootstepPredictor
    {
       try
       {
-         session = environment.createSession(modelFilePath + onnxFileName, sessionOptions);
+         session = environment.createSession(onnxFile.getFilesystemFile().toString(), sessionOptions);
 
          for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getInputInfo().entrySet())
          {
