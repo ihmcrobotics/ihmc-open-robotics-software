@@ -15,6 +15,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.tools.Timer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, ActionSequenceDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -26,6 +29,8 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
+   private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
+   private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo)
    {
@@ -40,6 +45,18 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    public void update()
    {
       super.update();
+
+      actionChildren.clear();
+      currentlyExecutingActions.clear();
+      for (RDXBehaviorTreeNode<?, ?> child : getChildren())
+      {
+         RDXActionNode<?, ?> actionNode = (RDXActionNode<?, ?>) child;
+         actionChildren.add(actionNode);
+         if (actionNode.getState().getIsExecuting())
+         {
+            currentlyExecutingActions.add(actionNode);
+         }
+      }
    }
 
    @Override
@@ -48,7 +65,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       if (ImGui.button(labels.get("<")))
       {
          getState().stepBackNextExecutionIndex();
-         getState().freeze();
       }
       ImGuiTools.previousWidgetTooltip("Go to previous action");
       ImGui.sameLine();
@@ -57,7 +73,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       if (ImGui.button(labels.get(">")))
       {
          getState().stepForwardNextExecutionIndex();
-         getState().freeze();
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
@@ -85,7 +100,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             ImGui.sameLine();
 
             if (!canExecuteNextAction)
-            ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
+               ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
             boolean confirmationState = manualExecutionOverrideTimer.isRunning(5.0);
             boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
             if (disableManuallyExecuteButton)
@@ -95,7 +110,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
                if (canExecuteNextAction || confirmationState)
                {
                   getState().setManualExecutionRequested(true);
-                  getState().freeze();
                }
                else
                {
@@ -118,12 +132,19 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          {
             ImGui.text("End of sequence.");
          }
-         else if (getState().getCurrentlyExecutingActions().isEmpty())
+
+         if (currentlyExecutingActions.isEmpty())
          {
             ImGui.text("Nothing executing.");
          }
+         else
+         {
+            for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
+            {
+               ImGui.text("Currently executing: " + currentlyExecutingAction.getDefinition().getDescription());
+            }
+         }
       }
-
    }
 
    @Override
