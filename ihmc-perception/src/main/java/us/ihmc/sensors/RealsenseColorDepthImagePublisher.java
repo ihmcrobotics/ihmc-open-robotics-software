@@ -136,7 +136,7 @@ public class RealsenseColorDepthImagePublisher
 
          // Close stuff
          depthPNGPointer.close();
-         depthImageToPublish.destroy();
+         depthImageToPublish.release();
       }
    }
 
@@ -176,7 +176,7 @@ public class RealsenseColorDepthImagePublisher
 
          // Close stuff
          colorJPEGPointer.close();
-         colorImageToPublish.destroy();
+         colorImageToPublish.release();
       }
    }
 
@@ -235,8 +235,8 @@ public class RealsenseColorDepthImagePublisher
          colorPublishLock.unlock();
       }
 
-      nextCpuDepthImage.destroy();
-      nextCpuColorImage.destroy();
+      nextCpuDepthImage.release();
+      nextCpuColorImage.release();
 
       imageEncoder.destroy();
 

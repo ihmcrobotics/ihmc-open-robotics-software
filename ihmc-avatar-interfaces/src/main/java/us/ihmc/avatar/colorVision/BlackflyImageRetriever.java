@@ -9,7 +9,6 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
@@ -22,6 +21,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.time.Instant;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 public class BlackflyImageRetriever
@@ -42,6 +44,10 @@ public class BlackflyImageRetriever
    private RawImage distortedImage = null;
    private final RestartableThrottledThread imageGrabThread;
    private int numberOfFailedReads = 0;
+
+   private final Lock newImageLock = new ReentrantLock();
+   private final Condition newImageAvailable = newImageLock.newCondition();
+   private long lastSequenceNumber = -1L;
 
    public BlackflyImageRetriever(String blackflySerialNumber,
                                  BlackflyLensProperties lensProperties,
@@ -91,20 +97,32 @@ public class BlackflyImageRetriever
          GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
          opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
 
-         distortedImage = new RawImage(sequenceNumber++,
-                                       acquisitionTime,
-                                       imageWidth,
-                                       imageHeight,
-                                       0,
-                                       null,
-                                       sourceImageBGR.clone(),
-                                       opencv_core.CV_8UC3,
-                                       (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
-                                       (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
-                                       (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
-                                       (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
-                                       cameraPose.getPosition(),
-                                       cameraPose.getOrientation());
+         newImageLock.lock();
+         try
+         {
+            if (distortedImage != null)
+               distortedImage.release();
+            distortedImage = new RawImage(sequenceNumber++,
+                                          acquisitionTime,
+                                          imageWidth,
+                                          imageHeight,
+                                          0,
+                                          null,
+                                          sourceImageBGR.clone(),
+                                          opencv_core.CV_8UC3,
+                                          (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
+                                          (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
+                                          (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
+                                          (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
+                                          cameraPose.getPosition(),
+                                          cameraPose.getOrientation());
+
+            newImageAvailable.signal();
+         }
+         finally
+         {
+            newImageLock.unlock();
+         }
 
          // close stuff
          spinImageData.close();
@@ -120,7 +138,26 @@ public class BlackflyImageRetriever
 
    public RawImage getLatestRawImage()
    {
-      return distortedImage;
+      newImageLock.lock();
+      try
+      {
+         while (distortedImage == null || distortedImage.isEmpty() || distortedImage.getSequenceNumber() == lastSequenceNumber)
+         {
+            newImageAvailable.await();
+         }
+
+         lastSequenceNumber = distortedImage.getSequenceNumber();
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException.getMessage());
+      }
+      finally
+      {
+         newImageLock.unlock();
+      }
+
+      return distortedImage.get();
    }
 
    public void start()

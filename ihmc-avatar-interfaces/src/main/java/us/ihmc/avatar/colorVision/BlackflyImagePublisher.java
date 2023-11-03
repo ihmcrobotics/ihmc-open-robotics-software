@@ -11,22 +11,16 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoImage;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -35,53 +29,46 @@ import us.ihmc.tools.thread.RestartableThread;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 public class BlackflyImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final ROS2Helper ros2Helper;
-   private final ROS2SceneGraph sceneGraph;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
    private final IHMCROS2Publisher<ImageMessage> ros2DistoredImagePublisher;
-   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
 
    private final BlackflyLensProperties lensProperties;
-   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
    private GpuMat undistortionMap1;
    private GpuMat undistortionMap2;
+   private final Mat cameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
    private int imageWidth;
    private int imageHeight;
-   private BytedecoImage undistortedBytedecoImage;
-   private final Supplier<ReferenceFrame> rightBlackflyCameraFrameSupplier;
-   private final MutableReferenceFrame blackflyFrameForSceneNodeUpdate = new MutableReferenceFrame();
 
    private long lastImageSequenceNumber = -1L;
    private RawImage nextGpuDistortedImage;
+   private RawImage undistortedRawImage;
 
    private final RestartableThread publishDistoredColorThread;
-   private final RestartableThread undistortAndUpdateArUcoThread;
+   private final RestartableThread undistortImageThread;
    private final Lock imagePublishLock = new ReentrantLock();
-   private final Lock updateArUcoLock = new ReentrantLock();
+   private final Lock undistortImageLock = new ReentrantLock();
    private final Condition newImageAvailable = imagePublishLock.newCondition();
-   private final Condition updateArUcoCondition = updateArUcoLock.newCondition();
+   private final Condition undistortImageAvailable = undistortImageLock.newCondition();
 
-   public BlackflyImagePublisher(BlackflyLensProperties lensProperties, Supplier<ReferenceFrame> rightBlackflyCameraFrameSupplier, ROS2Topic<ImageMessage> distortedImageTopic)
+   private final Lock newUndistortedImageLock = new ReentrantLock();
+   private final Condition newUndistortedImageAvailable = newUndistortedImageLock.newCondition();
+   private long lastUndistortedImageSequenceNumber = -1L;
+
+   public BlackflyImagePublisher(BlackflyLensProperties lensProperties, ROS2Topic<ImageMessage> distortedImageTopic)
    {
       this.lensProperties = lensProperties;
-      this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
-      this.rightBlackflyCameraFrameSupplier = rightBlackflyCameraFrameSupplier;
+      IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
-      ros2Helper = new ROS2Helper(ros2Node);
-      sceneGraph = new ROS2SceneGraph(ros2Helper);
       ros2DistoredImagePublisher = ROS2Tools.createPublisher(ros2Node, distortedImageTopic, ROS2QosProfile.BEST_EFFORT());
-      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Helper,
-                                                                        DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
-                                                                        ousterFisheyeColoringIntrinsics);
+      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
+                                                                        DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS, ousterFisheyeColoringIntrinsics);
 
       publishDistoredColorThread = new RestartableThread("BlackflyDistortedImagePublisher", () ->
       {
@@ -102,14 +89,14 @@ public class BlackflyImagePublisher
          }
       });
 
-      undistortAndUpdateArUcoThread = new RestartableThread("BlackflyUndistortAndUpdateArUco", () ->
+      undistortImageThread = new RestartableThread("BlackflyUndistortAndUpdateArUco", () ->
       {
-         updateArUcoLock.lock();
+         undistortImageLock.lock();
          try
          {
             while (nextGpuDistortedImage == null || nextGpuDistortedImage.isEmpty() || nextGpuDistortedImage.getSequenceNumber() == lastImageSequenceNumber)
             {
-               updateArUcoCondition.await();
+               undistortImageAvailable.await();
             }
 
             undistortAndUpdateArUco(nextGpuDistortedImage);
@@ -117,7 +104,7 @@ public class BlackflyImagePublisher
          catch (InterruptedException interruptedException)
          {
             interruptedException.printStackTrace();
-            updateArUcoLock.unlock();
+            undistortImageLock.unlock();
          }
       });
    }
@@ -165,7 +152,7 @@ public class BlackflyImagePublisher
 
          // Close stuff
          distortedImageJPEGPointer.close();
-         imageToPublish.destroy();
+         imageToPublish.release();
       }
    }
 
@@ -174,13 +161,10 @@ public class BlackflyImagePublisher
       RawImage imageForUndistortion = null;
       if (distortedImage != null)
          imageForUndistortion = new RawImage(distortedImage);
-      updateArUcoLock.unlock();
+      undistortImageLock.unlock();
 
       if (imageForUndistortion != null && !imageForUndistortion.isEmpty() && imageForUndistortion.getSequenceNumber() != lastImageSequenceNumber)
       {
-         blackflyFrameForSceneNodeUpdate.getTransformToParent().set(rightBlackflyCameraFrameSupplier.get().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()));
-         blackflyFrameForSceneNodeUpdate.getReferenceFrame().update();
-
          // Convert color from BGR to RGB
          GpuMat imageForUndistortionRGB = new GpuMat(imageForUndistortion.getImageHeight(),
                                                      imageForUndistortion.getImageWidth(),
@@ -192,15 +176,37 @@ public class BlackflyImagePublisher
                                                  imageForUndistortion.getImageWidth(),
                                                  imageForUndistortion.getOpenCVType());
          opencv_cudawarping.remap(imageForUndistortionRGB, undistortedImageRGB, undistortionMap1, undistortionMap2, opencv_imgproc.INTER_LINEAR);
-         undistortedImageRGB.download(undistortedBytedecoImage.getBytedecoOpenCVMat());
 
-         arUcoMarkerDetection.update();
-         arUcoMarkerPublisher.update();
+         newUndistortedImageLock.lock();
+         try
+         {
+            if (undistortedRawImage != null)
+               undistortedRawImage.release();
+            undistortedRawImage = new RawImage(imageForUndistortion.getSequenceNumber(),
+                                               imageForUndistortion.getAcquisitionTime(),
+                                               imageForUndistortion.getImageWidth(),
+                                               imageForUndistortion.getImageHeight(),
+                                               imageForUndistortion.getDepthDiscretization(),
+                                               null,
+                                               undistortedImageRGB.clone(),
+                                               imageForUndistortion.getOpenCVType(),
+                                               imageForUndistortion.getFocalLengthX(),
+                                               imageForUndistortion.getFocalLengthY(),
+                                               imageForUndistortion.getPrincipalPointX(),
+                                               imageForUndistortion.getPrincipalPointY(),
+                                               imageForUndistortion.getPosition(),
+                                               imageForUndistortion.getOrientation());
 
-         sceneGraph.updateSubscription();
-         ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
-         sceneGraph.updateOnRobotOnly(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
-         sceneGraph.updatePublication();
+            newUndistortedImageAvailable.signal();
+         }
+         finally
+         {
+            newUndistortedImageLock.unlock();
+         }
+
+         imageForUndistortion.release();
+         imageForUndistortionRGB.release();
+         undistortedImageRGB.release();
       }
    }
 
@@ -212,8 +218,7 @@ public class BlackflyImagePublisher
       cameraMatrix.ptr(1, 1).putDouble(lensProperties.getFocalLengthYForUndistortion());
       cameraMatrix.ptr(0, 2).putDouble(lensProperties.getPrincipalPointXForUndistortion());
       cameraMatrix.ptr(1, 2).putDouble(lensProperties.getPrincipalPointYForUndistortion());
-      Mat newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
-      opencv_core.setIdentity(newCameraMatrixEstimate);
+      opencv_core.setIdentity(cameraMatrixEstimate);
       Mat distortionCoefficients = new Mat(lensProperties.getK1ForUndistortion(),
                                            lensProperties.getK2ForUndistortion(),
                                            lensProperties.getK3ForUndistortion(),
@@ -231,7 +236,7 @@ public class BlackflyImagePublisher
                                                                        distortionCoefficients,
                                                                        sourceImageSize,
                                                                        rectificationTransformation,
-                                                                       newCameraMatrixEstimate,
+                                                                       cameraMatrixEstimate,
                                                                        balanceNewFocalLength,
                                                                        undistortedImageSize,
                                                                        fovScaleFocalLengthDivisor);
@@ -243,7 +248,7 @@ public class BlackflyImagePublisher
       opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrix,
                                                     distortionCoefficients,
                                                     rectificationTransformation,
-                                                    newCameraMatrixEstimate,
+                                                    cameraMatrixEstimate,
                                                     undistortedImageSize,
                                                     opencv_core.CV_32F,
                                                     tempUndistortionMat1,
@@ -254,14 +259,6 @@ public class BlackflyImagePublisher
       undistortionMap2 = new GpuMat();
       undistortionMap2.upload(tempUndistortionMat2);
 
-      // Create arUco marker detection
-      undistortedBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
-      arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(rightBlackflyCameraFrameSupplier.get());
-      arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
-      newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDToNodeMap());
-
       // Close pointers
       tempUndistortionMat2.close();
       tempUndistortionMat1.close();
@@ -269,8 +266,32 @@ public class BlackflyImagePublisher
       undistortedImageSize.close();
       sourceImageSize.close();
       distortionCoefficients.close();
-      newCameraMatrixEstimate.close();
       cameraMatrix.close();
+   }
+
+   public Mat getUndistortedCameraMatrix()
+   {
+      return cameraMatrixEstimate;
+   }
+
+   public RawImage getLatestUndistortedImage()
+   {
+      newUndistortedImageLock.lock();
+      try
+      {
+         while (undistortedRawImage == null || undistortedRawImage.isEmpty() || undistortedRawImage.getSequenceNumber() == lastUndistortedImageSequenceNumber)
+         {
+            newUndistortedImageAvailable.await();
+         }
+
+         lastUndistortedImageSequenceNumber = undistortedRawImage.getSequenceNumber();
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException.getMessage());
+      }
+
+      return undistortedRawImage.get();
    }
 
    public void startImagePublishing()
@@ -278,15 +299,15 @@ public class BlackflyImagePublisher
       publishDistoredColorThread.start();
    }
 
-   public void startArUcoDetection()
+   public void startImageUndistortion()
    {
-      undistortAndUpdateArUcoThread.start();
+      undistortImageThread.start();
    }
 
    public void startAll()
    {
       startImagePublishing();
-      startArUcoDetection();
+      startImageUndistortion();
    }
 
    public void stopImagePublishing()
@@ -294,37 +315,41 @@ public class BlackflyImagePublisher
       publishDistoredColorThread.stop();
    }
 
-   public void stopArUcoDetection()
+   public void stopImageUndistortion()
    {
-      undistortAndUpdateArUcoThread.stop();
+      undistortImageThread.stop();
    }
 
    public void stopAll()
    {
       stopImagePublishing();
-      stopArUcoDetection();
+      stopImageUndistortion();
    }
 
    public void destroy()
    {
       imagePublishLock.lock();
-      updateArUcoLock.lock();
+      undistortImageLock.lock();
       try
       {
          newImageAvailable.signal();
-         updateArUcoCondition.signal();
+         undistortImageAvailable.signal();
       }
       finally
       {
          imagePublishLock.unlock();
-         updateArUcoLock.unlock();
+         undistortImageLock.unlock();
       }
       publishDistoredColorThread.blockingStop();
-      undistortAndUpdateArUcoThread.blockingStop();
+      undistortImageThread.blockingStop();
+
+      nextGpuDistortedImage.release();
+      undistortedRawImage.release();
 
       undistortionMap1.close();
       undistortionMap2.close();
-      nextGpuDistortedImage.destroy();
+      cameraMatrixEstimate.close();
+      nextGpuDistortedImage.release();
       imageEncoder.destroy();
       ros2DistoredImagePublisher.destroy();
       ros2Node.destroy();
@@ -340,19 +365,19 @@ public class BlackflyImagePublisher
       }
 
       imagePublishLock.lock();
-      updateArUcoLock.lock();
+      undistortImageLock.lock();
       try
       {
          if (nextGpuDistortedImage != null)
-            nextGpuDistortedImage.destroy();
+            nextGpuDistortedImage.release();
          nextGpuDistortedImage = distortedImage;
          newImageAvailable.signal();
-         updateArUcoCondition.signal();
+         undistortImageAvailable.signal();
       }
       finally
       {
          imagePublishLock.unlock();
-         updateArUcoLock.unlock();
+         undistortImageLock.unlock();
       }
    }
 }

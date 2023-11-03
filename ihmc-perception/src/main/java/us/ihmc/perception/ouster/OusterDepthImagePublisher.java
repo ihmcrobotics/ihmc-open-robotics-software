@@ -99,7 +99,7 @@ public class OusterDepthImagePublisher
 
          // Close stuff
          depthPNGPointer.close();
-         depthImageToPublish.destroy();
+         depthImageToPublish.release();
       }
    }
 
@@ -127,7 +127,7 @@ public class OusterDepthImagePublisher
       }
       publishDepthThread.blockingStop();
       // TODO: Add null checks
-      nextCpuDepthImage.destroy();
+      nextCpuDepthImage.release();
 
       ros2DepthImagePublisher.destroy();
       ros2Node.destroy();

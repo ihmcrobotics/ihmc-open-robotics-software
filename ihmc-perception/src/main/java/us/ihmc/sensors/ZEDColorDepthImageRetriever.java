@@ -18,6 +18,9 @@ import us.ihmc.tools.thread.RestartableThread;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static org.bytedeco.zed.global.zed.*;
@@ -57,6 +60,15 @@ public class ZEDColorDepthImageRetriever
    // Frame poses of left and right cameras of ZED. Depth is always in the left pose.
    private final SideDependentList<FramePose3D> cameraFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final RestartableThread zedGrabThread;
+   
+   private final Lock newDepthImageLock = new ReentrantLock();
+   private final Condition newDepthImageAvailable = newDepthImageLock.newCondition();
+   private long lastDepthSequenceNumber = -1L;
+
+   private final SideDependentList<Lock> newColorImageLocks = new SideDependentList<>(new ReentrantLock(), new ReentrantLock());
+   private final SideDependentList<Condition> newColorImagesAvailable = new SideDependentList<>(newColorImageLocks.get(RobotSide.LEFT).newCondition(),
+                                                                                                newColorImageLocks.get(RobotSide.RIGHT).newCondition());
+   private SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
 
    public ZEDColorDepthImageRetriever(int cameraID, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
@@ -163,21 +175,33 @@ public class ZEDColorDepthImageRetriever
       colorGpuMats.put(side, new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3));
       opencv_cudaimgproc.cvtColor(colorImageBGRA, colorGpuMats.get(side), opencv_imgproc.COLOR_BGRA2BGR);
 
-      colorImages.put(side,
-                      new RawImage(grabSequenceNumber,
-                                   colorImageAcquisitionTime.get(),
-                                   imageWidth,
-                                   imageHeight,
-                                   MILLIMETER_TO_METERS,
-                                   null,
-                                   colorGpuMats.get(side).clone(),
-                                   opencv_core.CV_8UC3,
-                                   cameraFocalLengthX.get(side),
-                                   cameraFocalLengthY.get(side),
-                                   cameraPrincipalPointX.get(side),
-                                   cameraPrincipalPointY.get(side),
-                                   cameraFramePoses.get(side).getPosition(),
-                                   cameraFramePoses.get(side).getOrientation()));
+      newColorImageLocks.get(side).lock();
+      try
+      {
+         if (colorImages.get(side) != null)
+            colorImages.get(side).release();
+         colorImages.put(side,
+                         new RawImage(grabSequenceNumber,
+                                      colorImageAcquisitionTime.get(),
+                                      imageWidth,
+                                      imageHeight,
+                                      MILLIMETER_TO_METERS,
+                                      null,
+                                      colorGpuMats.get(side).clone(),
+                                      opencv_core.CV_8UC3,
+                                      cameraFocalLengthX.get(side),
+                                      cameraFocalLengthY.get(side),
+                                      cameraPrincipalPointX.get(side),
+                                      cameraPrincipalPointY.get(side),
+                                      cameraFramePoses.get(side).getPosition(),
+                                      cameraFramePoses.get(side).getOrientation()));
+
+         newColorImagesAvailable.get(side).signal();
+      }
+      finally
+      {
+         newColorImageLocks.get(side).unlock();
+      }
 
       // Close stuff
       colorImageBGRA.close();
@@ -199,30 +223,74 @@ public class ZEDColorDepthImageRetriever
                                sl_mat_get_ptr(depthImagePointer, SL_MEM_GPU),
                                sl_mat_get_step_bytes(depthImagePointer, SL_MEM_GPU));
 
-      depthImage = new RawImage(grabSequenceNumber,
-                                depthImageAcquisitionTime.get(),
-                                imageWidth,
-                                imageHeight,
-                                MILLIMETER_TO_METERS,
-                                null,
-                                depthGpuMat.clone(),
-                                opencv_core.CV_16UC1,
-                                cameraFocalLengthX.get(RobotSide.LEFT),
-                                cameraFocalLengthY.get(RobotSide.LEFT),
-                                cameraPrincipalPointX.get(RobotSide.LEFT),
-                                cameraPrincipalPointY.get(RobotSide.LEFT),
-                                cameraFramePoses.get(RobotSide.LEFT).getPosition(),
-                                cameraFramePoses.get(RobotSide.LEFT).getOrientation());
+      newDepthImageLock.lock();
+      try
+      {
+         if (depthImage != null)
+            depthImage.release();
+         depthImage = new RawImage(grabSequenceNumber,
+                                   depthImageAcquisitionTime.get(),
+                                   imageWidth,
+                                   imageHeight,
+                                   MILLIMETER_TO_METERS,
+                                   null,
+                                   depthGpuMat.clone(),
+                                   opencv_core.CV_16UC1,
+                                   cameraFocalLengthX.get(RobotSide.LEFT),
+                                   cameraFocalLengthY.get(RobotSide.LEFT),
+                                   cameraPrincipalPointX.get(RobotSide.LEFT),
+                                   cameraPrincipalPointY.get(RobotSide.LEFT),
+                                   cameraFramePoses.get(RobotSide.LEFT).getPosition(),
+                                   cameraFramePoses.get(RobotSide.LEFT).getOrientation());
+
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         newDepthImageLock.unlock();
+      }
    }
 
    public RawImage getLatestRawDepthImage()
    {
-      return depthImage;
+      newDepthImageLock.lock();
+      try
+      {
+         while (depthImage == null || depthImage.isEmpty() || depthImage.getSequenceNumber() == lastDepthSequenceNumber)
+         {
+            newDepthImageAvailable.await();
+         }
+
+         lastDepthSequenceNumber = depthImage.getSequenceNumber();
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException.getMessage());
+      }
+
+      return depthImage.get();
    }
 
    public RawImage getLatestRawColorImage(RobotSide side)
    {
-      return colorImages.get(side);
+      newColorImageLocks.get(side).lock();
+      try
+      {
+         while (colorImages.get(side) == null ||
+                colorImages.get(side).isEmpty() ||
+                colorImages.get(side).getSequenceNumber() == lastColorSequenceNumbers.get(side))
+         {
+            newColorImagesAvailable.get(side).await();
+         }
+
+         lastColorSequenceNumbers.put(side, colorImages.get(side).getSequenceNumber());
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException.getMessage());
+      }
+
+      return colorImages.get(side).get();
    }
 
    public ZEDModelData getZedModelData()
@@ -245,12 +313,12 @@ public class ZEDColorDepthImageRetriever
       zedGrabThread.blockingStop();
 
       depthImagePointer.close();
-      depthImage.destroy();
+      depthImage.release();
 
       colorImagePointer.close();
       for (RobotSide side : RobotSide.values)
       {
-         colorImages.get(side).destroy();
+         colorImages.get(side).release();
       }
       sl_close_camera(cameraID);
    }
