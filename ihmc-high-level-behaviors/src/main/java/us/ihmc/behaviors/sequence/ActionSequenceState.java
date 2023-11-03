@@ -107,7 +107,10 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public void setManualExecutionRequested(boolean manualExecutionRequested)
    {
-      this.manualExecutionRequested = manualExecutionRequested;
-      freeze();
+      if (this.manualExecutionRequested != manualExecutionRequested)
+      {
+         this.manualExecutionRequested = manualExecutionRequested;
+         freeze();
+      }
    }
 }
