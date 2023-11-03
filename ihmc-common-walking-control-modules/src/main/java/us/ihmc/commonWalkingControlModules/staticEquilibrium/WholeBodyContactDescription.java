@@ -108,7 +108,7 @@ public class WholeBodyContactDescription
       }
    }
 
-   /* Contact frame should have origin at the contact point with z pointing into the robot contacting link */
+   /* Contact frame should have origin at the contact point with z pointing along the environment surface normal (into the robot contacting link) */
    public void addContactPoint(ReferenceFrame contactFrame, RigidBodyBasics contactingBody, GeometricJacobian contactJacobian)
    {
       this.contactFrames.add(contactFrame);

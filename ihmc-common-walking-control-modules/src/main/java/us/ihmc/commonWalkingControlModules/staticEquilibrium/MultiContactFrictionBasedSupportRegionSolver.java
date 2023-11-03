@@ -53,7 +53,7 @@ public class MultiContactFrictionBasedSupportRegionSolver
 {
    private static final double optimizedCoMGraphicScale = 0.03;
 
-   private static final int defaultNumberOfDirectionsToOptimize = 32;
+   private static final int defaultNumberOfDirectionsToOptimize = 64;
    private static final int centerOfMassDimensions = 2;
    private static final int staticEquilibriumConstraints = 6;
    static final double mg = 1.0;

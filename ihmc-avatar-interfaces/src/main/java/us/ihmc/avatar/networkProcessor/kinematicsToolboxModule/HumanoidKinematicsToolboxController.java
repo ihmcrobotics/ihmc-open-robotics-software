@@ -113,7 +113,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    /** Multi-contact support region solver */
    private final YoBoolean enableMultiContactSupportRegionSolver = new YoBoolean("enableMultiContactSupportRegionSolver", registry);
-   private final MultiContactActuationBasedSupportRegionSolver supportRegionSolver = new MultiContactActuationBasedSupportRegionSolver(20, registry);
+   private final CenterOfMassStaticStabilityMarginCalculator supportRegionSolver = new CenterOfMassStaticStabilityMarginCalculator(20, registry);
    private final WholeBodyContactDescription supportRegionSolverInput;
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:

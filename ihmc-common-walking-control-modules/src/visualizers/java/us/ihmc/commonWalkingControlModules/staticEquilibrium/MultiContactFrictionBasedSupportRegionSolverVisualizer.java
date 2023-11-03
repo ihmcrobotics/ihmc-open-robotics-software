@@ -16,10 +16,14 @@ import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -39,8 +43,8 @@ public class MultiContactFrictionBasedSupportRegionSolverVisualizer
 
    public MultiContactFrictionBasedSupportRegionSolverVisualizer(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
-      runWithSCS1(input);
-//      runWithSCS2(input);
+//      runWithSCS1(input);
+      runWithSCS2(input);
    }
 
    private void runWithSCS1(MultiContactFrictionBasedSupportRegionSolverInput input)
@@ -107,18 +111,21 @@ public class MultiContactFrictionBasedSupportRegionSolverVisualizer
 
    private void runWithSCS2(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
-      SimulationConstructionSet2 scs2 = new SimulationConstructionSet2();
+      SimulationConstructionSet2 scs2 = new SimulationConstructionSet2(PhysicsEngineFactory.newDoNothingPhysicsEngineFactory());
+      scs2.start(true, true, false);
 
       MultiContactFrictionBasedSupportRegionSolver solver = new MultiContactFrictionBasedSupportRegionSolver();
       scs2.getRootRegistry().addChild(solver.getRegistry());
-      //      scs2.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
+
+      List<YoGraphicDefinition> graphicDefinitions = YoGraphicConversionTools.toYoGraphicDefinitions(solver.getGraphicsListRegistry());
+      scs2.addYoGraphics(graphicDefinitions);
 
       solver.setTickAndUpdatable(new TickAndUpdatable()
       {
          @Override
          public void tickAndUpdate()
          {
-            scs2.simulate(1);
+            scs2.simulateNow(1);
          }
 
          @Override

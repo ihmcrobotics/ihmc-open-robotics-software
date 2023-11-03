@@ -22,7 +22,7 @@ class ContactPoint
 {
    public static final double basisVectorGraphicScale = 0.1;
    public static final double forceVectorGraphicScale = 0.2;
-   public static final int basisVectorsPerContactPoint = 4;
+   public static final int basisVectorsPerContactPoint = 12;
 
    private final int contactPointIndex;
 
