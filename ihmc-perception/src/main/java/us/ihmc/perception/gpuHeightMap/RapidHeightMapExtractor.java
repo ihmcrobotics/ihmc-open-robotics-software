@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -39,6 +40,7 @@ public class RapidHeightMapExtractor
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
+   private HeightMapAutoencoder heightMapAutoencoder;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
 
@@ -75,6 +77,9 @@ public class RapidHeightMapExtractor
    private BytedecoImage terrainCostImage;
    private BytedecoImage contactMapImage;
 
+   private Mat croppedHeightMapImage;
+   private Mat denoisedHeightMap;
+
    private Rect cropWindowRectangle = new Rect((globalCellsPerAxis - CROP_WINDOW_SIZE) / 2, (globalCellsPerAxis - CROP_WINDOW_SIZE) / 2,
                                                CROP_WINDOW_SIZE,
                                                CROP_WINDOW_SIZE);
@@ -91,6 +96,8 @@ public class RapidHeightMapExtractor
       this.inputDepthImage = depthImage;
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
+
+      heightMapAutoencoder = new HeightMapAutoencoder();
 
       centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
       localCellsPerAxis = 2 * centerIndex + 1;
@@ -126,6 +133,9 @@ public class RapidHeightMapExtractor
 
       globalHeightVarianceImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       globalHeightVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
+      croppedHeightMapImage = new Mat(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
+      denoisedHeightMap = new Mat(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
 
       sensorCroppedHeightMapImage = new BytedecoImage(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
       sensorCroppedHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -231,6 +241,9 @@ public class RapidHeightMapExtractor
          terrainCostImage.readOpenCLImage(openCLManager);
          contactMapImage.readOpenCLImage(openCLManager);
 
+         croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
+         denoisedHeightMap = heightMapAutoencoder.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
+
          sequenceNumber++;
       }
    }
@@ -325,7 +338,7 @@ public class RapidHeightMapExtractor
 
    public Mat getCroppedGlobalHeightMapImage()
    {
-      return getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
+      return denoisedHeightMap;
    }
 
    public Mat getSensorCroppedHeightMapImage()

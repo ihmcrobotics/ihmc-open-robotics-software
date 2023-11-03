@@ -2,6 +2,7 @@ package us.ihmc.perception.neural;
 
 import ai.onnxruntime.*;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -65,14 +66,18 @@ public class HeightMapAutoencoder
       }
    }
 
-   public Mat denoiseHeightMap(Mat heightMap)
+   public Mat denoiseHeightMap(Mat heightMap, float offset)
    {
-      ArrayList<Point3D> footstepPositions = new ArrayList<>();
       Mat denoisedHeightMapImage = null;
-
       try
       {
-         denoisedHeightMapImage = predict(heightMap);
+         long startTime = System.nanoTime();
+
+         denoisedHeightMapImage = predict(heightMap, offset);
+
+         long endTime = System.nanoTime();
+         LogTools.info("Inference time: {} ms", (endTime - startTime) / 1000000.0);
+
       }
       catch (OrtException e)
       {
@@ -82,24 +87,45 @@ public class HeightMapAutoencoder
       return denoisedHeightMapImage;
    }
 
-   public Mat predict(Mat imageInput) throws OrtException
+   public Mat predict(Mat imageInput, float offset) throws OrtException
    {
       if (imageInput.rows() != IMAGE_HEIGHT || imageInput.cols() != IMAGE_WIDTH)
          throw new RuntimeException("Image height and width must be " + IMAGE_HEIGHT + " and " + IMAGE_WIDTH);
 
-      LogTools.info("Image Input Size: {}x{}", imageInput.rows(), imageInput.cols());
+      LogTools.debug("Image Input Size: {}x{}", imageInput.rows(), imageInput.cols());
 
       Mat heightMapImage = imageInput.clone();
-      heightMapImage.convertTo(heightMapImage, opencv_core.CV_32FC1, 1.0 / 10000.0, 0);
+
+      //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 4);
+
+      Mat heightMapInput = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
+
+      heightMapImage.convertTo(heightMapInput, opencv_core.CV_32FC1, 1, 0);
+      //opencv_core.convertScaleAbs(heightMapInput, heightMapInput, 1.0 / 10000.0, 0);
+
+      //PerceptionDebugTools.printMat("Input Image", heightMapInput, 4);
+
+      FloatBuffer inputFloatBuffer = FloatBuffer.allocate(IMAGE_HEIGHT * IMAGE_WIDTH);
+
+      for (int i = 0; i < IMAGE_HEIGHT; i++)
+      {
+         for (int j = 0; j < IMAGE_WIDTH; j++)
+         {
+            //LogTools.info("Reading pixel: {} {} {}", i, j, heightMapInput.ptr(i, j).getFloat());
+            inputFloatBuffer.put(heightMapInput.ptr(i, j).getFloat() / 10000.0f - offset);
+         }
+      }
+      inputFloatBuffer.rewind();
+
+      //PerceptionDebugTools.printBuffer2D("Input Buffer", inputFloatBuffer, IMAGE_HEIGHT, IMAGE_WIDTH, 4);
 
       // set the image to be in the first input
       String inputName = (String) session.getInputNames().toArray()[0];
-      long[] tensorInputShape = {1, 1, heightMapImage.rows(), heightMapImage.cols()};
-      FloatBuffer data = heightMapImage.getByteBuffer().asFloatBuffer();
+      long[] tensorInputShape = {1, 1, heightMapInput.rows(), heightMapInput.cols()};
 
       // create a map to store the input tensors
       Map<String, OnnxTensor> inputs = new HashMap<>();
-      inputs.put(inputName, OnnxTensor.createTensor(environment, data, tensorInputShape));
+      inputs.put(inputName, OnnxTensor.createTensor(environment, inputFloatBuffer, tensorInputShape));
 
       // run the inference
       OrtSession.Result output = session.run(inputs);
@@ -112,17 +138,25 @@ public class HeightMapAutoencoder
          OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
          float[][][][] outputArray = (float[][][][]) outputTensor.getValue();
 
-         LogTools.info("Output: {}", outputTensor.getInfo());
+         LogTools.debug("Output: {}", outputTensor.getInfo());
 
          if (outputArray[0][0].length != IMAGE_HEIGHT && outputArray[0][0][0].length != IMAGE_WIDTH)
          {
             throw new RuntimeException("Output size must be " + IMAGE_HEIGHT * IMAGE_WIDTH);
          }
 
-         FloatBuffer floatBuffer = FloatBuffer.wrap(outputArray[0][0][0]);
+         for (int i = 0; i < IMAGE_HEIGHT; i++)
+         {
+            for (int j = 0; j < IMAGE_WIDTH; j++)
+            {
+               outputImage.ptr(i, j).putFloat((outputArray[0][0][i][j] + offset) * 10000.0f);
+            }
+         }
 
-         outputImage.getByteBuffer().asFloatBuffer().put(floatBuffer);
+         //PerceptionDebugTools.printMat("Output Image", outputImage, 4);
 
+         // scale up the output image and convert to 16UC1
+         outputImage.convertTo(outputImage, opencv_core.CV_16UC1, 1, 0);
       }
 
       return outputImage;
@@ -130,44 +164,24 @@ public class HeightMapAutoencoder
 
    public static void main(String[] args) throws OrtException
    {
-      String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20231018_135001_PerceptionLog.hdf5").toString();
-      ArrayList<Point3D> startPositions = new ArrayList<>();
-      ArrayList<Point3D> goalPositions = new ArrayList<>();
-      ArrayList<Point3D> sensorPositions = new ArrayList<>();
+      String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20231023_131517_PerceptionLog.hdf5").toString();
 
       HeightMapAutoencoder heightMapAutoencoder = new HeightMapAutoencoder();
-
       PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
-
       perceptionDataLoader.openLogFile(perceptionLogFile);
 
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.START_FOOTSTEP_POSITION, startPositions);
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.GOAL_FOOTSTEP_POSITION, goalPositions);
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositions);
-
       BytePointer depthBytePointer = new BytePointer(1000000);
-      Mat heightMapImage = new Mat(201, 201, opencv_core.CV_16UC1);
-      Mat inputImage = new Mat(201, 201, opencv_core.CV_32FC1);
-      Mat output = null;
+      Mat heightMap16UC1 = new Mat(201, 201, opencv_core.CV_16UC1);
+      Mat outputHeightMap16UC1 = null;
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 1; i < 100; i++)
       {
-         perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME, i, depthBytePointer, heightMapImage);
-
-         Mat heightMapForDisplay = heightMapImage.clone();
-         opencv_core.convertScaleAbs(heightMapForDisplay, heightMapForDisplay, 255.0 / 65535.0, 0);
-         Mat display = new Mat(heightMapForDisplay.rows(), heightMapForDisplay.cols(), opencv_core.CV_8UC3);
-         opencv_imgproc.cvtColor(heightMapForDisplay, display, opencv_imgproc.COLOR_GRAY2RGB);
-
-         heightMapImage.convertTo(inputImage, opencv_core.CV_32FC1, 1.0 / 10000.0, 0);
-
-         startPositions.get(i).sub(sensorPositions.get(i));
-         goalPositions.get(i).sub(sensorPositions.get(i));
+         perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.CROPPED_HEIGHT_MAP_NAME, i, depthBytePointer, heightMap16UC1);
 
          // Measure start time
          long startTime = System.nanoTime();
 
-         output = heightMapAutoencoder.predict(inputImage);
+         outputHeightMap16UC1 = heightMapAutoencoder.predict(heightMap16UC1, 0.0f);
 
          // Measure end time
          long endTime = System.nanoTime();
@@ -175,14 +189,28 @@ public class HeightMapAutoencoder
          // Print time difference in ms
          LogTools.info("Inference time: {} ms", (endTime - startTime) / 1000000.0);
 
-         Mat outputImage = output.clone();
-         opencv_core.convertScaleAbs(outputImage, outputImage, 1000000, 0);
-         opencv_core.normalize(outputImage, outputImage, 0, 65535, opencv_core.NORM_MINMAX, opencv_core.CV_16UC1, new Mat());
+         // create display image for output image
+         Mat outputImage16UC1 = outputHeightMap16UC1.clone();
+         opencv_core.convertScaleAbs(outputImage16UC1, outputImage16UC1, 255.0 / 65535.0, 0);
+         Mat displayOutput = new Mat(outputImage16UC1.rows(), outputImage16UC1.cols(), opencv_core.CV_8UC3);
+         opencv_imgproc.cvtColor(outputImage16UC1, displayOutput, opencv_imgproc.COLOR_GRAY2RGB);
+
+         // create color image for input image
+         Mat heightMapForDisplay = heightMap16UC1.clone();
+         opencv_core.convertScaleAbs(heightMapForDisplay, heightMapForDisplay, 255.0 / 65535.0, 0);
+         Mat displayInput = new Mat(heightMapForDisplay.rows(), heightMapForDisplay.cols(), opencv_core.CV_8UC3);
+         opencv_imgproc.cvtColor(heightMapForDisplay, displayInput, opencv_imgproc.COLOR_GRAY2RGB);
+
+         // convert to color image
+         Mat stackedImage = new Mat(displayInput.rows(), displayInput.cols() * 2, opencv_core.CV_8UC3);
+         opencv_core.hconcat(displayInput, displayOutput, stackedImage);
+
+         // increase brightness of the image
+         opencv_core.convertScaleAbs(stackedImage, stackedImage, 4.0, 0);
 
          // plot and display the image using imshow, brighten the image
-         PerceptionDebugTools.printMat("Denoised Height Map", output, 4);
-         opencv_imgproc.resize(outputImage, outputImage, new org.bytedeco.opencv.opencv_core.Size(1000, 1000));
-         imshow("Display", outputImage);
+         opencv_imgproc.resize(stackedImage, stackedImage, new org.bytedeco.opencv.opencv_core.Size(2000, 1000));
+         imshow("Display", stackedImage);
          int code = waitKeyEx(0);
 
          if (code == 'q')

@@ -6,6 +6,7 @@ import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.ejml.data.FMatrixRMaj;
+import rosgraph_msgs.Log;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -15,6 +16,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -182,6 +184,25 @@ public class PerceptionDebugTools
             return enum_strings[i];
       }
       return "unknown image type";
+   }
+
+   public static void printBuffer2D(String tag, FloatBuffer buffer, int rows, int cols, int skip)
+   {
+      LogTools.info(bufferToString(tag, buffer, rows, cols, skip));
+   }
+
+   public static String bufferToString(String tag, FloatBuffer buffer, int rows, int cols, int skip)
+   {
+      StringBuilder matString = new StringBuilder("Buffer: [" + tag + "]\n");
+      for (int i = 0; i < rows; i += skip)
+      {
+         for (int j = 0; j < cols; j += skip)
+         {
+            matString.append(String.format("%.2f ", buffer.get(i * cols + j)));
+         }
+         matString.append("\n");
+      }
+      return matString.toString();
    }
 
    public static void printMat(String name, Mat image, int skip)

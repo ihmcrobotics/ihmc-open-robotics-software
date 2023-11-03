@@ -20,6 +20,7 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
+import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -211,6 +212,8 @@ public class HumanoidPerceptionModule
       long begin = System.nanoTime();
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
       perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
+
+
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
