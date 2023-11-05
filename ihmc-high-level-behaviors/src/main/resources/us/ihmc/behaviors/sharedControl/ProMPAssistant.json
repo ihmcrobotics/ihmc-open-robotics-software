@@ -76,6 +76,72 @@
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
       ]
+    },
+    {
+      "context": "Target",
+      "name": "Right0",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "Target",
+      "name": "Right1",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "Target",
+      "name": "Right2",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "Target",
+      "name": "Right3",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "Target",
+      "name": "Right4",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "Target",
+      "name": "Right5",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" },
+        { "name":"chest", "geometry":"Orientation" }
+      ]
     }
   ]
 }

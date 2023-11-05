@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -28,6 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiTransparentPanel;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -89,6 +91,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private final YawPitchRoll chestFightingHome;
    private final double[] leftArmOpenDoor;
    private int finalCounter = 0;
+   private boolean selectedRightSide = false;
 
    public RDXVRAssistance(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2ControllerHelper, SceneGraph sceneGraph, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -143,7 +146,14 @@ public class RDXVRAssistance implements TeleoperationAssistant
              setEnabled(!enabled.get());
           }
           joystickValue = forwardJoystickValue;
-          play = joystickValue > 0 || isPreviewGraphicActive();
+//          play = joystickValue > 0 || isPreviewGraphicActive();
+          play= true;
+
+          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+          {
+             selectedRightSide = !selectedRightSide;
+          }
        });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -305,7 +315,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
       if (!objectName.isEmpty())
       {
-         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
+         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame, selectedRightSide);
 
          if (previewSetToActive)
          {
@@ -317,7 +327,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                else
                {
                   //TODO remove once added the hands back on robot
-                  if (bodyPart.equals("rightHand"))
+                  if (bodyPart.contains("Hand"))
                   {
                      FramePose3D observedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), observedPose);
                      observedFramePose.changeFrame(syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT));
@@ -372,7 +382,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                   if (bodyPartReplayMotionMap.containsKey(bodyPart))
                   {
                      //TODO remove this once hand is added
-                     if (bodyPart.equals("rightHand"))
+                     if (bodyPart.contains("Hand"))
                      {
                         FramePose3D observedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), framePose);
                         observedFramePose.changeFrame(syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT));
@@ -665,6 +675,12 @@ public class RDXVRAssistance implements TeleoperationAssistant
       if (ImGui.checkbox(labels.get("Assistance"), enabled))
          setEnabled(enabled.get());
       ghostRobotGraphic.renderImGuiWidgets();
+      if (selectedRightSide)
+      {
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+         ImGui.text("R");
+         ImGui.popStyleColor();
+      }
    }
 
    public void destroy()

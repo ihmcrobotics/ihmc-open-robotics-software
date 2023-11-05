@@ -260,10 +260,9 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame, boolean selectedRight)
    {
-      if (taskDetected(observedPose, bodyPart, objectName, objectFrame))
-      {
+      if (taskDetected(observedPose, bodyPart, objectName, objectFrame, selectedRight)) {
          if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
             FramePose3D lastObservedPose = new FramePose3D(observedPose);
@@ -291,6 +290,11 @@ public class ProMPAssistant
             }
          }
       }
+   }
+
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
+   {
+      processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame, true);
    }
 
    private void ensureOrientationContinuity(String bodyPart, FramePose3D lastObservedPose)
@@ -370,7 +374,7 @@ public class ProMPAssistant
       }
    }
 
-   private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
+   private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame, boolean selectedRight)
    {
       if (currentTask.isEmpty())
       {
@@ -386,21 +390,38 @@ public class ProMPAssistant
                for (int i = 0; i < candidateTasks.size(); i++)
                {
                   // here compute the distance wrt to initial value of the hands for each candidate task
-//                  if (!hasObservedBothHand && bodyPart.contains("leftHand"))
-                  if (bodyPart.contains("leftHand"))
-                  { // compute distance wrt to first hand
-                     distanceCandidateTasks.add(proMPManagers.get(candidateTasks.get(i)).computeInitialDistance(lastObservedPose, bodyPart));
-//                     hasObservedBothHand = true;
+                  if (selectedRight)
+                  {
+                     if (candidateTasks.get(i).contains("Right"))
+                     {
+                        if (bodyPart.equals("rightHand"))
+                        {
+                           distanceCandidateTasks.add(proMPManagers.get(candidateTasks.get(i)).computeInitialDistance(lastObservedPose, bodyPart));
+                        }
+                     }
+                     else if (bodyPart.equals("rightHand"))
+                     {
+                        distanceCandidateTasks.add(Double.MAX_VALUE);
+                     }
                   }
-//                  else if (bodyPart.contains("Hand"))
-//                  { // compute distance wrt to second hand
-//                     distanceCandidateTasks.set(i,
-//                                                distanceCandidateTasks.get(i) + proMPManagers.get(candidateTasks.get(i))
-//                                                                                             .computeInitialDistance(lastObservedPose, bodyPart));
-//                  }
+                  else
+                  {
+                     if (candidateTasks.get(i).contains("Left"))
+                     {
+                        if (bodyPart.equals("leftHand"))
+                        {
+                           distanceCandidateTasks.add(proMPManagers.get(candidateTasks.get(i)).computeInitialDistance(lastObservedPose, bodyPart));
+                        }
+                     }
+                     else if (bodyPart.equals("leftHand"))
+                     {
+                        distanceCandidateTasks.add(Double.MAX_VALUE);
+                     }
+                  }
                }
-//               if (hasObservedBothHand) // if observed both hands
-//               { // select task with minimum distance observation - learned mean
+               if ( (selectedRight && bodyPart.equals("rightHand")) || (!selectedRight && bodyPart.equals("leftHand")))
+               {
+                  // select task with minimum distance observation - learned mean
                   currentTask = candidateTasks.get(getMinIndex(distanceCandidateTasks));
                   // get the body part used for recognition for this task
                   bodyPartInference = taskBodyPartInferenceMap.get(currentTask);
@@ -409,7 +430,7 @@ public class ProMPAssistant
 
                   // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
                   (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet().forEach(part -> bodyPartObservedTrajectoryMap.put(part, new ArrayList<>()));
-//               }
+               }
             }
             else // 1 task in this context
             {
@@ -446,6 +467,11 @@ public class ProMPAssistant
          }
       }
       return !currentTask.isEmpty();
+   }
+
+   private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
+   {
+      return taskDetected(observedPose, bodyPart, objectName, objectFrame, true);
    }
 
    public static int getMinIndex(List<Double> list)
