@@ -38,7 +38,6 @@ public class BehaviorActionExecutionStatusCalculator
          isNextForExecution = executionNextIndex >= actionIndex - numberOfImmediatelyPriorConcurrentActions;
       }
 
-      actionNode.getState().setActionIndex(actionIndex);
       actionNode.getState().setIsNextForExecution(isNextForExecution);
       actionNode.getState().setIsToBeExecutedConcurrently(executeWithPreviousAction || executeWithNextAction);
       actionNode.update();

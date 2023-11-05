@@ -3,6 +3,8 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.WalkActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -10,8 +12,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 {
    private final DetachableReferenceFrame goalFrame;
-   private int totalNumberOfFootsteps;
-   private int numberOfIncompleteFootsteps;
+   private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
+   private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
 
    public WalkActionState(long id,
                           CRDTInfo crdtInfo,
@@ -21,13 +23,14 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
       super(id, new WalkActionDefinition(footstepPlannerParameters), crdtInfo);
 
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform());
+      totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
    }
 
    @Override
    public void update()
    {
       goalFrame.update(getDefinition().getParentFrameName());
-      setCanExecute(goalFrame.isChildOfWorld());
    }
 
    public void toMessage(WalkActionStateMessage message)
@@ -36,8 +39,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
       super.toMessage(message.getState());
 
-      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps);
-      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps);
+      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
+      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
    }
 
    public void fromMessage(WalkActionStateMessage message)
@@ -46,8 +49,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
       getDefinition().fromMessage(message.getDefinition());
 
-      totalNumberOfFootsteps = message.getTotalNumberOfFootsteps();
-      numberOfIncompleteFootsteps = message.getNumberOfIncompleteFootsteps();
+      totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
+      numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
    }
 
    public DetachableReferenceFrame getGoalFrame()
@@ -57,21 +60,21 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
    public int getTotalNumberOfFootsteps()
    {
-      return totalNumberOfFootsteps;
+      return totalNumberOfFootsteps.intValue();
    }
 
    public void setTotalNumberOfFootsteps(int totalNumberOfFootsteps)
    {
-      this.totalNumberOfFootsteps = totalNumberOfFootsteps;
+      this.totalNumberOfFootsteps.setValue(totalNumberOfFootsteps);
    }
 
    public int getNumberOfIncompleteFootsteps()
    {
-      return numberOfIncompleteFootsteps;
+      return numberOfIncompleteFootsteps.intValue();
    }
 
    public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
    {
-      this.numberOfIncompleteFootsteps = numberOfIncompleteFootsteps;
+      this.numberOfIncompleteFootsteps.setValue(numberOfIncompleteFootsteps);
    }
 }

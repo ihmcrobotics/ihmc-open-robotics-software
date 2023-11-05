@@ -55,7 +55,6 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
    @Override
    public void updateCurrentlyExecuting()
    {
-      state.setActionIndex(state.getActionIndex());
       state.setIsExecuting(executionTimer.isRunning(getDefinition().getTrajectoryDuration()));
       state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());

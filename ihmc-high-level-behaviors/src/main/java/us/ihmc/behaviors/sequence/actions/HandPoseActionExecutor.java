@@ -156,7 +156,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                BehaviorActionCompletionComponent.TRANSLATION,
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 
-         state.setActionIndex(state.getActionIndex());
          state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
          state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

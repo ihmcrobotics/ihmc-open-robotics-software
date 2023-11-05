@@ -53,8 +53,8 @@ public class Confirmable extends Freezable
    public boolean isFrozen()
    {
       boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
-      if (isFrozen)
-         LogTools.info("Is frozen: {}", getClass().getSimpleName());
+//      if (isFrozen)
+//         LogTools.info("Is frozen: {}", getClass().getSimpleName());
 
       return isFrozen;
    }

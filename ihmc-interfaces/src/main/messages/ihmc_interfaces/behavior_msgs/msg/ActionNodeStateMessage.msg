@@ -4,9 +4,6 @@ behavior_msgs/BehaviorTreeNodeStateMessage state
 # The action's unique ID
 uint32 id
 
-# The action's index in the sequence
-int32 action_index
-
 # If the action is next for execution
 bool is_next_for_execution
 

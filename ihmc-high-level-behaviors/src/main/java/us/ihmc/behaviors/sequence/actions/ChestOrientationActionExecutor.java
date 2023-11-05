@@ -46,6 +46,8 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    public void update()
    {
       super.update();
+
+      state.setCanExecute(state.getChestFrame().isChildOfWorld());
    }
 
    @Override
@@ -95,7 +97,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                                                executionTimer,
                                                                BehaviorActionCompletionComponent.ORIENTATION));
 
-         state.setActionIndex(state.getActionIndex());
          state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
          state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

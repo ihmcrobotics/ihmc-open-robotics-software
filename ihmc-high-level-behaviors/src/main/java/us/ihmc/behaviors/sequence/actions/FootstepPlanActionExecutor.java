@@ -159,7 +159,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       state.setIsExecuting(!isComplete);
 
-      state.setActionIndex(state.getActionIndex());
       state.setNominalExecutionDuration(nominalExecutionDuration);
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
       state.setTotalNumberOfFootsteps(footstepPlanToExecute.getNumberOfSteps());

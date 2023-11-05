@@ -12,7 +12,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
@@ -73,6 +72,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    public void update()
    {
       super.update();
+
+      state.setCanExecute(state.getGoalFrame().isChildOfWorld());
 
       if (state.getGoalFrame().isChildOfWorld())
       {
@@ -209,7 +210,6 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
 
          state.setIsExecuting(!isComplete);
 
-         state.setActionIndex(state.getActionIndex());
          state.setNominalExecutionDuration(nominalExecutionDuration);
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
          state.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());

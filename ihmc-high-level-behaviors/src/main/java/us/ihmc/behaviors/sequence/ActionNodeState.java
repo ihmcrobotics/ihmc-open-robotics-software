@@ -3,68 +3,80 @@ package us.ihmc.behaviors.sequence;
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
-public abstract class ActionNodeState<D extends ActionNodeDefinition>
-      extends BehaviorTreeNodeState<D>
+public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
 {
    private int actionIndex = -1;
-   private boolean isNextForExecution = false;
-   private boolean isToBeExecutedConcurrently = false;
-   private boolean canExecute = true;
-   private boolean isExecuting = false;
-   private double nominalExecutionDuration = Double.NaN;
-   private double elapsedExecutionTime = Double.NaN;
-   private double currentPositionDistanceToGoal;
-   private double startPositionDistanceToGoal;
-   private double positionDistanceToGoalTolerance;
-   private double currentOrientationDistanceToGoal;
-   private double startOrientationDistanceToGoal;
-   private double orientationDistanceToGoalTolerance;
+   private final CRDTUnidirectionalBoolean isNextForExecution;
+   private final CRDTUnidirectionalBoolean isToBeExecutedConcurrently;
+   private final CRDTUnidirectionalBoolean canExecute;
+   private final CRDTUnidirectionalBoolean isExecuting;
+   private final CRDTUnidirectionalDouble nominalExecutionDuration;
+   private final CRDTUnidirectionalDouble elapsedExecutionTime;
+   private final CRDTUnidirectionalDouble currentPositionDistanceToGoal;
+   private final CRDTUnidirectionalDouble startPositionDistanceToGoal;
+   private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
+   private final CRDTUnidirectionalDouble currentOrientationDistanceToGoal;
+   private final CRDTUnidirectionalDouble startOrientationDistanceToGoal;
+   private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
 
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
+
+      isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      isToBeExecutedConcurrently = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      canExecute = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
+      isExecuting = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      nominalExecutionDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      currentPositionDistanceToGoal = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      startPositionDistanceToGoal = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      currentOrientationDistanceToGoal = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      startOrientationDistanceToGoal = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
    public void toMessage(ActionNodeStateMessage message)
    {
       super.toMessage(message.getState());
 
-      message.setActionIndex(actionIndex);
-      message.setIsNextForExecution(isNextForExecution);
-      message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
-      message.setCanExecute(canExecute);
-      message.setIsExecuting(isExecuting);
-      message.setNominalExecutionDuration(nominalExecutionDuration);
-      message.setElapsedExecutionTime(elapsedExecutionTime);
-      message.setNominalExecutionDuration(nominalExecutionDuration);
-      message.setElapsedExecutionTime(elapsedExecutionTime);
-      message.setCurrentPositionDistanceToGoal(currentPositionDistanceToGoal);
-      message.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-      message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance);
-      message.setCurrentOrientationDistanceToGoal(currentOrientationDistanceToGoal);
-      message.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-      message.setOrientationDistanceToGoalTolerance(orientationDistanceToGoalTolerance);
+      message.setIsNextForExecution(isNextForExecution.toMessage());
+      message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently.toMessage());
+      message.setCanExecute(canExecute.toMessage());
+      message.setIsExecuting(isExecuting.toMessage());
+      message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
+      message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
+      message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
+      message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
+      message.setCurrentPositionDistanceToGoal(currentPositionDistanceToGoal.toMessage());
+      message.setStartPositionDistanceToGoal(startPositionDistanceToGoal.toMessage());
+      message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
+      message.setCurrentOrientationDistanceToGoal(currentOrientationDistanceToGoal.toMessage());
+      message.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal.toMessage());
+      message.setOrientationDistanceToGoalTolerance(orientationDistanceToGoalTolerance.toMessage());
    }
 
    public void fromMessage(ActionNodeStateMessage message)
    {
       super.fromMessage(message.getState());
 
-      // Only updated by the robot
-      actionIndex = message.getActionIndex();
-      isNextForExecution = message.getIsNextForExecution();
-      isToBeExecutedConcurrently = message.getIsToBeExecutedConcurrently();
-      canExecute = message.getCanExecute();
-      isExecuting = message.getIsExecuting();
-      nominalExecutionDuration = message.getNominalExecutionDuration();
-      elapsedExecutionTime = message.getElapsedExecutionTime();
-      currentPositionDistanceToGoal = message.getCurrentPositionDistanceToGoal();
-      startPositionDistanceToGoal = message.getStartPositionDistanceToGoal();
-      positionDistanceToGoalTolerance = message.getPositionDistanceToGoalTolerance();
-      currentOrientationDistanceToGoal = message.getCurrentOrientationDistanceToGoal();
-      startOrientationDistanceToGoal = message.getStartOrientationDistanceToGoal();
-      orientationDistanceToGoalTolerance = message.getOrientationDistanceToGoalTolerance();
+      isNextForExecution.fromMessage(message.getIsNextForExecution());
+      isToBeExecutedConcurrently.fromMessage(message.getIsToBeExecutedConcurrently());
+      canExecute.fromMessage(message.getCanExecute());
+      isExecuting.fromMessage(message.getIsExecuting());
+      nominalExecutionDuration.fromMessage(message.getNominalExecutionDuration());
+      elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
+      currentPositionDistanceToGoal.fromMessage(message.getCurrentPositionDistanceToGoal());
+      startPositionDistanceToGoal.fromMessage(message.getStartPositionDistanceToGoal());
+      positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());
+      currentOrientationDistanceToGoal.fromMessage(message.getCurrentOrientationDistanceToGoal());
+      startOrientationDistanceToGoal.fromMessage(message.getStartOrientationDistanceToGoal());
+      orientationDistanceToGoalTolerance.fromMessage(message.getOrientationDistanceToGoalTolerance());
    }
 
    public void setActionIndex(int actionIndex)
@@ -79,122 +91,122 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition>
 
    public void setIsNextForExecution(boolean isNextForExecution)
    {
-      this.isNextForExecution = isNextForExecution;
+      this.isNextForExecution.setValue(isNextForExecution);
    }
 
    public boolean getIsNextForExecution()
    {
-      return isNextForExecution;
+      return isNextForExecution.booleanValue();
    }
 
    public void setIsToBeExecutedConcurrently(boolean isToBeExecutedConcurrently)
    {
-      this.isToBeExecutedConcurrently = isToBeExecutedConcurrently;
+      this.isToBeExecutedConcurrently.setValue(isToBeExecutedConcurrently);
    }
 
    public boolean getIsToBeExecutedConcurrently()
    {
-      return isToBeExecutedConcurrently;
+      return isToBeExecutedConcurrently.booleanValue();
    }
 
    public void setCanExecute(boolean canExecute)
    {
-      this.canExecute = canExecute;
+      this.canExecute.setValue(canExecute);
    }
 
    public boolean getCanExecute()
    {
-      return canExecute;
+      return canExecute.booleanValue();
    }
 
    public void setIsExecuting(boolean isExecuting)
    {
-      this.isExecuting = isExecuting;
+      this.isExecuting.setValue(isExecuting);
    }
 
    public void setNominalExecutionDuration(double nominalExecutionDuration)
    {
-      this.nominalExecutionDuration = nominalExecutionDuration;
+      this.nominalExecutionDuration.setValue(nominalExecutionDuration);
    }
 
    public double getNominalExecutionDuration()
    {
-      return nominalExecutionDuration;
+      return nominalExecutionDuration.doubleValue();
    }
 
    public void setElapsedExecutionTime(double elapsedExecutionTime)
    {
-      this.elapsedExecutionTime = elapsedExecutionTime;
+      this.elapsedExecutionTime.setValue(elapsedExecutionTime);
    }
 
    public double getElapsedExecutionTime()
    {
-      return elapsedExecutionTime;
+      return elapsedExecutionTime.doubleValue();
    }
 
    public double getCurrentPositionDistanceToGoal()
    {
-      return currentPositionDistanceToGoal;
+      return currentPositionDistanceToGoal.doubleValue();
    }
 
    public void setCurrentPositionDistanceToGoal(double currentPositionDistanceToGoal)
    {
-      this.currentPositionDistanceToGoal = currentPositionDistanceToGoal;
+      this.currentPositionDistanceToGoal.setValue(currentPositionDistanceToGoal);
    }
 
    public double getStartPositionDistanceToGoal()
    {
-      return startPositionDistanceToGoal;
+      return startPositionDistanceToGoal.doubleValue();
    }
 
    public void setStartPositionDistanceToGoal(double startPositionDistanceToGoal)
    {
-      this.startPositionDistanceToGoal = startPositionDistanceToGoal;
+      this.startPositionDistanceToGoal.setValue(startPositionDistanceToGoal);
    }
 
    public double getPositionDistanceToGoalTolerance()
    {
-      return positionDistanceToGoalTolerance;
+      return positionDistanceToGoalTolerance.doubleValue();
    }
 
    public void setPositionDistanceToGoalTolerance(double positionDistanceToGoalTolerance)
    {
-      this.positionDistanceToGoalTolerance = positionDistanceToGoalTolerance;
+      this.positionDistanceToGoalTolerance.setValue(positionDistanceToGoalTolerance);
    }
 
    public double getCurrentOrientationDistanceToGoal()
    {
-      return currentOrientationDistanceToGoal;
+      return currentOrientationDistanceToGoal.doubleValue();
    }
 
    public void setCurrentOrientationDistanceToGoal(double currentOrientationDistanceToGoal)
    {
-      this.currentOrientationDistanceToGoal = currentOrientationDistanceToGoal;
+      this.currentOrientationDistanceToGoal.setValue(currentOrientationDistanceToGoal);
    }
 
    public double getStartOrientationDistanceToGoal()
    {
-      return startOrientationDistanceToGoal;
+      return startOrientationDistanceToGoal.doubleValue();
    }
 
    public void setStartOrientationDistanceToGoal(double startOrientationDistanceToGoal)
    {
-      this.startOrientationDistanceToGoal = startOrientationDistanceToGoal;
+      this.startOrientationDistanceToGoal.setValue(startOrientationDistanceToGoal);
    }
 
    public double getOrientationDistanceToGoalTolerance()
    {
-      return orientationDistanceToGoalTolerance;
+      return orientationDistanceToGoalTolerance.doubleValue();
    }
 
    public void setOrientationDistanceToGoalTolerance(double orientationDistanceToGoalTolerance)
    {
-      this.orientationDistanceToGoalTolerance = orientationDistanceToGoalTolerance;
+      this.orientationDistanceToGoalTolerance.setValue(orientationDistanceToGoalTolerance);
    }
 
    /** Should return a precalculated value from {@link ActionNodeExecutor#updateCurrentlyExecuting} */
    public boolean getIsExecuting()
    {
-      return isExecuting;
+      return isExecuting.booleanValue();
    }
 }
