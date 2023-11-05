@@ -9,11 +9,11 @@
   "useCustomSpeed": true,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
-  "postProcessingVelocityAdjuster": 1,
+  "postProcessingVelocityAdjuster": 2,
   "tasks":[
     {
       "context": "Target",
-      "name": "Left0",
+      "name": "LeftPunch0",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 40,
@@ -24,7 +24,7 @@
     },
     {
       "context": "Target",
-      "name": "Left1",
+      "name": "LeftPunch1",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 40,
@@ -35,7 +35,7 @@
     },
     {
       "context": "Target",
-      "name": "Left2",
+      "name": "LeftPunch2",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 40,
@@ -46,7 +46,7 @@
     },
     {
       "context": "Target",
-      "name": "Left3",
+      "name": "LeftPunch3",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 40,
@@ -57,7 +57,7 @@
     },
     {
       "context": "Target",
-      "name": "Left4",
+      "name": "LeftPunch4",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 40,
@@ -68,7 +68,7 @@
     },
     {
       "context": "Target",
-      "name": "Left5",
+      "name": "LeftPunch5",
       "bodyPartForInference": "leftHand",
       "bodyPartWithObservableGoal": "leftHand",
       "customSpeed": 40,
@@ -79,7 +79,7 @@
     },
     {
       "context": "Target",
-      "name": "Right0",
+      "name": "RightPunch0",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "customSpeed": 40,
@@ -90,7 +90,7 @@
     },
     {
       "context": "Target",
-      "name": "Right1",
+      "name": "RightPunch1",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "customSpeed": 40,
@@ -101,7 +101,7 @@
     },
     {
       "context": "Target",
-      "name": "Right2",
+      "name": "RightPunch2",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "customSpeed": 40,
@@ -112,7 +112,7 @@
     },
     {
       "context": "Target",
-      "name": "Right3",
+      "name": "RightPunch3",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "customSpeed": 40,
@@ -123,7 +123,7 @@
     },
     {
       "context": "Target",
-      "name": "Right4",
+      "name": "RightPunch4",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "customSpeed": 40,
@@ -134,7 +134,7 @@
     },
     {
       "context": "Target",
-      "name": "Right5",
+      "name": "RightPunch5",
       "bodyPartForInference": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "customSpeed": 40,
