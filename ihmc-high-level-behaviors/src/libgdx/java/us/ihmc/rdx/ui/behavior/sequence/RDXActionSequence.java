@@ -110,7 +110,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             {
                if (canExecuteNextAction || confirmationState)
                {
-                  getState().setManualExecutionRequested(true);
+                  getState().setManualExecutionRequested();
                }
                else
                {
