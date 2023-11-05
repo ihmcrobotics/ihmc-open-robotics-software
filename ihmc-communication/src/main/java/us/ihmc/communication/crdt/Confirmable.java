@@ -39,7 +39,7 @@ public class Confirmable extends Freezable
          needToSendRequest.set();
 
          requestNumber = nextRequestID.getAndIncrement();
-//         LogTools.info("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
+         LogTools.debug("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
       }
    }
 
@@ -52,7 +52,11 @@ public class Confirmable extends Freezable
    @Override
    public boolean isFrozen()
    {
-      return crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
+      boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
+      if (isFrozen)
+         LogTools.info("Is frozen: {}", getClass().getSimpleName());
+
+      return isFrozen;
    }
 
    public void toMessage(ConfirmableRequestMessage message)
@@ -67,7 +71,7 @@ public class Confirmable extends Freezable
          message.setValue(ConfirmableRequestMessage.CONFIRMATION);
          message.setRequestNumber(requestNumber);
 
-//         LogTools.info("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
+         LogTools.debug("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
       }
       else
       {
@@ -87,12 +91,12 @@ public class Confirmable extends Freezable
          long confirmationsRequestUUID = message.getRequestNumber();
          if (confirmationsRequestUUID == requestNumber)
          {
-//            LogTools.info("Confirmed: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationsRequestUUID, crdtInfo.getActorDesignation().name());
+            LogTools.debug("Confirmed: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationsRequestUUID, crdtInfo.getActorDesignation().name());
             unfreeze();
          }
          else
          {
-//            LogTools.error("Received a different request ID than sent. Sent: {} Recieved: {}", requestNumber, confirmationsRequestUUID);
+            LogTools.error("Received a different request ID than sent. Sent: {} Recieved: {}", requestNumber, confirmationsRequestUUID);
          }
       }
    }
