@@ -21,10 +21,6 @@ module behavior_msgs
          */
         unsigned long id;
         /**
-         * The action's index in the sequence
-         */
-        long action_index;
-        /**
          * If the action is next for execution
          */
         boolean is_next_for_execution;

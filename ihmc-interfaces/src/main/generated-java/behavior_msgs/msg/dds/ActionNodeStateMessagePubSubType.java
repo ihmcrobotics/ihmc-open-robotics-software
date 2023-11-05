@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c4ce971f55ad5c8b115edf0591942cd4abde668b3ef7eb92b91a37460114cc0a";
+   		return "fc324abe5e86169f533b1a27c99b50d22a92abcec294c64f1dc8008bb7dc6808";
    }
    
    @Override
@@ -53,8 +53,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       int initial_alignment = current_alignment;
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -96,9 +94,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       int initial_alignment = current_alignment;
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -148,8 +143,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getState(), cdr);
       cdr.write_type_4(data.getId());
 
-      cdr.write_type_2(data.getActionIndex());
-
       cdr.write_type_7(data.getIsNextForExecution());
 
       cdr.write_type_7(data.getIsToBeExecutedConcurrently());
@@ -180,8 +173,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
       data.setId(cdr.read_type_4());
-      	
-      data.setActionIndex(cdr.read_type_2());
       	
       data.setIsNextForExecution(cdr.read_type_7());
       	
@@ -216,7 +207,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
 
       ser.write_type_4("id", data.getId());
-      ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
       ser.write_type_7("is_to_be_executed_concurrently", data.getIsToBeExecutedConcurrently());
       ser.write_type_7("can_execute", data.getCanExecute());
@@ -237,7 +227,6 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
 
       data.setId(ser.read_type_4("id"));
-      data.setActionIndex(ser.read_type_2("action_index"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
       data.setIsToBeExecutedConcurrently(ser.read_type_7("is_to_be_executed_concurrently"));
       data.setCanExecute(ser.read_type_7("can_execute"));

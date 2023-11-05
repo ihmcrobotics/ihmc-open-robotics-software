@@ -7,14 +7,14 @@ import us.ihmc.log.LogTools;
  * Represents a data field that should only be modified by one actor type
  * and read-only for the others.
  */
-public class CRDTUnidirectionalField<T>
+public class CRDTUnidirectionalDouble
 {
    private final ROS2ActorDesignation sideThatCanModify;
    private final CRDTInfo crdtInfo;
 
-   private T value;
+   private double value;
 
-   public CRDTUnidirectionalField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, T initialValue)
+   public CRDTUnidirectionalDouble(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, double initialValue)
    {
       this.sideThatCanModify = sideThatCanModify;
       this.crdtInfo = crdtInfo;
@@ -22,12 +22,12 @@ public class CRDTUnidirectionalField<T>
       value = initialValue;
    }
 
-   public T getValue()
+   public double doubleValue()
    {
       return value;
    }
 
-   public void setValue(T value)
+   public void setValue(double value)
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation())
          throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
@@ -35,7 +35,7 @@ public class CRDTUnidirectionalField<T>
       this.value = value;
    }
 
-   public void fromMessage(T value)
+   public void fromMessage(double value)
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
       {
@@ -43,7 +43,7 @@ public class CRDTUnidirectionalField<T>
       }
    }
 
-   public T toMessage()
+   public double toMessage()
    {
       return value;
    }

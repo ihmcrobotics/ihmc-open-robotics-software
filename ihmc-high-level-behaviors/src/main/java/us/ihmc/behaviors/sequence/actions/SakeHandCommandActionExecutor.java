@@ -49,7 +49,6 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    {
       state.setIsExecuting(executionTimer.isRunning(WAIT_TIME));
 
-      state.setActionIndex(state.getActionIndex());
       state.setNominalExecutionDuration(WAIT_TIME);
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }

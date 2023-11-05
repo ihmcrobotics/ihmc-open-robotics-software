@@ -31,7 +31,6 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    {
       state.setIsExecuting(executionTimer.isRunning(getDefinition().getWaitDuration()));
 
-      state.setActionIndex(state.getActionIndex());
       state.setNominalExecutionDuration(getDefinition().getWaitDuration());
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }

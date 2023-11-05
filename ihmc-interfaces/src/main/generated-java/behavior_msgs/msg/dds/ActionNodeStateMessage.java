@@ -17,10 +17,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public long id_;
    /**
-            * The action's index in the sequence
-            */
-   public int action_index_;
-   /**
             * If the action is next for execution
             */
    public boolean is_next_for_execution_;
@@ -85,8 +81,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       id_ = other.id_;
 
-      action_index_ = other.action_index_;
-
       is_next_for_execution_ = other.is_next_for_execution_;
 
       is_to_be_executed_concurrently_ = other.is_to_be_executed_concurrently_;
@@ -135,21 +129,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    public long getId()
    {
       return id_;
-   }
-
-   /**
-            * The action's index in the sequence
-            */
-   public void setActionIndex(int action_index)
-   {
-      action_index_ = action_index;
-   }
-   /**
-            * The action's index in the sequence
-            */
-   public int getActionIndex()
-   {
-      return action_index_;
    }
 
    /**
@@ -353,8 +332,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_next_for_execution_, other.is_next_for_execution_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_to_be_executed_concurrently_, other.is_to_be_executed_concurrently_, epsilon)) return false;
@@ -395,8 +372,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if(this.id_ != otherMyClass.id_) return false;
 
-      if(this.action_index_ != otherMyClass.action_index_) return false;
-
       if(this.is_next_for_execution_ != otherMyClass.is_next_for_execution_) return false;
 
       if(this.is_to_be_executed_concurrently_ != otherMyClass.is_to_be_executed_concurrently_) return false;
@@ -435,8 +410,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append(this.state_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
-      builder.append("action_index=");
-      builder.append(this.action_index_);      builder.append(", ");
       builder.append("is_next_for_execution=");
       builder.append(this.is_next_for_execution_);      builder.append(", ");
       builder.append("is_to_be_executed_concurrently=");

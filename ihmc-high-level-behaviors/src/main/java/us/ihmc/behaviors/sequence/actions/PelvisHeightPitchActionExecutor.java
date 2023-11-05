@@ -105,7 +105,6 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
                                                                executionTimer,
                                                                BehaviorActionCompletionComponent.TRANSLATION));
 
-         state.setActionIndex(state.getActionIndex());
          state.setNominalExecutionDuration(definition.getTrajectoryDuration());
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
          state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);

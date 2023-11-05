@@ -37,9 +37,10 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
       executorChildren.clear();
       currentlyExecutingActions.clear();
-      for (BehaviorTreeNodeExecutor<?, ?> child : getChildren())
+      for (int i = 0; i < getChildren().size(); i++)
       {
-         ActionNodeExecutor<?, ?> actionNodeExecutor = (ActionNodeExecutor<?, ?>) child;
+         ActionNodeExecutor<?, ?> actionNodeExecutor = (ActionNodeExecutor<?, ?>) getChildren().get(i);
+         actionNodeExecutor.getState().setActionIndex(i);
          executorChildren.add(actionNodeExecutor);
          if (actionNodeExecutor.getState().getIsExecuting())
          {
