@@ -2,18 +2,24 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
-   private boolean automaticExecution = false;
-   private int executionNextIndex = 0;
-   private String nextActionRejectionTooltip = "";
-   private boolean manualExecutionRequested = false;
+   private final CRDTBidirectionalBoolean automaticExecution;
+   private final CRDTBidirectionalInteger executionNextIndex;
+   private final CRDTBidirectionalNotification manualExecutionRequested;
+   private final CRDTUnidirectionalField<String> nextActionRejectionTooltip;
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo)
    {
       super(id, new ActionSequenceDefinition(), crdtInfo);
+
+      automaticExecution = new CRDTBidirectionalBoolean(this, false);
+      executionNextIndex = new CRDTBidirectionalInteger(this, 0);
+      manualExecutionRequested = new CRDTBidirectionalNotification(this);
+      nextActionRejectionTooltip = new CRDTUnidirectionalField<>(ROS2ActorDesignation.ROBOT, crdtInfo, "");
    }
 
    public void toMessage(ActionSequenceStateMessage message)
@@ -22,10 +28,10 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       super.toMessage(message.getState());
 
-      message.setAutomaticExecution(automaticExecution);
-      message.setExecutionNextIndex(executionNextIndex);
-      message.setNextActionRejectionTooltip(nextActionRejectionTooltip);
-      message.setManualExecutionRequested(manualExecutionRequested);
+      message.setAutomaticExecution(automaticExecution.toMessage());
+      message.setExecutionNextIndex(executionNextIndex.toMessage());
+      message.setManualExecutionRequested(manualExecutionRequested.toMessage());
+      message.setNextActionRejectionTooltip(nextActionRejectionTooltip.toMessage());
    }
 
    public void fromMessage(ActionSequenceStateMessage message)
@@ -34,83 +40,66 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       getDefinition().fromMessage(message.getDefinition());
 
-      // Only modified by robot
-      nextActionRejectionTooltip = message.getNextActionRejectionTooltipAsString();
-
-      // Only modified by operator
-
-      if (!isFrozen()) // Can be modified by either
-      {
-         automaticExecution = message.getAutomaticExecution();
-         manualExecutionRequested = message.getManualExecutionRequested();
-         executionNextIndex = message.getExecutionNextIndex();
-      }
+      automaticExecution.fromMessage(message.getAutomaticExecution());
+      executionNextIndex.fromMessage(message.getExecutionNextIndex());
+      manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
+      nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
    }
 
    public void stepBackNextExecutionIndex()
    {
-      if (executionNextIndex > 0)
-         --executionNextIndex;
-      freeze();
+      if (executionNextIndex.intValue() > 0)
+         executionNextIndex.decrement();
    }
 
    public void stepForwardNextExecutionIndex()
    {
-      if (executionNextIndex < getChildren().size())
-         ++executionNextIndex;
-      freeze();
+      if (executionNextIndex.intValue() < getChildren().size())
+         executionNextIndex.increment();
    }
 
    public void setExecutionNextIndex(int executionNextIndex)
    {
-      this.executionNextIndex = executionNextIndex;
-      freeze();
+      this.executionNextIndex.setValue(executionNextIndex);
    }
 
    public int getExecutionNextIndex()
    {
-      return executionNextIndex;
+      return executionNextIndex.intValue();
    }
 
    public void setNextActionRejectionTooltip(String nextActionRejectionTooltip)
    {
-      this.nextActionRejectionTooltip = nextActionRejectionTooltip;
+      this.nextActionRejectionTooltip.setValue(nextActionRejectionTooltip);
    }
 
    public String getNextActionRejectionTooltip()
    {
-      return nextActionRejectionTooltip;
+      return nextActionRejectionTooltip.getValue();
    }
 
    public boolean getAutomaticExecution()
    {
-      return automaticExecution;
+      return automaticExecution.booleanValue();
    }
 
    public void setAutomaticExecution(boolean automaticExecution)
    {
-      this.automaticExecution = automaticExecution;
-      freeze();
+      this.automaticExecution.setValue(automaticExecution);
    }
 
    public boolean pollManualExecutionRequested()
    {
-      boolean previousValue = manualExecutionRequested;
-      setManualExecutionRequested(false);
-      return previousValue;
+      return manualExecutionRequested.poll();
    }
 
    public boolean getManualExecutionRequested()
    {
-      return manualExecutionRequested;
+      return manualExecutionRequested.peek();
    }
 
-   public void setManualExecutionRequested(boolean manualExecutionRequested)
+   public void setManualExecutionRequested()
    {
-      if (this.manualExecutionRequested != manualExecutionRequested)
-      {
-         this.manualExecutionRequested = manualExecutionRequested;
-         freeze();
-      }
+      manualExecutionRequested.set();
    }
 }
