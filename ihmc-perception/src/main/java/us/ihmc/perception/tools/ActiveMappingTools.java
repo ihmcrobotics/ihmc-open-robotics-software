@@ -46,35 +46,15 @@ public class ActiveMappingTools
       goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.11, 0.0);
    }
 
-   public static void setRandomGoalWithinBounds(SideDependentList<FramePose3D> startPose,
+   public static void setRandomGoalWithinBounds(Point2D generatedGoalLocation,
+                                                SideDependentList<FramePose3D> startPose,
                                                 SideDependentList<FramePose3D> goalPose,
                                                 float xDistance,
                                                 float offsetZ)
    {
 
-      FramePose3D startMidPose = new FramePose3D();
-      startMidPose.interpolate(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT), 0.5);
-
-      double offsetX = 0.0;
-      double offsetY = 0.0;
-
-      // if start is outside bounds, reflect the dimension about the boundary
-      if (startMidPose.getX() < 1.0)
-      {
-         offsetX = -startMidPose.getX() * 2.0;;
-      }
-      if (startMidPose.getY() < 0.0)
-      {
-         offsetY = -startMidPose.getY() * 2.0;
-      }
-      if (startMidPose.getX() > 4.0)
-      {
-         offsetX = (4.0 - startMidPose.getX()) * 2.0;
-      }
-      if (startMidPose.getY() > 4.0)
-      {
-         offsetY = (4.0 - startMidPose.getY()) * 2.0;
-      }
+      FramePose3D goalMidPose = new FramePose3D();
+      goalMidPose.getTranslation().set(generatedGoalLocation.getX(), generatedGoalLocation.getY(), 0.0);
 
       // compute yaw as direction from start to goal
       double offsetYaw = Math.atan2(goalPose.get(RobotSide.LEFT).getY() - startPose.get(RobotSide.LEFT).getY(),
@@ -82,9 +62,7 @@ public class ActiveMappingTools
 
       for (RobotSide side : RobotSide.values)
       {
-         goalPose.get(side).getPosition().set(startMidPose.getPosition());
-         goalPose.get(side).getOrientation().set(startMidPose.getOrientation());
-         goalPose.get(side).appendTranslation(offsetX + xDistance, offsetY, offsetZ);
+         goalPose.get(side).getPosition().set(goalMidPose.getPosition());
          goalPose.get(side).getOrientation().setYawPitchRoll(offsetYaw, 0, 0);
       }
 

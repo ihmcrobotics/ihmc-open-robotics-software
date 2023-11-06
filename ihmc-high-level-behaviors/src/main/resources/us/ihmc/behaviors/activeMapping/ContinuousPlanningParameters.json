@@ -9,6 +9,6 @@
   "Goal pose up distance" : 0.6,
   "Swing time" : 0.8,
   "Transfer time" : 0.4,
-  "Planning with reference timeout" : 0.3,
+  "Planning with reference timeout" : 0.2,
   "Initial planning timeout" : 0.5
 }

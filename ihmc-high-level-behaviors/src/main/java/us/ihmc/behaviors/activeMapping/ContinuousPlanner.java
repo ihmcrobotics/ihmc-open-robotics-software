@@ -9,6 +9,7 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -33,6 +34,7 @@ public class ContinuousPlanner
 
    private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
 
+   private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
    private FramePose3D walkingStartMidPose = new FramePose3D();
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> startingStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -122,7 +124,8 @@ public class ContinuousPlanner
                                                               (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
          case RANDOM_WALK:
-            ActiveMappingTools.setRandomGoalWithinBounds(startingStancePose, goalStancePose,
+            goalGenerator.updateCurrentPosition(new Point3D(startingStancePose.get(RobotSide.LEFT).getPosition()));
+            ActiveMappingTools.setRandomGoalWithinBounds(goalGenerator.getNextLocation(), startingStancePose, goalStancePose,
                                                          (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
                                                          (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
