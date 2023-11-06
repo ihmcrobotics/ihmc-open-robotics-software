@@ -40,7 +40,7 @@ import java.util.List;
  * Notation taken from EoM:
  * M qdd + C qd + G = tau + J^T f
  */
-public class CenterOfMassStaticStabilityMarginCalculator
+public class CenterOfMassStaticStabilityOptimizationModule
 {
    private static final double GRAVITY = 9.81;
    private static final int NUM_BASIS_VECTORS = 4;
@@ -97,7 +97,7 @@ public class CenterOfMassStaticStabilityMarginCalculator
    private final FrameVector3D tempVector = new FrameVector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   public CenterOfMassStaticStabilityMarginCalculator(double robotMass, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public CenterOfMassStaticStabilityOptimizationModule(double robotMass, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       mg = robotMass * GRAVITY;
 
@@ -132,7 +132,7 @@ public class CenterOfMassStaticStabilityMarginCalculator
       }
    }
 
-   public void initialize(WholeBodyContactState contactState)
+   public void updateContactState(WholeBodyContactStateInterface contactState)
    {
       clear();
 
