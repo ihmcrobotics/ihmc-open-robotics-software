@@ -15,7 +15,7 @@ public class SakeHandCommandActionStateMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2c081ad11830c4722b1474464e8db3ff3807bc210cea91a62d970d33cc8b47b2";
+   		return "b1b5739f1a492d4f8789f122e7a5a5d81c03c637f9ad4b1c6f6f7ab7fccf73ff";
    }
    
    @Override

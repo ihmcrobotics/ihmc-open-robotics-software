@@ -8,30 +8,27 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * A way of avoiding local data get overriden before
-       * it is received by peers.
+       * it is received by peers. A message can be a request
+       * and confirmation at the same time.
        */
 public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage> implements Settable<ConfirmableRequestMessage>, EpsilonComparable<ConfirmableRequestMessage>
 {
    /**
-          * Nothing special has happened. This should trigger no effects.
-          */
-   public static final byte NOOP = (byte) 0;
-   /**
-          * This message is a request to change something.
-          */
-   public static final byte REQUEST = (byte) 1;
-   /**
-          * Confirmation that the request has been received by the other side.
-          */
-   public static final byte CONFIRMATION = (byte) 2;
-   /**
-            * Holds one of the above constant values.
+            * If this message is a request to change something.
             */
-   public int value_;
+   public boolean is_request_;
+   /**
+            * If this message is a confirmation that the request has been received by the other side.
+            */
+   public boolean is_confirmation_;
    /**
             * Request number, monotonically increasing
             */
    public long request_number_;
+   /**
+            * Confirmation number, the value of the last received request number
+            */
+   public long confirmation_number_;
 
    public ConfirmableRequestMessage()
    {
@@ -45,25 +42,44 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
    public void set(ConfirmableRequestMessage other)
    {
-      value_ = other.value_;
+      is_request_ = other.is_request_;
+
+      is_confirmation_ = other.is_confirmation_;
 
       request_number_ = other.request_number_;
 
+      confirmation_number_ = other.confirmation_number_;
+
    }
 
    /**
-            * Holds one of the above constant values.
+            * If this message is a request to change something.
             */
-   public void setValue(int value)
+   public void setIsRequest(boolean is_request)
    {
-      value_ = value;
+      is_request_ = is_request;
    }
    /**
-            * Holds one of the above constant values.
+            * If this message is a request to change something.
             */
-   public int getValue()
+   public boolean getIsRequest()
    {
-      return value_;
+      return is_request_;
+   }
+
+   /**
+            * If this message is a confirmation that the request has been received by the other side.
+            */
+   public void setIsConfirmation(boolean is_confirmation)
+   {
+      is_confirmation_ = is_confirmation;
+   }
+   /**
+            * If this message is a confirmation that the request has been received by the other side.
+            */
+   public boolean getIsConfirmation()
+   {
+      return is_confirmation_;
    }
 
    /**
@@ -79,6 +95,21 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
    public long getRequestNumber()
    {
       return request_number_;
+   }
+
+   /**
+            * Confirmation number, the value of the last received request number
+            */
+   public void setConfirmationNumber(long confirmation_number)
+   {
+      confirmation_number_ = confirmation_number;
+   }
+   /**
+            * Confirmation number, the value of the last received request number
+            */
+   public long getConfirmationNumber()
+   {
+      return confirmation_number_;
    }
 
 
@@ -99,9 +130,13 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.value_, other.value_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_request_, other.is_request_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_confirmation_, other.is_confirmation_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.request_number_, other.request_number_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confirmation_number_, other.confirmation_number_, epsilon)) return false;
 
 
       return true;
@@ -116,9 +151,13 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
       ConfirmableRequestMessage otherMyClass = (ConfirmableRequestMessage) other;
 
-      if(this.value_ != otherMyClass.value_) return false;
+      if(this.is_request_ != otherMyClass.is_request_) return false;
+
+      if(this.is_confirmation_ != otherMyClass.is_confirmation_) return false;
 
       if(this.request_number_ != otherMyClass.request_number_) return false;
+
+      if(this.confirmation_number_ != otherMyClass.confirmation_number_) return false;
 
 
       return true;
@@ -130,10 +169,14 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ConfirmableRequestMessage {");
-      builder.append("value=");
-      builder.append(this.value_);      builder.append(", ");
+      builder.append("is_request=");
+      builder.append(this.is_request_);      builder.append(", ");
+      builder.append("is_confirmation=");
+      builder.append(this.is_confirmation_);      builder.append(", ");
       builder.append("request_number=");
-      builder.append(this.request_number_);
+      builder.append(this.request_number_);      builder.append(", ");
+      builder.append("confirmation_number=");
+      builder.append(this.confirmation_number_);
       builder.append("}");
       return builder.toString();
    }

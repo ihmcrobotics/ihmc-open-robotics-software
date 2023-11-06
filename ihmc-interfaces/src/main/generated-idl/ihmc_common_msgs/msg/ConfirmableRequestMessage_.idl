@@ -7,40 +7,31 @@ module ihmc_common_msgs
   {
     module dds
     {
-      /**
-       * Nothing special has happened. This should trigger no effects.
-       */
-      const octet NOOP =
-      0;
-
-      /**
-       * This message is a request to change something.
-       */
-      const octet REQUEST =
-      1;
-
-      /**
-       * Confirmation that the request has been received by the other side.
-       */
-      const octet CONFIRMATION =
-      2;
-
 
       /**
        * A way of avoiding local data get overriden before
-       * it is received by peers.
+       * it is received by peers. A message can be a request
+       * and confirmation at the same time.
        */
       @TypeCode(type="ihmc_common_msgs::msg::dds_::ConfirmableRequestMessage_")
       struct ConfirmableRequestMessage
       {
         /**
-         * Holds one of the above constant values.
+         * If this message is a request to change something.
          */
-        unsigned short value;
+        boolean is_request;
+        /**
+         * If this message is a confirmation that the request has been received by the other side.
+         */
+        boolean is_confirmation;
         /**
          * Request number, monotonically increasing
          */
         unsigned long request_number;
+        /**
+         * Confirmation number, the value of the last received request number
+         */
+        unsigned long confirmation_number;
       };
     };
   };
