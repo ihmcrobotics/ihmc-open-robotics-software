@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -17,13 +18,13 @@ import java.util.List;
  */
 public class MonteCarloPlanner
 {
-   private int searchIterations = 10;
-   private int simulationIterations = 10;
+   private int searchIterations = 15;
+   private int simulationIterations = 100;
    private int uniqueNodeId = 0;
 
    private MonteCarloPlanningWorld world;
-   private MonteCarloPlanningAgent agent;
-   private MonteCarloTreeNode root;
+   private MonteCarloWaypointAgent agent;
+   private MonteCarloWaypointNode root;
 
    int worldHeight = 200;
    int worldWidth = 200;
@@ -38,9 +39,9 @@ public class MonteCarloPlanner
       agentPos.set(offset, offset);
 
       this.world = new MonteCarloPlanningWorld(goalMargin, worldHeight, worldWidth);
-      this.agent = new MonteCarloPlanningAgent(agentPos);
+      this.agent = new MonteCarloWaypointAgent(agentPos);
 
-      root = new MonteCarloTreeNode(agent.getPosition(), null, uniqueNodeId++);
+      root = new MonteCarloWaypointNode(agent.getState(), null, uniqueNodeId++);
    }
 
    /**
@@ -51,7 +52,7 @@ public class MonteCarloPlanner
    public Point2DReadOnly plan()
    {
       if (root == null)
-         return agent.getPosition();
+         return agent.getState();
 
       // Update the tree multiple times
       for (int i = 0; i < searchIterations; i++)
@@ -60,7 +61,7 @@ public class MonteCarloPlanner
       }
 
       float bestScore = 0;
-      MonteCarloTreeNode bestNode = null;
+      MonteCarloWaypointNode bestNode = null;
 
       if (root.getChildren().isEmpty())
          LogTools.warn("No Children Nodes Found");
@@ -72,16 +73,14 @@ public class MonteCarloPlanner
          if (node.getUpperConfidenceBound() > bestScore)
          {
             bestScore = node.getUpperConfidenceBound();
-            bestNode = node;
+            bestNode = (MonteCarloWaypointNode) node;
          }
       }
 
       root = bestNode;
 
-      //LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodesInSubTree(root));
-
       if (bestNode == null)
-         return agent.getPosition();
+         return agent.getState();
 
       return bestNode.getPosition();
    }
@@ -102,14 +101,14 @@ public class MonteCarloPlanner
     *       2a. select and recurse into the child node with the highest Upper Confidence Bound (UCB)
     *       2b. until the node is a leaf node (unvisited node is reached)
     */
-   public void updateTree(MonteCarloTreeNode node)
+   public void updateTree(MonteCarloWaypointNode node)
    {
       if (node == null)
          return;
 
       if (node.getVisits() == 0)
       {
-         MonteCarloTreeNode childNode = expand(node);
+         MonteCarloWaypointNode childNode = expand(node);
          double score = simulate(childNode);
          childNode.setValue((float) score);
          backPropagate(node, (float) score);
@@ -117,14 +116,14 @@ public class MonteCarloPlanner
       else
       {
          float bestScore = 0;
-         MonteCarloTreeNode bestNode = null;
+         MonteCarloWaypointNode bestNode = null;
          for (MonteCarloTreeNode child : node.getChildren())
          {
             child.updateUpperConfidenceBound();
             if (child.getUpperConfidenceBound() >= bestScore)
             {
                bestScore = child.getUpperConfidenceBound();
-               bestNode = child;
+               bestNode = (MonteCarloWaypointNode) child;
             }
          }
          updateTree(bestNode);
@@ -144,19 +143,19 @@ public class MonteCarloPlanner
    /**
     * Expands the given node by creating a child node for each available action.
     */
-   public MonteCarloTreeNode expand(MonteCarloTreeNode node)
+   public MonteCarloWaypointNode expand(MonteCarloWaypointNode node)
    {
       ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(node.getPosition(), stepLength);
 
       for (Vector2DReadOnly action : availableActions)
       {
          Point2D newState = computeActionResult(node.getPosition(), action);
-         MonteCarloTreeNode postNode = new MonteCarloTreeNode(newState, node, uniqueNodeId++);
+         MonteCarloWaypointNode postNode = new MonteCarloWaypointNode(newState, node, uniqueNodeId++);
 
          node.getChildren().add(postNode);
       }
 
-      return node.getChildren().get((int) (Math.random() * node.getChildren().size()));
+      return (MonteCarloWaypointNode) node.getChildren().get((int) (Math.random() * node.getChildren().size()));
    }
 
    /**
@@ -187,7 +186,7 @@ public class MonteCarloPlanner
       return availableActions;
    }
 
-   public double simulate(MonteCarloTreeNode node)
+   public double simulate(MonteCarloWaypointNode node)
    {
       double score = 0;
 
@@ -245,14 +244,14 @@ public class MonteCarloPlanner
       return score;
    }
 
-   public void backPropagate(MonteCarloTreeNode node, float score)
+   public void backPropagate(MonteCarloWaypointNode node, float score)
    {
       node.addValue(score);
       node.incrementVisits();
 
       if (node.getParent() != null)
       {
-         backPropagate(node.getParent(), score);
+         backPropagate((MonteCarloWaypointNode) node.getParent(), score);
       }
    }
 
@@ -293,7 +292,39 @@ public class MonteCarloPlanner
       agent.setMeasurements(points);
    }
 
-   public MonteCarloPlanningAgent getAgent()
+   public void setParameters(int simulationIterations, int searchIterations, int stepLength)
+   {
+      this.simulationIterations = simulationIterations;
+      this.searchIterations = searchIterations;
+      this.stepLength = stepLength;
+   }
+
+   public void getOptimalPathFromRoot(List<MonteCarloWaypointNode> path)
+   {
+      MonteCarloPlannerTools.getOptimalPath(root, path);
+   }
+
+   public int getNumberOfNodesInTree()
+   {
+      return MonteCarloPlannerTools.getTotalNodesInSubTree(root);
+   }
+
+   public void printLayerCounts()
+   {
+      HashMap<Integer, Integer> layerCounts = new HashMap<>();
+      MonteCarloPlannerTools.getLayerCounts(root, layerCounts);
+
+      StringBuilder output = new StringBuilder("{");
+      for (Integer key : layerCounts.keySet())
+      {
+         output.append("(").append(key - root.getLevel()).append(":").append(layerCounts.get(key)).append(")");
+         output.append(", ");
+      }
+
+      LogTools.info("Layer Counts: {}", output.toString());
+   }
+
+   public MonteCarloWaypointAgent getAgent()
    {
       return agent;
    }

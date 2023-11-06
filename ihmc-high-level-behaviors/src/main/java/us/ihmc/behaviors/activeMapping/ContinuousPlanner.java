@@ -138,7 +138,7 @@ public class ContinuousPlanner
                               (startingStancePose.get(RobotSide.LEFT).getY() + startingStancePose.get(RobotSide.RIGHT).getY()) / 2.0f);
 
             monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
-            agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
+            agentPositionIndices.set(monteCarloPlanner.getAgent().getState());
             robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
                                      ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
 
@@ -275,7 +275,7 @@ public class ContinuousPlanner
 
             monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
 
-            agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
+            agentPositionIndices.set(monteCarloPlanner.getAgent().getState());
 
             robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
                                      ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));

@@ -10,15 +10,13 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 public class MonteCarloPlannerTools
 {
-   public static int getTotalNodesInSubTree(MonteCarloTreeNode rootNode)
+   public static int getTotalNodesInSubTree(MonteCarloWaypointNode rootNode)
    {
       if (rootNode == null)
          return 0;
@@ -26,13 +24,13 @@ public class MonteCarloPlannerTools
       int total = 1;
       for (MonteCarloTreeNode child : rootNode.getChildren())
       {
-         total += getTotalNodesInSubTree(child);
+         total += getTotalNodesInSubTree((MonteCarloWaypointNode) child);
       }
 
       return total;
    }
 
-   public static void printTree(MonteCarloTreeNode node, int level)
+   public static void printTree(MonteCarloWaypointNode node, int level)
    {
       // TODO: Make this write to a string and then print the combined string with LogTools.info()
       LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
@@ -43,7 +41,7 @@ public class MonteCarloPlannerTools
 
       for (MonteCarloTreeNode child : node.getChildren())
       {
-         printTree(child, level + 1);
+         printTree((MonteCarloWaypointNode) child, level + 1);
       }
    }
 
@@ -58,22 +56,24 @@ public class MonteCarloPlannerTools
       // Plot lidar scan points as filled red cells
       for (Point2DReadOnly point : scanPoints)
       {
-         if (point.getX32() < gridColor.rows() && point.getY32() < gridColor.cols() && point.getX32() >= 0 && point.getY32() >= 0)
+         // check bounds of point
+         if (isWithinGridBoundaries(point, gridColor.cols()))
          {
             gridColor.ptr((int) point.getX32(), (int) point.getY32()).put(new byte[] {0, 0, (byte) 255});
          }
       }
    }
 
-   public static void plotAgent(MonteCarloPlanningAgent agent, Mat gridColor)
+   public static void plotAgent(MonteCarloWaypointAgent agent, Mat gridColor)
    {
-      // Set the agent's position as 50
-      gridColor.ptr((int) (agent.getPreviousPosition().getX32()), (int) (agent.getPreviousPosition().getY32()))
-               .put(new byte[] {0, 0, 0});
-      gridColor.ptr((int) (agent.getPosition().getX32()), (int) (agent.getPosition().getY32()))
-               .put(new byte[] {0, (byte) 255, (byte) 250});
-      gridColor.ptr((int) (agent.getAveragePosition().getX32()), (int) (agent.getAveragePosition().getY32()))
-               .put(new byte[] {100, 100, (byte) 255});
+      // check bounds of agent
+      if (isWithinGridBoundaries(agent.getState(), gridColor.cols()))
+      {
+         // Set the agent's position as 50
+         gridColor.ptr((int) (agent.getPreviousPosition().getX32()), (int) (agent.getPreviousPosition().getY32())).put(new byte[] {0, 0, 0});
+         gridColor.ptr((int) (agent.getState().getX32()), (int) (agent.getState().getY32())).put(new byte[] {0, (byte) 255, (byte) 250});
+         gridColor.ptr((int) (agent.getAveragePosition().getX32()), (int) (agent.getAveragePosition().getY32())).put(new byte[] {100, 100, (byte) 255});
+      }
    }
 
    public static void plotGoal(Point2DReadOnly goal, int goalMargin, Mat gridColor)
@@ -201,6 +201,51 @@ public class MonteCarloPlannerTools
 
    public static boolean isWithinGridBoundaries(Point2DReadOnly position, int gridWidth)
    {
-      return MathTools.intervalContains(position.getX(), 0, gridWidth) && MathTools.intervalContains(position.getY(), 0, gridWidth);
+      return position.getX() >= 0 && position.getX() < gridWidth && position.getY() >= 0 && position.getY() < gridWidth;
+   }
+
+   public static void getOptimalPath(MonteCarloWaypointNode root, List<MonteCarloWaypointNode> path)
+   {
+      float maxValue = Float.MIN_VALUE;
+      MonteCarloWaypointNode maxNode = null;
+      for (MonteCarloTreeNode node : root.getChildren())
+      {
+         if (node.getValue() > maxValue)
+         {
+            maxValue = node.getValue();
+            maxNode = (MonteCarloWaypointNode) node;
+         }
+      }
+
+      if (maxNode != null)
+      {
+         path.add(maxNode);
+         getOptimalPath(maxNode, path);
+      }
+   }
+
+   public static void plotPath(List<MonteCarloWaypointNode> path, Mat gridColor)
+   {
+      for (MonteCarloWaypointNode node : path)
+      {
+         Point2DReadOnly position = node.getPosition();
+
+         // check bounds of the grid
+         if (isWithinGridBoundaries(position, gridColor.cols()))
+            gridColor.ptr((int) position.getX32(), (int) position.getY32()).put((byte) 255, (byte) 100, (byte) 255);
+      }
+   }
+
+   public static void getLayerCounts(MonteCarloWaypointNode root, HashMap<Integer, Integer> layerCounts)
+   {
+      if (layerCounts.get(root.getLevel()) == null)
+         layerCounts.put(root.getLevel(), 1);
+      else
+         layerCounts.merge(root.getLevel(), 1, Integer::sum);
+
+      for (MonteCarloTreeNode child : root.getChildren())
+      {
+         getLayerCounts((MonteCarloWaypointNode) child, layerCounts);
+      }
    }
 }

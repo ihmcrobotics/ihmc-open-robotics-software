@@ -6,9 +6,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MonteCarloTreeNode
+public abstract class MonteCarloTreeNode
 {
-   private Point2D position;
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
@@ -16,13 +15,17 @@ public class MonteCarloTreeNode
    private float upperConfidenceBound = 0;
    private int visits = 0;
    private float value = 0;
+   private int level = 0;
 
-   public MonteCarloTreeNode(Point2DReadOnly state, MonteCarloTreeNode parent, int id)
+   public MonteCarloTreeNode(MonteCarloTreeNode parent, int id)
    {
-      this.position = new Point2D(state);
       this.id = id;
       this.parent = parent;
-      children = new ArrayList<>();
+      this.children = new ArrayList<>();
+      this.level = 0;
+
+      if (parent != null)
+         this.level = parent.getLevel() + 1;
    }
 
    public void updateUpperConfidenceBound()
@@ -86,9 +89,8 @@ public class MonteCarloTreeNode
       return id;
    }
 
-   public Point2D getPosition()
+   public int getLevel()
    {
-      return position;
+      return level;
    }
-
 }

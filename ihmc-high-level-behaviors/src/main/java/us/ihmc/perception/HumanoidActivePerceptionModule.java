@@ -6,7 +6,7 @@ import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloWaypointAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,7 +22,7 @@ public class HumanoidActivePerceptionModule
 {
    /* For storing world and agent states when active mapping module is disabled */
    private MonteCarloPlanningWorld world;
-   private MonteCarloPlanningAgent agent;
+   private MonteCarloWaypointAgent agent;
 
    /* For displaying occupancy grid from the active mapping module. */
    private final Mat gridColor = new Mat();
@@ -93,8 +93,8 @@ public class HumanoidActivePerceptionModule
       {
          LogTools.warn("Initializing Occupancy Grid from Scratch");
 
-         world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
-         agent = new MonteCarloPlanningAgent(new Point2D());
+         this.world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
+         this.agent = new MonteCarloWaypointAgent(new Point2D());
       }
    }
 
