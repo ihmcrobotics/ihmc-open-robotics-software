@@ -10,13 +10,13 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalInteger
 {
-   private final Confirmable confirmable;
+   private final RequestConfirmFreezable requestConfirmFreezable;
 
    private int value;
 
-   public CRDTBidirectionalInteger(Confirmable confirmable, int initialValue)
+   public CRDTBidirectionalInteger(RequestConfirmFreezable requestConfirmFreezable, int initialValue)
    {
-      this.confirmable = confirmable;
+      this.requestConfirmFreezable = requestConfirmFreezable;
 
       value = initialValue;
    }
@@ -41,13 +41,13 @@ public class CRDTBidirectionalInteger
       if (this.value != value) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
-         confirmable.freeze();
+         requestConfirmFreezable.freeze();
       }
    }
 
    public void fromMessage(int value)
    {
-      if (!confirmable.isFrozen())
+      if (!requestConfirmFreezable.isFrozen())
       {
          this.value = value;
       }

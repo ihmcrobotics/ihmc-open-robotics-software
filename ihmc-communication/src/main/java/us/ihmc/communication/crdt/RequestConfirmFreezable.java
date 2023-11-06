@@ -12,7 +12,7 @@ import us.ihmc.log.LogTools;
  *
  * We assume messages are not dropped and do not arrive out of order.
  */
-public class Confirmable extends Freezable
+public class RequestConfirmFreezable implements Freezable
 {
    private final CRDTInfo crdtInfo;
    private final MutableLong nextRequestID = new MutableLong();
@@ -23,7 +23,7 @@ public class Confirmable extends Freezable
    private long updateNumberToUnfreeze = 0;
    private boolean isFrozen = false;
 
-   public Confirmable(CRDTInfo crdtInfo)
+   public RequestConfirmFreezable(CRDTInfo crdtInfo)
    {
       this.crdtInfo = crdtInfo;
    }
@@ -31,8 +31,6 @@ public class Confirmable extends Freezable
    @Override
    public void freeze()
    {
-      super.freeze();
-
       if (!isFrozen)
          LogTools.info(1, "Freezing: %s  Actor: %s".formatted(this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
       isFrozen = true;
