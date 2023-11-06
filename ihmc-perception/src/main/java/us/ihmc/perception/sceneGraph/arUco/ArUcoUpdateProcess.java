@@ -135,6 +135,7 @@ public class ArUcoUpdateProcess
 
    public void destroy()
    {
+      LogTools.info("Destroying {}", this.getClass().getSimpleName());
       arUcoLock.lock();
       try
       {
@@ -149,6 +150,7 @@ public class ArUcoUpdateProcess
 
       arUcoImage.release();
       arUcoMarkerDetection.destroy();
+      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
    }
 
    public void setNextArUcoImage(RawImage distortedArUcoImage)

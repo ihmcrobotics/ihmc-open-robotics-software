@@ -310,6 +310,7 @@ public class ZEDColorDepthImageRetriever
 
    public void destroy()
    {
+      LogTools.info("Destroying {}", this.getClass().getSimpleName());
       zedGrabThread.blockingStop();
 
       depthImagePointer.close();
@@ -321,6 +322,7 @@ public class ZEDColorDepthImageRetriever
          colorImages.get(side).release();
       }
       sl_close_camera(cameraID);
+      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
    }
 
    private void checkError(String functionName, int returnedState)

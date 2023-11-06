@@ -19,16 +19,14 @@ import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoUpdateProcess;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
-import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
-import us.ihmc.sensors.ZEDColorDepthImagePublisher;
-import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.sensors.*;
 import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
@@ -92,13 +90,16 @@ public class PerceptionAndAutonomyProcess
    private RestartableThrottledThread sceneGraphUpdateThread;
    private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
    private final ArUcoUpdateProcess arUcoUpdater;
+   private final CenterposeDetectionManager centerposeDetectionManager;
+
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> rightBlackflyFrameSupplier)
+                                       Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
+                                       ReferenceFrame zed2iLeftCameraFrame)
    {
       this.zedFrameSupplier = zedFrameSupplier;
       zedPointCloudHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ZED_POINT_CLOUD);
@@ -128,6 +129,8 @@ public class PerceptionAndAutonomyProcess
 
       arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
       initializeArUcoHeartbeatCallbacks();
+
+      centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "PerceptionAndAutonomyShutdown"));
    }
@@ -176,6 +179,7 @@ public class PerceptionAndAutonomyProcess
 
    public void destroy()
    {
+      LogTools.info("Destroying {}", this.getClass().getSimpleName());
       if (zedImageRetriever != null)
       {
          zedProcessAndPublishThread.stop();
@@ -210,6 +214,7 @@ public class PerceptionAndAutonomyProcess
          if (blackflyImageRetrievers.get(side) != null)
             blackflyImageRetrievers.get(side).destroy();
       }
+      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
    }
 
    private void processAndPublishZED()
@@ -275,6 +280,9 @@ public class PerceptionAndAutonomyProcess
 
    private void updateSceneGraph()
    {
+      // TODO: Maybe this should be somewhere else?
+      centerposeDetectionManager.updateSceneGraph(sceneGraph);
+
       sceneGraph.updateSubscription();
       sceneGraph.updateOnRobotOnly(ousterFrameSupplier.get()); // TODO: Add robot pelvis frame here or something
       sceneGraph.updatePublication();
