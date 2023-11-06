@@ -282,6 +282,8 @@ public class PerceptionAndAutonomyProcess
 
       if (arUcoDetectionInitialized && blackflyImagePublishers.get(RobotSide.RIGHT).getLatestUndistortedImage() != null)
          sceneGraphProcess.setNextArUcoImage(new RawImage(blackflyImagePublishers.get(RobotSide.RIGHT).getLatestUndistortedImage()));
+      else
+         ThreadTools.sleepSeconds(3);
    }
 
    private void initializeZED()
