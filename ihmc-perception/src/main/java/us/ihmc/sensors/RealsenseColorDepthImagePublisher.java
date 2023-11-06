@@ -10,6 +10,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -236,6 +237,7 @@ public class RealsenseColorDepthImagePublisher
 
    public void destroy()
    {
+      LogTools.info("Destroying {}", this.getClass().getSimpleName());
       stopAll();
       depthPublishLock.lock();
       try
@@ -264,6 +266,7 @@ public class RealsenseColorDepthImagePublisher
       ros2DepthImagePublisher.destroy();
       ros2ColorImagePublisher.destroy();
       ros2Node.destroy();
+      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
    }
 
    public void setNextDepthImage(RawImage depthImage)

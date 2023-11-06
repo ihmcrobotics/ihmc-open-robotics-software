@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -31,10 +32,10 @@ public class CenterposeDetectionManager
    private final Map<Integer, TimeBasedDetectionFilter> centerposeNodeDetectionFilters = new HashMap<>();
    private final ReferenceFrame centerposeOutputFrame;
 
-   public CenterposeDetectionManager(ROS2Helper ros2Helper, ReferenceFrame sensorFrame)
+   public CenterposeDetectionManager(ROS2PublishSubscribeAPI ros2API, ReferenceFrame sensorFrame)
    {
       ROS2Topic<DetectedObjectPacket> topicName = PerceptionAPI.CENTERPOSE_DETECTED_OBJECT;
-      subscriber = ros2Helper.subscribe(topicName);
+      subscriber = ros2API.subscribe(topicName);
 
       centerposeOutputFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
                                                                                                 sensorFrame,
