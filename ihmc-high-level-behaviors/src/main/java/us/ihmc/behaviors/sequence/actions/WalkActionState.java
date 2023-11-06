@@ -20,7 +20,7 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
                           FootstepPlannerParametersBasics footstepPlannerParameters,
                           ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new WalkActionDefinition(footstepPlannerParameters), crdtInfo);
+      super(id, new WalkActionDefinition(crdtInfo, footstepPlannerParameters), crdtInfo);
 
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform());
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);

@@ -12,7 +12,7 @@ public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPi
 
    public PelvisHeightPitchActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new PelvisHeightPitchActionDefinition(), crdtInfo);
+      super(id, new PelvisHeightPitchActionDefinition(crdtInfo), crdtInfo);
 
       pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPelvisToParentTransform());
    }

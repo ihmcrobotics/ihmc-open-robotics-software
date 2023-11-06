@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,8 +16,10 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
    private String parentFrameName;
    private final RigidBodyTransform pelvisToParentTransform = new RigidBodyTransform();
 
-   public PelvisHeightPitchActionDefinition()
+   public PelvisHeightPitchActionDefinition(CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       setDescription("Pelvis height and pitch");
    }
 

@@ -4,7 +4,11 @@ import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalField;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,15 +17,20 @@ import us.ihmc.tools.io.JSONTools;
 
 public class WalkActionDefinition extends ActionNodeDefinition
 {
-   private double swingDuration = 1.2;
-   private double transferDuration = 0.8;
-   private String parentFrameName;
+   private final CRDTUnidirectionalDouble swingDuration;
+   private final CRDTUnidirectionalDouble transferDuration;
+   private final CRDTUnidirectionalField<String> parentFrameName;
    private final RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
 
-   public WalkActionDefinition(FootstepPlannerParametersBasics footstepPlannerParameters)
+   public WalkActionDefinition(CRDTInfo crdtInfo, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
+      super(crdtInfo);
+
       setDescription("Walk");
+
+      swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
+      transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);
 
       for (RobotSide side : RobotSide.values)
       {

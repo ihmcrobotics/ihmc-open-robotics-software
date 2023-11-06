@@ -8,7 +8,7 @@ public class WaitDurationActionState extends ActionNodeState<WaitDurationActionD
 {
    public WaitDurationActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new WaitDurationActionDefinition(), crdtInfo);
+      super(id, new WaitDurationActionDefinition(crdtInfo), crdtInfo);
    }
 
    public void toMessage(WaitDurationActionStateMessage message)

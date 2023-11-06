@@ -18,7 +18,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public FootstepPlanActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new FootstepPlanActionDefinition(), crdtInfo);
+      super(id, new FootstepPlanActionDefinition(crdtInfo), crdtInfo);
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 

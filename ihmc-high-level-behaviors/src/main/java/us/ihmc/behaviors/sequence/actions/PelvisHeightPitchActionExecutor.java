@@ -20,7 +20,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final PelvisHeightPitchActionDefinition definition = new PelvisHeightPitchActionDefinition();
+   private final PelvisHeightPitchActionDefinition definition;
    private final PelvisHeightPitchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -40,6 +40,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
+      definition = new PelvisHeightPitchActionDefinition(crdtInfo);
       state = new PelvisHeightPitchActionState(id, crdtInfo, referenceFrameLibrary);
    }
 

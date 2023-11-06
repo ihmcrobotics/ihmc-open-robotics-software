@@ -4,7 +4,6 @@ import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
@@ -15,7 +14,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new ActionSequenceDefinition(), crdtInfo);
+      super(id, new ActionSequenceDefinition(crdtInfo), crdtInfo);
 
       automaticExecution = new CRDTBidirectionalBoolean(this, false);
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);

@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.HandPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,8 +20,10 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private String palmParentFrameName;
    private final RigidBodyTransform palmTransformToParent = new RigidBodyTransform();
 
-   public HandPoseActionDefinition()
+   public HandPoseActionDefinition(CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       setDescription("Hand pose");
    }
 
