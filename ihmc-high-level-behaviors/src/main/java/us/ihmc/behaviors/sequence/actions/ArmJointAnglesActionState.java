@@ -8,7 +8,7 @@ public class ArmJointAnglesActionState extends ActionNodeState<ArmJointAnglesAct
 {
    public ArmJointAnglesActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new ArmJointAnglesActionDefinition(), crdtInfo);
+      super(id, new ArmJointAnglesActionDefinition(crdtInfo), crdtInfo);
    }
 
    public void toMessage(ArmJointAnglesActionStateMessage message)

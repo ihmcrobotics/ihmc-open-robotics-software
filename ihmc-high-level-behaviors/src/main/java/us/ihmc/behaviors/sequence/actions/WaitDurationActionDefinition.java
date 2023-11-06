@@ -4,13 +4,16 @@ import behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
 
 public class WaitDurationActionDefinition extends ActionNodeDefinition
 {
    private double waitDuration = 4.0;
 
-   public WaitDurationActionDefinition()
+   public WaitDurationActionDefinition(CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       setDescription("Wait");
    }
 

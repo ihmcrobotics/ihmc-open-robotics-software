@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
@@ -17,8 +18,10 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private String parentFrameName;
    private final RecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps = new RecyclingArrayList<>(FootstepPlanActionFootstepDefinition::new);
 
-   public FootstepPlanActionDefinition()
+   public FootstepPlanActionDefinition(CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       setDescription("Footstep plan");
    }
 

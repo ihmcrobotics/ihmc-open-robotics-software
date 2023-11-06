@@ -4,6 +4,9 @@ import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalField;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +18,14 @@ import java.util.List;
 public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
    /** A human readable description of what the node does */
-   private String description = "";
+   private final CRDTUnidirectionalField<String> description;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
+
+   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo)
+   {
+      description = new CRDTUnidirectionalField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+   }
 
    /**
     * Saves the file recursively.
@@ -26,8 +34,8 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    {
       jsonNode.put("type", getClass().getSimpleName());
 
-      if (!description.isEmpty()) // No reason to write default description
-         jsonNode.put("description", description);
+      if (!description.getValue().isEmpty()) // No reason to write default description
+         jsonNode.put("description", description.getValue());
 
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
       for (BehaviorTreeNodeDefinition child : children)
@@ -43,18 +51,18 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
     */
    public void loadFromFile(JsonNode jsonNode)
    {
-      description = jsonNode.get("description").textValue();
+      description.setValue(jsonNode.get("description").textValue());
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      message.setDescription(description);
+      message.setDescription(description.toMessage());
       message.setNumberOfChildren(children.size());
    }
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      description = message.getDescriptionAsString();
+      description.fromMessage(message.getDescriptionAsString());
    }
 
    /**
@@ -63,12 +71,12 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
     */
    public void setDescription(String description)
    {
-      this.description = description;
+      this.description.setValue(description);
    }
 
    public String getDescription()
    {
-      return description;
+      return description.getValue();
    }
 
    @Override

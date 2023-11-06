@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SakeHandCommandActionDefinition extends ActionNodeDefinition
@@ -15,8 +16,10 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    private double goalTorque = 0.0;    // default to none
    private boolean executeWitNextAction = false;
 
-   public SakeHandCommandActionDefinition()
+   public SakeHandCommandActionDefinition(CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       setDescription("Hand configuration");
    }
 

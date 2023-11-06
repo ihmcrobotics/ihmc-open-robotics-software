@@ -23,7 +23,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public HandPoseActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new HandPoseActionDefinition(), crdtInfo);
+      super(id, new HandPoseActionDefinition(crdtInfo), crdtInfo);
 
       palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPalmTransformToParent());
    }

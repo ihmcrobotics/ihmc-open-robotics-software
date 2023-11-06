@@ -8,7 +8,7 @@ public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefin
 {
    public HandWrenchActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new HandWrenchActionDefinition(), crdtInfo);
+      super(id, new HandWrenchActionDefinition(crdtInfo), crdtInfo);
    }
 
    public void toMessage(HandWrenchActionStateMessage message)

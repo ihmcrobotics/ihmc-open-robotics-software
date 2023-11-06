@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 /**
  * This is currently around to keep older behavior tree nodes
@@ -12,9 +11,9 @@ public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState<Behavi
    /** The current status of the behavior tree node. */
    private BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.SUCCESS;
 
-   public LocalOnlyBehaviorTreeNodeState()
+   public LocalOnlyBehaviorTreeNodeState(CRDTInfo crdtInfo)
    {
-      super(0, new BehaviorTreeNodeDefinition(), new CRDTInfo(ROS2ActorDesignation.ROBOT, 5));
+      super(0, new BehaviorTreeNodeDefinition(crdtInfo), crdtInfo);
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)

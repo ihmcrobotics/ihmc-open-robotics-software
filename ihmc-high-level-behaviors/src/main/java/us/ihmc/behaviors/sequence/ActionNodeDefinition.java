@@ -4,6 +4,9 @@ import behavior_msgs.msg.dds.ActionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 /**
  * Interface for a definition of an action with
@@ -17,18 +20,20 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 {
    // TODO: Is every action concurrent-able?
-   private boolean executeWitNextAction = false;
+   private final CRDTUnidirectionalBoolean executeWithNextAction;
 
-   public ActionNodeDefinition()
+   public ActionNodeDefinition(CRDTInfo crdtInfo)
    {
-      // Declared to use IDE to check usages
+      super(crdtInfo);
+
+      executeWithNextAction = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("executeWithNextAction", executeWitNextAction);
+      jsonNode.put("executeWithNextAction", executeWithNextAction.booleanValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -37,32 +42,32 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
       JsonNode executeWithNextActionNode = jsonNode.get("executeWithNextAction");
       if (executeWithNextActionNode != null)
-         executeWitNextAction = executeWithNextActionNode.asBoolean();
+         executeWithNextAction.setValue(executeWithNextActionNode.asBoolean());
       else
-         executeWitNextAction = false;
+         executeWithNextAction.setValue(false);
    }
 
    public void toMessage(ActionNodeDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setExecuteWithNextAction(getExecuteWithNextAction());
+      message.setExecuteWithNextAction(executeWithNextAction.toMessage());
    }
 
    public void fromMessage(ActionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      executeWitNextAction = message.getExecuteWithNextAction();
+      executeWithNextAction.fromMessage(message.getExecuteWithNextAction());
    }
 
    public void setExecuteWithNextAction(boolean executeWitNextAction)
    {
-      this.executeWitNextAction = executeWitNextAction;
+      this.executeWithNextAction.setValue(executeWitNextAction);
    }
 
    public boolean getExecuteWithNextAction()
    {
-      return executeWitNextAction;
+      return executeWithNextAction.booleanValue();
    }
 }

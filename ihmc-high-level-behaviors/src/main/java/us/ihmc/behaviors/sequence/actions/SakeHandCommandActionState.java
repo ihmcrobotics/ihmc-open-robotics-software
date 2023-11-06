@@ -8,7 +8,7 @@ public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandA
 {
    public SakeHandCommandActionState(long id, CRDTInfo crdtInfo)
    {
-      super(id, new SakeHandCommandActionDefinition(), crdtInfo);
+      super(id, new SakeHandCommandActionDefinition(crdtInfo), crdtInfo);
    }
 
    public void toMessage(SakeHandCommandActionStateMessage message)

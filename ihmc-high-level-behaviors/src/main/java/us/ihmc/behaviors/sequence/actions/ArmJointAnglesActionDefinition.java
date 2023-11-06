@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -20,8 +21,10 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    private double trajectoryDuration = 4.0;
    private final double[] jointAngles = new double[NUMBER_OF_JOINTS];
 
-   public ArmJointAnglesActionDefinition()
+   public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       setDescription("Arm joint angles");
    }
 

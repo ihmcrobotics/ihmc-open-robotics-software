@@ -1,7 +1,6 @@
 package us.ihmc.communication.crdt;
 
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 
 /**
  * Represents a data field that should only be modified by one actor type
