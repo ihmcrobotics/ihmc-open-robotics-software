@@ -18,7 +18,8 @@ import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.perception.sceneGraph.SceneGraphProcess;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoUpdateProcess;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,6 +50,8 @@ public class PerceptionAndAutonomyProcess
    private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17403057");
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
+
+   private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
 
    private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final ROS2HeartbeatMonitor zedPointCloudHeartbeat;
@@ -85,10 +88,10 @@ public class PerceptionAndAutonomyProcess
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private RestartableThread blackflyProcessAndPublishThread;
 
+   private final ROS2SceneGraph sceneGraph;
+   private RestartableThrottledThread sceneGraphUpdateThread;
    private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
-   private final SceneGraphProcess sceneGraphProcess;
-   private boolean arUcoDetectionInitialized = false;
-   private RestartableThread sceneGraphUpdateThread;
+   private final ArUcoUpdateProcess arUcoUpdater;
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
@@ -120,8 +123,11 @@ public class PerceptionAndAutonomyProcess
       arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ARUCO);
       initializeBlackflyHeartbeatCallbacks();
 
-      sceneGraphProcess = new SceneGraphProcess();
-      initializeSceneGraphHeartbeatCallbacks();
+      sceneGraph = new ROS2SceneGraph(ros2);
+      sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
+
+      arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
+      initializeArUcoHeartbeatCallbacks();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "PerceptionAndAutonomyShutdown"));
    }
@@ -151,8 +157,8 @@ public class PerceptionAndAutonomyProcess
 
       if (arUcoDetectionHeartbeat.isAlive())
       {
-         initializeSceneGraphProcess();
-         sceneGraphProcess.startArUcoDetection();
+         sceneGraphUpdateThread.start();
+         arUcoUpdater.startArUcoDetection();
       }
 
       for (RobotSide side : RobotSide.values)
@@ -192,8 +198,8 @@ public class PerceptionAndAutonomyProcess
          ousterDepthImageRetriever.destroy();
       }
 
-      sceneGraphProcess.stopArUcoDetection();
       sceneGraphUpdateThread.stop();
+      arUcoUpdater.stopArUcoDetection();
 
       if (blackflyProcessAndPublishThread != null)
          blackflyProcessAndPublishThread.stop();
@@ -259,6 +265,9 @@ public class PerceptionAndAutonomyProcess
 
             blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side).get());
 
+            if (side == RobotSide.RIGHT && blackflyImages.get(RobotSide.RIGHT).getImageWidth() != 0)
+               arUcoUpdater.setNextArUcoImage(blackflyImages.get(RobotSide.RIGHT).get());
+
             blackflyImages.get(side).release();
          }
       }
@@ -266,24 +275,9 @@ public class PerceptionAndAutonomyProcess
 
    private void updateSceneGraph()
    {
-      if (!arUcoDetectionInitialized &&
-          blackflyImages.get(RobotSide.RIGHT) != null)
-      {
-         System.out.println("INITIALIZING SCENE GERAPH");
-         System.out.println("Width: " + blackflyImages.get(RobotSide.RIGHT).getImageWidth());
-         System.out.println("Height: " + blackflyImages.get(RobotSide.RIGHT).getImageHeight());
-         sceneGraphProcess.initializeArUcoProcess(blackflyImages.get(RobotSide.RIGHT).getImageWidth(),
-                                                  blackflyImages.get(RobotSide.RIGHT).getImageHeight(),
-                                                  blackflyFrameSuppliers.get(RobotSide.RIGHT),
-                                                  blackflyImagePublishers.get(RobotSide.RIGHT).getUndistortedCameraMatrix());
-
-         arUcoDetectionInitialized = true;
-      }
-
-      if (arUcoDetectionInitialized && blackflyImagePublishers.get(RobotSide.RIGHT).getLatestUndistortedImage() != null)
-         sceneGraphProcess.setNextArUcoImage(new RawImage(blackflyImagePublishers.get(RobotSide.RIGHT).getLatestUndistortedImage()));
-      else
-         ThreadTools.sleepSeconds(3);
+      sceneGraph.updateSubscription();
+      sceneGraph.updateOnRobotOnly(ousterFrameSupplier.get()); // TODO: Add robot pelvis frame here or something
+      sceneGraph.updatePublication();
    }
 
    private void initializeZED()
@@ -492,13 +486,7 @@ public class PerceptionAndAutonomyProcess
       });
    }
 
-   private void initializeSceneGraphProcess()
-   {
-      sceneGraphUpdateThread = new RestartableThread("SceneGraphUpdater", this::updateSceneGraph);
-      sceneGraphUpdateThread.start();
-   }
-
-   private void initializeSceneGraphHeartbeatCallbacks()
+   private void initializeArUcoHeartbeatCallbacks()
    {
       arUcoDetectionHeartbeat.setAlivenessChangedCallback(isAlive ->
       {
@@ -507,22 +495,19 @@ public class PerceptionAndAutonomyProcess
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) == null)
                initializeBlackfly(RobotSide.RIGHT);
 
-            if (sceneGraphUpdateThread == null)
-               initializeSceneGraphProcess();
-
-            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null && sceneGraphUpdateThread != null)
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
             {
                blackflyImageRetrievers.get(RobotSide.RIGHT).start();
-               blackflyImagePublishers.get(RobotSide.RIGHT).startImageUndistortion();
-               sceneGraphProcess.startArUcoDetection();
+               sceneGraphUpdateThread.start();
+               arUcoUpdater.startArUcoDetection();
             }
          }
          else
          {
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
             {
-               sceneGraphProcess.stopArUcoDetection();
-               blackflyImagePublishers.get(RobotSide.RIGHT).stopImageUndistortion();
+               sceneGraphUpdateThread.stop();
+               arUcoUpdater.stopArUcoDetection();
 
                if (!blackflyImageHeartbeats.get(RobotSide.RIGHT).isAlive())
                   blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
