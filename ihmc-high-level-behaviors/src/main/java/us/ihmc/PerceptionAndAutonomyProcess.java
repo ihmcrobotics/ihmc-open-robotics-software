@@ -534,7 +534,8 @@ public class PerceptionAndAutonomyProcess
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame::getWorldFrame);
+                                                                                ReferenceFrame::getWorldFrame,
+                                                                                ReferenceFrame.getWorldFrame());
       publisher.start();
    }
 }
