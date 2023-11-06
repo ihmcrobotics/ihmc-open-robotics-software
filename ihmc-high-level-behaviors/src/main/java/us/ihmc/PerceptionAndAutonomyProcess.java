@@ -281,10 +281,9 @@ public class PerceptionAndAutonomyProcess
    private void updateSceneGraph()
    {
       // TODO: Maybe this should be somewhere else?
-      centerposeDetectionManager.updateSceneGraph(sceneGraph);
-
       sceneGraph.updateSubscription();
       sceneGraph.updateOnRobotOnly(ousterFrameSupplier.get()); // TODO: Add robot pelvis frame here or something
+      centerposeDetectionManager.updateSceneGraph(sceneGraph); // TODO: Maybe there's a better place for this?
       sceneGraph.updatePublication();
    }
 
@@ -503,7 +502,7 @@ public class PerceptionAndAutonomyProcess
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) == null)
                initializeBlackfly(RobotSide.RIGHT);
 
-            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null)
             {
                blackflyImageRetrievers.get(RobotSide.RIGHT).start();
                sceneGraphUpdateThread.start();
@@ -512,7 +511,7 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null && blackflyImagePublishers.get(RobotSide.RIGHT) != null)
+            if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null)
             {
                sceneGraphUpdateThread.stop();
                arUcoUpdater.stopArUcoDetection();
