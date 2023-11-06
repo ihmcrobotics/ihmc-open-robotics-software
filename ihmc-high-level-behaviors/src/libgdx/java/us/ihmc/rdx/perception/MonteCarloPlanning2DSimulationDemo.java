@@ -2,9 +2,9 @@ package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloWaypointNode;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointNode;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.perception.tools.PerceptionDebugTools;

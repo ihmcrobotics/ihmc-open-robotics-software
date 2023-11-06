@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.monteCarloPlanning;
+package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -36,11 +36,14 @@ public class MonteCarloPlanner
 
    public MonteCarloPlanner(int offset)
    {
+      this();
       agentPos.set(offset, offset);
+   }
 
+   public MonteCarloPlanner()
+   {
       this.world = new MonteCarloPlanningWorld(goalMargin, worldHeight, worldWidth);
       this.agent = new MonteCarloWaypointAgent(agentPos);
-
       root = new MonteCarloWaypointNode(agent.getState(), null, uniqueNodeId++);
    }
 

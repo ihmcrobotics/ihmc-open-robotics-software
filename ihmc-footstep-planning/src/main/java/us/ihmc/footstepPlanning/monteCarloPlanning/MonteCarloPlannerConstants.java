@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.monteCarloPlanning;
+package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 public class MonteCarloPlannerConstants
 {

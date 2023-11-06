@@ -1,7 +1,4 @@
-package us.ihmc.behaviors.monteCarloPlanning;
-
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import java.util.ArrayList;
 import java.util.List;

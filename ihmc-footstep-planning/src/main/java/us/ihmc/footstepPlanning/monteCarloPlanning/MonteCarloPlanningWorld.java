@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.monteCarloPlanning;
+package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;

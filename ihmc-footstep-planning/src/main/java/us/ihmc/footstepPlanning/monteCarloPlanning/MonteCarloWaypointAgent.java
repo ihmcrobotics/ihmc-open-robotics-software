@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.monteCarloPlanning;
+package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
