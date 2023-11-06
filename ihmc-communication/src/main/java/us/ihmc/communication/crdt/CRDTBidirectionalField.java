@@ -11,14 +11,12 @@ package us.ihmc.communication.crdt;
 public class CRDTBidirectionalField<T>
 {
    private final Confirmable confirmable;
-   private final CRDTInfo crdtInfo;
 
    private T value;
 
-   public CRDTBidirectionalField(Confirmable confirmable, CRDTInfo crdtInfo, T initialValue)
+   public CRDTBidirectionalField(Confirmable confirmable, T initialValue)
    {
       this.confirmable = confirmable;
-      this.crdtInfo = crdtInfo;
 
       value = initialValue;
    }

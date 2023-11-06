@@ -1,5 +1,7 @@
 package us.ihmc.communication.crdt;
 
+import us.ihmc.log.LogTools;
+
 /**
  * Represents a notification that can be modified by both the
  * robot and the operator.
@@ -22,7 +24,14 @@ public class CRDTBidirectionalNotification
    public boolean poll()
    {
       boolean wasSet = isSet;
-      isSet = false;
+
+      if (wasSet)
+      {
+         isSet = false;
+         confirmable.freeze();
+         LogTools.info("POLLED");
+      }
+
       return wasSet;
    }
 
@@ -35,6 +44,8 @@ public class CRDTBidirectionalNotification
    {
       if (!isSet)
       {
+         LogTools.info("SETTING");
+
          isSet = true;
          confirmable.freeze();
       }
@@ -44,6 +55,8 @@ public class CRDTBidirectionalNotification
    {
       if (!confirmable.isFrozen())
       {
+         if (isSet)
+            LogTools.info("FROM MESSAGE SET Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
          this.isSet = isSet;
       }
    }
