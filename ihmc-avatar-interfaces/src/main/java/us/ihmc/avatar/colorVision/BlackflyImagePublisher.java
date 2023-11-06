@@ -70,43 +70,29 @@ public class BlackflyImagePublisher
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS, ousterFisheyeColoringIntrinsics);
 
-      publishDistoredColorThread = new RestartableThread("BlackflyDistortedImagePublisher", () ->
+      publishDistoredColorThread = new RestartableThread("BlackflyDistortedImagePublisher", this::distortedImagePublisherThreadFunction);
+
+      undistortImageThread = new RestartableThread("BlackflyUndistortAndUpdateArUco", this::undistortImageThreadFunction);
+   }
+
+   private void distortedImagePublisherThreadFunction()
+   {
+      imagePublishLock.lock();
+      try
       {
-         imagePublishLock.lock();
-         try
+         while ((nextGpuDistortedImage == null || nextGpuDistortedImage.isEmpty() || nextGpuDistortedImage.getSequenceNumber() == lastImageSequenceNumber)
+                && publishDistoredColorThread.isRunning())
          {
-            while (nextGpuDistortedImage == null || nextGpuDistortedImage.isEmpty() || nextGpuDistortedImage.getSequenceNumber() == lastImageSequenceNumber)
-            {
-               newImageAvailable.await();
-            }
-
-            publishDistortedColor(nextGpuDistortedImage);
+            newImageAvailable.await();
          }
-         catch (InterruptedException interruptedException)
-         {
-            interruptedException.printStackTrace();
-            imagePublishLock.unlock();
-         }
-      });
 
-      undistortImageThread = new RestartableThread("BlackflyUndistortAndUpdateArUco", () ->
+         publishDistortedColor(nextGpuDistortedImage);
+      }
+      catch (InterruptedException interruptedException)
       {
-         undistortImageLock.lock();
-         try
-         {
-            while (nextGpuDistortedImage == null || nextGpuDistortedImage.isEmpty() || nextGpuDistortedImage.getSequenceNumber() == lastImageSequenceNumber)
-            {
-               undistortImageAvailable.await();
-            }
-
-            undistortAndUpdateArUco(nextGpuDistortedImage);
-         }
-         catch (InterruptedException interruptedException)
-         {
-            interruptedException.printStackTrace();
-            undistortImageLock.unlock();
-         }
-      });
+         interruptedException.printStackTrace();
+         imagePublishLock.unlock();
+      }
    }
 
    private void publishDistortedColor(RawImage distortedImageToPublish)
@@ -153,6 +139,26 @@ public class BlackflyImagePublisher
          // Close stuff
          distortedImageJPEGPointer.close();
          imageToPublish.release();
+      }
+   }
+
+   private void undistortImageThreadFunction()
+   {
+      undistortImageLock.lock();
+      try
+      {
+         while ((nextGpuDistortedImage == null || nextGpuDistortedImage.isEmpty() || nextGpuDistortedImage.getSequenceNumber() == lastImageSequenceNumber)
+                && undistortImageThread.isRunning())
+         {
+            undistortImageAvailable.await();
+         }
+
+         undistortAndUpdateArUco(nextGpuDistortedImage);
+      }
+      catch (InterruptedException interruptedException)
+      {
+         interruptedException.printStackTrace();
+         undistortImageLock.unlock();
       }
    }
 
@@ -313,11 +319,29 @@ public class BlackflyImagePublisher
    public void stopImagePublishing()
    {
       publishDistoredColorThread.stop();
+      imagePublishLock.lock();
+      try
+      {
+         newImageAvailable.signal();
+      }
+      finally
+      {
+         imagePublishLock.unlock();
+      }
    }
 
    public void stopImageUndistortion()
    {
       undistortImageThread.stop();
+      undistortImageLock.lock();
+      try
+      {
+         undistortImageAvailable.signal();
+      }
+      finally
+      {
+         undistortImageLock.unlock();
+      }
    }
 
    public void stopAll()

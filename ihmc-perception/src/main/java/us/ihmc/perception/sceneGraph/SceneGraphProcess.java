@@ -43,7 +43,7 @@ public class SceneGraphProcess
       ros2Helper = new ROS2Helper(node);
       sceneGraph = new ROS2SceneGraph(ros2Helper);
 
-      arUcoDetectionThread = new RestartableThread("ArUcoMarkerDetection", this::updateArUcoDetection);
+      arUcoDetectionThread = new RestartableThread("ArUcoMarkerDetector", this::updateArUcoDetection);
    }
 
    public void initializeArUcoProcess(int imageWidth, int imageHeight, Supplier<ReferenceFrame> blackflyFrameSupplier, Mat cameraMatrixEstimate)
@@ -62,7 +62,8 @@ public class SceneGraphProcess
       arUcoLock.lock();
       try
       {
-         while (arUcoImage == null || arUcoImage.isEmpty() || arUcoImage.getSequenceNumber() == lastArUcoImageSequenceNumber)
+         while ((arUcoImage == null || arUcoImage.isEmpty() || arUcoImage.getSequenceNumber() == lastArUcoImageSequenceNumber)
+                && arUcoDetectionThread.isRunning())
          {
             arUcoUpdateCondition.await();
          }
@@ -74,10 +75,9 @@ public class SceneGraphProcess
          arUcoMarkerPublisher.update();
          ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
 
-
 //         sceneGraph.updateSubscription();
          sceneGraph.updateOnRobotOnly(blackflyFrameSupplier.get());
-//         sceneGraph.updatePublication();
+         //         sceneGraph.updatePublication();
       }
       catch (InterruptedException interruptedException)
       {
@@ -97,6 +97,15 @@ public class SceneGraphProcess
    public void stopArUcoDetection()
    {
       arUcoDetectionThread.stop();
+      arUcoLock.lock();
+      try
+      {
+         arUcoUpdateCondition.signal();
+      }
+      finally
+      {
+         arUcoLock.unlock();
+      }
    }
 
    public void destroy()

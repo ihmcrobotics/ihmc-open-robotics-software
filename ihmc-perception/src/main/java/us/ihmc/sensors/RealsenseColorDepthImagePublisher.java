@@ -48,7 +48,6 @@ public class RealsenseColorDepthImagePublisher
    private final RestartableThread publishColorThread;
    private final Lock colorPublishLock = new ReentrantLock();
    private final Condition newColorImageAvailable = colorPublishLock.newCondition();
-   private boolean destroying = false;
 
    public RealsenseColorDepthImagePublisher(ROS2Topic<ImageMessage> depthTopic,
                                             ROS2Topic<ImageMessage> colorTopic)
@@ -57,51 +56,32 @@ public class RealsenseColorDepthImagePublisher
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
       ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic);
 
-      publishDepthThread = new RestartableThread("RealsenseDepthImagePublisher", () ->
+      publishDepthThread = new RestartableThread("RealsenseDepthImagePublisher", this::publishDepthThreadFunction);
+
+      publishColorThread = new RestartableThread("RealsenseColorImagePublisher", this::publishColorThreadFunction);
+   }
+
+   private void publishDepthThreadFunction()
+   {
+      depthPublishLock.lock();
+      try
       {
-         depthPublishLock.lock();
-         try
+         while ((nextCpuDepthImage == null || nextCpuDepthImage.isEmpty() || nextCpuDepthImage.getSequenceNumber() == lastDepthSequenceNumber)
+                && publishDepthThread.isRunning())
          {
-            while (!destroying && (nextCpuDepthImage == null || nextCpuDepthImage.isEmpty()
-                                   || nextCpuDepthImage.getSequenceNumber() == lastDepthSequenceNumber))
-            {
-               newDepthImageAvailable.await();
-            }
+            newDepthImageAvailable.await();
+         }
 
-            publishDepthImage(nextCpuDepthImage);
-         }
-         catch (InterruptedException interruptedException)
-         {
-            interruptedException.printStackTrace();
-         }
-         finally
-         {
-            depthPublishLock.unlock();
-         }
-      });
-
-      publishColorThread = new RestartableThread("RealsenseColorImagePublisher", () ->
+         publishDepthImage(nextCpuDepthImage);
+      }
+      catch (InterruptedException interruptedException)
       {
-         colorPublishLock.lock();
-         try
-         {
-            while (!destroying && (nextCpuColorImage == null || nextCpuColorImage.isEmpty()
-                                   || nextCpuColorImage.getSequenceNumber() == lastColorSequenceNumber))
-            {
-               newColorImageAvailable.await();
-            }
-
-            publishColorImage(nextCpuColorImage);
-         }
-         catch (InterruptedException interruptedException)
-         {
-            interruptedException.printStackTrace();
-         }
-         finally
-         {
-            colorPublishLock.unlock();
-         }
-      });
+         interruptedException.printStackTrace();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
    }
 
    private void publishDepthImage(RawImage depthImageToPublish)
@@ -139,6 +119,30 @@ public class RealsenseColorDepthImagePublisher
          depthImageToPublish.release();
       }
    }
+
+   private void publishColorThreadFunction()
+   {
+      colorPublishLock.lock();
+      try
+      {
+         while ((nextCpuColorImage == null || nextCpuColorImage.isEmpty() || nextCpuColorImage.getSequenceNumber() == lastColorSequenceNumber)
+                && publishColorThread.isRunning())
+         {
+            newColorImageAvailable.await();
+         }
+
+         publishColorImage(nextCpuColorImage);
+      }
+      catch (InterruptedException interruptedException)
+      {
+         interruptedException.printStackTrace();
+      }
+      finally
+      {
+         colorPublishLock.unlock();
+      }
+   }
+
 
    private void publishColorImage(RawImage colorImageToPublish)
    {
@@ -199,11 +203,29 @@ public class RealsenseColorDepthImagePublisher
    public void stopDepth()
    {
       publishDepthThread.stop();
+      depthPublishLock.lock();
+      try
+      {
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
    }
 
    public void stopColor()
    {
       publishColorThread.stop();
+      colorPublishLock.lock();
+      try
+      {
+         newColorImageAvailable.signal();
+      }
+      finally
+      {
+         colorPublishLock.unlock();
+      }
    }
 
    public void stopAll()
@@ -214,7 +236,6 @@ public class RealsenseColorDepthImagePublisher
 
    public void destroy()
    {
-      destroying = true;
       stopAll();
       depthPublishLock.lock();
       try

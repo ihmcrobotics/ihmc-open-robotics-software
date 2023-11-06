@@ -34,7 +34,6 @@ public class OusterDepthImagePublisher
    private final RestartableThread publishDepthThread;
    private final Lock depthPublishLock = new ReentrantLock();
    private final Condition newDepthImageAvailable = depthPublishLock.newCondition();
-   private boolean destroying = false;
 
    public OusterDepthImagePublisher(OusterNetServer ouster, ROS2Topic<ImageMessage> depthTopic)
    {
@@ -43,27 +42,30 @@ public class OusterDepthImagePublisher
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
 
-      publishDepthThread = new RestartableThread("OusterDepthImagePublisher", () ->
-      {
-         depthPublishLock.lock();
-         try
-         {
-            while (!destroying && (nextCpuDepthImage == null || nextCpuDepthImage.isEmpty() || nextCpuDepthImage.getSequenceNumber() == lastSequenceNumber))
-            {
-               newDepthImageAvailable.await();
-            }
+      publishDepthThread = new RestartableThread("OusterDepthImagePublisher", this::publishDepthThreadFunction);
+   }
 
-            publishDepthImage(nextCpuDepthImage);
-         }
-         catch (InterruptedException interruptedException)
+   private void publishDepthThreadFunction()
+   {
+      depthPublishLock.lock();
+      try
+      {
+         while ((nextCpuDepthImage == null || nextCpuDepthImage.isEmpty() || nextCpuDepthImage.getSequenceNumber() == lastSequenceNumber)
+                && publishDepthThread.isRunning())
          {
-            interruptedException.printStackTrace();
+            newDepthImageAvailable.await();
          }
-         finally
-         {
-            depthPublishLock.unlock();
-         }
-      });
+
+         publishDepthImage(nextCpuDepthImage);
+      }
+      catch (InterruptedException interruptedException)
+      {
+         interruptedException.printStackTrace();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
    }
 
    private void publishDepthImage(RawImage depthImageToPublish)
@@ -111,11 +113,19 @@ public class OusterDepthImagePublisher
    public void stopDepth()
    {
       publishDepthThread.stop();
+      depthPublishLock.lock();
+      try
+      {
+         newDepthImageAvailable.signal();
+      }
+      finally
+      {
+         depthPublishLock.unlock();
+      }
    }
 
    public void destroy()
    {
-      destroying = true;
       depthPublishLock.lock();
       try
       {
