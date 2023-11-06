@@ -16,6 +16,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -51,6 +53,7 @@ public class RigidBodyJointControlHelper
    private final List<YoDouble> messageWeights = new ArrayList<>();
    private final List<PIDGainsReadOnly> highLevelGains = new ArrayList<>();
    private final List<PIDGainsReadOnly> lowLevelGains = new ArrayList<>();
+   private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
 
    private final YoBoolean hasWeights;
    private final YoBoolean hasHighLevelGains;
@@ -64,7 +67,7 @@ public class RigidBodyJointControlHelper
 
    private final DoubleProvider time;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, YoRegistry parentRegistry)
+   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, boolean enableFunctionGenerators, YoRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoRegistry(bodyName + shortName);
@@ -100,6 +103,11 @@ public class RigidBodyJointControlHelper
 
          messageWeights.add(new YoDouble(prefix + "_" + jointName + "_messageWeight", registry));
          currentWeights.add(new YoDouble(prefix + "_" + jointName + "_currentWeight", registry));
+
+         if (enableFunctionGenerators)
+         {
+            functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FuncGen", time, registry));
+         }
       }
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
@@ -238,6 +246,14 @@ public class RigidBodyJointControlHelper
          double desiredPosition = generator.getValue();
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
+
+         if (!functionGenerators.isEmpty())
+         {
+            functionGenerators.get(jointIdx).update();
+            desiredPosition += functionGenerators.get(jointIdx).getValue();
+            desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
+            feedForwardAcceleration += functionGenerators.get(jointIdx).getValueDDot();
+         }
 
          OneDoFJointBasics joint = joints[jointIdx];
          PIDGainsReadOnly gain = highLevelGains.get(jointIdx);
