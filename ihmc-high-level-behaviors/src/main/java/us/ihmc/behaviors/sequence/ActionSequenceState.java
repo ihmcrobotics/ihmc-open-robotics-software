@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
@@ -90,7 +91,9 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public boolean pollManualExecutionRequested()
    {
-      return manualExecutionRequested.poll();
+      boolean poll = manualExecutionRequested.poll();
+//      LogTools.info("Polled: {}", poll);
+      return poll;
    }
 
    public boolean getManualExecutionRequested()
