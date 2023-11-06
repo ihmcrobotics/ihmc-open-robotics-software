@@ -1,6 +1,5 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 
 /**
@@ -65,12 +64,6 @@ public class CRDTBidirectionalNotification
 
    public boolean toMessage()
    {
-      if (isSet)
-         LogTools.info("SENDING true Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
-
-      if (confirmable.getCRDTInfo().getActorDesignation() == ROS2ActorDesignation.ROBOT)
-         LogTools.info("Sending {} Actor: ROBOT", isSet);
-
       return isSet;
    }
 }
