@@ -12,13 +12,13 @@ import us.ihmc.log.LogTools;
  */
 public class CRDTBidirectionalNotification
 {
-   private final Confirmable confirmable;
+   private final RequestConfirmFreezable requestConfirmFreezable;
 
    private boolean isSet = false;
 
-   public CRDTBidirectionalNotification(Confirmable confirmable)
+   public CRDTBidirectionalNotification(RequestConfirmFreezable requestConfirmFreezable)
    {
-      this.confirmable = confirmable;
+      this.requestConfirmFreezable = requestConfirmFreezable;
    }
 
    public boolean poll()
@@ -28,8 +28,8 @@ public class CRDTBidirectionalNotification
       if (wasSet)
       {
          isSet = false;
-         confirmable.freeze();
-         LogTools.info(1, "POLLED Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
+         requestConfirmFreezable.freeze();
+         LogTools.info(1, "POLLED Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
       }
 
       return wasSet;
@@ -44,19 +44,19 @@ public class CRDTBidirectionalNotification
    {
       if (!isSet)
       {
-         LogTools.info(1, "SETTING Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
+         LogTools.info(1, "SETTING Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
 
          isSet = true;
-         confirmable.freeze();
+         requestConfirmFreezable.freeze();
       }
    }
 
    public void fromMessage(boolean isSet)
    {
-      if (!confirmable.isFrozen())
+      if (!requestConfirmFreezable.isFrozen())
       {
          if (isSet != this.isSet)
-            LogTools.info("%b -> %b Actor: %s".formatted(this.isSet, isSet, confirmable.getCRDTInfo().getActorDesignation()));
+            LogTools.info("%b -> %b Actor: %s".formatted(this.isSet, isSet, requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
 
          this.isSet = isSet;
       }

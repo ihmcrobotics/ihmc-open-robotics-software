@@ -2,7 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.Confirmable;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
 public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
-      extends Confirmable
+      extends RequestConfirmFreezable
       implements BehaviorTreeNodeExtension<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
 {
    private final D definition;

@@ -10,13 +10,13 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalField<T>
 {
-   private final Confirmable confirmable;
+   private final RequestConfirmFreezable requestConfirmFreezable;
 
    private T value;
 
-   public CRDTBidirectionalField(Confirmable confirmable, T initialValue)
+   public CRDTBidirectionalField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
    {
-      this.confirmable = confirmable;
+      this.requestConfirmFreezable = requestConfirmFreezable;
 
       value = initialValue;
    }
@@ -31,13 +31,13 @@ public class CRDTBidirectionalField<T>
       if (!this.value.equals(value)) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
-         confirmable.freeze();
+         requestConfirmFreezable.freeze();
       }
    }
 
    public void fromMessage(T value)
    {
-      if (!confirmable.isFrozen())
+      if (!requestConfirmFreezable.isFrozen())
       {
          this.value = value;
       }

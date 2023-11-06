@@ -6,7 +6,7 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeR
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.Confirmable;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
  */
-public class BehaviorTreeState extends Confirmable
+public class BehaviorTreeState extends RequestConfirmFreezable
 {
    private final MutableLong nextID = new MutableLong(0);
    private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();

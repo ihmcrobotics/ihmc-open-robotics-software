@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.communication.crdt.Freezable;
+import us.ihmc.communication.crdt.DurationFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -15,7 +15,7 @@ import java.util.List;
  *
  * We give each node a name and a reference frame.
  */
-public class SceneNode extends Freezable
+public class SceneNode extends DurationFreezable
 {
    /** The node's unique ID. */
    private final long id;
