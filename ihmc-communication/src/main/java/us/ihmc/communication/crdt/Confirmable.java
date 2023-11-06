@@ -1,5 +1,6 @@
 package us.ihmc.communication.crdt;
 
+import gnu.trove.set.hash.TLongHashSet;
 import ihmc_common_msgs.msg.dds.ConfirmableRequestMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.commons.thread.Notification;
@@ -13,14 +14,14 @@ import us.ihmc.log.LogTools;
  */
 public class Confirmable extends Freezable
 {
-   private static final MutableLong nextRequestID = new MutableLong();
-
+   private final CRDTInfo crdtInfo;
+   private final MutableLong nextRequestID = new MutableLong();
    private final Notification needToSendRequest = new Notification();
    private final Notification needToSendConfirmation = new Notification();
-   private final CRDTInfo crdtInfo;
-
-   private long requestNumber;
+   private final TLongHashSet unconfirmedRequests = new TLongHashSet();
+   private long confirmationNumber;
    private long updateNumberToUnfreeze = 0;
+   private boolean isFrozen = false;
 
    public Confirmable(CRDTInfo crdtInfo)
    {
@@ -32,15 +33,13 @@ public class Confirmable extends Freezable
    {
       super.freeze();
 
+      if (!isFrozen)
+         LogTools.info(1, "Freezing: %s  Actor: %s".formatted(this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
+      isFrozen = true;
+
       updateNumberToUnfreeze = crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration();
 
-      if (!needToSendRequest.peek()) // Avoid sending multiple requests in one tick
-      {
-         needToSendRequest.set();
-
-         requestNumber = nextRequestID.getAndIncrement();
-         LogTools.debug("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
-      }
+      needToSendRequest.set();
    }
 
    @Override
@@ -53,6 +52,12 @@ public class Confirmable extends Freezable
    public boolean isFrozen()
    {
       boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
+
+      if (isFrozen != this.isFrozen)
+         LogTools.info("Frozen %b -> %b %s Actor: %s".formatted(this.isFrozen, isFrozen, this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
+
+      this.isFrozen = isFrozen;
+
 //      if (isFrozen)
 //         LogTools.info("Is frozen: {}", getClass().getSimpleName());
 
@@ -61,42 +66,51 @@ public class Confirmable extends Freezable
 
    public void toMessage(ConfirmableRequestMessage message)
    {
+      message.setIsRequest(false);
+      message.setIsConfirmation(false);
+
       if (needToSendRequest.poll())
       {
-         message.setValue(ConfirmableRequestMessage.REQUEST);
+         long requestNumber = nextRequestID.incrementAndGet();
+         LogTools.debug("Request: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
+         message.setIsRequest(true);
          message.setRequestNumber(requestNumber);
+         unconfirmedRequests.add(requestNumber);
       }
-      else if (needToSendConfirmation.poll())
-      {
-         message.setValue(ConfirmableRequestMessage.CONFIRMATION);
-         message.setRequestNumber(requestNumber);
 
-         LogTools.debug("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), requestNumber, crdtInfo.getActorDesignation().name());
-      }
-      else
+      if (needToSendConfirmation.poll())
       {
-         message.setValue(ConfirmableRequestMessage.NOOP);
+         LogTools.debug("Confirming: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationNumber, crdtInfo.getActorDesignation().name());
+         message.setIsConfirmation(true);
+         message.setConfirmationNumber(confirmationNumber);
       }
    }
 
    public void fromMessage(ConfirmableRequestMessage message)
    {
-      if (message.getValue() == ConfirmableRequestMessage.REQUEST)
+      if (message.getIsRequest())
       {
+         confirmationNumber = message.getRequestNumber();
          needToSendConfirmation.set();
-         requestNumber = message.getRequestNumber();
       }
-      else if (message.getValue() == ConfirmableRequestMessage.CONFIRMATION)
+
+      if (message.getIsConfirmation())
       {
-         long confirmationsRequestUUID = message.getRequestNumber();
-         if (confirmationsRequestUUID == requestNumber)
+         long confirmationsRequestUUID = message.getConfirmationNumber();
+
+         boolean removed = unconfirmedRequests.remove(confirmationsRequestUUID);
+
+         if (removed)
          {
             LogTools.debug("Confirmed: {}:{} Actor: {}", this.getClass().getSimpleName(), confirmationsRequestUUID, crdtInfo.getActorDesignation().name());
+            if (!unconfirmedRequests.isEmpty())
+               LogTools.debug("Still unconfirmed requests: {}", unconfirmedRequests);
+
             unfreeze();
          }
          else
          {
-            LogTools.error("Received a different request ID than sent. Sent: {} Recieved: {}", requestNumber, confirmationsRequestUUID);
+            LogTools.error("Received a different request ID than sent. Sent: {} Recieved: {}", unconfirmedRequests, confirmationsRequestUUID);
          }
       }
    }

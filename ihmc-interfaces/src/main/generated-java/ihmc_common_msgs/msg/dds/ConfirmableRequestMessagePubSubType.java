@@ -15,7 +15,7 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6ad7669ae99495429aa58b65854267e54a671108ed8ae80d647065d78c419982";
+   		return "68a1424b84c2b3598b6f9854ee0721d94884c4e3c050c753a18b31308346b563";
    }
    
    @Override
@@ -52,7 +52,11 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -69,7 +73,13 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -81,17 +91,25 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_3(data.getValue());
+      cdr.write_type_7(data.getIsRequest());
+
+      cdr.write_type_7(data.getIsConfirmation());
 
       cdr.write_type_4(data.getRequestNumber());
+
+      cdr.write_type_4(data.getConfirmationNumber());
 
    }
 
    public static void read(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setValue(cdr.read_type_3());
+      data.setIsRequest(cdr.read_type_7());
+      	
+      data.setIsConfirmation(cdr.read_type_7());
       	
       data.setRequestNumber(cdr.read_type_4());
+      	
+      data.setConfirmationNumber(cdr.read_type_4());
       	
 
    }
@@ -99,15 +117,19 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_3("value", data.getValue());
+      ser.write_type_7("is_request", data.getIsRequest());
+      ser.write_type_7("is_confirmation", data.getIsConfirmation());
       ser.write_type_4("request_number", data.getRequestNumber());
+      ser.write_type_4("confirmation_number", data.getConfirmationNumber());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.ConfirmableRequestMessage data)
    {
-      data.setValue(ser.read_type_3("value"));
+      data.setIsRequest(ser.read_type_7("is_request"));
+      data.setIsConfirmation(ser.read_type_7("is_confirmation"));
       data.setRequestNumber(ser.read_type_4("request_number"));
+      data.setConfirmationNumber(ser.read_type_4("confirmation_number"));
    }
 
    public static void staticCopy(ihmc_common_msgs.msg.dds.ConfirmableRequestMessage src, ihmc_common_msgs.msg.dds.ConfirmableRequestMessage dest)

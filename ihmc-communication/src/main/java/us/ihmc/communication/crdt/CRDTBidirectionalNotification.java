@@ -1,5 +1,6 @@
 package us.ihmc.communication.crdt;
 
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 
 /**
@@ -29,7 +30,7 @@ public class CRDTBidirectionalNotification
       {
          isSet = false;
          confirmable.freeze();
-         LogTools.info("POLLED");
+         LogTools.info(1, "POLLED Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
       }
 
       return wasSet;
@@ -44,7 +45,7 @@ public class CRDTBidirectionalNotification
    {
       if (!isSet)
       {
-         LogTools.info("SETTING");
+         LogTools.info(1, "SETTING Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
 
          isSet = true;
          confirmable.freeze();
@@ -55,14 +56,21 @@ public class CRDTBidirectionalNotification
    {
       if (!confirmable.isFrozen())
       {
-         if (isSet)
-            LogTools.info("FROM MESSAGE SET Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
+         if (isSet != this.isSet)
+            LogTools.info("%b -> %b Actor: %s".formatted(this.isSet, isSet, confirmable.getCRDTInfo().getActorDesignation()));
+
          this.isSet = isSet;
       }
    }
 
    public boolean toMessage()
    {
+      if (isSet)
+         LogTools.info("SENDING true Actor: %s".formatted(confirmable.getCRDTInfo().getActorDesignation()));
+
+      if (confirmable.getCRDTInfo().getActorDesignation() == ROS2ActorDesignation.ROBOT)
+         LogTools.info("Sending {} Actor: ROBOT", isSet);
+
       return isSet;
    }
 }
