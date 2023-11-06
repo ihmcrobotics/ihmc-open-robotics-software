@@ -44,13 +44,13 @@ public class MultiContactForceDistributionCalculator
    /**
     * Returns whether an optimal solution was found
     */
-   public boolean solve(WholeBodyContactDescription input)
+   public boolean solve(WholeBodyContactState input)
    {
       clear();
 
       double mg = 9.81 * input.getRobotMass();
 
-      int rhoSize = WholeBodyContactDescription.numberOfBasisVectors * input.getNumberOfContactPoints();
+      int rhoSize = WholeBodyContactState.numberOfBasisVectors * input.getNumberOfContactPoints();
       int decisionVariables = rhoSize;
 
       rho.reshape(rhoSize, 1);
@@ -84,7 +84,7 @@ public class MultiContactForceDistributionCalculator
          contactPointPosition.setToZero(input.getContactFrame(contactPointIndex));
          contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-         for (int basisVectorIndex = 0; basisVectorIndex < WholeBodyContactDescription.numberOfBasisVectors; basisVectorIndex++)
+         for (int basisVectorIndex = 0; basisVectorIndex < WholeBodyContactState.numberOfBasisVectors; basisVectorIndex++)
          {
             FrameVector3D basisVector = input.getBasisVector(contactPointIndex, basisVectorIndex);
             int column = basisVectorsPerContactPoint * contactPointIndex + basisVectorIndex;
@@ -141,15 +141,15 @@ public class MultiContactForceDistributionCalculator
       rho.zero();
    }
 
-   public Vector3D getResolvedForce(int contactPointIndex, WholeBodyContactDescription input)
+   public Vector3D getResolvedForce(int contactPointIndex, WholeBodyContactState input)
    {
       Vector3D resolvedForce = new Vector3D();
-      for (int i = 0; i < WholeBodyContactDescription.numberOfBasisVectors; i++)
+      for (int i = 0; i < WholeBodyContactState.numberOfBasisVectors; i++)
       {
          FrameVector3D basisVector = input.getBasisVector(contactPointIndex, i);
          basisVector.changeFrame(ReferenceFrame.getWorldFrame());
 
-         double rho = this.rho.get(WholeBodyContactDescription.numberOfBasisVectors * contactPointIndex + i, 0);
+         double rho = this.rho.get(WholeBodyContactState.numberOfBasisVectors * contactPointIndex + i, 0);
 
          resolvedForce.addX(basisVector.getX() * rho);
          resolvedForce.addY(basisVector.getY() * rho);
