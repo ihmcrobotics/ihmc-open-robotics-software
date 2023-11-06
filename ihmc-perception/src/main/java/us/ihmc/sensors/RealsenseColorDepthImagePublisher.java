@@ -237,7 +237,7 @@ public class RealsenseColorDepthImagePublisher
 
    public void destroy()
    {
-      LogTools.info("Destroying {}", this.getClass().getSimpleName());
+      System.out.println("Destroying " + this.getClass().getSimpleName());
       stopAll();
       depthPublishLock.lock();
       try
@@ -266,7 +266,7 @@ public class RealsenseColorDepthImagePublisher
       ros2DepthImagePublisher.destroy();
       ros2ColorImagePublisher.destroy();
       ros2Node.destroy();
-      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+      System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 
    public void setNextDepthImage(RawImage depthImage)

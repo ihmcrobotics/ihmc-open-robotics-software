@@ -125,9 +125,9 @@ public class OusterDepthImageRetriever
 
    public void destroy()
    {
-      LogTools.info("Destroying {}", this.getClass().getSimpleName());
+      System.out.println("Destroying " + this.getClass().getSimpleName());
       stop();
       depthImage.release();
-      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+      System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 }
