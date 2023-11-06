@@ -267,7 +267,7 @@ public class ZEDColorDepthImagePublisher
 
    public void destroy()
    {
-      LogTools.info("Destroying {}", this.getClass().getSimpleName());
+      System.out.println("Destroying " + this.getClass().getSimpleName());
 
       depthPublishLock.lock();
       try
@@ -300,7 +300,7 @@ public class ZEDColorDepthImagePublisher
 
       ros2DepthImagePublisher.destroy();
       ros2Node.destroy();
-      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+      System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 
    public void setNextGpuDepthImage(RawImage depthImage)

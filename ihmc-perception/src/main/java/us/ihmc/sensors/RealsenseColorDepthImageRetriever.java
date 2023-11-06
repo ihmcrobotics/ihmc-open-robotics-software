@@ -203,13 +203,13 @@ public class RealsenseColorDepthImageRetriever
 
    public void destroy()
    {
-      LogTools.info("Destroying {}", this.getClass().getSimpleName());
+      System.out.println("Destroying " + this.getClass().getSimpleName());
       stop();
       depthImage.release();
       colorImage.release();
       realsense.deleteDevice();
       realsenseManager.deleteContext();
-      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+      System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 
    private boolean startRealsense()

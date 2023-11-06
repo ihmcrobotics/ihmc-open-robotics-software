@@ -172,11 +172,11 @@ public class BlackflyImageRetriever
 
    public void destroy()
    {
-      LogTools.info("Destroying {}", this.getClass().getSimpleName());
+      System.out.println("Destroying " + this.getClass().getSimpleName());
       stop();
       blackfly.stopAcquiringImages();
       blackflyManager.destroy();
-      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+      System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 
    private boolean initializeBlackfly()
