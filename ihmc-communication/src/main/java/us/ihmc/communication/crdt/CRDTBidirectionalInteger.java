@@ -45,16 +45,16 @@ public class CRDTBidirectionalInteger
       }
    }
 
+   public int toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(int value)
    {
       if (!requestConfirmFreezable.isFrozen())
       {
          this.value = value;
       }
-   }
-
-   public int toMessage()
-   {
-      return value;
    }
 }

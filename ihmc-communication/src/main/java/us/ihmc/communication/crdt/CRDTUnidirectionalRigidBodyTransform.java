@@ -11,46 +11,28 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  * and read-only for the others. The internal writeable instance is kept protected
  * from unchecked modifications.
  */
-public class CRDTUnidirectionalRigidBodyTransform
+public class CRDTUnidirectionalRigidBodyTransform extends CRDTUnidirectionalMutableField<RigidBodyTransform>
 {
-   private final ROS2ActorDesignation sideThatCanModify;
-   private final CRDTInfo crdtInfo;
-
-   private final RigidBodyTransform value = new RigidBodyTransform();
-
    public CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
    {
-      this.sideThatCanModify = sideThatCanModify;
-      this.crdtInfo = crdtInfo;
+      super(sideThatCanModify, crdtInfo, RigidBodyTransform::new);
    }
 
    public RigidBodyTransformReadOnly getValueReadOnly()
    {
-      return value;
-   }
-
-   public RigidBodyTransform getValue()
-   {
-      checkActorCanModify();
-      return value;
-   }
-
-   private void checkActorCanModify()
-   {
-      if (sideThatCanModify != crdtInfo.getActorDesignation())
-         throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
-   }
-
-   public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
-   {
-      if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
-      {
-         MessageTools.toEuclid(rigidBodyTransformMessage, value);
-      }
+      return getValueInternal();
    }
 
    public void toMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      MessageTools.toMessage(value, rigidBodyTransformMessage);
+      MessageTools.toMessage(getValueInternal(), rigidBodyTransformMessage);
+   }
+
+   public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
+   {
+      if (!canActorModify()) // Ignore updates if we are the only side that can modify
+      {
+         MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
+      }
    }
 }

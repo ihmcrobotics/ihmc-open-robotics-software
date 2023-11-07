@@ -34,16 +34,16 @@ public class CRDTUnidirectionalInteger
       this.value = value;
    }
 
+   public int toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(int value)
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
       {
          this.value = value;
       }
-   }
-
-   public int toMessage()
-   {
-      return value;
    }
 }
