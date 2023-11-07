@@ -141,10 +141,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
          LogTools.info("File path is null");
          return parameters;
       }
-      else
-      {
-         //         FileInputStream fileInputStream  = new FileInputStream(fileName);
-      }
       JSONFileTools.load(inputStream, rootNode ->
       {
          parameters.setShowDecomposedMeshGraphics(rootNode.get("showDecomposedMeshGraphics").asBoolean());
