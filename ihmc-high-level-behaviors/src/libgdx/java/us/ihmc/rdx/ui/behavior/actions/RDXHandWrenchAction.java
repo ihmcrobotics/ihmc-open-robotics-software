@@ -19,6 +19,8 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    {
       state = new HandWrenchActionState(id, crdtInfo);
 
+      getDefinition().setDescription("Hand wrench");
+
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));

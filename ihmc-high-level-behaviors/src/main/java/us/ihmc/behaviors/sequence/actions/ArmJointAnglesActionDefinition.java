@@ -24,8 +24,6 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Arm joint angles");
    }
 
    @Override

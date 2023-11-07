@@ -29,6 +29,8 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
 
       state = new ArmJointAnglesActionState(id, crdtInfo);
 
+      getDefinition().setDescription("Arm joint angles");
+
       sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,

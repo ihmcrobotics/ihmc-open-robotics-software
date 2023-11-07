@@ -37,6 +37,8 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       state = new ActionSequenceState(id, crdtInfo);
 
+      getDefinition().setDescription("ActionSequence");
+
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
                                                         imBoolean -> ImGui.checkbox(labels.get("Autonomously"), imBoolean));

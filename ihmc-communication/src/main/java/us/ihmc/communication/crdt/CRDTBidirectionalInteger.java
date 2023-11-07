@@ -21,19 +21,19 @@ public class CRDTBidirectionalInteger
       value = initialValue;
    }
 
-   public int intValue()
+   public int getValue()
    {
       return value;
    }
 
    public void decrement()
    {
-      setValue(intValue() - 1);
+      setValue(getValue() - 1);
    }
 
    public void increment()
    {
-      setValue(intValue() + 1);
+      setValue(getValue() + 1);
    }
 
    public void setValue(int value)

@@ -53,6 +53,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       state = new FootstepPlanActionState(id, crdtInfo, referenceFrameLibrary);
 
+      getDefinition().setDescription("Footstep plan");
+
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,

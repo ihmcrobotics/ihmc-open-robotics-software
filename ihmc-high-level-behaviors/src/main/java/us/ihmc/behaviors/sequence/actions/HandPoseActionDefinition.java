@@ -23,8 +23,6 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public HandPoseActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Hand pose");
    }
 
    @Override

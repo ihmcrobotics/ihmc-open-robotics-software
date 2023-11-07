@@ -90,6 +90,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       state = new HandPoseActionState(id, crdtInfo, referenceFrameLibrary);
 
+      getDefinition().setDescription("Hand pose");
+
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent(), getSelected());
       poseGizmo.create(panel3D);
 

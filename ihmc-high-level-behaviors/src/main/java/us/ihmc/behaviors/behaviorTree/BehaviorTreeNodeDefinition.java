@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalField;
+import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.ArrayList;
@@ -18,13 +18,13 @@ import java.util.List;
 public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
    /** A human readable description of what the node does */
-   private final CRDTUnidirectionalField<String> description;
+   private final CRDTUnidirectionalString description;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo)
    {
-      description = new CRDTUnidirectionalField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+      description = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
    }
 
    /**

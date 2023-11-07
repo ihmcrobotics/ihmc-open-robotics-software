@@ -65,7 +65,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new WalkActionState(id, crdtInfo, footstepPlannerParameters, referenceFrameLibrary);
+      state = new WalkActionState(id, crdtInfo, referenceFrameLibrary);
    }
 
    @Override
@@ -79,7 +79,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       {
          for (RobotSide side : RobotSide.values)
          {
-            goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(), getDefinition().getGoalFootstepToGoalTransforms().get(side));
+            goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
+                                                      getDefinition().getGoalFootstepToGoalTransform(side).getValue());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
       }

@@ -21,8 +21,6 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public FootstepPlanActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Footstep plan");
    }
 
    @Override

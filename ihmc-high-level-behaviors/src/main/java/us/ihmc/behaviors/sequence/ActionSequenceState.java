@@ -10,7 +10,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTBidirectionalNotification manualExecutionRequested;
-   private final CRDTUnidirectionalField<String> nextActionRejectionTooltip;
+   private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo)
    {
@@ -19,7 +19,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       automaticExecution = new CRDTBidirectionalBoolean(this, false);
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);
       manualExecutionRequested = new CRDTBidirectionalNotification(this);
-      nextActionRejectionTooltip = new CRDTUnidirectionalField<>(ROS2ActorDesignation.ROBOT, crdtInfo, "");
+      nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
    }
 
    public void toMessage(ActionSequenceStateMessage message)
@@ -48,13 +48,13 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public void stepBackNextExecutionIndex()
    {
-      if (executionNextIndex.intValue() > 0)
+      if (executionNextIndex.getValue() > 0)
          executionNextIndex.decrement();
    }
 
    public void stepForwardNextExecutionIndex()
    {
-      if (executionNextIndex.intValue() < getChildren().size())
+      if (executionNextIndex.getValue() < getChildren().size())
          executionNextIndex.increment();
    }
 
@@ -65,7 +65,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public int getExecutionNextIndex()
    {
-      return executionNextIndex.intValue();
+      return executionNextIndex.getValue();
    }
 
    public void setNextActionRejectionTooltip(String nextActionRejectionTooltip)
@@ -80,7 +80,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public boolean getAutomaticExecution()
    {
-      return automaticExecution.booleanValue();
+      return automaticExecution.getValue();
    }
 
    public void setAutomaticExecution(boolean automaticExecution)

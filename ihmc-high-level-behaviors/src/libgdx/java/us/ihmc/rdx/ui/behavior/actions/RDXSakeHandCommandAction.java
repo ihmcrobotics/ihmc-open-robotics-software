@@ -32,6 +32,8 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    {
       state = new SakeHandCommandActionState(id, crdtInfo);
 
+      getDefinition().setDescription("Hand configuration");
+
       sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));
       handCommandOptionIndex = new ImIntegerWrapper(getDefinition()::getHandConfigurationIndex,
                                                     getDefinition()::setHandConfigurationIndex,

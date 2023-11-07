@@ -48,10 +48,20 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                         ReferenceFrameLibrary referenceFrameLibrary,
                         FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      state = new WalkActionState(id, crdtInfo, footstepPlannerParameters, referenceFrameLibrary);
+      state = new WalkActionState(id, crdtInfo, referenceFrameLibrary);
+
+      getDefinition().setDescription("Walk");
+
+      for (RobotSide side : RobotSide.values)
+      {
+         getDefinition().getGoalFootstepToGoalTransform(side).setValue(goalFootstepToGoalTransform ->
+         {
+            goalFootstepToGoalTransform.getTranslation().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         });
+      }
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
-                                                                       getDefinition().getGoalToParentTransform(),
+                                                                       getDefinition().getGoalToParentTransform().getValueUnsafe(),
                                                                        getSelected());
       footstepPlannerGoalGizmo.create(panel3D);
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -71,7 +81,8 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
       {
          goalFeetPosesSelected.put(side, new ImBoolean(false));
 
-         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getGoalFootstepToGoalTransforms().get(side));
+         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(),
+                                                       getDefinition().getGoalFootstepToGoalTransform(side).getValueUnsafe());
          footGizmo.create(panel3D);
          goalFeetGizmos.put(side, footGizmo);
 

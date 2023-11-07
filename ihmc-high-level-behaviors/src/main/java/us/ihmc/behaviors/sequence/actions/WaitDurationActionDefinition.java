@@ -13,8 +13,6 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
    public WaitDurationActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Wait");
    }
 
    @Override
