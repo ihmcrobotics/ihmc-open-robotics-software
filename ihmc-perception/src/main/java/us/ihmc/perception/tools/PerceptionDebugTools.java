@@ -284,7 +284,7 @@ public class PerceptionDebugTools
 
       if (screenSize != -1)
       {
-         opencv_highgui.resizeWindow(tag, screenSize, screenSize);
+         opencv_highgui.resizeWindow(tag, screenSize / image.rows() * image.cols(), screenSize);
       }
 
       int code = opencv_highgui.waitKeyEx(delay);

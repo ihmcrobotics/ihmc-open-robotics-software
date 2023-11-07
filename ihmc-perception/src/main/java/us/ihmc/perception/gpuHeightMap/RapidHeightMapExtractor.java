@@ -65,7 +65,6 @@ public class RapidHeightMapExtractor
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
    private _cl_kernel heightMapRegistrationKernel;
-   private _cl_kernel croppingKernel;
    private _cl_kernel terrainCostKernel;
    private _cl_kernel contactMapKernel;
 
@@ -116,21 +115,15 @@ public class RapidHeightMapExtractor
       groundToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
-      localHeightMapImage = new BytedecoImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
-      globalHeightMapImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
-      globalHeightVarianceImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       croppedHeightMapImage = new Mat(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
       denoisedHeightMap = new Mat(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
-      sensorCroppedHeightMapImage = new BytedecoImage(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
-      terrainCostImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-      contactMapImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
 
-      localHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      globalHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      globalHeightVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      sensorCroppedHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      terrainCostImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      contactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
+      createGlobalHeightMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
+      createGlobalHeightVarianceImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
+      createSensorCroppedHeightMapImage(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
+      createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
+      createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
@@ -165,7 +158,7 @@ public class RapidHeightMapExtractor
 
          sensorOrigin.set(sensorToWorldTransform.getTranslation());
 
-         populateParameterBuffer(heightMapParameters, sensorOrigin);
+         populateParameterBuffer(heightMapParameters, cameraIntrinsics, sensorOrigin);
 
          // Fill world-to-sensor transform buffer
          groundToSensorTransform.get(groundToSensorTransformArray);
@@ -202,35 +195,17 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 4, worldToGroundTransformBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 5, sensorToGroundTransformBuffer.getOpenCLBufferObject());
 
-         // Set kernel arguments for the cropping kernel
-         //openCLManager.setKernelArgument(croppingKernel, 0, globalHeightMapImage.getOpenCLImageObject());
-         //openCLManager.setKernelArgument(croppingKernel, 1, sensorCroppedHeightMapImage.getOpenCLImageObject());
-         //openCLManager.setKernelArgument(croppingKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         //openCLManager.setKernelArgument(croppingKernel, 3, groundToWorldTransformBuffer.getOpenCLBufferObject());
-
-         // Set kernel arguments for the terrain cost kernel
-         openCLManager.setKernelArgument(terrainCostKernel, 0, globalHeightMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(terrainCostKernel, 1, terrainCostImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(terrainCostKernel, 2, parametersBuffer.getOpenCLBufferObject());
-
-         // Set kernel arguments for the contact map kernel
-         openCLManager.setKernelArgument(contactMapKernel, 0, terrainCostImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(contactMapKernel, 1, contactMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(contactMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
-
-         // Execute kernels with length and width parameters
+         // execute height map extraction and registration kernels
          openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
          openCLManager.execute2D(heightMapRegistrationKernel, globalCellsPerAxis, globalCellsPerAxis);
-         //openCLManager.execute2D(croppingKernel, CROP_WINDOW_SIZE, CROP_WINDOW_SIZE);
-         openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
-         openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
 
-         // Read height map image into CPU memory
+         // read local and global height map images
          localHeightMapImage.readOpenCLImage(openCLManager);
          globalHeightMapImage.readOpenCLImage(openCLManager);
-         //sensorCroppedHeightMapImage.readOpenCLImage(openCLManager);
-         terrainCostImage.readOpenCLImage(openCLManager);
-         contactMapImage.readOpenCLImage(openCLManager);
+
+         // compute and read terrain cost and contact map images
+         computeContactMap();
+         readContactMapImage();
 
          croppedHeightMapImage = getCroppedImage(sensorOrigin, globalCenterIndex, globalHeightMapImage.getBytedecoOpenCVMat());
          //denoisedHeightMap = denoiser.denoiseHeightMap(croppedHeightMapImage, 3.2768f);
@@ -239,13 +214,13 @@ public class RapidHeightMapExtractor
       }
    }
 
-   private void populateParameterBuffer(HeightMapParameters parameters, Tuple3DReadOnly gridCenter)
+   public void populateParameterBuffer(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter)
    {
       //// Fill parameters buffer
       parametersBuffer.setParameter((float) parameters.getLocalCellSizeInMeters());
       parametersBuffer.setParameter(centerIndex);
-      parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
-      parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getHeight());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getWidth());
       parametersBuffer.setParameter((float) gridCenter.getX());
       parametersBuffer.setParameter((float) gridCenter.getY());
       parametersBuffer.setParameter((float) mode);
@@ -279,14 +254,8 @@ public class RapidHeightMapExtractor
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
-   public Mat computeContactMap(Mat heightMapImage, HeightMapParameters parameters)
+   public void computeContactMap()
    {
-      populateParameterBuffer(parameters, new Point3D(0.0, 0.0, 0.0));
-
-      // Set height map image to be used
-      globalHeightMapImage.getBytedecoOpenCVMat().put(heightMapImage.data());
-      globalHeightMapImage.writeOpenCLImage(openCLManager);
-
       // Set kernel arguments for the terrain cost kernel
       openCLManager.setKernelArgument(terrainCostKernel, 0, globalHeightMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(terrainCostKernel, 1, terrainCostImage.getOpenCLImageObject());
@@ -300,12 +269,22 @@ public class RapidHeightMapExtractor
       // Execute kernels with length and width parameters
       openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
+   }
 
+   public void setGlobalHeightMapImage(Mat heightMapImage)
+   {
+      // Set height map image to be used
+      globalHeightMapImage.getBytedecoOpenCVMat().put(heightMapImage.data());
+      globalHeightMapImage.writeOpenCLImage(openCLManager);
+
+      //createContactMapImage(heightMapImage.cols(), heightMapImage.rows(), opencv_core.CV_8UC1);
+   }
+
+   public void readContactMapImage()
+   {
       // Read height map image into CPU memory
       terrainCostImage.readOpenCLImage(openCLManager);
       contactMapImage.readOpenCLImage(openCLManager);
-
-      return contactMapImage.getBytedecoOpenCVMat();
    }
 
    public void setDepthIntrinsics(double fx, double fy, double cx, double cy)
@@ -324,6 +303,42 @@ public class RapidHeightMapExtractor
       globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(32768));
       globalHeightMapImage.writeOpenCLImage(openCLManager);
       sequenceNumber = 0;
+   }
+
+   public void createLocalHeightMapImage(int height, int width, int type)
+   {
+      localHeightMapImage = new BytedecoImage(width, height, type);
+      localHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   public void createGlobalHeightMapImage(int height, int width, int type)
+   {
+      globalHeightMapImage = new BytedecoImage(width, height, type);
+      globalHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   public void createGlobalHeightVarianceImage(int height, int width, int type)
+   {
+      globalHeightVarianceImage = new BytedecoImage(width, height, type);
+      globalHeightVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   public void createSensorCroppedHeightMapImage(int height, int width, int type)
+   {
+      sensorCroppedHeightMapImage = new BytedecoImage(width, height, type);
+      sensorCroppedHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   public void createTerrainCostImage(int height, int width, int type)
+   {
+      terrainCostImage = new BytedecoImage(width, height, type);
+      terrainCostImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   public void createContactMapImage(int height, int width, int type)
+   {
+      contactMapImage = new BytedecoImage(width, height, type);
+      contactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
    public boolean isProcessing()
@@ -379,6 +394,11 @@ public class RapidHeightMapExtractor
    public Mat getCroppedContactMapImage()
    {
       return getCroppedImage(sensorOrigin, globalCenterIndex, contactMapImage.getBytedecoOpenCVMat());
+   }
+
+   public Mat getGlobalContactImage()
+   {
+      return contactMapImage.getBytedecoOpenCVMat();
    }
 
    public Mat getCroppedImage(Point3D origin, int globalCenterIndex, Mat imageToCrop)
