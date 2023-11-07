@@ -146,8 +146,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
              setEnabled(!enabled.get());
           }
           joystickValue = forwardJoystickValue;
-//          play = joystickValue > 0 || isPreviewGraphicActive();
-          play= true;
+          play = joystickValue > 0 || isPreviewGraphicActive();
+//          play= true;
 
           InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())

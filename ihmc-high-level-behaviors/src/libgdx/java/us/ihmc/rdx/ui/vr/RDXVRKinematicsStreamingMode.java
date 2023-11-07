@@ -223,6 +223,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
             if (pelvisControlState.isHeightControlled())
             {
                newPelvisHeightReference += pelvisFrameChangeRate * VR_INPUT_PELVIS_CHANGE_RATIO;
+               LogTools.info(newPelvisHeightReference);
                if (newPelvisHeightReference < UPPER_LIMIT_PELVIS_HEIGHT && newPelvisHeightReference > LOWER_LIMIT_PELVIS_HEIGHT)
                {
                   if (newPelvisHeightReference < LOWER_LIMIT_PELVIS_HEIGHT_WITH_BACK_BENDING)

@@ -6,10 +6,10 @@
   "numberObservations": 5,
   "conditionOnlyLastObservation": true,
   "conditioningStep": 2,
-  "useCustomSpeed": true,
+  "useCustomSpeed": false,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
-  "postProcessingVelocityAdjuster": 2,
+  "postProcessingVelocityAdjuster": 4,
   "tasks":[
     {
       "context": "Target",
@@ -141,6 +141,16 @@
       "bodyParts":[
         { "name":"rightHand", "geometry":"Pose" },
         { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "RightDoorLeverHandle",
+      "name": "ReachHandle",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "customSpeed": 30,
+      "bodyParts": [
+        { "name": "rightHand", "geometry": "Pose" }
       ]
     }
   ]
