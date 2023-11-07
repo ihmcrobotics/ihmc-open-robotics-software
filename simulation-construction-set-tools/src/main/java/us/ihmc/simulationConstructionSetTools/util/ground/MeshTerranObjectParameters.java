@@ -3,16 +3,11 @@ package us.ihmc.simulationConstructionSetTools.util.ground;
 import java.io.File;
 import java.nio.file.Path;
 
-import javax.swing.UIManager;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.jme3.system.NativeLibraryLoader;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
-import vhacd.VHACDParameters;
 import vhacd4.Vhacd4Parameters;
 
 public class MeshTerranObjectParameters
@@ -27,25 +22,17 @@ public class MeshTerranObjectParameters
       NativeLibraryLoader.setCustomExtractionFolder(scsCachePath.toString());
 
    }
-   
+
    private int maximumNumberOfHulls = 20;
    private int maximumNumberOfVerticesPerHull = 64;
-   private double maximumVolumePercentError = 0.01;
    private int maximumVoxelResolution = 100000;
-   private double maximumConvacity = 0.5;
+   private double maximumVolumetricPercentError = 0.01;
 
    private boolean showOriginalMeshGraphics = true;
    private boolean showDecomposedMeshGraphics = false;
-
-   private VHACDParameters vhacdParameters;
+   private boolean doConvexDecomposition = true;
+   
    private Vhacd4Parameters vhacd4Parameters;
-
-   public enum ConvexDecomposition
-   {
-      VHACD, VHACD4, NO_DECOMPOSITION
-   };
-
-   private ConvexDecomposition decompositionType = ConvexDecomposition.VHACD4;
 
    public MeshTerranObjectParameters()
    {
@@ -55,19 +42,14 @@ public class MeshTerranObjectParameters
 
    public void updateParameters()
    {
-      this.vhacdParameters = new VHACDParameters();
       this.vhacd4Parameters = new Vhacd4Parameters();
-      
+
       // Setting VHACD4 parameters
       this.vhacd4Parameters.setMaxVerticesPerHull(this.maximumNumberOfVerticesPerHull);
       this.vhacd4Parameters.setVoxelResolution(this.maximumVoxelResolution);
-      this.vhacd4Parameters.setVolumePercentError(this.maximumVolumePercentError);
+      this.vhacd4Parameters.setVolumePercentError(this.maximumVolumetricPercentError);
       this.vhacd4Parameters.setMaxHulls(this.maximumNumberOfHulls);
-
-      // Setting VHACD parameters
-      this.vhacdParameters.setMaxConcavity(this.maximumConvacity);
-      this.vhacdParameters.setMaxVerticesPerHull(this.maximumNumberOfVerticesPerHull);
-      this.vhacdParameters.setVoxelResolution(this.maximumVoxelResolution);
+      
    }
 
    public int getMaxNoOfHulls()
@@ -92,12 +74,12 @@ public class MeshTerranObjectParameters
 
    public double getMaxVolumePercentError()
    {
-      return maximumVolumePercentError;
+      return maximumVolumetricPercentError;
    }
 
    public void setMaxVolumePercentError(double maxVolumePercentError)
    {
-      this.maximumVolumePercentError = maxVolumePercentError;
+      this.maximumVolumetricPercentError = maxVolumePercentError;
    }
 
    public int getVoxelResolution()
@@ -108,16 +90,6 @@ public class MeshTerranObjectParameters
    public void setVoxelResolution(int voxelResolution)
    {
       this.maximumVoxelResolution = voxelResolution;
-   }
-
-   public double getMaxConvacity()
-   {
-      return maximumConvacity;
-   }
-
-   public void setMaxConvacity(double maxConvacity)
-   {
-      this.maximumConvacity = maxConvacity;
    }
 
    public boolean isShowUndecomposedMeshGraphics()
@@ -140,15 +112,14 @@ public class MeshTerranObjectParameters
       this.showDecomposedMeshGraphics = showDecomposedMeshGraphics;
    }
 
-   public VHACDParameters getVhacdParameters()
+   public boolean isDoConvexDecomposition()
    {
-      updateParameters();
-      return vhacdParameters;
+      return doConvexDecomposition;
    }
 
-   public void setVhacdParameters(VHACDParameters vhacdParameters)
+   public void setDoConvexDecomposition(boolean doConvexDecomposition)
    {
-      this.vhacdParameters = vhacdParameters;
+      this.doConvexDecomposition = doConvexDecomposition;
    }
 
    public Vhacd4Parameters getVhacd4Parameters()
@@ -162,14 +133,5 @@ public class MeshTerranObjectParameters
       this.vhacd4Parameters = vhacd4Parameters;
    }
 
-   public ConvexDecomposition getDecompositionType()
-   {
-      return decompositionType;
-   }
-
-   public void setDecompositionType(ConvexDecomposition decompositionType)
-   {
-      this.decompositionType = decompositionType;
-   }
 
 }

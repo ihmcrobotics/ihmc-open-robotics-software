@@ -12,6 +12,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -60,7 +61,11 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
          {
             if (face.distance(pointIntersectionLineAndFace) <= EPSILON)
             {
-               highest = Math.max(highest, pointIntersectionLineAndFace.getZ());
+               if (pointIntersectionLineAndFace.getZ() > highest)
+               {
+                  highest = pointIntersectionLineAndFace.getZ();
+                  intersectionResult.intersectionFaceAtHighestPoint = face;
+               }
                lowest = Math.min(lowest, pointIntersectionLineAndFace.getZ());
             }
          }
@@ -74,7 +79,7 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
       return Double.NEGATIVE_INFINITY;
    }
 
-   private final Point3D tempIntersection = new Point3D();
+   private IntersectionResult intersectionResult = new IntersectionResult();
 
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
@@ -88,13 +93,9 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
          intersectionToPack.setZ(heightAt);
       }
 
-      if (normalToPack != null)
+      if (normalToPack != null && heightAt > Double.NEGATIVE_INFINITY)
       {
-         if (heightAt > Double.NEGATIVE_INFINITY)
-         {
-            tempIntersection.set(x, y, heightAt);
-            normalToPack.set(convexPolytope.getClosestFace(tempIntersection).getNormal());
-         }
+         normalToPack.set(intersectionResult.intersectionFaceAtHighestPoint.getNormal());
       }
 
       return (z < heightAt);
@@ -139,6 +140,10 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
    public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
    {
       return Collections.singletonList(convexPolytope);
+   }
+   private class IntersectionResult
+   {
+      private Face3DReadOnly intersectionFaceAtHighestPoint;
    }
 
 }
