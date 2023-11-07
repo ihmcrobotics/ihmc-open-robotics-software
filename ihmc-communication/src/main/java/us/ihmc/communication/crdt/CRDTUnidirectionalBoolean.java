@@ -34,16 +34,16 @@ public class CRDTUnidirectionalBoolean
       this.value = value;
    }
 
+   public boolean toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(boolean value)
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
       {
          this.value = value;
       }
-   }
-
-   public boolean toMessage()
-   {
-      return value;
    }
 }

@@ -35,16 +35,16 @@ public class CRDTBidirectionalField<T>
       }
    }
 
+   public T toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(T value)
    {
       if (!requestConfirmFreezable.isFrozen())
       {
          this.value = value;
       }
-   }
-
-   public T toMessage()
-   {
-      return value;
    }
 }

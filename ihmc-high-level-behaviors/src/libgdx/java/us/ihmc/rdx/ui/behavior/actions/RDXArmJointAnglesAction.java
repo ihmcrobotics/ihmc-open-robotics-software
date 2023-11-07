@@ -46,8 +46,8 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
       for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
-         jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles()[jointIndex],
-                                                    jointAngle -> getDefinition().getJointAngles()[jointIndex] = jointAngle,
+         jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
+                                                    jointAngle -> getDefinition().getJointAngles().getValue()[jointIndex] = jointAngle,
                                                     imDouble -> ImGui.inputDouble(labels.get("j" + jointIndex), imDouble));
       }
    }
@@ -63,7 +63,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
       // Copy the preset values into the custom data fields so they can be tweaked
       // relatively when switching to custom angles.
       if (preset != null)
-         robotModel.getPresetArmConfiguration(getDefinition().getSide(), preset, getDefinition().getJointAngles());
+         robotModel.getPresetArmConfiguration(getDefinition().getSide(), preset, getDefinition().getJointAngles().getValue());
    }
 
    @Override

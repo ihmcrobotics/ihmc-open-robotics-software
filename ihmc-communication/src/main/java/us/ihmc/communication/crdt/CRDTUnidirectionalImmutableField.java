@@ -34,16 +34,16 @@ public class CRDTUnidirectionalImmutableField<T>
       this.value = value;
    }
 
+   public T toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(T value)
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
       {
          this.value = value;
       }
-   }
-
-   public T toMessage()
-   {
-      return value;
    }
 }

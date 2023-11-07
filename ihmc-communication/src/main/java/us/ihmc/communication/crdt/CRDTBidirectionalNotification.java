@@ -51,6 +51,11 @@ public class CRDTBidirectionalNotification
       }
    }
 
+   public boolean toMessage()
+   {
+      return isSet;
+   }
+
    public void fromMessage(boolean isSet)
    {
       if (!requestConfirmFreezable.isFrozen())
@@ -60,10 +65,5 @@ public class CRDTBidirectionalNotification
 
          this.isSet = isSet;
       }
-   }
-
-   public boolean toMessage()
-   {
-      return isSet;
    }
 }

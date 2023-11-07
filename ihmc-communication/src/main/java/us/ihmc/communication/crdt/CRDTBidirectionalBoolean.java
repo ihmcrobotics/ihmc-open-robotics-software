@@ -35,16 +35,16 @@ public class CRDTBidirectionalBoolean
       }
    }
 
+   public boolean toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(boolean value)
    {
       if (!requestConfirmFreezable.isFrozen())
       {
          this.value = value;
       }
-   }
-
-   public boolean toMessage()
-   {
-      return value;
    }
 }

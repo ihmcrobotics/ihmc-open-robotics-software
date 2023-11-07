@@ -34,16 +34,16 @@ public class CRDTUnidirectionalDouble
       this.value = value;
    }
 
+   public double toMessage()
+   {
+      return value;
+   }
+
    public void fromMessage(double value)
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
       {
          this.value = value;
       }
-   }
-
-   public double toMessage()
-   {
-      return value;
    }
 }

@@ -38,7 +38,7 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
          jointAngleArray = new double[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
          for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
          {
-            jointAngleArray[i] = getDefinition().getJointAngles()[i];
+            jointAngleArray[i] = getDefinition().getJointAngles().getValueReadOnly(i);
          }
       }
       else
