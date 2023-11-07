@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * An place to stored sided values backed by an {@link EnumMap}/
+ */
 public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
    private final transient RobotSide[][] sideArrays = new RobotSide[3][];
@@ -19,11 +22,17 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
 
    private static final long serialVersionUID = -6514328471068877058L;
 
+   /**
+    * Does not put values in the underlying EnumMap.
+    */
    public SideDependentList()
    {
       super(RobotSide.class);
    }
 
+   /**
+    * Initializes both sides to the given values.
+    */
    public SideDependentList(V leftObject, V rightObject)
    {
       super(RobotSide.class);
@@ -31,6 +40,9 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
       this.put(RobotSide.RIGHT, rightObject);
    }
 
+   /**
+    * Initializes both sides to values from the supplier.
+    */
    public SideDependentList(Supplier<V> valueSupplier)
    {
       super(RobotSide.class);
@@ -38,6 +50,9 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
       this.put(RobotSide.RIGHT, valueSupplier.get());
    }
 
+   /**
+    * Initializes both sides to values from the valueFunction.
+    */
    public SideDependentList(Function<RobotSide, V> valueFunction)
    {
       super(RobotSide.class);
