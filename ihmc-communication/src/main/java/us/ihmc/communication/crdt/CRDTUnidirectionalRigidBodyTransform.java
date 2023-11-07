@@ -6,8 +6,6 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
-import java.util.function.Consumer;
-
 /**
  * Represents a RigidBodyTransform that should only be modified by one actor type
  * and read-only for the others. The internal writeable instance is kept protected
@@ -26,22 +24,21 @@ public class CRDTUnidirectionalRigidBodyTransform
       this.crdtInfo = crdtInfo;
    }
 
-   public void setValue(Consumer<RigidBodyTransform> modification)
+   public RigidBodyTransformReadOnly getValueReadOnly()
+   {
+      return value;
+   }
+
+   public RigidBodyTransform getValue()
+   {
+      checkActorCanModify();
+      return value;
+   }
+
+   private void checkActorCanModify()
    {
       if (sideThatCanModify != crdtInfo.getActorDesignation())
          throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
-
-      modification.accept(value);
-   }
-
-   public RigidBodyTransformReadOnly getValue()
-   {
-      return value;
-   }
-
-   public RigidBodyTransform getValueUnsafe()
-   {
-      return value;
    }
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)

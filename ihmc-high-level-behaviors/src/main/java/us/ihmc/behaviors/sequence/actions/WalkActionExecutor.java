@@ -80,7 +80,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
          for (RobotSide side : RobotSide.values)
          {
             goalFeetPoses.get(side).setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
-                                                      getDefinition().getGoalFootstepToGoalTransform(side).getValue());
+                                                      getDefinition().getGoalFootstepToGoalTransform(side).getValueReadOnly());
             goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
       }

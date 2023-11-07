@@ -18,7 +18,7 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
    {
       super(id, new WalkActionDefinition(crdtInfo), crdtInfo);
 
-      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform().getValue());
+      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform().getValueReadOnly());
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
    }
