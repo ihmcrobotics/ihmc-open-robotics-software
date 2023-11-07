@@ -40,11 +40,11 @@ public class WalkActionDefinition extends ActionNodeDefinition
       jsonNode.put("swingDuration", swingDuration.getValue());
       jsonNode.put("transferDuration", transferDuration.getValue());
       jsonNode.put("parentFrame", parentFrameName.getValue());
-      JSONTools.toJSON(jsonNode, goalToParentTransform.getValue());
+      JSONTools.toJSON(jsonNode, goalToParentTransform.getValueReadOnly());
       for (RobotSide side : RobotSide.values)
       {
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
+         JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side).getValueReadOnly());
       }
    }
 
@@ -56,14 +56,11 @@ public class WalkActionDefinition extends ActionNodeDefinition
       swingDuration.setValue(jsonNode.get("swingDuration").asDouble());
       transferDuration.setValue(jsonNode.get("transferDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      goalToParentTransform.setValue(goalToParentTransform -> JSONTools.toEuclid(jsonNode, goalToParentTransform));
+      JSONTools.toEuclid(jsonNode, goalToParentTransform.getValue());
       for (RobotSide side : RobotSide.values)
       {
-         goalFootstepToGoalTransforms.get(side).setValue(goalFootstepToGoalTransform ->
-         {
-            JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-            JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransform);
-         });
+         JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
+         JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
       }
    }
 

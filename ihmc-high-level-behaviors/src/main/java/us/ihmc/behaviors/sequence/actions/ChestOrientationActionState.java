@@ -22,7 +22,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    {
       super(id, new ChestOrientationActionDefinition(crdtInfo), crdtInfo);
 
-      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform());
+      chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform().getValueReadOnly());
    }
 
    @Override
