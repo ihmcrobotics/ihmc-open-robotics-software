@@ -96,7 +96,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public boolean getIsNextForExecution()
    {
-      return isNextForExecution.booleanValue();
+      return isNextForExecution.getValue();
    }
 
    public void setIsToBeExecutedConcurrently(boolean isToBeExecutedConcurrently)
@@ -106,7 +106,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public boolean getIsToBeExecutedConcurrently()
    {
-      return isToBeExecutedConcurrently.booleanValue();
+      return isToBeExecutedConcurrently.getValue();
    }
 
    public void setCanExecute(boolean canExecute)
@@ -116,7 +116,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public boolean getCanExecute()
    {
-      return canExecute.booleanValue();
+      return canExecute.getValue();
    }
 
    public void setIsExecuting(boolean isExecuting)
@@ -131,7 +131,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getNominalExecutionDuration()
    {
-      return nominalExecutionDuration.doubleValue();
+      return nominalExecutionDuration.getValue();
    }
 
    public void setElapsedExecutionTime(double elapsedExecutionTime)
@@ -141,12 +141,12 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getElapsedExecutionTime()
    {
-      return elapsedExecutionTime.doubleValue();
+      return elapsedExecutionTime.getValue();
    }
 
    public double getCurrentPositionDistanceToGoal()
    {
-      return currentPositionDistanceToGoal.doubleValue();
+      return currentPositionDistanceToGoal.getValue();
    }
 
    public void setCurrentPositionDistanceToGoal(double currentPositionDistanceToGoal)
@@ -156,7 +156,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getStartPositionDistanceToGoal()
    {
-      return startPositionDistanceToGoal.doubleValue();
+      return startPositionDistanceToGoal.getValue();
    }
 
    public void setStartPositionDistanceToGoal(double startPositionDistanceToGoal)
@@ -166,7 +166,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getPositionDistanceToGoalTolerance()
    {
-      return positionDistanceToGoalTolerance.doubleValue();
+      return positionDistanceToGoalTolerance.getValue();
    }
 
    public void setPositionDistanceToGoalTolerance(double positionDistanceToGoalTolerance)
@@ -176,7 +176,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getCurrentOrientationDistanceToGoal()
    {
-      return currentOrientationDistanceToGoal.doubleValue();
+      return currentOrientationDistanceToGoal.getValue();
    }
 
    public void setCurrentOrientationDistanceToGoal(double currentOrientationDistanceToGoal)
@@ -186,7 +186,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getStartOrientationDistanceToGoal()
    {
-      return startOrientationDistanceToGoal.doubleValue();
+      return startOrientationDistanceToGoal.getValue();
    }
 
    public void setStartOrientationDistanceToGoal(double startOrientationDistanceToGoal)
@@ -196,7 +196,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public double getOrientationDistanceToGoalTolerance()
    {
-      return orientationDistanceToGoalTolerance.doubleValue();
+      return orientationDistanceToGoalTolerance.getValue();
    }
 
    public void setOrientationDistanceToGoalTolerance(double orientationDistanceToGoalTolerance)
@@ -207,6 +207,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    /** Should return a precalculated value from {@link ActionNodeExecutor#updateCurrentlyExecuting} */
    public boolean getIsExecuting()
    {
-      return isExecuting.booleanValue();
+      return isExecuting.getValue();
    }
 }

@@ -20,8 +20,6 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    public ChestOrientationActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Chest orientation");
    }
 
    @Override

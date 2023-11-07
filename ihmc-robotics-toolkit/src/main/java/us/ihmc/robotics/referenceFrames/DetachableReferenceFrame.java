@@ -2,7 +2,7 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 /**
  * This class provides support for having a reference frame that
@@ -16,23 +16,14 @@ public class DetachableReferenceFrame
 {
    private transient final ReferenceFrameLibrary referenceFrameLibrary;
 
-   private final RigidBodyTransform transformToParent;
+   private final RigidBodyTransformReadOnly transformToParent;
    /** Never null, but does change. */
    private ReferenceFrame referenceFrame;
 
-   public DetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary, RigidBodyTransform transformToParent)
+   public DetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary, RigidBodyTransformReadOnly transformToParent)
    {
       this.transformToParent = transformToParent;
       this.referenceFrameLibrary = referenceFrameLibrary;
-   }
-
-   /**
-    * Note: Given frame's parent must be in the ReferenceFrameLibrary.
-    */
-   public void setToReferenceFrameIncludingParent(ReferenceFrame referenceFrame)
-   {
-      referenceFrame.getTransformToDesiredFrame(transformToParent, referenceFrame.getParent());
-      update(referenceFrame.getParent().getName());
    }
 
    public void update(String parentFrameName)

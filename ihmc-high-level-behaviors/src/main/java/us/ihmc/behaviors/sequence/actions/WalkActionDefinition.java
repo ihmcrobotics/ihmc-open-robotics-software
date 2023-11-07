@@ -6,11 +6,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalField;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
@@ -19,23 +17,19 @@ public class WalkActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalDouble swingDuration;
    private final CRDTUnidirectionalDouble transferDuration;
-   private final CRDTUnidirectionalField<String> parentFrameName;
-   private final RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
-   private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
+   private final CRDTUnidirectionalString parentFrameName;
+   private final CRDTUnidirectionalRigidBodyTransform goalToParentTransform;
+   private final SideDependentList<CRDTUnidirectionalRigidBodyTransform> goalFootstepToGoalTransforms;
 
-   public WalkActionDefinition(CRDTInfo crdtInfo, FootstepPlannerParametersBasics footstepPlannerParameters)
+   public WalkActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
 
-      setDescription("Walk");
-
       swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
       transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);
-
-      for (RobotSide side : RobotSide.values)
-      {
-         goalFootstepToGoalTransforms.get(side).getTranslation().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
-      }
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, null);
+      goalToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      goalFootstepToGoalTransforms = new SideDependentList<>(() -> new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo));
    }
 
    @Override
@@ -43,14 +37,14 @@ public class WalkActionDefinition extends ActionNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("swingDuration", swingDuration);
-      jsonNode.put("transferDuration", transferDuration);
-      jsonNode.put("parentFrame", parentFrameName);
-      JSONTools.toJSON(jsonNode, goalToParentTransform);
+      jsonNode.put("swingDuration", swingDuration.getValue());
+      jsonNode.put("transferDuration", transferDuration.getValue());
+      jsonNode.put("parentFrame", parentFrameName.getValue());
+      JSONTools.toJSON(jsonNode, goalToParentTransform.getValue());
       for (RobotSide side : RobotSide.values)
       {
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side));
+         JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
       }
    }
 
@@ -59,14 +53,17 @@ public class WalkActionDefinition extends ActionNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      swingDuration = jsonNode.get("swingDuration").asDouble();
-      transferDuration = jsonNode.get("transferDuration").asDouble();
-      parentFrameName = jsonNode.get("parentFrame").textValue();
-      JSONTools.toEuclid(jsonNode, goalToParentTransform);
+      swingDuration.setValue(jsonNode.get("swingDuration").asDouble());
+      transferDuration.setValue(jsonNode.get("transferDuration").asDouble());
+      parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
+      goalToParentTransform.setValue(goalToParentTransform -> JSONTools.toEuclid(jsonNode, goalToParentTransform));
       for (RobotSide side : RobotSide.values)
       {
-         JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side));
+         goalFootstepToGoalTransforms.get(side).setValue(goalFootstepToGoalTransform ->
+         {
+            JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
+            JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransform);
+         });
       }
    }
 
@@ -74,62 +71,62 @@ public class WalkActionDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setSwingDuration(swingDuration);
-      message.setTransferDuration(transferDuration);
-      message.setParentFrameName(parentFrameName);
-      MessageTools.toMessage(goalToParentTransform, message.getTransformToParent());
-      MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
-      MessageTools.toMessage(goalFootstepToGoalTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
+      message.setSwingDuration(swingDuration.toMessage());
+      message.setTransferDuration(transferDuration.toMessage());
+      message.setParentFrameName(parentFrameName.toMessage());
+      goalToParentTransform.toMessage(message.getTransformToParent());
+      goalFootstepToGoalTransforms.get(RobotSide.LEFT).toMessage(message.getLeftGoalFootTransformToGizmo());
+      goalFootstepToGoalTransforms.get(RobotSide.RIGHT).toMessage(message.getRightGoalFootTransformToGizmo());
    }
 
    public void fromMessage(WalkActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      swingDuration = message.getSwingDuration();
-      transferDuration = message.getTransferDuration();
-      parentFrameName = message.getParentFrameNameAsString();
-      MessageTools.toEuclid(message.getTransformToParent(), goalToParentTransform);
-      MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToGoalTransforms.get(RobotSide.LEFT));
-      MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToGoalTransforms.get(RobotSide.RIGHT));
+      swingDuration.fromMessage(message.getSwingDuration());
+      transferDuration.fromMessage(message.getTransferDuration());
+      parentFrameName.fromMessage(message.getParentFrameNameAsString());
+      goalToParentTransform.fromMessage(message.getTransformToParent());
+      goalFootstepToGoalTransforms.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootTransformToGizmo());
+      goalFootstepToGoalTransforms.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootTransformToGizmo());
    }
 
    public double getSwingDuration()
    {
-      return swingDuration;
+      return swingDuration.getValue();
    }
 
    public void setSwingDuration(double swingDuration)
    {
-      this.swingDuration = swingDuration;
+      this.swingDuration.setValue(swingDuration);
    }
 
    public double getTransferDuration()
    {
-      return transferDuration;
+      return transferDuration.getValue();
    }
 
    public void setTransferDuration(double transferDuration)
    {
-      this.transferDuration = transferDuration;
+      this.transferDuration.setValue(transferDuration);
    }
 
-   public SideDependentList<RigidBodyTransform> getGoalFootstepToGoalTransforms()
+   public CRDTUnidirectionalRigidBodyTransform getGoalFootstepToGoalTransform(RobotSide side)
    {
-      return goalFootstepToGoalTransforms;
+      return goalFootstepToGoalTransforms.get(side);
    }
 
    public String getParentFrameName()
    {
-      return parentFrameName;
+      return parentFrameName.getValue();
    }
 
    public void setParentFrameName(String parentFrameName)
    {
-      this.parentFrameName = parentFrameName;
+      this.parentFrameName.setValue(parentFrameName);
    }
 
-   public RigidBodyTransform getGoalToParentTransform()
+   public CRDTUnidirectionalRigidBodyTransform getGoalToParentTransform()
    {
       return goalToParentTransform;
    }

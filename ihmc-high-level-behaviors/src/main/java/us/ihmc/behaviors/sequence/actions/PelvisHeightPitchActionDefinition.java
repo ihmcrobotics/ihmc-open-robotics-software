@@ -19,8 +19,6 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
    public PelvisHeightPitchActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Pelvis height and pitch");
    }
 
    @Override

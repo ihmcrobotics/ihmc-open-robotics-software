@@ -33,7 +33,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("executeWithNextAction", executeWithNextAction.booleanValue());
+      jsonNode.put("executeWithNextAction", executeWithNextAction.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -68,6 +68,6 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
    public boolean getExecuteWithNextAction()
    {
-      return executeWithNextAction.booleanValue();
+      return executeWithNextAction.getValue();
    }
 }

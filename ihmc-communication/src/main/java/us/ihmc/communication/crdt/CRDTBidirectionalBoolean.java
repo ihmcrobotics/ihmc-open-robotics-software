@@ -21,7 +21,7 @@ public class CRDTBidirectionalBoolean
       value = initialValue;
    }
 
-   public boolean booleanValue()
+   public boolean getValue()
    {
       return value;
    }

@@ -19,8 +19,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    public SakeHandCommandActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Hand configuration");
    }
 
    @Override

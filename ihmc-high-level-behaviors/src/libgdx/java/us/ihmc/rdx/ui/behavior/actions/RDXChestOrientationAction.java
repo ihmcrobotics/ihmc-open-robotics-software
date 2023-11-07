@@ -63,6 +63,8 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    {
       state = new ChestOrientationActionState(id, crdtInfo, referenceFrameLibrary);
 
+      getDefinition().setDescription("Chest orientation");
+
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform(), getSelected());
       poseGizmo.create(panel3D);
 

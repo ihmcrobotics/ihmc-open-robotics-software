@@ -17,8 +17,6 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    public HandWrenchActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      setDescription("Hand wrench");
    }
 
    @Override

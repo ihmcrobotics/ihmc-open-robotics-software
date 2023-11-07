@@ -66,6 +66,8 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
 
       state = new PelvisHeightPitchActionState(id, crdtInfo, referenceFrameLibrary);
 
+      getDefinition().setDescription("Pelvis height and pitch");
+
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform());
       poseGizmo.create(panel3D);
 
