@@ -319,6 +319,8 @@ public class RDXBaseUI
       {
          ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(true);
       }
+
+      screenRecorder.record(recordScreenUI.get());
    }
 
    private void renderMenuBar()
@@ -507,10 +509,7 @@ public class RDXBaseUI
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
       }
 
-      if (ImGui.checkbox("Record UI", recordScreenUI))
-      {
-         screenRecorder.saveScreenshot(IHMCCommonPaths.LOGS_DIRECTORY.toString());
-      }
+      ImGui.checkbox("Record UI", recordScreenUI);
       frameRateDisplay.renderHz();
 
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
