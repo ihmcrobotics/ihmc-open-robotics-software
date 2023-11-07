@@ -1,0 +1,6 @@
+{
+  "title" : "MonteCarloFootstepPlannerParameters",
+  "Number of iterations" : 20,
+  "Number of simulations" : 100,
+  "Timeout duration" : 0.1
+}

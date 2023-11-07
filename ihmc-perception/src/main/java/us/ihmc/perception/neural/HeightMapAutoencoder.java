@@ -193,15 +193,13 @@ public class HeightMapAutoencoder
 
          // create display image for output image
          Mat outputImage16UC1 = outputHeightMap16UC1.clone();
-         opencv_core.convertScaleAbs(outputImage16UC1, outputImage16UC1, 255.0 / 65535.0, 0);
          Mat displayOutput = new Mat(outputImage16UC1.rows(), outputImage16UC1.cols(), opencv_core.CV_8UC3);
-         opencv_imgproc.cvtColor(outputImage16UC1, displayOutput, opencv_imgproc.COLOR_GRAY2RGB);
+         PerceptionDebugTools.convertDepthCopyToColor(outputImage16UC1, displayOutput);
 
          // create color image for input image
          Mat heightMapForDisplay = heightMap16UC1.clone();
-         opencv_core.convertScaleAbs(heightMapForDisplay, heightMapForDisplay, 255.0 / 65535.0, 0);
          Mat displayInput = new Mat(heightMapForDisplay.rows(), heightMapForDisplay.cols(), opencv_core.CV_8UC3);
-         opencv_imgproc.cvtColor(heightMapForDisplay, displayInput, opencv_imgproc.COLOR_GRAY2RGB);
+         PerceptionDebugTools.convertDepthCopyToColor(heightMapForDisplay, displayInput);
 
          // convert to color image
          Mat stackedImage = new Mat(displayInput.rows(), displayInput.cols() * 2, opencv_core.CV_8UC3);

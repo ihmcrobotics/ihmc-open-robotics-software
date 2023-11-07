@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.ejml.data.FMatrixRMaj;
-import rosgraph_msgs.Log;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -409,6 +408,12 @@ public class PerceptionDebugTools
                                -1,
                                opencv_imgproc.LINE_4,
                                0);
+   }
+
+   public static void convertDepthCopyToColor(Mat depthImage16UC1Copy, Mat colorImage8UC3)
+   {
+      opencv_core.convertScaleAbs(depthImage16UC1Copy, depthImage16UC1Copy, 255.0 / 65535.0, 0);
+      opencv_imgproc.cvtColor(depthImage16UC1Copy, colorImage8UC3, opencv_imgproc.COLOR_GRAY2RGB);
    }
 
    public static void clearAllWindows()

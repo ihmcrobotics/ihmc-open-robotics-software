@@ -251,9 +251,9 @@ public class HumanoidPerceptionModule
    public void initializeHeightMapExtractor(CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor();
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager);
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
-      rapidHeightMapExtractor.create(openCLManager, realsenseDepthImage, 1);
+      rapidHeightMapExtractor.create(realsenseDepthImage, 1);
    }
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)

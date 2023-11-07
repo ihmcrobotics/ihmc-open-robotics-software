@@ -88,12 +88,6 @@ public class MonteCarloPlanner
       return bestNode.getPosition();
    }
 
-   public void updateState(Point2DReadOnly newState)
-   {
-      updateWorld(newState);
-      updateAgent(newState);
-   }
-
    /**
     * Performs the Monte Carlo Tree Search Algorithm on the given sub-tree of the Monte Carlo Tree.
     *    1. If the node has not been visited
@@ -131,16 +125,6 @@ public class MonteCarloPlanner
          }
          updateTree(bestNode);
       }
-   }
-
-   public void updateWorld(Point2DReadOnly newState)
-   {
-      MonteCarloPlannerTools.updateGrid(world, newState, agent.getRangeScanner().getMaxRange());
-   }
-
-   public void updateAgent(Point2DReadOnly newState)
-   {
-      agent.changeStateTo(newState);
    }
 
    /**
@@ -293,6 +277,22 @@ public class MonteCarloPlanner
       }
 
       agent.setMeasurements(points);
+   }
+
+   public void updateState(Point2DReadOnly newState)
+   {
+      updateWorld(newState);
+      updateAgent(newState);
+   }
+
+   public void updateWorld(Point2DReadOnly newState)
+   {
+      MonteCarloPlannerTools.updateGrid(world, newState, agent.getRangeScanner().getMaxRange());
+   }
+
+   public void updateAgent(Point2DReadOnly newState)
+   {
+      agent.changeStateTo(newState);
    }
 
    public void setParameters(int simulationIterations, int searchIterations, int stepLength)
