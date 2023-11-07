@@ -1,13 +1,18 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Random;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -20,8 +25,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MeshTerrainObjectTest
 {
-   private static final boolean SHOW_VISUALIZATION = true;
+   private static final boolean SHOW_VISUALIZATION = false;
    private static SimulationConstructionSet scs = null;
+   private static double sphereRadius = 0.01;
+   private static double cubeDimesnion = 0.01;
+   private static final Random random = new Random();
 
    @AfterEach
    public void tearDown()
@@ -49,10 +57,11 @@ public class MeshTerrainObjectTest
       {
 
          RigidBodyTransform configuration = new RigidBodyTransform();
-         configuration.setRotationEulerAndZeroTranslation(new Vector3D(0.0, 0.0, -Math.PI / 2.0));
-
+         Vector3D translation = new Vector3D(0.0, 0.0, 0.1);
+         Quaternion orientation = new Quaternion(-Math.PI / 2.0, 0.0, 0.0);
+         configuration.set(orientation, translation);
          //         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/SmallWalkway/Walkway.obj", configuration);
-         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/Walkway/Walkway.obj", configuration);
+         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/walkway/walkway.obj", configuration);
          //         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/Valley/Valley.obj", configuration);
 
          scs = new SimulationConstructionSet(new Robot("dummy"));
@@ -95,11 +104,10 @@ public class MeshTerrainObjectTest
     */
    public void testHeightAt()
    {
-
       // Testing using a Stool with bounding box dimensions as X,Y,Z = 0.375, 0.375,0.575
       // Stool dimensions can be found here "https://cad.onshape.com/documents/ed770d6e6aa0b5ca25885953/w/d5578c1a76bb6f06ae50c7b9/e/ebb25271027fb47ebaec1c9c"
 
-      String relativeFilePath = "models/Stool/Stool.obj";
+      String relativeFilePath = "models/stool/stool.obj";
       MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
 
       Double heightAt;
@@ -107,7 +115,7 @@ public class MeshTerrainObjectTest
       // Point A is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will intersect the stool
       Point3D pointA = new Point3D(0.25, 0.25, 0.6);
       heightAt = meshTerrainObject.heightAt(pointA.getX(), pointA.getY(), pointA.getZ());
-      assertEquals(heightAt, 0.575, maxError);
+      assertEquals(heightAt, 0.575, maxError, "Error");
 
       // Point B is under the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will still intersect the stool
       Point3D pointB = new Point3D(0.18, 0.18, 0.25);
@@ -134,50 +142,136 @@ public class MeshTerrainObjectTest
       heightAt = meshTerrainObject.heightAt(pointF.getX(), pointF.getY(), pointF.getZ());
       assertEquals(heightAt, 0.575, maxError);
 
-      Graphics3DObject viz = new Graphics3DObject();
+      if (SHOW_VISUALIZATION)
+      {
+         Graphics3DObject viz = new Graphics3DObject();
+         scs = new SimulationConstructionSet(new Robot("dummy"));
+         scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
+
+         scs.setGroundVisible(false);
+
+         addGraphicWithTestPoints(viz, meshTerrainObject, pointA, YoAppearance.DarkSalmon());
+         addGraphicWithTestPoints(viz, meshTerrainObject, pointB, YoAppearance.DarkSalmon());
+         addGraphicWithTestPoints(viz, meshTerrainObject, pointC, YoAppearance.DarkSalmon());
+         addGraphicWithTestPoints(viz, meshTerrainObject, pointD, YoAppearance.DarkSalmon());
+         addGraphicWithTestPoints(viz, meshTerrainObject, pointE, YoAppearance.DarkSalmon());
+         addGraphicWithTestPoints(viz, meshTerrainObject, pointF, YoAppearance.DarkSalmon());
+
+         // Red is the point being tested - it will be a cube if heightAt is negative
+         // infinity, otherwise it will be a sphere
+         // Yellow ball is heightAt value if it exists
+
+         scs.addStaticLinkGraphics(viz);
+         scs.startOnAThread();
+         ThreadTools.sleepForever();
+      }
+
+   }
+
+   @Test
+   public void testHeightAndNormalAt()
+   {
+      // Testing using a sphere with bounding box dimensions as X,Y,Z = 0.25, 0.25,0.25
+      // Stool dimensions can be found here "https://cad.onshape.com/documents/ed770d6e6aa0b5ca25885953/w/d5578c1a76bb6f06ae50c7b9/e/57007e2af3e9933eb97ecdca"
+
+      String relativeFilePath = "models/simpleShapeForTesting/simpleShapeForTesting.obj";
+      MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
       scs = new SimulationConstructionSet(new Robot("dummy"));
       scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
 
-      scs.setGroundVisible(false);
+      double maxError = 0.01;
 
-      addGraphicWithTestPoints(viz, meshTerrainObject, pointA, YoAppearance.DarkSalmon());
-      addGraphicWithTestPoints(viz, meshTerrainObject, pointB, YoAppearance.DarkSalmon());
-      addGraphicWithTestPoints(viz, meshTerrainObject, pointC, YoAppearance.DarkSalmon());
-      addGraphicWithTestPoints(viz, meshTerrainObject, pointD, YoAppearance.DarkSalmon());
-      addGraphicWithTestPoints(viz, meshTerrainObject, pointE, YoAppearance.DarkSalmon());
-      addGraphicWithTestPoints(viz, meshTerrainObject, pointF, YoAppearance.DarkSalmon());
+      double heightAt;
+      Vector3D normalToPack = new Vector3D(0, 0, 0);
 
-      // Red is the point being tested - it will be a cube if heightAt is negative
-      // infinity, otherwise it will be a sphere
-      // Yellow ball is heightAt value if it exists
+      // Point A is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will intersect the stool
+      Point3D pointA = new Point3D(-0.1, -0.1, 0.3);
+      heightAt = meshTerrainObject.heightAndNormalAt(pointA.getX(), pointA.getY(), pointA.getZ(), normalToPack);
+      assertEquals(heightAt, 0.25 / 2, maxError);
+      assertEquals(normalToPack, new Vector3D(0, 0, 1));
 
-      scs.addStaticLinkGraphics(viz);
-      scs.startOnAThread();
-      ThreadTools.sleepForever();
+      // Point B is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will intersect the stool and its normal will be 45 degree from the Z axis
+      Point3D pointB = new Point3D(0.1, -0.1, 0.3);
+      heightAt = meshTerrainObject.heightAndNormalAt(pointB.getX(), pointB.getY(), pointB.getZ(), normalToPack);
+      double errorX = normalToPack.getX() - 0.707;
+      double errorY = normalToPack.getY() - 0.0;
+      double errorZ = normalToPack.getZ() - 0.707;
+
+      double rmsError = Math.sqrt(errorX * errorX + errorY * errorY + errorZ * errorZ);
+
+      assertEquals(heightAt, 0.25 / 2 - pointB.getX(), maxError);
+      assertEquals(rmsError, 0.0, maxError);
 
    }
 
    @Test
    public void testCheckIfInside()
    {
-      // METHOD NOT YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
+      String relativeFilePath = "models/sphere/sphere.obj";
+
+      MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
+      parameters.setMaxNoOfHulls(100);
+      parameters.setMaxNoOfVertices(100);
+
+      MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
+
+      double errrorMargin = 0.03;
+      double emptyRange = 0.1412 - errrorMargin ; // Largest square that can be inscribed in a circle of Dia 0.2m is 0.1412 m
+      
+      Point3D intersectionToPack = new Point3D();
+      Vector3D normalToPack = new Vector3D();
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         // Randomly sample a point in the empty area inside the surface of the sphere centered at the origin
+         double randomX = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * emptyRange/2;
+         double randomY = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * emptyRange/2;
+         double randomZ = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * 100;
+         assertFalse(meshTerrainObject.checkIfInside(randomX, randomY, randomZ, intersectionToPack, normalToPack));
+      }
    }
 
-   @Test
-   public void testHeightAndNormalAt()
-   {
-      // METHOD NOT YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
-   }
 
    @Test
    public void testIsClose()
    {
-      // METHOD NOT YET IMPLEMENTED FOR MESH TERRAIN OBJECTS
+      // Testing using a sphere with bounding box dimensions as X,Y,Z = 0.5, 0.5,0.5
+      // Sphere dimensions can be found here "https://cad.onshape.com/documents/ed770d6e6aa0b5ca25885953/w/d5578c1a76bb6f06ae50c7b9/e/ebb25271027fb47ebaec1c9c"
 
+      String relativeFilePath = "models/sphere/sphere.obj";
+
+      MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
+      parameters.setMaxNoOfHulls(100);
+      parameters.setMaxNoOfVertices(100);
+
+      MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
+
+      double boundingBoxDimension = 0.5;
+      double errrorMargin = 0.03;
+
+      double sampleInsideRange = boundingBoxDimension / 2 - errrorMargin;
+      double sampleOutsidevalue = boundingBoxDimension / 2 + errrorMargin;
+
+      // Sample 100 points
+      for (int i = 0; i < 100; i++)
+      {
+         // Randomly sample a point inside the cube centered at the origin
+         double randomX = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * sampleInsideRange;
+         double randomY = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * sampleInsideRange;
+         double randomZ = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * sampleInsideRange;
+         assertTrue(meshTerrainObject.isClose(randomX, randomY, randomZ));
+
+         // Randomly sample a point outside the cube centered at the origin
+         randomX = (random.nextDouble() + 1) * (random.nextBoolean() ? 1 : -1) * sampleOutsidevalue;
+         randomY = (random.nextDouble() + 1) * (random.nextBoolean() ? 1 : -1) * sampleOutsidevalue;
+         randomZ = (random.nextDouble() + 1) * (random.nextBoolean() ? 1 : -1) * sampleOutsidevalue;
+         assertFalse(meshTerrainObject.isClose(randomX, randomY, randomZ));
+      }
    }
 
    /**
     * This method is used to visualize the heightat value of a MeshTerrainObject at a given point.
+    * 
     * @author Khizar
     */
    public static void addArrowForNormal(Double xPoint, Double yPoint, Double heightAt, Vector3D normal)
@@ -198,14 +292,13 @@ public class MeshTerrainObjectTest
       scs.addYoGraphic(surfaceNormalGraphic);
 
    }
+
    /**
-    * This method is used to draw arrows that align with the normal to the surface    * 
+    * This method is used to draw arrows that align with the normal to the surface *
+    * 
     * @author Khizar
     */
-   private static void addGraphicWithTestPoints(Graphics3DObject viz,
-                                                MeshTerrainObject convexPolytopeTerrainObject,
-                                                Point3D point,
-                                                AppearanceDefinition lineAppearance)
+   private static void addGraphicWithTestPoints(Graphics3DObject viz, MeshTerrainObject meshTerrainObject, Point3D point, AppearanceDefinition lineAppearance)
    {
 
       Double xPoint = point.getX();
@@ -214,7 +307,7 @@ public class MeshTerrainObjectTest
 
       Vector3D normalToPack = new Vector3D();
       normalToPack.set(0.0, 0.0, 0.0);
-      double result = convexPolytopeTerrainObject.heightAndNormalAt(xPoint, yPoint, zPoint, normalToPack);
+      double result = meshTerrainObject.heightAndNormalAt(xPoint, yPoint, zPoint, normalToPack);
 
       if (result != Double.NEGATIVE_INFINITY)
       {
@@ -222,18 +315,18 @@ public class MeshTerrainObjectTest
 
          viz.identity();
          viz.translate(xPoint, yPoint, zPoint);
-         viz.addSphere(0.04, YoAppearance.Red());
+         viz.addSphere(sphereRadius, YoAppearance.Red());
 
          viz.identity();
          viz.translate(xPoint, yPoint, result);
-         viz.addSphere(0.04, YoAppearance.Yellow());
+         viz.addSphere(sphereRadius, YoAppearance.Yellow());
       }
       else
       {
 
          viz.identity();
          viz.translate(xPoint, yPoint, zPoint);
-         viz.addCube(0.08, 0.08, 0.08, YoAppearance.Red());
+         viz.addCube(cubeDimesnion, cubeDimesnion, cubeDimesnion, YoAppearance.Red());
       }
       viz.identity();
       viz.translate(xPoint, yPoint, -500.0);
