@@ -6,17 +6,13 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
  * Represents a data field that should only be modified by one actor type
  * and read-only for the others.
  */
-public class CRDTUnidirectionalImmutableField<T>
+public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 {
-   private final ROS2ActorDesignation sideThatCanModify;
-   private final CRDTInfo crdtInfo;
-
    private T value;
 
    public CRDTUnidirectionalImmutableField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, T initialValue)
    {
-      this.sideThatCanModify = sideThatCanModify;
-      this.crdtInfo = crdtInfo;
+      super(sideThatCanModify, crdtInfo);
 
       value = initialValue;
    }
@@ -28,8 +24,7 @@ public class CRDTUnidirectionalImmutableField<T>
 
    public void setValue(T value)
    {
-      if (sideThatCanModify != crdtInfo.getActorDesignation())
-         throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
+      checkActorCanModify();
 
       this.value = value;
    }
@@ -41,7 +36,7 @@ public class CRDTUnidirectionalImmutableField<T>
 
    public void fromMessage(T value)
    {
-      if (sideThatCanModify != crdtInfo.getActorDesignation()) // Ignore updates if we are the only side that can modify
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          this.value = value;
       }
