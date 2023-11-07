@@ -29,7 +29,7 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
 
    public void fromMessage(double[] messageArray)
    {
-      if (!canActorModify()) // Ignore updates if we are the only side that can modify
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          for (int i = 0; i < getValueInternal().length; i++)
          {

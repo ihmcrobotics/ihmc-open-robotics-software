@@ -30,7 +30,7 @@ public class CRDTUnidirectionalRigidBodyTransform extends CRDTUnidirectionalMuta
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      if (!canActorModify()) // Ignore updates if we are the only side that can modify
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
       }

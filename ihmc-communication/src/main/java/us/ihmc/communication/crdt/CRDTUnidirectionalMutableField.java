@@ -12,17 +12,14 @@ import java.util.function.Supplier;
  * This is abstract because there is a need to provide a read-only access to this
  * mutable value, which will vary by type.
  */
-public abstract class CRDTUnidirectionalMutableField<T>
+public abstract class CRDTUnidirectionalMutableField<T> extends CRDTUnidirectionalField
 {
-   private final ROS2ActorDesignation sideThatCanModify;
-   private final CRDTInfo crdtInfo;
-
    private final T value;
 
    public CRDTUnidirectionalMutableField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, Supplier<T> valueSupplier)
    {
-      this.sideThatCanModify = sideThatCanModify;
-      this.crdtInfo = crdtInfo;
+      super(sideThatCanModify, crdtInfo);
+
       value = valueSupplier.get();
    }
 
@@ -35,16 +32,5 @@ public abstract class CRDTUnidirectionalMutableField<T>
    protected T getValueInternal()
    {
       return value;
-   }
-
-   protected void checkActorCanModify()
-   {
-      if (!canActorModify())
-         throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
-   }
-
-   protected boolean canActorModify()
-   {
-      return sideThatCanModify == crdtInfo.getActorDesignation();
    }
 }
