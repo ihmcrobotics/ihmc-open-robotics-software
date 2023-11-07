@@ -27,6 +27,7 @@ public class RDX3DScene
 {
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final Set<RDXRenderableAdapter> renderables = new HashSet<>();
+   private final Map<Object, RDXRenderableAdapter> renderableOwnerKeyMap = new HashMap<>();
 
    private TreeSet<RDXSceneLevel> sceneLevelsToRender;
    private float ambientLight = 0.4f;
@@ -215,9 +216,33 @@ public class RDX3DScene
       return renderableAdapter;
    }
 
+   public void addRenderableProvider(Object ownerKey, RDXRenderableProvider renderableProvider)
+   {
+      RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
+      renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
+      renderables.add(renderableAdapter);
+   }
+
+   public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider)
+   {
+      addRenderableProvider(ownerKey, renderableProvider, RDXSceneLevel.MODEL);
+   }
+
+   public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
+   {
+      RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
+      renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
+      renderables.add(renderableAdapter);
+   }
+
    public void addRenderableAdapter(RDXRenderableAdapter renderableAdapter)
    {
       renderables.add(renderableAdapter);
+   }
+
+   public void removeRenderable(Object ownerKey)
+   {
+      renderables.remove(renderableOwnerKeyMap.remove(ownerKey));
    }
 
    public void removeRenderableAdapter(RDXRenderableAdapter renderableAdapter)

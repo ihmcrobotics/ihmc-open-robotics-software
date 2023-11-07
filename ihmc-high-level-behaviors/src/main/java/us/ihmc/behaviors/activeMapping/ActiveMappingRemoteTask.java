@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -27,7 +26,6 @@ public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
    private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(new WalkingStatusMessage());
 
    private final ROS2PublisherMap publisherMap;
-   private final ROS2SyncedRobotModel syncedRobotModel;
 
    private ActiveMapper activeMappingModule;
 
@@ -37,7 +35,6 @@ public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
 
    public ActiveMappingRemoteTask(String simpleRobotName,
                                   DRCRobotModel robotModel,
-                                  ROS2SyncedRobotModel syncedRobotModel,
                                   ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
                                   ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
                                   ROS2Node ros2Node,
@@ -49,7 +46,6 @@ public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
 
-      this.syncedRobotModel = syncedRobotModel;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
       activeMappingModule = new ActiveMapper(robotModel, referenceFrames);

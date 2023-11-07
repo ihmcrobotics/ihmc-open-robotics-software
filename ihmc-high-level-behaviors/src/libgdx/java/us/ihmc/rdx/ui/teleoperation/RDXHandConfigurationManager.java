@@ -12,6 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXSakeHandPositionSlider;
+import us.ihmc.rdx.ui.interactable.RDXSakeHandTorqueSlider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -28,6 +29,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
    private final SideDependentList<RDXSakeHandPositionSlider> handPositionSliders = new SideDependentList<>();
+   private final SideDependentList<RDXSakeHandTorqueSlider> handTorqueSliders = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -49,7 +51,8 @@ public class RDXHandConfigurationManager
          Runnable resetHand = () -> publishHandCommand(side, HandConfiguration.RESET);
          handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
-         handPositionSliders.put(side, new RDXSakeHandPositionSlider(syncedRobotModel, communicationHelper, side));
+         handPositionSliders.put(side, new RDXSakeHandPositionSlider(communicationHelper, side));
+         handTorqueSliders.put(side, new RDXSakeHandTorqueSlider(syncedRobotModel, communicationHelper, side));
       }
 
       if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
@@ -66,7 +69,7 @@ public class RDXHandConfigurationManager
 
    public void update()
    {
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : sakeHandInfo.sides())
       {
          sakeHandInfo.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandInfo.get(side));
@@ -106,6 +109,7 @@ public class RDXHandConfigurationManager
          }
 
          handPositionSliders.get(side).renderImGuiWidgets();
+         handTorqueSliders.get(side).renderImGuiWidgets();
       }
       if (!sakeHandInfo.isEmpty())
          ImGui.text("Sake EZGrippers:");

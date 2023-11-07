@@ -9,6 +9,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -20,7 +21,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
@@ -43,7 +45,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    private final ImBoolean useSensorColor = new ImBoolean(true);
    private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
    private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(true);
-   private final ImFloat pointSize = new ImFloat(0.01f);
+   private final ImFloat pointSizeScale = new ImFloat(1.0f);
    private final ImInt levelOfColorDetail = new ImInt(0);
 
    private final RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel;
@@ -60,6 +62,11 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    private RDXPinholePinholeColoredPointCloudKernel pinholePinholeKernel;
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private boolean usingColor;
+
+   private final MutableReferenceFrame depthFrame = new MutableReferenceFrame();
+   private final MutableReferenceFrame colorFrame = new MutableReferenceFrame();
+   private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
+
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -160,6 +167,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 
    private void runKernels()
    {
+      float pointSize = pointSizeScale.get() / depthChannel.getFx();
       if (depthChannel.getCameraModel() == CameraModel.PINHOLE) // Assuming color camera is also pinhole if using it
       {
          pinholePinholeKernel.computeVertexBuffer(colorChannel,
@@ -167,17 +175,20 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
                                                   usingColor && useSensorColor.get(),
                                                   gradientMode.ordinal(),
                                                   useSinusoidalGradientPattern.get(),
-                                                  pointSize.get(),
+                                                  pointSize,
                                                   pointCloudVertexBuffer);
       }
       else if (depthChannel.getCameraModel() == CameraModel.OUSTER) // Assuming color is equidistant fisheye if using it
       {
+         depthFrame.update(transformToWorld -> transformToWorld.set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld()));
+         colorFrame.update(transformToWorld -> transformToWorld.set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld()));
+         depthFrame.getReferenceFrame().getTransformToDesiredFrame(depthToColorTransform, colorFrame.getReferenceFrame());
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
-         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
+         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(depthToColorTransform.getRotation(), depthToColorTransform.getTranslation());
          ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterBeamAltitudeAnglesBuffer(), depthChannel.getOusterBeamAzimuthAnglesBuffer());
          ousterFisheyeKernel.runKernel(0.0f,
-                                       pointSize.get(),
+                                       pointSize,
                                        usingColor && useSensorColor.get(),
                                        gradientMode.ordinal(),
                                        useSinusoidalGradientPattern.get(),
@@ -234,7 +245,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       if (ImGui.radioButton(labels.get("Sensor X"), gradientMode == RDXColorGradientMode.SENSOR_X))
          gradientMode = RDXColorGradientMode.SENSOR_X;
       ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
-      ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
+      ImGui.sliderFloat(labels.get("Point scale"), pointSizeScale.getData(), 0.0f, 2.0f);
       if (depthChannel.getCameraModel() == CameraModel.OUSTER && colorChannel.getCameraModel() == CameraModel.EQUIDISTANT_FISHEYE)
       {
          ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3);
@@ -283,9 +294,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       return subscribed.get();
    }
 
-   public void setPointSize(float pointSize)
+   public void setPointSizeScale(float pointSizeScale)
    {
-      this.pointSize.set(pointSize);
+      this.pointSizeScale.set(pointSizeScale);
    }
 
    public void setLevelOfColorDetail(int levelOfColorDetail)

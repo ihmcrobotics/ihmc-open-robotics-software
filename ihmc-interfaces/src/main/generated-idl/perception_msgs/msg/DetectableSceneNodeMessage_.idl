@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__DetectableSceneNodeMessage__idl__
 #define __perception_msgs__msg__DetectableSceneNodeMessage__idl__
 
-#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "perception_msgs/msg/./SceneNodeMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -17,41 +17,13 @@ module perception_msgs
       struct DetectableSceneNodeMessage
       {
         /**
-         * The name of the scene node
+         * The base scene node information
          */
-        string name;
+        perception_msgs::msg::dds::SceneNodeMessage scene_node;
         /**
          * Whether or not the node is currently detected
          */
         boolean currently_detected;
-        /**
-         * Transform of the node's frame to world frame
-         */
-        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
-        /**
-         * If this node is trackable via an ArUco maker, this is the ArUco marker's
-         * transform to world frame. This is so we can reset overriden node
-         * poses back to ArUco relative ones.
-         */
-        controller_msgs::msg::dds::RigidBodyTransformMessage aruco_marker_transform_to_world;
-        /**
-         * Nodes can be set to not track the detected pose
-         */
-        boolean track_detected_pose;
-        /**
-         * Break frequency filter value for nodes that are alpha filtered
-         */
-        float break_frequency;
-        /**
-         * Distance to robot to disable tracking.
-         * Used for automatically disabling tracking for static relative objects.
-         */
-        float distance_to_disable_tracking;
-        /**
-         * Current distance to robot.
-         * Used for automatically disabling tracking for static relative objects.
-         */
-        float current_distance_to_robot;
       };
     };
   };

@@ -1,0 +1,95 @@
+#ifndef __perception_msgs__msg__SceneGraphMessage__idl__
+#define __perception_msgs__msg__SceneGraphMessage__idl__
+
+#include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
+#include "perception_msgs/msg/./CenterposeNodeMessage_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+#include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
+#include "perception_msgs/msg/./PrimitiveRigidBodySceneNodeMessage_.idl"
+#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+#include "perception_msgs/msg/./StaticRelativeSceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet SCENE_NODE_TYPE =
+      0;
+
+      const octet DETECTABLE_SCENE_NODE_TYPE =
+      1;
+
+      const octet PREDEFINED_RIGID_BODY_NODE_TYPE =
+      2;
+
+      const octet ARUCO_MARKER_NODE_TYPE =
+      3;
+
+      const octet CENTERPOSE_NODE_TYPE =
+      4;
+
+      const octet STATIC_RELATIVE_NODE_TYPE =
+      5;
+
+      const octet PRIMITIVE_RIGID_BODY_NODE_TYPE =
+      6;
+
+
+      /**
+       * Gives the current state of the complete collection of detectable scene nodes.
+       * Publishing all scene nodes in one messages can simplify synchronization and
+       * reduce the complexity of logic in figuring out when nodes are currently under
+       * consideration.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::SceneGraphMessage_")
+      struct SceneGraphMessage
+      {
+        /**
+         * The ID to assign to the next instantiated node
+         */
+        unsigned long next_id;
+        /**
+         * A depth first ordered list of types.
+         */
+        sequence<octet, 1000> scene_tree_types;
+        /**
+         * A depth first ordered list of node indexes.
+         * The index is of that node in it's respective list for
+         * it's type.
+         */
+        sequence<unsigned long, 1000> scene_tree_indices;
+        /**
+         * Basic scene nodes
+         */
+        sequence<perception_msgs::msg::dds::SceneNodeMessage, 200> scene_nodes;
+        /**
+         * Detectable scene nodes
+         */
+        sequence<perception_msgs::msg::dds::DetectableSceneNodeMessage, 200> detectable_scene_nodes;
+        /**
+         * Predefined rigid body scene nodes
+         */
+        sequence<perception_msgs::msg::dds::PredefinedRigidBodySceneNodeMessage, 200> predefined_rigid_body_scene_nodes;
+        /**
+         * ArUco marker scene nodes
+         */
+        sequence<perception_msgs::msg::dds::ArUcoMarkerNodeMessage, 200> aruco_marker_scene_nodes;
+        /**
+         * Centerpose scene nodes
+         */
+        sequence<perception_msgs::msg::dds::CenterposeNodeMessage, 200> centerpose_scene_nodes;
+        /**
+         * Static relative scene nodes
+         */
+        sequence<perception_msgs::msg::dds::StaticRelativeSceneNodeMessage, 200> static_relative_scene_nodes;
+        /**
+         * Reshapable rigid body scene nodes
+         */
+        sequence<perception_msgs::msg::dds::PrimitiveRigidBodySceneNodeMessage, 200> primitive_rigid_body_scene_nodes;
+      };
+    };
+  };
+};
+
+#endif

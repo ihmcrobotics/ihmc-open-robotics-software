@@ -281,6 +281,15 @@ public abstract class WalkingControllerParameters
    }
 
    /**
+    * If true, the rigid body jointspace control state for the given rigid body will be setup
+    * with function generators
+    */
+   public boolean enableFunctionGeneratorMode(String rigidBodyName)
+   {
+      return false;
+   }
+
+   /**
     * The map returned contains the default rigid body poses in their respective base frame. For
     * example, if the base frame of the chest body is the pelvis z-up frame this should contain the
     * home pose of the chest in that frame. If the particular body does not support full pose control
@@ -849,6 +858,11 @@ public abstract class WalkingControllerParameters
    public double getSwingTimeOverrunToInitializeFreeFall()
    {
       return Double.POSITIVE_INFINITY;
+   }
+
+   public NaturalPostureParameters getNaturalPostureParameters()
+   {
+      return null;
    }
 
    /**

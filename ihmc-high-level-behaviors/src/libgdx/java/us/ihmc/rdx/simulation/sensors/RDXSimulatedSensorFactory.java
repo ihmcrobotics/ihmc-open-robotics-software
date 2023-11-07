@@ -2,7 +2,6 @@ package us.ihmc.rdx.simulation.sensors;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -94,6 +93,35 @@ public class RDXSimulatedSensorFactory
                                                                                                             publishRateHz);
       highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.D435_DEPTH, RosTools.D435_DEPTH_CAMERA_INFO);
       highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.D435_VIDEO, RosTools.D435_CAMERA_INFO);
+      return highLevelDepthSensorSimulator;
+   }
+
+   public static RDXHighLevelDepthSensorSimulator createChestD455ForMapSense(ROS2SyncedRobotModel syncedRobot)
+   {
+      return createRealsenseD455(syncedRobot.getReferenceFrames().getSteppingCameraFrame(), syncedRobot::getTimestamp);
+   }
+
+   public static RDXHighLevelDepthSensorSimulator createRealsenseD455(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
+   {
+      // These specs were pulled from the internet :)
+      double publishRateHz = 30.0;
+      double verticalFOV = 58.0;
+      int imageWidth = 1280;
+      int imageHeight = 720;
+      double minRange = 0.5;
+      double maxRange = 18.0;
+      RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new RDXHighLevelDepthSensorSimulator("D455 RealSense",
+                                                                                                            sensorFrame,
+                                                                                                            timestampSupplier,
+                                                                                                            verticalFOV,
+                                                                                                            imageWidth,
+                                                                                                            imageHeight,
+                                                                                                            minRange,
+                                                                                                            maxRange,
+                                                                                                            0.005,
+                                                                                                            0.009,
+                                                                                                            true,
+                                                                                                            publishRateHz);
       return highLevelDepthSensorSimulator;
    }
 

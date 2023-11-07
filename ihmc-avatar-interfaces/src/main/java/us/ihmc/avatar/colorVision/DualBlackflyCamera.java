@@ -14,8 +14,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -27,21 +27,18 @@ import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
@@ -51,17 +48,17 @@ import java.util.function.Supplier;
 
 public class DualBlackflyCamera
 {
+   private static final boolean ENABLE_ARUCO_MARKER_DETECTION = true;
    private static final boolean DEBUG_SHUTDOWN = false;
-   private static final int MAX_IMAGE_READ_FREQUENCY = 30;
 
    private final RobotSide side;
-   private final Supplier<HumanoidReferenceFrames> referenceFrameSupplier;
-
+   private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
+   private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2Helper ros2Helper;
 
    private SpinnakerBlackfly spinnakerBlackfly;
    private final BlackflyLensProperties blackflyLensProperties;
-   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final ROS2SceneGraph sceneGraph;
 
    private final FrequencyCalculator readFrequencyCalculator = new FrequencyCalculator();
    private final Timer printCameraReadRateTimer = new Timer();
@@ -70,12 +67,10 @@ public class DualBlackflyCamera
 
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   private final ModifiableReferenceFrame blackflyFrameForSceneNodeUpdate = new ModifiableReferenceFrame();
+   private final MutableReferenceFrame blackflyFrameForSceneNodeUpdate = new MutableReferenceFrame();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
-   private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
-   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
@@ -132,15 +127,15 @@ public class DualBlackflyCamera
                              ROS2Node ros2Node,
                              SpinnakerBlackfly spinnakerBlackfly,
                              BlackflyLensProperties blackflyLensProperties,
-                             PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+                             ROS2SceneGraph sceneGraph)
    {
       this.side = side;
-      this.referenceFrameSupplier = referenceFramesSupplier;
+      this.humanoidReferenceFramesSupplier = referenceFramesSupplier;
 
       this.spinnakerBlackfly = spinnakerBlackfly;
       this.blackflyLensProperties = blackflyLensProperties;
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensProperties);
-      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+      this.sceneGraph = sceneGraph;
 
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
       ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
@@ -157,21 +152,14 @@ public class DualBlackflyCamera
                                                                            PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(side),
                                                                            cameraTransformToParent);
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
-                                                                                  ros2Helper,
-                                                                                  ROS2IOTopicQualifier.COMMAND);
-
       // Camera read thread
       cameraReadThread = new Thread(() ->
       {
-         Throttler throttler = new Throttler();
-         throttler.setFrequency(MAX_IMAGE_READ_FREQUENCY);
-
          printCameraReadRateTimer.reset();
 
          while (!destroyed)
          {
-            throttler.waitAndRun();
+            // Do not sleep in this thread, read as fast as the camera can supply frames
             cameraRead();
 
             // Calculate read frequency (maybe it's lower than MAX_IMAGE_READ_FREQUENCY)
@@ -292,7 +280,8 @@ public class DualBlackflyCamera
 
       cameraReadThread.start();
       imageEncodeAndPublishThread.start();
-      imageUndistortAndUpdateArUcoThread.start();
+      if (ENABLE_ARUCO_MARKER_DETECTION)
+         imageUndistortAndUpdateArUcoThread.start();
       imageDeallocationThread.start();
    }
 
@@ -367,12 +356,11 @@ public class DualBlackflyCamera
       undistortionMap2.upload(tempUndistortionMat2);
 
       // Create arUco marker detection
-      ReferenceFrame rightBlackflyCameraFrame = referenceFrameSupplier.get().getSituationalAwarenessCameraFrame(RobotSide.RIGHT);
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(rightBlackflyCameraFrame);
+      arUcoMarkerDetection.create(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
       newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, sceneGraph.getArUcoMarkerIDToNodeMap());
 
       // Close pointers
       tempUndistortionMat2.close();
@@ -395,6 +383,20 @@ public class DualBlackflyCamera
       // Get image from camera
       spinImage spinImage = new spinImage(); // Release at the end
       spinnakerBlackfly.getNextImage(spinImage);
+
+      // Get camera frame
+      synchronized (blackflyFrameForSceneNodeUpdate)
+      {
+         blackflyFrameForSceneNodeUpdate.update(transformToParent ->
+            transformToParent.set(humanoidReferenceFramesSupplier.get().getSituationalAwarenessCameraFrame(side).getTransformToWorldFrame()));
+      }
+
+      // Get camera pose
+      synchronized (cameraPose)
+      {
+         cameraPose.setToZero(humanoidReferenceFramesSupplier.get().getSituationalAwarenessCameraFrame(side));
+         cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+      }
 
       // Initialize stuff on the first run
       if (imageWidth == 0 || imageHeight == 0)
@@ -448,25 +450,6 @@ public class DualBlackflyCamera
 
       remoteTunableCameraTransform.update();
 
-      ReferenceFrame ousterLidarFrame = referenceFrameSupplier.get().getOusterLidarFrame();
-      RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
-
-      if (side == RobotSide.LEFT)
-      {
-         // TODO: left behavior
-      }
-      else if (side == RobotSide.RIGHT)
-      {
-         ReferenceFrame rightBlackflyCameraFrame = referenceFrameSupplier.get().getSituationalAwarenessCameraFrame(RobotSide.RIGHT);
-         ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, rightBlackflyCameraFrame);
-
-         synchronized (blackflyFrameForSceneNodeUpdate)
-         {
-            blackflyFrameForSceneNodeUpdate.getTransformToParent().set(rightBlackflyCameraFrame.getTransformToRoot());
-            blackflyFrameForSceneNodeUpdate.getReferenceFrame().update();
-         }
-      }
-
       BytePointer jpegImageBytePointer = new BytePointer(imageFrameSize); // close at the end
 
       // Encode the image
@@ -497,8 +480,11 @@ public class DualBlackflyCamera
       CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
       imageMessage.setSequenceNumber(imageMessageSequenceNumber++);
       ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(imageMessage);
-      imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());
-      imageMessage.getOrientation().set(ousterToBlackflyTransfrom.getRotation());
+      synchronized (cameraPose)
+      {
+         imageMessage.getPosition().set(cameraPose.getTranslation());
+         imageMessage.getOrientation().set(cameraPose.getRotation());
+      }
       ros2ImagePublisher.publish(imageMessage);
 
       // Close pointers
@@ -536,13 +522,13 @@ public class DualBlackflyCamera
 //          arUcoMarkerDetection.drawRejectedPoints(undistortedBytedecoImage.getBytedecoOpenCVMat());
          arUcoMarkerPublisher.update();
 
-         detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
-         ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+         sceneGraph.updateSubscription(); // Receive overridden poses from operator
+         ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
          synchronized (blackflyFrameForSceneNodeUpdate)
          {
-            predefinedSceneNodeLibrary.update(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
+            sceneGraph.updateOnRobotOnly(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
          }
-         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+         sceneGraph.updatePublication();
       }
       // TODO: left behavior?
    }
@@ -568,7 +554,8 @@ public class DualBlackflyCamera
       {
          cameraReadThread.join();
          imageEncodeAndPublishThread.join();
-         imageUndistortAndUpdateArUcoThread.join();
+         if (ENABLE_ARUCO_MARKER_DETECTION)
+            imageUndistortAndUpdateArUcoThread.join();
          imageDeallocationThread.join();
       }
       catch (InterruptedException interruptedException)

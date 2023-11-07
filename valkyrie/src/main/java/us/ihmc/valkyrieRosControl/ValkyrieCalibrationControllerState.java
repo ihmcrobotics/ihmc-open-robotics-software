@@ -66,7 +66,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       timeToMoveForCalibration.set(timeToMove);
       timeForEstimatingOffset.set(highLevelControllerParameters.getCalibrationDuration());
 
-      boolean useArms = ValkyrieRosControlController.VERSION.hasArms();
+      boolean useArms = ValkyrieRosControlController.VERSION.hasBothArms();
       JointTorqueOffsetEstimatorParameters parameters = new JointTorqueOffsetEstimatorParameters();
       if (!useArms)
          parameters.setArmJointsToRun(null);

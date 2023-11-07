@@ -9,7 +9,7 @@ module behavior_msgs
     {
 
       /**
-       * This message is meant to communicate the status of currently executing actions
+       * This message is meant to communicate the status of a currently executing action
        */
       @TypeCode(type="behavior_msgs::msg::dds_::ActionExecutionStatusMessage_")
       struct ActionExecutionStatusMessage

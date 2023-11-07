@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
@@ -70,7 +70,7 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private final HandWrenchCalculator handWrenchCalculator;
+   private final SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators = new SideDependentList<>();
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
@@ -91,10 +91,9 @@ public class RDXArmManager
       this.interactableHands = interactableHands;
       armJointNames = robotModel.getJointMap().getArmJointNames();
 
-      handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
-
       for (RobotSide side : RobotSide.values)
       {
+         handWrenchCalculators.put(side, new ROS2HandWrenchCalculator(side, syncedRobot));
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames()));
       }
@@ -117,18 +116,19 @@ public class RDXArmManager
    public void update()
    {
       handManager.update();
-      handWrenchCalculator.compute();
 
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
+         handWrenchCalculators.get(side).compute();
+         armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(),
+                                       interactableHands.get(side).getControlReferenceFrame());
 
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
          if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
             interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
+         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculators.get(side).getFilteredWrench());
 
          // Check if the desired hand pose changed and we need to run the solver again.
          // We only want to evaluate this when we are going to take action on it
@@ -141,8 +141,8 @@ public class RDXArmManager
          if (showWrench)
          {
             panelHandWrenchIndicator.update(side,
-                                            handWrenchCalculator.getLinearWrenchMagnitude(side, true),
-                                            handWrenchCalculator.getAngularWrenchMagnitude(side, true));
+                                            handWrenchCalculators.get(side).getLinearWrenchMagnitude(true),
+                                            handWrenchCalculators.get(side).getAngularWrenchMagnitude(true));
          }
       }
 
@@ -152,7 +152,7 @@ public class RDXArmManager
          readyToSolve = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).copyActualToWork();
+            armIKSolvers.get(side).copySourceToWork();
          }
 
          MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
@@ -190,32 +190,32 @@ public class RDXArmManager
    {
       handManager.renderImGuiWidgets();
 
-      ImGui.text("Arms:");
+      ImGui.text("Arms Home:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Home")))
          {
-            executeArmHome(side);
+            executeArmAngles(side, PresetArmConfiguration.HOME, teleoperationParameters.getTrajectoryTime());
          }
       }
 
-      ImGui.text("Wide Arms:");
+      ImGui.text("Arms Wide:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Wide " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Wide")))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME_WIDE, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.WIDE_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
-      ImGui.text("Walking Arms:");
+      ImGui.text("Arms Tucked Up:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Tucked Up")))
          {
-            executeArmAngles(side, PresetArmConfiguration.HOME_UP_FOR_WALKING, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(side, PresetArmConfiguration.TUCKED_UP_ARMS, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Door avoidance arms:");
@@ -225,16 +225,6 @@ public class RDXArmManager
          if (ImGui.button(labels.get(side.getPascalCaseName(), "Door avoidance")))
          {
             executeDoorAvoidanceArmAngles(side);
-         }
-      }
-      ImGui.sameLine();
-      ImGui.text("Shield holding arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName(), "Shield holding")))
-         {
-            executeShieldHoldingArmAngles(side);
          }
       }
 
@@ -307,7 +297,8 @@ public class RDXArmManager
       // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
       // i.e. when the fingers are more than 30 degrees apart from each other
       // This is an arbitrary value
-      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
+      if (syncedRobot.getRobotModel().getHandModels().toString().contains("SakeHand") &&
+           syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
       {
          showWarningNotification.set(side);
       }
@@ -315,11 +306,6 @@ public class RDXArmManager
       {
          executeArmAngles(side, PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
       }
-   }
-
-   public void executeShieldHoldingArmAngles(RobotSide side)
-   {
-      executeArmAngles(side, PresetArmConfiguration.SHIELD_HOLDING, 3.0);
    }
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
