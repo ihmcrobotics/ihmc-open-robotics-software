@@ -26,22 +26,10 @@ public class ContinuousPlannerStatistics
       statistics.put("last_footstep_queue_length", 0.0f);
    }
 
-   public void setLastContinuousWalkingTime(float lastContinuousWalkingTime)
-   {
-      statistics.put("last_continuous_walking_time", lastContinuousWalkingTime);
-      statistics.put("total_continuous_walking_time", statistics.get("total_continuous_walking_time") + lastContinuousWalkingTime);
-   }
-
    public void setLastPlanningTime(float lastPlanningTime)
    {
       statistics.put("last_planning_time", lastPlanningTime);
       statistics.put("total_planning_time", statistics.get("total_planning_time") + lastPlanningTime);
-   }
-
-   public void setLastWaitingTime(float lastWaitingTime)
-   {
-      statistics.put("last_waiting_time", lastWaitingTime);
-      statistics.put("total_waiting_time", statistics.get("total_waiting_time") + lastWaitingTime);
    }
 
    public void setLastFootstepQueueLength(int lastFootstepQueueLength)
@@ -76,6 +64,20 @@ public class ContinuousPlannerStatistics
       float lastStepTime = System.currentTimeMillis() / 1000.0f - statistics.get("last_continuous_walking_time");
       statistics.put("last_continuous_walking_time", lastStepTime);
       statistics.put("total_continuous_walking_time", statistics.get("total_continuous_walking_time") + lastStepTime);
+      lock = false;
+   }
+
+   public void startWaitingTime()
+   {
+      lock = true;
+      statistics.put("last_waiting_time", System.currentTimeMillis() / 1000.0f);
+   }
+
+   public void endWaitingTime()
+   {
+      float lastWaitingTime = System.currentTimeMillis() / 1000.0f - statistics.get("last_waiting_time");
+      statistics.put("last_waiting_time", lastWaitingTime);
+      statistics.put("total_waiting_time", statistics.get("total_waiting_time") + lastWaitingTime);
       lock = false;
    }
 

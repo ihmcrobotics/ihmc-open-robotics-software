@@ -105,8 +105,6 @@ public class ContinuousPlannerSchedulingTask
       {
          planAndSendFootsteps();
       }
-
-      LogTools.info(continuousPlannerStatistics.toString());
    }
 
    public void initializeContinuousPlanner()
@@ -149,6 +147,8 @@ public class ContinuousPlannerSchedulingTask
 
          state = ContinuousWalkingState.WAITING_TO_LAND;
          continuousPlanner.setPlanAvailable(false);
+
+         continuousPlannerStatistics.startWaitingTime();
       }
    }
 
@@ -173,12 +173,22 @@ public class ContinuousPlannerSchedulingTask
       {
          state = ContinuousWalkingState.READY_TO_PLAN;
          continuousPlannerStatistics.startStepTime();
+         continuousPlannerStatistics.endWaitingTime();
       }
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
          continuousPlannerStatistics.endStepTime();
          continuousPlannerStatistics.incrementTotalStepsCompleted();
+
+         double distance = referenceFrames.getSoleFrame(RobotSide.LEFT)
+                                          .getTransformToDesiredFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT))
+                                          .getTranslation()
+                                          .norm();
+         continuousPlannerStatistics.setLastLengthCompleted((float) distance);
+         continuousPlannerStatistics.setLastFootstepQueueLength(controllerFootstepQueueSize);
+
+         LogTools.info(continuousPlannerStatistics.toString());
       }
 
       this.footstepStatusMessage.set(footstepStatusMessage);
