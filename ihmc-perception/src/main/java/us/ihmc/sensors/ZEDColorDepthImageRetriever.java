@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -38,15 +39,15 @@ public class ZEDColorDepthImageRetriever
    private ZEDModelData zedModelData;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
-   private final int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
-   private final int imageHeight; // Height of rectified image in pixels (color image height ==  depth image height)
-   private final SideDependentList<Float> cameraFocalLengthX;
-   private final SideDependentList<Float> cameraFocalLengthY;
-   private final SideDependentList<Float> cameraPrincipalPointX;
-   private final SideDependentList<Float> cameraPrincipalPointY;
+   private int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
+   private int imageHeight; // Height of rectified image in pixels (color image height ==  depth image height)
+   private final SideDependentList<Float> cameraFocalLengthX = new SideDependentList<>();
+   private final SideDependentList<Float> cameraFocalLengthY = new SideDependentList<>();
+   private final SideDependentList<Float> cameraPrincipalPointX = new SideDependentList<>();
+   private final SideDependentList<Float> cameraPrincipalPointY = new SideDependentList<>();
 
-   private final Pointer colorImagePointer;
-   private final Pointer depthImagePointer;
+   private Pointer colorImagePointer;
+   private Pointer depthImagePointer;
    private long grabSequenceNumber = 0L;
 
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
@@ -76,63 +77,14 @@ public class ZEDColorDepthImageRetriever
 
       LogTools.info("ZED SDK version: " + sl_get_sdk_version().getString());
 
-      // Create and initialize the camera
-      sl_create_camera(cameraID);
-
-      SL_InitParameters zedInitializationParameters = new SL_InitParameters();
-
-      // Open camera with default parameters to find model
-      // Can't get the model number without opening the camera first
-      checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
-      setZEDConfiguration(cameraID);
-      sl_close_camera(cameraID);
-
-      // Set initialization parameters based on camera model
-      zedInitializationParameters.camera_fps(CAMERA_FPS);
-      zedInitializationParameters.resolution(SL_RESOLUTION_HD720);
-      zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
-      zedInitializationParameters.camera_device_id(cameraID);
-      zedInitializationParameters.camera_image_flip(SL_FLIP_MODE_OFF);
-      zedInitializationParameters.camera_disable_self_calib(false);
-      zedInitializationParameters.enable_image_enhancement(true);
-      zedInitializationParameters.svo_real_time_mode(true);
-      zedInitializationParameters.depth_mode(SL_DEPTH_MODE_ULTRA);
-      zedInitializationParameters.depth_stabilization(1);
-      zedInitializationParameters.depth_maximum_distance(zedModelData.getMaximumDepthDistance());
-      zedInitializationParameters.depth_minimum_distance(zedModelData.getMinimumDepthDistance());
-      zedInitializationParameters.coordinate_unit(SL_UNIT_METER);
-      zedInitializationParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
-      zedInitializationParameters.sdk_gpu_id(-1); // Will find and use the best available GPU
-      zedInitializationParameters.sdk_verbose(0); // false
-      zedInitializationParameters.sensors_required(true);
-      zedInitializationParameters.enable_right_side_measure(false);
-      zedInitializationParameters.open_timeout_sec(5.0f);
-      zedInitializationParameters.async_grab_camera_recovery(false);
-
-      // Reopen camera with specific parameters set
-      checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
-
-      zedRuntimeParameters.enable_depth(true);
-      zedRuntimeParameters.confidence_threshold(100);
-      zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
-      zedRuntimeParameters.texture_confidence_threshold(100);
-      zedRuntimeParameters.remove_saturated_areas(true);
-      zedRuntimeParameters.enable_fill_mode(false);
-
-      // Get camera's parameters
-      SL_CalibrationParameters zedCalibrationParameters = sl_get_calibration_parameters(cameraID, false);
-      cameraFocalLengthX = new SideDependentList<>(zedCalibrationParameters.left_cam().fx(), zedCalibrationParameters.right_cam().fx());
-      cameraFocalLengthY = new SideDependentList<>(zedCalibrationParameters.left_cam().fy(), zedCalibrationParameters.right_cam().fy());
-      cameraPrincipalPointX = new SideDependentList<>(zedCalibrationParameters.left_cam().cx(), zedCalibrationParameters.right_cam().cx());
-      cameraPrincipalPointY = new SideDependentList<>(zedCalibrationParameters.left_cam().cy(), zedCalibrationParameters.right_cam().cy());
-      imageWidth = sl_get_width(cameraID);
-      imageHeight = sl_get_height(cameraID);
-
-      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
-      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
-
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
+         while (!sl_is_opened(cameraID))
+         {
+            if (!startZED())
+               ThreadTools.sleep(3000);
+         }
+
          // sl_grab is blocking, and will wait for next frame available. No need to use throttler
          checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
@@ -149,11 +101,6 @@ public class ZEDColorDepthImageRetriever
          retrieveAndSaveColorImage(RobotSide.RIGHT);
          grabSequenceNumber++;
       });
-
-      // TODO: Should this go in "start()" method?
-      LogTools.info("Starting {} camera", getCameraModel(cameraID));
-      LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
-      LogTools.info("Image resolution: {} x {}", imageWidth, imageHeight);
    }
 
    private void retrieveAndSaveColorImage(RobotSide side)
@@ -311,7 +258,7 @@ public class ZEDColorDepthImageRetriever
    public void destroy()
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
-      zedGrabThread.blockingStop();
+      zedGrabThread.stop();
 
       depthImagePointer.close();
       depthImage.release();
@@ -325,12 +272,99 @@ public class ZEDColorDepthImageRetriever
       System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 
-   private void checkError(String functionName, int returnedState)
+   private boolean startZED()
+   {
+      boolean success;
+
+      if (colorImagePointer != null && !colorImagePointer.isNull())
+         colorImagePointer.close();
+      if (depthImagePointer != null && !depthImagePointer.isNull())
+         depthImagePointer.close();
+      if (sl_is_opened(cameraID))
+         sl_close_camera(cameraID);
+
+      LogTools.info("Starting ZED...");
+
+      // Create and initialize the camera
+      success = sl_create_camera(cameraID);
+//      if (!success)
+//         return success;
+
+      SL_InitParameters zedInitializationParameters = new SL_InitParameters();
+
+      // Open camera with default parameters to find model
+      // Can't get the model number without opening the camera first
+      success = checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
+      if (!success)
+         return success;
+      setZEDConfiguration(cameraID);
+      sl_close_camera(cameraID);
+
+      // Set initialization parameters based on camera model
+      zedInitializationParameters.camera_fps(CAMERA_FPS);
+      zedInitializationParameters.resolution(SL_RESOLUTION_HD720);
+      zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
+      zedInitializationParameters.camera_device_id(cameraID);
+      zedInitializationParameters.camera_image_flip(SL_FLIP_MODE_OFF);
+      zedInitializationParameters.camera_disable_self_calib(false);
+      zedInitializationParameters.enable_image_enhancement(true);
+      zedInitializationParameters.svo_real_time_mode(true);
+      zedInitializationParameters.depth_mode(SL_DEPTH_MODE_ULTRA);
+      zedInitializationParameters.depth_stabilization(1);
+      zedInitializationParameters.depth_maximum_distance(zedModelData.getMaximumDepthDistance());
+      zedInitializationParameters.depth_minimum_distance(zedModelData.getMinimumDepthDistance());
+      zedInitializationParameters.coordinate_unit(SL_UNIT_METER);
+      zedInitializationParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
+      zedInitializationParameters.sdk_gpu_id(-1); // Will find and use the best available GPU
+      zedInitializationParameters.sdk_verbose(0); // false
+      zedInitializationParameters.sensors_required(true);
+      zedInitializationParameters.enable_right_side_measure(false);
+      zedInitializationParameters.open_timeout_sec(5.0f);
+      zedInitializationParameters.async_grab_camera_recovery(false);
+
+      // Reopen camera with specific parameters set
+      success = checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
+      if (!success)
+         return success;
+
+      zedRuntimeParameters.enable_depth(true);
+      zedRuntimeParameters.confidence_threshold(100);
+      zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
+      zedRuntimeParameters.texture_confidence_threshold(100);
+      zedRuntimeParameters.remove_saturated_areas(true);
+      zedRuntimeParameters.enable_fill_mode(false);
+
+      // Get camera's parameters
+      SL_CalibrationParameters zedCalibrationParameters = sl_get_calibration_parameters(cameraID, false);
+      cameraFocalLengthX.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().fx());
+      cameraFocalLengthX.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().fx());
+      cameraFocalLengthY.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().fy());
+      cameraFocalLengthY.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().fy());
+      cameraPrincipalPointX.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().cx());
+      cameraPrincipalPointX.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().cx());
+      cameraPrincipalPointY.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().cy());
+      cameraPrincipalPointY.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().cy());
+
+      imageWidth = sl_get_width(cameraID);
+      imageHeight = sl_get_height(cameraID);
+
+      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
+      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
+
+      LogTools.info("Started {} camera", getCameraModel(cameraID));
+      LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
+      LogTools.info("Image resolution: {} x {}", imageWidth, imageHeight);
+
+      return success;
+   }
+
+   private boolean checkError(String functionName, int returnedState)
    {
       if (returnedState != SL_ERROR_CODE_SUCCESS)
       {
          LogTools.error(String.format("%s returned '%d'", functionName, returnedState));
       }
+      return returnedState == SL_ERROR_CODE_SUCCESS;
    }
 
    private String getCameraModel(int cameraID)

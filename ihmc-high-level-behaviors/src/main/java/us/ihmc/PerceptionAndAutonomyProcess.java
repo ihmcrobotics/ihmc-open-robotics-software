@@ -135,46 +135,6 @@ public class PerceptionAndAutonomyProcess
       centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
    }
 
-   public void start()
-   {
-      if (zedPointCloudHeartbeat.isAlive())
-      {
-         initializeZED();
-         zedImageRetriever.start();
-         zedImagePublisher.startAll();
-      }
-
-      if (realsenseHeartbeat.isAlive())
-      {
-         initializeRealsense();
-         realsenseImageRetriever.start();
-         realsenseImagePublisher.startAll();
-      }
-
-      if (ousterDepthHeartbeat.isAlive())
-      {
-         initializeOuster();
-         ousterDepthImageRetriever.start();
-         ousterDepthImagePublisher.startDepth();
-      }
-
-      if (arUcoDetectionHeartbeat.isAlive())
-      {
-         sceneGraphUpdateThread.start();
-         arUcoUpdater.startArUcoDetection();
-      }
-
-      for (RobotSide side : RobotSide.values)
-      {
-         if (blackflyImageHeartbeats.get(side).isAlive() || (side == RobotSide.RIGHT && (ousterDepthHeartbeat.isAlive() || arUcoDetectionHeartbeat.isAlive())))
-         {
-            initializeBlackfly(side);
-            blackflyImageRetrievers.get(side).start();
-            blackflyImagePublishers.get(side).startAll();
-         }
-      }
-   }
-
    public void destroy()
    {
       LogTools.info("Destroying {}", this.getClass().getSimpleName());
@@ -299,7 +259,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (zedImageRetriever == null)
+            if (zedProcessAndPublishThread == null)
                initializeZED();
             zedImageRetriever.start();
             zedImagePublisher.startAll();
@@ -321,7 +281,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (zedImageRetriever == null)
+            if (zedProcessAndPublishThread == null)
                initializeZED();
             zedImageRetriever.start();
             zedImagePublisher.startColor();
@@ -344,7 +304,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (zedImageRetriever == null)
+            if (zedProcessAndPublishThread == null)
                initializeZED();
             zedImageRetriever.start();
             zedImagePublisher.startDepth();
@@ -381,7 +341,7 @@ public class PerceptionAndAutonomyProcess
       {
          if (isAlive)
          {
-            if (realsenseImageRetriever == null)
+            if (realsenseProcessAndPublishThread == null)
                initializeRealsense();
             realsenseImageRetriever.start();
             realsenseImagePublisher.startAll();
@@ -533,6 +493,6 @@ public class PerceptionAndAutonomyProcess
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame.getWorldFrame());
-      publisher.start();
+      //publisher.start();
    }
 }
