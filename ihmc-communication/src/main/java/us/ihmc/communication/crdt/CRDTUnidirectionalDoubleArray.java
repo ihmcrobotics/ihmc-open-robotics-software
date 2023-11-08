@@ -19,6 +19,11 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
       return getValueInternal()[index];
    }
 
+   public int getLength()
+   {
+      return getValueInternal().length;
+   }
+
    public void toMessage(double[] messageArray)
    {
       for (int i = 0; i < getValueInternal().length; i++)

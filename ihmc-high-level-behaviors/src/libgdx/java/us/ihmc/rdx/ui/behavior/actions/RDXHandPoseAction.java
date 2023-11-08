@@ -92,7 +92,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       getDefinition().setDescription("Hand pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent(), getSelected());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPalmTransformToParent().getValue(), getSelected());
       poseGizmo.create(panel3D);
 
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
@@ -209,9 +209,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getDefinition().getSide()).getRigidBody().getChildrenJoints().get(0);
       floatingJoint.getJointPose().set(state.getGoalChestFrame().getReferenceFrame().getTransformToRoot());
 
-      for (int i = 0; i < state.getJointAngles().length; i++)
+      for (int i = 0; i < state.getJointAngles().getLength(); i++)
       {
-         armGraphicOneDoFJoints.get(getDefinition().getSide())[i].setQ(state.getJointAngles()[i]);
+         armGraphicOneDoFJoints.get(getDefinition().getSide())[i].setQ(state.getJointAngles().getValueReadOnly(i));
       }
       armMultiBodyGraphics.get(getDefinition().getSide()).updateFramesRecursively();
       armMultiBodyGraphics.get(getDefinition().getSide()).updateSubtreeGraphics();
