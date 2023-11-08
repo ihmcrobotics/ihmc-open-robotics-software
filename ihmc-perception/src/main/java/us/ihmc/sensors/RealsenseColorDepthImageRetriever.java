@@ -207,7 +207,8 @@ public class RealsenseColorDepthImageRetriever
       stop();
       depthImage.release();
       colorImage.release();
-      realsense.deleteDevice();
+      if (realsense.getDevice() != null)
+         realsense.deleteDevice();
       realsenseManager.deleteContext();
       System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
@@ -217,14 +218,15 @@ public class RealsenseColorDepthImageRetriever
       LogTools.info("Starting Realsense...");
       if (realsense != null)
       {
-         realsense.deleteDevice();
+         if (realsense.getDevice() != null)
+            realsense.deleteDevice();
          realsenseManager.deleteContext();
       }
 
       realsenseManager = new RealsenseDeviceManager();
       realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
 
-      if (realsense != null)
+      if (realsense != null && realsense.getDevice() != null)
       {
          LogTools.info("Initializing Realsense...");
          realsense.enableColor(realsenseConfiguration);
