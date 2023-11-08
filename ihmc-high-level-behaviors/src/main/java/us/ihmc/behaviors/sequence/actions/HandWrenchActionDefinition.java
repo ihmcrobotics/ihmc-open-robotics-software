@@ -5,18 +5,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 
 public class HandWrenchActionDefinition extends ActionNodeDefinition implements SidedObject
 {
-   private RobotSide side = RobotSide.LEFT;
-   private double trajectoryDuration = 1000.0;
-   private double force = 20.0;
+   private final CRDTUnidirectionalEnumField<RobotSide> side;
+   private final CRDTUnidirectionalDouble trajectoryDuration;
+   private final CRDTUnidirectionalDouble force;
 
    public HandWrenchActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
+
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1000.0);
+      force = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 20.0);
    }
 
    @Override
@@ -24,9 +31,9 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("force", force);
+      jsonNode.put("side", side.getValue().getLowerCaseName());
+      jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
+      jsonNode.put("force", force.getValue());
    }
 
    @Override
@@ -34,57 +41,57 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    {
       super.loadFromFile(jsonNode);
 
-      side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      force = jsonNode.get("force").asDouble();
+      side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+      trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
+      force.setValue(jsonNode.get("force").asDouble());
    }
 
    public void toMessage(HandWrenchActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setRobotSide(side.toByte());
-      message.setTrajectoryDuration(trajectoryDuration);
-      message.setForce(force);
+      message.setRobotSide(side.toMessage().toByte());
+      message.setTrajectoryDuration(trajectoryDuration.toMessage());
+      message.setForce(force.toMessage());
    }
 
    public void fromMessage(HandWrenchActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      side = RobotSide.fromByte(message.getRobotSide());
-      trajectoryDuration = message.getTrajectoryDuration();
-      force = message.getForce();
+      side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
+      trajectoryDuration.fromMessage(message.getTrajectoryDuration());
+      force.fromMessage(message.getForce());
    }
 
    public double getTrajectoryDuration()
    {
-      return trajectoryDuration;
+      return trajectoryDuration.getValue();
    }
 
    public double getForce()
    {
-      return force;
+      return force.getValue();
    }
 
    public void setForce(double force)
    {
-      this.force = force;
+      this.force.setValue(force);
    }
 
    @Override
    public RobotSide getSide()
    {
-      return side;
+      return side.getValue();
    }
 
    public void setTrajectoryDuration(double trajectoryDuration)
    {
-      this.trajectoryDuration = trajectoryDuration;
+      this.trajectoryDuration.setValue(trajectoryDuration);
    }
 
    public void setSide(RobotSide side)
    {
-      this.side = side;
+      this.side.setValue(side);
    }
 }

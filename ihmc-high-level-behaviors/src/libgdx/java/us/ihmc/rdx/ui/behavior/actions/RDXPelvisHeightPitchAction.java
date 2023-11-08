@@ -68,7 +68,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
 
       getDefinition().setDescription("Pelvis height and pitch");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue());
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -136,7 +136,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
             currentRobotPelvisPose.changeFrame(state.getPelvisFrame().getReferenceFrame().getParent());
          RigidBodyTransform transformVariation = new RigidBodyTransform();
          transformVariation.setAndInvert(currentRobotPelvisPose);
-         getDefinition().getPelvisToParentTransform().transform(transformVariation);
+         getDefinition().getPelvisToParentTransform().getValueReadOnly().transform(transformVariation);
 
          // if the action is part of a group of concurrent actions that is currently executing or about to be executed
          // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
