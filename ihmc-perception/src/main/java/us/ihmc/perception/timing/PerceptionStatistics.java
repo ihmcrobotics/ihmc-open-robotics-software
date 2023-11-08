@@ -12,6 +12,9 @@ public class PerceptionStatistics
    float averageTimeToComputeSphericalRapidRegions = 0.0f;
    float averageTimeToComputeMapRegions = 0.0f;
 
+   float timeToDenoiseHeightMap = 0.0f;
+   float timeToExtractContactMap = 0.0f;
+
    public void updateTimeToComputeHeightMap(float timeToComputeHeightMap)
    {
       this.timeToComputeHeightMap = timeToComputeHeightMap;
