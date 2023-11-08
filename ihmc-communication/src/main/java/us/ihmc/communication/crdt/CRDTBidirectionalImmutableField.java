@@ -8,13 +8,13 @@ package us.ihmc.communication.crdt;
  *   tick after tick, as that will mean the value is essentially never
  *   synced properly to the other side.
  */
-public class CRDTBidirectionalField<T>
+public class CRDTBidirectionalImmutableField<T>
 {
    private final RequestConfirmFreezable requestConfirmFreezable;
 
    private T value;
 
-   public CRDTBidirectionalField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalImmutableField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
    {
       this.requestConfirmFreezable = requestConfirmFreezable;
 
