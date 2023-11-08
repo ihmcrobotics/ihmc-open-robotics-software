@@ -111,7 +111,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             newFootstepPose.getPosition().addX(aLittleInFront);
 
             newFootstepPose.changeFrame(referenceFrameLibrary.findFrameByName(getDefinition().getParentFrameName()));
-            addedFootstep.getDefinition().getSoleToPlanFrameTransform().set(newFootstepPose);
+            addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValue().set(newFootstepPose);
          }
 
          if (userRemovedFootstep.poll())
