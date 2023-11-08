@@ -8,4 +8,7 @@ public enum PresetArmConfiguration
    WIDE_ARMS,
    TUCKED_UP_ARMS,
    DOOR_AVOIDANCE,
+   ;
+
+   public static final PresetArmConfiguration[] values = values();
 }
