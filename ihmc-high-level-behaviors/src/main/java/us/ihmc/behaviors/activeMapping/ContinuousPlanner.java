@@ -34,6 +34,7 @@ public class ContinuousPlanner
 
    private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
 
+   private ContinuousPlannerStatistics continuousPlannerStatistics = new ContinuousPlannerStatistics();
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
    private FramePose3D walkingStartMidPose = new FramePose3D();
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
