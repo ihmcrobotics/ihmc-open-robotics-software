@@ -68,14 +68,14 @@ public class ContinuousPlannerStatistics
    public void startStepTime()
    {
       lock = true;
-      statistics.put("last_step_start_time", System.currentTimeMillis() / 1000.0f);
+      statistics.put("last_continuous_walking_time", System.currentTimeMillis() / 1000.0f);
    }
 
    public void endStepTime()
    {
-      float lastStepTime = System.currentTimeMillis() / 1000.0f - statistics.get("last_step_start_time");
-      statistics.put("last_step_time", lastStepTime);
-      statistics.put("total_steps_time", statistics.get("total_steps_time") + lastStepTime);
+      float lastStepTime = System.currentTimeMillis() / 1000.0f - statistics.get("last_continuous_walking_time");
+      statistics.put("last_continuous_walking_time", lastStepTime);
+      statistics.put("total_continuous_walking_time", statistics.get("total_continuous_walking_time") + lastStepTime);
       lock = false;
    }
 
