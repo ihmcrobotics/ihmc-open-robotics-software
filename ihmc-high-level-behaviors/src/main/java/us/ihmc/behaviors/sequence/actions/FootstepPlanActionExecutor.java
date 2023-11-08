@@ -76,7 +76,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          footstepPlanToExecute.clear();
          for (FootstepPlanActionFootstepState footstep : state.getFootsteps())
          {
-            solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(), footstep.getDefinition().getSoleToPlanFrameTransform());
+            solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(),
+                                       footstep.getDefinition().getSoleToPlanFrameTransform().getValueReadOnly());
             solePose.changeFrame(ReferenceFrame.getWorldFrame());
             footstepPlanToExecute.addFootstep(footstep.getDefinition().getSide(), solePose);
          }
