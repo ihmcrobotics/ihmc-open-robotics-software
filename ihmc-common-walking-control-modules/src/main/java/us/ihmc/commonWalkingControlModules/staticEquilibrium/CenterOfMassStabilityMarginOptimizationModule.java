@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -40,15 +41,16 @@ import java.util.List;
  * Notation taken from EoM:
  * M qdd + C qd + G = tau + J^T f
  */
-public class CenterOfMassStaticStabilityOptimizationModule
+public class CenterOfMassStabilityMarginOptimizationModule
 {
    private static final double GRAVITY = 9.81;
    private static final int NUM_BASIS_VECTORS = 4;
-   private static final int MAX_CONTACT_POINTS = 12;
    private static final double COEFFICIENT_OF_FRICTION = 0.7;
    private static final double BASIS_VEC_ANGLE = Math.atan(COEFFICIENT_OF_FRICTION);
+   static final int MAX_CONTACT_POINTS = 12;
 
    private static final int CoM_DIMENSIONS = 2;
+   private static final int LINEAR_DIMENSIONS = 3;
    private static final int STATIC_EQUILIBRIUM_CONSTRAINTS = 6;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -58,6 +60,7 @@ public class CenterOfMassStaticStabilityOptimizationModule
    private final List<YoFramePoint3D> contactPointPositions = new ArrayList<>();
    private final List<YoFrameVector3D> basisVectors = new ArrayList<>();
 
+   private int numberOfContactPoints;
    /* Number of nominal decision variables: 3 * n_contact_points + 2 CoM directions */
    private int nominalDecisionVariables;
    /* Number of non-negative decision variables: n_basis_vectors + 2 * 2 CoM directions */
@@ -86,6 +89,8 @@ public class CenterOfMassStaticStabilityOptimizationModule
 
    /* Position of optimized CoM */
    private final Point2D optimizedCoM = new Point2D();
+   /* Yo-Position of optimized CoM */
+   private final YoFramePoint3D yoOptimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
 
    /* Indices for CoM position variables in x+ */
    private int cx_pos_index;
@@ -97,7 +102,7 @@ public class CenterOfMassStaticStabilityOptimizationModule
    private final FrameVector3D tempVector = new FrameVector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   public CenterOfMassStaticStabilityOptimizationModule(double robotMass, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public CenterOfMassStabilityMarginOptimizationModule(double robotMass, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       mg = robotMass * GRAVITY;
 
@@ -121,10 +126,11 @@ public class CenterOfMassStaticStabilityOptimizationModule
 
             for (int j = 0; j < NUM_BASIS_VECTORS; j++)
             {
-               YoGraphicVector basisVectorGraphic = new YoGraphicVector("basisGraphic" + i + "_" + j, contactPointPositions.get(i), basisVectors.get(j), 0.03, YoAppearance.Black());
+               YoGraphicVector basisVectorGraphic = new YoGraphicVector("basisGraphic" + i + "_" + j, contactPointPositions.get(i), basisVectors.get(j), 0.15, YoAppearance.Black());
                graphicsList.add(basisVectorGraphic);
             }
          }
+         graphicsList.add(new YoGraphicPosition("optimizedCoMGraphic", yoOptimizedCoM, 0.03, YoAppearance.Red()));
 
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
 
@@ -138,6 +144,8 @@ public class CenterOfMassStaticStabilityOptimizationModule
 
       /* Compute contact point positions and corresponding basis vectors */
 
+      numberOfContactPoints = contactState.getNumberOfContactPoints();
+
       for (int contactIdx = 0; contactIdx < contactState.getNumberOfContactPoints(); contactIdx++)
       {
          ReferenceFrame contactFrame = contactState.getContactFrame(contactIdx);
@@ -148,7 +156,7 @@ public class CenterOfMassStaticStabilityOptimizationModule
 
          for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
          {
-            tempVector.set(contactFrame, Axis3D.Z);
+            tempVector.setIncludingFrame(contactFrame, Axis3D.Z);
             double axisPolarCoordinate = basisIdx * 2.0 * Math.PI / NUM_BASIS_VECTORS;
             tempAxisAngle.set(Math.cos(axisPolarCoordinate), Math.sin(axisPolarCoordinate), 0.0, BASIS_VEC_ANGLE);
             tempAxisAngle.transform(tempVector);
@@ -160,7 +168,7 @@ public class CenterOfMassStaticStabilityOptimizationModule
 
       /* Compute nominal equality constraint to enforce static equilibrium */
 
-      nominalDecisionVariables = contactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
+      nominalDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
       Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
       beq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, 1);
 
@@ -191,14 +199,14 @@ public class CenterOfMassStaticStabilityOptimizationModule
 
       /* Compute map from positive x to nominal x */
 
-      posDecisionVariables = nominalDecisionVariables + CoM_DIMENSIONS;
+      posDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints() + 2 * CoM_DIMENSIONS;
       posXToNominalX.reshape(nominalDecisionVariables, posDecisionVariables);
 
       for (int contactIdx = 0; contactIdx < contactState.getNumberOfContactPoints(); contactIdx++)
       {
          for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
          {
-            int rowOffset = 3 * contactIdx;
+            int rowOffset = LINEAR_DIMENSIONS * contactIdx;
             int column = getBasisIndex(contactIdx, basisIdx);
             YoFrameVector3D basisVector = basisVectors.get(column);
 
@@ -256,7 +264,7 @@ public class CenterOfMassStaticStabilityOptimizationModule
       rewardVectorC.set(cy_pos_index, 0, queryDirectionY);
       rewardVectorC.set(cy_neg_index, 0, -queryDirectionY);
 
-      foundSolution = linearProgramSolver.solve(rewardVectorC, Ain, bin, solution);
+      foundSolution = linearProgramSolver.solve(rewardVectorC, Ain_pos, bin, solution);
       if (foundSolution)
       {
          optimizedCoM.set(rewardVectorC.get(cx_pos_index) - rewardVectorC.get(cx_neg_index), rewardVectorC.get(cy_pos_index) - rewardVectorC.get(cy_neg_index));
@@ -265,6 +273,8 @@ public class CenterOfMassStaticStabilityOptimizationModule
       {
          optimizedCoM.setToNaN();
       }
+
+      yoOptimizedCoM.set(optimizedCoM, 0.0);
 
       return foundSolution;
    }
@@ -279,8 +289,35 @@ public class CenterOfMassStaticStabilityOptimizationModule
       return optimizedCoM;
    }
 
+   public void getResolvedForce(int contactIdx, Vector3DBasics resolvedForceToPack)
+   {
+      resolvedForceToPack.setToZero();
+
+      for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
+      {
+         int basisIndex = getBasisIndex(contactIdx, basisIdx);
+         YoFrameVector3D basisVector = basisVectors.get(basisIndex);
+         double rhoSolution = solution.get(basisIndex);
+
+         resolvedForceToPack.addX(basisVector.getX() * rhoSolution);
+         resolvedForceToPack.addY(basisVector.getY() * rhoSolution);
+         resolvedForceToPack.addZ(basisVector.getZ() * rhoSolution);
+      }
+   }
+
+   int getNumberOfContactPoints()
+   {
+      return numberOfContactPoints;
+   }
+
+   YoFramePoint3D getYoContactPointPosition(int contactIdx)
+   {
+      return contactPointPositions.get(contactIdx);
+   }
+
    private void clear()
    {
+      numberOfContactPoints = 0;
       nominalDecisionVariables = -1;
       posDecisionVariables = -1;
       Aeq.zero();
