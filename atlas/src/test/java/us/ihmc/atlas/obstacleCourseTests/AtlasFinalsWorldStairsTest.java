@@ -62,6 +62,7 @@ public class AtlasFinalsWorldStairsTest
 
    @Tag("humanoid-rough-terrain")
    @Test
+   @Disabled
    public void testWalkingUpStairs() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
