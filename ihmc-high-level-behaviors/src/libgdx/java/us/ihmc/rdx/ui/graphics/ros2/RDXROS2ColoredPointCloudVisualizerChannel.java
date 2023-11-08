@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.ouster.NettyOuster;
+import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -58,8 +58,8 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final Vector3D translationToWorld = new Vector3D();
    private float depthDiscretization;
    private CameraModel cameraModel;
-   private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
-   private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
+   private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * OusterNetServer.MAX_POINTS_PER_COLUMN);
+   private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * OusterNetServer.MAX_POINTS_PER_COLUMN);
 
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {

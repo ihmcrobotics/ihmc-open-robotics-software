@@ -30,7 +30,7 @@ public class OusterDriverAndDepthPublisher
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
    private final Runnable asynchronousCompressAndPublish = this::asynchronousCompressAndPublish;
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
-   private final NettyOuster ouster;
+   private final OusterNetServer ouster;
    private final OusterDepthPublisher depthPublisher;
    private final OusterHeightMapUpdater heightMapUpdater;
    private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
@@ -50,8 +50,8 @@ public class OusterDriverAndDepthPublisher
       publishSteppableRegionsMonitor = new ROS2HeartbeatMonitor(ros2, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
       publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
 
-      ouster = new NettyOuster();
-      ouster.bind();
+      ouster = new OusterNetServer();
+      ouster.start();
 
       depthPublisher = new OusterDepthPublisher(imageMessageTopic, lidarScanTopic, publishLidarScanMonitor::isAlive);
       heightMapUpdater = new OusterHeightMapUpdater(ros2);
@@ -77,15 +77,18 @@ public class OusterDriverAndDepthPublisher
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
+         ouster.setOnFrameReceived(null);
+         ouster.destroy();
+
          publishLidarScanMonitor.destroy();
          publishHeightMapMonitor.destroy();
          depthPublisher.destroy();
          heightMapUpdater.stop();
          heightMapUpdater.destroy();
-         ouster.setOnFrameReceived(null);
-         ouster.destroy();
-         ThreadTools.sleepSeconds(0.5);
+
          extractCompressAndPublishThread.destroy();
+
+         System.out.println("Ouster driver/publisher shutting down...");
       }, getClass().getSimpleName() + "Shutdown"));
    }
 
