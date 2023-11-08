@@ -85,7 +85,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void create()
    {
       super.create();
-      int cellsPerAxis = RapidHeightMapExtractor.CROP_WINDOW_SIZE + 1;
+      int cellsPerAxis = RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize() + 1;
       heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
    }
 
@@ -133,8 +133,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
               if (latestHeightMapData == null)
               {
-                 latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                                         RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+                 latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                         RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
                                                          imageMessage.getPosition().getX(),
                                                          imageMessage.getPosition().getY());
               }
@@ -150,8 +150,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
                  PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                                latestHeightMapData,
                                                                imageMessage.getPosition(),
-                                                               RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                               RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+                                                               (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                               (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
                  latestHeightMapMessage = HeightMapMessageTools.toMessage(latestHeightMapData);
                  heightMapMessageGenerated = true;
               }
@@ -225,7 +225,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
                                      zUpToWorldTransform.getTranslation().getX32(),
                                      zUpToWorldTransform.getTranslation().getY32(),
                                      heightMapImage.rows() / 2,
-                                     RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
+                                     (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
                                      pixelScalingFactor);
          }
       }

@@ -375,15 +375,15 @@ public class HumanoidPerceptionModule
       Mat heightMapMat = heightMapImage.getBytedecoOpenCVMat().clone();
       if (latestHeightMapData == null)
       {
-         latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                                 RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getX(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getY());
       }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat, latestHeightMapData,
                                                     rapidHeightMapExtractor.getSensorOrigin(),
-                                                    RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                    RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
       return HeightMapMessageTools.toMessage(latestHeightMapData);
    }
 
@@ -392,15 +392,15 @@ public class HumanoidPerceptionModule
       Mat heightMapMat = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
       if (latestHeightMapData == null)
       {
-         latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS,
-                                                 RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
+         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getX(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getY());
       }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat, latestHeightMapData,
                                                     rapidHeightMapExtractor.getSensorOrigin(),
-                                                    RapidHeightMapExtractor.GLOBAL_WIDTH_IN_METERS,
-                                                    RapidHeightMapExtractor.GLOBAL_CELL_SIZE_IN_METERS);
+                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
       return latestHeightMapData;
    }
 

@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.neural.HeightMapAutoencoder;
@@ -25,8 +26,6 @@ public class RapidHeightMapExtractor
 
    public static float GLOBAL_WIDTH_IN_METERS = 4.0f; // globalWidthInMeters
    public static float GLOBAL_CELL_SIZE_IN_METERS = 0.02f; // globalCellSizeInMeters
-
-   public static int CROP_WINDOW_SIZE = 201;
 
    private int centerIndex;
    private int localCellsPerAxis;
@@ -79,9 +78,7 @@ public class RapidHeightMapExtractor
    private Mat croppedHeightMapImage;
    private Mat denoisedHeightMap;
 
-   private Rect cropWindowRectangle = new Rect((globalCellsPerAxis - CROP_WINDOW_SIZE) / 2, (globalCellsPerAxis - CROP_WINDOW_SIZE) / 2,
-                                               CROP_WINDOW_SIZE,
-                                               CROP_WINDOW_SIZE);
+   private Rect cropWindowRectangle;
 
    private CameraIntrinsics cameraIntrinsics;
 
@@ -94,13 +91,15 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
+   }
 
-      centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
-      localCellsPerAxis = 2 * centerIndex + 1;
-      gridOffsetX = (float) heightMapParameters.getLocalWidthInMeters() / 2.0f;
-      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(),
-                                                            heightMapParameters.getInternalGlobalCellSizeInMeters());
-      globalCellsPerAxis = 2 * globalCenterIndex + 1;
+   public void initialize()
+   {
+      recomputeDerivedParameters();
+      cropWindowRectangle = new Rect((globalCellsPerAxis - heightMapParameters.getCropWindowSize()) / 2,
+                                     (globalCellsPerAxis - heightMapParameters.getCropWindowSize()) / 2,
+                                     heightMapParameters.getCropWindowSize(),
+                                     heightMapParameters.getCropWindowSize());
 
       parametersBuffer = new OpenCLFloatParameters();
       groundToSensorTransformBuffer = new OpenCLFloatBuffer(16);
@@ -115,13 +114,13 @@ public class RapidHeightMapExtractor
       groundToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
-      croppedHeightMapImage = new Mat(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
-      denoisedHeightMap = new Mat(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
+      croppedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      denoisedHeightMap = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
       createGlobalHeightMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
       createGlobalHeightVarianceImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-      createSensorCroppedHeightMapImage(CROP_WINDOW_SIZE, CROP_WINDOW_SIZE, opencv_core.CV_16UC1);
+      createSensorCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
 
@@ -136,7 +135,19 @@ public class RapidHeightMapExtractor
    {
       this.inputDepthImage = depthImage;
       this.mode = mode;
+
+      initialize();
       reset();
+   }
+
+   public void recomputeDerivedParameters()
+   {
+      centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
+      localCellsPerAxis = 2 * centerIndex + 1;
+      gridOffsetX = (float) heightMapParameters.getLocalWidthInMeters() / 2.0f;
+      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(),
+                                                            heightMapParameters.getInternalGlobalCellSizeInMeters());
+      globalCellsPerAxis = 2 * globalCenterIndex + 1;
    }
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
@@ -242,7 +253,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) parameters.getMaxHeightDifference());
       parametersBuffer.setParameter((float) parameters.getSearchWindowHeight());
       parametersBuffer.setParameter((float) parameters.getSearchWindowWidth());
-      parametersBuffer.setParameter((float) CROP_WINDOW_SIZE / 2);
+      parametersBuffer.setParameter((float) heightMapParameters.getCropWindowSize() / 2);
       parametersBuffer.setParameter((float) parameters.getMinClampHeight());
       parametersBuffer.setParameter((float) parameters.getMaxClampHeight());
       parametersBuffer.setParameter((float) parameters.getHeightOffset());
@@ -405,7 +416,10 @@ public class RapidHeightMapExtractor
    {
       int xIndex = HeightMapTools.coordinateToIndex(origin.getX(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
       int yIndex = HeightMapTools.coordinateToIndex(origin.getY(), 0, GLOBAL_CELL_SIZE_IN_METERS, globalCenterIndex);
-      cropWindowRectangle = new Rect((yIndex - CROP_WINDOW_SIZE / 2), (xIndex - CROP_WINDOW_SIZE / 2), CROP_WINDOW_SIZE, CROP_WINDOW_SIZE);
+      cropWindowRectangle = new Rect((yIndex - heightMapParameters.getCropWindowSize() / 2),
+                                     (xIndex - heightMapParameters.getCropWindowSize() / 2),
+                                     heightMapParameters.getCropWindowSize(),
+                                     heightMapParameters.getCropWindowSize());
       return imageToCrop.apply(cropWindowRectangle);
    }
 
