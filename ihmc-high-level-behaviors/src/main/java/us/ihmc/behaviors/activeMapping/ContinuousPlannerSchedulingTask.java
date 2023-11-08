@@ -46,6 +46,7 @@ public class ContinuousPlannerSchedulingTask
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
+   private final ContinuousPlannerStatistics continuousPlannerStatistics = new ContinuousPlannerStatistics();
 
    private ROS2PublisherMap publisherMap;
    private HeightMapData latestHeightMapData;
@@ -68,7 +69,7 @@ public class ContinuousPlannerSchedulingTask
       this.referenceFrames = referenceFrames;
       this.continuousPlanningParameters = continuousPlanningParameters;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
+      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousPlannerStatistics, ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
@@ -104,6 +105,8 @@ public class ContinuousPlannerSchedulingTask
       {
          planAndSendFootsteps();
       }
+
+      LogTools.info(continuousPlannerStatistics.toString());
    }
 
    public void initializeContinuousPlanner()
@@ -167,7 +170,16 @@ public class ContinuousPlannerSchedulingTask
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
+      {
          state = ContinuousWalkingState.READY_TO_PLAN;
+         continuousPlannerStatistics.startStepTime();
+      }
+
+      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+      {
+         continuousPlannerStatistics.endStepTime();
+         continuousPlannerStatistics.incrementTotalStepsCompleted();
+      }
 
       this.footstepStatusMessage.set(footstepStatusMessage);
    }

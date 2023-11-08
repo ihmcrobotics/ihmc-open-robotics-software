@@ -34,7 +34,6 @@ public class ContinuousPlanner
 
    private PlanningMode mode = PlanningMode.WALK_TO_GOAL;
 
-   private ContinuousPlannerStatistics continuousPlannerStatistics = new ContinuousPlannerStatistics();
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
    private FramePose3D walkingStartMidPose = new FramePose3D();
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -61,6 +60,7 @@ public class ContinuousPlanner
    private FootstepPlanningResult footstepPlanningResult;
 
    private ContinuousPlanningParameters continuousPlanningParameters;
+   private ContinuousPlannerStatistics statistics;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
@@ -69,10 +69,14 @@ public class ContinuousPlanner
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ContinuousPlanner(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames, PlanningMode mode)
+   public ContinuousPlanner(DRCRobotModel robotModel,
+                            HumanoidReferenceFrames humanoidReferenceFrames,
+                            ContinuousPlannerStatistics statistics,
+                            PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
+      this.statistics = statistics;
 
       active = true;
 
@@ -90,13 +94,13 @@ public class ContinuousPlanner
    public void initialize()
    {
       footstepPlanner.clearCustomTerminationConditions();
-      footstepPlanner.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize >= continuousPlanningParameters.getNumberOfStepsToSend());
+      footstepPlanner.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize
+                                                                                                                  >= continuousPlanningParameters.getNumberOfStepsToSend());
 
       for (RobotSide side : RobotSide.values)
       {
          startingStancePose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
          goalStancePose.get(side).setFromReferenceFrame(referenceFrames.getSoleFrame(side));
-
       }
 
       FramePose3D finalGoalMidPose = new FramePose3D();
@@ -105,10 +109,7 @@ public class ContinuousPlanner
       walkingStartMidPose.getPosition().setX(finalGoalMidPose.getPosition().getX());
       walkingStartMidPose.getPosition().setY(finalGoalMidPose.getPosition().getY());
       walkingStartMidPose.getPosition().setZ(finalGoalMidPose.getPosition().getZ());
-      walkingStartMidPose
-                         .getOrientation()
-                         .setToYawOrientation(finalGoalMidPose.getRotation().getYaw());
-
+      walkingStartMidPose.getOrientation().setToYawOrientation(finalGoalMidPose.getRotation().getYaw());
 
       initialized = true;
    }
@@ -120,13 +121,17 @@ public class ContinuousPlanner
       switch (this.mode)
       {
          case WALK_TO_GOAL:
-            ActiveMappingTools.setRandomizedStraightGoalPoses(walkingStartMidPose, startingStancePose, goalStancePose,
+            ActiveMappingTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
+                                                              startingStancePose,
+                                                              goalStancePose,
                                                               (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
                                                               (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
          case RANDOM_WALK:
             goalGenerator.updateCurrentPosition(new Point3D(startingStancePose.get(RobotSide.LEFT).getPosition()));
-            ActiveMappingTools.setRandomGoalWithinBounds(goalGenerator.getNextLocation(), startingStancePose, goalStancePose,
+            ActiveMappingTools.setRandomGoalWithinBounds(goalGenerator.getNextLocation(),
+                                                         startingStancePose,
+                                                         goalStancePose,
                                                          (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
                                                          (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
@@ -169,6 +174,7 @@ public class ContinuousPlanner
 
    public void planToGoalWithHeightMap(HeightMapData heightMapData)
    {
+      long startTime = System.currentTimeMillis();
       if (footstepPlanner.isPlanning())
       {
          LogTools.warn("Footstep Planner is Busy!");
@@ -219,6 +225,8 @@ public class ContinuousPlanner
                                      planAvailable,
                                      imminentFootstepSide));
       }
+
+      statistics.setLastPlanningTime((float) (System.currentTimeMillis() - startTime) / 1000.0f);
    }
 
    public FootstepPlannerOutput planToExploreWithHeightMap(HeightMapData heightMapData)
@@ -323,8 +331,7 @@ public class ContinuousPlanner
       }
    }
 
-   public FootstepPlannerRequest createFootstepPlannerRequest(SideDependentList<FramePose3D> startPose,
-                                                              SideDependentList<FramePose3D> goalPose)
+   public FootstepPlannerRequest createFootstepPlannerRequest(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setStartFootPoses(startPose.get(RobotSide.LEFT), startPose.get(RobotSide.RIGHT));
