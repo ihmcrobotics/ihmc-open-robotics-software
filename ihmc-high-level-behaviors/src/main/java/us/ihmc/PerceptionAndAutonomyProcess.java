@@ -3,7 +3,6 @@ package us.ihmc;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -26,7 +25,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensors.*;
+import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
+import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
+import us.ihmc.sensors.ZEDColorDepthImagePublisher;
+import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
@@ -131,8 +133,6 @@ public class PerceptionAndAutonomyProcess
       initializeArUcoHeartbeatCallbacks();
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
-
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "PerceptionAndAutonomyShutdown"));
    }
 
    public void start()
@@ -173,8 +173,6 @@ public class PerceptionAndAutonomyProcess
             blackflyImagePublishers.get(side).startAll();
          }
       }
-
-      ThreadTools.sleepForever();
    }
 
    public void destroy()
