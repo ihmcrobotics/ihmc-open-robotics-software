@@ -5,20 +5,26 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
 public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
 {
-   private double trajectoryDuration = 4.0;
-   private String parentFrameName;
-   private final RigidBodyTransform pelvisToParentTransform = new RigidBodyTransform();
+   private final CRDTUnidirectionalDouble trajectoryDuration;
+   private final CRDTUnidirectionalString parentFrameName;
+   private final CRDTUnidirectionalRigidBodyTransform pelvisToParentTransform;
 
    public PelvisHeightPitchActionDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
+
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, null);
+      pelvisToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
    }
 
    @Override
@@ -26,9 +32,9 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("parentFrame", parentFrameName);
-      JSONTools.toJSON(jsonNode, pelvisToParentTransform);
+      jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
+      jsonNode.put("parentFrame", parentFrameName.getValue());
+      JSONTools.toJSON(jsonNode, pelvisToParentTransform.getValueReadOnly());
    }
 
    @Override
@@ -36,71 +42,73 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
-      parentFrameName = jsonNode.get("parentFrame").textValue();
-      JSONTools.toEuclid(jsonNode, pelvisToParentTransform);
+      trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
+      parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
+      JSONTools.toEuclid(jsonNode, pelvisToParentTransform.getValue());
    }
 
    public void toMessage(PelvisHeightPitchActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setTrajectoryDuration(trajectoryDuration);
-      message.setParentFrameName(parentFrameName);
-      MessageTools.toMessage(pelvisToParentTransform, message.getPelvisTransformToParent());
+      message.setTrajectoryDuration(trajectoryDuration.toMessage());
+      message.setParentFrameName(parentFrameName.toMessage());
+      pelvisToParentTransform.toMessage(message.getPelvisTransformToParent());
    }
 
    public void fromMessage(PelvisHeightPitchActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      trajectoryDuration = message.getTrajectoryDuration();
-      parentFrameName = message.getParentFrameNameAsString();
-      MessageTools.toEuclid(message.getPelvisTransformToParent(), pelvisToParentTransform);
+      trajectoryDuration.fromMessage(message.getTrajectoryDuration());
+      parentFrameName.fromMessage(message.getParentFrameNameAsString());
+      pelvisToParentTransform.fromMessage(message.getPelvisTransformToParent());
    }
 
    public void setHeight(double height)
    {
-      pelvisToParentTransform.getTranslation().set(pelvisToParentTransform.getTranslationX(), pelvisToParentTransform.getTranslationY(), height);
+      pelvisToParentTransform.getValue().getTranslation().set(pelvisToParentTransform.getValue().getTranslationX(),
+                                                              pelvisToParentTransform.getValue().getTranslationY(),
+                                                              height);
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.getRotation();
-      pelvisToParentTransform.getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValue().getRotation();
+      pelvisToParentTransform.getValue().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public double getHeight()
    {
-      return pelvisToParentTransform.getTranslationZ();
+      return pelvisToParentTransform.getValue().getTranslationZ();
    }
 
    public double getPitch()
    {
-      return pelvisToParentTransform.getRotation().getPitch();
+      return pelvisToParentTransform.getValue().getRotation().getPitch();
    }
 
    public double getTrajectoryDuration()
    {
-      return trajectoryDuration;
+      return trajectoryDuration.getValue();
    }
 
    public void setTrajectoryDuration(double trajectoryDuration)
    {
-      this.trajectoryDuration = trajectoryDuration;
+      this.trajectoryDuration.setValue(trajectoryDuration);
    }
 
    public String getParentFrameName()
    {
-      return parentFrameName;
+      return parentFrameName.getValue();
    }
 
    public void setParentFrameName(String parentFrameName)
    {
-      this.parentFrameName = parentFrameName;
+      this.parentFrameName.setValue(parentFrameName);
    }
 
-   public RigidBodyTransform getPelvisToParentTransform()
+   public CRDTUnidirectionalRigidBodyTransform getPelvisToParentTransform()
    {
       return pelvisToParentTransform;
    }
