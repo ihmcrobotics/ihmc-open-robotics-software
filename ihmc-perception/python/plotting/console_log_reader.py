@@ -86,3 +86,45 @@ data_dict = {
 # Print the data dictionary
 for key in data_dict:
     print(key, data_dict[key])
+
+
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 8})
+
+
+# ... (code to read in data_dict from log file)
+
+# Create a figure with 3 rows and 4 columns of subplots
+fig, axs = plt.subplots(3, 4, figsize=(18, 12))
+
+# Plot each data field in a separate subplot
+axs[0, 0].plot(data_dict['total_length_completed'])
+axs[0, 0].set_title('Total Length Completed')
+axs[0, 1].plot(data_dict['total_steps_completed'])
+axs[0, 1].set_title('Total Steps Completed')
+axs[0, 2].plot(data_dict['total_planning_time'])
+axs[0, 2].set_title('Total Planning Time')
+axs[0, 3].plot(data_dict['last_step_time'])
+axs[0, 3].set_title('Last Step Time')
+axs[1, 0].plot(data_dict['total_continuous_walking_time'])
+axs[1, 0].set_title('Total Continuous Walking Time')
+axs[1, 1].plot(data_dict['number_of_interventions'])
+axs[1, 1].set_title('Number of Interventions')
+axs[1, 2].plot(data_dict['last_planning_time'])
+axs[1, 2].set_title('Last Planning Time')
+axs[1, 3].plot(data_dict['last_waiting_time'])
+axs[1, 3].set_title('Last Waiting Time')
+axs[2, 0].plot(data_dict['total_waiting_time'])
+axs[2, 0].set_title('Total Waiting Time')
+axs[2, 1].plot(data_dict['total_steps_planned'])
+axs[2, 1].set_title('Total Steps Planned')
+axs[2, 2].plot(data_dict['last_footstep_queue_length'])
+axs[2, 2].set_title('Last Footstep Queue Length')
+axs[2, 3].plot(data_dict['last_continuous_walking_time'])
+axs[2, 3].set_title('Last Continuous Walking Time')
+
+# Add a title to the entire figure
+fig.suptitle('Continuous Walking Log Data')
+
+# Show the plot
+plt.show()
