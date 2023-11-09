@@ -62,6 +62,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
+      state.setCanExecute(state.getPalmFrame().isChildOfWorld());
+
       if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());

@@ -38,8 +38,6 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          footsteps.get(i).setIndex(i);
          footsteps.get(i).update();
       }
-
-      setCanExecute(referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName()));
    }
 
    public void toMessage(FootstepPlanActionStateMessage message)

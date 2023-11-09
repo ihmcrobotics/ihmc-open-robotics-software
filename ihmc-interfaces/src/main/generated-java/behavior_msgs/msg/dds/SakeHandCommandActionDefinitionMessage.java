@@ -28,10 +28,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
             * Goal torque as ratio from 0.0 (closed) to 1.0 (open)
             */
    public double torque_ratio_;
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public boolean execute_with_next_action_;
 
    public SakeHandCommandActionDefinitionMessage()
    {
@@ -54,8 +50,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       position_ratio_ = other.position_ratio_;
 
       torque_ratio_ = other.torque_ratio_;
-
-      execute_with_next_action_ = other.execute_with_next_action_;
 
    }
 
@@ -128,21 +122,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       return torque_ratio_;
    }
 
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public void setExecuteWithNextAction(boolean execute_with_next_action)
-   {
-      execute_with_next_action_ = execute_with_next_action;
-   }
-   /**
-            * Whether the next action can be executed at the same time of this one
-            */
-   public boolean getExecuteWithNextAction()
-   {
-      return execute_with_next_action_;
-   }
-
 
    public static Supplier<SakeHandCommandActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -170,8 +149,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
-
 
       return true;
    }
@@ -194,8 +171,6 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
 
-      if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
-
 
       return true;
    }
@@ -215,9 +190,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       builder.append("position_ratio=");
       builder.append(this.position_ratio_);      builder.append(", ");
       builder.append("torque_ratio=");
-      builder.append(this.torque_ratio_);      builder.append(", ");
-      builder.append("execute_with_next_action=");
-      builder.append(this.execute_with_next_action_);
+      builder.append(this.torque_ratio_);
       builder.append("}");
       return builder.toString();
    }
