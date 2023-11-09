@@ -126,7 +126,7 @@ public class ContinuousPlannerSchedulingTask
          LogTools.info("State: " + state);
          getImminentStanceFromLatestStatus();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, true);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, state != ContinuousWalkingState.PLANNING_FAILED);
 
          if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
             state = ContinuousWalkingState.PLAN_AVAILABLE;

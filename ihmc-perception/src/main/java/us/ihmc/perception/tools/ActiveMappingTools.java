@@ -40,6 +40,7 @@ public class ActiveMappingTools
          goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
          goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
          goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, offsetY, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
+//         goalPose.get(side).appendTranslation(stancePose.get(RobotSide.LEFT).getPosition().getX() + xDistance, offsetY, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
       goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.11, 0.0);
