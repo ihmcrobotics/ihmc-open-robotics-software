@@ -20,7 +20,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
             */
    public int id_;
    /**
-            * Position and Orientation of the object
+            * Position and Orientation of the sensor at the time when the corresponding ImageMessage was published
             */
    public us.ihmc.euclid.geometry.Pose3D sensor_pose_;
    /**
@@ -124,7 +124,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
 
    /**
-            * Position and Orientation of the object
+            * Position and Orientation of the sensor at the time when the corresponding ImageMessage was published
             */
    public us.ihmc.euclid.geometry.Pose3D getSensorPose()
    {
