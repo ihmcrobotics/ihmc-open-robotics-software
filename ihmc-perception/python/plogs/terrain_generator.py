@@ -42,6 +42,28 @@ def count_objects_by_type(objects):
 
     return dict
 
+def create_shifted_copies(filename):
+    offset = np.array([0.2, 2.2, 0])
+
+    shifted_terrain_objects_1 = copy_and_shift(objects, offset)
+    shifted_terrain_objects_2 = copy_and_shift(shifted_terrain_objects_1, offset)
+    shifted_terrain_objects_3 = copy_and_shift(shifted_terrain_objects_2, offset)
+    shifted_terrain_objects_4 = copy_and_shift(shifted_terrain_objects_3, offset)
+
+    # add all shifted objects to objects
+    shifted_terrain_objects = objects + shifted_terrain_objects_1 + shifted_terrain_objects_2 + shifted_terrain_objects_3 + shifted_terrain_objects_4
+
+    # save the new terrain to a file with name "FootstepPlannerTrainingTerrainGenerated.json"
+    with open(filename, 'w') as outfile:
+        # replace data['objects'] with shifted_terrain_objects
+        data['objects'] = shifted_terrain_objects
+        json.dump(data, outfile)
+
+    counts = count_objects_by_type(shifted_terrain_objects)
+
+    for count, type in counts.items():
+        print(type, count)
+
 
 if __name__ == "__main__":
     # Read JSON file
@@ -54,28 +76,10 @@ if __name__ == "__main__":
     # Print the type of data variable
     objects = data['objects']
 
-    offset = np.array([0.2, 2.2, 0])
-
-    shifted_terrain_objects_1 = copy_and_shift(objects, offset)
-    shifted_terrain_objects_2 = copy_and_shift(shifted_terrain_objects_1, offset)
-    shifted_terrain_objects_3 = copy_and_shift(shifted_terrain_objects_2, offset)
-    shifted_terrain_objects_4 = copy_and_shift(shifted_terrain_objects_3, offset)
-
-    # add all shifted objects to objects
-    shifted_terrain_objects = objects + shifted_terrain_objects_1 + shifted_terrain_objects_2 + shifted_terrain_objects_3 + shifted_terrain_objects_4
-
-    # save the new terrain to a file with name "FootstepPlannerTrainingTerrainGenerated.json"
-    with open(path + "FootstepPlannerTrainingTerrainGenerated_2.json", 'w') as outfile:
-        # replace data['objects'] with shifted_terrain_objects
-        data['objects'] = shifted_terrain_objects
-        json.dump(data, outfile)
+    # create_shifted_copies(path + "FootstepPlannerTrainingTerrainGenerated_2.json")
 
     
 
-    counts = count_objects_by_type(shifted_terrain_objects)
-
-    for count, type in counts.items():
-        print(type, count)
 
 # Types:  {'RDXPointLightObject', 
 # 'RDXLargeCinderBlockRoughed', 
