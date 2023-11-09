@@ -8,6 +8,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
@@ -55,8 +56,9 @@ public class PerceptionBasedContinuousWalking
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
       activePerceptionModule.initializeContinuousElevationMappingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames());
 
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getFootstepPlannerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.CONTINUOUS_PLANNING_PARAMETERS, continuousPlanningParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousPlanningAPI.CONTINUOUS_PLANNING_PARAMETERS, continuousPlanningParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousPlanningAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getFootstepPlannerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousPlanningAPI.SWING_PLANNING_PARAMETERS, activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getSwingPlannerParameters());
 
       perceptionTask.run();
 

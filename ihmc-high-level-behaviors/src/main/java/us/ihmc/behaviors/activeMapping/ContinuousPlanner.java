@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointNode;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -458,6 +459,11 @@ public class ContinuousPlanner
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlanner.getFootstepPlannerParameters();
+   }
+
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return footstepPlanner.getSwingPlannerParameters();
    }
 
    public SideDependentList<FramePose3D> getGoalStancePose()
