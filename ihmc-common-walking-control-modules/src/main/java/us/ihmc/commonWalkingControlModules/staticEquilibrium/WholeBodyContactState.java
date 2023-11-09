@@ -26,11 +26,11 @@ import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculato
 import java.util.HashMap;
 import java.util.Map;
 
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.GRAVITY;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.LINEAR_DIMENSIONS;
+
 public class WholeBodyContactState implements WholeBodyContactStateInterface
 {
-   private static final double GRAVITY = 9.81;
-   private static final int LINEAR_DIMENSIONS = 3;
-
    private final RecyclingArrayList<ContactPoint> contactPoints = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(ContactPoint::new));
    private final Map<RigidBodyBasics, GeometricJacobian> contactJacobians = new HashMap<>();
 

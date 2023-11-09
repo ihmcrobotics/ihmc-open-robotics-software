@@ -3,160 +3,134 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.matrixlib.MatrixTools;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.*;
 
 /**
- * Whole-body force distribution calculator.
- * Solves the QP:
- *
- * min_{f} f^2                         (min force)
- *    s.t.  mg + sum(f) = 0            (lin static equilibrium)
- *    s.t.  sum (r x f + r x mg) = 0   (ang static equilibrium)
- *          f is friction constrained
- *          tau_min <= G - J^T f <= tau_max  (f is actuation constrained)
- *
- * Notation taken from EoM:
- * M qdd + C qd + G = tau + J^T f
+ * Static whole-body force distribution calculator using the constraints from {@link CenterOfMassStabilityMarginOptimizationModule},
+ * but instead of varying CoM position and solving with an LP, it keeps the CoM fixed and solves with a QP.
  */
 public class MultiContactForceDistributionCalculator
 {
-   /* Maintain static equilibrium */
-   private static final int staticEquilibriumConstraints = 6;
+   private final CenterOfMassStabilityMarginOptimizationModule comOptimizationModule;
+   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final double mg;
 
-   private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
-   private final DMatrixRMaj beq = new DMatrixRMaj(0);
-   private final DMatrixRMaj Ain = new DMatrixRMaj(0);
-   private final DMatrixRMaj bin = new DMatrixRMaj(0);
-   private final DMatrixRMaj rho = new DMatrixRMaj(0);
+   private final DMatrixRMaj solutionPos = new DMatrixRMaj(0);
+   private final DMatrixRMaj solution = new DMatrixRMaj(0);
+
    private final DMatrixRMaj quadraticCost = new DMatrixRMaj(0);
    private final DMatrixRMaj linearCost = new DMatrixRMaj(0);
 
-   private final FramePoint3D contactPointPosition = new FramePoint3D();
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   /* Number of nominal decision variables: 3 * n_contact_points */
+   private int nominalDecisionVariables;
+   /* Number of non-negative decision variables: n_basis_vectors */
+   private int posDecisionVariables;
 
-   /**
-    * Returns whether an optimal solution was found
-    */
-   public boolean solve(WholeBodyContactState input)
+   /* Equality matrices for A x = b, where x = [f_0x, f_0y, ..., f_nz] */
+   private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
+   private final DMatrixRMaj beq = new DMatrixRMaj(0);
+
+   /* Equality matrix for A x+ = b, where x+ = [rho_0 ... rho_N] */
+   private final DMatrixRMaj Aeq_pos = new DMatrixRMaj(0);
+
+   /* Conversion from nominal x, which is x = [f_0x, f_0y, ..., f_nz] to positive x+, which is x+ = [rho_0, rho_1, ..., rho_n] , and x+ > =0 */
+   private final DMatrixRMaj posXToNominalX = new DMatrixRMaj(0);
+
+   /* Actuation constraint expressed in terms of x+ */
+   private final DMatrixRMaj Aact_pos = new DMatrixRMaj(0);
+
+   /* Inequality matrix for Ain x+ < bin, where x+ = [rho_0 ... rho_N] */
+   private final DMatrixRMaj Ain_pos = new DMatrixRMaj(0);
+   private final DMatrixRMaj bin_pos = new DMatrixRMaj(0);
+
+   private boolean feasibilityMode = false;
+
+   public MultiContactForceDistributionCalculator(double robotMass)
    {
-//      clear();
-//
-//      double mg = 9.81 * input.getRobotMass();
-//
-//      int rhoSize = WholeBodyContactState.numberOfBasisVectors * input.getNumberOfContactPoints();
-//      int decisionVariables = rhoSize;
-//
-//      rho.reshape(rhoSize, 1);
-//      Aeq.reshape(staticEquilibriumConstraints, decisionVariables);
-//      beq.reshape(staticEquilibriumConstraints, 1);
-//      Ain.reshape(rhoSize + 2 * input.getNumberOfJoints(), rhoSize);
-//      bin.reshape(rhoSize + 2 * input.getNumberOfJoints(), 1);
-//      quadraticCost.reshape(rhoSize, rhoSize);
-//      linearCost.reshape(rhoSize, 1);
-//
-//      CommonOps_DDRM.setIdentity(quadraticCost);
-//      CommonOps_DDRM.fill(beq, 0.0);
-//
-//      for (int i = 0; i < rhoSize; i++)
-//      { // Constraint for rho to be positive
-//         Ain.set(i, i, -1.0);
-//      }
-//
-//      DMatrixRMaj constraintUpperBound = input.getConstraintUpperBound();
-//      DMatrixRMaj constraintLowerBound = input.getConstraintLowerBound();
-//      DMatrixRMaj graspMatrixJacobianTranspose = input.getGraspMatrixJacobianTranspose();
-//
-//      MatrixTools.setMatrixBlock(Ain, rhoSize, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
-//      MatrixTools.setMatrixBlock(bin, rhoSize, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
-//
-//      MatrixTools.setMatrixBlock(Ain, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
-//      MatrixTools.setMatrixBlock(bin, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
-//
-//      for (int contactPointIndex = 0; contactPointIndex < input.getNumberOfContactPoints(); contactPointIndex++)
-//      {
-//         contactPointPosition.setToZero(input.getContactFrame(contactPointIndex));
-//         contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
-//
-//         for (int basisVectorIndex = 0; basisVectorIndex < WholeBodyContactState.numberOfBasisVectors; basisVectorIndex++)
-//         {
-//            FrameVector3D basisVector = input.getBasisVector(contactPointIndex, basisVectorIndex);
-//            int column = basisVectorsPerContactPoint * contactPointIndex + basisVectorIndex;
-//
-//            Aeq.set(0, column, basisVector.getX());
-//            Aeq.set(1, column, basisVector.getY());
-//            Aeq.set(2, column, basisVector.getZ());
-//
-//            // x-component of cross product
-//            double xMomentScale = contactPointPosition.getY() * basisVector.getZ() - contactPointPosition.getZ() * basisVector.getY();
-//            Aeq.set(3, column, xMomentScale);
-//
-//            // y-component of cross product
-//            double yMomentScale = contactPointPosition.getZ() * basisVector.getX() - contactPointPosition.getX() * basisVector.getZ();
-//            Aeq.set(4, column, yMomentScale);
-//
-//            // z-component of cross product
-//            double zMomentScale = contactPointPosition.getX() * basisVector.getY() - contactPointPosition.getY() * basisVector.getX();
-//            Aeq.set(5, column, zMomentScale);
-//         }
-//      }
-//
-//      FramePoint3DReadOnly centerOfMass = input.getCenterOfMass();
-//      beq.set(2, 0, mg);
-//      beq.set(3, 0, mg * centerOfMass.getY());
-//      beq.set(4, 0, -mg * centerOfMass.getX());
-//
-//      qpSolver.clear();
-//      qpSolver.resetActiveSet();
-//
-//      qpSolver.setMaxNumberOfIterations(500);
-//      qpSolver.setConvergenceThreshold(1e-9);
-//      qpSolver.setQuadraticCostFunction(quadraticCost, linearCost, 0.0);
-//      qpSolver.setLinearEqualityConstraints(Aeq, beq);
-//      qpSolver.setLinearInequalityConstraints(Ain, bin);
-//
-//      qpSolver.solve(rho);
-//      return !MatrixTools.containsNaN(rho);
-      return false;
+      comOptimizationModule = new CenterOfMassStabilityMarginOptimizationModule(robotMass);
+      mg = robotMass * GRAVITY;
    }
 
-   public DMatrixRMaj getRho()
+   public boolean solve(WholeBodyContactStateInterface contactState, double comX, double comY)
    {
-      return rho;
+      comOptimizationModule.updateContactState(contactState);
+
+      /* Compute nominal equality constraint to enforce static equilibrium */
+
+      nominalDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints();
+      Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
+      beq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, 1);
+
+      MatrixTools.setMatrixBlock(Aeq, 0, 0, comOptimizationModule.Aeq, 0, 0, Aeq.getNumRows(), Aeq.getNumCols(), 1.0);
+
+      beq.set(2, 0, mg);
+      beq.set(3, 0, comY * mg);
+      beq.set(4, 0, -comX * mg);
+
+      /* Compute map from positive x to nominal x */
+
+      posDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints();
+      posXToNominalX.reshape(nominalDecisionVariables, posDecisionVariables);
+
+      MatrixTools.setMatrixBlock(posXToNominalX, 0, 0, comOptimizationModule.posXToNominalX, 0, 0, posXToNominalX.getNumRows(), posXToNominalX.getNumCols(), 1.0);
+
+      /* Compute constraint matrices */
+      CommonOps_DDRM.mult(Aeq, posXToNominalX, Aeq_pos);
+
+      /* Compute inequality matrices */
+      DMatrixRMaj A_actuation = contactState.getActuationConstraintMatrix();
+      DMatrixRMaj b_actuation = contactState.getActuationConstraintVector();
+      CommonOps_DDRM.mult(A_actuation, posXToNominalX, Aact_pos);
+
+      Ain_pos.reshape(posDecisionVariables + A_actuation.getNumRows(), posDecisionVariables);
+      bin_pos.reshape(posDecisionVariables + b_actuation.getNumRows(), 1);
+
+      for (int basisIdx = 0; basisIdx < posDecisionVariables; basisIdx++)
+      {
+         Ain_pos.set(basisIdx, basisIdx, -1.0);
+      }
+
+      MatrixTools.setMatrixBlock(Ain_pos, posDecisionVariables, 0, A_actuation, 0, 0, A_actuation.getNumRows(), A_actuation.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(bin_pos, posDecisionVariables, 0, b_actuation, 0, 0, b_actuation.getNumRows(), b_actuation.getNumCols(), 1.0);
+
+      /* Compute optimal force distribution */
+      qpSolver.clear();
+      qpSolver.resetActiveSet();
+
+      qpSolver.setMaxNumberOfIterations(feasibilityMode ? 100 : 500);
+      qpSolver.setConvergenceThreshold(feasibilityMode ? 1e-2 : 1e-9);
+      qpSolver.setQuadraticCostFunction(quadraticCost, linearCost, 0.0);
+      qpSolver.setLinearEqualityConstraints(Aeq_pos, beq);
+      qpSolver.setLinearInequalityConstraints(Ain_pos, bin_pos);
+
+      qpSolver.solve(solutionPos);
+      boolean success = !MatrixTools.containsNaN(solutionPos);
+      if (success)
+      {
+         CommonOps_DDRM.mult(posXToNominalX, solutionPos, solution);
+      }
+
+      return success;
    }
 
-   private void clear()
+   public void getResolvedForce(int contactIdx, Vector3DBasics resolvedForceToPack)
    {
-      Aeq.zero();
-      beq.zero();
-      Ain.zero();
-      bin.zero();
-      quadraticCost.zero();
-      linearCost.zero();
-      rho.zero();
+      resolvedForceToPack.setX(solution.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.X.ordinal()));
+      resolvedForceToPack.setY(solution.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Y.ordinal()));
+      resolvedForceToPack.setZ(solution.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Z.ordinal()));
    }
 
-   public Vector3D getResolvedForce(int contactPointIndex, WholeBodyContactState input)
+   public void setAsFeasibilitySolver(boolean feasibilityMode)
    {
-      Vector3D resolvedForce = new Vector3D();
-//      for (int i = 0; i < WholeBodyContactState.numberOfBasisVectors; i++)
-//      {
-//         FrameVector3D basisVector = input.getBasisVector(contactPointIndex, i);
-//         basisVector.changeFrame(ReferenceFrame.getWorldFrame());
-//
-//         double rho = this.rho.get(WholeBodyContactState.numberOfBasisVectors * contactPointIndex + i, 0);
-//
-//         resolvedForce.addX(basisVector.getX() * rho);
-//         resolvedForce.addY(basisVector.getY() * rho);
-//         resolvedForce.addZ(basisVector.getZ() * rho);
-//      }
+      this.feasibilityMode = feasibilityMode;
+   }
 
-      return resolvedForce;
+   public DMatrixRMaj getRhoSolution()
+   {
+      return solutionPos;
    }
 }

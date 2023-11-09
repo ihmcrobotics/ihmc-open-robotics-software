@@ -99,6 +99,7 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
       supportRegionGraphics.identity();
 
       scs2.addStaticVisuals(supportRegionGraphics.getVisualDefinitions());
+      scs2.cropBuffer();
       scs2.startSimulationThread();
 
       ThreadTools.sleepForever();
@@ -106,7 +107,7 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
 
    public static void main(String[] args)
    {
-      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createTriangleFlatGround();
+//      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createTriangleFlatGround();
 //      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createTriangleTiltedOutSlightly();
 //      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createTriangleTiltedOutALot();
 //      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createTriangleOneTiltedFullyOut();
@@ -114,7 +115,7 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
 //      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createFlatSquare();
 //      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createBipedFeet();
 //      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createBipedFeetWithSingleHandhold();
-//      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createBipedFeetWithSingleHandhold();
+      WholeBodyContactStateInterface input = MultiContactSupportRegionSolverInputExamples2.createBipedFeetWithTwoHandholds();
 
       new CenterOfMassStabilityRegionCalculatorVisualizer(input);
    }
