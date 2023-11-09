@@ -25,7 +25,7 @@ module perception_msgs
          */
         long id;
         /**
-         * Position and Orientation of the object
+         * Position and Orientation of the sensor at the time when the corresponding ImageMessage was published
          */
         geometry_msgs::msg::dds::Pose sensor_pose;
         /**
