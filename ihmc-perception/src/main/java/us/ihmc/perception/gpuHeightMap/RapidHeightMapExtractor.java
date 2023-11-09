@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.neural.HeightMapAutoencoder;
+//import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -34,7 +34,7 @@ public class RapidHeightMapExtractor
    private RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
    private final Point3D sensorOrigin = new Point3D();
 
-   private HeightMapAutoencoder denoiser;
+//   private HeightMapAutoencoder denoiser;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatBuffer worldToGroundTransformBuffer;
@@ -74,7 +74,7 @@ public class RapidHeightMapExtractor
    public RapidHeightMapExtractor(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
-      denoiser = new HeightMapAutoencoder();
+//      denoiser = new HeightMapAutoencoder();
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
@@ -352,10 +352,10 @@ public class RapidHeightMapExtractor
       return croppedHeightMapImage;
    }
 
-   public Mat getDenoisedHeightMap()
-   {
-      return denoisedHeightMap;
-   }
+//   public Mat getDenoisedHeightMap()
+//   {
+//      return denoisedHeightMap;
+//   }
 
    public Mat getSensorCroppedHeightMapImage()
    {
