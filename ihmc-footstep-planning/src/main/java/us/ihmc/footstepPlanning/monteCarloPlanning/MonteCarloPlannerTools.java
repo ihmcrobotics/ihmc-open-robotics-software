@@ -5,9 +5,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
 
 import java.util.*;
@@ -16,7 +21,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 public class MonteCarloPlannerTools
 {
-   public static int getTotalNodesInSubTree(MonteCarloWaypointNode rootNode)
+   public static int getTotalNodesInSubTree(MonteCarloTreeNode rootNode)
    {
       if (rootNode == null)
          return 0;
@@ -24,7 +29,7 @@ public class MonteCarloPlannerTools
       int total = 1;
       for (MonteCarloTreeNode child : rootNode.getChildren())
       {
-         total += getTotalNodesInSubTree((MonteCarloWaypointNode) child);
+         total += getTotalNodesInSubTree(child);
       }
 
       return total;
@@ -204,16 +209,16 @@ public class MonteCarloPlannerTools
       return position.getX() >= 0 && position.getX() < gridWidth && position.getY() >= 0 && position.getY() < gridWidth;
    }
 
-   public static void getOptimalPath(MonteCarloWaypointNode root, List<MonteCarloWaypointNode> path)
+   public static void getOptimalPath(MonteCarloTreeNode root, List<MonteCarloTreeNode> path)
    {
       float maxValue = Float.MIN_VALUE;
-      MonteCarloWaypointNode maxNode = null;
+      MonteCarloTreeNode maxNode = null;
       for (MonteCarloTreeNode node : root.getChildren())
       {
          if (node.getValue() > maxValue)
          {
             maxValue = node.getValue();
-            maxNode = (MonteCarloWaypointNode) node;
+            maxNode = node;
          }
       }
 
@@ -224,11 +229,12 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void plotPath(List<MonteCarloWaypointNode> path, Mat gridColor)
+   public static void plotPath(List<MonteCarloTreeNode> path, Mat gridColor)
    {
-      for (MonteCarloWaypointNode node : path)
+      for (MonteCarloTreeNode node : path)
       {
-         Point2DReadOnly position = node.getPosition();
+         MonteCarloWaypointNode waypointNode = (MonteCarloWaypointNode) node;
+         Point2DReadOnly position = waypointNode.getPosition();
 
          // check bounds of the grid
          if (isWithinGridBoundaries(position, gridColor.cols()))
@@ -236,7 +242,7 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void getLayerCounts(MonteCarloWaypointNode root, HashMap<Integer, Integer> layerCounts)
+   public static void getLayerCounts(MonteCarloTreeNode root, HashMap<Integer, Integer> layerCounts)
    {
       if (layerCounts.get(root.getLevel()) == null)
          layerCounts.put(root.getLevel(), 1);
@@ -245,7 +251,23 @@ public class MonteCarloPlannerTools
 
       for (MonteCarloTreeNode child : root.getChildren())
       {
-         getLayerCounts((MonteCarloWaypointNode) child, layerCounts);
+         getLayerCounts(child, layerCounts);
       }
+   }
+
+   public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root)
+   {
+      List<MonteCarloTreeNode> path = new ArrayList<>();
+      MonteCarloPlannerTools.getOptimalPath(root, path);
+
+      FootstepPlan footstepPlan = new FootstepPlan();
+      for (MonteCarloTreeNode node : path)
+      {
+         MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
+         Point3D position = footstepNode.getPosition();
+         FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(position), new Quaternion(position.getZ(), 0, 0));
+         footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
+      }
+      return footstepPlan;
    }
 }

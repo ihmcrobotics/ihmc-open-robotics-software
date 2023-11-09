@@ -36,6 +36,11 @@ public abstract class MonteCarloTreeNode
       upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(parent.visits) / visits));
    }
 
+   public ArrayList<?> getAvailableStates(MonteCarloPlanningWorld world)
+   {
+      return null;
+   }
+
    public float getUpperConfidenceBound()
    {
       return upperConfidenceBound;
@@ -89,5 +94,10 @@ public abstract class MonteCarloTreeNode
    public int getLevel()
    {
       return level;
+   }
+
+   public Object getPosition()
+   {
+      return null;
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -48,6 +49,16 @@ public class MonteCarloFootstepPlannerRequest
     * Maximum iterations. Set to a non-positive number to disable. If {@link #timeout} is also set, the planner terminates whener either is reached.
     */
    private int maximumIterations;
+
+   /**
+    * Height Map image in OpenCV format
+    */
+   private Mat heightMap;
+
+   /**
+    * Contact map image in OpenCV format
+    */
+   private Mat contactMap;
 
    public MonteCarloFootstepPlannerRequest()
    {
@@ -184,6 +195,16 @@ public class MonteCarloFootstepPlannerRequest
    public int getMaximumIterations()
    {
       return maximumIterations;
+   }
+
+   public void setHeightMap(Mat heightMap)
+   {
+      this.heightMap = heightMap;
+   }
+
+   public void setContactMap(Mat contactMap)
+   {
+      this.contactMap = contactMap;
    }
 
    public void setPacket(MonteCarloFootstepPlannerRequest requestPacket)

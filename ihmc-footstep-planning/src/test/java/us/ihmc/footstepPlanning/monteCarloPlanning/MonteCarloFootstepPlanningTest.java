@@ -27,9 +27,9 @@ public class MonteCarloFootstepPlanningTest
    private boolean displayPlots = true;
 
    private OpenCLManager openCLManager = new OpenCLManager();
-   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner();
-   private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private MonteCarloFootstepPlannerParameters plannerParameters = new MonteCarloFootstepPlannerParameters();
+   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters);
+   private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager);
 
    @Disabled
@@ -69,6 +69,10 @@ public class MonteCarloFootstepPlanningTest
       request.setContactMap(contactMap);
       request.setHeightMap(heightMap);
 
+      FootstepPlan plan = planner.generateFootstepPlan(request);
+
+      LogTools.info("Plan Size: {}", plan.getNumberOfSteps());
+
       if (displayPlots)
          display(heightMap, contactMap, terrainCostImage);
 
@@ -84,8 +88,6 @@ public class MonteCarloFootstepPlanningTest
 
       //PerceptionDebugTools.printMat("Terrain Cost", terrainCostImage, 4);
       //PerceptionDebugTools.printMat("Contact Map", contactMapImage, 4);
-
-      //FootstepPlan footstepPlan = planner.generateFootstepPlan(heightMap, contactMapImage, plannerParameters);
 
       //PerceptionDebugTools.printMat("Height Map", heightMap, 4);
       //PerceptionDebugTools.printMat("Contact Map", contactMapImage, 4);

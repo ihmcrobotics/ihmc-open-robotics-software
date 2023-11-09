@@ -4,7 +4,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPathPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointNode;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -55,7 +57,7 @@ public class ContinuousPlanner
    private FootstepPlan previouslySentPlanForReference;
    private HumanoidReferenceFrames referenceFrames;
    private FootstepPlanningModule footstepPlanner;
-   private MonteCarloPlanner monteCarloPlanner;
+   private MonteCarloPathPlanner monteCarloPathPlanner;
    private FootstepPlannerOutput plannerOutput;
    private FootstepPlanningResult footstepPlanningResult;
 
@@ -83,7 +85,7 @@ public class ContinuousPlanner
       switch (mode)
       {
          case FRONTIER_EXPANSION:
-            monteCarloPlanner = new MonteCarloPlanner(offset);
+            monteCarloPathPlanner = new MonteCarloPathPlanner(offset);
             break;
          case WALK_TO_GOAL, RANDOM_WALK:
             footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
@@ -143,8 +145,8 @@ public class ContinuousPlanner
             robotLocation.set((startingStancePose.get(RobotSide.LEFT).getX() + startingStancePose.get(RobotSide.RIGHT).getX()) / 2.0f,
                               (startingStancePose.get(RobotSide.LEFT).getY() + startingStancePose.get(RobotSide.RIGHT).getY()) / 2.0f);
 
-            monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
-            agentPositionIndices.set(monteCarloPlanner.getAgent().getState());
+            monteCarloPathPlanner.getAgent().measure(monteCarloPathPlanner.getWorld());
+            agentPositionIndices.set(monteCarloPathPlanner.getAgent().getState());
             robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
                                      ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
 
@@ -152,11 +154,11 @@ public class ContinuousPlanner
 
             if (error < 10.0f)
             {
-               goalPositionIndices.set(monteCarloPlanner.plan());
+               goalPositionIndices.set((Point2DReadOnly) monteCarloPathPlanner.plan().getPosition());
                goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
                                 ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
 
-               monteCarloPlanner.updateState(goalPositionIndices);
+               monteCarloPathPlanner.updateState(new MonteCarloWaypointNode(goalPositionIndices, null, 0));
             }
 
             float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
@@ -231,9 +233,9 @@ public class ContinuousPlanner
 
    public FootstepPlannerOutput planToExploreWithHeightMap(HeightMapData heightMapData)
    {
-      MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
-      MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
-      MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
+      MonteCarloPlannerTools.plotWorld(monteCarloPathPlanner.getWorld(), gridColor);
+      MonteCarloPlannerTools.plotAgent(monteCarloPathPlanner.getAgent(), gridColor);
+      MonteCarloPlannerTools.plotRangeScan(monteCarloPathPlanner.getAgent().getScanPoints(), gridColor);
 
       PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
 
@@ -260,9 +262,9 @@ public class ContinuousPlanner
    {
       if (mode == PlanningMode.FRONTIER_EXPANSION)
       {
-         MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
-         MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
-         MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
+         MonteCarloPlannerTools.plotWorld(monteCarloPathPlanner.getWorld(), gridColor);
+         MonteCarloPlannerTools.plotAgent(monteCarloPathPlanner.getAgent(), gridColor);
+         MonteCarloPlannerTools.plotRangeScan(monteCarloPathPlanner.getAgent().getScanPoints(), gridColor);
 
          PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
 
@@ -282,9 +284,9 @@ public class ContinuousPlanner
             //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, goalPose.get(RobotSide.LEFT, goalPose.get(RobotSide.RIGHT), 0.6f);
             //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
-            monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
+            monteCarloPathPlanner.getAgent().measure(monteCarloPathPlanner.getWorld());
 
-            agentPositionIndices.set(monteCarloPlanner.getAgent().getState());
+            agentPositionIndices.set(monteCarloPathPlanner.getAgent().getState());
 
             robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
                                      ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
@@ -295,11 +297,11 @@ public class ContinuousPlanner
 
             if (error < 10.0f)
             {
-               goalPositionIndices.set(monteCarloPlanner.plan());
+               goalPositionIndices.set((Point2D) monteCarloPathPlanner.plan().getPosition());
                goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
                                 ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
 
-               monteCarloPlanner.updateState(goalPositionIndices);
+               monteCarloPathPlanner.updateState(new MonteCarloWaypointNode(goalPositionIndices, null, 0));
             }
 
             float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
@@ -440,17 +442,17 @@ public class ContinuousPlanner
 
    public int getGridSize()
    {
-      return monteCarloPlanner.getWorld().getGridHeight();
+      return monteCarloPathPlanner.getWorld().getGridHeight();
    }
 
    public void submitRangeScan(List<Point3DReadOnly> points)
    {
-      monteCarloPlanner.submitMeasurements(points);
+      monteCarloPathPlanner.submitMeasurements(points);
    }
 
-   public MonteCarloPlanner getPlanner()
+   public MonteCarloPathPlanner getPlanner()
    {
-      return monteCarloPlanner;
+      return monteCarloPathPlanner;
    }
 
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()

@@ -2,10 +2,10 @@ package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPathPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloTreeNode;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointNode;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
@@ -34,7 +34,7 @@ class MonteCarloPlanning2DSimulationDemo
       //obstacles.add(new Vector4D32(30, 80, 30, 1));
       //obstacles.add(new Vector4D32(75, 80, 5, 1));
 
-      MonteCarloPlanner planner = new MonteCarloPlanner(0);
+      MonteCarloPathPlanner planner = new MonteCarloPathPlanner(0);
       planner.getWorld().submitObstacles(obstacles);
 
       int screenSize = 1400;
@@ -43,7 +43,7 @@ class MonteCarloPlanning2DSimulationDemo
       Mat gridColor = new Mat();
       Scalar zero = new Scalar(0, 0, 0, 0);
 
-      List<MonteCarloWaypointNode> optimalPath = new ArrayList<>();
+      List<MonteCarloTreeNode> optimalPath = new ArrayList<>();
 
       planner.setParameters(50, 10, 4);
 
@@ -69,7 +69,7 @@ class MonteCarloPlanning2DSimulationDemo
 
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
 
-         Point2DReadOnly newState = planner.plan();
+         MonteCarloWaypointNode newState = (MonteCarloWaypointNode) planner.plan();
          planner.updateState(newState);
 
          i += 1;
