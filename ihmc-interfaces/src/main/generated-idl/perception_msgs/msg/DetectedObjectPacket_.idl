@@ -27,6 +27,10 @@ module perception_msgs
         /**
          * Position and Orientation of the object
          */
+        geometry_msgs::msg::dds::Pose sensor_pose;
+        /**
+         * Position and Orientation of the object
+         */
         geometry_msgs::msg::dds::Pose pose;
         /**
          * How confident are we about what object it is. Mostly used to NN based detections
