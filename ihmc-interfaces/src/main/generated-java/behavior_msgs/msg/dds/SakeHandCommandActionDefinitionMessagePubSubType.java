@@ -15,7 +15,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e90989259321b818572541933801b42bc8e86122d416a40ba634a523ca72030f";
+   		return "d2c8fb82f881ec2b84e925ecc5e3589a3cfcbf56a541e372c84d8b016f7e38b9";
    }
    
    @Override
@@ -62,8 +62,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -91,9 +89,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -109,8 +104,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
 
       cdr.write_type_6(data.getTorqueRatio());
 
-      cdr.write_type_7(data.getExecuteWithNextAction());
-
    }
 
    public static void read(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -124,8 +117,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       	
       data.setTorqueRatio(cdr.read_type_6());
       	
-      data.setExecuteWithNextAction(cdr.read_type_7());
-      	
 
    }
 
@@ -138,7 +129,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       ser.write_type_4("configuration", data.getConfiguration());
       ser.write_type_6("position_ratio", data.getPositionRatio());
       ser.write_type_6("torque_ratio", data.getTorqueRatio());
-      ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
    }
 
    @Override
@@ -150,7 +140,6 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       data.setConfiguration(ser.read_type_4("configuration"));
       data.setPositionRatio(ser.read_type_6("position_ratio"));
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
-      data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage src, behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage dest)

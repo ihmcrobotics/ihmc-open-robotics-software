@@ -15,7 +15,4 @@ float64 position_ratio
 # Goal torque as ratio from 0.0 (closed) to 1.0 (open)
 float64 torque_ratio
 
-# Whether the next action can be executed at the same time of this one
-bool execute_with_next_action
-
 

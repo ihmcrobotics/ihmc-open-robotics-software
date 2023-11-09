@@ -15,7 +15,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalInteger handConfigurationIndex;
    private final CRDTUnidirectionalDouble goalPosition;
    private final CRDTUnidirectionalDouble goalTorque;
-   private final CRDTUnidirectionalBoolean executeWitNextAction;
 
    public SakeHandCommandActionDefinition(CRDTInfo crdtInfo)
    {
@@ -25,7 +24,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandCommandOption.GOTO.ordinal());
       goalPosition = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0); // default to open
       goalTorque = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0); // default to none
-      executeWitNextAction = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
    }
 
    @Override
@@ -37,7 +35,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       jsonNode.put("configuration", SakeHandCommandOption.values[handConfigurationIndex.getValue()].name());
       jsonNode.put("position", goalPosition.getValue());
       jsonNode.put("torque", goalTorque.getValue());
-      jsonNode.put("executeWithNextAction", executeWitNextAction.getValue());
    }
 
    @Override
@@ -49,7 +46,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       handConfigurationIndex.setValue(SakeHandCommandOption.valueOf(jsonNode.get("configuration").asText()).ordinal());
       goalPosition.setValue(jsonNode.get("position").asDouble());
       goalTorque.setValue(jsonNode.get("torque").asDouble());
-      executeWitNextAction.setValue(jsonNode.get("executeWithNextAction").asBoolean());
    }
 
    public void toMessage(SakeHandCommandActionDefinitionMessage message)
@@ -60,7 +56,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       message.setConfiguration(SakeHandCommandOption.values[handConfigurationIndex.toMessage()].getCommandNumber());
       message.setPositionRatio(goalPosition.toMessage());
       message.setTorqueRatio(goalTorque.toMessage());
-      message.setExecuteWithNextAction(executeWitNextAction.toMessage());
    }
 
    public void fromMessage(SakeHandCommandActionDefinitionMessage message)
@@ -71,7 +66,6 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       handConfigurationIndex.fromMessage((int) message.getConfiguration());
       goalPosition.fromMessage(message.getPositionRatio());
       goalTorque.fromMessage(message.getTorqueRatio());
-      executeWitNextAction.fromMessage(message.getExecuteWithNextAction());
    }
 
    public RobotSide getSide()
@@ -112,15 +106,5 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    public void setGoalTorque(double goalTorque)
    {
       this.goalTorque.setValue(goalTorque);
-   }
-
-   public boolean getExecuteWithNextAction()
-   {
-      return executeWitNextAction.getValue();
-   }
-
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
-   {
-      this.executeWitNextAction.setValue(executeWitNextAction);
    }
 }

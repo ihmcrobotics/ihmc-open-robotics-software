@@ -66,6 +66,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    public void update()
    {
       super.update();
+
+      state.setCanExecute(referenceFrameLibrary.containsFrame(getDefinition().getParentFrameName()));
    }
 
    @Override

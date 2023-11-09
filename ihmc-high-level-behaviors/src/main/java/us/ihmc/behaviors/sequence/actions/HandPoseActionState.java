@@ -38,7 +38,6 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    public void update()
    {
       palmFrame.update(getDefinition().getPalmParentFrameName());
-      setCanExecute(palmFrame.isChildOfWorld());
    }
 
    public void toMessage(HandPoseActionStateMessage message)
@@ -64,7 +63,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
       handWrenchMagnitudeLinear.fromMessage(message.getHandWrenchMagnitudeLinear());
       jointAngles.fromMessage(message.getJointAngles());
-      solutionQuality.setValue(message.getSolutionQuality());
+      solutionQuality.fromMessage(message.getSolutionQuality());
       MessageTools.toEuclid(message.getGoalChestTransformToWorld(), goalChestFrame.getTransformToParent());
       goalChestFrame.getReferenceFrame().update();
    }

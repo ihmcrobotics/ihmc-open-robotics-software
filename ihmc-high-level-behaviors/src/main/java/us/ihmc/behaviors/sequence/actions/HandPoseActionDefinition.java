@@ -65,7 +65,6 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       palmTransformToParent.toMessage(message.getTransformToParent());
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
-      message.setExecuteWithNextAction(getExecuteWithNextAction());
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
       message.setJointSpaceControl(jointSpaceControl.toMessage());
    }
@@ -78,9 +77,8 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       palmTransformToParent.fromMessage(message.getTransformToParent());
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
-      setExecuteWithNextAction(message.getExecuteWithNextAction());
       holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
-      jointSpaceControl.setValue(message.getJointSpaceControl());
+      jointSpaceControl.fromMessage(message.getJointSpaceControl());
    }
 
    @Override
