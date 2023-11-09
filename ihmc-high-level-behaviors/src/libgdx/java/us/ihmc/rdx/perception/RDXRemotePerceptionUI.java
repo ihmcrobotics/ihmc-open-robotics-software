@@ -118,7 +118,7 @@ public class RDXRemotePerceptionUI
 
    public void setSwingPlannerParameters(SwingPlannerParametersBasics parameters)
    {
-      this.swingPlannerParameters.set(parameters);
+      this.swingPlannerParameters = parameters;
       remotePropertySets.registerRemotePropertySet(swingPlannerParameters, ContinuousPlanningAPI.SWING_PLANNING_PARAMETERS);
    }
 }
