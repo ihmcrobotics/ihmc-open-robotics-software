@@ -6,7 +6,7 @@ uint32 sequence_id
 # Object ID
 int32 id
 
-# Position and Orientation of the object
+# Position and Orientation of the sensor at the time when the corresponding ImageMessage was published
 geometry_msgs/Pose sensor_pose
 
 # Position and Orientation of the object
