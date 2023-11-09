@@ -174,7 +174,7 @@ public class ContinuousPlanner
       }
    }
 
-   public void planToGoalWithHeightMap(HeightMapData heightMapData)
+   public void planToGoalWithHeightMap(HeightMapData heightMapData, boolean useReferencePlan)
    {
       long startTime = System.currentTimeMillis();
       if (footstepPlanner.isPlanning())
@@ -189,8 +189,7 @@ public class ContinuousPlanner
       request.setHeightMapData(heightMapData);
       request.setAbortIfGoalStepSnappingFails(true);
 
-      request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
-      if (plannerOutput != null)
+      if (useReferencePlan)
       {
          LogTools.info("Setting Previous Plan as Reference in the Request");
          FootstepPlan previousFootstepPlan = plannerOutput.getFootstepPlan();
@@ -211,6 +210,7 @@ public class ContinuousPlanner
       }
       else
       {
+         request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
          LogTools.warn("No Reference Plan Available");
       }
 

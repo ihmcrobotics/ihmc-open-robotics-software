@@ -111,7 +111,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
-      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData);
+      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, false);
 
       if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
          state = ContinuousWalkingState.PLAN_AVAILABLE;
@@ -126,7 +126,7 @@ public class ContinuousPlannerSchedulingTask
          LogTools.info("State: " + state);
          getImminentStanceFromLatestStatus();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, true);
 
          if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
             state = ContinuousWalkingState.PLAN_AVAILABLE;
