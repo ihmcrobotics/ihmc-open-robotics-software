@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTableFlags;
@@ -21,10 +22,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
-import us.ihmc.rdx.imgui.ImGuiPanelManager;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
@@ -120,6 +118,7 @@ public class RDXBaseUI
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private final RDXScreenRecorder screenRecorder = new RDXScreenRecorder();
+   private final ImGuiFlashingButton recordButton = new ImGuiFlashingButton(Color.RED.toIntBits());
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -320,7 +319,7 @@ public class RDXBaseUI
          ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(true);
       }
 
-      screenRecorder.record(recordScreenUI.get());
+      screenRecorder.writeFrame();
    }
 
    private void renderMenuBar()
@@ -499,17 +498,19 @@ public class RDXBaseUI
       if (plotFrameRate.get())
       {
          // Currently we manually tune this value when we change the stuff in the status a
-         float menuBarStatusWidth = 320.0f;
+         float menuBarStatusWidth = 410f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
          frameRateDisplay.renderPlot();
       }
       else
       {
-         float menuBarStatusWidth = 212.0f;
+         float menuBarStatusWidth = 300f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
       }
 
-      ImGui.checkbox("Record UI", recordScreenUI);
+      if (recordButton.renderButton(screenRecorder.isRecording() ? "Stop recording" : "Start recording", screenRecorder.isRecording()))
+         screenRecorder.setRecording(!screenRecorder.isRecording());
+
       frameRateDisplay.renderHz();
 
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
