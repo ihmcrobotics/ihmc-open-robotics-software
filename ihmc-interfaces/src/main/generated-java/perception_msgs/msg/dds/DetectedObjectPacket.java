@@ -22,6 +22,10 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    /**
             * Position and Orientation of the object
             */
+   public us.ihmc.euclid.geometry.Pose3D sensor_pose_;
+   /**
+            * Position and Orientation of the object
+            */
    public us.ihmc.euclid.geometry.Pose3D pose_;
    /**
             * How confident are we about what object it is. Mostly used to NN based detections
@@ -42,6 +46,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
    public DetectedObjectPacket()
    {
+      sensor_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
       object_type_ = new java.lang.StringBuilder(255);
       bounding_box_2d_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
@@ -70,6 +75,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       id_ = other.id_;
 
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.sensor_pose_, sensor_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       confidence_ = other.confidence_;
 
@@ -114,6 +120,15 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    public int getId()
    {
       return id_;
+   }
+
+
+   /**
+            * Position and Orientation of the object
+            */
+   public us.ihmc.euclid.geometry.Pose3D getSensorPose()
+   {
+      return sensor_pose_;
    }
 
 
@@ -204,6 +219,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
+      if (!this.sensor_pose_.epsilonEquals(other.sensor_pose_, epsilon)) return false;
       if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
 
@@ -236,6 +252,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       if(this.id_ != otherMyClass.id_) return false;
 
+      if (!this.sensor_pose_.equals(otherMyClass.sensor_pose_)) return false;
       if (!this.pose_.equals(otherMyClass.pose_)) return false;
       if(this.confidence_ != otherMyClass.confidence_) return false;
 
@@ -263,6 +280,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
+      builder.append("sensor_pose=");
+      builder.append(this.sensor_pose_);      builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);      builder.append(", ");
       builder.append("confidence=");

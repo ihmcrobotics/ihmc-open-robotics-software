@@ -7,6 +7,9 @@ uint32 sequence_id
 int32 id
 
 # Position and Orientation of the object
+geometry_msgs/Pose sensor_pose
+
+# Position and Orientation of the object
 geometry_msgs/Pose pose
 
 # How confident are we about what object it is. Mostly used to NN based detections
