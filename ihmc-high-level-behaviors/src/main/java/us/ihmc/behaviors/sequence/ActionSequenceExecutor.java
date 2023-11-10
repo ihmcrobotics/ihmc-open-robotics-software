@@ -13,6 +13,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
    private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
+   private int lastIndexOfConcurrentSetToExecute;
 
    public ActionSequenceExecutor(long id, CRDTInfo crdtInfo)
    {
@@ -48,9 +49,16 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          }
       }
 
+      lastIndexOfConcurrentSetToExecute = findLastIndexOfConcurrentSetToExecute(executorChildren, getState().getExecutionNextIndex());
       for (int i = 0; i < getChildren().size(); i++)
       {
-         BehaviorActionExecutionStatusCalculator.update(executorChildren, i, getState().getExecutionNextIndex());
+         ActionNodeExecutor<?, ?> actionNodeExecutor = executorChildren.get(i);
+
+         boolean isNextForExecution = i >= getState().getExecutionNextIndex() && i <= lastIndexOfConcurrentSetToExecute;
+         boolean isToBeExecutedConcurrently = isNextForExecution && getState().getExecutionNextIndex() != lastIndexOfConcurrentSetToExecute;
+
+         actionNodeExecutor.getState().setIsNextForExecution(isNextForExecution);
+         actionNodeExecutor.getState().setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
       }
 
       for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
@@ -85,6 +93,17 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       }
    }
 
+   public static int findLastIndexOfConcurrentSetToExecute(List<ActionNodeExecutor<?, ?>> actionSequence, int executionNextIndex)
+   {
+      int lastIndexOfConcurrentSetToExecute = executionNextIndex;
+      while (lastIndexOfConcurrentSetToExecute < actionSequence.size()
+             && actionSequence.get(lastIndexOfConcurrentSetToExecute).getDefinition().getExecuteWithNextAction())
+      {
+         ++lastIndexOfConcurrentSetToExecute;
+      }
+      return lastIndexOfConcurrentSetToExecute;
+   }
+
    private void executeNextAction()
    {
       ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(getState().getExecutionNextIndex());
@@ -115,6 +134,16 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    private boolean isEndOfSequence()
    {
       return getState().getExecutionNextIndex() >= executorChildren.size();
+   }
+
+   public List<ActionNodeExecutor<?, ?>> getExecutorChildren()
+   {
+      return executorChildren;
+   }
+
+   public int getLastIndexOfConcurrentSetToExecute()
+   {
+      return lastIndexOfConcurrentSetToExecute;
    }
 
    @Override
