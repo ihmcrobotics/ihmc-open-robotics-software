@@ -48,6 +48,8 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    public void update()
    {
       super.update();
+
+      state.setCanExecute(state.getPelvisFrame().isChildOfWorld());
    }
 
    @Override
