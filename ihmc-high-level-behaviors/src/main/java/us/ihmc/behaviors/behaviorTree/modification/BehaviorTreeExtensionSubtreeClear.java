@@ -12,7 +12,7 @@ public class BehaviorTreeExtensionSubtreeClear extends BehaviorTreeSubtreeClear 
 
       if (subtreeToClear.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedSubtreeToClear)
       {
-         // This will result in recuresively performing the modification on all extended types
+         // This will result in recursively performing the modification on all extended types
          extensionSubtreeClear = new BehaviorTreeExtensionSubtreeClear(extendedSubtreeToClear);
       }
       else

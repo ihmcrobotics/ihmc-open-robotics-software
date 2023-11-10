@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.log.LogTools;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ public abstract class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D
       implements BehaviorTreeNodeExtension<BehaviorTreeNodeExecutor<?, ?>, S, S, D>
 {
    private final List<BehaviorTreeNodeExecutor<?, ?>> children = new ArrayList<>();
+   private transient BehaviorTreeNodeExecutor<?, ?> parent;
 
    /**
     * A method that should be called before each {@link #tick}
@@ -40,6 +42,19 @@ public abstract class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D
    public List<BehaviorTreeNodeExecutor<?, ?>> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public void setParent(@Nullable BehaviorTreeNodeExecutor<?, ?> parent)
+   {
+      this.parent = parent;
+   }
+
+   @Nullable
+   @Override
+   public BehaviorTreeNodeExecutor<?, ?> getParent()
+   {
+      return parent;
    }
 
    @Override

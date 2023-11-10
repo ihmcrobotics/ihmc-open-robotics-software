@@ -57,9 +57,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
                clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
             }
 
-            localNode.getDefinition().getChildren().clear(); // FIXME This is kinda weird
-            localNode.getState().getChildren().clear();
-            localNode.getChildren().clear();
+            BehaviorTreeNodeExtensionClear.clearChildren(localNode);
          }
          else
          {

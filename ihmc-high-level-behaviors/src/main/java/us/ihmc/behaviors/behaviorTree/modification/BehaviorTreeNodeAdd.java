@@ -21,6 +21,7 @@ public class BehaviorTreeNodeAdd<T extends BehaviorTreeNode<T>> implements Behav
    public void performOperation()
    {
       parent.getChildren().add(nodeToAdd);
+      nodeToAdd.setParent(parent);
    }
 
    protected BehaviorTreeNode<?> getNodeToAdd()

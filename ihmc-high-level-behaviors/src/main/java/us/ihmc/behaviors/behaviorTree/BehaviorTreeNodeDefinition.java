@@ -8,6 +8,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    private final CRDTUnidirectionalString description;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
+   private transient BehaviorTreeNodeDefinition parent;
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo)
    {
@@ -83,5 +85,18 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    public List<BehaviorTreeNodeDefinition> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public void setParent(@Nullable BehaviorTreeNodeDefinition parent)
+   {
+      this.parent = parent;
+   }
+
+   @Nullable
+   @Override
+   public BehaviorTreeNodeDefinition getParent()
+   {
+      return parent;
    }
 }

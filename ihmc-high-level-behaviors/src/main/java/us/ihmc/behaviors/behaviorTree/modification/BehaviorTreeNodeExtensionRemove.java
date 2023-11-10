@@ -15,7 +15,7 @@ public class BehaviorTreeNodeExtensionRemove<T extends BehaviorTreeNodeExtension
       if (nodeToRemove.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedNodeToRemove
        && rootNode.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedRootNode)
       {
-         // This will result in recuresively performing the modification on all extended types
+         // This will result in recursively performing the modification on all extended types
          extendedNodeRemoval = new BehaviorTreeNodeExtensionRemove(extendedNodeToRemove, extendedRootNode);
       }
       else

@@ -5,6 +5,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.log.LogTools;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,7 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
     * The state's children. They can be any type that is a BehaviorTreeNodeState.
     */
    private final List<BehaviorTreeNodeState<?>> children = new ArrayList<>();
+   private transient BehaviorTreeNodeState<?> parent;
 
    public BehaviorTreeNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
@@ -86,6 +88,19 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
    public List<BehaviorTreeNodeState<?>> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public void setParent(@Nullable BehaviorTreeNodeState<?> parent)
+   {
+      this.parent = parent;
+   }
+
+   @Nullable
+   @Override
+   public BehaviorTreeNodeState<?> getParent()
+   {
+      return parent;
    }
 
    @Override

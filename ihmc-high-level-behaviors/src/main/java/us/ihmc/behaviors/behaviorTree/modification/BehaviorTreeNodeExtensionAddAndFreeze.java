@@ -15,7 +15,7 @@ public class BehaviorTreeNodeExtensionAddAndFreeze<T extends BehaviorTreeNodeExt
       if (nodeToAdd.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedNodeToAdd
        && parent.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedParent)
       {
-         // This will result in recuresively performing the modification on all extended types
+         // This will result in recursively performing the modification on all extended types
          extendedTypeAddition = new BehaviorTreeNodeExtensionAddAndFreeze(extendedNodeToAdd, extendedParent);
       }
       else
