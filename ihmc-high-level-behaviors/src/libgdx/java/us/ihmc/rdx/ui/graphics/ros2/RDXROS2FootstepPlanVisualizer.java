@@ -66,8 +66,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    public void update()
    {
       super.update();
-
-
    }
 
    @Override
