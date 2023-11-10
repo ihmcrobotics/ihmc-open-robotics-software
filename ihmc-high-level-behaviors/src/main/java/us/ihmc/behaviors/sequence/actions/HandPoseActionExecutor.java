@@ -66,9 +66,17 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
       {
+         // TODO: Find goal chest frame based on concurrent actions
+         if (getParent() instanceof ActionSequenceExecutor parentSequence)
+         {
+
+         }
+         state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
+         state.getGoalChestFrame().update();
+
          ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
          armIKSolver.copySourceToWork();
-         armIKSolver.update(state.getGoalChestFrame().getReferenceFrame(), state.getPalmFrame().getReferenceFrame());
+         armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
          armIKSolver.solve();
 
          // Send the solution back to the UI so the user knows what's gonna happen with the arm.
