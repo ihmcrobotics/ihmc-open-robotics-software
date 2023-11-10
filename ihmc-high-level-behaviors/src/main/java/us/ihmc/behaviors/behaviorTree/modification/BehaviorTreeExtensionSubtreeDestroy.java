@@ -12,7 +12,7 @@ public class BehaviorTreeExtensionSubtreeDestroy extends BehaviorTreeSubtreeDest
 
       if (subtreeToDestroy.getExtendedNode() instanceof BehaviorTreeNodeExtension extendedSubtreeToDestroy)
       {
-         // This will result in recuresively performing the modification on all extended types
+         // This will result in recursively performing the modification on all extended types
          extensionSubtreeDestruction = new BehaviorTreeExtensionSubtreeDestroy(extendedSubtreeToDestroy);
       }
       else

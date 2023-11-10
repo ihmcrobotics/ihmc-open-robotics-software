@@ -12,6 +12,7 @@ import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.vr.RDXVRContext;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final TypedNotification<Boolean> expandCollapseRequest = new TypedNotification<>();
 
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
+   private transient RDXBehaviorTreeNode<?, ?> parent;
 
    @Override
    public void update()
@@ -88,6 +90,19 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()
    {
       return children;
+   }
+
+   @Override
+   public void setParent(@Nullable RDXBehaviorTreeNode<?, ?> parent)
+   {
+      this.parent = parent;
+   }
+
+   @Nullable
+   @Override
+   public RDXBehaviorTreeNode<?, ?> getParent()
+   {
+      return parent;
    }
 
    @Override

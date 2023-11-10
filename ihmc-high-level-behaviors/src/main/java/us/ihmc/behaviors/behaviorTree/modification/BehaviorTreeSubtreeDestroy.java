@@ -28,7 +28,7 @@ public class BehaviorTreeSubtreeDestroy implements BehaviorTreeModification
          clearChildren(child);
       }
 
-      localNode.getChildren().clear();
+      BehaviorTreeNodeClear.clearChildren(localNode);
 
       if (localNode instanceof BehaviorTreeNodeExtension nodeExtension)
          nodeExtension.destroy();

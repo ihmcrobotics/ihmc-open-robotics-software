@@ -27,6 +27,7 @@ public class BehaviorTreeNodeRemove<T extends BehaviorTreeNode<T>> implements Be
    {
       if (parentNode.getChildren().remove(nodeToRemove))
       {
+         nodeToRemove.setParent(null);
          if (parentNode instanceof Freezable freezableNode)
          {
             freezableNode.freeze();

@@ -27,7 +27,7 @@ public class BehaviorTreeSubtreeClear implements BehaviorTreeModification
          clearChildren(child);
       }
 
-      localNode.getChildren().clear();
+      BehaviorTreeNodeClear.clearChildren(localNode);
    }
 }
 
