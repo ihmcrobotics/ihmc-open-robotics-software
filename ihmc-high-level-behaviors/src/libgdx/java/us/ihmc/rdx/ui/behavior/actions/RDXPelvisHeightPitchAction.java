@@ -68,7 +68,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
 
       getDefinition().setDescription("Pelvis height and pitch");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue(), getSelected());
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
