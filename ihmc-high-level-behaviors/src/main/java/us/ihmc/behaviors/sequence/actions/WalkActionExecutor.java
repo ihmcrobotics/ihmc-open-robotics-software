@@ -47,6 +47,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final WalkingFootstepTracker footstepTracker;
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
+   private double startPositionDistanceToGoal;
+   private double startOrientationDistanceToGoal;
 
    public WalkActionExecutor(long id,
                              CRDTInfo crdtInfo,
@@ -155,6 +157,14 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                                                                                                getDefinition().getTransferDuration());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+
+         startPositionDistanceToGoal = 0;
+         startOrientationDistanceToGoal = 0;
+         for (RobotSide side : RobotSide.values)
+         {
+            startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(goalFeetPoses.get(side).getTranslation());
+            startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(goalFeetPoses.get(side).getRotation(), true);
+         }
       }
 
       nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
@@ -215,6 +225,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
          state.setElapsedExecutionTime(executionTimer.getElapsedTime());
          state.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
          state.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
          state.setCurrentOrientationDistanceToGoal(
                completionCalculator.get(RobotSide.LEFT).getRotationError() + completionCalculator.get(RobotSide.RIGHT).getRotationError());
          state.setCurrentPositionDistanceToGoal(
