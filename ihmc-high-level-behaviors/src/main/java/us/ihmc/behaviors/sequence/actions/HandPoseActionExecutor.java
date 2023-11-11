@@ -12,6 +12,7 @@ import us.ihmc.behaviors.tools.ROS2HandWrenchCalculator;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -36,6 +37,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private double startPositionDistanceToGoal;
    private double startOrientationDistanceToGoal;
    private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
+   private final FramePose3D chestInPelvis = new FramePose3D();
+   private final FramePose3D goalChestFrame = new FramePose3D();
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -55,6 +59,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
       }
+
+      FramePose3D chestAfterJointToPelvis = new FramePose3D();
+      chestAfterJointToPelvis.setToZero(syncedRobot.getReferenceFrames().getChestFrame());
+      chestAfterJointToPelvis.changeFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+      chestAfterJointToPelvis.get(chestToPelvisZeroAngles);
    }
 
    @Override
@@ -67,6 +76,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
       {
          ChestOrientationActionExecutor concurrentChestOrientationAction = null;
+         PelvisHeightPitchActionExecutor concurrentPelvisHeightPitchAction = null;
          if (state.getIsToBeExecutedConcurrently() && getParent() instanceof ActionSequenceExecutor parentSequence)
          {
             int concurrentSetIndex = parentSequence.getState().getExecutionNextIndex();
@@ -77,18 +87,39 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
+               if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+               {
+                  concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
+               }
                ++concurrentSetIndex;
             }
          }
-         if (concurrentChestOrientationAction == null)
+         if (concurrentChestOrientationAction == null && concurrentPelvisHeightPitchAction == null)
          {
             state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
          }
-         else
+         else if (concurrentPelvisHeightPitchAction == null)
          {
             concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
             state.getGoalChestToWorldTransform().getValue()
                  .set(concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame().getTransformToRoot());
+         }
+         else // Combined case
+         {
+            concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
+            concurrentPelvisHeightPitchAction.getState().update(); // Ensure state's frames are initialized
+
+            ReferenceFrame chestActionFrame = concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame();
+            ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getState().getPelvisFrame().getReferenceFrame();
+
+            chestInPelvis.setToZero(chestActionFrame);
+            chestInPelvis.changeFrame(pelvisActionFrame);
+
+            goalChestFrame.setToZero(pelvisActionFrame);
+            goalChestFrame.getRotation().append(chestInPelvis.getRotation()); // Append chest rotation
+            goalChestFrame.prependTranslation(chestToPelvisZeroAngles.getTranslation());
+            goalChestFrame.changeFrame(ReferenceFrame.getWorldFrame());
+            goalChestFrame.get(state.getGoalChestToWorldTransform().getValue());
          }
          state.getGoalChestFrame().update();
 
@@ -126,6 +157,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
          if (getDefinition().getJointSpaceControl())
          {
+            LogTools.info("Publishing arm jointspace trajectory");
             ros2ControllerHelper.publishToController(armTrajectoryMessage);
          }
          else
@@ -149,6 +181,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                   getDefinition().getSide(),
                   handTrajectoryMessage.getSe3Trajectory(),
                   armTrajectoryMessage.getJointspaceTrajectory());
+            LogTools.info("Publishing arm hybrid jointspace taskpace");
             ros2ControllerHelper.publishToController(hybridHandMessage);
          }
 
