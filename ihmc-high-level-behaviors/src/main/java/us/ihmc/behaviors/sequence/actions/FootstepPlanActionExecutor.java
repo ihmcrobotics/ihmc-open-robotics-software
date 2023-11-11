@@ -110,13 +110,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             int indexOfLastFootSide = indexOfLastFoot.get(side);
             if (indexOfLastFootSide >= 0)
             {
-               goalFeetPoses.get(side)
-                            .setIncludingFrame(state.getFootsteps().get(indexOfLastFootSide).getSoleFrame().getReferenceFrame().getParent(),
-                                               footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
-               goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+               goalFeetPoses.get(side).setIncludingFrame(footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
             }
             else
+            {
                goalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
+            }
          }
          startPositionDistanceToGoal = 0;
          startOrientationDistanceToGoal = 0;
@@ -142,16 +141,18 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          int indexOfLastFootSide = indexOfLastFoot.get(side);
          if (indexOfLastFootSide >= 0)
          {
-            goalFeetPoses.get(side).setIncludingFrame(state.getFootsteps().get(indexOfLastFootSide).getSoleFrame().getReferenceFrame().getParent(),
-                                                      footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
-            goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            goalFeetPoses.get(side).setIncludingFrame(footstepPlanToExecute.getFootstep(indexOfLastFootSide).getFootstepPose());
          }
          else
+         {
             goalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
+         }
 
          isComplete &= completionCalculator.get(side)
                                            .isComplete(goalFeetPoses.get(side),
-                                                       syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
+                                                       syncedFeetPoses.get(side),
+                                                       POSITION_TOLERANCE,
+                                                       ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
                                                        executionTimer,
                                                        BehaviorActionCompletionComponent.TRANSLATION,
