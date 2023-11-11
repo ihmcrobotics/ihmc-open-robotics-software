@@ -32,7 +32,7 @@ public class RequestConfirmFreezable implements Freezable
    public void freeze()
    {
       if (!isFrozen)
-         LogTools.info(1, "Freezing: %s  Actor: %s".formatted(this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
+         LogTools.debug(1, "Freezing: %s  Actor: %s".formatted(this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
       isFrozen = true;
 
       updateNumberToUnfreeze = crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration();
@@ -52,12 +52,9 @@ public class RequestConfirmFreezable implements Freezable
       boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
 
       if (isFrozen != this.isFrozen)
-         LogTools.info("Frozen %b -> %b %s Actor: %s".formatted(this.isFrozen, isFrozen, this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
+         LogTools.debug("Frozen %b -> %b %s Actor: %s".formatted(this.isFrozen, isFrozen, this.getClass().getSimpleName(), crdtInfo.getActorDesignation()));
 
       this.isFrozen = isFrozen;
-
-//      if (isFrozen)
-//         LogTools.info("Is frozen: {}", getClass().getSimpleName());
 
       return isFrozen;
    }

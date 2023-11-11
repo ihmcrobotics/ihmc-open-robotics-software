@@ -90,9 +90,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public boolean pollManualExecutionRequested()
    {
-      boolean poll = manualExecutionRequested.poll();
-//      LogTools.info("Polled: {}", poll);
-      return poll;
+      return manualExecutionRequested.poll();
    }
 
    public boolean getManualExecutionRequested()

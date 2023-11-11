@@ -29,7 +29,7 @@ public class CRDTBidirectionalNotification
       {
          isSet = false;
          requestConfirmFreezable.freeze();
-         LogTools.info(1, "POLLED Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
+         LogTools.debug(1, "Polled. Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
       }
 
       return wasSet;
@@ -44,7 +44,7 @@ public class CRDTBidirectionalNotification
    {
       if (!isSet)
       {
-         LogTools.info(1, "SETTING Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
+         LogTools.debug(1, "Setting. Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
 
          isSet = true;
          requestConfirmFreezable.freeze();
@@ -61,7 +61,7 @@ public class CRDTBidirectionalNotification
       if (!requestConfirmFreezable.isFrozen())
       {
          if (isSet != this.isSet)
-            LogTools.info("%b -> %b Actor: %s".formatted(this.isSet, isSet, requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
+            LogTools.debug("%b -> %b Actor: %s".formatted(this.isSet, isSet, requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
 
          this.isSet = isSet;
       }
