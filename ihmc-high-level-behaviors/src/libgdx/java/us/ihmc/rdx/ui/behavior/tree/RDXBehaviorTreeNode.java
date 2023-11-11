@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.*;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -22,10 +21,10 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImStringWrapper descriptionWrapper;
-   private final TypedNotification<Boolean> expandCollapseRequest = new TypedNotification<>();
 
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
    private transient RDXBehaviorTreeNode<?, ?> parent;
+   private boolean treeWidgetExpanded = false;
 
    @Override
    public void update()
@@ -82,9 +81,14 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       return descriptionWrapper;
    }
 
-   public TypedNotification<Boolean> getExpandCollapseRequest()
+   public void setTreeWidgetExpanded(boolean treeWidgetExpanded)
    {
-      return expandCollapseRequest;
+      this.treeWidgetExpanded = treeWidgetExpanded;
+   }
+
+   public boolean getTreeWidgetExpanded()
+   {
+      return treeWidgetExpanded;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()

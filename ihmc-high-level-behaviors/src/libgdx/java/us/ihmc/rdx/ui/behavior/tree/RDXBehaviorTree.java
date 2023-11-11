@@ -20,7 +20,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiTreeRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -49,7 +48,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeNodesMenu nodesMenu;
    private final RDXBehaviorTreeFileLoader fileLoader;
    private final ImVec2 expandButtonSize = new ImVec2();
-   private final ImGuiTreeRenderer treeRenderer = new ImGuiTreeRenderer();
+   private final RDXBehaviorTreeWidgetRenderer treeRenderer = new RDXBehaviorTreeWidgetRenderer();
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -204,30 +203,17 @@ public class RDXBehaviorTree
       ImGuiTools.previousWidgetTooltip("Collapse all nodes");
 
       if (rootNode != null)
-         renderImGuiWidgetsAsTree(rootNode);
+         treeRenderer.render(rootNode);
    }
 
    private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
    {
-      node.getExpandCollapseRequest().set(expandOrCollapse);
+      node.setTreeWidgetExpanded(expandOrCollapse);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
          expandCollapseAll(expandOrCollapse, child);
       }
-   }
-
-   private void renderImGuiWidgetsAsTree(RDXBehaviorTreeNode<?, ?> node)
-   {
-      treeRenderer.render(node.getState().getID(), node.getDefinition().getDescription(), () ->
-      {
-         node.renderImGuiWidgets();
-
-         for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-         {
-            renderImGuiWidgetsAsTree(child);
-         }
-      }, node.getExpandCollapseRequest());
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
