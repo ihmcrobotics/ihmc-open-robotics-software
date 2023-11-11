@@ -12,6 +12,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
@@ -21,6 +22,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
+
+import java.util.Collections;
 
 /**
  * The entry point and initial setup of the behavior sequence on-robot process.
@@ -46,6 +49,7 @@ public class BehaviorTreeModule
 
       sceneGraph = new ROS2SceneGraph(ros2ControllerHelper);
       referenceFrameLibrary = new ReferenceFrameLibrary();
+      referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
