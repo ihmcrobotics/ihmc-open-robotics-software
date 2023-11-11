@@ -86,6 +86,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          }
          else
          {
+            concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
             state.getGoalChestToWorldTransform().getValue()
                  .set(concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame().getTransformToRoot());
          }
