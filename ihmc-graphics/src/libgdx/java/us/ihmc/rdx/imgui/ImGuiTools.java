@@ -290,13 +290,13 @@ public class ImGuiTools
    public static void markedProgressBar(float barHeight, float barWidth, int color, double percent, double markPercent, String text)
    {
       float markPosition = (float) (barWidth * markPercent);
-      float windowPositionX = ImGui.getWindowPosX();
-      float windowPositionY = ImGui.getWindowPosY();
+      float actualCursorX = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
+      float actualCursorY = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
       float verticalExtents = 3.0f;
-      ImGui.getWindowDrawList().addRectFilled(windowPositionX + ImGui.getCursorPosX() + markPosition,
-                                              windowPositionY + ImGui.getCursorPosY() - verticalExtents,
-                                              windowPositionX + ImGui.getCursorPosX() + markPosition + 2.0f,
-                                              windowPositionY + ImGui.getCursorPosY() + barHeight + verticalExtents,
+      ImGui.getWindowDrawList().addRectFilled(actualCursorX + markPosition,
+                                              actualCursorY - verticalExtents,
+                                              actualCursorX + markPosition + 2.0f,
+                                              actualCursorY + barHeight + verticalExtents,
                                               ImGuiTools.BLACK, 1.0f);
       ImGui.pushStyleColor(ImGuiCol.PlotHistogram, color);
       ImGui.progressBar((float) percent, barWidth, barHeight, text);
