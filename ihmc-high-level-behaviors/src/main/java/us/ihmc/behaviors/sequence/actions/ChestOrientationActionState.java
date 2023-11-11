@@ -3,10 +3,12 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
@@ -16,13 +18,17 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
     * This is used to compute joint angles that achieve the desired and previewed end pose
     * even when the pelvis and/or chest might also move.
     */
-   private final MutableReferenceFrame goalPelvisFrame = new MutableReferenceFrame();
+   private final CRDTUnidirectionalRigidBodyTransform goalPelvisToWorldTransform;
+   private final ReferenceFrame goalPelvisFrame;
 
    public ChestOrientationActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new ChestOrientationActionDefinition(crdtInfo), crdtInfo);
 
       chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform().getValueReadOnly());
+      goalPelvisToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
+      goalPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                               goalPelvisToWorldTransform.getValueReadOnly());
    }
 
    @Override
@@ -37,7 +43,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
       super.toMessage(message.getState());
 
-      MessageTools.toMessage(goalPelvisFrame.getTransformToParent(), message.getGoalPelvisTransformToWorld());
+      goalPelvisToWorldTransform.toMessage(message.getGoalPelvisTransformToWorld());
    }
 
    public void fromMessage(ChestOrientationActionStateMessage message)
@@ -46,8 +52,8 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
       getDefinition().fromMessage(message.getDefinition());
 
-      MessageTools.toEuclid(message.getGoalPelvisTransformToWorld(), goalPelvisFrame.getTransformToParent());
-      goalPelvisFrame.getReferenceFrame().update();
+      goalPelvisToWorldTransform.fromMessage(message.getGoalPelvisTransformToWorld());
+      goalPelvisFrame.update();
    }
 
    public DetachableReferenceFrame getChestFrame()
@@ -55,7 +61,12 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
       return chestFrame;
    }
 
-   public MutableReferenceFrame getGoalPelvisFrame()
+   public CRDTUnidirectionalRigidBodyTransform getGoalPelvisToWorldTransform()
+   {
+      return goalPelvisToWorldTransform;
+   }
+
+   public ReferenceFrame getGoalPelvisFrame()
    {
       return goalPelvisFrame;
    }
