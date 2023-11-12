@@ -5,7 +5,6 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImRect;
 import us.ihmc.rdx.imgui.ImGuiArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -16,7 +15,6 @@ public class RDXBehaviorTreeWidgetRenderer
    private final ImGuiArrowRenderer arrowRenderer = new ImGuiArrowRenderer();
    private final ImVec2 padding = new ImVec2();
    private final ImVec2 labelSize = new ImVec2();
-   private final ImRect interactionBoundingBox = new ImRect();
 
    public void render(RDXBehaviorTreeNode<?, ?> node)
    {
@@ -26,11 +24,6 @@ public class RDXBehaviorTreeWidgetRenderer
       ImGui.calcTextSize(labelSize, labelText);
 
       float frameHeight = labelSize.y + padding.y;
-
-      interactionBoundingBox.min.x = ImGui.getCursorPosX();
-      interactionBoundingBox.min.y = ImGui.getCursorPosY();
-      interactionBoundingBox.max.x = interactionBoundingBox.min.x + labelSize.x + ImGui.getStyle().getItemSpacingX() * 2.0f;
-      interactionBoundingBox.max.y = interactionBoundingBox.min.y + frameHeight;
 
       float mousePosXInDesktopFrame = ImGui.getMousePosX();
       float mousePosYInDesktopFrame = ImGui.getMousePosY();
