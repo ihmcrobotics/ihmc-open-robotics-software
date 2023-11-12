@@ -33,6 +33,7 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -66,6 +67,18 @@ public class EuclidCoreMissingTools
       tuple3d.setX(MathTools.roundToPrecision(tuple3d.getX(), precision));
       tuple3d.setY(MathTools.roundToPrecision(tuple3d.getY(), precision));
       tuple3d.setZ(MathTools.roundToPrecision(tuple3d.getZ(), precision));
+   }
+
+   public static void floorToGivenPrecision(Tuple2DBasics tuple2d, double precision)
+   {
+      tuple2d.setX(MathTools.floorToPrecision(tuple2d.getX(), precision));
+      tuple2d.setY(MathTools.floorToPrecision(tuple2d.getY(), precision));
+   }
+
+   public static void roundToGivenPrecision(Tuple2DBasics tuple2d, double precision)
+   {
+      tuple2d.setX(MathTools.roundToPrecision(tuple2d.getX(), precision));
+      tuple2d.setY(MathTools.roundToPrecision(tuple2d.getY(), precision));
    }
 
    public static boolean isFinite(Tuple3DBasics tuple)

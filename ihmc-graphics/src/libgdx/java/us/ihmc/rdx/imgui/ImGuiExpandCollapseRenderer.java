@@ -2,7 +2,9 @@ package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiStyleVar;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 public class ImGuiExpandCollapseRenderer
 {
@@ -28,7 +30,6 @@ public class ImGuiExpandCollapseRenderer
 
       scale *= fontSize;
 
-      // Center is base of arrowhead
       center.set(0.5f * fontSize, 0.5f * fontSize);
 
       float zero = 0.0f;
@@ -53,6 +54,16 @@ public class ImGuiExpandCollapseRenderer
       plusTop.scaleAdd(scale, center);
       plusBottom.scaleAdd(scale, center);
 
+      // Fix aliasing
+      EuclidCoreMissingTools.roundToGivenPrecision(boxTopLeft, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(boxTopRight, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(boxBottomLeft, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(boxBottomRight, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(minusLeft, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(minusRight, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(plusTop, 1.0);
+      EuclidCoreMissingTools.roundToGivenPrecision(plusBottom, 1.0);
+
       float mousePosXInDesktopFrame = ImGui.getMousePosX();
       float mousePosYInDesktopFrame = ImGui.getMousePosY();
       // Widget frame is the top-left of the start of the widgets, which is not the same as window
@@ -65,25 +76,33 @@ public class ImGuiExpandCollapseRenderer
       isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
       isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
 
-      lineColor = ImGui.getColorU32(ImGuiCol.Text);
       backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Button);
 
       cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
-      ImGui.getWindowDrawList().addRectFilled(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
-                                              cursorXDesktopFrame + boxBottomRight.getX32(), cursorYDesktopFrame + boxBottomRight.getY32(),
-                                              backgroundColor);
-//      ImGui.getWindowDrawList().addRect(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
-//                                        cursorXDesktopFrame + boxBottomRight.getX32(), cursorYDesktopFrame + boxBottomRight.getY32(),
-//                                        lineColor);
+//      ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0.0f);
+      ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0.0f);
+      ImGui.getStyle().setAntiAliasedLines(false);
 
-      drawLine(boxTopLeft, boxTopRight);
-      drawLine(boxTopRight, boxBottomRight);
-      drawLine(boxBottomRight, boxBottomLeft);
-      drawLine(boxBottomLeft, boxTopLeft);
+      ImGui.getWindowDrawList().addRectFilled(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
+                                              cursorXDesktopFrame + boxBottomRight.getX32() + 1.0f, cursorYDesktopFrame + boxBottomRight.getY32() + 1.0f,
+                                              backgroundColor);
+      lineColor = ImGui.getColorU32(ImGuiCol.Border);
+      ImGui.getWindowDrawList().addRect(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
+                                        cursorXDesktopFrame + boxBottomRight.getX32() + 1.0f, cursorYDesktopFrame + boxBottomRight.getY32() + 1.0f,
+                                        lineColor);
+      // Doing it this way doesn't work as well because lines have gray endpoints for some reason
+      //   drawLine(boxTopLeft, boxTopRight);
+      //   drawLine(boxTopRight, boxBottomRight);
+      //   drawLine(boxBottomRight, boxBottomLeft);
+      //   drawLine(boxBottomLeft, boxTopLeft);
+
+      lineColor = ImGui.getColorU32(ImGuiCol.Text);
       drawLine(minusLeft, minusRight);
       if (!expanded)
          drawLine(plusTop, plusBottom);
+
+      ImGui.popStyleVar();
    }
 
    private void drawLine(Point2D32 from, Point2D32 to)
