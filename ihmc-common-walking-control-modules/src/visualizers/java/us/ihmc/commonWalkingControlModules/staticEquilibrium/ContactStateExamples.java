@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class MultiContactSupportRegionSolverInputExamples2
+public class ContactStateExamples
 {
    public static MutableWholeBodyContactState createTriangleFlatGround()
    {
