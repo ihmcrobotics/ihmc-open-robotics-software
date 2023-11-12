@@ -5,14 +5,16 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.rdx.imgui.ImGuiArrowRenderer;
+import us.ihmc.rdx.imgui.ImGuiDirectionalTriangleRenderer;
+import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 public class RDXBehaviorTreeWidgetRenderer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiArrowRenderer arrowRenderer = new ImGuiArrowRenderer();
+   private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
+   private final ImGuiDirectionalTriangleRenderer directionalTriangleRenderer = new ImGuiDirectionalTriangleRenderer();
    private final ImVec2 padding = new ImVec2();
    private final ImVec2 labelSize = new ImVec2();
 
@@ -32,6 +34,13 @@ public class RDXBehaviorTreeWidgetRenderer
       float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
       float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
 
+      int color = ImGui.getColorU32(ImGuiCol.Text);
+
+      hollowArrowRenderer.render(0.7f, color);
+
+      float arrowWidth = ImGui.getFontSize();
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + arrowWidth + padding.x);
+
       boolean isHoveringArrow = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
       isHoveringArrow &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + ImGui.getFontSize() + padding.x;
       isHoveringArrow &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
@@ -42,11 +51,9 @@ public class RDXBehaviorTreeWidgetRenderer
          node.setTreeWidgetExpanded(!node.getTreeWidgetExpanded());
       }
 
-      int arrowColor = isHoveringArrow ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text);
+      color = isHoveringArrow ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text);
 
-      ImGui.setCursorPosY(ImGui.getCursorPosY() + padding.y);
-      arrowRenderer.renderArrow(node.getTreeWidgetExpanded() ? ImGuiDir.Down : ImGuiDir.Right, 0.7f, arrowColor);
-      ImGui.setCursorPosY(ImGui.getCursorPosY() - padding.y);
+      directionalTriangleRenderer.render(node.getTreeWidgetExpanded() ? ImGuiDir.Down : ImGuiDir.Right, 0.7f, color);
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() + padding.x);
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
