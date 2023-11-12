@@ -4,6 +4,8 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
@@ -13,10 +15,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -37,9 +41,6 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    private final OneDoFJointBasics[] oneDoFJoints;
    private final GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator;
 
-   private final DMatrixRMaj torqueLowerBound;
-   private final DMatrixRMaj torqueUpperBound;
-
    private final DMatrixRMaj constraintLowerBound;
    private final DMatrixRMaj constraintUpperBound;
 
@@ -49,39 +50,37 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    private final DMatrixRMaj contactJacobian;
    private final DMatrixRMaj contactJacobianTranspose;
    private final DMatrixRMaj graspMatrixJacobianTranspose;
+   private final int numberOfActuationConstraints;
 
    private final FramePose3D worldAlignedContactPose = new FramePose3D();
    private final PoseReferenceFrame worldAlignedContactFrame = new PoseReferenceFrame("worldAlignedContactFrame", ReferenceFrame.getWorldFrame());
    private final TObjectIntMap<OneDoFJointBasics> jointIndexMap = new TObjectIntHashMap<>();
+   private final PlaneContactStateCommand tempPlaneContactStateCommand = new PlaneContactStateCommand();
 
-   public WholeBodyContactState(OneDoFJointBasics[] oneDoFJoints)
+   public WholeBodyContactState(OneDoFJointBasics[] oneDoFJoints, JointBasics rootJoint)
    {
       this.oneDoFJoints = oneDoFJoints;
 
       RigidBodyBasics elevator = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
+
       this.gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(elevator, false);
       gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-GRAVITY);
 
-      RigidBodyBasics[] rigidBodies = MultiBodySystemTools.collectSuccessors(elevator.getParentJoint());
-      for (int i = 0; i < rigidBodies.length; i++)
+      for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         contactJacobians.put(rigidBodies[i], new GeometricJacobian(elevator, rigidBodies[i], rigidBodies[i].getBodyFixedFrame()));
+         RigidBodyBasics rigidBody = oneDoFJoints[i].getSuccessor();
+         contactJacobians.put(rigidBody, new GeometricJacobian(elevator, rigidBody, rigidBody.getBodyFixedFrame()));
       }
 
-      torqueLowerBound = new DMatrixRMaj(oneDoFJoints.length, 1);
-      torqueUpperBound = new DMatrixRMaj(oneDoFJoints.length, 1);
+      RigidBodyBasics pelvis = rootJoint.getSuccessor();
+      contactJacobians.put(pelvis, new GeometricJacobian(elevator, pelvis, pelvis.getBodyFixedFrame()));
 
       constraintLowerBound = new DMatrixRMaj(oneDoFJoints.length, 1);
       constraintUpperBound = new DMatrixRMaj(oneDoFJoints.length, 1);
 
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         torqueLowerBound.set(i, oneDoFJoints[i].getEffortLimitLower());
-         torqueUpperBound.set(i, oneDoFJoints[i].getEffortLimitUpper());
-      }
-
+      numberOfActuationConstraints = 2 * oneDoFJoints.length;
       stackedConstraintMatrix = new DMatrixRMaj(0);
-      stackedConstraintVector = new DMatrixRMaj(oneDoFJoints.length, 1);
+      stackedConstraintVector = new DMatrixRMaj(numberOfActuationConstraints, 1);
 
       contactJacobian = new DMatrixRMaj(LINEAR_DIMENSIONS, oneDoFJoints.length);
       contactJacobianTranspose = new DMatrixRMaj(oneDoFJoints.length, LINEAR_DIMENSIONS);
@@ -97,8 +96,6 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    {
       contactPoints.clear();
 
-      torqueLowerBound.zero();
-      torqueUpperBound.zero();
       stackedConstraintMatrix.zero();
       stackedConstraintVector.zero();
       contactJacobian.zero();
@@ -118,7 +115,28 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       }
    }
 
-   public void addContactPoint(RigidBodyBasics contactingBody, FramePoint3D contactPoint, FrameVector3D surfaceNormal)
+   public void addContactPoints(PlaneContactState planeContactState)
+   {
+      if (!planeContactState.inContact())
+         return;
+
+      planeContactState.getPlaneContactStateCommand(tempPlaneContactStateCommand);
+      addContactPoints(tempPlaneContactStateCommand);
+   }
+
+   public void addContactPoints(PlaneContactStateCommand contactStateCommand)
+   {
+      RigidBodyBasics contactingRigidBody = contactStateCommand.getContactingRigidBody();
+      FrameVector3DBasics contactNormal = contactStateCommand.getContactNormal();
+
+      for (int contactIdx = 0; contactIdx < contactStateCommand.getNumberOfContactPoints(); contactIdx++)
+      {
+         FramePoint3DBasics contactPoint = contactStateCommand.getContactPoint(contactIdx);
+         addContactPoint(contactingRigidBody, contactPoint, contactNormal);
+      }
+   }
+
+   public void addContactPoint(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal)
    {
       contactPoints.add().set(contactingBody, contactPoint, surfaceNormal);
    }
@@ -130,8 +148,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double gravityTorque = gravityCoriolisExternalWrenchMatrixCalculator.getComputedJointTau(oneDoFJoints[i]).get(0, 0);
-         constraintLowerBound.set(i, gravityTorque - torqueUpperBound.get(i, 0));
-         constraintUpperBound.set(i, gravityTorque - torqueLowerBound.get(i, 0));
+         constraintLowerBound.set(i, gravityTorque - oneDoFJoints[i].getEffortLimitUpper());
+         constraintUpperBound.set(i, gravityTorque - oneDoFJoints[i].getEffortLimitLower());
       }
 
       int nContactForceVariables = 3 * contactPoints.size();
@@ -177,7 +195,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          MatrixTools.setMatrixBlock(graspMatrixJacobianTranspose, 0, LINEAR_DIMENSIONS * contactPointIndex, contactJacobianTranspose, 0, 0, contactJacobianTranspose.getNumRows(), contactJacobianTranspose.getNumCols(), 1.0);
       }
 
-      stackedConstraintMatrix.reshape(2 * oneDoFJoints.length, nContactForceVariables);
+      stackedConstraintMatrix.reshape(numberOfActuationConstraints, nContactForceVariables);
 
       MatrixTools.setMatrixBlock(stackedConstraintMatrix, 0, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
       MatrixTools.setMatrixBlock(stackedConstraintMatrix, graspMatrixJacobianTranspose.getNumRows(), 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
@@ -194,6 +212,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       ContactPoint(int index)
       {
          contactFrame = new PoseReferenceFrame("contactFrame" + index, ReferenceFrame.getWorldFrame());
+         clear();
       }
 
       void clear()
@@ -202,14 +221,16 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          contactPose.setToNaN();
       }
 
-      void set(RigidBodyBasics contactingBody, FramePoint3D contactPoint, FrameVector3D surfaceNormal)
+      void set(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal)
       {
          this.contactingBody = contactingBody;
-         contactPoint.changeFrame(contactingBody.getBodyFixedFrame());
-         surfaceNormal.changeFrame(contactingBody.getBodyFixedFrame());
-         contactPose.setReferenceFrame(contactingBody.getBodyFixedFrame());
-         contactPose.getPosition().set(contactPoint);
+
+         // Set orientation in given frame
+         contactPose.setReferenceFrame(surfaceNormal.getReferenceFrame());
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, surfaceNormal, contactPose.getOrientation());
+
+         // Set position
+         contactPose.getPosition().setMatchingFrame(contactPoint);
       }
 
       void set(ContactPoint other)
@@ -222,7 +243,6 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       {
          contactPose.changeFrame(ReferenceFrame.getWorldFrame());
          contactFrame.setPoseAndUpdate(contactPose);
-         contactPose.changeFrame(contactingBody.getBodyFixedFrame());
       }
    }
 
