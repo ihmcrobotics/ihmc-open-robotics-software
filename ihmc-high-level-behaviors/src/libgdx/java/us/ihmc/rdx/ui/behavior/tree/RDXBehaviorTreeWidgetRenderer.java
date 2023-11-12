@@ -36,7 +36,7 @@ public class RDXBehaviorTreeWidgetRenderer
          node.setTreeWidgetExpanded(!node.getTreeWidgetExpanded());
       }
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() + padding.x);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() + padding.x * 2.0f);
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text(labelText);
       ImGui.popFont();
