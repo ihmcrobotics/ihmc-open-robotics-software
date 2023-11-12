@@ -38,11 +38,11 @@ public class ImGuiArrowRenderer
       centerB.set(center.x + b.x, center.y + b.y);
       centerC.set(center.x + c.x, center.y + c.y);
 
-      float actualCursorX = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
-      float actualCursorY = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
-      ImGui.getWindowDrawList().addTriangleFilled(actualCursorX + centerA.x, actualCursorY + centerA.y,
-                                                  actualCursorX + centerB.x, actualCursorY + centerB.y,
-                                                  actualCursorX + centerC.x, actualCursorY + centerC.y,
+      float cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
+      float cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
+      ImGui.getWindowDrawList().addTriangleFilled(cursorXDesktopFrame + centerA.x, cursorYDesktopFrame + centerA.y,
+                                                  cursorXDesktopFrame + centerB.x, cursorYDesktopFrame + centerB.y,
+                                                  cursorXDesktopFrame + centerC.x, cursorYDesktopFrame + centerC.y,
                                                   color);
    }
 }
