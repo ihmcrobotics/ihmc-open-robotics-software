@@ -42,8 +42,12 @@ public class RDXVisualizerWrapper
    {
       this.visualizer = visualizer;
       this.dependentVisualizers = Arrays.asList(dependentVisualizers);
+      isAlive.set(visualizer.isActive());
       if (heartbeatTopic != null)
+      {
          heartbeat = new ROS2Heartbeat(node, heartbeatTopic);
+         heartbeat.setAlive(visualizer.isActive());
+      }
    }
 
    public void create()
