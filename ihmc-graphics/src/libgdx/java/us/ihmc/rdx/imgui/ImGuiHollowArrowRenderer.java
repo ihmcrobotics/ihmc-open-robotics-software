@@ -66,7 +66,9 @@ public class ImGuiHollowArrowRenderer
       drawLine(baseTopLeft, baseBottomLeft);
       drawLine(baseBottomLeft, baseBottomRight);
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (arrowheadTip.getX32() - baseTopLeft.getX32()) + ImGui.getStyle().getFramePaddingX() * 2.0f);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (arrowheadTip.getX32() - baseTopLeft.getX32()));
+
+      ImGui.newLine();
    }
 
    private void drawLine(Point2D32 from, Point2D32 to)

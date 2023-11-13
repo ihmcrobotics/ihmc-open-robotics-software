@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
-import imgui.ImVec2;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
@@ -19,6 +18,7 @@ import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -47,7 +47,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodesMenu nodesMenu;
    private final RDXBehaviorTreeFileLoader fileLoader;
-   private final ImVec2 expandButtonSize = new ImVec2();
+   private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTreeWidgetRenderer treeRenderer = new RDXBehaviorTreeWidgetRenderer();
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
@@ -193,14 +193,15 @@ public class RDXBehaviorTree
    {
       ImGui.endMenuBar();
 
-      if (ImGui.button(labels.get("[+]")))
+      if (expandCollapseAllRenderer.render(false, true))
          expandCollapseAll(true, rootNode);
-      ImGuiTools.previousWidgetTooltip("Expand all nodes");
-      ImGui.getItemRectSize(expandButtonSize);
+      if (expandCollapseAllRenderer.getIsHovered())
+         ImGui.setTooltip("Expand all nodes");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("[-]"), expandButtonSize.x, expandButtonSize.y))
+      if (expandCollapseAllRenderer.render(true, true))
          expandCollapseAll(false, rootNode);
-      ImGuiTools.previousWidgetTooltip("Collapse all nodes");
+      if (expandCollapseAllRenderer.getIsHovered())
+         ImGui.setTooltip("Collapse all nodes");
 
       if (rootNode != null)
          treeRenderer.render(rootNode);
