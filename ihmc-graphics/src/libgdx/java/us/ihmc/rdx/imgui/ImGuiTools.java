@@ -319,7 +319,7 @@ public class ImGuiTools
       boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
       isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
-      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + itemWidth + ImGui.getStyle().getFramePaddingY();
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
 
       return isHovered;
    }
