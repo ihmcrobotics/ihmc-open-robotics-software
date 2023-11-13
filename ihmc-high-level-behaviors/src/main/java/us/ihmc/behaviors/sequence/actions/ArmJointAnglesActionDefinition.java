@@ -18,7 +18,7 @@ public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition
    private PresetArmConfiguration preset = PresetArmConfiguration.HOME;
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
-   private final double[] jointAngles = new double[NUMBER_OF_JOINTS];
+   private double[] jointAngles = new double[NUMBER_OF_JOINTS];
 
    public ArmJointAnglesActionDefinition()
    {
@@ -89,6 +89,11 @@ public class ArmJointAnglesActionDefinition extends BehaviorActionDefinition
    public double[] getJointAngles()
    {
       return jointAngles;
+   }
+
+   public void setJointAngles(double[] jointAngles)
+   {
+      this.jointAngles = jointAngles;
    }
 
    @Nullable

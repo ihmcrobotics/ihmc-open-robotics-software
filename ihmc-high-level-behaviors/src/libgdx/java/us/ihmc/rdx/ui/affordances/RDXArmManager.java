@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -78,7 +77,6 @@ public class RDXArmManager
 
    private final ImInt selectedArmConfiguration = new ImInt();
    private final String[] armConfigurationNames = new String[PresetArmConfiguration.values.length];
-   private final SideDependentList<ImString> customAnglesText = new SideDependentList<>(new ImString(), new ImString());
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
@@ -216,24 +214,6 @@ public class RDXArmManager
          }
       }
 
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.text(side.getPascalCaseName());
-         ImGui.sameLine();
-         ImGui.inputText(labels.getHidden("Custom angles" + side.getPascalCaseName()), customAnglesText.get(side));
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Send", side.getPascalCaseName())))
-         {
-            String[] angleStrings = customAnglesText.get(side).get().split(", ");
-            double[] customAngles = new double[angleStrings.length];
-            for (int i = 0; i < angleStrings.length; i++)
-            {
-               customAngles[i] = Double.valueOf(angleStrings[i]);
-            }
-            executeArmAngles(side, teleoperationParameters.getTrajectoryTime(), customAngles);
-         }
-      }
-
       ImGui.text("Arm & hand control mode:");
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
@@ -317,20 +297,9 @@ public class RDXArmManager
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
    {
       double[] jointAngles = robotModel.getPresetArmConfiguration(side, presetArmConfiguration);
-      StringBuilder jointAnglesText = new StringBuilder();
-      jointAnglesText.append("%.2f".formatted(jointAngles[0]));
-      for (int i = 1; i < jointAngles.length; i++)
-      {
-         jointAnglesText.append(", %.2f".formatted(jointAngles[i]));
-      }
-      customAnglesText.get(side).set(jointAnglesText);
-      executeArmAngles(side, trajectoryTime, jointAngles);
-   }
-
-   private void executeArmAngles(RobotSide side, double trajectoryTime, double[] jointAngles)
-   {
-      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side, trajectoryTime, jointAngles);
-      LogTools.info("Sending {} arm joint angles: {}", side.getUpperCaseName(), jointAngles);
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                  trajectoryTime,
+                                                                                                  jointAngles);
       communicationHelper.publishToController(armTrajectoryMessage);
    }
 
