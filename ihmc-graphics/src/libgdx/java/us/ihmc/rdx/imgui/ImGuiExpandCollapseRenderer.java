@@ -2,7 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
@@ -24,10 +24,14 @@ public class ImGuiExpandCollapseRenderer
 
    private boolean isHovered = false;
 
-   public void render(boolean expanded, float scale, int color)
+   /**
+    * @return clicked
+    */
+   public boolean render(boolean expanded)
    {
       float fontSize = ImGui.getFontSize();
 
+      float scale = 0.7f; // Make parameter if desired
       scale *= fontSize;
 
       center.set(0.5f * fontSize, 0.5f * fontSize);
@@ -80,9 +84,6 @@ public class ImGuiExpandCollapseRenderer
 
       cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
-//      ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0.0f);
-      ImGui.pushStyleVar(ImGuiStyleVar.FrameBorderSize, 0.0f);
-      ImGui.getStyle().setAntiAliasedLines(false);
 
       ImGui.getWindowDrawList().addRectFilled(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
                                               cursorXDesktopFrame + boxBottomRight.getX32() + 1.0f, cursorYDesktopFrame + boxBottomRight.getY32() + 1.0f,
@@ -102,14 +103,17 @@ public class ImGuiExpandCollapseRenderer
       if (!expanded)
          drawLine(plusTop, plusBottom);
 
-      ImGui.popStyleVar();
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (boxTopRight.getX32() - boxTopLeft.getX32()) + ImGui.getStyle().getFramePaddingX() * 2.0f);
+
+      return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
    }
 
    private void drawLine(Point2D32 from, Point2D32 to)
    {
-      ImGui.getWindowDrawList().addLine(cursorXDesktopFrame + from.getX32(), cursorYDesktopFrame + from.getY32(),
-                                        cursorXDesktopFrame + to.getX32(), cursorYDesktopFrame + to.getY32(),
-                                        lineColor);
+      // addLine for some reason puts gray pixels on the ends -- working around that - @dcalvert
+      ImGui.getWindowDrawList().addRectFilled(cursorXDesktopFrame + from.getX32(), cursorYDesktopFrame + from.getY32(),
+                                              cursorXDesktopFrame + to.getX32() + 1.0f, cursorYDesktopFrame + to.getY32() + 1.0f,
+                                              lineColor);
    }
 
    public boolean getIsHovered()

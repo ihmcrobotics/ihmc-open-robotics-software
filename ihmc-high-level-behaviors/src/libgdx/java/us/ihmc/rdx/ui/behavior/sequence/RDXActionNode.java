@@ -5,6 +5,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
@@ -21,10 +22,17 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString rejectionTooltip = new ImString();
+   private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
 
    public RDXActionNode()
    {
 
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      hollowArrowRenderer.render();
    }
 
    @Override

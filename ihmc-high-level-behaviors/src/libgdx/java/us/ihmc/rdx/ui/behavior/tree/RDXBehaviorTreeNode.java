@@ -59,6 +59,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    }
 
+   public void renderTreeViewIconArea()
+   {
+
+   }
+
    public void renderImGuiWidgets()
    {
 
