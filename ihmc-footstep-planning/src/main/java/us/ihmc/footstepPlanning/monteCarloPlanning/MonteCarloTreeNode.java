@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class MonteCarloTreeNode
 {
-   private MonteCarloTreeNode parent;
+   private ArrayList<MonteCarloTreeNode> parents;
    private ArrayList<MonteCarloTreeNode> children;
 
    protected int id = 0;
@@ -17,7 +17,7 @@ public abstract class MonteCarloTreeNode
    public MonteCarloTreeNode(MonteCarloTreeNode parent, int id)
    {
       this.id = id;
-      this.parent = parent;
+      this.parents = new ArrayList<>();
       this.children = new ArrayList<>();
       this.level = 0;
 
@@ -33,7 +33,9 @@ public abstract class MonteCarloTreeNode
          return;
       }
 
-      upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(parent.visits) / visits));
+      // total visits of all parents
+      double totalParentVists = parents.stream().mapToInt(MonteCarloTreeNode::getVisits).sum();
+      upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(totalParentVists) / visits));
    }
 
    public ArrayList<?> getAvailableStates(MonteCarloPlanningWorld world)
@@ -81,9 +83,9 @@ public abstract class MonteCarloTreeNode
       this.value += value;
    }
 
-   public MonteCarloTreeNode getParent()
+   public ArrayList<MonteCarloTreeNode> getParents()
    {
-      return parent;
+      return parents;
    }
 
    public int getId()

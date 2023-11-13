@@ -3,15 +3,11 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -23,7 +19,6 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class MonteCarloFootstepPlanningTest
 {
@@ -72,9 +67,11 @@ public class MonteCarloFootstepPlanningTest
       request.setContactMap(contactMap);
       request.setHeightMap(heightMap);
 
+      long timeStart = System.nanoTime();
       FootstepPlan plan = planner.generateFootstepPlan(request);
+      long timeEnd = System.nanoTime();
 
-      LogTools.info("Plan Size: {}", plan.getNumberOfSteps());
+      LogTools.info("Total Time: {} ms, Plan Size: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps());
 
       if (displayPlots)
          display(heightMap, contactMap, terrainCostImage, plan);

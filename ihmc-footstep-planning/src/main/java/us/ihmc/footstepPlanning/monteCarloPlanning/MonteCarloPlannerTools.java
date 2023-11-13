@@ -293,9 +293,9 @@ public class MonteCarloPlannerTools
    public static void getFootstepActionGrid(ArrayList<Vector3D> actions, Point3D origin, int side)
    {
       actions.clear();
-      for (int i = 20; i <= 50; i++)
+      for (int i = 20; i <= 40; i++)
       {
-         for (int j = 20; j <= 50; j++)
+         for (int j = 20; j <= 40; j++)
          {
             actions.add(new Vector3D(i * side, j * side, 0));
          }

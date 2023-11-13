@@ -4,7 +4,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -77,5 +76,20 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   // equals method for hashset
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj instanceof MonteCarloFootstepNode)
+      {
+         MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
+         return position.equals(other.position) && robotSide == other.robotSide;
+      }
+      else
+      {
+         return false;
+      }
    }
 }

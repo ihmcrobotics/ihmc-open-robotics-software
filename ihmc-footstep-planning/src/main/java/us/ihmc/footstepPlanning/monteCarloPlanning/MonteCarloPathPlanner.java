@@ -205,9 +205,12 @@ public class MonteCarloPathPlanner
       node.addValue(score);
       node.incrementVisits();
 
-      if (node.getParent() != null)
+      if (!node.getParents().isEmpty())
       {
-         backPropagate((MonteCarloWaypointNode) node.getParent(), score);
+         for (MonteCarloTreeNode parent : node.getParents())
+         {
+            backPropagate((MonteCarloWaypointNode) parent, score);
+         }
       }
    }
 
