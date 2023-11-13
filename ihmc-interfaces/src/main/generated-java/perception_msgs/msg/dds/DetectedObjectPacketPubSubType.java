@@ -15,7 +15,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0e7e0d7d38734434db33d9d7f6cf34916560fae9bcd7eaa92ec19a177d5648e4";
+   		return "c3629262e54c9df5a5580f9c0bfcd71ff5e4dc255ac5a8f7e341ef0893d1e4fd";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -86,6 +88,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getSensorPose(), current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -111,6 +115,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_2(data.getId());
 
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getSensorPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
       cdr.write_type_6(data.getConfidence());
 
@@ -136,6 +141,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       	
       data.setId(cdr.read_type_2());
       	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getSensorPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setConfidence(cdr.read_type_6());
       	
@@ -158,6 +164,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("id", data.getId());
+      ser.write_type_a("sensor_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getSensorPose());
+
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       ser.write_type_6("confidence", data.getConfidence());
@@ -171,6 +179,8 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setId(ser.read_type_2("id"));
+      ser.read_type_a("sensor_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getSensorPose());
+
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       data.setConfidence(ser.read_type_6("confidence"));
