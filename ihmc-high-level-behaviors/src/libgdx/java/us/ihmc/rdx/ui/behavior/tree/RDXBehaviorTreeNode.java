@@ -3,6 +3,12 @@ package us.ihmc.rdx.ui.behavior.tree;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -25,6 +31,9 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
    private transient RDXBehaviorTreeNode<?, ?> parent;
    private boolean treeWidgetExpanded = false;
+   private boolean isDescriptionBeingEdited = false;
+   private transient final ImString imDescriptionText = new ImString();
+   private transient final ImVec2 descriptionTextSize = new ImVec2();
 
    @Override
    public void update()
@@ -64,6 +73,35 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    }
 
+   public void renderNodeDescription()
+   {
+      String descriptionText = getDefinition().getDescription();
+      ImGui.calcTextSize(descriptionTextSize, descriptionText);
+      boolean textHovered = ImGuiTools.isItemHovered(descriptionTextSize.x);
+
+      if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+      {
+         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
+         isDescriptionBeingEdited = true;
+         imDescriptionText.set(getDefinition().getDescription());
+      }
+
+      if (isDescriptionBeingEdited)
+      {
+         if (ImGuiTools.inputText(labels.getHidden("description"), imDescriptionText))
+         {
+            getDefinition().setDescription(imDescriptionText.get());
+            isDescriptionBeingEdited = false;
+         }
+      }
+      else
+      {
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.textColored(textHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text), descriptionText);
+         ImGui.popFont();
+      }
+   }
+
    public void renderImGuiWidgets()
    {
 
@@ -84,6 +122,16 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public ImStringWrapper getDescriptionWrapper()
    {
       return descriptionWrapper;
+   }
+
+   public void setDescriptionBeingEdited(boolean descriptionBeingEdited)
+   {
+      isDescriptionBeingEdited = descriptionBeingEdited;
+   }
+
+   public boolean getDescriptionBeingEdited()
+   {
+      return isDescriptionBeingEdited;
    }
 
    public void setTreeWidgetExpanded(boolean treeWidgetExpanded)
