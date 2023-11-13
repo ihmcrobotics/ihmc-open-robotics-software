@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -211,7 +212,7 @@ public class MonteCarloPlannerTools
 
    public static void getOptimalPath(MonteCarloTreeNode root, List<MonteCarloTreeNode> path)
    {
-      float maxValue = Float.MIN_VALUE;
+      float maxValue = -1e10f;
       MonteCarloTreeNode maxNode = null;
       for (MonteCarloTreeNode node : root.getChildren())
       {
@@ -255,6 +256,21 @@ public class MonteCarloPlannerTools
       }
    }
 
+   public static void printLayerCounts(MonteCarloTreeNode root)
+   {
+      HashMap<Integer, Integer> layerCounts = new HashMap<>();
+      MonteCarloPlannerTools.getLayerCounts(root, layerCounts);
+
+      StringBuilder output = new StringBuilder("{");
+      for (Integer key : layerCounts.keySet())
+      {
+         output.append("(").append(key - root.getLevel()).append(":").append(layerCounts.get(key)).append(")");
+         output.append(", ");
+      }
+
+      LogTools.info("Layer Counts: {}", output.toString());
+   }
+
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
@@ -265,9 +281,24 @@ public class MonteCarloPlannerTools
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
          Point3D position = footstepNode.getPosition();
+         position.scale(1/50.0f);
          FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(position), new Quaternion(position.getZ(), 0, 0));
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
+
+         LogTools.info("Footstep Side: {}, Position: {}", footstepNode.getRobotSide(), position);
       }
       return footstepPlan;
+   }
+
+   public static void getFootstepActionGrid(ArrayList<Vector3D> actions, Point3D origin, int side)
+   {
+      actions.clear();
+      for (int i = 20; i <= 50; i++)
+      {
+         for (int j = 20; j <= 50; j++)
+         {
+            actions.add(new Vector3D(i * side, j * side, 0));
+         }
+      }
    }
 }

@@ -3,12 +3,15 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -74,12 +77,12 @@ public class MonteCarloFootstepPlanningTest
       LogTools.info("Plan Size: {}", plan.getNumberOfSteps());
 
       if (displayPlots)
-         display(heightMap, contactMap, terrainCostImage);
+         display(heightMap, contactMap, terrainCostImage, plan);
 
       Assertions.assertEquals(0.0, 0.0 - 0.0001, 1e-3);
    }
 
-   public void display(Mat heightMap, Mat contactMapImage, Mat terrainCostImage)
+   public void display(Mat heightMap, Mat contactMapImage, Mat terrainCostImage, FootstepPlan plan)
    {
       HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
       Mat heightMapColorImage = new Mat(201, 201, opencv_core.CV_8UC3);
@@ -114,8 +117,22 @@ public class MonteCarloFootstepPlanningTest
       // convert contact heat map from 8UC4 to 8UC3
       Mat contactHeatMapColorImage = new Mat(contactHeatMapImage.rows(), contactHeatMapImage.cols(), opencv_core.CV_8UC3);
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
+
+      plotFootsteps(contactHeatMapColorImage, plan);
       contactHeatMapColorImage.copyTo(right);
 
       PerceptionDebugTools.display("Display", stacked, 0, 1000);
+   }
+
+   private void plotFootsteps(Mat image, FootstepPlan plan)
+   {
+      if (plan == null)
+         return;
+
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         Point3D position = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
+         PerceptionDebugTools.plotTiltedRectangle(image, position, 1, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+      }
    }
 }

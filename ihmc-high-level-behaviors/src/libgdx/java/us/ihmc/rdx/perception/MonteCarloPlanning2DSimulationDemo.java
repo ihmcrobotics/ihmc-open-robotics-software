@@ -65,7 +65,7 @@ class MonteCarloPlanning2DSimulationDemo
          
          //LogTools.info("Optimal Path Length: {}/({})", optimalPath.size(), totalNodes);
 
-         planner.printLayerCounts();
+         MonteCarloPlannerTools.printLayerCounts(planner.getRoot());
 
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
 

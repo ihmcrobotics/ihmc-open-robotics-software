@@ -8,11 +8,11 @@ public abstract class MonteCarloTreeNode
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
-   private int id = 0;
-   private float upperConfidenceBound = 0;
-   private int visits = 0;
-   private float value = 0;
-   private int level = 0;
+   protected int id = 0;
+   protected float upperConfidenceBound = 0;
+   protected int visits = 0;
+   protected float value = 0;
+   protected int level = 0;
 
    public MonteCarloTreeNode(MonteCarloTreeNode parent, int id)
    {

@@ -399,11 +399,30 @@ public class PerceptionDebugTools
 
    public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
    {
+      LogTools.info("Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
+
       // just like plotFootsteps
       Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
                                  new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
                                  new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               color,
+                               -1,
+                               opencv_imgproc.LINE_4,
+                               0);
+   }
+
+   public static void plotTiltedRectangle(Mat displayImage, Point3D point, int size, int side)
+   {
+      LogTools.info("Footstep: {} {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2), side);
+
+      Scalar color = side == 1 ? new Scalar(0, 0, 255, 0) : new Scalar(255, 255, 0, 0);
+
+      // just like plotFootsteps
+      Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      opencv_imgproc.rectangle(displayImage,
+                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
                                color,
                                -1,
                                opencv_imgproc.LINE_4,

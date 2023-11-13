@@ -290,4 +290,9 @@ public class MonteCarloPathPlanner
    {
       agent.measure(world);
    }
+
+   public MonteCarloTreeNode getRoot()
+   {
+      return root;
+   }
 }

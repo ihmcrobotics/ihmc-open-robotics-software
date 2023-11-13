@@ -21,8 +21,6 @@ public class MonteCarloFootstepPlanner
    private MonteCarloWaypointAgent agent;
    private MonteCarloFootstepNode root;
 
-   private MonteCarloFootstepPlannerRequest request;
-
    private int searchIterations = 15;
    private int simulationIterations = 100;
    private int uniqueNodeId = 0;
@@ -35,7 +33,7 @@ public class MonteCarloFootstepPlanner
    {
       this.plannerParameters = plannerParameters;
       this.world = new MonteCarloPlanningWorld(goalMargin, worldHeight, worldWidth);
-      root = new MonteCarloFootstepNode(new Point3D(), null, uniqueNodeId++);
+      root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
    }
 
    /**
@@ -45,13 +43,14 @@ public class MonteCarloFootstepPlanner
     */
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
    {
-      this.request = request;
-
       // Update the tree multiple times
       for (int i = 0; i < searchIterations; i++)
       {
-         updateTree(root);
+         LogTools.info("Iteration: {}", i);
+         updateTree(root, request);
       }
+
+      MonteCarloPlannerTools.printLayerCounts(root);
 
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root);
       return plan;
@@ -91,15 +90,15 @@ public class MonteCarloFootstepPlanner
     *       2a. select and recurse into the child node with the highest Upper Confidence Bound (UCB)
     *       2b. until the node is a leaf node (unvisited node is reached)
     */
-   public void updateTree(MonteCarloFootstepNode node)
+   public void updateTree(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
       if (node == null)
          return;
 
       if (node.getVisits() == 0)
       {
-         MonteCarloFootstepNode childNode = expand(node);
-         double score = simulate(childNode);
+         MonteCarloFootstepNode childNode = expand(node, request);
+         double score = simulate(childNode, request);
          childNode.setValue((float) score);
          backPropagate(node, (float) score);
       }
@@ -116,21 +115,21 @@ public class MonteCarloFootstepPlanner
                bestNode = (MonteCarloFootstepNode) child;
             }
          }
-         updateTree(bestNode);
+         updateTree(bestNode, request);
       }
    }
 
    /**
     * Expands the given node by creating a child node for each available action.
     */
-   public MonteCarloFootstepNode expand(MonteCarloFootstepNode node)
+   public MonteCarloFootstepNode expand(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
-      ArrayList<?> availableStates = node.getAvailableStates(world);
+      ArrayList<?> availableStates = node.getAvailableStates(world, request);
 
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
-         MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getPosition(), node, uniqueNodeId++);
+         MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getPosition(), node, newState.getRobotSide(), uniqueNodeId++);
 
          node.getChildren().add(postNode);
       }
@@ -138,34 +137,29 @@ public class MonteCarloFootstepPlanner
       return (MonteCarloFootstepNode) node.getChildren().get((int) (Math.random() * node.getChildren().size()));
    }
 
-   public double simulate(MonteCarloFootstepNode node)
+   public double simulate(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
+      LogTools.info("Simulate");
+
       double score = 0;
 
-      MonteCarloFootstepNode randomState = new MonteCarloFootstepNode(node.getPosition(), null, 0);
+      MonteCarloFootstepNode randomState = new MonteCarloFootstepNode(node.getPosition(), null, node.getRobotSide().getOppositeSide(), 0);
 
       for (int i = 0; i < simulationIterations; i++)
       {
-         //LogTools.warn("Simulation: {}", i);
+         ArrayList<MonteCarloFootstepNode> nextStates = randomState.getAvailableStates(world, request);
+         int actionIndex = (int) (Math.random() * nextStates.size());
+         randomState = nextStates.get(actionIndex);
 
-         ArrayList<MonteCarloFootstepNode> availableActions = randomState.getAvailableStates(world);
-         randomState = availableActions.get((int) (Math.random() * availableActions.size()));
-         score -= 1;
+         LogTools.info(String.format("Simulation %d for Node %d, Position: %s, Random State: %s, Actions: %d", i, node.getId(), node.getPosition(), randomState.getPosition(), nextStates.size()));
 
-         //if (!MonteCarloPlannerTools.isWithinGridBoundaries(randomState.getPosition(), world.getGridWidth()))
-         //{
-         //   score -= MonteCarloPlannerConstants.PENALTY_COLLISION_BOUNDARY;
-         //}
-
-         if (randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
+         //score -= 0.1;
+         //if (randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
          {
-            score += MonteCarloPlannerConstants.REWARD_GOAL;
+            score += 1.0f / randomState.getPosition().distance(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
          }
 
-         if (world.getGrid().ptr((int) randomState.getPosition().getX(), (int) randomState.getPosition().getY()).get() == MonteCarloPlannerConstants.OCCUPIED)
-         {
-            score -= MonteCarloPlannerConstants.PENALTY_COLLISION_OBSTACLE;
-         }
+         LogTools.info("Action Taken: {}, Score: {}", actionIndex, score);
       }
 
       return score;
@@ -227,21 +221,6 @@ public class MonteCarloFootstepPlanner
       return MonteCarloPlannerTools.getTotalNodesInSubTree(root);
    }
 
-   public void printLayerCounts()
-   {
-      HashMap<Integer, Integer> layerCounts = new HashMap<>();
-      MonteCarloPlannerTools.getLayerCounts(root, layerCounts);
-
-      StringBuilder output = new StringBuilder("{");
-      for (Integer key : layerCounts.keySet())
-      {
-         output.append("(").append(key - root.getLevel()).append(":").append(layerCounts.get(key)).append(")");
-         output.append(", ");
-      }
-
-      LogTools.info("Layer Counts: {}", output.toString());
-   }
-
    public MonteCarloWaypointAgent getAgent()
    {
       return agent;
@@ -257,4 +236,8 @@ public class MonteCarloFootstepPlanner
       agent.measure(world);
    }
 
+   public MonteCarloTreeNode getRoot()
+   {
+      return root;
+   }
 }
