@@ -19,6 +19,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.RestartableThread;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -45,7 +46,7 @@ public class ArUcoUpdateProcess
    private GpuMat undistortionMap2;
    private final Mat cameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
 
-   private boolean arUcoProcessInitialized = false;
+   private AtomicBoolean arUcoProcessInitialized = new AtomicBoolean(false);
 
    public ArUcoUpdateProcess(ROS2SceneGraph sceneGraph, BlackflyLensProperties blackflyLensProperties, Supplier<ReferenceFrame> blackflyFrameSupplier)
    {
@@ -71,7 +72,7 @@ public class ArUcoUpdateProcess
          }
 
          // Initialize arUco process
-         if (!arUcoProcessInitialized)
+         if (!arUcoProcessInitialized.get())
          {
             initializeArUcoProcess(arUcoImage.getImageWidth(), arUcoImage.getImageHeight());
          }
@@ -93,11 +94,6 @@ public class ArUcoUpdateProcess
          // Update the Bytedeco image
          cpuUndistortedImage.copyTo(arUcoBytedecoImage.getBytedecoOpenCVMat());
          lastArUcoImageSequenceNumber = arUcoImage.getSequenceNumber();
-
-         // Update ArUco detection
-         arUcoMarkerDetection.update();
-         arUcoMarkerPublisher.update();
-         ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
 
          // Close stuff
          imageForUndistortionRGB.close();
@@ -169,6 +165,18 @@ public class ArUcoUpdateProcess
       }
    }
 
+   public void updateArUcoDetection()
+   {
+      arUcoMarkerDetection.update();
+      arUcoMarkerPublisher.update();
+      ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetection, sceneGraph);
+   }
+
+   public boolean isInitialized()
+   {
+      return arUcoProcessInitialized.get();
+   }
+
    private void initializeArUcoProcess(int imageWidth, int imageHeight)
    {
       LogTools.info("Initializing ArUco process");
@@ -183,7 +191,7 @@ public class ArUcoUpdateProcess
       initializeImageUndistortion(imageWidth, imageHeight);
 
       LogTools.info("ArUco process initialized");
-      arUcoProcessInitialized = true;
+      arUcoProcessInitialized.set(true);
    }
 
    private void initializeImageUndistortion(int imageWidth, int imageHeight)
