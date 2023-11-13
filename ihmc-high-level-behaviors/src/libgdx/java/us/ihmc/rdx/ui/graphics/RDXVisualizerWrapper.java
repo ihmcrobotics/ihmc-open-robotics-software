@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2CenterposeVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -158,6 +159,11 @@ public class RDXVisualizerWrapper
          imgui.internal.ImGui.text(arUcoVisualizer.getTitle());
          arUcoVisualizer.getFrequencyPlot().renderImGuiWidgets();
          arUcoVisualizer.getNumberOfMarkersPlot().render(arUcoVisualizer.getNumberOfArUcoMarkers());
+      }
+      else if (visualizer instanceof RDXROS2CenterposeVisualizer centerposeVisualizer)
+      {
+         imgui.internal.ImGui.text(centerposeVisualizer.getTitle());
+         centerposeVisualizer.getFrequencyPlot().renderImGuiWidgets();
       }
       else
       {

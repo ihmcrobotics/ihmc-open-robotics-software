@@ -125,6 +125,7 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> PUBLISH_ZED_COLOR = PERCEPTION_MODULE.withSuffix("publish_zed_color").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("publish_zed_depth").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("publish_zed_point_cloud").withType(Empty.class);
+   public static final ROS2Topic<Empty> PUBLISH_CENTERPOSE = PERCEPTION_MODULE.withSuffix("publish_centerpose").withType(Empty.class);
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
    public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(IHMC_ROOT.withModule(ZED2_NAME)
