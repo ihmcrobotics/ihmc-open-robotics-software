@@ -52,7 +52,6 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
    private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
-   private static final double CENTERPOSE_DETECTION_FREQUENCY = 5.0;
 
    private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final ROS2HeartbeatMonitor zedPointCloudHeartbeat;
@@ -97,8 +96,6 @@ public class PerceptionAndAutonomyProcess
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private final ROS2HeartbeatMonitor centerposeUpdateHeartbeat;
-   private final RestartableThrottledThread centerposeUpdateThread;
-
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
@@ -134,17 +131,16 @@ public class PerceptionAndAutonomyProcess
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
-      sceneGraphUpdateThread.start(); // scene graph runs at all times
 
       arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
       arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ARUCO);
       initializeArUcoHeartbeatCallbacks();
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
-
       centerposeUpdateHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_CENTERPOSE);
       initializeCenterposeHeartbeatCallbacks();
-      centerposeUpdateThread = new RestartableThrottledThread("CenterposeUpdater", CENTERPOSE_DETECTION_FREQUENCY, this::updateCenterpose);
+
+      sceneGraphUpdateThread.start(); // scene graph runs at all times
    }
 
    public void destroy()
@@ -176,7 +172,6 @@ public class PerceptionAndAutonomyProcess
 
       sceneGraphUpdateThread.stop();
       arUcoUpdater.stopArUcoDetection();
-      centerposeUpdateThread.stop();
 
       if (blackflyProcessAndPublishThread != null)
          blackflyProcessAndPublishThread.stop();
@@ -254,13 +249,12 @@ public class PerceptionAndAutonomyProcess
    private void updateSceneGraph()
    {
       sceneGraph.updateSubscription();
+      if (arUcoDetectionHeartbeat.isAlive() && arUcoUpdater.isInitialized())
+         arUcoUpdater.updateArUcoDetection();
+      if (centerposeUpdateHeartbeat.isAlive())
+         centerposeDetectionManager.updateSceneGraph(sceneGraph);
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
-   }
-
-   private void updateCenterpose()
-   {
-      centerposeDetectionManager.updateSceneGraph(sceneGraph);
    }
 
    private void initializeZED()
@@ -508,11 +502,9 @@ public class PerceptionAndAutonomyProcess
 
             zedImageRetriever.start();
             zedImagePublisher.startColor();
-            centerposeUpdateThread.start();
          }
          else
          {
-            centerposeUpdateThread.stop();
             if (!zedPointCloudHeartbeat.isAlive() && !zedColorHeartbeat.isAlive() && !zedDepthHeartbeat.isAlive())
             {
                zedImagePublisher.stopColor();
