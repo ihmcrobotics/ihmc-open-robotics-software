@@ -1,6 +1,7 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.tuple2D.Point2D32;
 
 public class ImGuiHollowArrowRenderer
@@ -15,18 +16,21 @@ public class ImGuiHollowArrowRenderer
    private final Point2D32 baseBottomRight = new Point2D32();
    private float cursorXDesktopFrame;
    private float cursorYDesktopFrame;
-   private int color;
+   private int lineColor;
 
-   public void render(float scale, int color)
+   private boolean isHovered = false;
+
+   public void render()
    {
-      this.color = color;
+      lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
       float fontSize = ImGui.getFontSize();
 
+      float scale = 0.7f; // Make parameter if desired
       scale *= fontSize;
 
       // Center is base of arrowhead
-      center.set(0.5f * fontSize, 0.5f * fontSize);
+      center.set(0.7f * fontSize, 0.5f * fontSize);
 
       float zero = 0.0f;
       float arrowheadHalfheight = 0.4f;
@@ -61,12 +65,18 @@ public class ImGuiHollowArrowRenderer
       drawLine(baseTopRight, baseTopLeft);
       drawLine(baseTopLeft, baseBottomLeft);
       drawLine(baseBottomLeft, baseBottomRight);
+
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (arrowheadTip.getX32() - baseTopLeft.getX32()) + ImGui.getStyle().getFramePaddingX() * 2.0f);
    }
 
    private void drawLine(Point2D32 from, Point2D32 to)
    {
       ImGui.getWindowDrawList().addLine(cursorXDesktopFrame + from.getX32(), cursorYDesktopFrame + from.getY32(),
-                                        cursorXDesktopFrame + to.getX32(), cursorYDesktopFrame + to.getY32(),
-                                        color);
+                                        cursorXDesktopFrame + to.getX32(), cursorYDesktopFrame + to.getY32(), lineColor);
+   }
+
+   public boolean getIsHovered()
+   {
+      return isHovered;
    }
 }
