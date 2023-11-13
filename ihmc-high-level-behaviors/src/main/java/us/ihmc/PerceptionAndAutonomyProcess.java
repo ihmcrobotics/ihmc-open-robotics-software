@@ -52,6 +52,7 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
    private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
+   private static final double CENTERPOSE_DETECTION_FREQUENCY = 5.0;
 
    private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final ROS2HeartbeatMonitor zedPointCloudHeartbeat;
@@ -93,7 +94,10 @@ public class PerceptionAndAutonomyProcess
    private RestartableThrottledThread sceneGraphUpdateThread;
    private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
    private final ArUcoUpdateProcess arUcoUpdater;
+
    private final CenterposeDetectionManager centerposeDetectionManager;
+   private final ROS2HeartbeatMonitor centerposeUpdateHeartbeat;
+   private final RestartableThrottledThread centerposeUpdateThread;
 
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
@@ -125,17 +129,22 @@ public class PerceptionAndAutonomyProcess
       blackflyFrameSuppliers.put(RobotSide.RIGHT, rightBlackflyFrameSupplier);
       blackflyImageHeartbeats.put(RobotSide.LEFT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT)));
       blackflyImageHeartbeats.put(RobotSide.RIGHT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT)));
-      arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ARUCO);
       initializeBlackflyHeartbeatCallbacks();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
+      sceneGraphUpdateThread.start(); // scene graph runs at all times
 
       arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
+      arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ARUCO);
       initializeArUcoHeartbeatCallbacks();
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
+
+      centerposeUpdateHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_CENTERPOSE);
+      initializeCenterposeHeartbeatCallbacks();
+      centerposeUpdateThread = new RestartableThrottledThread("CenterposeUpdater", CENTERPOSE_DETECTION_FREQUENCY, this::updateCenterpose);
    }
 
    public void destroy()
@@ -157,7 +166,9 @@ public class PerceptionAndAutonomyProcess
 
       if (ouster != null)
       {
+         System.out.println("Destroying OusterNetServer...");
          ouster.destroy();
+         System.out.println("Destroyed OusterNetServer...");
          ousterProcessAndPublishThread.stop();
          ousterDepthImagePublisher.destroy();
          ousterDepthImageRetriever.destroy();
@@ -165,6 +176,7 @@ public class PerceptionAndAutonomyProcess
 
       sceneGraphUpdateThread.stop();
       arUcoUpdater.stopArUcoDetection();
+      centerposeUpdateThread.stop();
 
       if (blackflyProcessAndPublishThread != null)
          blackflyProcessAndPublishThread.stop();
@@ -243,8 +255,12 @@ public class PerceptionAndAutonomyProcess
    {
       sceneGraph.updateSubscription();
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
-      centerposeDetectionManager.updateSceneGraph(sceneGraph); // TODO: Maybe there's a better place for this?
       sceneGraph.updatePublication();
+   }
+
+   private void updateCenterpose()
+   {
+      centerposeDetectionManager.updateSceneGraph(sceneGraph);
    }
 
    private void initializeZED()
@@ -271,7 +287,7 @@ public class PerceptionAndAutonomyProcess
             if (!zedColorHeartbeat.isAlive() && !zedDepthHeartbeat.isAlive())
                zedImageRetriever.stop();
 
-            if (!zedColorHeartbeat.isAlive())
+            if (!zedColorHeartbeat.isAlive() && !centerposeUpdateHeartbeat.isAlive())
                zedImagePublisher.stopColor();
 
             if (!zedDepthHeartbeat.isAlive())
@@ -295,7 +311,7 @@ public class PerceptionAndAutonomyProcess
                zedImageRetriever.stop();
                zedImagePublisher.stopAll();
             }
-            else if (!zedPointCloudHeartbeat.isAlive())
+            else if (!zedPointCloudHeartbeat.isAlive() && !centerposeUpdateHeartbeat.isAlive())
             {
                zedImagePublisher.stopColor();
             }
@@ -313,7 +329,7 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (!zedPointCloudHeartbeat.isAlive() && !zedColorHeartbeat.isAlive())
+            if (!zedPointCloudHeartbeat.isAlive() && !zedColorHeartbeat.isAlive() && !centerposeUpdateHeartbeat.isAlive())
             {
                zedImageRetriever.stop();
                zedImagePublisher.stopAll();
@@ -465,7 +481,6 @@ public class PerceptionAndAutonomyProcess
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null)
             {
                blackflyImageRetrievers.get(RobotSide.RIGHT).start();
-               sceneGraphUpdateThread.start();
                arUcoUpdater.startArUcoDetection();
             }
          }
@@ -473,11 +488,35 @@ public class PerceptionAndAutonomyProcess
          {
             if (blackflyImageRetrievers.get(RobotSide.RIGHT) != null)
             {
-               sceneGraphUpdateThread.stop();
                arUcoUpdater.stopArUcoDetection();
 
                if (!blackflyImageHeartbeats.get(RobotSide.RIGHT).isAlive())
                   blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
+            }
+         }
+      });
+   }
+
+   private void initializeCenterposeHeartbeatCallbacks()
+   {
+      centerposeUpdateHeartbeat.setAlivenessChangedCallback(isAlive ->
+      {
+         if (isAlive)
+         {
+            if (zedImageRetriever == null)
+               initializeZED();
+
+            zedImageRetriever.start();
+            zedImagePublisher.startColor();
+            centerposeUpdateThread.start();
+         }
+         else
+         {
+            centerposeUpdateThread.stop();
+            if (!zedPointCloudHeartbeat.isAlive() && !zedColorHeartbeat.isAlive() && !zedDepthHeartbeat.isAlive())
+            {
+               zedImagePublisher.stopColor();
+               zedImageRetriever.stop();
             }
          }
       });
@@ -488,14 +527,13 @@ public class PerceptionAndAutonomyProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper,
-                                                                                ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame::getWorldFrame,
-                                                                                ReferenceFrame.getWorldFrame());
-      //publisher.start();
+      new PerceptionAndAutonomyProcess(ros2Helper,
+                                       ReferenceFrame::getWorldFrame,
+                                       ReferenceFrame::getWorldFrame,
+                                       ReferenceFrame::getWorldFrame,
+                                       ReferenceFrame::getWorldFrame,
+                                       ReferenceFrame::getWorldFrame,
+                                       ReferenceFrame::getWorldFrame,
+                                       ReferenceFrame.getWorldFrame());
    }
 }
