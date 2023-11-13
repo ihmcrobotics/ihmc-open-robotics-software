@@ -73,18 +73,8 @@ public class ImGuiExpandCollapseRenderer
       EuclidCoreMissingTools.roundToGivenPrecision(plusTop, 1.0);
       EuclidCoreMissingTools.roundToGivenPrecision(plusBottom, 1.0);
 
-
-      float mousePosXInDesktopFrame = ImGui.getMousePosX();
-      float mousePosYInDesktopFrame = ImGui.getMousePosY();
-      // Widget frame is the top-left of the start of the widgets, which is not the same as window
-      // frame in the case the window is scrolled.
-      float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
-      float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
-
-      isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
-      isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingX();
-      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
-      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + ImGui.getFontSize() + ImGui.getStyle().getFramePaddingY();
+      float itemWidth = boxTopRight.getX32() - boxTopLeft.getX32();
+      isHovered = ImGuiTools.isItemHovered(itemWidth);
 
       backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Button);
 
@@ -129,7 +119,7 @@ public class ImGuiExpandCollapseRenderer
       if (!expanded)
          drawLine(plusTop, plusBottom);
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (boxTopRight.getX32() - boxTopLeft.getX32()));
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + itemWidth);
 
       ImGui.newLine();
 

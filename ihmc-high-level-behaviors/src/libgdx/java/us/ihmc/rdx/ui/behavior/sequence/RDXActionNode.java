@@ -32,7 +32,13 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    @Override
    public void renderTreeViewIconArea()
    {
-      hollowArrowRenderer.render();
+      if (hollowArrowRenderer.render(getState().getIsNextForExecution()))
+      {
+         if (getParent() instanceof RDXActionSequence actionSequence)
+         {
+            actionSequence.getState().setExecutionNextIndex(getState().getActionIndex());
+         }
+      }
    }
 
    @Override
