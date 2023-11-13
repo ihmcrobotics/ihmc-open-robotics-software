@@ -88,6 +88,7 @@ public class PerceptionAndAutonomyProcess
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private RestartableThread blackflyProcessAndPublishThread;
 
+   private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
    private RestartableThrottledThread sceneGraphUpdateThread;
    private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
@@ -101,6 +102,7 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
+                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier,
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
       this.zedFrameSupplier = zedFrameSupplier;
@@ -126,6 +128,7 @@ public class PerceptionAndAutonomyProcess
       arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.PUBLISH_ARUCO);
       initializeBlackflyHeartbeatCallbacks();
 
+      this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
 
@@ -238,9 +241,8 @@ public class PerceptionAndAutonomyProcess
 
    private void updateSceneGraph()
    {
-      // TODO: Maybe this should be somewhere else?
       sceneGraph.updateSubscription();
-      sceneGraph.updateOnRobotOnly(ousterFrameSupplier.get()); // TODO: Add robot pelvis frame here or something
+      sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       centerposeDetectionManager.updateSceneGraph(sceneGraph); // TODO: Maybe there's a better place for this?
       sceneGraph.updatePublication();
    }
@@ -487,6 +489,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess publisher = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
                                                                                 ReferenceFrame::getWorldFrame,
