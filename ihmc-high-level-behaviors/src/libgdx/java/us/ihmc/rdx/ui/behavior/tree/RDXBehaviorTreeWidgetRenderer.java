@@ -16,8 +16,10 @@ public class RDXBehaviorTreeWidgetRenderer
          node.setTreeWidgetExpanded(!node.getTreeWidgetExpanded());
       }
 
+      ImGui.sameLine();
       node.renderTreeViewIconArea();
 
+      ImGui.sameLine();
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text(node.getDefinition().getDescription());
       ImGui.popFont();

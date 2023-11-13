@@ -29,6 +29,11 @@ public class ImGuiExpandCollapseRenderer
     */
    public boolean render(boolean expanded)
    {
+      return render(expanded, false);
+   }
+
+   public boolean render(boolean expanded, boolean expandCollapseAll)
+   {
       float fontSize = ImGui.getFontSize();
 
       float scale = 0.7f; // Make parameter if desired
@@ -68,6 +73,7 @@ public class ImGuiExpandCollapseRenderer
       EuclidCoreMissingTools.roundToGivenPrecision(plusTop, 1.0);
       EuclidCoreMissingTools.roundToGivenPrecision(plusBottom, 1.0);
 
+
       float mousePosXInDesktopFrame = ImGui.getMousePosX();
       float mousePosYInDesktopFrame = ImGui.getMousePosY();
       // Widget frame is the top-left of the start of the widgets, which is not the same as window
@@ -84,6 +90,26 @@ public class ImGuiExpandCollapseRenderer
 
       cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
+
+      if (expandCollapseAll)
+      {
+         ImGui.getWindowDrawList().addRectFilled(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
+                                                 cursorXDesktopFrame + boxBottomRight.getX32() + 1.0f, cursorYDesktopFrame + boxBottomRight.getY32() + 1.0f,
+                                                 backgroundColor);
+         lineColor = ImGui.getColorU32(ImGuiCol.Border);
+         ImGui.getWindowDrawList().addRect(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
+                                           cursorXDesktopFrame + boxBottomRight.getX32() + 1.0f, cursorYDesktopFrame + boxBottomRight.getY32() + 1.0f,
+                                           lineColor);
+
+         boxTopLeft.add(2.0, 2.0);
+         boxTopRight.add(2.0, 2.0);
+         boxBottomLeft.add(2.0, 2.0);
+         boxBottomRight.add(2.0, 2.0);
+         minusLeft.add(2.0, 2.0);
+         minusRight.add(2.0, 2.0);
+         plusTop.add(2.0, 2.0);
+         plusBottom.add(2.0, 2.0);
+      }
 
       ImGui.getWindowDrawList().addRectFilled(cursorXDesktopFrame + boxTopLeft.getX32(), cursorYDesktopFrame + boxTopLeft.getY32(),
                                               cursorXDesktopFrame + boxBottomRight.getX32() + 1.0f, cursorYDesktopFrame + boxBottomRight.getY32() + 1.0f,
@@ -103,7 +129,9 @@ public class ImGuiExpandCollapseRenderer
       if (!expanded)
          drawLine(plusTop, plusBottom);
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (boxTopRight.getX32() - boxTopLeft.getX32()) + ImGui.getStyle().getFramePaddingX() * 2.0f);
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (boxTopRight.getX32() - boxTopLeft.getX32()));
+
+      ImGui.newLine();
 
       return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
    }
