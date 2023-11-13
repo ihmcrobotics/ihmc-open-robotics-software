@@ -100,6 +100,22 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          ImGui.textColored(textHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text), descriptionText);
          ImGui.popFont();
       }
+
+      if (textHovered && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+      {
+         ImGui.openPopup(labels.get("Node popup"));
+      }
+
+      if (ImGui.beginPopup(labels.get("Node popup")))
+      {
+         // TODO
+
+         ImGui.separator();
+         if (ImGui.menuItem("Cancel"))
+            ImGui.closeCurrentPopup();
+
+         ImGui.endPopup();
+      }
    }
 
    public void renderImGuiWidgets()
