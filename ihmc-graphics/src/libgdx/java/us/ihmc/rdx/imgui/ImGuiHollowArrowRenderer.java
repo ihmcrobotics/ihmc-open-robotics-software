@@ -2,6 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple2D.Point2D32;
 
 public class ImGuiHollowArrowRenderer
@@ -17,10 +18,11 @@ public class ImGuiHollowArrowRenderer
    private float cursorXDesktopFrame;
    private float cursorYDesktopFrame;
    private int lineColor;
+   private int backgroundColor;
 
    private boolean isHovered = false;
 
-   public void render()
+   public boolean render(boolean active)
    {
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
@@ -56,8 +58,25 @@ public class ImGuiHollowArrowRenderer
       baseBottomLeft.scaleAdd(scale, center);
       baseBottomRight.scaleAdd(scale, center);
 
+      float itemWidth = arrowheadTip.getX32() - baseTopLeft.getX32();
+      isHovered = ImGuiTools.isItemHovered(itemWidth);
+
       cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
+
+      if (active || isHovered)
+      {
+         backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGuiTools.GREEN;
+
+         ImGui.getWindowDrawList() .addTriangleFilled(cursorXDesktopFrame + arrowheadTop.getX32(), cursorYDesktopFrame + arrowheadTop.getY32(),
+                                                      cursorXDesktopFrame + arrowheadTip.getX32(), cursorYDesktopFrame + arrowheadTip.getY32(),
+                                                      cursorXDesktopFrame + arrowheadBottom.getX32(), cursorYDesktopFrame + arrowheadBottom.getY32(),
+                                                      backgroundColor);
+         ImGui.getWindowDrawList() .addRectFilled(cursorXDesktopFrame + baseTopLeft.getX32(), cursorYDesktopFrame + baseTopLeft.getY32(),
+                                                  cursorXDesktopFrame + baseBottomRight.getX32() + 1.0f, cursorYDesktopFrame + baseBottomRight.getY32() + 1.0f,
+                                                  backgroundColor);
+      }
+
       drawLine(arrowheadTop, arrowheadTip);
       drawLine(arrowheadTip, arrowheadBottom);
       drawLine(arrowheadTop, baseTopRight);
@@ -66,15 +85,18 @@ public class ImGuiHollowArrowRenderer
       drawLine(baseTopLeft, baseBottomLeft);
       drawLine(baseBottomLeft, baseBottomRight);
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (arrowheadTip.getX32() - baseTopLeft.getX32()));
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + itemWidth);
 
       ImGui.newLine();
+
+      return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
    }
 
    private void drawLine(Point2D32 from, Point2D32 to)
    {
       ImGui.getWindowDrawList().addLine(cursorXDesktopFrame + from.getX32(), cursorYDesktopFrame + from.getY32(),
-                                        cursorXDesktopFrame + to.getX32(), cursorYDesktopFrame + to.getY32(), lineColor);
+                                        cursorXDesktopFrame + to.getX32(), cursorYDesktopFrame + to.getY32(),
+                                        lineColor);
    }
 
    public boolean getIsHovered()

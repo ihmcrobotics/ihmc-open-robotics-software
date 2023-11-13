@@ -303,6 +303,27 @@ public class ImGuiTools
       ImGui.popStyleColor();
    }
 
+   /**
+    * Useful for custom widgets.
+    * @return Whether the area of the current custom item is hovered.
+    */
+   public static boolean isItemHovered(float itemWidth)
+   {
+      float mousePosXInDesktopFrame = ImGui.getMousePosX();
+      float mousePosYInDesktopFrame = ImGui.getMousePosY();
+      // Widget frame is the top-left of the start of the widgets, which is not the same as window
+      // frame in the case the window is scrolled.
+      float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
+      float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
+
+      boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
+      isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
+      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
+      isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + itemWidth + ImGui.getStyle().getFramePaddingY();
+
+      return isHovered;
+   }
+
    /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueLabel(String label)
    {
