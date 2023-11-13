@@ -5,8 +5,6 @@ import us.ihmc.rdx.imgui.*;
 
 public class RDXBehaviorTreeWidgetRenderer
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
 
    public void render(RDXBehaviorTreeNode<?, ?> node)
@@ -20,9 +18,7 @@ public class RDXBehaviorTreeWidgetRenderer
       node.renderTreeViewIconArea();
 
       ImGui.sameLine();
-      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text(node.getDefinition().getDescription());
-      ImGui.popFont();
+      node.renderNodeDescription();
 
       if (node.getTreeWidgetExpanded())
       {
