@@ -6,7 +6,7 @@ public class RDXBehaviorTreeTools
 {
    public static RDXBehaviorTreeNode<?, ?> findRootNode(RDXBehaviorTreeNode<?, ?> node)
    {
-      while (node.getParent() != null)
+      while (!node.isRootNode())
          node = node.getParent();
 
       return node;

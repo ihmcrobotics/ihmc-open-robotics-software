@@ -45,7 +45,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeNodesMenu nodesMenu;
    private final RDXBehaviorTreeFileLoader fileLoader;
    private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
-   private final RDXBehaviorTreeWidgetRenderer treeRenderer = new RDXBehaviorTreeWidgetRenderer();
+   private final RDXBehaviorTreeWidgetRenderer treeRenderer;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -65,10 +65,11 @@ public class RDXBehaviorTree
                                                    footstepPlannerParametersBasics);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
-      nodesMenu = new RDXBehaviorTreeNodesMenu(treeFilesDirectory);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo);
       fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
+      nodesMenu = new RDXBehaviorTreeNodesMenu(this, treeFilesDirectory);
+      treeRenderer = new RDXBehaviorTreeWidgetRenderer(this);
    }
 
    public void createAndSetupDefault(RDXBaseUI baseUI)
@@ -149,6 +150,7 @@ public class RDXBehaviorTree
    protected void renderImGuiWidgetsPre()
    {
       ImGui.beginMenuBar();
+      fileMenu.renderFileMenu();
    }
 
    protected void renderImGuiWidgetsPost()
@@ -167,14 +169,14 @@ public class RDXBehaviorTree
 
       if (rootNode != null)
       {
-         treeRenderer.render(this, behaviorTreeState.getModificationQueue(), rootNode);
+         treeRenderer.render(rootNode);
       }
       else
       {
          ImGui.pushFont(ImGuiTools.getMediumFont());
          ImGui.text("Add a root node:");
          ImGui.popFont();
-         nodesMenu.renderNodeCreationWidgets(this, rootNode, behaviorTreeState.getModificationQueue());
+         nodesMenu.renderNodeCreationWidgets(rootNode, RDXTreeNodeInsertionType.INSERT_ROOT);
       }
    }
 
@@ -263,5 +265,10 @@ public class RDXBehaviorTree
    public RDXBehaviorTreeFileLoader getFileLoader()
    {
       return fileLoader;
+   }
+
+   public RDXBehaviorTreeNodesMenu getNodesMenu()
+   {
+      return nodesMenu;
    }
 }

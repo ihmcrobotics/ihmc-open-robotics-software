@@ -19,7 +19,7 @@ public class BehaviorTreeSubtreeDestroy implements BehaviorTreeModification
    @Override
    public void performOperation()
    {
-      if (subtreeToClear.getParent() != null)
+      if (!subtreeToClear.isRootNode())
       {
          if (subtreeToClear.getParent() instanceof Freezable parentNode)
             parentNode.freeze();
