@@ -137,9 +137,7 @@ public class ContinuousPlannerSchedulingTask
       if (state == ContinuousWalkingState.PLAN_AVAILABLE)
       {
          LogTools.info("State: " + state);
-         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousPlanningParameters.getNumberOfStepsToSend(),
-                                                                                                        (float) continuousPlanningParameters.getSwingTime(),
-                                                                                                        (float) continuousPlanningParameters.getTransferTime());
+         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousPlanningParameters);
          LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
          publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
          publishForVisualization(footstepDataList);

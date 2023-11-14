@@ -346,12 +346,13 @@ public class ContinuousPlanner
       return request;
    }
 
-   public FootstepDataListMessage getLimitedFootstepDataListMessage(int count, float swingDuration, float transferDuration)
+   public FootstepDataListMessage getLimitedFootstepDataListMessage(ContinuousPlanningParameters parameters)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingDuration(swingDuration);
-      footstepDataListMessage.setDefaultTransferDuration(transferDuration);
+      footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingTime());
+      footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferTime());
 
+      int count = parameters.getNumberOfStepsToSend();
       // The planner may time out before getting the recommended number of steps, this makes sure we take the smaller of the values
       if (count > plannerOutput.getFootstepPlan().getNumberOfSteps())
          count = plannerOutput.getFootstepPlan().getNumberOfSteps();
