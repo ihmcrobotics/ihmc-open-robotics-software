@@ -61,6 +61,8 @@ public class ImGuiTools
    public static int DARK_GREEN = new Color(0.0f, 0.7f, 0.0f, 1.0f).toIntBits();
    public static int LIGHT_BLUE = new Color(0.4f, 0.4f, 0.8f, 1.0f).toIntBits();
 
+   private static final ImVec2 calcTextSize = new ImVec2();
+
    public static long createContext()
    {
       return ImGui.createContext().ptr;
@@ -323,6 +325,21 @@ public class ImGuiTools
       isHovered &= ImGui.isWindowHovered();
 
       return isHovered;
+   }
+
+   /** ImGui doesn't support underlined text so this is the best we can do. */
+   public static void addTextUnderline(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+
+      float cursorPosXInWidgetFrame = ImGui.getCursorPosX() + ImGui.getWindowPosX() - ImGui.getScrollX();
+      float cursorPosYInWidgetFrame = ImGui.getCursorPosY() + ImGui.getWindowPosY() - ImGui.getScrollY();
+      float adjustment = 3.0f;
+      ImGui.getWindowDrawList().addRectFilled(cursorPosXInWidgetFrame,
+                                              cursorPosYInWidgetFrame - 1.0f - adjustment,
+                                              cursorPosXInWidgetFrame + calcTextSize.x,
+                                              cursorPosYInWidgetFrame - adjustment,
+                                              ImGui.getColorU32(ImGuiCol.Text));
    }
 
    /** @deprecated Use ImGuiUniqueLabelMap instead. */
