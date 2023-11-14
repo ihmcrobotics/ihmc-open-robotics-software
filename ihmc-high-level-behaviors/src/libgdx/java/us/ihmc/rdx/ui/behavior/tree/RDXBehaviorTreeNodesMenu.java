@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
-import us.ihmc.commons.thread.Notification;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
@@ -15,10 +15,8 @@ public class RDXBehaviorTreeNodesMenu
 {
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final Notification menuShouldClose = new Notification();
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
    private final TypedNotification<RDXAvailableBehaviorTreeFile> loadFileRequest = new TypedNotification<>();
-   private final Notification deleteRootNode = new Notification();
 
    public RDXBehaviorTreeNodesMenu(WorkspaceResourceDirectory treeFilesDirectory)
    {
@@ -39,48 +37,32 @@ public class RDXBehaviorTreeNodesMenu
       indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
    }
 
-   public void renderNodesMenu()
+   public void renderNodeCreationWidgets(BehaviorTreeModificationQueue modificationQueue)
    {
-      if (ImGui.beginMenu(labels.get("Nodes"), !menuShouldClose.poll()))
+      ImGui.text("From File:");
+
+      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         // TODO: Replace with being able to delete any node
-         if (ImGui.button(labels.get("Delete Root Node")))
+         if (ImGui.button(indexedTreeFile.getName()))
          {
-            deleteRootNode.set();
+            loadFileRequest.set(indexedTreeFile);
          }
-
-         ImGui.text("From File:");
-
-         for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
-         {
-            if (ImGui.button(indexedTreeFile.getName()))
-            {
-               loadFileRequest.set(indexedTreeFile);
-            }
-         }
-
-         if (ImGui.button(labels.get("Reindex directory")))
-         {
-            reindexDirectory();
-         }
-
-         ImGui.text("Control Nodes:");
-         // TODO
-
-         ImGui.text("Actions");
-         // TODO
-
-         ImGui.endMenu();
       }
+
+      if (ImGui.button(labels.get("Reindex directory")))
+      {
+         reindexDirectory();
+      }
+
+      ImGui.text("Control Nodes:");
+      // TODO
+
+      ImGui.text("Actions");
+      // TODO
    }
 
    public TypedNotification<RDXAvailableBehaviorTreeFile> getLoadFileRequest()
    {
       return loadFileRequest;
-   }
-
-   public Notification getDeleteRootNode()
-   {
-      return deleteRootNode;
    }
 }

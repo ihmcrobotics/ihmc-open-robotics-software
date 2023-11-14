@@ -8,7 +8,6 @@ import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,7 +22,7 @@ import java.util.function.Supplier;
 public class BehaviorTreeState extends RequestConfirmFreezable
 {
    private final MutableLong nextID = new MutableLong(0);
-   private final Queue<BehaviorTreeModification> queuedModifications = new LinkedList<>();
+   private final BehaviorTreeModificationQueue modificationQueue = new BehaviorTreeModificationQueue();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier;
@@ -64,19 +63,23 @@ public class BehaviorTreeState extends RequestConfirmFreezable
       }
    }
 
+   /**
+    * Convenience method.
+    */
    public void modifyTree(Consumer<BehaviorTreeModificationQueue> modifier)
    {
-      modifier.accept(queuedModifications::add);
+      modifier.accept(modificationQueue);
+      modifyTree();
+   }
 
-      boolean modified = !queuedModifications.isEmpty();
+   /**
+    * Use with {@link #getModificationQueue()}.
+    */
+   public void modifyTree()
+   {
+      boolean atLeastOnePerformed = modificationQueue.performModifications();
 
-      while (!queuedModifications.isEmpty())
-      {
-         BehaviorTreeModification modification = queuedModifications.poll();
-         modification.performOperation();
-      }
-
-      if (modified)
+      if (atLeastOnePerformed)
          update();
    }
 
@@ -118,6 +121,11 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    public BehaviorTreeExtensionSubtreeRebuilder getTreeRebuilder()
    {
       return treeRebuilder;
+   }
+
+   public BehaviorTreeModificationQueue getModificationQueue()
+   {
+      return modificationQueue;
    }
 
    public int getNumberOfFrozenNodes()

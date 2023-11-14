@@ -2,6 +2,9 @@ package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 
+/**
+ * Clearing the subtree and detroying the removed nodes.
+ */
 public class BehaviorTreeExtensionSubtreeDestroy extends BehaviorTreeSubtreeDestroy implements BehaviorTreeModification
 {
    private final BehaviorTreeSubtreeDestroy extensionSubtreeDestruction;

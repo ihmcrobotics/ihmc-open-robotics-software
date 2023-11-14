@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.JSONFileTools;
@@ -47,7 +46,7 @@ public class RDXBehaviorTreeFileLoader
 
       if (parentNode != null)
       {
-         modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze<>(node, parentNode));
+         modificationQueue.queueAddAndFreezeNode(node, parentNode);
       }
 
       JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->

@@ -6,8 +6,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAdd;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -56,7 +54,8 @@ public class ROS2BehaviorTreeSubscription
          if (!behaviorTreeState.isFrozen())
          {
             // Clears all unfrozen nodes
-            behaviorTreeState.modifyTree(modificationQueue -> modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
+            behaviorTreeState.modifyTree(modificationQueue ->
+                                   modificationQueue.queueModification(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
          }
 
          behaviorTreeState.modifyTree(modificationQueue ->
@@ -78,7 +77,7 @@ public class ROS2BehaviorTreeSubscription
                rootNodeSetter.accept(null);
             }
 
-            modificationQueue.accept(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
+            modificationQueue.queueModification(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
          });
       }
    }
@@ -110,9 +109,9 @@ public class ROS2BehaviorTreeSubscription
       if (!anAncestorIsFrozen)
       {
          if (localParentNode == null)
-            modificationQueue.accept(new BehaviorTreeNodeSetRoot(localNode, rootNodeSetter));
+            modificationQueue.queueSetRootNode(localNode, rootNodeSetter);
          else
-            modificationQueue.accept(new BehaviorTreeNodeExtensionAdd(localNode, localParentNode));
+            modificationQueue.queueAddNode(localNode, localParentNode);
       }
 
       for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
