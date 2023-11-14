@@ -22,8 +22,8 @@ mainDependencies {
 
    api("us.ihmc:ihmc-realtime:1.6.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")

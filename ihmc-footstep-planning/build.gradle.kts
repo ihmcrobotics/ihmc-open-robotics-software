@@ -17,7 +17,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-convex-optimization:0.17.18")
    api("us.ihmc:ihmc-path-planning:source")
