@@ -98,7 +98,7 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    {
       FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
 
-      swingTrajectoryGraphic.updateFromPlan(plan, );
+      //swingTrajectoryGraphic.updateFromPlan(plan, );
    }
 
    public void renderImGuiWidgets()

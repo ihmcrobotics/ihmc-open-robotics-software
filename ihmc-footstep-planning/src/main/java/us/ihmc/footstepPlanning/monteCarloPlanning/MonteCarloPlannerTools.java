@@ -301,4 +301,23 @@ public class MonteCarloPlannerTools
          }
       }
    }
+
+   public static MonteCarloTreeNode getBestNode(MonteCarloFootstepNode root)
+   {
+      float bestScore = 0;
+      MonteCarloTreeNode bestNode = null;
+
+      for (MonteCarloTreeNode node : root.getChildren())
+      {
+         node.updateUpperConfidenceBound();
+         if (node.getUpperConfidenceBound() > bestScore)
+         {
+            bestScore = node.getUpperConfidenceBound();
+            bestNode = node;
+         }
+      }
+
+      return bestNode;
+   }
+
 }

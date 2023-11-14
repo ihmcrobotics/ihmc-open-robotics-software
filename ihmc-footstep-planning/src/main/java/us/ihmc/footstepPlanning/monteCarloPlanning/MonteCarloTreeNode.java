@@ -21,8 +21,12 @@ public abstract class MonteCarloTreeNode
       this.children = new ArrayList<>();
       this.level = 0;
 
+
       if (parent != null)
+      {
+         parents.add(parent);
          this.level = parent.getLevel() + 1;
+      }
    }
 
    public void updateUpperConfidenceBound()

@@ -38,59 +38,18 @@ public class MonteCarloFootstepPlanner
       root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
    }
 
-   /**
-    * Computes the next best action for the agent to take based on the current state of the world
-    * and the agent. Updates the Monte Carlo Tree multiple times before selecting the best node
-    * based on the Upper Confidence Bound.
-    */
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
    {
-      // Update the tree multiple times
       for (int i = 0; i < searchIterations; i++)
       {
          updateTree(root, request);
       }
 
       MonteCarloPlannerTools.printLayerCounts(root);
-
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root);
       return plan;
    }
 
-   public MonteCarloFootstepNode getBestNode()
-   {
-      float bestScore = 0;
-      MonteCarloFootstepNode bestNode = null;
-
-      if (root.getChildren().isEmpty())
-         LogTools.warn("No Children Nodes Found");
-
-      // Select the best node based on the Upper Confidence Bound
-      for (MonteCarloTreeNode node : root.getChildren())
-      {
-         node.updateUpperConfidenceBound();
-         if (node.getUpperConfidenceBound() > bestScore)
-         {
-            bestScore = node.getUpperConfidenceBound();
-            bestNode = (MonteCarloFootstepNode) node;
-         }
-      }
-
-      root = bestNode;
-
-      return bestNode;
-   }
-
-   /**
-    * Performs the Monte Carlo Tree Search Algorithm on the given sub-tree of the Monte Carlo Tree.
-    *    1. If the node has not been visited
-    *       1a. expand the node
-    *       1b. compute its value by simulating with random actions.
-    *       1c. back propagate the value to the root node.
-    *    2. If the node has been visited
-    *       2a. select and recurse into the child node with the highest Upper Confidence Bound (UCB)
-    *       2b. until the node is a leaf node (unvisited node is reached)
-    */
    public void updateTree(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
       if (node == null)
@@ -120,9 +79,6 @@ public class MonteCarloFootstepPlanner
       }
    }
 
-   /**
-    * Expands the given node by creating a child node for each available action.
-    */
    public MonteCarloFootstepNode expand(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
       ArrayList<?> availableStates = node.getAvailableStates(world, request);
@@ -185,22 +141,6 @@ public class MonteCarloFootstepPlanner
             backPropagate((MonteCarloFootstepNode) parent, score);
          }
       }
-   }
-
-   public void updateState(MonteCarloTreeNode newState)
-   {
-      updateWorld(newState);
-      updateAgent(newState);
-   }
-
-   public void updateWorld(MonteCarloTreeNode newState)
-   {
-      MonteCarloPlannerTools.updateGrid(world, (Point2DReadOnly) newState.getPosition(), agent.getRangeScanner().getMaxRange());
-   }
-
-   public void updateAgent(MonteCarloTreeNode newState)
-   {
-      agent.changeStateTo((Point2DReadOnly) newState.getPosition());
    }
 
    public MonteCarloPlanningWorld getWorld()

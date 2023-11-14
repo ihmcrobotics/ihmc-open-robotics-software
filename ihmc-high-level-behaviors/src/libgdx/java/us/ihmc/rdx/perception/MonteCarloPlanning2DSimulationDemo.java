@@ -57,20 +57,21 @@ class MonteCarloPlanning2DSimulationDemo
          MonteCarloPlannerTools.plotRangeScan(planner.getAgent().getScanPoints(), gridColor);
          MonteCarloPlannerTools.plotGoal(planner.getWorld().getGoal(), planner.getWorld().getGoalMargin(), gridColor);
 
+
+         MonteCarloWaypointNode newState = (MonteCarloWaypointNode) planner.plan();
+         planner.updateState(newState);
+
          optimalPath.clear();
          planner.getOptimalPathFromRoot(optimalPath);
          MonteCarloPlannerTools.plotPath(optimalPath, gridColor);
 
          int totalNodes = planner.getNumberOfNodesInTree();
-         
+
          //LogTools.info("Optimal Path Length: {}/({})", optimalPath.size(), totalNodes);
 
          MonteCarloPlannerTools.printLayerCounts(planner.getRoot());
 
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
-
-         MonteCarloWaypointNode newState = (MonteCarloWaypointNode) planner.plan();
-         planner.updateState(newState);
 
          i += 1;
       }
