@@ -1,5 +1,5 @@
 {
-  "maximumNumberOfHulls" : 20,
+  "maximumNumberOfHulls" : 40,
   "maximumNumberOfVerticesPerHull" : 20,
   "maximumVolumetricPercentError" : 1.0E-4,
   "maximumVoxelResolution" : 1000000,

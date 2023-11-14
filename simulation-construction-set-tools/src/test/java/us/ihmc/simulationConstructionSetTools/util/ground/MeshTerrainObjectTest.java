@@ -60,8 +60,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class MeshTerrainObjectTest
 {
    private static final boolean SHOW_VISUALIZATION = false;
-   private static final double SPHERERADIUS = 0.01;
-   private static final double CUBEDIMESNION = 0.01;
+   private static final double SPHERE_RADIUS = 0.01;
+   private static final double CUBE_DIMESNION = 0.01;
 
    private static SimulationConstructionSet scs = null;
    
@@ -226,9 +226,10 @@ public class MeshTerrainObjectTest
          highestPoint = intersectionResult.getHighestIntersection();
          lowestPoint = intersectionResult.getLowestIntersection();
 
+         String randomLocationAsString = "x:" + randomX +"   y:" + randomY;
          assertTrue(intersectionResult.isHighestPointValid());
-         assertEquals(actualHighestPoint.differenceNormSquared(highestPoint), 0.0, MAXIMUM_ERROR);
-         assertEquals(actualLowestPoint.differenceNormSquared(lowestPoint), 0.0, MAXIMUM_ERROR);
+         assertEquals(actualHighestPoint.differenceNormSquared(highestPoint), 0.0, MAXIMUM_ERROR, randomLocationAsString);
+         assertEquals(actualLowestPoint.differenceNormSquared(lowestPoint), 0.0, MAXIMUM_ERROR, randomLocationAsString);
 
          // Randomly sample a point that does not have any vertical line intersection with the Mesh
          randomX = (0.6 + 5.0 * RANDOM.nextDouble()) * (RANDOM.nextBoolean() ? 1 : -1);
@@ -254,39 +255,41 @@ public class MeshTerrainObjectTest
          double randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
          double randomY = legoBlockAZoneMinimumYValue + (legoBlockAZoneMaximumYValue - legoBlockAZoneMinimumYValue) * RANDOM.nextDouble();
          double randomZ = legoBlockAZoneMinimumYValue + (legoBlockAZoneMaximumZValue - legoBlockAZoneMinimumZValue) * RANDOM.nextDouble();
+         String randomLocationAsString = "x:" + randomX + " y:" + randomY + " z:" + randomZ;
 
          double heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
          double actualHeightAtValue = legoBlockAZoneMaximumZValue + BUFFER_VALUE;
-         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR);
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR, randomLocationAsString);
 
          // Randomly sample a point in the C zone
          randomY = legoBlockCZoneMinimumYValue + (legoBlockCZoneMaximumYValue - legoBlockCZoneMinimumYValue) * RANDOM.nextDouble();
          randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
          randomZ = legoBlockCZoneMinimumYValue + (legoBlockCZoneMaximumZValue - legoBlockCZoneMinimumZValue) * RANDOM.nextDouble();
-
+         randomLocationAsString = "x:" + randomX + " y:" + randomY + " z:" + randomZ;
+         
          heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
          actualHeightAtValue = legoBlockCZoneMaximumZValue + BUFFER_VALUE;
-         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR);
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR, randomLocationAsString);
 
          // Randomly sample a point in the dot zone
          randomY = legoBlockDotZoneMinimumYValue + (legoBlockDotZoneMaximumYValue - legoBlockDotZoneMinimumYValue) * RANDOM.nextDouble();
          randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
          randomZ = legoBlockDotZoneMinimumYValue + (legoBlockDotZoneMaximumZValue - legoBlockDotZoneMinimumZValue) * RANDOM.nextDouble();
+         randomLocationAsString = "x:" + randomX + " y:" + randomY + " z:" + randomZ;
 
          heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
          actualHeightAtValue = legoBlockDotZoneMinimumZValue - BUFFER_VALUE;
-         String printStatement = "x:" + randomX + "   y: " + randomY+"  z: " +randomZ;
-         
-         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR, printStatement);
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR, randomLocationAsString);
 
          // Randomly sample a point in the comma zone
          randomY = legoBlockCommaZoneMinimumYValue + (legoBlockCommaZoneMaximumYValue - legoBlockCommaZoneMinimumYValue) * RANDOM.nextDouble();
          randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
          randomZ = legoBlockCommaZoneMinimumZValue + (legoBlockCommaZoneMaximumZValue - legoBlockCommaZoneMinimumZValue) * RANDOM.nextDouble();
+         randomLocationAsString = "x:" + randomX + " y:" + randomY + " z:" + randomZ;
 
          heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
          actualHeightAtValue = Double.NEGATIVE_INFINITY;
-         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR);
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR, randomLocationAsString);
       }
    }
    public  void showVisualization(MeshTerrainObject meshTerrainObject)
@@ -318,7 +321,6 @@ public class MeshTerrainObjectTest
       
       Vector3D normalToPack = new Vector3D(0.0,0.0,0.0);
       Vector3D acualNormalToPack = new Vector3D(0.0, 0.0, 1.0);
-      
       
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
@@ -354,7 +356,6 @@ public class MeshTerrainObjectTest
       Vector3D normalToPack = new Vector3D(0.0,0.0,0.0);
       Vector3D acualNormalToPack = new Vector3D(0.0, 0.0, 1.0);
       
-      // Sample 100 points
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
          // Randomly sample a point inside the b zone
@@ -442,7 +443,6 @@ public class MeshTerrainObjectTest
          randomX = (legoBlockMinimumZValue - RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()? 1:-1);
          assertFalse(legoBlockMeshTerrainObject.isClose(randomX, randomY, randomZ));
          
-         
          // Randomly sample a point inside the bounding box for hShape
          randomX = hShapeMinimumXValue + (hShapeMaximumXValue - hShapeMinimumXValue)*RANDOM.nextDouble(); 
          randomY = hShapeMinimumYValue + (hShapeMaximumYValue - hShapeMinimumYValue)*RANDOM.nextDouble(); 
@@ -503,18 +503,18 @@ public class MeshTerrainObjectTest
 
          viz.identity();
          viz.translate(xPoint, yPoint, zPoint);
-         viz.addSphere(SPHERERADIUS, YoAppearance.Red());
+         viz.addSphere(SPHERE_RADIUS, YoAppearance.Red());
 
          viz.identity();
          viz.translate(xPoint, yPoint, result);
-         viz.addSphere(SPHERERADIUS, YoAppearance.Yellow());
+         viz.addSphere(SPHERE_RADIUS, YoAppearance.Yellow());
       }
       else
       {
 
          viz.identity();
          viz.translate(xPoint, yPoint, zPoint);
-         viz.addCube(CUBEDIMESNION, CUBEDIMESNION, CUBEDIMESNION, YoAppearance.Red());
+         viz.addCube(CUBE_DIMESNION, CUBE_DIMESNION, CUBE_DIMESNION, YoAppearance.Red());
       }
       viz.identity();
       viz.translate(xPoint, yPoint, -500.0);
