@@ -149,14 +149,13 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       }
       else
       {
-         inputStream = parameters.getClass().getClassLoader().getResourceAsStream("");
+         inputStream = parameters.getClass().getClassLoader().getResourceAsStream(jsonFilePath);
       }
 
       if (inputStream == null)
       {
          // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
          LogTools.info("VHACD Tuned parameters JSON file was not found");
-         return parameters;
       }
       else
       {
