@@ -1,8 +1,13 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
+import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -17,6 +22,7 @@ public class RDXBehaviorTreeNodesMenu
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
    private final TypedNotification<RDXAvailableBehaviorTreeFile> loadFileRequest = new TypedNotification<>();
+   private final ImVec2 fileNameTextSize = new ImVec2();
 
    public RDXBehaviorTreeNodesMenu(WorkspaceResourceDirectory treeFilesDirectory)
    {
@@ -37,27 +43,65 @@ public class RDXBehaviorTreeNodesMenu
       indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
    }
 
-   public void renderNodeCreationWidgets(BehaviorTreeModificationQueue modificationQueue)
+   public void renderNodeCreationWidgets(RDXBehaviorTree tree, RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeModificationQueue modificationQueue)
    {
-      ImGui.text("From File:");
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+      ImGui.text("From file:");
+      ImGui.popFont();
 
+      ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         if (ImGui.button(indexedTreeFile.getName()))
+         ImGui.calcTextSize(fileNameTextSize, indexedTreeFile.getTreeFile().getFileName());
+         boolean textHovered = ImGuiTools.isItemHovered(fileNameTextSize.x);
+
+         ImGui.text(indexedTreeFile.getTreeFile().getFileName());
+
+         if (textHovered)
          {
-            loadFileRequest.set(indexedTreeFile);
+            float cursorPosXInWidgetFrame = ImGui.getCursorPosX() + ImGui.getWindowPosX() - ImGui.getScrollX();
+            float cursorPosYInWidgetFrame = ImGui.getCursorPosY() + ImGui.getWindowPosY() - ImGui.getScrollY();
+            float adjustment = 3.0f;
+            ImGui.getWindowDrawList().addRectFilled(cursorPosXInWidgetFrame,
+                                                    cursorPosYInWidgetFrame - 1.0f - adjustment,
+                                                    cursorPosXInWidgetFrame + fileNameTextSize.x,
+                                                    cursorPosYInWidgetFrame - adjustment,
+                                                    ImGui.getColorU32(ImGuiCol.Text));
+
+            if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+               BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, modificationQueue);
+
+               if (tree.getRootNode() != null)
+               {
+                  modificationQueue.queueDestroySubtree(tree.getRootNode());
+               }
+
+               modificationQueue.queueSetRootNode(loadedNode, newRootNode -> tree.setRootNode((RDXBehaviorTreeNode<?, ?>) newRootNode));
+               tree.getBehaviorTreeState().freeze();
+            }
          }
       }
+      ImGui.unindent();
+      ImGui.spacing();
 
-      if (ImGui.button(labels.get("Reindex directory")))
+      if (ImGui.button(labels.get("Refresh File List")))
       {
          reindexDirectory();
       }
 
+      ImGui.separator();
+
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("Control Nodes:");
+      ImGui.popFont();
       // TODO
 
+      ImGui.separator();
+
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("Actions");
+      ImGui.popFont();
       // TODO
    }
 
