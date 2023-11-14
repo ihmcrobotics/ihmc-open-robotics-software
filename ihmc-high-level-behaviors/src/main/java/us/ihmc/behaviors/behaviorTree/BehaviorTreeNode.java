@@ -29,4 +29,9 @@ public interface BehaviorTreeNode<T extends BehaviorTreeNode<T>>
     * @return The parent node or null if this is the root node
     */
    @Nullable T getParent();
+
+   default boolean isRootNode()
+   {
+      return getParent() == null;
+   }
 }

@@ -6,10 +6,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
@@ -19,14 +17,18 @@ import java.util.Comparator;
 
 public class RDXBehaviorTreeNodesMenu
 {
+   private final RDXBehaviorTree tree;
    private final WorkspaceResourceDirectory treeFilesDirectory;
+   private final BehaviorTreeModificationQueue modificationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
-   private final TypedNotification<RDXAvailableBehaviorTreeFile> loadFileRequest = new TypedNotification<>();
 
-   public RDXBehaviorTreeNodesMenu(WorkspaceResourceDirectory treeFilesDirectory)
+   public RDXBehaviorTreeNodesMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory)
    {
+      this.tree = tree;
       this.treeFilesDirectory = treeFilesDirectory;
+
+      modificationQueue = tree.getBehaviorTreeState().getModificationQueue();
 
       reindexDirectory();
    }
@@ -43,7 +45,7 @@ public class RDXBehaviorTreeNodesMenu
       indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
    }
 
-   public void renderNodeCreationWidgets(RDXBehaviorTree tree, RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeModificationQueue modificationQueue)
+   public void renderNodeCreationWidgets(RDXBehaviorTreeNode<?, ?> parentNode, RDXTreeNodeInsertionType insertionType)
    {
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("From file:");
@@ -63,13 +65,18 @@ public class RDXBehaviorTreeNodesMenu
             {
                BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, modificationQueue);
 
-               if (tree.getRootNode() != null)
+               switch (insertionType)
                {
-                  modificationQueue.queueDestroySubtree(tree.getRootNode());
+                  case INSERT_ROOT ->
+                  {
+                     modificationQueue.queueSetRootNode(loadedNode, newRootNode -> tree.setRootNode((RDXBehaviorTreeNode<?, ?>) newRootNode));
+                     tree.getBehaviorTreeState().freeze();
+                  }
+                  case INSERT_AFTER ->
+                  {
+//                     modificationQueue.queueAddNode();
+                  }
                }
-
-               modificationQueue.queueSetRootNode(loadedNode, newRootNode -> tree.setRootNode((RDXBehaviorTreeNode<?, ?>) newRootNode));
-               tree.getBehaviorTreeState().freeze();
             }
          }
       }
@@ -111,10 +118,5 @@ public class RDXBehaviorTreeNodesMenu
       }
 
       ImGui.unindent();
-   }
-
-   public TypedNotification<RDXAvailableBehaviorTreeFile> getLoadFileRequest()
-   {
-      return loadFileRequest;
    }
 }

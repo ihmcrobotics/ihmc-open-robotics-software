@@ -34,6 +34,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImString imDescriptionText = new ImString();
    private transient final ImVec2 descriptionTextSize = new ImVec2();
    private final String nodePopupID = labels.get("Node popup");
+   private final String modalPopupID = labels.get("Create Node");
 
    @Override
    public void update()
@@ -152,6 +153,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public String getNodePopupID()
    {
       return nodePopupID;
+   }
+
+   public String getModalPopupID()
+   {
+      return modalPopupID;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()
