@@ -1,9 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.utils.ScreenUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -13,122 +11,134 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Executors;
-
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXScreenRecorder
 {
-   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private VideoWriter videoWriter;
+   private String fileLocation;
+   private final AtomicReference<Pixmap> lastFrame = new AtomicReference<>();
+   private ScreenFrameWriteThread screenFrameWriteThread;
 
-   private VideoWriter videoWriter = null;
+   private volatile boolean recording;
 
-   String fileLocation = null;
-
-   private int counter = 1;
-
-   private boolean recording = false;
-
-   public void record(boolean enabled)
+   public boolean isRecording()
    {
-      if (enabled)
+      return recording;
+   }
+
+   public void setRecording(boolean recording)
+   {
+      this.recording = recording;
+   }
+
+   public void writeFrame()
+   {
+      if (recording && videoWriter == null)
       {
-         if (!recording)
+         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+         String logFileName = dateFormat.format(new Date()) + "_" + "UIRecording.avi";
+         FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.RECORDINGS_DIRECTORY.toString()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+         fileLocation = IHMCCommonPaths.RECORDINGS_DIRECTORY.resolve(logFileName).toString();
+
+         int fourcc = VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G');
+         int fps = 30;
+
+         videoWriter = new VideoWriter(fileLocation, fourcc, fps, new Size(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), true);
+
+         LogTools.warn("Opening AVI for UI Recording: {} - [{}]", fileLocation, videoWriter.isOpened());
+
+         if (videoWriter.isOpened())
          {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String logFileName = dateFormat.format(new Date()) + "_" + "UIRecording.avi";
-            FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.RECORDINGS_DIRECTORY.toString()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            screenFrameWriteThread = new ScreenFrameWriteThread();
+            screenFrameWriteThread.start();
 
-            fileLocation = IHMCCommonPaths.RECORDINGS_DIRECTORY.resolve(logFileName).toString();
-
-            int fourcc = VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G');
-            int fps = 30;
-
-            videoWriter = new VideoWriter(fileLocation, fourcc, fps, new Size(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), true);
-
-            LogTools.warn("Opening MP4 for UI Recording: {} - [{}]", fileLocation, videoWriter.isOpened());
-
-            if (videoWriter.isOpened())
-            {
-               recording = true;
-            }
-            else {
-               // Print an error message and check for any additional error details
-               LogTools.error("Failed to open VideoWriter.");
-            }
+            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Started recording to: " + fileLocation);
          }
-         else if (recording)
+      }
+      else if (recording && videoWriter.isOpened())
+      {
+         Pixmap pixmap = getFrame(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+         lastFrame.set(pixmap);
+
+         synchronized (lastFrame)
          {
-            if (videoWriter != null && videoWriter.isOpened())
+            lastFrame.notify();
+         }
+      }
+      else
+      {
+         // Stop the recording
+         if (videoWriter != null)
+         {
+            LogTools.warn("Closing AVI for UI Recording: " + fileLocation);
+            try
             {
-               Pixmap pixmap = getScreenshot(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+               screenFrameWriteThread.join();
+            }
+            catch (InterruptedException e)
+            {
+               LogTools.error(e);
+            }
+            screenFrameWriteThread = null;
+
+            lastFrame.set(null);
+
+            videoWriter.release(); // Release the video writer
+            videoWriter = null;
+
+            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Stopped recording");
+         }
+      }
+   }
+
+   private class ScreenFrameWriteThread extends Thread
+   {
+      @Override
+      public void run()
+      {
+         while (recording)
+         {
+            synchronized (lastFrame)
+            {
+               try
+               {
+                  lastFrame.wait();
+               }
+               catch (InterruptedException e)
+               {
+                  LogTools.error(e);
+               }
+
+               // Check again after waiting
+               if (!recording)
+                  break;
+
+               Pixmap pixmap = lastFrame.get();
+
                ByteBuffer buffer = ByteBuffer.allocateDirect(pixmap.getPixels().limit());
                BytePointer bytePointer = new BytePointer(buffer);
-               buffer.put(pixmap.getPixels()).flip();
-               Mat mat = new Mat(pixmap.getHeight(), pixmap.getWidth(), org.bytedeco.opencv.global.opencv_core.CV_8UC4, bytePointer);
+               buffer.put(pixmap.getPixels());
 
-               videoWriter.write(mat); // Write the frame to the video
+               Mat mat = new Mat(pixmap.getHeight(), pixmap.getWidth(), org.bytedeco.opencv.global.opencv_core.CV_8UC4, bytePointer);
+               videoWriter.write(mat);
+               mat.close();
 
                pixmap.dispose();
             }
          }
       }
-
-      if (recording && !enabled)
-      {
-         recording = false;
-         if (videoWriter != null && videoWriter.isOpened())
-         {
-            LogTools.warn("Closing MP4 for UI Recording: " + fileLocation);
-            videoWriter.release(); // Release the video writer
-         }
-      }
    }
 
-   public void saveScreenshot(String path)
+   private static Pixmap getFrame(int w, int h)
    {
-      try
-      {
-         FileHandle fh;
-         do
-         {
-            fh = new FileHandle(path + "/screenshot" + counter++ + ".png");
-         }
-         while (fh.exists());
-         Pixmap pixmap = getScreenshot(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-         PixmapIO.writePNG(fh, pixmap);
-         pixmap.dispose();
-      }
-      catch (Exception e)
-      {
-      }
-   }
-
-   public void showScreenCaptureImage()
-   {
-      Pixmap pixmap = getScreenshot(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-      ByteBuffer buffer = ByteBuffer.allocateDirect(pixmap.getPixels().limit());
-      BytePointer bytePointer = new BytePointer(buffer);
-      buffer.put(pixmap.getPixels()).flip();
-      Mat mat = new Mat(pixmap.getHeight(), pixmap.getWidth(), org.bytedeco.opencv.global.opencv_core.CV_8UC4, bytePointer);
-
-      imshow("Screen Capture", mat);
-      waitKey(1);
-
-      pixmap.dispose();
-   }
-
-   private Pixmap getScreenshot(int x, int y, int w, int h)
-   {
-      final Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h);
+      final Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, w, h);
       return pixmap;
    }
 }
