@@ -28,10 +28,10 @@ mainDependencies {
    api("org.yaml:snakeyaml:1.17") //1.11
 
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-frame:0.20.0")
-   api("us.ihmc:euclid-frame-shape:0.20.0")
-   api("us.ihmc:euclid-shape:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:mecano:17-0.14.0")
    api("us.ihmc:mecano-yovariables:17-0.14.0")
    api("us.ihmc:ihmc-commons:0.32.0")
@@ -49,7 +49,7 @@ testDependencies {
    api("org.jfree:jcommon:1.0.24")
    api("org.hamcrest:hamcrest:2.2")
 
-   api("us.ihmc:euclid-test:0.20.0")
+   api("us.ihmc:euclid-test:0.21.0")
    api("us.ihmc:simulation-construction-set:0.24.3")
    api("us.ihmc:ihmc-matrix-library-test:0.18.11")
    api("us.ihmc:ihmc-commons-testing:0.32.0")
