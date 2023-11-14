@@ -11,12 +11,12 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -84,21 +84,6 @@ public class RDXBehaviorTree
    {
       // Perform any modifications we made in the last tick.
       behaviorTreeState.modifyTree();
-
-      if (nodesMenu.getLoadFileRequest().poll()) // TODO: Load to non-root nodes -- queue load modification?
-      {
-         BehaviorTreeModificationQueue modificationQueue = behaviorTreeState.getModificationQueue();
-         BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = fileLoader.loadFromFile(nodesMenu.getLoadFileRequest().read(), modificationQueue);
-
-         if (rootNode != null)
-         {
-            modificationQueue.queueDestroySubtree(rootNode);
-         }
-
-         modificationQueue.queueSetRootNode(loadedNode, newRootNode -> rootNode = (RDXBehaviorTreeNode<?, ?>) newRootNode);
-         behaviorTreeState.freeze();
-         behaviorTreeState.modifyTree();
-      }
 
       idToNodeMap.clear();
 
@@ -186,8 +171,10 @@ public class RDXBehaviorTree
       }
       else
       {
+         ImGui.pushFont(ImGuiTools.getMediumFont());
          ImGui.text("Add a root node:");
-         nodesMenu.renderNodeCreationWidgets(behaviorTreeState.getModificationQueue());
+         ImGui.popFont();
+         nodesMenu.renderNodeCreationWidgets(this, rootNode, behaviorTreeState.getModificationQueue());
       }
    }
 
@@ -271,5 +258,10 @@ public class RDXBehaviorTree
    public RDXBehaviorTreeNode<?, ?> getRootNode()
    {
       return rootNode;
+   }
+
+   public RDXBehaviorTreeFileLoader getFileLoader()
+   {
+      return fileLoader;
    }
 }
