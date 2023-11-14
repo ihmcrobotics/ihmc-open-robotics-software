@@ -20,7 +20,7 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerrainObject;
-import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerranObjectParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerrainObjectParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,7 +50,7 @@ public class MeshTerrainObjectViewer
 
    private final YoBoolean updateVisuals;
 
-   private MeshTerranObjectParameters parameters;
+   private MeshTerrainObjectParameters parameters;
    private MeshTerrainObject meshTerrainObject;
 
    private static SimulationConstructionSet2 scs = null;
@@ -58,20 +58,24 @@ public class MeshTerrainObjectViewer
 
    private List<VisualDefinition> visuals = null;
 
-//   private String relativeFilePath = "models/stool/stool.obj";
-//      private String relativeFilePath = "models/simpleShapeForTesting/simpleShapeForTesting.obj";
-   //   private String relativeFilePath = "models/roughTerrain/roughTerrain.obj";
    private File currentMeshFile = null;
 
    public MeshTerrainObjectViewer()
    {
 
-      MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
+      MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters();
 
       maximumNumberOfHulls = new YoInteger("maximumNumberOfHulls", registry);
+      maximumNumberOfHulls.setVariableBounds(0, 0);
+      
       maximumNumberOfVerticesPerHull = new YoInteger("maximumNumberOfVerticesPerHull", registry);
+      maximumNumberOfVerticesPerHull.setVariableBounds(0, 0);
+      
       maximumVoxelResolution = new YoInteger("maximumVoxelResolution", registry);
+      maximumNumberOfVerticesPerHull.setVariableBounds(100000 , 10000000);
+      
       maximumVolumetricPercentError = new YoDouble("maximumVolumetricPercentError", registry);
+      maximumNumberOfVerticesPerHull.setVariableBounds(0, 0);
 
       showOriginalMeshGraphics = new YoBoolean("showOriginalMeshGraphics", registry);
       showDecomposedMeshGraphics = new YoBoolean("showDecomposedMeshGraphics", registry);
@@ -93,7 +97,7 @@ public class MeshTerrainObjectViewer
       scs = new SimulationConstructionSet2("MeshTerrainObjectViewer");
       scs.addRegistry(registry);
 
-      this.parameters = new MeshTerranObjectParameters();
+      this.parameters = new MeshTerrainObjectParameters();
 
       scs.startSimulationThread();
       scs.waitUntilVisualizerFullyUp();
@@ -107,7 +111,7 @@ public class MeshTerrainObjectViewer
 
          //Saving terrain Mesh Parameters in the GUI
          Button saveTerrainMeshParams = new Button("Save terrain mesh params");
-         saveTerrainMeshParams.setOnAction(e -> saveTerrainMeshParams());
+         saveTerrainMeshParams.setOnAction(e -> saveTerrainMeshParameters());
          scs.addCustomGUIControl(saveTerrainMeshParams);
       });
    }
@@ -129,7 +133,7 @@ public class MeshTerrainObjectViewer
       currentMeshFile = result;
    }
 
-   private void saveTerrainMeshParams()
+   private void saveTerrainMeshParameters()
    {
       if (currentMeshFile == null)
       {
@@ -139,7 +143,7 @@ public class MeshTerrainObjectViewer
 
       File parentFile = currentMeshFile.getParentFile();
       String meshName = FilenameUtils.removeExtension(currentMeshFile.getName());
-      File parameterFile = new File(parentFile, meshName + "_Parameters.json");
+      File parameterFile = new File(parentFile, meshName + MeshTerrainObject.VHACD_FILENAME_EXTENSION);
       try
       {
          if (parameterFile.exists())
@@ -147,6 +151,7 @@ public class MeshTerrainObjectViewer
          parameterFile.createNewFile();
          JsonFactory jsonFactory = new JsonFactory();
          JsonGenerator generator = jsonFactory.createGenerator(new FileOutputStream(parameterFile));
+         generator.useDefaultPrettyPrinter();
          generator.writeStartObject();
 
          generator.writeNumberField(maximumNumberOfHulls.getName(), maximumNumberOfHulls.getValue());
@@ -171,24 +176,15 @@ public class MeshTerrainObjectViewer
    {
       if (pathToMesh == null)
          return;
-
-      RigidBodyTransform configuration = new RigidBodyTransform();
-      Vector3D translation = new Vector3D(0.0, 0.0, 0.0);
-      Quaternion orientation = new Quaternion(-Math.PI / 2.0, 0.0, 0.0);
-      configuration.set(orientation, translation);
-      meshTerrainObject = new MeshTerrainObject(pathToMesh, configuration);
+      meshTerrainObject = new MeshTerrainObject(pathToMesh);
    }
 
-   private void makeMeshTerrainObject(String pathToMesh, MeshTerranObjectParameters parameters)
+   private void makeMeshTerrainObject(String pathToMesh, MeshTerrainObjectParameters parameters)
    {
       if (pathToMesh == null)
          return;
-
-      RigidBodyTransform configuration = new RigidBodyTransform();
-      Vector3D translation = new Vector3D(0.0, 0.0, 0.0);
-      Quaternion orientation = new Quaternion(-Math.PI / 2.0, 0.0, 0.0);
-      configuration.set(orientation, translation);
-      meshTerrainObject = new MeshTerrainObject(pathToMesh, parameters, configuration);
+      
+      meshTerrainObject = new MeshTerrainObject(pathToMesh, parameters);
    }
 
    private void updateGraphics()
@@ -198,14 +194,13 @@ public class MeshTerrainObjectViewer
       visuals = VisualsConversionTools.toVisualDefinitions(meshTerrainObject.getLinkGraphics());
       scs.addStaticVisuals(visuals);
    }
-   private MeshTerranObjectParameters getParameters()
+   private MeshTerrainObjectParameters getParameters()
    {
       return this.parameters;
    }
 
    private void updateParameters()
    {
-      // TODO Auto-generated method stub
       this.parameters.setMaxNoOfHulls(maximumNumberOfHulls.getValue());
       this.parameters.setMaxNoOfVertices(maximumNumberOfVerticesPerHull.getValue());
       this.parameters.setVoxelResolution(maximumVoxelResolution.getValue());
@@ -219,7 +214,6 @@ public class MeshTerrainObjectViewer
 
    private void updateYoVariables()
    {
-      // TODO Auto-generated method stub
       this.maximumNumberOfHulls.set(this.parameters.getMaxNoOfHulls());
       this.maximumNumberOfVerticesPerHull.set(this.parameters.getMaxNoOfVertices());
       this.maximumVoxelResolution.set(this.parameters.getVoxelResolution());

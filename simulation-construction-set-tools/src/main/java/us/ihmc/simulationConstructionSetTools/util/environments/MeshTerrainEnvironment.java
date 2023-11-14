@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerrainObject;
-import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerranObjectParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerrainObjectParameters;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -47,7 +47,7 @@ public class MeshTerrainEnvironment implements CommonAvatarEnvironmentInterface
          Quaternion orientation = new Quaternion(-Math.PI / 2.0, 0.0, 0.0);
          configuration.set(orientation,translation);
          
-         MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
+         MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters();
          parameters.setMaxNoOfHulls(1024);
          parameters.setMaxNoOfVertices(256);
          parameters.setVoxelResolution(500000);
