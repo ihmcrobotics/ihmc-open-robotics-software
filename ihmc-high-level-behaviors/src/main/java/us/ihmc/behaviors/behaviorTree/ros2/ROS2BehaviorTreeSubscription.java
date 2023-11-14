@@ -118,10 +118,19 @@ public class ROS2BehaviorTreeSubscription
       {
          anAncestorIsFrozen |= localNode.getState().isFrozen();
 
-         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode;
+         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = null;
          if (anAncestorIsFrozen)
          {
-            localChildNode = (BehaviorTreeNodeExtension<?, ?, ?, ?>) localNode.getChildren().get(i);
+            // In the case of locally nodes that just got added or removed, only update children with matching IDs.
+            // This'll just be for a few updates.
+            for (Object objectChild : localNode.getChildren())
+            {
+               BehaviorTreeNodeExtension<?, ?, ?, ?> possibleMatch = (BehaviorTreeNodeExtension<?, ?, ?, ?>) objectChild;
+               if (possibleMatch.getState().getID() == subscriptionNode.getChildren().get(i).getBehaviorTreeNodeStateMessage().getId())
+               {
+                  localChildNode = possibleMatch;
+               }
+            }
          }
          else
          {
