@@ -1,5 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,33 +53,32 @@ import us.ihmc.tools.io.JSONFileTools;
  */
 public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
+   public static final String VHACD_FILENAME_EXTENSION = "_VHACDParameters.json";
 
    private static final double EPSILON = 1.0e-12;
    private final BoundingBox3D boundingBox = new BoundingBox3D();
    private final List<ConvexPolytope3D> convexPolytopes = new ArrayList<>();
    private final Graphics3DObject linkGraphics;
 
-   private final MeshTerranObjectParameters parameters;
-   private final String filePath;
+   private final MeshTerrainObjectParameters parameters;
 
-   public MeshTerrainObject(String filename)
+   public MeshTerrainObject(String filePath)
    {
-      this(filename, useTunedMeshTerrainObjectParametersIfItExists(filename));
+      this(filePath, useTunedMeshTerrainObjectParametersIfItExists(filePath));
    }
 
-   public MeshTerrainObject(String filename, MeshTerranObjectParameters parameters)
+   public MeshTerrainObject(String filePath, MeshTerrainObjectParameters vhacdParameters)
    {
-      this(filename, parameters, new RigidBodyTransform());
+      this(filePath, vhacdParameters, new RigidBodyTransform());
    }
 
-   public MeshTerrainObject(String filename, RigidBodyTransformReadOnly transform)
+   public MeshTerrainObject(String filePath, RigidBodyTransformReadOnly transform)
    {
-      this(filename, useTunedMeshTerrainObjectParametersIfItExists(filename), transform);
+      this(filePath, useTunedMeshTerrainObjectParametersIfItExists(filePath), transform);
    }
 
-   public MeshTerrainObject(String filename, MeshTerranObjectParameters parameters, RigidBodyTransformReadOnly transform)
+   public MeshTerrainObject(String filePath, MeshTerrainObjectParameters vhacdParameters, RigidBodyTransformReadOnly transform)
    {
-      this.filePath = filename;
 
       RigidBodyTransformReadOnly pose;
       if (transform == null)
@@ -89,9 +91,9 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       }
 
       linkGraphics = new Graphics3DObject();
-      this.parameters = parameters;
+      this.parameters = vhacdParameters;
 
-      doDecomposition(filename);
+      doDecomposition(filePath);
 
       convexPolytopes.forEach(polytope -> polytope.applyTransform(pose));
       boundingBox.setToNaN();
@@ -105,14 +107,14 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
             linkGraphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), YoAppearance.randomColor(random));
          }
          linkGraphics.transform(pose);
-         linkGraphics.addModelFile(filename);
+         linkGraphics.addModelFile(filePath);
 
       }
 
       else if (this.getParameters().isShowUndecomposedMeshGraphics())
       {
          linkGraphics.transform(pose);
-         linkGraphics.addModelFile(filename);
+         linkGraphics.addModelFile(filePath);
 
       }
 
@@ -126,38 +128,56 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       }
    }
 
-   public static MeshTerranObjectParameters useTunedMeshTerrainObjectParametersIfItExists(String filePath)
+   public static MeshTerrainObjectParameters useTunedMeshTerrainObjectParametersIfItExists(String filePath)
    {
-      MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
+      MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters();
+      InputStream inputStream = null;
+      String jsonFilePath = FilenameUtils.removeExtension(filePath) + VHACD_FILENAME_EXTENSION;
 
-      String jsonFilePath = FilenameUtils.removeExtension(filePath) + "_Parameters.json";
-      String jsonFileName = FilenameUtils.getName(jsonFilePath);
-      String jsonRelativePath = "models/" + FilenameUtils.removeExtension(FilenameUtils.getName(filePath)) + "/" + jsonFileName;
+      File vhacdParametersJsonFile = new File(jsonFilePath);
 
-      InputStream inputStream = parameters.getClass().getClassLoader().getResourceAsStream(jsonRelativePath);
-      // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
+      if (vhacdParametersJsonFile.exists())
+      {
+         try
+         {
+            inputStream = new FileInputStream(vhacdParametersJsonFile);
+         }
+         catch (FileNotFoundException e)
+         {
+            e.printStackTrace();
+         }
+      }
+      else
+      {
+         inputStream = parameters.getClass().getClassLoader().getResourceAsStream("");
+      }
+
       if (inputStream == null)
       {
-         LogTools.info("File path is null");
+         // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
+         LogTools.info("VHACD Tuned parameters JSON file was not found");
          return parameters;
       }
-      JSONFileTools.load(inputStream, rootNode ->
+      else
       {
-         parameters.setShowDecomposedMeshGraphics(rootNode.get("showDecomposedMeshGraphics").asBoolean());
-         parameters.setShowUndecomposedMeshGraphics(rootNode.get("showDecomposedMeshGraphics").asBoolean());
-         parameters.setShowUndecomposedMeshGraphics(rootNode.get("doConvexDecomposition").asBoolean());
+         JSONFileTools.load(inputStream, rootNode ->
+         {
+            parameters.setShowDecomposedMeshGraphics(rootNode.get("showDecomposedMeshGraphics").asBoolean());
+            parameters.setShowUndecomposedMeshGraphics(rootNode.get("showOriginalMeshGraphics").asBoolean());
+            parameters.setDoConvexDecomposition(rootNode.get("doConvexDecomposition").asBoolean());
 
-         parameters.setMaxNoOfHulls(rootNode.get("maximumNumberOfHulls").asInt());
-         parameters.setMaxNoOfVertices(rootNode.get("maximumNumberOfVerticesPerHull").asInt());
-         parameters.setVoxelResolution(rootNode.get("maximumVoxelResolution").asInt());
-         parameters.setMaxVolumePercentError(rootNode.get("maximumVolumetricPercentError").asDouble());
-      });
+            parameters.setMaxNoOfHulls(rootNode.get("maximumNumberOfHulls").asInt());
+            parameters.setMaxNoOfVertices(rootNode.get("maximumNumberOfVerticesPerHull").asInt());
+            parameters.setVoxelResolution(rootNode.get("maximumVoxelResolution").asInt());
+            parameters.setMaxVolumePercentError(rootNode.get("maximumVolumetricPercentError").asDouble());
+         });
+      }
       return parameters;
    }
 
-   private void doDecomposition(String filename)
+   private void doDecomposition(String filePath)
    {
-      Spatial model = loadOBJFromPath(filename);
+      Spatial model = loadOBJFromPath(filePath);
 
       if (!getParameters().isDoConvexDecomposition())
       {
@@ -192,7 +212,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    private Spatial loadOBJFromPath(String objAssetPath)
    {
-      // TODO Auto-generated method stub
 
       DesktopAssetManager assetManager = new DesktopAssetManager();
       assetManager.registerLoader(AWTLoader.class, "jpg", "png");
@@ -206,12 +225,15 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return model;
    }
 
-   @Override
-   public double heightAt(double x, double y, double z)
+   public IntersectionResult intersectionWithVerticalLine(double x, double y)
    {
-      Point3D point = new Point3D(x, y, z);
+      Point3D point = new Point3D(x, y, 0);
+
       double highest = Double.NEGATIVE_INFINITY;
       double lowest = Double.POSITIVE_INFINITY;
+
+      Face3DReadOnly highestFace = null;
+      Face3DReadOnly lowestFace = null;
 
       for (ConvexPolytope3D convexPolytope : convexPolytopes)
       {
@@ -231,29 +253,89 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
                   if (pointIntersectionLineAndFace.getZ() > highest)
                   {
                      highest = pointIntersectionLineAndFace.getZ();
-                     intersectionResult.intersectionFaceAtHighestPoint = face;
+                     highestFace = face;
                   }
-                  lowest = Math.min(lowest, pointIntersectionLineAndFace.getZ());
+                  if (pointIntersectionLineAndFace.getZ() < lowest)
+                  {
+                     lowest = pointIntersectionLineAndFace.getZ();
+                     lowestFace = face;
+                  }
                }
             }
          }
       }
+
+      return new IntersectionResult(new Point3D(x, y, highest), highestFace, new Point3D(x, y, lowest), lowestFace);
+
+   }
+
+   static class IntersectionResult
+   {
+      private final Point3D highestIntersection;
+      private final Face3DReadOnly highestFace;
+
+      private final Point3D lowestIntersection;
+      private final Face3DReadOnly lowestFace;
+
+      public IntersectionResult(Point3D highestIntersection, Face3DReadOnly highestFace, Point3D lowestIntersection, Face3DReadOnly lowestFace)
+      {
+         this.highestIntersection = highestIntersection;
+         this.highestFace = highestFace;
+         this.lowestIntersection = lowestIntersection;
+         this.lowestFace = lowestFace;
+      }
+
+      public boolean isHighestPointValid()
+      {
+         return highestIntersection.getZ() != Double.NEGATIVE_INFINITY;
+      }
+
+      public Point3D getHighestIntersection()
+      {
+         return highestIntersection;
+      }
+
+      public Face3DReadOnly getHighestFace()
+      {
+         return highestFace;
+      }
+
+      public Point3D getLowestIntersection()
+      {
+         return lowestIntersection;
+      }
+
+      public Face3DReadOnly getLowestFace()
+      {
+         return lowestFace;
+      }
+   }
+
+   @Override
+   public double heightAt(double x, double y, double z)
+   {
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
       // Determine the height of the point on the zAxis of the ConvexPolytope -
       // returns boundingBox.getMinZ() if it does
       // not pass through the ConvexPolytope or the point is completely below the
       // ConvexPolytope
-      if (highest != Double.NEGATIVE_INFINITY && z >= lowest)
-         return highest;
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         return result.highestIntersection.getZ();
 
       return Double.NEGATIVE_INFINITY;
    }
 
-   private IntersectionResult intersectionResult = new IntersectionResult();
-
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
-      double heightAt = heightAt(x, y, z);
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
+
+      double heightAt;
+
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         heightAt = result.highestIntersection.getZ();
+      else
+         heightAt = Double.NEGATIVE_INFINITY;
 
       if (intersectionToPack != null)
       {
@@ -264,7 +346,7 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
       if (normalToPack != null && heightAt > Double.NEGATIVE_INFINITY)
       {
-         normalToPack.set(intersectionResult.intersectionFaceAtHighestPoint.getNormal());
+         normalToPack.set(result.highestFace.getNormal());
       }
 
       return (z < heightAt);
@@ -325,14 +407,9 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return convexPolytopes;
    }
 
-   public MeshTerranObjectParameters getParameters()
+   public MeshTerrainObjectParameters getParameters()
    {
       return parameters;
-   }
-
-   private class IntersectionResult
-   {
-      private Face3DReadOnly intersectionFaceAtHighestPoint;
    }
 
 }

@@ -17,19 +17,119 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.simulationConstructionSetTools.util.ground.MeshTerrainObject.IntersectionResult;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+
+/**
+ * This class tests the MeshTerrainObject Class and it mainly uses two meshes to test objects
+ * <p>
+ * The meshObjects can be found at this link 
+ * 
+ * LEGO Block (CAD Model:https://cad.onshape.com/documents/618f39b230922ef75ccbda07/w/1cfb27e10c4a7a5b0e6e57a9/e/159fe516a3c575efc6c9925e )
+ * Y axis has a universal width of 0.5m 
+ *
+ *         Z AXIS  
+ *         ^  
+ *         |  
+ * AAAAAAAA|.......
+ * AAAAAAAA|.......____ -Y Axis
+ * AAAAAAAA|CCCCCCC
+ * AAAAAAAA|CCCCCCC
+ * ,,,,,,,,|CCCCCCC
+ * ,,,,,,,,|CCCCCCC
+ * 
+ * HSHAPE (CAD Model:https://cad.onshape.com/documents/618f39b230922ef75ccbda07/w/1cfb27e10c4a7a5b0e6e57a9/e/a6ff244d83f3181ae8497374 )
+ *       Z AXIS  
+ *       ^  
+ *       |  
+ * AAAA,,,,CCCC
+ * AAAA,,,,CCCC
+ * AAAABBBBCCCC___ X Axis
+ * AAAABBBBCCCC
+ * AAAA....CCCC
+ * AAAA....CCCC
+ * 
+ * </p>
+ * @author Khizar Mohammed Amjed Mohamed
+ */
 public class MeshTerrainObjectTest
 {
    private static final boolean SHOW_VISUALIZATION = false;
+   private static final double SPHERERADIUS = 0.01;
+   private static final double CUBEDIMESNION = 0.01;
+
    private static SimulationConstructionSet scs = null;
-   private static double sphereRadius = 0.01;
-   private static double cubeDimesnion = 0.01;
-   private static final Random random = new Random();
+   
+   private static final int NUMBER_OF_ITERATIONS= 1000;
+   private static final double MAXIMUM_ERROR = 0.02;
+   private static final double BUFFER_VALUE = 0.05;
+   
+   private static final Random RANDOM = new Random();
+   
+   //LEGO BLOCK DIMENSIONS
+   // Dimensions of A Zone; refer to drawing above
+   private static double legoBlockAZoneMaximumZValue = 0.25 - BUFFER_VALUE;
+   private static double legoBlockAZoneMinimumZValue = -0.25 + BUFFER_VALUE;
+   private static double legoBlockAZoneMaximumYValue = 0.5 - BUFFER_VALUE;
+   private static double legoBlockAZoneMinimumYValue = 0.0 + BUFFER_VALUE;
+   
+   // Dimensions of C Zone; refer to drawing above
+   private static double legoBlockCZoneMaximumZValue = 0.0 - BUFFER_VALUE;
+   private static double legoBlockCZoneMinimumZValue = -0.5 + BUFFER_VALUE;
+   private static double legoBlockCZoneMaximumYValue = 0.0 - BUFFER_VALUE;
+   private static double legoBlockCZoneMinimumYValue = -0.5 + BUFFER_VALUE;
+   
+   // Dimensions of comma Zone; refer to drawing above
+   private static double legoBlockCommaZoneMaximumZValue = -0.25 - BUFFER_VALUE; 
+   private static double legoBlockCommaZoneMinimumZValue = -5.0 + BUFFER_VALUE;
+   
+   private static double legoBlockCommaZoneMaximumYValue = 0.5 - BUFFER_VALUE ;
+   private static double legoBlockCommaZoneMinimumYValue = 0.0 + BUFFER_VALUE;
+   
+   // Dimensions of dot Zone
+   private static double legoBlockDotZoneMaximumZValue = 5.0 - BUFFER_VALUE; 
+   private static double legoBlockDotZoneMinimumZValue = 0.0 + BUFFER_VALUE;
+   private static double legoBlockDotZoneMaximumYValue = 0.0 - BUFFER_VALUE;
+   private static double legoBlockDotZoneMinimumYValue = -0.5 + BUFFER_VALUE;
+   
+   // X Axis dimensions
+   private static double legoBlockMaximumXValue = 0.5 - BUFFER_VALUE;
+   private static double legoBlockMinimumXValue = 0.0 + BUFFER_VALUE;
+   
+   
+   //HSHAPE BLOCK DIMENSIONS
+   // A Zone Dimensions
+   private static double hShapeAZoneMaximumZValue = 0.5 - BUFFER_VALUE;
+   private static double hShapeAZoneMinimumZValue = -0.5 + BUFFER_VALUE;
+   
+   private static double hShapeAZoneMaximumXValue = -0.25 - BUFFER_VALUE;
+   private static double hShapeAZoneMinimumXValue = -0.5 + BUFFER_VALUE;
+
+   private static double hShapeAZoneMaximumYValue = 0.25 - BUFFER_VALUE;
+   private static double hShapeAZoneMinimumYValue = -0.25 + BUFFER_VALUE;
+
+   // Dimensions of B Zone
+   private static double hShapeBZoneMaximumZValue = 0.25 - BUFFER_VALUE;
+   private static double hShapeBZoneMinimumZValue = -0.25 + BUFFER_VALUE;
+
+   private static double hShapeBZoneMaximumXValue = 0.25 - BUFFER_VALUE;
+   private static double hShapeBZoneMinimumXValue = -0.25 + BUFFER_VALUE;
+
+   private static double hShapeBZoneMaximumYValue = 0.25 - BUFFER_VALUE;
+   private static double hShapeBZoneMinimumYValue = -0.25 + BUFFER_VALUE;
+  
+   // Dimensions of comma Zone
+   private static double hShapeCommaZoneMaximumZValue = 0.5 - BUFFER_VALUE;
+   private static double hShapeCommaZoneMinimumZValue = 0.25 + BUFFER_VALUE;
+   
+   // Dimensions of dot Zone
+   private static double hShapeDotZoneMaximumZValue = -0.25 - BUFFER_VALUE;
+   private static double hShapeDotZoneMinimumZValue = -0.5 + BUFFER_VALUE;
 
    @AfterEach
    public void tearDown()
@@ -60,9 +160,7 @@ public class MeshTerrainObjectTest
          Vector3D translation = new Vector3D(0.0, 0.0, 0.1);
          Quaternion orientation = new Quaternion(-Math.PI / 2.0, 0.0, 0.0);
          configuration.set(orientation, translation);
-         //         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/SmallWalkway/Walkway.obj", configuration);
          MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/walkway/walkway.obj", configuration);
-         //         MeshTerrainObject meshTerrainObject = new MeshTerrainObject("models/Valley/Valley.obj", configuration);
 
          scs = new SimulationConstructionSet(new Robot("dummy"));
          scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
@@ -87,190 +185,285 @@ public class MeshTerrainObjectTest
          scs.addStaticLinkGraphics(viz);
          scs.setGroundVisible(false);
          scs.startOnAThread();
-         ThreadTools.sleepForever();
+         ThreadTools.sleep(5000);
 
       }
    }
 
    @Test
-   /**
-    * This method is used to test the method heightAt() of a MeshTerrainObject
-    * <p>
-    * Red is the point being tested - it will be a cube if heightAt is negative infinity, otherwise it
-    * will be a sphere. Yellow ball is heightAt value if it exists.
-    * </p>
-    * 
-    * @author Khizar
-    */
-   public void testHeightAt()
+   public void testintersectionWithVerticalLine()
    {
-      // Testing using a Stool with bounding box dimensions as X,Y,Z = 0.375, 0.375,0.575
-      // Stool dimensions can be found here "https://cad.onshape.com/documents/ed770d6e6aa0b5ca25885953/w/d5578c1a76bb6f06ae50c7b9/e/ebb25271027fb47ebaec1c9c"
-
-      String relativeFilePath = "models/stool/stool.obj";
+      String relativeFilePath = "models/legoBlock/legoBlock.obj";
       MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
 
-      Double heightAt;
-      Double maxError = 0.001;
-      // Point A is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will intersect the stool
-      Point3D pointA = new Point3D(0.25, 0.25, 0.6);
-      heightAt = meshTerrainObject.heightAt(pointA.getX(), pointA.getY(), pointA.getZ());
-      assertEquals(heightAt, 0.575, maxError, "Error");
+      showVisualization(meshTerrainObject);
 
-      // Point B is under the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will still intersect the stool
-      Point3D pointB = new Point3D(0.18, 0.18, 0.25);
-      heightAt = meshTerrainObject.heightAt(pointB.getX(), pointB.getY(), pointB.getZ());
-      assertEquals(heightAt, Double.NEGATIVE_INFINITY);
-
-      // Point C is inside the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will still intersect the stool
-      Point3D pointC = new Point3D(0.18, 0.18, 0.5);
-      heightAt = meshTerrainObject.heightAt(pointC.getX(), pointC.getY(), pointC.getZ());
-      assertEquals(heightAt, 0.575, maxError);
-
-      // Point D is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will still NOT INTERSECT the stool
-      Point3D pointD = new Point3D(0.5, 0.5, 0.75);
-      heightAt = meshTerrainObject.heightAt(pointD.getX(), pointD.getY(), pointD.getZ());
-      assertEquals(heightAt, Double.NEGATIVE_INFINITY);
-
-      // Point E is below the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will still NOT INTERSECT the stool
-      Point3D pointE = new Point3D(-0.25, -0.25, -0.25);
-      heightAt = meshTerrainObject.heightAt(pointE.getX(), pointE.getY(), pointE.getZ());
-      assertEquals(heightAt, Double.NEGATIVE_INFINITY);
-
-      // Point F is on the top surface of the stool. If an infinite line is drawn and parallel to the Z axis of this point, the line will INTERSECT the stool
-      Point3D pointF = new Point3D(0.18, 0.18, 0.575);
-      heightAt = meshTerrainObject.heightAt(pointF.getX(), pointF.getY(), pointF.getZ());
-      assertEquals(heightAt, 0.575, maxError);
-
-      if (SHOW_VISUALIZATION)
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         Graphics3DObject viz = new Graphics3DObject();
-         scs = new SimulationConstructionSet(new Robot("dummy"));
-         scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
+         // Randomly sample a point in the A zone
+         double randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
+         double randomY = legoBlockAZoneMinimumYValue + (legoBlockAZoneMaximumYValue - legoBlockAZoneMinimumYValue) * RANDOM.nextDouble();
 
-         scs.setGroundVisible(false);
+         IntersectionResult intersectionResult = meshTerrainObject.intersectionWithVerticalLine(randomX, randomY);
+         Point3D actualHighestPoint = new Point3D(randomX, randomY, legoBlockAZoneMaximumZValue);
+         Point3D actualLowestPoint = new Point3D(randomX, randomY, legoBlockAZoneMinimumZValue);
 
-         addGraphicWithTestPoints(viz, meshTerrainObject, pointA, YoAppearance.DarkSalmon());
-         addGraphicWithTestPoints(viz, meshTerrainObject, pointB, YoAppearance.DarkSalmon());
-         addGraphicWithTestPoints(viz, meshTerrainObject, pointC, YoAppearance.DarkSalmon());
-         addGraphicWithTestPoints(viz, meshTerrainObject, pointD, YoAppearance.DarkSalmon());
-         addGraphicWithTestPoints(viz, meshTerrainObject, pointE, YoAppearance.DarkSalmon());
-         addGraphicWithTestPoints(viz, meshTerrainObject, pointF, YoAppearance.DarkSalmon());
+         Point3D highestPoint = intersectionResult.getHighestIntersection();
+         Point3D lowestPoint = intersectionResult.getLowestIntersection();
 
-         // Red is the point being tested - it will be a cube if heightAt is negative
-         // infinity, otherwise it will be a sphere
-         // Yellow ball is heightAt value if it exists
+         assertTrue(intersectionResult.isHighestPointValid());
+         assertEquals(actualHighestPoint.differenceNormSquared(highestPoint), 0.0, MAXIMUM_ERROR);
+         assertEquals(actualLowestPoint.differenceNormSquared(lowestPoint), 0.0, MAXIMUM_ERROR);
 
-         scs.addStaticLinkGraphics(viz);
-         scs.startOnAThread();
-         ThreadTools.sleepForever();
+         // Randomly sample a point in the C zone
+         randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
+         randomY = legoBlockCZoneMinimumYValue + (legoBlockCZoneMaximumYValue - legoBlockCZoneMinimumYValue) * RANDOM.nextDouble();
+
+         intersectionResult = meshTerrainObject.intersectionWithVerticalLine(randomX, randomY);
+         actualHighestPoint = new Point3D(randomX, randomY, legoBlockCZoneMaximumZValue);
+         actualLowestPoint = new Point3D(randomX, randomY, legoBlockCZoneMinimumZValue);
+
+         highestPoint = intersectionResult.getHighestIntersection();
+         lowestPoint = intersectionResult.getLowestIntersection();
+
+         assertTrue(intersectionResult.isHighestPointValid());
+         assertEquals(actualHighestPoint.differenceNormSquared(highestPoint), 0.0, MAXIMUM_ERROR);
+         assertEquals(actualLowestPoint.differenceNormSquared(lowestPoint), 0.0, MAXIMUM_ERROR);
+
+         // Randomly sample a point that does not have any vertical line intersection with the Mesh
+         randomX = (0.6 + 5.0 * RANDOM.nextDouble()) * (RANDOM.nextBoolean() ? 1 : -1);
+         randomY = (0.6 + 5.0 * RANDOM.nextDouble()) * (RANDOM.nextBoolean() ? 1 : -1);
+         intersectionResult = meshTerrainObject.intersectionWithVerticalLine(randomX, randomY);
+         assertFalse(intersectionResult.isHighestPointValid());
       }
 
    }
 
+   @Test
+   public void testHeightAt()
+   {
+
+      String relativeFilePath = "models/legoBlock/legoBlock.obj";
+      MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
+
+      showVisualization(meshTerrainObject);
+
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
+      {
+         // Randomly sample a point inside the A zone
+         double randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
+         double randomY = legoBlockAZoneMinimumYValue + (legoBlockAZoneMaximumYValue - legoBlockAZoneMinimumYValue) * RANDOM.nextDouble();
+         double randomZ = legoBlockAZoneMinimumYValue + (legoBlockAZoneMaximumZValue - legoBlockAZoneMinimumZValue) * RANDOM.nextDouble();
+
+         double heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
+         double actualHeightAtValue = legoBlockAZoneMaximumZValue + BUFFER_VALUE;
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR);
+
+         // Randomly sample a point in the C zone
+         randomY = legoBlockCZoneMinimumYValue + (legoBlockCZoneMaximumYValue - legoBlockCZoneMinimumYValue) * RANDOM.nextDouble();
+         randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
+         randomZ = legoBlockCZoneMinimumYValue + (legoBlockCZoneMaximumZValue - legoBlockCZoneMinimumZValue) * RANDOM.nextDouble();
+
+         heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
+         actualHeightAtValue = legoBlockCZoneMaximumZValue + BUFFER_VALUE;
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR);
+
+         // Randomly sample a point in the dot zone
+         randomY = legoBlockDotZoneMinimumYValue + (legoBlockDotZoneMaximumYValue - legoBlockDotZoneMinimumYValue) * RANDOM.nextDouble();
+         randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
+         randomZ = legoBlockDotZoneMinimumYValue + (legoBlockDotZoneMaximumZValue - legoBlockDotZoneMinimumZValue) * RANDOM.nextDouble();
+
+         heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
+         actualHeightAtValue = legoBlockDotZoneMinimumZValue - BUFFER_VALUE;
+         String printStatement = "x:" + randomX + "   y: " + randomY+"  z: " +randomZ;
+         
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR, printStatement);
+
+         // Randomly sample a point in the comma zone
+         randomY = legoBlockCommaZoneMinimumYValue + (legoBlockCommaZoneMaximumYValue - legoBlockCommaZoneMinimumYValue) * RANDOM.nextDouble();
+         randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue) * RANDOM.nextDouble();
+         randomZ = legoBlockCommaZoneMinimumZValue + (legoBlockCommaZoneMaximumZValue - legoBlockCommaZoneMinimumZValue) * RANDOM.nextDouble();
+
+         heightAtValue = meshTerrainObject.heightAt(randomX, randomY, randomZ);
+         actualHeightAtValue = Double.NEGATIVE_INFINITY;
+         assertEquals(heightAtValue, actualHeightAtValue, MAXIMUM_ERROR);
+      }
+   }
+   public  void showVisualization(MeshTerrainObject meshTerrainObject)
+   {
+      if (SHOW_VISUALIZATION)
+      {         
+         scs = new SimulationConstructionSet(new Robot("dummy"));
+         scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
+         scs.setGroundVisible(false);
+         scs.startOnAThread();
+         ThreadTools.sleep(5000);
+      }
+   }
+   
    @Test
    public void testHeightAndNormalAt()
    {
-      // Testing using a sphere with bounding box dimensions as X,Y,Z = 0.25, 0.25,0.25
-      // Stool dimensions can be found here "https://cad.onshape.com/documents/ed770d6e6aa0b5ca25885953/w/d5578c1a76bb6f06ae50c7b9/e/57007e2af3e9933eb97ecdca"
-
-      String relativeFilePath = "models/simpleShapeForTesting/simpleShapeForTesting.obj";
+      String relativeFilePath = "models/hShape/hShape.obj";
       MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
-      scs = new SimulationConstructionSet(new Robot("dummy"));
-      scs.addStaticLinkGraphics(meshTerrainObject.getLinkGraphics());
 
-      double maxError = 0.01;
+      showVisualization(meshTerrainObject);
 
-      double heightAt;
-      Vector3D normalToPack = new Vector3D(0, 0, 0);
-
-      // Point A is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will intersect the stool
-      Point3D pointA = new Point3D(-0.1, -0.1, 0.3);
-      heightAt = meshTerrainObject.heightAndNormalAt(pointA.getX(), pointA.getY(), pointA.getZ(), normalToPack);
-      assertEquals(heightAt, 0.25 / 2, maxError);
-      assertEquals(normalToPack, new Vector3D(0, 0, 1));
-
-      // Point B is above the stool. If an infinite line is drawn parallel to the Z axis of this point, the line will intersect the stool and its normal will be 45 degree from the Z axis
-      Point3D pointB = new Point3D(0.1, -0.1, 0.3);
-      heightAt = meshTerrainObject.heightAndNormalAt(pointB.getX(), pointB.getY(), pointB.getZ(), normalToPack);
-      double errorX = normalToPack.getX() - 0.707;
-      double errorY = normalToPack.getY() - 0.0;
-      double errorZ = normalToPack.getZ() - 0.707;
-
-      double rmsError = Math.sqrt(errorX * errorX + errorY * errorY + errorZ * errorZ);
-
-      assertEquals(heightAt, 0.25 / 2 - pointB.getX(), maxError);
-      assertEquals(rmsError, 0.0, maxError);
-
+      double randomX;
+      double randomY;
+      double randomZ;
+      
+      double actualHeightAtValue;
+      double heightAtValue;
+      
+      Vector3D normalToPack = new Vector3D(0.0,0.0,0.0);
+      Vector3D acualNormalToPack = new Vector3D(0.0, 0.0, 1.0);
+      
+      
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
+      {
+         // Randomly sample a point inside the a zone of the H Shape
+         randomX = hShapeAZoneMinimumXValue + (hShapeAZoneMaximumXValue - hShapeAZoneMinimumXValue) * RANDOM.nextDouble();
+         randomY = hShapeAZoneMinimumYValue + (hShapeAZoneMaximumYValue - hShapeAZoneMinimumYValue) * RANDOM.nextDouble();
+         randomZ = hShapeAZoneMinimumZValue + (hShapeAZoneMaximumZValue - hShapeAZoneMinimumZValue) * RANDOM.nextDouble();
+         
+         actualHeightAtValue = hShapeAZoneMaximumZValue + BUFFER_VALUE;
+         heightAtValue = meshTerrainObject.heightAndNormalAt(randomX, randomY, randomZ, normalToPack);
+         assertEquals(actualHeightAtValue, heightAtValue, MAXIMUM_ERROR);
+         assertEquals(acualNormalToPack.differenceNormSquared(normalToPack), 0.0, MAXIMUM_ERROR);
+      }
+      
    }
 
    @Test
    public void testCheckIfInside()
    {
-      String relativeFilePath = "models/sphere/sphere.obj";
-
-      MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
-      parameters.setMaxNoOfHulls(100);
-      parameters.setMaxNoOfVertices(100);
-
+      String relativeFilePath = "models/hShape/hShape.obj";
       MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
 
-      double errrorMargin = 0.03;
-      double emptyRange = 0.1412 - errrorMargin ; // Largest square that can be inscribed in a circle of Dia 0.2m is 0.1412 m
+      showVisualization(meshTerrainObject);
+
+      double randomX;
+      double randomY;
+      double randomZ;
       
-      Point3D intersectionToPack = new Point3D();
-      Vector3D normalToPack = new Vector3D();
+      boolean isInside;
+      Point3D intersectionToPack = new Point3D(0.0, 0.0, 0.0);
+      Point3D actualIntersectionToPack;
       
-      for (int i = 0; i < 1000; i++)
+      Vector3D normalToPack = new Vector3D(0.0,0.0,0.0);
+      Vector3D acualNormalToPack = new Vector3D(0.0, 0.0, 1.0);
+      
+      // Sample 100 points
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         // Randomly sample a point in the empty area inside the surface of the sphere centered at the origin
-         double randomX = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * emptyRange/2;
-         double randomY = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * emptyRange/2;
-         double randomZ = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * 100;
-         assertFalse(meshTerrainObject.checkIfInside(randomX, randomY, randomZ, intersectionToPack, normalToPack));
+         // Randomly sample a point inside the b zone
+         randomX = hShapeBZoneMinimumXValue + (hShapeBZoneMaximumXValue - hShapeBZoneMinimumXValue) * RANDOM.nextDouble();
+         randomY = hShapeBZoneMinimumYValue + (hShapeBZoneMaximumYValue - hShapeBZoneMinimumYValue) * RANDOM.nextDouble();
+         randomZ = hShapeBZoneMinimumZValue + (hShapeBZoneMaximumZValue - hShapeBZoneMinimumZValue) * RANDOM.nextDouble();
+         
+         actualIntersectionToPack = new Point3D(randomX, randomY, hShapeBZoneMaximumZValue);
+         isInside = meshTerrainObject.checkIfInside(randomX, randomY, randomZ, intersectionToPack, normalToPack);
+         
+         assertTrue(isInside);
+         assertEquals(actualIntersectionToPack.differenceNormSquared(intersectionToPack), 0.0, MAXIMUM_ERROR);
+         assertEquals(acualNormalToPack.differenceNormSquared(normalToPack), 0.0, MAXIMUM_ERROR);
+         
+         // Randomly sample a point inside the comma zone
+         randomX = hShapeBZoneMinimumXValue + (hShapeBZoneMaximumXValue - hShapeBZoneMinimumXValue) * RANDOM.nextDouble();
+         randomY = hShapeBZoneMinimumYValue + (hShapeBZoneMaximumYValue - hShapeBZoneMinimumYValue) * RANDOM.nextDouble();
+         randomZ = hShapeCommaZoneMinimumZValue + (hShapeCommaZoneMaximumZValue - hShapeCommaZoneMinimumZValue) * RANDOM.nextDouble();
+         
+         actualIntersectionToPack = new Point3D(randomX, randomY, hShapeCommaZoneMinimumZValue);
+         isInside = meshTerrainObject.checkIfInside(randomX, randomY, randomZ, intersectionToPack, normalToPack);
+         
+         assertFalse(isInside);
+         assertEquals(actualIntersectionToPack.differenceNormSquared(intersectionToPack), 0.0, MAXIMUM_ERROR);
+         assertEquals(acualNormalToPack.differenceNormSquared(normalToPack), 0.0, MAXIMUM_ERROR);
+
+         // Randomly sample a point inside the dot zone
+         randomX = hShapeBZoneMinimumXValue + (hShapeBZoneMaximumXValue - hShapeBZoneMinimumXValue) * RANDOM.nextDouble();
+         randomY = hShapeBZoneMinimumYValue + (hShapeBZoneMaximumYValue - hShapeBZoneMinimumYValue) * RANDOM.nextDouble();
+         randomZ = hShapeDotZoneMinimumZValue + (hShapeDotZoneMaximumZValue - hShapeDotZoneMinimumZValue) * RANDOM.nextDouble();
+         
+         actualIntersectionToPack = new Point3D(randomX, randomY, Double.NEGATIVE_INFINITY);
+         isInside = meshTerrainObject.checkIfInside(randomX, randomY, randomZ, intersectionToPack, normalToPack);
+         
+         assertFalse(isInside);
+         assertEquals(intersectionToPack.getZ(),Double.NEGATIVE_INFINITY);
       }
    }
-
 
    @Test
    public void testIsClose()
    {
-      // Testing using a sphere with bounding box dimensions as X,Y,Z = 0.5, 0.5,0.5
-      // Sphere dimensions can be found here "https://cad.onshape.com/documents/ed770d6e6aa0b5ca25885953/w/d5578c1a76bb6f06ae50c7b9/e/ebb25271027fb47ebaec1c9c"
+      String legoBlockRelativeFilePath = "models/legoBlock/legoBlock.obj";
+      MeshTerrainObject legoBlockMeshTerrainObject = new MeshTerrainObject(legoBlockRelativeFilePath);
+      
+      String hShapeRelativeFilePath = "models/hShape/hShape.obj";
+      MeshTerrainObject hShapeMeshTerrainObject = new MeshTerrainObject(hShapeRelativeFilePath);
 
-      String relativeFilePath = "models/sphere/sphere.obj";
+      // LegoBlock Bounding box limits
+      double legoBlockMaximumXValue = 0.0;
+      double legoBlockMinimumXValue = 0.5;
+      
+      double legoBlockMaximumYValue = 0.5;
+      double legoBlockMinimumYValue = -0.5;
+      
+      double legoBlockMaximumZValue = 0.25;
+      double legoBlockMinimumZValue = -0.5;
+      
+      // hShape Bounding box limits
+      double hShapeMaximumYValue = 0.0;
+      double hShapeMinimumYValue = -0.0;
 
-      MeshTerranObjectParameters parameters = new MeshTerranObjectParameters();
-      parameters.setMaxNoOfHulls(100);
-      parameters.setMaxNoOfVertices(100);
+      double hShapeMaximumXValue = 0.0;
+      double hShapeMinimumXValue = -0.0;
 
-      MeshTerrainObject meshTerrainObject = new MeshTerrainObject(relativeFilePath);
+      double hShapeMaximumZValue = 0.5;
+      double hShapeMinimumZValue = -0.5;
 
-      double boundingBoxDimension = 0.5;
-      double errrorMargin = 0.03;
-
-      double sampleInsideRange = boundingBoxDimension / 2 - errrorMargin;
-      double sampleOutsidevalue = boundingBoxDimension / 2 + errrorMargin;
-
-      // Sample 100 points
-      for (int i = 0; i < 100; i++)
+      
+      double randomX;
+      double randomY;
+      double randomZ;
+      
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         // Randomly sample a point inside the cube centered at the origin
-         double randomX = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * sampleInsideRange;
-         double randomY = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * sampleInsideRange;
-         double randomZ = random.nextDouble() * (random.nextBoolean() ? 1 : -1) * sampleInsideRange;
-         assertTrue(meshTerrainObject.isClose(randomX, randomY, randomZ));
-
-         // Randomly sample a point outside the cube centered at the origin
-         randomX = (random.nextDouble() + 1) * (random.nextBoolean() ? 1 : -1) * sampleOutsidevalue;
-         randomY = (random.nextDouble() + 1) * (random.nextBoolean() ? 1 : -1) * sampleOutsidevalue;
-         randomZ = (random.nextDouble() + 1) * (random.nextBoolean() ? 1 : -1) * sampleOutsidevalue;
-         assertFalse(meshTerrainObject.isClose(randomX, randomY, randomZ));
+         // Randomly sample a point inside the bounding box for LegoBlocks
+         randomX = legoBlockMinimumXValue + (legoBlockMaximumXValue - legoBlockMinimumXValue)*RANDOM.nextDouble(); 
+         randomY = legoBlockMinimumYValue + (legoBlockMaximumYValue - legoBlockMinimumYValue)*RANDOM.nextDouble(); 
+         randomZ = legoBlockMinimumZValue + (legoBlockMaximumZValue - legoBlockMinimumZValue)*RANDOM.nextDouble(); 
+         assertTrue(legoBlockMeshTerrainObject.isClose(randomX, randomY, randomZ));
+         
+         // Randomly sample a point outside the bounding box for LegoBlocks
+         randomX = (legoBlockMaximumXValue + RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()? 1:-1);
+         randomX = (legoBlockMaximumYValue + RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()? 1:-1);
+         randomX = (legoBlockMinimumZValue - RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()? 1:-1);
+         assertFalse(legoBlockMeshTerrainObject.isClose(randomX, randomY, randomZ));
+         
+         
+         // Randomly sample a point inside the bounding box for hShape
+         randomX = hShapeMinimumXValue + (hShapeMaximumXValue - hShapeMinimumXValue)*RANDOM.nextDouble(); 
+         randomY = hShapeMinimumYValue + (hShapeMaximumYValue - hShapeMinimumYValue)*RANDOM.nextDouble(); 
+         randomZ = hShapeMinimumZValue + (hShapeMaximumZValue - hShapeMinimumZValue)*RANDOM.nextDouble(); 
+         assertTrue(hShapeMeshTerrainObject.isClose(randomX, randomY, randomZ));
+         
+         // Randomly sample a point outside the bounding box for hShape
+         randomX = (hShapeMaximumXValue +RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()?1:-1);
+         randomX = (hShapeMaximumYValue +RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()?1:-1);
+         randomX = (hShapeMaximumZValue +RANDOM.nextDouble()*5.0)*(RANDOM.nextBoolean()?1:-1);
+         assertFalse(legoBlockMeshTerrainObject.isClose(randomX, randomY, randomZ));
       }
    }
 
    /**
     * This method is used to visualize the heightat value of a MeshTerrainObject at a given point.
+    * 
+    * @author Khizar
+    */
+   /**
+    * This method is used to draw arrows that align with the normal to the surface *
     * 
     * @author Khizar
     */
@@ -293,11 +486,6 @@ public class MeshTerrainObjectTest
 
    }
 
-   /**
-    * This method is used to draw arrows that align with the normal to the surface *
-    * 
-    * @author Khizar
-    */
    private static void addGraphicWithTestPoints(Graphics3DObject viz, MeshTerrainObject meshTerrainObject, Point3D point, AppearanceDefinition lineAppearance)
    {
 
@@ -315,18 +503,18 @@ public class MeshTerrainObjectTest
 
          viz.identity();
          viz.translate(xPoint, yPoint, zPoint);
-         viz.addSphere(sphereRadius, YoAppearance.Red());
+         viz.addSphere(SPHERERADIUS, YoAppearance.Red());
 
          viz.identity();
          viz.translate(xPoint, yPoint, result);
-         viz.addSphere(sphereRadius, YoAppearance.Yellow());
+         viz.addSphere(SPHERERADIUS, YoAppearance.Yellow());
       }
       else
       {
 
          viz.identity();
          viz.translate(xPoint, yPoint, zPoint);
-         viz.addCube(cubeDimesnion, cubeDimesnion, cubeDimesnion, YoAppearance.Red());
+         viz.addCube(CUBEDIMESNION, CUBEDIMESNION, CUBEDIMESNION, YoAppearance.Red());
       }
       viz.identity();
       viz.translate(xPoint, yPoint, -500.0);

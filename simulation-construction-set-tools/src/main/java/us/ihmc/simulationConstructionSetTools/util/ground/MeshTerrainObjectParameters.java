@@ -10,7 +10,7 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import vhacd4.Vhacd4Parameters;
 
-public class MeshTerranObjectParameters
+public final class MeshTerrainObjectParameters
 {
    static
    {
@@ -23,9 +23,9 @@ public class MeshTerranObjectParameters
 
    }
 
-   private int maximumNumberOfHulls = 20;
+   private int maximumNumberOfHulls = 32;
    private int maximumNumberOfVerticesPerHull = 64;
-   private int maximumVoxelResolution = 100000;
+   private int maximumVoxelResolution = 400000;
    private double maximumVolumetricPercentError = 0.01;
 
    private boolean showOriginalMeshGraphics = true;
@@ -34,7 +34,7 @@ public class MeshTerranObjectParameters
    
    private Vhacd4Parameters vhacd4Parameters;
 
-   public MeshTerranObjectParameters()
+   public MeshTerrainObjectParameters()
    {
       NativeLibraryLoader.loadNativeLibrary("bulletjme", true);
       updateParameters();
