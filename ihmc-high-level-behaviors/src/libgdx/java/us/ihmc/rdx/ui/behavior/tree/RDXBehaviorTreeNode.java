@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
@@ -34,6 +33,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean isDescriptionBeingEdited = false;
    private transient final ImString imDescriptionText = new ImString();
    private transient final ImVec2 descriptionTextSize = new ImVec2();
+   private final String nodePopupID = labels.get("Node popup");
 
    @Override
    public void update()
@@ -103,18 +103,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (textHovered && !isDescriptionBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
-         ImGui.openPopup(labels.get("Node popup"));
-      }
-
-      if (ImGui.beginPopup(labels.get("Node popup")))
-      {
-         // TODO
-
-         ImGui.separator();
-         if (ImGui.menuItem("Cancel"))
-            ImGui.closeCurrentPopup();
-
-         ImGui.endPopup();
+         ImGui.openPopup(nodePopupID);
       }
    }
 
@@ -158,6 +147,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public boolean getTreeWidgetExpanded()
    {
       return treeWidgetExpanded;
+   }
+
+   public String getNodePopupID()
+   {
+      return nodePopupID;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()

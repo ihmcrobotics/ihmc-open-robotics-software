@@ -72,7 +72,7 @@ public class BehaviorTreeExecutor
 
    public void destroy()
    {
-      behaviorTreeState.modifyTree(behaviorTreeModificationQueue -> new BehaviorTreeExtensionSubtreeDestroy(rootNode));
+      behaviorTreeState.modifyTree(modificationQueue -> modificationQueue.queueDestroySubtree(rootNode));
    }
 
    public void setRootNode(BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode)

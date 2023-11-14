@@ -10,16 +10,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeDestroy;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeExtensionAddAndFreeze;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeSetRoot;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -85,40 +82,22 @@ public class RDXBehaviorTree
 
    public void update()
    {
-      if (nodesMenu.getLoadFileRequest().poll())
+      // Perform any modifications we made in the last tick.
+      behaviorTreeState.modifyTree();
+
+      if (nodesMenu.getLoadFileRequest().poll()) // TODO: Load to non-root nodes -- queue load modification?
       {
-         RDXBehaviorTreeNode<?, ?> selectedNode = null; // TODO: Traverse tree for selected node, probably RDXBTNode
+         BehaviorTreeModificationQueue modificationQueue = behaviorTreeState.getModificationQueue();
+         BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = fileLoader.loadFromFile(nodesMenu.getLoadFileRequest().read(), modificationQueue);
 
-         behaviorTreeState.modifyTree(modificationQueue ->
+         if (rootNode != null)
          {
-            BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = fileLoader.loadFromFile(nodesMenu.getLoadFileRequest().read(), modificationQueue);
+            modificationQueue.queueDestroySubtree(rootNode);
+         }
 
-            if (selectedNode == null)
-            {
-               if (rootNode != null)
-                  modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(rootNode));
-
-               modificationQueue.accept(new BehaviorTreeNodeSetRoot(loadedNode, newRootNode -> rootNode = (RDXBehaviorTreeNode<?, ?>) newRootNode));
-               behaviorTreeState.freeze();
-            }
-            else
-            {
-               modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(selectedNode));
-
-               modificationQueue.accept(new BehaviorTreeNodeExtensionAddAndFreeze(loadedNode, selectedNode));
-            }
-         });
-      }
-
-      if (nodesMenu.getDeleteRootNode().poll() && rootNode != null) // poll must be first to get cleared every time
-      {
-         behaviorTreeState.modifyTree(modificationQueue ->
-         {
-            modificationQueue.accept(new BehaviorTreeExtensionSubtreeDestroy(rootNode));
-         });
-
-         setRootNode(null);
+         modificationQueue.queueSetRootNode(loadedNode, newRootNode -> rootNode = (RDXBehaviorTreeNode<?, ?>) newRootNode);
          behaviorTreeState.freeze();
+         behaviorTreeState.modifyTree();
       }
 
       idToNodeMap.clear();
@@ -185,8 +164,6 @@ public class RDXBehaviorTree
    protected void renderImGuiWidgetsPre()
    {
       ImGui.beginMenuBar();
-      fileMenu.renderFileMenu();
-      nodesMenu.renderNodesMenu();
    }
 
    protected void renderImGuiWidgetsPost()
@@ -204,7 +181,14 @@ public class RDXBehaviorTree
          ImGui.setTooltip("Collapse all nodes");
 
       if (rootNode != null)
-         treeRenderer.render(rootNode);
+      {
+         treeRenderer.render(this, behaviorTreeState.getModificationQueue(), rootNode);
+      }
+      else
+      {
+         ImGui.text("Add a root node:");
+         nodesMenu.renderNodeCreationWidgets(behaviorTreeState.getModificationQueue());
+      }
    }
 
    private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
