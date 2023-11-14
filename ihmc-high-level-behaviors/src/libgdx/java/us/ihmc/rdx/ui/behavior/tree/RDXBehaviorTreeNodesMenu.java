@@ -1,14 +1,15 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
-import imgui.ImVec2;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
@@ -22,7 +23,6 @@ public class RDXBehaviorTreeNodesMenu
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
    private final TypedNotification<RDXAvailableBehaviorTreeFile> loadFileRequest = new TypedNotification<>();
-   private final ImVec2 fileNameTextSize = new ImVec2();
 
    public RDXBehaviorTreeNodesMenu(WorkspaceResourceDirectory treeFilesDirectory)
    {
@@ -52,21 +52,12 @@ public class RDXBehaviorTreeNodesMenu
       ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         ImGui.calcTextSize(fileNameTextSize, indexedTreeFile.getTreeFile().getFileName());
-         boolean textHovered = ImGuiTools.isItemHovered(fileNameTextSize.x);
+         String fileName = indexedTreeFile.getTreeFile().getFileName();
+         ImGui.text(fileName);
 
-         ImGui.text(indexedTreeFile.getTreeFile().getFileName());
-
-         if (textHovered)
+         if (ImGui.isItemHovered())
          {
-            float cursorPosXInWidgetFrame = ImGui.getCursorPosX() + ImGui.getWindowPosX() - ImGui.getScrollX();
-            float cursorPosYInWidgetFrame = ImGui.getCursorPosY() + ImGui.getWindowPosY() - ImGui.getScrollY();
-            float adjustment = 3.0f;
-            ImGui.getWindowDrawList().addRectFilled(cursorPosXInWidgetFrame,
-                                                    cursorPosYInWidgetFrame - 1.0f - adjustment,
-                                                    cursorPosXInWidgetFrame + fileNameTextSize.x,
-                                                    cursorPosYInWidgetFrame - adjustment,
-                                                    ImGui.getColorU32(ImGuiCol.Text));
+            ImGuiTools.addTextUnderline(fileName);
 
             if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
             {
@@ -93,16 +84,33 @@ public class RDXBehaviorTreeNodesMenu
       ImGui.separator();
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("Control Nodes:");
+      ImGui.text("Control nodes:");
       ImGui.popFont();
-      // TODO
+      ImGui.indent();
 
+      String className = ActionSequenceDefinition.class.getSimpleName();
+      ImGui.text(className);
+      if (ImGui.isItemHovered())
+      {
+         ImGuiTools.addTextUnderline(className);
+      }
+
+      ImGui.unindent();
       ImGui.separator();
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("Actions");
+      ImGui.text("Actions:");
       ImGui.popFont();
-      // TODO
+      ImGui.indent();
+
+      className = HandPoseActionDefinition.class.getSimpleName();
+      ImGui.text(className);
+      if (ImGui.isItemHovered())
+      {
+         ImGuiTools.addTextUnderline(className);
+      }
+
+      ImGui.unindent();
    }
 
    public TypedNotification<RDXAvailableBehaviorTreeFile> getLoadFileRequest()
