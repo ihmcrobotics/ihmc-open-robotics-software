@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -74,12 +75,12 @@ public class MonteCarloFootstepPlanningTest
       LogTools.info("Total Time: {} ms, Plan Size: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps());
 
       if (displayPlots)
-         display(heightMap, contactMap, terrainCostImage, plan);
+         display(heightMap, contactMap, terrainCostImage, plan, planner);
 
       Assertions.assertEquals(0.0, 0.0 - 0.0001, 1e-3);
    }
 
-   public void display(Mat heightMap, Mat contactMapImage, Mat terrainCostImage, FootstepPlan plan)
+   public void display(Mat heightMap, Mat contactMapImage, Mat terrainCostImage, FootstepPlan plan, MonteCarloFootstepPlanner planner)
    {
       HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
       Mat heightMapColorImage = new Mat(201, 201, opencv_core.CV_8UC3);
@@ -115,7 +116,9 @@ public class MonteCarloFootstepPlanningTest
       Mat contactHeatMapColorImage = new Mat(contactHeatMapImage.rows(), contactHeatMapImage.cols(), opencv_core.CV_8UC3);
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
 
+      MonteCarloPlannerTools.plotFootstepNodeList(planner.getVisitedNodes(), contactHeatMapColorImage);
       plotFootsteps(contactHeatMapColorImage, plan);
+
       contactHeatMapColorImage.copyTo(right);
 
       PerceptionDebugTools.display("Display", stacked, 0, 1000);
@@ -130,6 +133,31 @@ public class MonteCarloFootstepPlanningTest
       {
          Point3D position = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
          PerceptionDebugTools.plotTiltedRectangle(image, position, 1, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+
+         //Draw line from start to first
+         if (i == 0)
+         {
+            Point3D startPosition = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
+            opencv_imgproc.line(image, new org.bytedeco.opencv.opencv_core.Point((int) (startPosition.getX() * 100), (int) (startPosition.getY() * 100)),
+                             new org.bytedeco.opencv.opencv_core.Point((int) (position.getX() * 100), (int) (position.getY() * 100)), new Scalar(255, 255, 255, 0));
+         }
+
+         //Draw line from start to previous to current
+         if (i > 0)
+         {
+            Point3D previousPosition = new Point3D(plan.getFootstep(i - 1).getFootstepPose().getPosition());
+            opencv_imgproc.line(image, new org.bytedeco.opencv.opencv_core.Point((int) (previousPosition.getX() * 100), (int) (previousPosition.getY() * 100)),
+                             new org.bytedeco.opencv.opencv_core.Point((int) (position.getX() * 100), (int) (position.getY() * 100)), new Scalar(255, 255, 255, 0));
+
+         }
+
+         //Draw line from last to goal
+         if (i == plan.getNumberOfSteps() - 1)
+         {
+            Point3D goalPosition = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
+            opencv_imgproc.line(image, new org.bytedeco.opencv.opencv_core.Point((int) (position.getX() * 100), (int) (position.getY() * 100)),
+                             new org.bytedeco.opencv.opencv_core.Point((int) (goalPosition.getX() * 100), (int) (goalPosition.getY() * 100)), new Scalar(255, 255, 255, 0));
+         }
       }
    }
 }

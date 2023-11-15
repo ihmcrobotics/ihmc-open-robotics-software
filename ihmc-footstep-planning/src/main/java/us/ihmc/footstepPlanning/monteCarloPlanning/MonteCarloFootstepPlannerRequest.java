@@ -207,6 +207,16 @@ public class MonteCarloFootstepPlannerRequest
       this.contactMap = contactMap;
    }
 
+   public Mat getHeightMap()
+   {
+      return heightMap;
+   }
+
+   public Mat getContactMap()
+   {
+      return contactMap;
+   }
+
    public void setPacket(MonteCarloFootstepPlannerRequest requestPacket)
    {
       requestPacket.setRequestedInitialStanceSide(RobotSide.fromByte(getRequestedInitialStanceSide().toByte()));

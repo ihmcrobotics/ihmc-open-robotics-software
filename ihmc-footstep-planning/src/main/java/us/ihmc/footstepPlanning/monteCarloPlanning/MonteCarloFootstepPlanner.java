@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
@@ -11,7 +8,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class MonteCarloFootstepPlanner
@@ -25,7 +21,7 @@ public class MonteCarloFootstepPlanner
    private HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
 
    private int searchIterations = 200;
-   private int simulationIterations = 8;
+   private int simulationIterations = 80;
    private int uniqueNodeId = 0;
    private int worldHeight = 200;
    private int worldWidth = 200;
@@ -53,9 +49,12 @@ public class MonteCarloFootstepPlanner
    public void updateTree(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
       if (node == null)
+      {
+         LogTools.warn("Node is null");
          return;
+      }
 
-      if (node.getVisits() == 0)
+      if (node.getVisits() <= 4 || node.getChildren().isEmpty())
       {
          MonteCarloFootstepNode childNode = expand(node, request);
          double score = simulate(childNode, request);
@@ -86,11 +85,13 @@ public class MonteCarloFootstepPlanner
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
+         double contactScore = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request);
 
          if (visitedNodes.getOrDefault(newState, null) != null)
          {
             MonteCarloFootstepNode existingNode = visitedNodes.get(newState);
             node.getChildren().add(existingNode);
+            existingNode.getParents().add(node);
          }
          else
          {
@@ -115,13 +116,10 @@ public class MonteCarloFootstepPlanner
          int actionIndex = (int) (Math.random() * nextStates.size());
          randomState = nextStates.get(actionIndex);
 
-         //LogTools.info(String.format("Simulation %d for Node %d, Position: %s, Random State: %s, Actions: %d", i, node.getId(), node.getPosition(), randomState.getPosition(), nextStates.size()));
 
-         //score -= 0.1;
-         //if (randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
-         {
-            score += 1.0f / randomState.getPosition().distance(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
-         }
+         //LogTools.info(String.format("Simulation %d, Random State: %s, Actions: %d, Side:%s", i, randomState.getPosition(), nextStates.size(), randomState.getRobotSide()));
+
+         score += MonteCarloPlannerTools.scoreFootstepNode(node, randomState, request);
 
          //LogTools.info("Action Taken: {}, Score: {}", actionIndex, score);
       }
@@ -151,5 +149,10 @@ public class MonteCarloFootstepPlanner
    public MonteCarloTreeNode getRoot()
    {
       return root;
+   }
+
+   public List<MonteCarloFootstepNode> getVisitedNodes()
+   {
+      return new ArrayList<>(visitedNodes.values());
    }
 }

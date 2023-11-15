@@ -34,23 +34,13 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
 
       for (Vector3D action : actions)
       {
-         if (checkActionObstacles(action, world))
+         if (checkActionBoundaries(action, world.getGridWidth()))
          {
-            if (checkActionBoundaries(action, world.getGridWidth()))
-            {
-               availableStates.add(computeActionResult(action));
-            }
+            availableStates.add(computeActionResult(action));
          }
       }
 
       return availableStates;
-   }
-
-   public boolean checkActionObstacles(Vector3DReadOnly action, MonteCarloPlanningWorld world)
-   {
-      MonteCarloFootstepNode resultState = computeActionResult(action);
-      //return !MonteCarloPlannerTools.isPointOccupied(resultState.getPosition(), world.getGrid());
-      return true;
    }
 
    public boolean checkActionBoundaries(Vector3DReadOnly action, int gridWidth)
@@ -65,7 +55,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    {
       Point3D actionResult = new Point3D();
       actionResult.add(position, action);
-      return new MonteCarloFootstepNode(actionResult, null, robotSide.getOppositeSide(), 0);
+      MonteCarloFootstepNode monteCarloFootstepNode = new MonteCarloFootstepNode(actionResult, null, robotSide.getOppositeSide(), 0);
+      return monteCarloFootstepNode;
    }
 
    public Point3D getPosition()
@@ -78,7 +69,6 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       return robotSide;
    }
 
-   // equals method for hashset
    @Override
    public boolean equals(Object obj)
    {

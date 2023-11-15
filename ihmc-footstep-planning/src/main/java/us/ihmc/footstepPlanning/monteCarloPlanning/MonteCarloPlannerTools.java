@@ -11,10 +11,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.*;
 
@@ -293,9 +295,9 @@ public class MonteCarloPlannerTools
    public static void getFootstepActionGrid(ArrayList<Vector3D> actions, Point3D origin, int side)
    {
       actions.clear();
-      for (int i = 20; i <= 40; i++)
+      for (int i = 20; i <= 40; i+=2)
       {
-         for (int j = 20; j <= 40; j++)
+         for (int j = 20; j <= 40; j+=2)
          {
             actions.add(new Vector3D(i * side, j * side, 0));
          }
@@ -320,4 +322,41 @@ public class MonteCarloPlannerTools
       return bestNode;
    }
 
+   public static void plotFootstepNodeList(List<MonteCarloFootstepNode> nodes, Mat gridColor)
+   {
+      for (MonteCarloFootstepNode node : nodes)
+      {
+         Point3D position = node.getPosition();
+         position.add((double) gridColor.cols() / 2, (double) gridColor.rows() / 2, 0);
+
+         double score = node.getValue();
+         if (isWithinGridBoundaries(new Point2D(position), gridColor.cols()) && node.getRobotSide() == RobotSide.LEFT)
+         {
+            gridColor.ptr((int) position.getX32(), (int) position.getY32()).put(new byte[] {0, (byte) (score * 255), (byte) (score * 255), (byte) 255});
+         }
+         else if (isWithinGridBoundaries(new Point2D(position), gridColor.cols()) && node.getRobotSide() == RobotSide.RIGHT)
+         {
+            gridColor.ptr((int) position.getX32(), (int) position.getY32()).put(new byte[] {(byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255});
+         }
+      }
+   }
+
+   public static double scoreFootstepNode(MonteCarloFootstepNode oldNode, MonteCarloFootstepNode newNode, MonteCarloFootstepPlannerRequest request)
+   {
+      //(randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
+
+      double edgeCost = Math.abs(0.5f - oldNode.getPosition().distance(newNode.getPosition())) * 0.01f;
+
+      int rIndex = (int) (newNode.getPosition().getX() + request.getContactMap().rows() / 2);
+      int cIndex = (int) (newNode.getPosition().getY() + request.getContactMap().cols() / 2);
+
+      Point3D goalPosition = request.getGoalFootPoses().get(RobotSide.LEFT).getPosition();
+      goalPosition.scale(50.0f);
+      goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2, 0);
+
+      double score = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0;
+      score += 1.0f / newNode.getPosition().distance(goalPosition);
+      //score -= edgeCost;
+      return score;
+   }
 }
