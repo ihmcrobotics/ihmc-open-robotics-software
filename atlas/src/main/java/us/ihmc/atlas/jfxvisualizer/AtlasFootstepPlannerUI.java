@@ -64,7 +64,6 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
 
       ui = FootstepPlannerUI.createUI(primaryStage,
                                       messager,
-                                      drcRobotModel.getVisibilityGraphsParameters(),
                                       drcRobotModel.getAStarBodyPathPlannerParameters(),
                                       drcRobotModel.getFootstepPlannerParameters("ForLookAndStep"),
                                       drcRobotModel.getSwingPlannerParameters(),
@@ -75,8 +74,6 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
                                       drcRobotModel.getWalkingControllerParameters(),
                                       new AtlasUIAuxiliaryData(),
                                       drcRobotModel.getCollisionBoxProvider());
-      ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
-      ui.setREAStateRequestPublisher(reaStateRequestPublisher);
       ui.show();
 
       if (launchPlannerToolbox)
