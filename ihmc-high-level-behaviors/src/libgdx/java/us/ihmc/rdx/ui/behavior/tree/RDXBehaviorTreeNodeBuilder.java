@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
@@ -103,5 +104,16 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return null;
       }
+   }
+
+   public void initializeNewNode(RDXBehaviorTreeNode<?, ?> newNode)
+   {
+      if (newNode instanceof RDXWalkAction walkAction)
+      {
+         MovingReferenceFrame parentFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
+         walkAction.getDefinition().setParentFrameName(parentFrame.getName());
+         walkAction.getState().update();
+      }
+
    }
 }
