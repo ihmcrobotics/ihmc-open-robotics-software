@@ -155,4 +155,18 @@ public class YoLowLevelState implements LowLevelStateReadOnly
    {
       return isEffortValid.getBooleanValue();
    }
+
+   @Override
+   public double getTemperature()
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
+
+   @Override
+   public boolean isTemperatureValid()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
 }

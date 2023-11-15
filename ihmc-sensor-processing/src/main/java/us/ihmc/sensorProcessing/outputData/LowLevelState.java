@@ -8,10 +8,12 @@ public class LowLevelState implements LowLevelStateReadOnly, Settable<LowLevelSt
    private double velocity;
    private double acceleration;
    private double effort;
+   private int temperature;
    private boolean isPositionValid;
    private boolean isVelocityValid;
    private boolean isAccelerationValid;
    private boolean isEffortValid;
+   private boolean isTemperatureValid;
 
    public LowLevelState()
    {
@@ -154,6 +156,11 @@ public class LowLevelState implements LowLevelStateReadOnly, Settable<LowLevelSt
       this.isEffortValid = isEffortValid;
    }
 
+   public void setTemperatureValid(boolean isTemperatureValid)
+   {
+      this.isTemperatureValid = isTemperatureValid;
+   }
+
    @Override
    public boolean isPositionValid()
    {
@@ -176,6 +183,12 @@ public class LowLevelState implements LowLevelStateReadOnly, Settable<LowLevelSt
    public boolean isEffortValid()
    {
       return isEffortValid;
+   }
+
+   @Override
+   public boolean isTemperatureValid()
+   {
+      return isTemperatureValid;
    }
 
    @Override
@@ -220,5 +233,18 @@ public class LowLevelState implements LowLevelStateReadOnly, Settable<LowLevelSt
       ret += "\nAcceleration " + acceleration + (isAccelerationValid ? " (valid)" : "");
       ret += "\nEffort " + effort + (isEffortValid ? " (valid)" : "");
       return ret;
+   }
+
+   public void setStatorTemperature(int statorTemperature)
+   {
+      this.temperature = statorTemperature;
+      this.isTemperatureValid = true;
+   }
+
+   @Override
+   public double getTemperature()
+   {
+      // TODO Auto-generated method stub
+      return this.temperature;
    }
 }
