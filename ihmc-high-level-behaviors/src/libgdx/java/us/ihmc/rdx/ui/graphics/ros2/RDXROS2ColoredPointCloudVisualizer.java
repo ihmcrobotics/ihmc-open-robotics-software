@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.kitfox.svg.Gradient;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
