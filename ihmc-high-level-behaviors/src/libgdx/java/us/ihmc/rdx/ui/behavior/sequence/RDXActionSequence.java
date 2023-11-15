@@ -53,12 +53,14 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       currentlyExecutingActions.clear();
       for (int i = 0; i < getChildren().size(); i++)
       {
-         RDXActionNode<?, ?> actionNode = (RDXActionNode<?, ?>) getChildren().get(i);
-         actionNode.getState().setActionIndex(i);
-         actionChildren.add(actionNode);
-         if (actionNode.getState().getIsExecuting())
+         if (getChildren().get(i) instanceof RDXActionNode<?, ?> actionNode)
          {
-            currentlyExecutingActions.add(actionNode);
+            actionNode.getState().setActionIndex(i);
+            actionChildren.add(actionNode);
+            if (actionNode.getState().getIsExecuting())
+            {
+               currentlyExecutingActions.add(actionNode);
+            }
          }
       }
    }

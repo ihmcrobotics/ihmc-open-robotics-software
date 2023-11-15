@@ -40,25 +40,25 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       currentlyExecutingActions.clear();
       for (int i = 0; i < getChildren().size(); i++)
       {
-         ActionNodeExecutor<?, ?> actionNodeExecutor = (ActionNodeExecutor<?, ?>) getChildren().get(i);
-         actionNodeExecutor.getState().setActionIndex(i);
-         executorChildren.add(actionNodeExecutor);
-         if (actionNodeExecutor.getState().getIsExecuting())
+         if (getChildren().get(i) instanceof ActionNodeExecutor<?, ?> actionNodeExecutor)
          {
-            currentlyExecutingActions.add(actionNodeExecutor);
+            actionNodeExecutor.getState().setActionIndex(i);
+            executorChildren.add(actionNodeExecutor);
+            if (actionNodeExecutor.getState().getIsExecuting())
+            {
+               currentlyExecutingActions.add(actionNodeExecutor);
+            }
          }
       }
 
       lastIndexOfConcurrentSetToExecute = findLastIndexOfConcurrentSetToExecute(executorChildren, getState().getExecutionNextIndex());
-      for (int i = 0; i < getChildren().size(); i++)
+      for (int i = 0; i < executorChildren.size(); i++)
       {
-         ActionNodeExecutor<?, ?> actionNodeExecutor = executorChildren.get(i);
-
          boolean isNextForExecution = i >= getState().getExecutionNextIndex() && i <= lastIndexOfConcurrentSetToExecute;
          boolean isToBeExecutedConcurrently = isNextForExecution && getState().getExecutionNextIndex() != lastIndexOfConcurrentSetToExecute;
 
-         actionNodeExecutor.getState().setIsNextForExecution(isNextForExecution);
-         actionNodeExecutor.getState().setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
+         executorChildren.get(i).getState().setIsNextForExecution(isNextForExecution);
+         executorChildren.get(i).getState().setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
       }
 
       for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)

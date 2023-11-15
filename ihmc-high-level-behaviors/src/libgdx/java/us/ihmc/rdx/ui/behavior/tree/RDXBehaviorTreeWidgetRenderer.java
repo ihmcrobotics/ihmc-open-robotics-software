@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.*;
@@ -13,7 +14,7 @@ public class RDXBehaviorTreeWidgetRenderer
    private final RDXBehaviorTree tree;
    private final BehaviorTreeModificationQueue modificationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXTreeNodeInsertionType insertionType = null;
+   private BehaviorTreeNodeInsertionType insertionType = null;
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
    private final TypedNotification<Runnable> queuePopupModal = new TypedNotification<>();
 
@@ -43,18 +44,18 @@ public class RDXBehaviorTreeWidgetRenderer
          {
             if (ImGui.menuItem("Insert Node Before..."))
             {
-               queuePopupModal.set(() -> popNodeCreationModalDialog(node, RDXTreeNodeInsertionType.INSERT_BEFORE));
+               queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_BEFORE));
             }
             if (ImGui.menuItem("Insert Node After..."))
             {
-               queuePopupModal.set(() -> popNodeCreationModalDialog(node, RDXTreeNodeInsertionType.INSERT_AFTER));
+               queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
             }
          }
          if (node.getChildren().isEmpty())
          {
             if (ImGui.menuItem("Add Child Node..."))
             {
-               queuePopupModal.set(() -> popNodeCreationModalDialog(node, RDXTreeNodeInsertionType.INSERT_AS_CHILD));
+               queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AS_CHILD));
             }
          }
          if (!(node.isRootNode() && !node.getChildren().isEmpty()))
@@ -104,7 +105,7 @@ public class RDXBehaviorTreeWidgetRenderer
       }
    }
 
-   private void popNodeCreationModalDialog(RDXBehaviorTreeNode<?, ?> node, RDXTreeNodeInsertionType insertionType)
+   private void popNodeCreationModalDialog(RDXBehaviorTreeNode<?, ?> node, BehaviorTreeNodeInsertionType insertionType)
    {
       this.modalPopupNode = node;
       this.insertionType = insertionType;

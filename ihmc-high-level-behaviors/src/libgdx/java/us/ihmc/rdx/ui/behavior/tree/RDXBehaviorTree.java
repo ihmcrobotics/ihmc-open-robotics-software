@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -176,7 +177,7 @@ public class RDXBehaviorTree
          ImGui.pushFont(ImGuiTools.getMediumFont());
          ImGui.text("Add a root node:");
          ImGui.popFont();
-         nodesMenu.renderNodeCreationWidgets(rootNode, RDXTreeNodeInsertionType.INSERT_ROOT);
+         nodesMenu.renderNodeCreationWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
    }
 
@@ -270,5 +271,10 @@ public class RDXBehaviorTree
    public RDXBehaviorTreeNodesMenu getNodesMenu()
    {
       return nodesMenu;
+   }
+
+   public RDXBehaviorTreeNodeBuilder getNodeBuilder()
+   {
+      return nodeBuilder;
    }
 }
