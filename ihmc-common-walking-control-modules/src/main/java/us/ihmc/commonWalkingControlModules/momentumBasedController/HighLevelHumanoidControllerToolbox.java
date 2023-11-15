@@ -45,7 +45,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.nadia.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
