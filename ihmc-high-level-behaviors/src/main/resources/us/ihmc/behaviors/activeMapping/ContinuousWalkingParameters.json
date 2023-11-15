@@ -1,0 +1,13 @@
+{
+  "title" : "Continuous Walking parameters",
+  "Active mapping" : false,
+  "Clear entire controller queue" : true,
+  "Number of steps to send" : 3,
+  "Max steps to hold in controller queue" : 3,
+  "Goal pose forward distance" : 1.6,
+  "Goal pose up distance" : 0.8,
+  "Swing time" : 1.0,
+  "Transfer time" : 0.6,
+  "Planning with reference timeout" : 0.8,
+  "Initial planning timeout" : 4.0
+}

@@ -14,15 +14,14 @@ import us.ihmc.tools.property.*;
  *
  * If the constant paths have changed, change them in this file and run the main to regenerate.
  */
-public class ContinuousPlanningParameters extends StoredPropertySet implements ContinuousPlanningParametersBasics
+public class ContinuousWalkingParameters extends StoredPropertySet implements ContinuousWalkingParametersBasics
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
-   public static final BooleanStoredPropertyKey pauseContinuousWalking = keys.addBooleanKey("Pause Continuous Walking");
-   public static final BooleanStoredPropertyKey onlyDoPlanning = keys.addBooleanKey("Only do planning");
+   public static final BooleanStoredPropertyKey clearEntireControllerQueue = keys.addBooleanKey("Clear entire controller queue");
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");
-   public static final IntegerStoredPropertyKey maxNumberOfStepsToHoldInControllerQueue = keys.addIntegerKey("Max number of steps to hold in controller queue");
+   public static final IntegerStoredPropertyKey maxStepsToHoldInControllerQueue = keys.addIntegerKey("Max steps to hold in controller queue");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
    public static final DoubleStoredPropertyKey goalPoseUpDistance = keys.addDoubleKey("Goal pose up distance");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
@@ -33,7 +32,7 @@ public class ContinuousPlanningParameters extends StoredPropertySet implements C
    /**
     * Loads this property set.
     */
-   public ContinuousPlanningParameters()
+   public ContinuousWalkingParameters()
    {
       this("");
    }
@@ -41,29 +40,29 @@ public class ContinuousPlanningParameters extends StoredPropertySet implements C
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public ContinuousPlanningParameters(String versionSuffix)
+   public ContinuousWalkingParameters(String versionSuffix)
    {
-      this(ContinuousPlanningParameters.class, versionSuffix);
+      this(ContinuousWalkingParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public ContinuousPlanningParameters(Class<?> classForLoading, String versionSuffix)
+   public ContinuousWalkingParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, ContinuousPlanningParameters.class, versionSuffix);
+      super(keys, classForLoading, ContinuousWalkingParameters.class, versionSuffix);
       load();
    }
 
-   public ContinuousPlanningParameters(StoredPropertySetReadOnly other)
+   public ContinuousWalkingParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, ContinuousPlanningParameters.class, other.getCurrentVersionSuffix());
+      super(keys, ContinuousWalkingParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys, ContinuousPlanningParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, ContinuousWalkingParameters.class);
       parameters.generateJavaFiles();
    }
 }

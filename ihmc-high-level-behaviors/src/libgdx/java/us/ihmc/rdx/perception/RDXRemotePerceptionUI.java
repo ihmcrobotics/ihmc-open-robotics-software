@@ -1,10 +1,7 @@
 package us.ihmc.rdx.perception;
 
-import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
+import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -27,7 +24,7 @@ public class RDXRemotePerceptionUI
    private RDXPanel panel;
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
-   private final ContinuousPlanningParameters continuousPlanningParameters = new ContinuousPlanningParameters();
+   private final ContinuousWalkingParameters continuousWalkingParameters = new ContinuousWalkingParameters();
    private final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private SwingPlannerParametersBasics swingPlannerParameters;
@@ -58,7 +55,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(continuousPlanningParameters, ContinuousPlanningAPI.CONTINUOUS_PLANNING_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(continuousWalkingParameters, ContinuousPlanningAPI.CONTINUOUS_PLANNING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
    }
 
@@ -95,9 +92,9 @@ public class RDXRemotePerceptionUI
       return perceptionConfigurationParameters;
    }
 
-   public ContinuousPlanningParameters getContinuousPlanningParameters()
+   public ContinuousWalkingParameters getContinuousPlanningParameters()
    {
-      return continuousPlanningParameters;
+      return continuousWalkingParameters;
    }
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()

@@ -65,7 +65,7 @@ public class RDXFootstepGraphic implements RenderableProvider
 
       modelInstance = new RDXModelInstance(RDXModelBuilder.buildModelInstance(meshBuilder ->
       {
-         meshBuilder.addMultiLine(vertices, 0.01, color, true);
+         meshBuilder.addMultiLine(vertices, 0.014, color, true);
       }, "footstepGraphic" + INDEX.getAndIncrement()));
       LibGDXTools.setOpacity(modelInstance, color.a);
    }

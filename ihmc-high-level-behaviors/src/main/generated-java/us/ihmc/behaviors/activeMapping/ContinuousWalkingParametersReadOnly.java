@@ -2,27 +2,22 @@ package us.ihmc.behaviors.activeMapping;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters.*;
+import static us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
  */
-public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetReadOnly
+public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetReadOnly
 {
    default boolean getActiveMapping()
    {
       return get(activeMapping);
    }
 
-   default boolean getPauseContinuousWalking()
+   default boolean getClearEntireControllerQueue()
    {
-      return get(pauseContinuousWalking);
-   }
-
-   default boolean getOnlyDoPlanning()
-   {
-      return get(onlyDoPlanning);
+      return get(clearEntireControllerQueue);
    }
 
    default int getNumberOfStepsToSend()
@@ -30,9 +25,9 @@ public interface ContinuousPlanningParametersReadOnly extends StoredPropertySetR
       return get(numberOfStepsToSend);
    }
 
-   default int getMaxNumberOfStepsToHoldInControllerQueue()
+   default int getMaxStepsToHoldInControllerQueue()
    {
-      return get(maxNumberOfStepsToHoldInControllerQueue);
+      return get(maxStepsToHoldInControllerQueue);
    }
 
    default double getGoalPoseForwardDistance()

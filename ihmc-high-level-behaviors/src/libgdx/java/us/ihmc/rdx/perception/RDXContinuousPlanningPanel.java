@@ -6,17 +6,11 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import org.apache.logging.log4j.core.layout.MessageLayout;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
@@ -45,10 +39,8 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    private final RDXSwingTrajectoryGraphic swingTrajectoryGraphic = new RDXSwingTrajectoryGraphic();
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final ImBoolean enableContinuousPlanner = new ImBoolean(false);
-   private final ImBoolean pauseContinuousWalking = new ImBoolean(false);
    private final ImBoolean renderEnabled = new ImBoolean(true);
-   private final ContinuousPlanningParameters continuousPlanningParameters;
-   private final RDXPanel panel;
+   private final ContinuousWalkingParameters continuousWalkingParameters;
    private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
    private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
 
@@ -62,14 +54,12 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    public RDXContinuousPlanningPanel(String name,
                                      ROS2Helper ros2Helper,
                                      HumanoidActivePerceptionModule activePerceptionModule,
-                                     ContinuousPlanningParameters continuousPlanningParameters,
+                                     ContinuousWalkingParameters continuousWalkingParameters,
                                      ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2Helper = ros2Helper;
-      this.continuousPlanningParameters = continuousPlanningParameters;
+      this.continuousWalkingParameters = continuousWalkingParameters;
       this.activePerceptionModule = activePerceptionModule;
-
-      panel = new RDXPanel(name, this::renderImGuiWidgets);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
                                                                                      .getContactPointParameters()
@@ -85,10 +75,10 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       goalFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
       goalFootstepGraphics.get(RobotSide.LEFT).create();
 
-      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f));
+      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
       startFootstepGraphics.get(RobotSide.RIGHT).create();
 
-      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f));
+      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
       startFootstepGraphics.get(RobotSide.LEFT).create();
 
       ros2Helper.subscribeViaCallback(ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
@@ -116,17 +106,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       if (plannerOutput != null)
       {
          swingTrajectoryGraphic.updateFromPlan(plannerOutput.getFootstepPlan(), plannerOutput.getSwingTrajectories());
-      }
-   }
-
-   public void renderImGuiWidgets()
-   {
-      ImGui.checkbox("Enable Continuous Planner", enableContinuousPlanner);
-      ImGui.checkbox("Pause Cintinuous Walking", pauseContinuousWalking);
-      if (continuousPlanningParameters != null)
-      {
-         continuousPlanningParameters.setPauseContinuousWalking(pauseContinuousWalking.get());
-         continuousPlanningParameters.setActiveMapping(enableContinuousPlanner.get());
       }
    }
 
@@ -166,11 +145,6 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
       goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
       goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
-   }
-
-   public RDXPanel getPanel()
-   {
-      return panel;
    }
 
    public void destroy()
