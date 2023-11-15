@@ -85,6 +85,8 @@ public class OusterNetServer
    public static final int MEASUREMENT_BLOCK_STATUS_BITS = 32;
    public static final int MEASUREMENT_BLOCK_STATUS_BYTES = MEASUREMENT_BLOCK_STATUS_BITS / BITS_PER_BYTE;
 
+   private static final int RECEIVE_PACKET_TIMEOUT = 3000;
+
    // Lidar frames are composed of N UDP datagrams (data packets) containing 16 measurement blocks each
    // Example: For a OS0-128 running at 2048x10Hz, there will be N = 2048 / 16 = 128 UDP datagrams / scan
    // The frequency of UDP datagrams in this case would be 128 * 10Hz = 1280 Hz UDP datagram processing.
@@ -136,6 +138,7 @@ public class OusterNetServer
       {
          LogTools.info("Binding to UDP port: " + UDP_PORT);
          udpSocket = new DatagramSocket(UDP_PORT);
+         udpSocket.setSoTimeout(RECEIVE_PACKET_TIMEOUT);
       }
       catch (SocketException e)
       {
@@ -148,6 +151,11 @@ public class OusterNetServer
          try
          {
             udpSocket.receive(packet);
+         }
+         catch (SocketTimeoutException timeoutException)
+         {
+            LogTools.warn("Ouster socket did not receive a packet.");
+            continue;
          }
          catch (IOException e)
          {
