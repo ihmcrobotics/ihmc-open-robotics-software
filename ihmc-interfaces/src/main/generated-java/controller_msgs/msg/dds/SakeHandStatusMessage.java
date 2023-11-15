@@ -31,8 +31,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
             * 0.0 min, 1.0 max
             */
    public double goal_torque_ratio_;
-   public boolean calibrated_;
-   public boolean needs_reset_;
+   public boolean is_in_error_state_;
 
    public SakeHandStatusMessage()
    {
@@ -58,9 +57,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       goal_torque_ratio_ = other.goal_torque_ratio_;
 
-      calibrated_ = other.calibrated_;
-
-      needs_reset_ = other.needs_reset_;
+      is_in_error_state_ = other.is_in_error_state_;
 
    }
 
@@ -142,22 +139,13 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return goal_torque_ratio_;
    }
 
-   public void setCalibrated(boolean calibrated)
+   public void setIsInErrorState(boolean is_in_error_state)
    {
-      calibrated_ = calibrated;
+      is_in_error_state_ = is_in_error_state;
    }
-   public boolean getCalibrated()
+   public boolean getIsInErrorState()
    {
-      return calibrated_;
-   }
-
-   public void setNeedsReset(boolean needs_reset)
-   {
-      needs_reset_ = needs_reset;
-   }
-   public boolean getNeedsReset()
-   {
-      return needs_reset_;
+      return is_in_error_state_;
    }
 
 
@@ -190,9 +178,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_torque_ratio_, other.goal_torque_ratio_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calibrated_, other.calibrated_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_in_error_state_, other.is_in_error_state_, epsilon)) return false;
 
 
       return true;
@@ -219,9 +205,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.goal_torque_ratio_ != otherMyClass.goal_torque_ratio_) return false;
 
-      if(this.calibrated_ != otherMyClass.calibrated_) return false;
-
-      if(this.needs_reset_ != otherMyClass.needs_reset_) return false;
+      if(this.is_in_error_state_ != otherMyClass.is_in_error_state_) return false;
 
 
       return true;
@@ -245,10 +229,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append(this.postion_ratio_);      builder.append(", ");
       builder.append("goal_torque_ratio=");
       builder.append(this.goal_torque_ratio_);      builder.append(", ");
-      builder.append("calibrated=");
-      builder.append(this.calibrated_);      builder.append(", ");
-      builder.append("needs_reset=");
-      builder.append(this.needs_reset_);
+      builder.append("is_in_error_state=");
+      builder.append(this.is_in_error_state_);
       builder.append("}");
       return builder.toString();
    }

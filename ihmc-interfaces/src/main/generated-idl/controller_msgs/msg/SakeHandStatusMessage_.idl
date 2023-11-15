@@ -39,8 +39,7 @@ module controller_msgs
          * 0.0 min, 1.0 max
          */
         double goal_torque_ratio;
-        boolean calibrated;
-        boolean needs_reset;
+        boolean is_in_error_state;
       };
     };
   };

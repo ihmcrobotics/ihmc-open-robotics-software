@@ -14,14 +14,12 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte HAND_CONFIGURATION_CALIBRATE = (byte) 0;
-   public static final byte HAND_CONFIGURATION_RESET = (byte) 1;
-   public static final byte HAND_CONFIGURATION_OPEN = (byte) 2;
-   public static final byte HAND_CONFIGURATION_CLOSE = (byte) 3;
-   public static final byte HAND_CONFIGURATION_RELEASE = (byte) 4;
-   public static final byte HAND_CONFIGURATION_GOTO_POSITION_WITH_TORQUE = (byte) 5;
-   public static final byte HAND_CONFIGURATION_GRIP_WITH_TORQUE = (byte) 6;
-   public static final byte HAND_CONFIGURATION_GRIP_HARD = (byte) 7;
+   public static final byte COMMAND_OPTION_OPEN = (byte) 0;
+   public static final byte COMMAND_OPTION_CLOSE = (byte) 1;
+   public static final byte COMMAND_OPTION_GRIP = (byte) 2;
+   public static final byte COMMAND_OPTION_GOAL_POSITION = (byte) 3;
+   public static final byte COMMAND_OPTION_SET_GOAL_TORQUE = (byte) 4;
+   public static final byte COMMAND_OPTION_CALIBRATE = (byte) 5;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -33,11 +31,11 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    /**
             * Specifies the grasp to perform
             */
-   public byte desired_hand_configuration_ = (byte) 255;
+   public byte desired_command_option_ = (byte) 255;
    /**
-            * 0.0 is closed, 1.0 is open
+            * 1.0 is closed, 0.0 is open
             */
-   public double postion_ratio_;
+   public double position_ratio_;
    /**
             * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
             */
@@ -59,9 +57,9 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       robot_side_ = other.robot_side_;
 
-      desired_hand_configuration_ = other.desired_hand_configuration_;
+      desired_command_option_ = other.desired_command_option_;
 
-      postion_ratio_ = other.postion_ratio_;
+      position_ratio_ = other.position_ratio_;
 
       torque_ratio_ = other.torque_ratio_;
 
@@ -100,31 +98,31 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    /**
             * Specifies the grasp to perform
             */
-   public void setDesiredHandConfiguration(byte desired_hand_configuration)
+   public void setDesiredCommandOption(byte desired_command_option)
    {
-      desired_hand_configuration_ = desired_hand_configuration;
+      desired_command_option_ = desired_command_option;
    }
    /**
             * Specifies the grasp to perform
             */
-   public byte getDesiredHandConfiguration()
+   public byte getDesiredCommandOption()
    {
-      return desired_hand_configuration_;
+      return desired_command_option_;
    }
 
    /**
-            * 0.0 is closed, 1.0 is open
+            * 1.0 is closed, 0.0 is open
             */
-   public void setPostionRatio(double postion_ratio)
+   public void setPositionRatio(double position_ratio)
    {
-      postion_ratio_ = postion_ratio;
+      position_ratio_ = position_ratio;
    }
    /**
-            * 0.0 is closed, 1.0 is open
+            * 1.0 is closed, 0.0 is open
             */
-   public double getPostionRatio()
+   public double getPositionRatio()
    {
-      return postion_ratio_;
+      return position_ratio_;
    }
 
    /**
@@ -164,9 +162,9 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_hand_configuration_, other.desired_hand_configuration_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_command_option_, other.desired_command_option_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.postion_ratio_, other.postion_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_ratio_, other.position_ratio_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
 
@@ -187,9 +185,9 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.desired_hand_configuration_ != otherMyClass.desired_hand_configuration_) return false;
+      if(this.desired_command_option_ != otherMyClass.desired_command_option_) return false;
 
-      if(this.postion_ratio_ != otherMyClass.postion_ratio_) return false;
+      if(this.position_ratio_ != otherMyClass.position_ratio_) return false;
 
       if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
 
@@ -207,10 +205,10 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("desired_hand_configuration=");
-      builder.append(this.desired_hand_configuration_);      builder.append(", ");
-      builder.append("postion_ratio=");
-      builder.append(this.postion_ratio_);      builder.append(", ");
+      builder.append("desired_command_option=");
+      builder.append(this.desired_command_option_);      builder.append(", ");
+      builder.append("position_ratio=");
+      builder.append(this.position_ratio_);      builder.append(", ");
       builder.append("torque_ratio=");
       builder.append(this.torque_ratio_);
       builder.append("}");

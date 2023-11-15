@@ -4,14 +4,12 @@
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
-byte HAND_CONFIGURATION_CALIBRATE = 0
-byte HAND_CONFIGURATION_RESET = 1
-byte HAND_CONFIGURATION_OPEN = 2
-byte HAND_CONFIGURATION_CLOSE = 3
-byte HAND_CONFIGURATION_RELEASE = 4
-byte HAND_CONFIGURATION_GOTO_POSITION_WITH_TORQUE = 5
-byte HAND_CONFIGURATION_GRIP_WITH_TORQUE = 6
-byte HAND_CONFIGURATION_GRIP_HARD = 7
+byte COMMAND_OPTION_OPEN = 0
+byte COMMAND_OPTION_CLOSE = 1
+byte COMMAND_OPTION_GRIP = 2
+byte COMMAND_OPTION_GOAL_POSITION = 3
+byte COMMAND_OPTION_SET_GOAL_TORQUE = 4
+byte COMMAND_OPTION_CALIBRATE = 5
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
@@ -19,9 +17,9 @@ uint32 sequence_id
 # Specifies the side of the robot that will execute the trajectory
 byte robot_side 255
 # Specifies the grasp to perform
-byte desired_hand_configuration 255
-# 0.0 is closed, 1.0 is open
-float64 postion_ratio
+byte desired_command_option 255
 
+# 1.0 is closed, 0.0 is open
+float64 position_ratio
 # Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
 float64 torque_ratio

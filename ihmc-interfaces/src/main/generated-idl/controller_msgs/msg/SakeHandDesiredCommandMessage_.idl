@@ -13,29 +13,23 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
-      const octet HAND_CONFIGURATION_CALIBRATE =
+      const octet COMMAND_OPTION_OPEN =
       0;
 
-      const octet HAND_CONFIGURATION_RESET =
+      const octet COMMAND_OPTION_CLOSE =
       1;
 
-      const octet HAND_CONFIGURATION_OPEN =
+      const octet COMMAND_OPTION_GRIP =
       2;
 
-      const octet HAND_CONFIGURATION_CLOSE =
+      const octet COMMAND_OPTION_GOAL_POSITION =
       3;
 
-      const octet HAND_CONFIGURATION_RELEASE =
+      const octet COMMAND_OPTION_SET_GOAL_TORQUE =
       4;
 
-      const octet HAND_CONFIGURATION_GOTO_POSITION_WITH_TORQUE =
+      const octet COMMAND_OPTION_CALIBRATE =
       5;
-
-      const octet HAND_CONFIGURATION_GRIP_WITH_TORQUE =
-      6;
-
-      const octet HAND_CONFIGURATION_GRIP_HARD =
-      7;
 
 
       /**
@@ -58,11 +52,11 @@ module controller_msgs
          * Specifies the grasp to perform
          */
         @defaultValue(value=255)
-        octet desired_hand_configuration;
+        octet desired_command_option;
         /**
-         * 0.0 is closed, 1.0 is open
+         * 1.0 is closed, 0.0 is open
          */
-        double postion_ratio;
+        double position_ratio;
         /**
          * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
          */

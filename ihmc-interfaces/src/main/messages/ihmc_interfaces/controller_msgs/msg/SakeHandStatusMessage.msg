@@ -15,5 +15,4 @@ float64 postion_ratio
 # 0.0 min, 1.0 max
 float64 goal_torque_ratio
 
-bool calibrated
-bool needs_reset
+bool is_in_error_state

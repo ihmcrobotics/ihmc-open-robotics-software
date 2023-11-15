@@ -15,7 +15,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f78813ecc39f58314d7b334c0e08265b3d2b19f06992f7be1ec117d81e8ab732";
+   		return "4734fcb5f6d6af61cb9c9df0239e106e7d668af69e771052a3d392ef4468de7c";
    }
    
    @Override
@@ -100,9 +100,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_9(data.getDesiredHandConfiguration());
+      cdr.write_type_9(data.getDesiredCommandOption());
 
-      cdr.write_type_6(data.getPostionRatio());
+      cdr.write_type_6(data.getPositionRatio());
 
       cdr.write_type_6(data.getTorqueRatio());
 
@@ -114,9 +114,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setDesiredHandConfiguration(cdr.read_type_9());
+      data.setDesiredCommandOption(cdr.read_type_9());
       	
-      data.setPostionRatio(cdr.read_type_6());
+      data.setPositionRatio(cdr.read_type_6());
       	
       data.setTorqueRatio(cdr.read_type_6());
       	
@@ -128,8 +128,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_9("desired_hand_configuration", data.getDesiredHandConfiguration());
-      ser.write_type_6("postion_ratio", data.getPostionRatio());
+      ser.write_type_9("desired_command_option", data.getDesiredCommandOption());
+      ser.write_type_6("position_ratio", data.getPositionRatio());
       ser.write_type_6("torque_ratio", data.getTorqueRatio());
    }
 
@@ -138,8 +138,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setDesiredHandConfiguration(ser.read_type_9("desired_hand_configuration"));
-      data.setPostionRatio(ser.read_type_6("postion_ratio"));
+      data.setDesiredCommandOption(ser.read_type_9("desired_command_option"));
+      data.setPositionRatio(ser.read_type_6("position_ratio"));
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
    }
 
