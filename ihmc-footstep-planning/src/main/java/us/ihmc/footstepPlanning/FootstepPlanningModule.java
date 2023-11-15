@@ -188,7 +188,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else
       {
-         LogTools.info("Handling footstep planner request...");
+         if (getRequest().hasReferenceFootstepPlan())
+            LogTools.info("Handling footstep planner request (with reference plan) ...");
+         else
+            LogTools.info("Handling footstep planner request...");
       }
 
       stopwatch.start();
