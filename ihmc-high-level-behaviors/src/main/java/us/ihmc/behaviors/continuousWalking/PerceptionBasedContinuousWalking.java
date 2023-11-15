@@ -2,7 +2,7 @@ package us.ihmc.behaviors.continuousWalking;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
+import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -10,7 +10,6 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
-import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.pubsub.DomainFactory;
@@ -27,7 +26,7 @@ public class PerceptionBasedContinuousWalking
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private TerrainPerceptionProcessWithDriver perceptionTask;
    private HumanoidActivePerceptionModule activePerceptionModule;
-   private final ContinuousPlanningParameters continuousPlanningParameters = new ContinuousPlanningParameters();
+   private final ContinuousWalkingParameters continuousPlanningParameters = new ContinuousWalkingParameters();
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),

@@ -3,7 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
+import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
@@ -31,13 +31,13 @@ public class HumanoidActivePerceptionModule
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingThread;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
-   private final ContinuousPlanningParameters continuousPlanningParameters;
+   private final ContinuousWalkingParameters continuousPlanningParameters;
 
    public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters,
-                                         ContinuousPlanningParameters continuousPlanningParameters)
+                                         ContinuousWalkingParameters continuousWalkingParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
-      this.continuousPlanningParameters = continuousPlanningParameters;
+      this.continuousPlanningParameters = continuousWalkingParameters;
    }
 
    public void initializeActivePlaneMappingTask(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
