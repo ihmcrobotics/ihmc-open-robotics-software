@@ -205,8 +205,11 @@ public class RealsenseColorDepthImageRetriever
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
       stop();
-      depthImage.release();
-      colorImage.release();
+
+      if (depthImage != null)
+         depthImage.release();
+      if (colorImage != null)
+         colorImage.release();
       if (realsense.getDevice() != null)
          realsense.deleteDevice();
       realsenseManager.deleteContext();
