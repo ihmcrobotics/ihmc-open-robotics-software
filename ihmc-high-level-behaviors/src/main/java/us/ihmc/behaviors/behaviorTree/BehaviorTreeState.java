@@ -3,12 +3,10 @@ package us.ihmc.behaviors.behaviorTree;
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModification;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 
-import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 

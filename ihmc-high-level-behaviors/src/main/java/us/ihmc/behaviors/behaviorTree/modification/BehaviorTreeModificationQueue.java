@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.modification;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -27,6 +28,30 @@ public class BehaviorTreeModificationQueue
       }
 
       return modified;
+   }
+
+   public void queueInsertNode(BehaviorTreeState tree,
+                               BehaviorTreeNodeExtension<?, ?, ?, ?> nodeToInsert,
+                               BehaviorTreeNodeExtension<?, ?, ?, ?> relativeNode,
+                               Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter,
+                               BehaviorTreeNodeInsertionType insertionType)
+   {
+      switch (insertionType)
+      {
+         case INSERT_ROOT ->
+         {
+            queueSetRootNode(nodeToInsert, rootNodeSetter);
+            tree.freeze();
+         }
+         case INSERT_BEFORE, INSERT_AFTER ->
+         {
+            queueInsertNode(nodeToInsert, relativeNode, insertionType);
+         }
+         case INSERT_AS_CHILD ->
+         {
+            queueAddNode(nodeToInsert, relativeNode);
+         }
+      }
    }
 
    public void queueSetRootNode(BehaviorTreeNodeExtension<?, ?, ?, ?> node, Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> setter)
@@ -57,6 +82,18 @@ public class BehaviorTreeModificationQueue
    public <T extends BehaviorTreeNode<T>> void queueAddNode(T nodeToAdd, T parent)
    {
       modificationQueue.add(new BehaviorTreeNodeAdd<>(nodeToAdd, parent));
+   }
+
+   public <T extends BehaviorTreeNode<T>> void queueInsertNode(T nodeToInsert, T existingNode, BehaviorTreeNodeInsertionType insertionType)
+   {
+      modificationQueue.add(new BehaviorTreeNodeInsert<>(nodeToInsert, existingNode, insertionType));
+   }
+
+   public void queueInsertNode(BehaviorTreeNodeExtension<?, ?, ?, ?> nodeToInsert,
+                            BehaviorTreeNodeExtension<?, ?, ?, ?> existingNode,
+                            BehaviorTreeNodeInsertionType insertionType)
+   {
+      modificationQueue.add(new BehaviorTreeNodeExtensionInsert(nodeToInsert, existingNode, insertionType));
    }
 
    public void queueAddNode(BehaviorTreeNodeExtension<?, ?, ?, ?> nodeToAdd, BehaviorTreeNodeExtension<?, ?, ?, ?> parent)
