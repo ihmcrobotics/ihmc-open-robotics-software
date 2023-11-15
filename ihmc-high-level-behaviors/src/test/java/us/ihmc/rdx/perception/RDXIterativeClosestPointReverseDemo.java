@@ -8,7 +8,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
+import org.ejml.simple.SimpleSVD;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,6 +23,8 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
+import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
+import us.ihmc.rdx.simulation.environment.object.objects.RDXArUcoBoxObject;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -78,9 +82,11 @@ public class RDXIterativeClosestPointReverseDemo
    private DMatrixRMaj zeroMatrixPoint = new DMatrixRMaj(1,3);
 
    private final SvdImplicitQrDecompose_DDRM svdSolver = new SvdImplicitQrDecompose_DDRM(false, true, true, false);
-   private int envSize = 600;
-
-
+   private int envSize = 6;
+   private Point3D testPointInWorld = new Point3D(2.5, 0.0, 1.0);
+   private RDXEnvironmentObject realBox;
+   private Pose3D realBoxPose = new Pose3D();;
+   private long counter = 0;
 
 
 
@@ -93,13 +99,14 @@ public class RDXIterativeClosestPointReverseDemo
          {
             // Create base GUI
             baseUI.create();
+            baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, 0.0, 2.5);
 
             // Create Environment and render panels
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
-
+            realBox = environmentBuilder.getAllObjects().get(3);
             // Place sensor in environment
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
@@ -108,7 +115,7 @@ public class RDXIterativeClosestPointReverseDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             // Adjust sensor position to better see the box
-            sensorPoseGizmo.getTransformToParent().appendTranslation(.2, -0.5, 2.);
+            sensorPoseGizmo.getTransformToParent().appendTranslation(0., 0., 5.);
             sensorPoseGizmo.getTransformToParent().appendYawRotation(0.0 * Math.PI / 180.0);
             sensorPoseGizmo.getTransformToParent().appendPitchRotation(60. * Math.PI / 180.0);
 
@@ -164,22 +171,31 @@ public class RDXIterativeClosestPointReverseDemo
             // Create point cloud and renderer for box points
             Random random = new Random(0);
 //            random.nextDouble(-boxHalfSize, boxHalfSize);
-            float halfBoxWidth = (float)RigidBodySceneObjectDefinitions.BOX_WIDTH/2.0f;
-            float halfBoxDepth = (float)RigidBodySceneObjectDefinitions.BOX_DEPTH/2.0f;
-            float halfBoxHeight = (float)RigidBodySceneObjectDefinitions.BOX_HEIGHT/2.0f;
+//            float halfBoxWidth = (float)RigidBodySceneObjectDefinitions.BOX_WIDTH/2.0f;
+//            float halfBoxDepth = (float)RigidBodySceneObjectDefinitions.BOX_DEPTH/2.0f;
+//            float halfBoxHeight = (float)RigidBodySceneObjectDefinitions.BOX_HEIGHT/2.0f;
+//            for (int i = 0; i < 6; i++) {
+//               for (int j = 0; j < 600; j++) {
+//                  float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
+//                  float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
+//                  float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
+//                  if (i==0 | i==1) {x = (-((i >> 0)&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
+//                  if (i==2 | i==3) {y = (-((i >> 0)&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
+//                  if (i==4 | i==5) {z = (-((i >> 0)&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
+//                  pointA.setToZero(boxReferenceFrame);
+//                  pointA.set(x,y,z);
+//                  FramePoint3D worldFramePoint = boxModelPoints.add();
+//                  worldFramePoint.setIncludingFrame(pointA);
+//               }
+//            }
             for (int i = 0; i < 6; i++) {
-               for (int j = 0; j < 100; j++) {
-                  float x =(float)random.nextDouble(-halfBoxDepth, halfBoxDepth);
-                  float y =(float)random.nextDouble(-halfBoxWidth, halfBoxWidth);
-                  float z =(float)random.nextDouble(-halfBoxHeight, halfBoxHeight);
-                  if (i==0 | i==1) {x = (-((i >> 0)&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
-                  if (i==2 | i==3) {y = (-((i >> 0)&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
-                  if (i==4 | i==5) {z = (-((i >> 0)&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
-                  pointA.setToZero(boxReferenceFrame);
-                  pointA.set(x,y,z);
-                  FramePoint3D worldFramePoint = boxModelPoints.add();
-                  worldFramePoint.setIncludingFrame(pointA);
-               }
+               float x = -0.5f+(0.2f*i);
+               float y = 0.0f;
+               float z = 0.0f;
+               pointA.setToZero(boxReferenceFrame);
+               pointA.set(x,y,z);
+               FramePoint3D worldFramePoint = boxModelPoints.add();
+               worldFramePoint.setIncludingFrame(pointA);
             }
 
             RDXInteractableReferenceFrame interactableReferenceFrame = new RDXInteractableReferenceFrame();
@@ -190,7 +206,7 @@ public class RDXIterativeClosestPointReverseDemo
             baseUI.getPrimaryScene().addRenderableProvider(boxPointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
             // Pick 3D point when collision is selected
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::ICPMainFunction);
+//            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::ICPMainFunction);
 
             // Create ICP panel
             baseUI.getImGuiPanelManager().addPanel("Iterative Closest Point", this::renderImGuiICPWidgets);
@@ -200,45 +216,54 @@ public class RDXIterativeClosestPointReverseDemo
             baseUI.add3DPanel(panel3D);
 
             // Initialize ICP distances and indices
-            for (int i = 0; i < boxModelPoints.size(); i++) {
+            for (int i = 0; i < envSize; i++) {
                ICPDistances.add(Float.MAX_VALUE);
                ICPIndices.add(0);
             }
 
             boxCentroid  = new DMatrixRMaj(1, 3);
             envCentroid  = new DMatrixRMaj(1, 3);
-            boxCentroidSubtractedPoints = new DMatrixRMaj(boxModelPoints.size(), 3);
+            boxCentroidSubtractedPoints = new DMatrixRMaj(envSize, 3);
             boxCorrespondencePoints = new DMatrixRMaj(envSize, 3);
             envCentroidSubtractedPoints = new DMatrixRMaj(envSize, 3);
+
+            getBoxPoints();
           }
 
 
 
-         private void ICPMainFunction(us.ihmc.rdx.input.ImGui3DViewInput input) {
-            float cuttoffRange = .4f;
-            pickPointInWorld = input.getPickPointInWorld();
-            Point3D testPointInWorld = new Point3D(1.0, -0.573, 0.932);
+         private void ICPMainFunction() {
+            float cuttoffRange = .5f;
+//            pickPointInWorld = input.getPickPointInWorld();
             LibGDXTools.toLibGDX(testPointInWorld, mousePickSphere.transform);
-            envPointCloud.clear();
 
+            envPointCloud.clear();
             if (ICPToggle.get()) {
-               List<Point3D> depthData =  highLevelDepthSensorSimulator.getPointCloud();
+               List<Point3D> depthData = highLevelDepthSensorSimulator.getPointCloud();
 
                // Seclect env point cloud and filter based on distance
-               for (int i = 0; i < depthData.size(); i++) {
-                  Point3D envPoint = depthData.get(i);
-                  double pointDifferenceFromSelected = testPointInWorld.distance(envPoint);
-                  if (pointDifferenceFromSelected <= cuttoffRange)
-                  {
-                     envPointCloud.add().set(envPoint);
-                  }
+//               for (int i = 0; i < depthData.size(); i++) {
+//                  Point3D envPoint = depthData.get(i);
+//                  double pointDifferenceFromSelected = testPointInWorld.distance(envPoint);
+//                  if (pointDifferenceFromSelected <= cuttoffRange) {
+//                     envPointCloud.add().set(envPoint);
+//                  }
+//               }
+
+               for (int i = 0; i < 6; i++) {
+                  float x = 1.0f;
+                  float y = 0.5f+(0.2f*i);
+                  float z = 1.0f;
+                  envPointCloud.add().set(x,y,z);
                }
+
+
 
 
 
                // START ICP CALCS
                // Calc nearest neighbor env to object
-               if (envPointCloud.size() >boxModelPoints.size()) {
+               if (envPointCloud.size() >= envSize) {
                   envPointCloud.shuffle(new Random(0));
                   for (int i = 0; i < envSize; i++) {
                      ICPDistances.set(i, Float.MAX_VALUE);
@@ -264,21 +289,18 @@ public class RDXIterativeClosestPointReverseDemo
                   }
 
 
-
-
-
                   // Calculate data centroid and arrange in matrices
                   boxCentroid.set(zeroMatrixPoint);
-                  for (int i = 0; i < boxCorrespondencePoints.numRows; i++) {
-                     boxCentroid.add(0, 0, boxCorrespondencePoints.get(i,0));
-                     boxCentroid.add(0, 1, boxCorrespondencePoints.get(i,1));
-                     boxCentroid.add(0, 2, boxCorrespondencePoints.get(i,2));
+                  for (int i = 0; i < envSize; i++) {
+                     boxCentroid.add(0, 0, boxCorrespondencePoints.get(i, 0));
+                     boxCentroid.add(0, 1, boxCorrespondencePoints.get(i, 1));
+                     boxCentroid.add(0, 2, boxCorrespondencePoints.get(i, 2));
                   }
                   boxCentroid.set(0, 0, boxCentroid.get(0, 0) / boxCorrespondencePoints.numRows);
                   boxCentroid.set(0, 1, boxCentroid.get(0, 1) / boxCorrespondencePoints.numRows);
                   boxCentroid.set(0, 2, boxCentroid.get(0, 2) / boxCorrespondencePoints.numRows);
 
-                  for (int i = 0; i < boxCorrespondencePoints.numRows; i++) {
+                  for (int i = 0; i < envSize; i++) {
                      boxCentroidSubtractedPoints.set(i, 0, boxCorrespondencePoints.get(i, 0) - boxCentroid.get(0, 0));
                      boxCentroidSubtractedPoints.set(i, 1, boxCorrespondencePoints.get(i, 1) - boxCentroid.get(0, 1));
                      boxCentroidSubtractedPoints.set(i, 2, boxCorrespondencePoints.get(i, 2) - boxCentroid.get(0, 2));
@@ -301,67 +323,125 @@ public class RDXIterativeClosestPointReverseDemo
                      envCentroidSubtractedPoints.set(i, 2, envPointCloud.get(i).getZ() - envCentroid.get(0, 2));
                   }
 
-
                   // Initialize matrix variables
                   DMatrixRMaj H = new DMatrixRMaj(3, 3);
                   DMatrixRMaj U = new DMatrixRMaj(3, 3);
-                  DMatrixRMaj Vt = new DMatrixRMaj(3, 3);
+                  DMatrixRMaj V = new DMatrixRMaj(3, 3);
                   DMatrixRMaj R = new DMatrixRMaj(3, 3);
                   DMatrixRMaj newBoxLocation = new DMatrixRMaj(1, 3);
                   DMatrixRMaj boxTranslation = new DMatrixRMaj(1, 3);
                   DMatrixRMaj T = new DMatrixRMaj(4, 4);
                   CommonOps_DDRM.setIdentity(T);
 
+
+
+
+
+
+
+
+
+
+
+
+                  // Set up test points
+//                  DMatrixRMaj testObjPoints = new DMatrixRMaj(6, 3);
+//                  DMatrixRMaj testEnvPoints = new DMatrixRMaj(6, 3);
+//
+//                  for (int i = 0; i < 6; i++) {
+//                     testObjPoints.set(i, 0, -0.5+(0.2*i));
+//                     testObjPoints.set(i, 1, 0.0);
+//                     testObjPoints.set(i, 2, 0.0);
+//
+//                     testEnvPoints.set(i, 0, 0.0);
+//                     testEnvPoints.set(i, 1, -0.5+(0.2*i));
+//                     testEnvPoints.set(i, 2, 0.0);
+//                  }
+//
+//                  DMatrixRMaj testboxCentroid = new DMatrixRMaj(1, 3);
+//                  DMatrixRMaj testenvCentroid = new DMatrixRMaj(1, 3);
+//
+//                  testboxCentroid.set(0,0,0.5);
+//                  testboxCentroid.set(0,1,0.0);
+//                  testboxCentroid.set(0,2,0.0);
+//
+//                  testenvCentroid.set(0,0,1.0);
+//                  testenvCentroid.set(0,1,1.5);
+//                  testenvCentroid.set(0,2,1.0);
+
+
+
                   // Best Fit Transform
-                  CommonOps_DDRM.multTransA(envCentroidSubtractedPoints, boxCentroidSubtractedPoints, H);
+                  CommonOps_DDRM.multTransA(boxCentroidSubtractedPoints, envCentroidSubtractedPoints, H);
+//                  CommonOps_DDRM.multTransA(testObjPoints, testEnvPoints, H);
+//                  CommonOps_DDRM.transpose(H);
 
                   svdSolver.decompose(H);
-                  svdSolver.getU(U, false);
-                  svdSolver.getV(Vt, true);
+                  svdSolver.getU(U, true);
+                  svdSolver.getV(V, true);
 
+                  SimpleSVD svdSimpleSolver = new SimpleSVD(H,false);
+                  DMatrixRMaj Utest = new DMatrixRMaj(3, 3);
+                  DMatrixRMaj Vtest = new DMatrixRMaj(3, 3);
+                  Utest = svdSimpleSolver.getU().getDDRM();
+                  Vtest = svdSimpleSolver.getV().getDDRM();
 
-//                  CommonOps_DDRM.transpose(U);
-//                  CommonOps_DDRM.transpose(Vt);
-                  CommonOps_DDRM.mult(Vt, U, R);
+//                  CommonOps_DDRM.transpose(Utest);
+//                  CommonOps_DDRM.transpose(Vtest);
+                  CommonOps_DDRM.mult(V, U, R);
+//                  CommonOps_DDRM.transpose(R);
 
                   // check if transform wants to reflect instead of rotate and fix it
                   if (CommonOps_DDRM.det(R) < 0) {
-                     Vt.set(2,0,-Vt.get(2,0));
-                     Vt.set(2,1,-Vt.get(2,1));
-                     Vt.set(2,2,-Vt.get(2,2));
-                     CommonOps_DDRM.mult(Vt, U, R);
+                     Vtest.set(2, 0, -Vtest.get(2, 0));
+                     Vtest.set(2, 1, -Vtest.get(2, 1));
+                     Vtest.set(2, 2, -Vtest.get(2, 2));
+                     CommonOps_DDRM.mult(Vtest, Utest, R);
                      System.out.println("flipped");
-                  }
-                  else{
+                  } else {
                      System.out.println("NOT");
                   }
 
-//                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
-//                  CommonOps_DDRM.transpose(newBoxLocation);
+                  CommonOps_DDRM.multTransB(R, boxCentroid, newBoxLocation);
+                  CommonOps_DDRM.transpose(newBoxLocation);
+//                  CommonOps_DDRM.subtract(envCentroid, newBoxLocation, boxTranslation);
                   CommonOps_DDRM.subtract(envCentroid, boxCentroid, boxTranslation);
 
 
-                  boxTransform.getTranslation().addX(boxTranslation.get(0,0));
-                  boxTransform.getTranslation().addY(boxTranslation.get(0,1));
-                  boxTransform.getTranslation().addZ(boxTranslation.get(0,2));
-                  boxTransform.getRotation().set(R);
+                  boxTransform.getTranslation().addX(boxTranslation.get(0, 0));
+                  boxTransform.getTranslation().addY(boxTranslation.get(0, 1));
+                  boxTransform.getTranslation().addZ(boxTranslation.get(0, 2));
+//                  boxTransform.getRotation().set(R);
 
 
+                  //                  testPointInWorld.set(boxTransform.getTranslation().getX(), boxTransform.getTranslation().getY(), boxTransform.getTranslation().getZ());
 
 
                   // Render ICP point cloud
                   if (envPointCloud.size() >= 1) {
                      for (int i = 0; i < envPointCloud.size(); i++) {
-                        envPointCloud.get(i).add(0,0,.01);
+                        envPointCloud.get(i).add(0, 0, .01);
                      }
-                     envPointCloudRenderer.setPointsToRender(envPointCloud, Color.GRAY);
-                     envPointCloudRenderer.updateMesh();
+//                     envPointCloudRenderer.setPointsToRender(envPointCloud, Color.GRAY);
+//                     envPointCloudRenderer.updateMesh();
                   }
                }
             }
          }
 
 
+         private void getBoxPoints(){
+            boxInWorldPoints.clear();
+            for (int i = 0; i < boxModelPoints.size(); i++)
+            {
+               Point3D32 testPoint = boxInWorldPoints.add();
+               FramePoint3D testTwo = boxModelPoints.get(i);
+               testTwo.add(1.49,0.995,0.51);
+               testTwo.changeFrame(ReferenceFrame.getWorldFrame());
+               testPoint.set(testTwo);
+               testTwo.changeFrame(boxReferenceFrame);
+            }
+         }
 
          // Render ICP Panel
          private void renderImGuiICPWidgets()
@@ -384,11 +464,22 @@ public class RDXIterativeClosestPointReverseDemo
          public void render()
          {
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            counter = baseUI.getRenderIndex();
+            double x = 1.5;
+//            double y = (Math.sin(((double)counter)*0.0125));
+            double y = 1.0;
+            double z = 0.5;
 
+//            double x = (Math.sin(((double)counter)*0.005)*2.0)+2.5;
+//            double y = (Math.sin(((double)counter)*0.0125)*2.0);
+//            double z = (Math.sin(((double)counter)*0.0165)*.5)+1.;
+//            realBoxPose.set(x,y,z,0.785,0,0);
+            realBoxPose.set(x,y,z,0.0,0,0);
+            testPointInWorld.set(x,y,z);
+            realBox.setPoseInWorld(realBoxPose);
 
             int aliasedRenderedAreaWidth = (int) baseUI.getPrimary3DPanel().getRenderSizeX();
             int aliasedRenderedAreaHeight = (int) baseUI.getPrimary3DPanel().getRenderSizeY();
-
             ByteBuffer depthBuffer = baseUI.getPrimary3DPanel().getNormalizedDeviceCoordinateDepthDirectByteBuffer();
             if (depthBuffer != null)
             {
@@ -413,19 +504,12 @@ public class RDXIterativeClosestPointReverseDemo
 
 
 
-            // Render Box Points
-//            boxTransform.getTranslation().addX(0.001);
-            boxInWorldPoints.clear();
-            for (int i = 0; i < boxModelPoints.size(); i++)
-            {
-               Point3D32 testPoint = boxInWorldPoints.add();
-               FramePoint3D testTwo = boxModelPoints.get(i);
-               testTwo.changeFrame(ReferenceFrame.getWorldFrame());
-               testPoint.set(testTwo);
-               testTwo.changeFrame(boxReferenceFrame);
-            }
+
+//            getBoxPoints();
+//            ICPMainFunction();
+
             boxPointCloudRenderer.create(boxModelPoints.size());
-            boxPointCloudRenderer.setPointsToRender(boxInWorldPoints, Color.WHITE);
+            boxPointCloudRenderer.setPointsToRender(boxInWorldPoints, Color.BLUE);
             boxPointCloudRenderer.updateMesh();
 
 
