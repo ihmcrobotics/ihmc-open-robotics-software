@@ -21,7 +21,6 @@ public class ActiveMappingTools
                                                      float zDistance)
    {
       float offsetX = (float) (Math.random() * 0.2 - 0.1);
-      float offsetY = (float) (Math.random() * 0.2 - 0.1);
 
       FramePose3D finalGoalMidPose = new FramePose3D();
       finalGoalMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
@@ -39,8 +38,7 @@ public class ActiveMappingTools
          double xWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
          goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
          goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
-         goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, offsetY, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
-//         goalPose.get(side).appendTranslation(stancePose.get(RobotSide.LEFT).getPosition().getX() + xDistance, offsetY, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
+         goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
       goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.11, 0.0);
