@@ -115,6 +115,7 @@ public class RDXBehaviorTreeNodesMenu
                                                     .createNode(nodeType,
                                                                 tree.getBehaviorTreeState().getAndIncrementNextID(),
                                                                 tree.getBehaviorTreeState().getCRDTInfo());
+            tree.getNodeBuilder().initializeNewNode(newNode);
             modificationQueue.queueInsertNode(tree.getBehaviorTreeState(), newNode, parentNode, tree::setRootNode, insertionType);
             ImGui.closeCurrentPopup();
          }
