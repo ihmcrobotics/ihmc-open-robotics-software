@@ -12,6 +12,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.logging.log4j.core.layout.MessageLayout;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -24,7 +25,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -54,12 +57,19 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private final ROS2Helper ros2Helper;
+   private HumanoidActivePerceptionModule activePerceptionModule;
 
-   public RDXContinuousPlanningPanel(String name, ROS2Helper ros2Helper, ContinuousPlanningParameters continuousPlanningParameters, ROS2SyncedRobotModel syncedRobot)
+   public RDXContinuousPlanningPanel(String name,
+                                     ROS2Helper ros2Helper,
+                                     HumanoidActivePerceptionModule activePerceptionModule,
+                                     ContinuousPlanningParameters continuousPlanningParameters,
+                                     ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2Helper = ros2Helper;
-      panel = new RDXPanel(name, this::renderImGuiWidgets);
       this.continuousPlanningParameters = continuousPlanningParameters;
+      this.activePerceptionModule = activePerceptionModule;
+
+      panel = new RDXPanel(name, this::renderImGuiWidgets);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel()
                                                                                      .getContactPointParameters()
@@ -98,7 +108,15 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    {
       FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(message);
 
-      //swingTrajectoryGraphic.updateFromPlan(plan, );
+      //swingTrajectoryGraphic.updateFromPlan(plan);
+   }
+
+   public void generateSwingGraphics(FootstepPlannerOutput plannerOutput)
+   {
+      if (plannerOutput != null)
+      {
+         swingTrajectoryGraphic.updateFromPlan(plannerOutput.getFootstepPlan(), plannerOutput.getSwingTrajectories());
+      }
    }
 
    public void renderImGuiWidgets()
@@ -114,7 +132,11 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
 
    public void render()
    {
-      generateSwingGraphics(footstepDataListMessage.get());
+      if (activePerceptionModule != null)
+      {
+         generateSwingGraphics(activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getPlannerOutput());
+      }
+
       generateStartAndGoalFootstepGraphics();
    }
 
