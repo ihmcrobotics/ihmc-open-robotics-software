@@ -1,0 +1,12 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "3D View 2" : false,
+    "Environment###java.lang.Class:Environment" : false,
+    "Iterative Closest Point" : true,
+    "Main view depth" : false,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}
