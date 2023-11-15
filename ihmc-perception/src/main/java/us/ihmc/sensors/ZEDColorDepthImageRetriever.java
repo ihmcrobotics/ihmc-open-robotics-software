@@ -261,12 +261,14 @@ public class ZEDColorDepthImageRetriever
       zedGrabThread.stop();
 
       depthImagePointer.close();
-      depthImage.release();
+      if (depthImage != null)
+         depthImage.release();
 
       colorImagePointer.close();
       for (RobotSide side : RobotSide.values)
       {
-         colorImages.get(side).release();
+         if (colorImages.get(side) != null)
+            colorImages.get(side).release();
       }
       sl_close_camera(cameraID);
       System.out.println("Destroyed " + this.getClass().getSimpleName());

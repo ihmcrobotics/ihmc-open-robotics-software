@@ -279,7 +279,9 @@ public class ZEDColorDepthImagePublisher
          depthPublishLock.unlock();
       }
       publishDepthThread.blockingStop();
-      nextGpuDepthImage.release();
+
+      if (nextGpuDepthImage != null)
+         nextGpuDepthImage.release();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -294,7 +296,8 @@ public class ZEDColorDepthImagePublisher
          }
          publishColorThreads.get(side).blockingStop();
          imageEncoders.get(side).destroy();
-         nextGpuColorImages.get(side).release();
+         if (nextGpuColorImages.get(side) != null)
+            nextGpuColorImages.get(side).release();
          ros2ColorImagePublishers.get(side).destroy();
       }
 

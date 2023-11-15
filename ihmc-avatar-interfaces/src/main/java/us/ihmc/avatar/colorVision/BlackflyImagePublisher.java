@@ -170,9 +170,9 @@ public class BlackflyImagePublisher
       }
       publishDistoredColorThread.blockingStop();
 
-      nextGpuDistortedImage.release();
+      if (nextGpuDistortedImage != null)
+         nextGpuDistortedImage.release();
 
-      nextGpuDistortedImage.release();
       imageEncoder.destroy();
       ros2DistoredImagePublisher.destroy();
       ros2Node.destroy();

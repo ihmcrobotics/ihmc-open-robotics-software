@@ -127,7 +127,8 @@ public class OusterDepthImageRetriever
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
       stop();
-      depthImage.release();
+      if (depthImage != null)
+         depthImage.release();
       System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 }

@@ -258,8 +258,10 @@ public class RealsenseColorDepthImagePublisher
          colorPublishLock.unlock();
       }
 
-      nextCpuDepthImage.release();
-      nextCpuColorImage.release();
+      if (nextCpuDepthImage != null)
+         nextCpuDepthImage.release();
+      if (nextCpuColorImage != null)
+         nextCpuColorImage.release();
 
       imageEncoder.destroy();
 
