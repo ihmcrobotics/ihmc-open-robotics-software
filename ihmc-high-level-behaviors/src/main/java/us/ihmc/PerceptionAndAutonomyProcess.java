@@ -369,7 +369,6 @@ public class PerceptionAndAutonomyProcess
    private void initializeOuster()
    {
       ouster = new OusterNetServer();
-      ouster.start();
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster, ousterFrameSupplier, lidarScanHeartbeat::isAlive, heightMapHeartbeat::isAlive);
       ousterDepthImagePublisher = new OusterDepthImagePublisher(ouster, OUSTER_DEPTH_TOPIC);
       ousterProcessAndPublishThread = new RestartableThread("OusterProcessAndPublish", this::processAndPublishOuster);
@@ -384,11 +383,13 @@ public class PerceptionAndAutonomyProcess
          {
             if (ouster == null)
                initializeOuster();
+            ouster.start();
             ousterDepthImageRetriever.start();
             ousterDepthImagePublisher.startDepth();
          }
          else
          {
+            ouster.stop();
             ousterDepthImageRetriever.stop();
             ousterDepthImagePublisher.stopDepth();
          }
