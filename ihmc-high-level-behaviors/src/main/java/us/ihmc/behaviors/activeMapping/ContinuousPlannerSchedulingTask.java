@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -13,8 +11,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -32,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlannerSchedulingTask
 {
-   private final static long CONTINUOUS_PLANNING_DELAY_MS = 10;
+   private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private enum ContinuousWalkingState
    {
@@ -52,19 +48,22 @@ public class ContinuousPlannerSchedulingTask
    private HeightMapData latestHeightMapData;
 
    private final ROS2Topic controllerFootstepDataTopic;
-   private final ContinuousPlanningParameters continuousPlanningParameters;
+   private final ContinuousWalkingParameters continuousPlanningParameters;
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousPlanner continuousPlanner;
 
-   private int controllerFootstepQueueSize = 0;
+   private int controllerQueueSize = 0;
+   private List<QueuedFootstepStatusMessage> controllerQueue;
 
-   IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
-   IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
+   private final IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
+   private final IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
-                                          ContinuousPlanningParameters continuousPlanningParameters)
+                                          ContinuousWalkingParameters continuousPlanningParameters)
    {
       this.referenceFrames = referenceFrames;
       this.continuousPlanningParameters = continuousPlanningParameters;
@@ -74,8 +73,12 @@ public class ContinuousPlannerSchedulingTask
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
+      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
       publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.PLANNED_FOOTSTEPS);
       startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousPlanningAPI.START_AND_GOAL_FOOTSTEPS);
+      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopic);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopic);
+
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()),
                                       this::footstepStatusReceived);
@@ -92,7 +95,8 @@ public class ContinuousPlannerSchedulingTask
    {
       if (!continuousPlanningParameters.getActiveMapping())
       {
-         continuousPlanner.setInitialized(false);
+         stopContinuousWalkingGracefully();
+
          state = ContinuousWalkingState.NOT_STARTED;
          return;
       }
@@ -101,10 +105,23 @@ public class ContinuousPlannerSchedulingTask
       {
          initializeContinuousPlanner();
       }
-      else if (!continuousPlanningParameters.getPauseContinuousWalking())
+      else
       {
          planAndSendFootsteps();
       }
+   }
+
+   private void stopContinuousWalkingGracefully()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+
+      if (continuousPlanner.isInitialized())
+      {
+         message.setPause(true);
+         pauseWalkingPublisher.publish(message);
+      }
+
+      continuousPlanner.setInitialized(false);
    }
 
    public void initializeContinuousPlanner()
@@ -124,7 +141,8 @@ public class ContinuousPlannerSchedulingTask
       if (state == ContinuousWalkingState.READY_TO_PLAN || state == ContinuousWalkingState.PLANNING_FAILED)
       {
          LogTools.info("State: " + state);
-         getImminentStanceFromLatestStatus();
+         continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
+         publishForVisualization();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
          continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, state != ContinuousWalkingState.PLANNING_FAILED);
 
@@ -137,32 +155,16 @@ public class ContinuousPlannerSchedulingTask
       if (state == ContinuousWalkingState.PLAN_AVAILABLE)
       {
          LogTools.info("State: " + state);
-         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousPlanningParameters);
+         FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousPlanningParameters, controllerQueue);
          LogTools.info("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
          publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-         publishForVisualization(footstepDataList);
-         continuousPlanner.setPreviouslySentPlanForReference();
 
          state = ContinuousWalkingState.WAITING_TO_LAND;
          continuousPlanner.setPlanAvailable(false);
+         continuousPlanner.setPreviouslySentPlanForReference();
 
          continuousPlannerStatistics.startWaitingTime();
       }
-   }
-
-   /**
-    * This method gets called when we need a new footstep plan, this gets the latest information in the controller footstep queue
-    */
-   public void getImminentStanceFromLatestStatus()
-   {
-      RobotSide imminentFootstepSide = RobotSide.fromByte(footstepStatusMessage.get().getRobotSide());
-      assert imminentFootstepSide != null;
-      FramePose3D realRobotStancePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                        referenceFrames.getSoleFrame(imminentFootstepSide.getOppositeSide()).getTransformToWorldFrame());
-      FramePose3D imminentFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                         footstepStatusMessage.get().getDesiredFootPositionInWorld(),
-                                                         footstepStatusMessage.get().getDesiredFootOrientationInWorld());
-      continuousPlanner.updateImminentStance(realRobotStancePose, imminentFootstepPose, imminentFootstepSide);
    }
 
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
@@ -184,7 +186,7 @@ public class ContinuousPlannerSchedulingTask
                                           .getTranslation()
                                           .norm();
          continuousPlannerStatistics.setLastLengthCompleted((float) distance);
-         continuousPlannerStatistics.setLastFootstepQueueLength(controllerFootstepQueueSize);
+         continuousPlannerStatistics.setLastFootstepQueueLength(controllerQueueSize);
 
          LogTools.info(continuousPlannerStatistics.toString());
       }
@@ -194,12 +196,13 @@ public class ContinuousPlannerSchedulingTask
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
-      if (controllerFootstepQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
+      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
+      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
          LogTools.warn("Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
-      controllerFootstepQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
+      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
-   public void publishForVisualization(FootstepDataListMessage footstepDataList)
+   public void publishForVisualization()
    {
       List<Pose3D> poses = new ArrayList<>();
       poses.add(new Pose3D(continuousPlanner.getStartingStancePose().get(RobotSide.LEFT)));
@@ -211,7 +214,6 @@ public class ContinuousPlannerSchedulingTask
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
       startAndGoalPublisherForUI.publish(poseListMessage);
-      publisherForUI.publish(footstepDataList);
    }
 
    public void setLatestHeightMapData(HeightMapData heightMapData)

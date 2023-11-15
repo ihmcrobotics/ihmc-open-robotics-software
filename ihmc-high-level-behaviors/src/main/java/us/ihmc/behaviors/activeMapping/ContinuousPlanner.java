@@ -1,9 +1,12 @@
 package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPathPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
@@ -27,6 +30,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanner
 {
@@ -62,7 +66,7 @@ public class ContinuousPlanner
    private FootstepPlannerOutput plannerOutput;
    private FootstepPlanningResult footstepPlanningResult;
 
-   private ContinuousPlanningParameters continuousPlanningParameters;
+   private ContinuousWalkingParameters continuousPlanningParameters;
    private ContinuousPlannerStatistics statistics;
 
    private boolean initialized = false;
@@ -117,7 +121,7 @@ public class ContinuousPlanner
       initialized = true;
    }
 
-   public void setGoalWaypointPoses(ContinuousPlanningParameters continuousPlanningParameters)
+   public void setGoalWaypointPoses(ContinuousWalkingParameters continuousPlanningParameters)
    {
       this.continuousPlanningParameters = continuousPlanningParameters;
 
@@ -192,7 +196,7 @@ public class ContinuousPlanner
 
       if (useReferencePlan)
       {
-         LogTools.info("Setting Previous Plan as Reference in the Request");
+         // Sets the previous footstep plan to be a reference for the current plan
          FootstepPlan previousFootstepPlan = plannerOutput.getFootstepPlan();
 
          if (previousFootstepPlan.getNumberOfSteps() < continuousPlanningParameters.getNumberOfStepsToSend())
@@ -201,10 +205,12 @@ public class ContinuousPlanner
          }
          else
          {
-            if (imminentFootstepSide == previousFootstepPlan.getFootstep(0).getRobotSide())
-            {
-               previousFootstepPlan.remove(0);
-            }
+            // These are steps that are considered to be at the start of the plan, don't want to use them as reference
+            previouslySentPlanForReference.remove(0);
+
+            if (!continuousPlanningParameters.getClearEntireControllerQueue())
+               previouslySentPlanForReference.remove(1);
+
             request.setReferencePlan(previouslySentPlanForReference);
             request.setTimeout(continuousPlanningParameters.getPlanningWithReferenceTimeout());
          }
@@ -212,7 +218,6 @@ public class ContinuousPlanner
       else
       {
          request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
-         LogTools.warn("No Reference Plan Available");
       }
 
       plannerOutput = footstepPlanner.handleRequest(request);
@@ -346,18 +351,24 @@ public class ContinuousPlanner
       return request;
    }
 
-   public FootstepDataListMessage getLimitedFootstepDataListMessage(ContinuousPlanningParameters parameters)
+   public FootstepDataListMessage getLimitedFootstepDataListMessage(ContinuousWalkingParameters parameters, List<QueuedFootstepStatusMessage> controllerQueue)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingTime());
       footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferTime());
 
-      int count = parameters.getNumberOfStepsToSend();
-      // The planner may time out before getting the recommended number of steps, this makes sure we take the smaller of the values
-      if (count > plannerOutput.getFootstepPlan().getNumberOfSteps())
-         count = plannerOutput.getFootstepPlan().getNumberOfSteps();
 
-      for (int i = 0; i < count; i++)
+      // We expect the plannerOutput to contain this number of steps we ask for
+      int index = 0;
+      if (!controllerQueue.isEmpty() && !continuousPlanningParameters.getClearEntireControllerQueue())
+      {
+         PlannedFootstep stepToNotOverride = new PlannedFootstep(RobotSide.fromByte(controllerQueue.get(1).getRobotSide()),
+                                                                 new Pose3D(controllerQueue.get(1).getLocation(), controllerQueue.get(1).getOrientation()));
+         footstepDataListMessage.getFootstepDataList().add().set(stepToNotOverride.getAsMessage());
+         index = 1;
+      }
+
+      for (int i = index; i < parameters.getNumberOfStepsToSend(); i++)
       {
          PlannedFootstep footstep = plannerOutput.getFootstepPlan().getFootstep(i);
          footstep.limitFootholdVertices();
@@ -373,11 +384,54 @@ public class ContinuousPlanner
       return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 2.0, 1.0);
    }
 
-   public void updateImminentStance(FramePose3D realRobotStancePose, FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
+   /**
+    * This method gets called when we need a new footstep plan, this gets the latest information in the controller footstep queue
+    */
+   public void getImminentStanceFromLatestStatus(AtomicReference<FootstepStatusMessage> footstepStatusMessage,
+                                                 List<QueuedFootstepStatusMessage> controllerQueue)
+   {
+      RobotSide imminentFootstepSide = RobotSide.fromByte(footstepStatusMessage.get().getRobotSide());
+      assert imminentFootstepSide != null;
+
+      int index = getNextIndexOnOppositeSide(RobotSide.fromByte(footstepStatusMessage.get().getRobotSide()), controllerQueue);
+
+      FramePose3D imminentFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                         footstepStatusMessage.get().getDesiredFootPositionInWorld(),
+                                                         footstepStatusMessage.get().getDesiredFootOrientationInWorld());
+
+
+      FramePose3D nextRobotStepAfterCurrent;
+
+      if (continuousPlanningParameters.getClearEntireControllerQueue())
+      {
+         nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                     referenceFrames.getSoleFrame(imminentFootstepSide.getOppositeSide()).getTransformToWorldFrame());
+      }
+      else
+      {
+         nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                     controllerQueue.get(index).getLocation(),
+                                                     controllerQueue.get(index).getOrientation());
+      }
+
+
+      updateImminentStance(nextRobotStepAfterCurrent, imminentFootstepPose, imminentFootstepSide);
+   }
+
+   private int getNextIndexOnOppositeSide(RobotSide side, List<QueuedFootstepStatusMessage> controllerQueue)
+   {
+      int i = 0;
+      while (i < controllerQueue.size() && RobotSide.fromByte(controllerQueue.get(i).getRobotSide()) == side)
+         i++;
+
+      return i;
+   }
+
+   public void updateImminentStance(FramePose3D nextRobotStepAfterCurrent, FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
    {
       this.imminentFootstepPose.set(imminentFootstepPose);
       this.imminentFootstepSide = imminentFootstepSide;
-      startingStancePose.get(imminentFootstepSide.getOppositeSide()).set(realRobotStancePose);
+      startingStancePose.get(imminentFootstepSide.getOppositeSide()).set(nextRobotStepAfterCurrent);
       startingStancePose.get(imminentFootstepSide).set(imminentFootstepPose);
    }
 
