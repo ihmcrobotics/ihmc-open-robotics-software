@@ -3,17 +3,19 @@ package us.ihmc.rdx.ui.behavior.tree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
 {
@@ -106,14 +108,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
    }
 
-   public void initializeNewNode(RDXBehaviorTreeNode<?, ?> newNode)
+   public void initializeActionNode(RDXActionSequence actionSequence, RDXActionNode<?, ?> newAction, int insertionIndex, RobotSide sideOfNewAction)
    {
-      if (newNode instanceof RDXWalkAction walkAction)
-      {
-         MovingReferenceFrame parentFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
-         walkAction.getDefinition().setParentFrameName(parentFrame.getName());
-         walkAction.getState().update();
-      }
-
+      ActionNodeInitialization.initializeAction(actionSequence.getState(), newAction.getState(), insertionIndex, sideOfNewAction, syncedRobot);
    }
 }

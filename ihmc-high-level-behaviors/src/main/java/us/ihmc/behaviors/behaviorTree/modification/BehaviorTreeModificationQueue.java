@@ -1,8 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.modification;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.communication.crdt.Freezable;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -12,6 +11,8 @@ import java.util.function.Consumer;
  * This interface just exists to provide a better name to what this is,
  * which gets passed down from BehaviorTree's modifyTree method and serves
  * to queue up tree modifications.
+ * We are intentionally not checking the types in this class, because it gets
+ * to complicated to use and doesn't add much value.
  */
 public class BehaviorTreeModificationQueue
 {
@@ -30,115 +31,59 @@ public class BehaviorTreeModificationQueue
       return modified;
    }
 
-   public void queueInsertNode(BehaviorTreeState tree,
-                               BehaviorTreeNodeExtension<?, ?, ?, ?> nodeToInsert,
-                               BehaviorTreeNodeExtension<?, ?, ?, ?> relativeNode,
-                               Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter,
-                               BehaviorTreeNodeInsertionType insertionType)
+   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueInsertNode(BehaviorTreeNodeInsertionDefinition<T> insertionDefinition)
    {
-      switch (insertionType)
+      if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-         case INSERT_ROOT ->
-         {
-            queueSetRootNode(nodeToInsert, rootNodeSetter);
-            tree.freeze();
-         }
-         case INSERT_BEFORE, INSERT_AFTER ->
-         {
-            queueInsertNode(nodeToInsert, relativeNode, insertionType);
-         }
-         case INSERT_AS_CHILD ->
-         {
-            queueAddNode(nodeToInsert, relativeNode);
-         }
+         queueSetAndFreezeRootNode(insertionDefinition.getNodeToInsert(),
+                                   insertionDefinition.getRootNodeSetter(),
+                                   insertionDefinition.getFreezableRootNodeHolder());
+      }
+      else
+      {
+         queueAddAndFreezeNode(insertionDefinition.getNodeToInsert(),
+                               insertionDefinition.getParent(),
+                               insertionDefinition.getInsertionIndex());
       }
    }
 
-   public void queueSetRootNode(BehaviorTreeNodeExtension<?, ?, ?, ?> node, Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> setter)
+   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueSetRootNode(T node, Consumer<T> setter)
    {
-      modificationQueue.add(new BehaviorTreeNodeSetRoot(node, setter));
+      modificationQueue.add(() -> setter.accept(node));
+   }
+
+   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueSetAndFreezeRootNode(T node,
+                                                                                           Consumer<T> setter,
+                                                                                           Freezable freezableRootHolder)
+   {
+      modificationQueue.add(() ->
+      {
+         setter.accept(node);
+         freezableRootHolder.freeze();
+      });
    }
 
    public void queueDestroySubtree(BehaviorTreeNodeExtension<?, ?, ?, ?> subtree)
    {
-      modificationQueue.add(new BehaviorTreeExtensionSubtreeDestroy(subtree));
+      modificationQueue.add(() -> BehaviorTreeTopologyOperations.detachAndDestroySubtree(subtree));
    }
 
-   public void queueDestroySubtree(BehaviorTreeNode<?> subtree)
+   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddNode(T nodeToAdd, T parent)
    {
-      modificationQueue.add(new BehaviorTreeSubtreeDestroy(subtree));
+      modificationQueue.add(() -> BehaviorTreeTopologyOperations.addChild(nodeToAdd, parent));
    }
 
-   public void queueClearSubtree(BehaviorTreeNodeExtension<?, ?, ?, ?> subtree)
+   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent, int insertionIndex)
    {
-      modificationQueue.add(new BehaviorTreeExtensionSubtreeClear(subtree));
-   }
-
-   public void queueClearSubtree(BehaviorTreeNode<?> subtree)
-   {
-      modificationQueue.add(new BehaviorTreeSubtreeClear(subtree));
-   }
-
-   public <T extends BehaviorTreeNode<T>> void queueAddNode(T nodeToAdd, T parent)
-   {
-      modificationQueue.add(new BehaviorTreeNodeAdd<>(nodeToAdd, parent));
-   }
-
-   public <T extends BehaviorTreeNode<T>> void queueInsertNode(T nodeToInsert, T existingNode, BehaviorTreeNodeInsertionType insertionType)
-   {
-      modificationQueue.add(new BehaviorTreeNodeInsert<>(nodeToInsert, existingNode, insertionType));
-   }
-
-   public void queueInsertNode(BehaviorTreeNodeExtension<?, ?, ?, ?> nodeToInsert,
-                            BehaviorTreeNodeExtension<?, ?, ?, ?> existingNode,
-                            BehaviorTreeNodeInsertionType insertionType)
-   {
-      modificationQueue.add(new BehaviorTreeNodeExtensionInsert(nodeToInsert, existingNode, insertionType));
-   }
-
-   public void queueAddNode(BehaviorTreeNodeExtension<?, ?, ?, ?> nodeToAdd, BehaviorTreeNodeExtension<?, ?, ?, ?> parent)
-   {
-      modificationQueue.add(new BehaviorTreeNodeExtensionAdd(nodeToAdd, parent));
+      modificationQueue.add(() ->
+      {
+         BehaviorTreeTopologyOperations.insertAndFreezeChild(nodeToAdd, parent, insertionIndex);
+      });
    }
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
    {
-      modificationQueue.add(new BehaviorTreeNodeExtensionAddAndFreeze<>(nodeToAdd, parent));
-   }
-
-   public <T extends BehaviorTreeNode<T>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
-   {
-      modificationQueue.add(new BehaviorTreeNodeAddAndFreeze<>(nodeToAdd, parent));
-   }
-
-   public void queueClearNode(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
-   {
-      modificationQueue.add(new BehaviorTreeNodeExtensionClear(node));
-   }
-
-   public void queueClearNode(BehaviorTreeNode<?> node)
-   {
-      modificationQueue.add(new BehaviorTreeNodeClear(node));
-   }
-
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueRemoveNode(T nodeToRemove, T rootNode)
-   {
-      modificationQueue.add(new BehaviorTreeNodeExtensionRemove<>(nodeToRemove, rootNode));
-   }
-
-   public <T extends BehaviorTreeNode<T>> void queueRemoveNode(T nodeToRemove, T rootNode)
-   {
-      modificationQueue.add(new BehaviorTreeNodeRemove<>(nodeToRemove, rootNode));
-   }
-
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueMoveNode(T nodeToMove, T previousParent, T newParent)
-   {
-      modificationQueue.add(new BehaviorTreeNodeExtensionMove<>(nodeToMove, previousParent, newParent));
-   }
-
-   public <T extends BehaviorTreeNode<T>> void queueMoveNode(T nodeToMove, T previousParent, T newParent)
-   {
-      modificationQueue.add(new BehaviorTreeNodeMove<>(nodeToMove, previousParent, newParent));
+      modificationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreezeChild(nodeToAdd, parent));
    }
 
    public void queueModification(BehaviorTreeModification modification)

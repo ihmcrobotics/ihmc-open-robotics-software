@@ -14,19 +14,20 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
 
-public class ROS2BehaviorTreeSubscription
+@SuppressWarnings({"unchecked"}) // Sometimes in this class we need to be a little unsafe
+public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;
    private final BehaviorTreeState behaviorTreeState;
-   private final Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter;
+   private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
    private BehaviorTreeStateMessage latestBehaviorTreeMessage;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
    public ROS2BehaviorTreeSubscription(BehaviorTreeState behaviorTreeState,
-                                       Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter,
+                                       Consumer<T> rootNodeSetter,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
@@ -64,7 +65,7 @@ public class ROS2BehaviorTreeSubscription
             boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
 
             boolean allowReplicatingRoot = !treeRootReferenceFrozen;
-            BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode
+            T rootNode
                   = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
 
             if (rootNode != null)
@@ -82,10 +83,10 @@ public class ROS2BehaviorTreeSubscription
       }
    }
 
-   private BehaviorTreeNodeExtension<?, ?, ?, ?> retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
+   private T retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
    {
       long nodeID = subscriptionNode.getBehaviorTreeNodeStateMessage().getId();
-      BehaviorTreeNodeExtension<?, ?, ?, ?> localNode = behaviorTreeState.getTreeRebuilder().getReplacementNode(nodeID);
+      T localNode = (T) behaviorTreeState.getTreeRebuilder().getReplacementNode(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
          Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
@@ -93,15 +94,15 @@ public class ROS2BehaviorTreeSubscription
                        subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getDescription(),
                        nodeID,
                        behaviorTreeState.getCRDTInfo().getActorDesignation().name());
-         localNode = behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID, behaviorTreeState.getCRDTInfo());
+         localNode = (T) behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID, behaviorTreeState.getCRDTInfo());
       }
 
       return localNode;
    }
 
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
-                                                BehaviorTreeNodeExtension<?, ?, ?, ?> localNode,
-                                                BehaviorTreeNodeExtension<?, ?, ?, ?> localParentNode,
+                                                T localNode,
+                                                T localParentNode,
                                                 BehaviorTreeModificationQueue modificationQueue,
                                                 boolean anAncestorIsFrozen)
    {
@@ -118,14 +119,13 @@ public class ROS2BehaviorTreeSubscription
       {
          anAncestorIsFrozen |= localNode.getState().isFrozen();
 
-         BehaviorTreeNodeExtension<?, ?, ?, ?> localChildNode = null;
+         T localChildNode = null;
          if (anAncestorIsFrozen)
          {
             // In the case of locally nodes that just got added or removed, only update children with matching IDs.
             // This'll just be for a few updates.
-            for (Object objectChild : localNode.getChildren())
+            for (T possibleMatch : localNode.getChildren())
             {
-               BehaviorTreeNodeExtension<?, ?, ?, ?> possibleMatch = (BehaviorTreeNodeExtension<?, ?, ?, ?>) objectChild;
                if (possibleMatch.getState().getID() == subscriptionNode.getChildren().get(i).getBehaviorTreeNodeStateMessage().getId())
                {
                   localChildNode = possibleMatch;
@@ -134,7 +134,7 @@ public class ROS2BehaviorTreeSubscription
          }
          else
          {
-            localChildNode = retrieveOrReplicateLocalNode(subscriptionNode.getChildren().get(i), true);
+            localChildNode = (T) retrieveOrReplicateLocalNode(subscriptionNode.getChildren().get(i), true);
          }
 
          if (localChildNode != null)
