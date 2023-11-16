@@ -46,6 +46,7 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
          LogTools.error("Cannot save. Can only be called for JSON roots.");
 
       WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, jsonFileName.getValue());
+      LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
       JSONFileTools.save(saveFile, this::saveToFile);
    }
 
