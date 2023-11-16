@@ -8,7 +8,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
@@ -340,25 +339,19 @@ public class TerrainPlanningSimulationUI
          {
             if (!monteCarloFootstepPlanner.isPlanning())
             {
-               LogTools.info("Not Planning. Clearing Queue");
                executorService.clearTaskQueue();
                executorService.submit(() ->
                  {
-                    LogTools.info("Planning MCFP");
                     FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
                                                                 humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(),
                                                                 cameraZUpFrame.getTransformToWorldFrame());
 
                      footstepPlanToRenderNotificaiton.set(plan);
-
-                     LogTools.info("Plan Set: {}", plan);
                  });
             }
 
             if (footstepPlanToRenderNotificaiton.poll())
             {
-               LogTools.info("Rendering Footstep Plan");
-
                FootstepPlan generatedPlan = footstepPlanToRenderNotificaiton.read();
                FootstepDataListMessage footstepsMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(generatedPlan, 2.0, 1.0);
                footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
@@ -405,7 +398,7 @@ public class TerrainPlanningSimulationUI
                                                           (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
                                                           (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters());
 
-            ContinuousPlanningTools.generateSensorZUpToRandomGoalFootPoses(latestHeightMapData, zUpToWorldTransform, startPose, goalPose, random);
+            ContinuousPlanningTools.generateSensorZUpToStraightGoalFootPoses(latestHeightMapData, zUpToWorldTransform, startPose, goalPose, null);
             sidednessBit = random.nextBoolean();
 
             FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -427,7 +420,7 @@ public class TerrainPlanningSimulationUI
 
          public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform)
          {
-            monteCarloFootstepPlanner.reset();
+            //monteCarloFootstepPlanner.reset();
 
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
             request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-0.5, -0.3, 0.0), new Quaternion()));
@@ -441,7 +434,7 @@ public class TerrainPlanningSimulationUI
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();
 
-            LogTools.debug("Total Time: {} ms, Plan Size: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps());
+            LogTools.info("Total Time: {} ms, Plan Size: {}, Visited: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps(), monteCarloFootstepPlanner.getVisitedNodes().size());
 
             monteCarloFootstepPlanner.getDebugger().display(plan, 1);
 

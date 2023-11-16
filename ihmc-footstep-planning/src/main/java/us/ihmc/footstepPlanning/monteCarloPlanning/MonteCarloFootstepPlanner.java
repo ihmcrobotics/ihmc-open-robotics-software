@@ -117,19 +117,16 @@ public class MonteCarloFootstepPlanner
    {
       double score = 0;
 
-      MonteCarloFootstepNode randomState = new MonteCarloFootstepNode(node.getPosition(), null, node.getRobotSide().getOppositeSide(), 0);
+      MonteCarloFootstepNode simulationState = new MonteCarloFootstepNode(node.getPosition(), null, node.getRobotSide().getOppositeSide(), 0);
 
       for (int i = 0; i < simulationIterations; i++)
       {
-         ArrayList<MonteCarloFootstepNode> nextStates = randomState.getAvailableStates(world, request);
+         ArrayList<MonteCarloFootstepNode> nextStates = simulationState.getAvailableStates(world, request);
          int actionIndex = (int) (Math.random() * nextStates.size());
-         randomState = nextStates.get(actionIndex);
-
+         simulationState = nextStates.get(actionIndex);
 
          //LogTools.info(String.format("Simulation %d, Random State: %s, Actions: %d, Side:%s", i, randomState.getPosition(), nextStates.size(), randomState.getRobotSide()));
-
-         score += MonteCarloPlannerTools.scoreFootstepNode(node, randomState, request);
-
+         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request);
          //LogTools.info("Action Taken: {}, Score: {}", actionIndex, score);
       }
 

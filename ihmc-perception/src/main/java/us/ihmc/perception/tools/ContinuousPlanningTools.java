@@ -114,11 +114,11 @@ public class ContinuousPlanningTools
       return goalPose;
    }
 
-   public static void generateSensorZUpToRandomGoalFootPoses(HeightMapData latestHeightMapData,
-                                                             RigidBodyTransform sensorZUpToWorldTransform,
-                                                             SideDependentList<FramePose3D> startPoseToPack,
-                                                             SideDependentList<FramePose3D> goalPoseToPack,
-                                                             Random random)
+   public static void generateSensorZUpToStraightGoalFootPoses(HeightMapData latestHeightMapData,
+                                                               RigidBodyTransform sensorZUpToWorldTransform,
+                                                               SideDependentList<FramePose3D> startPoseToPack,
+                                                               SideDependentList<FramePose3D> goalPoseToPack,
+                                                               Random random)
    {
       double heightAtStartPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX(),
                                                                  sensorZUpToWorldTransform.getTranslation().getY());
@@ -140,7 +140,11 @@ public class ContinuousPlanningTools
 
          // set goal pose to be 1.65m in front of the camera
          goalPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
-         goalPoseToPack.get(RobotSide.LEFT).appendTranslation(random.nextDouble(1.35, 1.65), random.nextDouble(-1.0, 1.0), heightAtGoalPose + 0.1);
+
+         if (random != null)
+            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(random.nextDouble(1.35, 1.65), random.nextDouble(-1.0, 1.0), heightAtGoalPose + 0.1);
+         else
+            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(1.5f, 0.0f, heightAtGoalPose + 0.1);
 
          goalPoseToPack.get(RobotSide.RIGHT).set(goalPoseToPack.get(RobotSide.LEFT));
          goalPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.0);
