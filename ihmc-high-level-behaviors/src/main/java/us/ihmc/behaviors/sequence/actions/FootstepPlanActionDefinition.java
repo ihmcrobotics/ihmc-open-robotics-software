@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionDefinition extends ActionNodeDefinition
@@ -26,7 +27,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
       transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, null);
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
       footsteps = new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo));
    }
 
