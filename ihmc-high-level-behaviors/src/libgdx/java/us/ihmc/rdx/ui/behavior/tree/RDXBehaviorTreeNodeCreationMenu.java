@@ -61,8 +61,7 @@ public class RDXBehaviorTreeNodeCreationMenu
                BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                    = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
 
-               topologyOperationQueue.queueInsertNode(insertionDefinition);
-               ImGui.closeCurrentPopup();
+               complete(insertionDefinition);
             }
          }
       }
@@ -147,10 +146,17 @@ public class RDXBehaviorTreeNodeCreationMenu
                tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 
-            topologyOperationQueue.queueInsertNode(insertionDefinition);
-            ImGui.closeCurrentPopup();
+            complete(insertionDefinition);
          }
       }
+   }
+
+   private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition)
+   {
+      topologyOperationQueue.queueInsertNode(insertionDefinition);
+      ImGui.closeCurrentPopup();
+
+      insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
    private void reindexDirectory()

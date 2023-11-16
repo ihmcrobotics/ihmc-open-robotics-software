@@ -80,11 +80,9 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       ImGui.calcTextSize(descriptionTextSize, descriptionText);
       boolean textHovered = ImGuiTools.isItemHovered(descriptionTextSize.x);
 
-      if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+      if (textHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
       {
-         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
-         isDescriptionBeingEdited = true;
-         imDescriptionText.set(getDefinition().getDescription());
+         treeWidgetExpanded = !treeWidgetExpanded;
       }
 
       if (isDescriptionBeingEdited)
@@ -106,6 +104,13 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          ImGui.openPopup(nodePopupID);
       }
+   }
+
+   public void enterEditDescriptionMode()
+   {
+      RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
+      isDescriptionBeingEdited = true;
+      imDescriptionText.set(getDefinition().getDescription());
    }
 
    public void renderImGuiWidgets()
