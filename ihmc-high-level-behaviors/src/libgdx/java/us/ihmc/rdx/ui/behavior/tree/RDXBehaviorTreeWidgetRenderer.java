@@ -120,14 +120,6 @@ public class RDXBehaviorTreeWidgetRenderer
          tree.getNodesMenu().renderNodeCreationWidgets(modalPopupNode, insertionType);
 
          ImGui.separator();
-         if (ImGui.button("Ok"))
-         {
-            // TODO
-
-
-            ImGui.closeCurrentPopup();
-         }
-         ImGui.sameLine();
          if (ImGui.button("Cancel"))
          {
             ImGui.closeCurrentPopup();
