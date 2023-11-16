@@ -13,19 +13,14 @@ public interface ContinuousWalkingParametersBasics extends ContinuousWalkingPara
       set(ContinuousWalkingParameters.activeMapping, activeMapping);
    }
 
-   default void setClearEntireControllerQueue(boolean clearEntireControllerQueue)
+   default void setOverrideEntireQueueEachStep(boolean overrideEntireQueueEachStep)
    {
-      set(ContinuousWalkingParameters.clearEntireControllerQueue, clearEntireControllerQueue);
+      set(ContinuousWalkingParameters.overrideEntireQueueEachStep, overrideEntireQueueEachStep);
    }
 
    default void setNumberOfStepsToSend(int numberOfStepsToSend)
    {
       set(ContinuousWalkingParameters.numberOfStepsToSend, numberOfStepsToSend);
-   }
-
-   default void setMaxStepsToHoldInControllerQueue(int maxStepsToHoldInControllerQueue)
-   {
-      set(ContinuousWalkingParameters.maxStepsToHoldInControllerQueue, maxStepsToHoldInControllerQueue);
    }
 
    default void setGoalPoseForwardDistance(double goalPoseForwardDistance)
@@ -48,13 +43,13 @@ public interface ContinuousWalkingParametersBasics extends ContinuousWalkingPara
       set(ContinuousWalkingParameters.transferTime, transferTime);
    }
 
-   default void setPlanningWithReferenceTimeout(double planningWithReferenceTimeout)
+   default void setPlanningReferenceTimeout(double planningReferenceTimeout)
    {
-      set(ContinuousWalkingParameters.planningWithReferenceTimeout, planningWithReferenceTimeout);
+      set(ContinuousWalkingParameters.planningReferenceTimeout, planningReferenceTimeout);
    }
 
-   default void setInitialPlanningTimeout(double initialPlanningTimeout)
+   default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)
    {
-      set(ContinuousWalkingParameters.initialPlanningTimeout, initialPlanningTimeout);
+      set(ContinuousWalkingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
    }
 }

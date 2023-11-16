@@ -15,19 +15,14 @@ public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetRe
       return get(activeMapping);
    }
 
-   default boolean getClearEntireControllerQueue()
+   default boolean getOverrideEntireQueueEachStep()
    {
-      return get(clearEntireControllerQueue);
+      return get(overrideEntireQueueEachStep);
    }
 
    default int getNumberOfStepsToSend()
    {
       return get(numberOfStepsToSend);
-   }
-
-   default int getMaxStepsToHoldInControllerQueue()
-   {
-      return get(maxStepsToHoldInControllerQueue);
    }
 
    default double getGoalPoseForwardDistance()
@@ -50,13 +45,13 @@ public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetRe
       return get(transferTime);
    }
 
-   default double getPlanningWithReferenceTimeout()
+   default double getPlanningReferenceTimeout()
    {
-      return get(planningWithReferenceTimeout);
+      return get(planningReferenceTimeout);
    }
 
-   default double getInitialPlanningTimeout()
+   default double getPlanningWithoutReferenceTimeout()
    {
-      return get(initialPlanningTimeout);
+      return get(planningWithoutReferenceTimeout);
    }
 }

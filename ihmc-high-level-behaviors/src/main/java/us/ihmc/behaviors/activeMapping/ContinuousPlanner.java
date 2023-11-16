@@ -225,16 +225,16 @@ public class ContinuousPlanner
             // These are steps that are considered to be at the start of the plan, don't want to use them as reference
             previouslySentPlanForReference.remove(0);
 
-            if (!continuousPlanningParameters.getClearEntireControllerQueue())
+            if (!continuousPlanningParameters.getOverrideEntireQueueEachStep())
                previouslySentPlanForReference.remove(1);
 
             request.setReferencePlan(previouslySentPlanForReference);
-            request.setTimeout(continuousPlanningParameters.getPlanningWithReferenceTimeout());
+            request.setTimeout(continuousPlanningParameters.getPlanningReferenceTimeout());
          }
       }
       else
       {
-         request.setTimeout(continuousPlanningParameters.getInitialPlanningTimeout());
+         request.setTimeout(continuousPlanningParameters.getPlanningWithoutReferenceTimeout());
       }
 
       plannerOutput = footstepPlanner.handleRequest(request);
@@ -387,7 +387,7 @@ public class ContinuousPlanner
 
       // We expect the plannerOutput to contain this number of steps we ask for
       int index = 0;
-      if (!controllerQueue.isEmpty() && !continuousPlanningParameters.getClearEntireControllerQueue())
+      if (!controllerQueue.isEmpty() && !continuousPlanningParameters.getOverrideEntireQueueEachStep())
       {
          PlannedFootstep stepToNotOverride = new PlannedFootstep(RobotSide.fromByte(controllerQueue.get(1).getRobotSide()),
                                                                  new Pose3D(controllerQueue.get(1).getLocation(), controllerQueue.get(1).getOrientation()));
@@ -429,7 +429,7 @@ public class ContinuousPlanner
 
       FramePose3D nextRobotStepAfterCurrent;
 
-      if (continuousPlanningParameters.getClearEntireControllerQueue())
+      if (continuousPlanningParameters.getOverrideEntireQueueEachStep())
       {
          nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      referenceFrames.getSoleFrame(imminentFootstepSide.getOppositeSide()).getTransformToWorldFrame());

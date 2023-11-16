@@ -255,10 +255,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
          ConvexPolygon2D footPolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
-         boolean update0 = footstepToWiggle.getXIndex() == 147 && footstepToWiggle.getYIndex() == 7 && footstepToWiggle.getYawIndex() == 0;
-         boolean update1 = footstepToWiggle.getXIndex() == 146 && footstepToWiggle.getYIndex() == 2 && footstepToWiggle.getYawIndex() == 0;
-         boolean updateSCS = update0 || update1;
-
          RigidBodyTransform wiggleTransformInLocal;
          boolean concaveWigglerRequested;
 
