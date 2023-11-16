@@ -361,6 +361,11 @@ public class RDXAffordanceTemplateFrames
       return poses;
    }
 
+   public SideDependentList<List<PoseReferenceFrame>> getPoseFrames()
+   {
+      return poseFrames;
+   }
+
    public SideDependentList<List<Boolean>> getArePosesSet()
    {
       return arePosesSet;

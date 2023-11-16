@@ -42,7 +42,7 @@ public class RDXInteractableObject implements RenderableProvider
    private RDXSelectablePose3DGizmo selectablePose3DGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), objectTransform);
    private static final float DEFAULT_DIMENSION = 0.1F;
    protected static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.6);
-   public PrimitiveRigidBodyShape shape;
+   private PrimitiveRigidBodyShape shape;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat xLength = new ImFloat(DEFAULT_DIMENSION);
