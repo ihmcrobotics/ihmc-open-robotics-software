@@ -46,7 +46,7 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      waitDuration.setValue(message.getWaitDuration());
+      waitDuration.fromMessage(message.getWaitDuration());
    }
 
    public double getWaitDuration()
