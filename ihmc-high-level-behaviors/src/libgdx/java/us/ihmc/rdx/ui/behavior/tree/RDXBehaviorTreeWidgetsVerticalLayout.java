@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.*;
 
-public class RDXBehaviorTreeWidgetRenderer
+public class RDXBehaviorTreeWidgetsVerticalLayout
 {
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTree tree;
@@ -18,14 +18,14 @@ public class RDXBehaviorTreeWidgetRenderer
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
    private final TypedNotification<Runnable> queuePopupModal = new TypedNotification<>();
 
-   public RDXBehaviorTreeWidgetRenderer(RDXBehaviorTree tree)
+   public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree tree)
    {
       this.tree = tree;
 
       topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
    }
 
-   public void render(RDXBehaviorTreeNode<?, ?> node)
+   public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
    {
       if (expandCollapseRenderer.render(node.getTreeWidgetExpanded()))
       {
@@ -98,7 +98,7 @@ public class RDXBehaviorTreeWidgetRenderer
 
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
          {
-            render(child);
+            renderImGuiWidgets(child);
          }
 
          ImGui.unindent(indentAmount);
@@ -117,7 +117,7 @@ public class RDXBehaviorTreeWidgetRenderer
    {
       if (ImGui.beginPopupModal(node.getModalPopupID()))
       {
-         tree.getNodesMenu().renderNodeCreationWidgets(modalPopupNode, insertionType);
+         tree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
 
          ImGui.separator();
          if (ImGui.button("Cancel"))
