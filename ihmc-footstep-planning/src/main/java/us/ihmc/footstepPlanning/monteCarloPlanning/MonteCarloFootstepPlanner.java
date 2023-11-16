@@ -94,19 +94,23 @@ public class MonteCarloFootstepPlanner
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
-         double contactScore = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request);
+         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request);
 
-         if (visitedNodes.getOrDefault(newState, null) != null)
+         if (score > 0.5)
          {
-            MonteCarloFootstepNode existingNode = visitedNodes.get(newState);
-            node.addChild(existingNode);
-            existingNode.getParents().add(node);
-         }
-         else
-         {
-            MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getPosition(), node, newState.getRobotSide(), uniqueNodeId++);
-            visitedNodes.put(newState, postNode);
-            node.addChild(postNode);
+            if (visitedNodes.getOrDefault(newState, null) != null)
+            {
+               LogTools.warn("Hit Hash Map");
+               MonteCarloFootstepNode existingNode = visitedNodes.get(newState);
+               node.addChild(existingNode);
+               existingNode.getParents().add(node);
+            }
+            else
+            {
+               MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getPosition(), node, newState.getRobotSide(), uniqueNodeId++);
+               visitedNodes.put(newState, postNode);
+               node.addChild(postNode);
+            }
          }
       }
 
