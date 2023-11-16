@@ -10,6 +10,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.io.JSONTools;
 
 public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
@@ -23,7 +24,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
       super(crdtInfo);
 
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, null);
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
       pelvisToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
    }
 
