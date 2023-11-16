@@ -26,6 +26,7 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -55,6 +56,7 @@ public class RDXAffordanceTemplateEditorUI
    private final RDXInteractableObjectBuilder objectBuilder;
    private String currentObjectName = "";
    private final float[] gripperClosure = new float[1];
+   private float[] objectScale = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
    // affordance poses
    private final RDXAffordanceTemplateFrame graspFrame;
@@ -212,9 +214,29 @@ public class RDXAffordanceTemplateEditorUI
 
       mirror.update();
 
+      rescaleAffordanceTemplate();
+
       graspFrame.update();
       preGraspFrames.update();
       postGraspFrames.update();
+   }
+
+   public void rescaleAffordanceTemplate()
+   {
+      var poseFrames = preGraspFrames.getPoseFrames();
+      for (RobotSide side : handPoses.keySet())
+      {
+         for (int i = 0; i < poseFrames.get(side).size(); ++i)
+            PoseReferenceFrame newpose = poseFrames.get(side).get(i);
+      }
+//      switch (objectBuilder.getSelectedObject().getShape()) {
+//         case BOX, PRISM -> {
+//            if (objectScale[0]>1.0f || objectScale[1]>1.0f || objectScale[2]>1.0f)
+//            {
+//
+//            }
+//         }
+//      }
    }
 
    public void renderImGuiWidgets()
@@ -485,7 +507,7 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
-            rescaleAffordanceTemplate();
+            calculateAffordanceTemplateScale();
          }
       }
       else
@@ -497,20 +519,12 @@ public class RDXAffordanceTemplateEditorUI
 
    }
 
-   private void rescaleAffordanceTemplate()
+   private void calculateAffordanceTemplateScale()
    {
-      float[] objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
+      objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
       for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
       {
          objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i)/objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
-      }
-      switch (objectBuilder.getSelectedObject().getShape()) {
-         case BOX, PRISM -> {
-            if (objectScale[0]>1.0f || objectScale[1]>1.0f || objectScale[2]>1.0f)
-            {
-
-            }
-         }
       }
    }
 
