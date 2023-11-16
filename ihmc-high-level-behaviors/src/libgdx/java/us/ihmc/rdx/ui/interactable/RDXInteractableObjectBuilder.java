@@ -100,7 +100,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
       {
          selectedObject.switchGizmoVisualization();
       }
-      if (selectedObject.shape != null)
+      if (selectedObject.getShape() != null)
       {
          selectedObject.updateVisuals();
       }
