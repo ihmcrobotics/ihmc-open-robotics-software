@@ -6,8 +6,10 @@ import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPathPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -34,6 +36,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanner
 {
+   private static final boolean LOG_FOOTSTEP_PLANS = false;
+
    public enum PlanningMode
    {
       EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL, RANDOM_WALK
@@ -62,6 +66,7 @@ public class ContinuousPlanner
    private FootstepPlan previouslySentPlanForReference;
    private HumanoidReferenceFrames referenceFrames;
    private FootstepPlanningModule footstepPlanner;
+   private FootstepPlannerLogger logger;
    private MonteCarloPathPlanner monteCarloPathPlanner;
    private FootstepPlannerOutput plannerOutput;
    private FootstepPlanningResult footstepPlanningResult;
@@ -94,8 +99,11 @@ public class ContinuousPlanner
             break;
          case WALK_TO_GOAL, RANDOM_WALK:
             footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
+            logger = new FootstepPlannerLogger(footstepPlanner);
             break;
       }
+
+
    }
 
    public void initialize()
@@ -221,6 +229,16 @@ public class ContinuousPlanner
       }
 
       plannerOutput = footstepPlanner.handleRequest(request);
+
+      if (LOG_FOOTSTEP_PLANS)
+      {
+         ThreadTools.startAThread(() ->
+                                  {
+                                     LogTools.info("Logging Session");
+                                     logger.logSession();
+                                     FootstepPlannerLogger.deleteOldLogs();
+                                  }, "FootstepPlanLogAndDeletion");
+      }
 
       if (plannerOutput != null)
       {
