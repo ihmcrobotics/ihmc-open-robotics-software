@@ -22,7 +22,7 @@ import java.util.List;
 
 public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                           D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeExtension<RDXBehaviorTreeNode<?, ?>, S, S, D>
+      implements BehaviorTreeNodeLayer<RDXBehaviorTreeNode<?, ?>, S, S, D>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImStringWrapper descriptionWrapper;
@@ -39,7 +39,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public void update()
    {
-      BehaviorTreeNodeExtension.super.update();
+      BehaviorTreeNodeLayer.super.update();
 
       if (descriptionWrapper == null)
       {
@@ -179,7 +179,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    }
 
    @Override
-   public S getExtendedNode()
+   public S getNextLowerLayer()
    {
       return getState();
    }

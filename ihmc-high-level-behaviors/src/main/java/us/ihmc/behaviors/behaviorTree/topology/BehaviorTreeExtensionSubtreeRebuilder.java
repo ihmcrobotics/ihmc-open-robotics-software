@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtensionSupplier;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayerSupplier;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 
@@ -10,13 +10,13 @@ import java.util.HashMap;
 
 public class BehaviorTreeExtensionSubtreeRebuilder
 {
-   private final HashMap<Long, BehaviorTreeNodeExtension<?, ?, ?, ?>> idToNodesMap = new HashMap<>();
+   private final HashMap<Long, BehaviorTreeNodeLayer<?, ?, ?, ?>> idToNodesMap = new HashMap<>();
    private final CRDTInfo crdtInfo;
 
    private final BehaviorTreeTopologyOperation clearSubtreeOperation;
    private final BehaviorTreeTopologyOperation destroyLeftoversOperation;
 
-   public BehaviorTreeExtensionSubtreeRebuilder(BehaviorTreeNodeExtensionSupplier subtreeNodeSupplier, CRDTInfo crdtInfo)
+   public BehaviorTreeExtensionSubtreeRebuilder(BehaviorTreeNodeLayerSupplier subtreeNodeSupplier, CRDTInfo crdtInfo)
    {
       this.crdtInfo = crdtInfo;
 
@@ -27,12 +27,12 @@ public class BehaviorTreeExtensionSubtreeRebuilder
             LogTools.error("Clearing {} nodes in map. Actor: {}", idToNodesMap.size(), crdtInfo.getActorDesignation());
             idToNodesMap.clear();
          }
-         clearChildren(subtreeNodeSupplier.getNodeExtension());
+         clearChildren(subtreeNodeSupplier.getNodeLayer());
       };
 
       destroyLeftoversOperation = () ->
       {
-         for (BehaviorTreeNodeExtension<?, ?, ?, ?> leftover : idToNodesMap.values())
+         for (BehaviorTreeNodeLayer<?, ?, ?, ?> leftover : idToNodesMap.values())
          {
             leftover.destroy();
          }
@@ -40,7 +40,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       };
    }
 
-   private void clearChildren(BehaviorTreeNodeExtension<?, ?, ?, ?> localNode)
+   private void clearChildren(BehaviorTreeNodeLayer<?, ?, ?, ?> localNode)
    {
       if (localNode != null) // In the case of a null root node
       {
@@ -54,7 +54,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
          {
             for (BehaviorTreeNode<?> child : localNode.getChildren())
             {
-               clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
+               clearChildren((BehaviorTreeNodeLayer<?, ?, ?, ?>) child);
             }
 
             BehaviorTreeTopologyOperations.clearChildren(localNode);
@@ -69,7 +69,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       }
    }
 
-   public BehaviorTreeNodeExtension<?, ?, ?, ?> getReplacementNode(long id)
+   public BehaviorTreeNodeLayer<?, ?, ?, ?> getReplacementNode(long id)
    {
       return idToNodesMap.remove(id);
    }

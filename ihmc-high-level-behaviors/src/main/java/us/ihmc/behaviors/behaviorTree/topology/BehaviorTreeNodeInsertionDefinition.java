@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.communication.crdt.Freezable;
 
 import java.util.function.Consumer;
@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 /**
  * To use this class, use static {@link #build} method.
  */
-public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
+public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    // A lot of these fields may be null depending on the insertion type
    private T nodeToInsert;
@@ -19,7 +19,7 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeExten
    private BehaviorTreeNodeInsertionType insertionType;
    private int insertionIndex;
 
-   public static <R extends BehaviorTreeNodeExtension<R, ?, ?, ?>>
+   public static <R extends BehaviorTreeNodeLayer<R, ?, ?, ?>>
    BehaviorTreeNodeInsertionDefinition<R> build(R nodeToInsert,
                                                 Freezable freezableRootNodeHolder,
                                                 Consumer<R> rootNodeSetter,

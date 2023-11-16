@@ -23,13 +23,13 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
-   private final Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier;
+   private final Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier;
    private int numberOfNodes = 0;
    private int numberOfFrozenNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
-                            Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier,
+                            Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier,
                             CRDTInfo crdtInfo)
    {
       super(crdtInfo);
@@ -46,7 +46,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
       update(rootNodeSupplier.get());
    }
 
-   private void update(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
+   private void update(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
    {
       if (node != null)
       {
@@ -56,7 +56,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
 
          for (Object child : node.getChildren())
          {
-            update((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
+            update((BehaviorTreeNodeLayer<?, ?, ?, ?>) child);
          }
       }
    }
@@ -106,7 +106,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
       return nextID.longValue();
    }
 
-   public BehaviorTreeNodeExtension<?, ?, ?, ?> getRootNode()
+   public BehaviorTreeNodeLayer<?, ?, ?, ?> getRootNode()
    {
       return rootNodeSupplier.get();
    }

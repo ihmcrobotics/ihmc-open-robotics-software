@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.tools.thread.Throttler;
@@ -27,7 +27,7 @@ public class ROS2BehaviorTreeState
     * on-robot ones.
     */
    public ROS2BehaviorTreeState(BehaviorTreeState behaviorTreeState,
-                                Consumer<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSetter,
+                                Consumer<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSetter,
                                 ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;

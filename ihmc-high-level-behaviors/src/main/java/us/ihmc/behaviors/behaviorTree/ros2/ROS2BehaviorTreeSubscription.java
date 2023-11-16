@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.AutonomyAPI;
@@ -15,7 +15,7 @@ import us.ihmc.ros2.ROS2Topic;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked"}) // Sometimes in this class we need to be a little unsafe
-public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeExtension<T, ?, ?, ?>>
+public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final IHMCROS2Input<BehaviorTreeStateMessage> behaviorTreeSubscription;

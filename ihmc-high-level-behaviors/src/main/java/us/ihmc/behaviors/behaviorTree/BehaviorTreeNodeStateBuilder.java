@@ -7,5 +7,5 @@ import us.ihmc.communication.crdt.CRDTInfo;
  */
 public interface BehaviorTreeNodeStateBuilder
 {
-   BehaviorTreeNodeExtension createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo);
+   BehaviorTreeNodeLayer createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo);
 }
