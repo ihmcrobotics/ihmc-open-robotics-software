@@ -270,7 +270,7 @@ public class MonteCarloPlannerTools
          output.append(", ");
       }
 
-      LogTools.info("Layer Counts: {}", output.toString());
+      LogTools.debug("Layer Counts: {}", output.toString());
    }
 
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root)
@@ -286,8 +286,6 @@ public class MonteCarloPlannerTools
          position.scale(1/50.0f);
          FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(position), new Quaternion(position.getZ(), 0, 0));
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
-
-         LogTools.info("Footstep Side: {}, Position: {}", footstepNode.getRobotSide(), position);
       }
       return footstepPlan;
    }

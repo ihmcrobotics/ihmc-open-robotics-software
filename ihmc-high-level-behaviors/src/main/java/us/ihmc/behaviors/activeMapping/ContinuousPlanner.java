@@ -23,7 +23,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
-import us.ihmc.perception.tools.ActiveMappingTools;
+import us.ihmc.perception.tools.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -128,19 +128,19 @@ public class ContinuousPlanner
       switch (this.mode)
       {
          case WALK_TO_GOAL:
-            ActiveMappingTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
+            ContinuousPlanningTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
+                                                                   startingStancePose,
+                                                                   goalStancePose,
+                                                                   (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
+                                                                   (float) continuousPlanningParameters.getGoalPoseUpDistance());
+            break;
+         case RANDOM_WALK:
+            goalGenerator.updateCurrentPosition(new Point3D(startingStancePose.get(RobotSide.LEFT).getPosition()));
+            ContinuousPlanningTools.setRandomGoalWithinBounds(goalGenerator.getNextLocation(),
                                                               startingStancePose,
                                                               goalStancePose,
                                                               (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
                                                               (float) continuousPlanningParameters.getGoalPoseUpDistance());
-            break;
-         case RANDOM_WALK:
-            goalGenerator.updateCurrentPosition(new Point3D(startingStancePose.get(RobotSide.LEFT).getPosition()));
-            ActiveMappingTools.setRandomGoalWithinBounds(goalGenerator.getNextLocation(),
-                                                         startingStancePose,
-                                                         goalStancePose,
-                                                         (float) continuousPlanningParameters.getGoalPoseForwardDistance(),
-                                                         (float) continuousPlanningParameters.getGoalPoseUpDistance());
             break;
          case FRONTIER_EXPANSION:
             //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
@@ -152,16 +152,16 @@ public class ContinuousPlanner
 
             monteCarloPathPlanner.getAgent().measure(monteCarloPathPlanner.getWorld());
             agentPositionIndices.set(monteCarloPathPlanner.getAgent().getState());
-            robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
-                                     ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
+            robotLocationIndices.set(ContinuousPlanningTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
+                                     ContinuousPlanningTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
 
             double error = agentPositionIndices.distance(robotLocationIndices);
 
             if (error < 10.0f)
             {
                goalPositionIndices.set((Point2DReadOnly) monteCarloPathPlanner.plan().getPosition());
-               goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
-                                ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+               goalPosition.set(ContinuousPlanningTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                                ContinuousPlanningTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
 
                monteCarloPathPlanner.updateState(new MonteCarloWaypointNode(goalPositionIndices, null, 0));
             }
@@ -294,8 +294,8 @@ public class ContinuousPlanner
 
             agentPositionIndices.set(monteCarloPathPlanner.getAgent().getState());
 
-            robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
-                                     ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
+            robotLocationIndices.set(ContinuousPlanningTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
+                                     ContinuousPlanningTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
 
             double error = agentPositionIndices.distance(robotLocationIndices);
 
@@ -304,8 +304,8 @@ public class ContinuousPlanner
             if (error < 10.0f)
             {
                goalPositionIndices.set((Point2D) monteCarloPathPlanner.plan().getPosition());
-               goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
-                                ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+               goalPosition.set(ContinuousPlanningTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                                ContinuousPlanningTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
 
                monteCarloPathPlanner.updateState(new MonteCarloWaypointNode(goalPositionIndices, null, 0));
             }

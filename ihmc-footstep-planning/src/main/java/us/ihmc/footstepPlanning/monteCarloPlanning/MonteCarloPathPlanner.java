@@ -137,7 +137,7 @@ public class MonteCarloPathPlanner
          MonteCarloWaypointNode newState = (MonteCarloWaypointNode) newStateObj;
          MonteCarloWaypointNode postNode = new MonteCarloWaypointNode(newState.getPosition(), node, uniqueNodeId++);
 
-         node.getChildren().add(postNode);
+         node.addChild(postNode);
       }
 
       return (MonteCarloWaypointNode) node.getChildren().get((int) (Math.random() * node.getChildren().size()));

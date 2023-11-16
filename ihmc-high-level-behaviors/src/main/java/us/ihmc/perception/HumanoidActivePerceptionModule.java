@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.tools.ActiveMappingTools;
+import us.ihmc.perception.tools.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 
@@ -59,12 +59,12 @@ public class HumanoidActivePerceptionModule
    {
       if (activePlaneMappingRemoteThread == null)
       {
-         int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
-                                                                perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                                70);
-         int gridY = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
-                                                                perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                                70);
+         int gridX = ContinuousPlanningTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
+                                                                     perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                                     70);
+         int gridY = ContinuousPlanningTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
+                                                                     perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                                     70);
 
          agent.changeStateTo(gridX, gridY);
          agent.measure(world);

@@ -20,13 +20,12 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
-import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
-import us.ihmc.perception.tools.ActiveMappingTools;
+import us.ihmc.perception.tools.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -301,8 +300,8 @@ public class HumanoidPerceptionModule
          Point3D point = pointCloud.get(i);
          //sensorToWorldTransform.transform(point);
 
-         int gridX = ActiveMappingTools.getIndexFromCoordinates(point.getX(), occupancyGridResolution, offset);
-         int gridY = ActiveMappingTools.getIndexFromCoordinates(point.getY(), occupancyGridResolution, offset);
+         int gridX = ContinuousPlanningTools.getIndexFromCoordinates(point.getX(), occupancyGridResolution, offset);
+         int gridY = ContinuousPlanningTools.getIndexFromCoordinates(point.getY(), occupancyGridResolution, offset);
 
          if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {

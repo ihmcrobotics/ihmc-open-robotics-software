@@ -399,7 +399,7 @@ public class PerceptionDebugTools
 
    public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
    {
-      LogTools.info("Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
+      LogTools.debug("Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
 
       // just like plotFootsteps
       Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
@@ -414,7 +414,7 @@ public class PerceptionDebugTools
 
    public static void plotTiltedRectangle(Mat displayImage, Point3D point, int size, int side)
    {
-      LogTools.info("Footstep: {} {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2), side);
+      LogTools.debug("Footstep: {} {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2), side);
 
       Scalar color = side == 1 ? new Scalar(0, 0, 255, 0) : new Scalar(255, 255, 0, 0);
 

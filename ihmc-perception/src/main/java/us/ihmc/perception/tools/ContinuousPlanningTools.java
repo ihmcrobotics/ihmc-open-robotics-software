@@ -6,13 +6,17 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-public class ActiveMappingTools
+import java.util.Random;
+
+public class ContinuousPlanningTools
 {
    public static void setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
                                                      SideDependentList<FramePose3D> stancePose,
@@ -108,6 +112,42 @@ public class ActiveMappingTools
       }
 
       return goalPose;
+   }
+
+   public static void generateSensorZUpToRandomGoalFootPoses(HeightMapData latestHeightMapData,
+                                                             RigidBodyTransform sensorZUpToWorldTransform,
+                                                             SideDependentList<FramePose3D> startPoseToPack,
+                                                             SideDependentList<FramePose3D> goalPoseToPack,
+                                                             Random random)
+   {
+      double heightAtStartPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX(),
+                                                                 sensorZUpToWorldTransform.getTranslation().getY());
+      double heightAtGoalPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX() + 1.65,
+                                                                sensorZUpToWorldTransform.getTranslation().getY());
+
+      if (heightAtStartPose == Double.NaN || heightAtGoalPose == Double.NaN)
+      {
+         LogTools.error("Height at start or goal pose is NaN");
+      }
+      else
+      {
+         // set start pose to be below the camera
+         startPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
+         startPoseToPack.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, heightAtStartPose + 0.1);
+
+         startPoseToPack.get(RobotSide.RIGHT).set(sensorZUpToWorldTransform);
+         startPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, heightAtStartPose + 0.1);
+
+         // set goal pose to be 1.65m in front of the camera
+         goalPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
+         goalPoseToPack.get(RobotSide.LEFT).appendTranslation(random.nextDouble(1.35, 1.65), random.nextDouble(-1.0, 1.0), heightAtGoalPose + 0.1);
+
+         goalPoseToPack.get(RobotSide.RIGHT).set(goalPoseToPack.get(RobotSide.LEFT));
+         goalPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.0);
+
+         LogTools.info("Start Poses: {} {}", startPoseToPack.get(RobotSide.LEFT).getPosition(), startPoseToPack.get(RobotSide.RIGHT).getPosition());
+         LogTools.info("Goal Poses: {} {}", goalPoseToPack.get(RobotSide.LEFT).getPosition(), goalPoseToPack.get(RobotSide.RIGHT).getPosition());
+      }
    }
 
    public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)

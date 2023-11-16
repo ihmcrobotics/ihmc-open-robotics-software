@@ -2,11 +2,14 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
-public abstract class MonteCarloTreeNode
+public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNode>
 {
-   private ArrayList<MonteCarloTreeNode> parents;
-   private ArrayList<MonteCarloTreeNode> children;
+
+   private final ArrayList<MonteCarloTreeNode> parents;
+   private final ArrayList<MonteCarloTreeNode> children;
+   private final PriorityQueue<MonteCarloTreeNode> maxQueue = new PriorityQueue<>();
 
    protected int id = 0;
    protected float upperConfidenceBound = 0;
@@ -17,10 +20,10 @@ public abstract class MonteCarloTreeNode
    public MonteCarloTreeNode(MonteCarloTreeNode parent, int id)
    {
       this.id = id;
+
+      this.level = 0;
       this.parents = new ArrayList<>();
       this.children = new ArrayList<>();
-      this.level = 0;
-
 
       if (parent != null)
       {
@@ -37,7 +40,6 @@ public abstract class MonteCarloTreeNode
          return;
       }
 
-      // total visits of all parents
       double totalParentVists = parents.stream().mapToInt(MonteCarloTreeNode::getVisits).sum();
       upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(totalParentVists) / visits));
    }
@@ -105,5 +107,58 @@ public abstract class MonteCarloTreeNode
    public Object getPosition()
    {
       return null;
+   }
+
+   public PriorityQueue<MonteCarloTreeNode> getMaxQueue()
+   {
+      return maxQueue;
+   }
+
+   public MonteCarloTreeNode getMaxQueueNode()
+   {
+      return maxQueue.poll();
+   }
+
+   public void addChild(MonteCarloTreeNode child)
+   {
+      children.add(child);
+      maxQueue.add(child);
+   }
+
+   public void removeChild(MonteCarloTreeNode child)
+   {
+      children.remove(child);
+      maxQueue.remove(child);
+   }
+
+   public void addParent(MonteCarloTreeNode parent)
+   {
+      parents.add(parent);
+   }
+
+   public void removeParent(MonteCarloTreeNode parent)
+   {
+      parents.remove(parent);
+   }
+
+   public MonteCarloTreeNode getChild(int index)
+   {
+      return children.get(index);
+   }
+
+   public int compareTo(MonteCarloTreeNode other)
+   {
+      if (this.getValue() > other.getValue())
+      {
+         return 1;
+      }
+      else if (this.getValue() < other.getValue())
+      {
+         return -1;
+      }
+      else
+      {
+         return 0;
+      }
    }
 }

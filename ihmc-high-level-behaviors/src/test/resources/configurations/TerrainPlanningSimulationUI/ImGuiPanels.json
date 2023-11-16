@@ -1,0 +1,20 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Dataset Navigation Panel" : true,
+    "Environment###java.lang.Class:Environment" : false,
+    "Perception Panel" : true,
+    "Contact Map Image" : false,
+    "Cropped Height Map" : false,
+    "Depth Image" : false,
+    "Internal Height Map" : false,
+    "Local Height Map" : false,
+    "Terrain Cost Image" : false,
+    "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : false,
+    "Stepping L515 Color###GlobalWidgetIndex:1:Stepping L515 Color" : false,
+    "Stepping L515 Depth###GlobalWidgetIndex:0:Stepping L515 Depth" : false,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

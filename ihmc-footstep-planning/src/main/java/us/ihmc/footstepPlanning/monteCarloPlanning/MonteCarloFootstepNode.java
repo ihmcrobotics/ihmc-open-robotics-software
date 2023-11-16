@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public class MonteCarloFootstepNode extends MonteCarloTreeNode
 {

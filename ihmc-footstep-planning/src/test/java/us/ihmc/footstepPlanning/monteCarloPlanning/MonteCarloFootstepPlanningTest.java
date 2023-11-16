@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -15,10 +12,8 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MonteCarloFootstepPlanningTest
@@ -57,7 +52,6 @@ public class MonteCarloFootstepPlanningTest
       heightMapExtractor.computeContactMap();
       heightMapExtractor.readContactMapImage();
 
-      Mat terrainCostImage = heightMapExtractor.getCroppedTerrainCostImage();
       Mat contactMap = heightMapExtractor.getGlobalContactImage();
 
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
@@ -75,89 +69,8 @@ public class MonteCarloFootstepPlanningTest
       LogTools.info("Total Time: {} ms, Plan Size: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps());
 
       if (displayPlots)
-         display(heightMap, contactMap, terrainCostImage, plan, planner);
+         planner.getDebugger().display(plan, 0);
 
       Assertions.assertEquals(0.0, 0.0 - 0.0001, 1e-3);
-   }
-
-   public void display(Mat heightMap, Mat contactMapImage, Mat terrainCostImage, FootstepPlan plan, MonteCarloFootstepPlanner planner)
-   {
-      HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
-      Mat heightMapColorImage = new Mat(201, 201, opencv_core.CV_8UC3);
-
-      Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(contactMapImage);
-
-      //PerceptionDebugTools.printMat("Terrain Cost", terrainCostImage, 4);
-      //PerceptionDebugTools.printMat("Contact Map", contactMapImage, 4);
-
-      //PerceptionDebugTools.printMat("Height Map", heightMap, 4);
-      //PerceptionDebugTools.printMat("Contact Map", contactMapImage, 4);
-      //PerceptionDebugTools.plotFootsteps(display, null, 2);
-
-      LogTools.info(String.format("Dimensions: HeightMap(%d x %d), ContactMap(%d x %d)",
-                                  heightMap.rows(),
-                                  heightMap.cols(),
-                                  contactMapImage.rows(),
-                                  contactMapImage.cols()));
-
-      // stack the contact map to the right of the height map
-      Mat stacked = new Mat(heightMap.rows(), heightMap.cols() + contactMapImage.cols(), opencv_core.CV_8UC3);
-      Mat left = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0, 0, heightMap.cols(), heightMap.rows()));
-      Mat right = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(heightMap.cols(), 0, contactMapImage.cols(), contactMapImage.rows()));
-
-      PerceptionDebugTools.convertDepthCopyToColor(heightMap, heightMapColorImage);
-      heightMapColorImage.copyTo(left);
-
-      //Mat contactMapColorImage = new Mat(contactMapImage.rows(), contactMapImage.cols(), opencv_core.CV_8UC3);
-      //opencv_imgproc.cvtColor(contactMapImage, contactMapColorImage, opencv_imgproc.COLOR_GRAY2RGB);
-      //contactMapColorImage.copyTo(right);
-
-      // convert contact heat map from 8UC4 to 8UC3
-      Mat contactHeatMapColorImage = new Mat(contactHeatMapImage.rows(), contactHeatMapImage.cols(), opencv_core.CV_8UC3);
-      opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
-
-      MonteCarloPlannerTools.plotFootstepNodeList(planner.getVisitedNodes(), contactHeatMapColorImage);
-      plotFootsteps(contactHeatMapColorImage, plan);
-
-      contactHeatMapColorImage.copyTo(right);
-
-      PerceptionDebugTools.display("Display", stacked, 0, 1000);
-   }
-
-   private void plotFootsteps(Mat image, FootstepPlan plan)
-   {
-      if (plan == null)
-         return;
-
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
-      {
-         Point3D position = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
-         PerceptionDebugTools.plotTiltedRectangle(image, position, 1, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
-
-         //Draw line from start to first
-         if (i == 0)
-         {
-            Point3D startPosition = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
-            opencv_imgproc.line(image, new org.bytedeco.opencv.opencv_core.Point((int) (startPosition.getX() * 100), (int) (startPosition.getY() * 100)),
-                             new org.bytedeco.opencv.opencv_core.Point((int) (position.getX() * 100), (int) (position.getY() * 100)), new Scalar(255, 255, 255, 0));
-         }
-
-         //Draw line from start to previous to current
-         if (i > 0)
-         {
-            Point3D previousPosition = new Point3D(plan.getFootstep(i - 1).getFootstepPose().getPosition());
-            opencv_imgproc.line(image, new org.bytedeco.opencv.opencv_core.Point((int) (previousPosition.getX() * 100), (int) (previousPosition.getY() * 100)),
-                             new org.bytedeco.opencv.opencv_core.Point((int) (position.getX() * 100), (int) (position.getY() * 100)), new Scalar(255, 255, 255, 0));
-
-         }
-
-         //Draw line from last to goal
-         if (i == plan.getNumberOfSteps() - 1)
-         {
-            Point3D goalPosition = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
-            opencv_imgproc.line(image, new org.bytedeco.opencv.opencv_core.Point((int) (position.getX() * 100), (int) (position.getY() * 100)),
-                             new org.bytedeco.opencv.opencv_core.Point((int) (goalPosition.getX() * 100), (int) (goalPosition.getY() * 100)), new Scalar(255, 255, 255, 0));
-         }
-      }
    }
 }
