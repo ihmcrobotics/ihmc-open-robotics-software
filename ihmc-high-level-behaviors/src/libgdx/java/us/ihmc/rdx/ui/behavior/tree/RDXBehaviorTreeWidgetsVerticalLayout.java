@@ -40,6 +40,11 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       if (ImGui.beginPopup(node.getNodePopupID()))
       {
+         if (ImGui.menuItem("Rename..."))
+         {
+            node.enterEditDescriptionMode();
+         }
+         ImGui.separator();
          if (!node.isRootNode())
          {
             if (ImGui.menuItem("Insert Node Before..."))
