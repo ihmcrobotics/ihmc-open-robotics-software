@@ -23,10 +23,15 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
             * Number of children
             */
    public int number_of_children_;
+   /**
+            * JSON file name if this node is the root of a JSON file
+            */
+   public java.lang.StringBuilder json_file_name_;
 
    public BehaviorTreeNodeDefinitionMessage()
    {
       description_ = new java.lang.StringBuilder(255);
+      json_file_name_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorTreeNodeDefinitionMessage(BehaviorTreeNodeDefinitionMessage other)
@@ -41,6 +46,9 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       description_.append(other.description_);
 
       number_of_children_ = other.number_of_children_;
+
+      json_file_name_.setLength(0);
+      json_file_name_.append(other.json_file_name_);
 
    }
 
@@ -83,6 +91,30 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       return number_of_children_;
    }
 
+   /**
+            * JSON file name if this node is the root of a JSON file
+            */
+   public void setJsonFileName(java.lang.String json_file_name)
+   {
+      json_file_name_.setLength(0);
+      json_file_name_.append(json_file_name);
+   }
+
+   /**
+            * JSON file name if this node is the root of a JSON file
+            */
+   public java.lang.String getJsonFileNameAsString()
+   {
+      return getJsonFileName().toString();
+   }
+   /**
+            * JSON file name if this node is the root of a JSON file
+            */
+   public java.lang.StringBuilder getJsonFileName()
+   {
+      return json_file_name_;
+   }
+
 
    public static Supplier<BehaviorTreeNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -105,6 +137,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.json_file_name_, other.json_file_name_, epsilon)) return false;
+
 
       return true;
    }
@@ -122,6 +156,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.json_file_name_, otherMyClass.json_file_name_)) return false;
+
 
       return true;
    }
@@ -135,7 +171,9 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       builder.append("description=");
       builder.append(this.description_);      builder.append(", ");
       builder.append("number_of_children=");
-      builder.append(this.number_of_children_);
+      builder.append(this.number_of_children_);      builder.append(", ");
+      builder.append("json_file_name=");
+      builder.append(this.json_file_name_);
       builder.append("}");
       return builder.toString();
    }
