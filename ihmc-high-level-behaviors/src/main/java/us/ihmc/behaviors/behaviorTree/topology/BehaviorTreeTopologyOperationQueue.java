@@ -70,20 +70,42 @@ public class BehaviorTreeTopologyOperationQueue
 
    public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddNode(T nodeToAdd, T parent)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addChild(nodeToAdd, parent));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.add(nodeToAdd, parent));
    }
 
    public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent, int insertionIndex)
    {
       topologyOperationQueue.add(() ->
       {
-         BehaviorTreeTopologyOperations.insertAndFreezeChild(nodeToAdd, parent, insertionIndex);
+         BehaviorTreeTopologyOperations.insertAndFreeze(nodeToAdd, parent, insertionIndex);
+      });
+   }
+
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueMoveAndFreezeNode(T nodeToMove,
+                                                                                    T parent,
+                                                                                    T relativeNode,
+                                                                                    BehaviorTreeNodeInsertionType insertionType)
+   {
+      topologyOperationQueue.add(() ->
+      {
+         int indexOfNodeToMove = nodeToMove.getParent().getChildren().indexOf(nodeToMove);
+         int indexOfRelativeNode = nodeToMove.getParent().getChildren().indexOf(relativeNode);
+
+         int insertionIndex = indexOfRelativeNode;
+
+         if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER)
+            ++insertionIndex;
+
+         if (indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
+            --insertionIndex;
+
+         BehaviorTreeTopologyOperations.moveAndFreeze(nodeToMove, parent, insertionIndex);
       });
    }
 
    public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreezeChild(nodeToAdd, parent));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreeze(nodeToAdd, parent));
    }
 
    public void queueOperation(BehaviorTreeTopologyOperation topologyOperation)

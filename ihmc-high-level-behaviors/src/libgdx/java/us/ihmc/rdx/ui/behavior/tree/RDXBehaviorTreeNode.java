@@ -35,6 +35,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImVec2 descriptionTextSize = new ImVec2();
    private final String nodePopupID = labels.get("Node popup");
    private final String modalPopupID = labels.get("Create Node");
+   private boolean nodeContextMenuShowing = false;
 
    @Override
    public void update()
@@ -96,7 +97,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       else
       {
          ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-         ImGui.textColored(textHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text), descriptionText);
+         // We want the text to stay highlighted when the context menu is showing to help the operator
+         // know which node they're operating on.
+         boolean highlightText = textHovered || nodeContextMenuShowing;
+         ImGui.textColored(highlightText ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text), descriptionText);
+         nodeContextMenuShowing = false;
          ImGui.popFont();
       }
 
@@ -163,6 +168,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public String getModalPopupID()
    {
       return modalPopupID;
+   }
+
+   public void setNodeContextMenuShowing(boolean nodeContextMenuShowing)
+   {
+      this.nodeContextMenuShowing = nodeContextMenuShowing;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()
