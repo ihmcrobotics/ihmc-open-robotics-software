@@ -19,15 +19,14 @@ public class ContinuousWalkingParameters extends StoredPropertySet implements Co
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
-   public static final BooleanStoredPropertyKey clearEntireControllerQueue = keys.addBooleanKey("Clear entire controller queue");
+   public static final BooleanStoredPropertyKey overrideEntireQueueEachStep = keys.addBooleanKey("Override entire queue each step");
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");
-   public static final IntegerStoredPropertyKey maxStepsToHoldInControllerQueue = keys.addIntegerKey("Max steps to hold in controller queue");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
    public static final DoubleStoredPropertyKey goalPoseUpDistance = keys.addDoubleKey("Goal pose up distance");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
-   public static final DoubleStoredPropertyKey planningWithReferenceTimeout = keys.addDoubleKey("Planning with reference timeout");
-   public static final DoubleStoredPropertyKey initialPlanningTimeout = keys.addDoubleKey("Initial planning timeout");
+   public static final DoubleStoredPropertyKey planningReferenceTimeout = keys.addDoubleKey("Planning reference timeout");
+   public static final DoubleStoredPropertyKey planningWithoutReferenceTimeout = keys.addDoubleKey("Planning without reference timeout");
 
    /**
     * Loads this property set.
