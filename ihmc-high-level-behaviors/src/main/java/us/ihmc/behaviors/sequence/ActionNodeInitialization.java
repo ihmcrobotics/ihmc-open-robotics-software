@@ -2,9 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
-import us.ihmc.behaviors.sequence.actions.WalkActionState;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,12 +48,62 @@ public class ActionNodeInitialization
          else // set to current robot's hand pose
          {
             handPoseAction.getDefinition().setPalmParentFrameName(ReferenceFrame.getWorldFrame().getName());
-            syncedRobot.getReferenceFrames()
-                       .getHandFrame(sideOfNewAction)
+            syncedRobot.getReferenceFrames().getHandFrame(sideOfNewAction)
                        .getTransformToDesiredFrame(handPoseAction.getDefinition().getPalmTransformToParent().getValue(),
                                                    ReferenceFrame.getWorldFrame());
          }
          handPoseAction.update();
+      }
+      else if (newAction instanceof ChestOrientationActionState chestOrientationAction)
+      {
+         ChestOrientationActionState nextPreviousAction = findNextPreviousAction(actionSequence, ChestOrientationActionState.class, indexOfInsertion, null);
+         if (nextPreviousAction != null && nextPreviousAction.getChestFrame().isChildOfWorld())
+         {
+            chestOrientationAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
+            chestOrientationAction.getDefinition().getChestToParentTransform().getValue()
+                                  .set(nextPreviousAction.getDefinition().getChestToParentTransform().getValueReadOnly());
+         }
+         else
+         {
+            chestOrientationAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+            syncedRobot.getReferenceFrames().getPelvisZUpFrame()
+                       .getTransformToDesiredFrame(chestOrientationAction.getDefinition().getChestToParentTransform().getValue(),
+                                                   ReferenceFrame.getWorldFrame());
+
+         }
+         chestOrientationAction.update();
+      }
+      else if (newAction instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+      {
+         PelvisHeightPitchActionState nextPreviousAction = findNextPreviousAction(actionSequence, PelvisHeightPitchActionState.class, indexOfInsertion, null);
+         if (nextPreviousAction != null && nextPreviousAction.getPelvisFrame().isChildOfWorld())
+         {
+            pelvisHeightPitchAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
+            pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValue()
+                                  .set(nextPreviousAction.getDefinition().getPelvisToParentTransform().getValueReadOnly());
+         }
+         else
+         {
+            pelvisHeightPitchAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+            syncedRobot.getReferenceFrames().getPelvisFrame()
+                       .getTransformToDesiredFrame(pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValue(),
+                                                   ReferenceFrame.getWorldFrame());
+
+         }
+         pelvisHeightPitchAction.update();
+      }
+      else if (newAction instanceof FootstepPlanActionState footstepPlanAction)
+      {
+         FootstepPlanActionState nextPreviousFootstepPlanAction = findNextPreviousAction(actionSequence, FootstepPlanActionState.class, indexOfInsertion, null);
+         if (nextPreviousFootstepPlanAction != null)
+         {
+            footstepPlanAction.getDefinition().setParentFrameName(nextPreviousFootstepPlanAction.getDefinition().getParentFrameName());
+         }
+         else // set to current robot's pelvis pose
+         {
+            footstepPlanAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+         }
+         footstepPlanAction.update();
       }
    }
 
