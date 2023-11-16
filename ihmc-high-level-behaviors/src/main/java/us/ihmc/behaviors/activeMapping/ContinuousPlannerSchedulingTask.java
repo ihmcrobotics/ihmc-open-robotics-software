@@ -12,6 +12,7 @@ import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,6 +50,8 @@ public class ContinuousPlannerSchedulingTask
 
    private final ROS2Topic controllerFootstepDataTopic;
    private final ContinuousWalkingParameters continuousPlanningParameters;
+   private final SwingPlannerParametersBasics swingFootPlannerParameters;
+
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousPlanner continuousPlanner;
 
@@ -68,7 +71,12 @@ public class ContinuousPlannerSchedulingTask
       this.referenceFrames = referenceFrames;
       this.continuousPlanningParameters = continuousPlanningParameters;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousPlannerStatistics, ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
+      swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
+      continuousPlanner = new ContinuousPlanner(robotModel,
+                                                referenceFrames,
+                                                continuousPlannerStatistics,
+                                                swingFootPlannerParameters,
+                                                ContinuousPlanner.PlanningMode.WALK_TO_GOAL);
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);

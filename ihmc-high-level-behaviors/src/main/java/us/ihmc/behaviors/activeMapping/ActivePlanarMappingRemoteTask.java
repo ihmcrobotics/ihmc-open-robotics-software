@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -28,6 +29,8 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
 
    private ContinuousPlanner activeMappingModule;
    private final ContinuousWalkingParameters continuousPlanningParameters;
+   private final SwingPlannerParametersBasics swingFootPlannerParameters;
+
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,
@@ -45,8 +48,10 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
 
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       this.continuousPlanningParameters = continuousPlanningParameters;
+      swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, new ContinuousPlannerStatistics(), ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION);
+      activeMappingModule = new ContinuousPlanner(robotModel, referenceFrames, new ContinuousPlannerStatistics(), swingFootPlannerParameters,
+                                                  ContinuousPlanner.PlanningMode.FRONTIER_EXPANSION);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);

@@ -64,8 +64,9 @@ public class ContinuousPlanner
    private final Point2D robotLocationIndices = new Point2D();
 
    private FootstepPlan previouslySentPlanForReference;
-   private HumanoidReferenceFrames referenceFrames;
+   private final HumanoidReferenceFrames referenceFrames;
    private FootstepPlanningModule footstepPlanner;
+   private SwingPlannerParametersBasics swingFootPlannerParameters;
    private FootstepPlannerLogger logger;
    private MonteCarloPathPlanner monteCarloPathPlanner;
    private FootstepPlannerOutput plannerOutput;
@@ -84,11 +85,13 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,
                             ContinuousPlannerStatistics statistics,
+                            SwingPlannerParametersBasics swingFootPlannerParameters,
                             PlanningMode mode)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.mode = mode;
       this.statistics = statistics;
+      this.swingFootPlannerParameters = swingFootPlannerParameters;
 
       active = true;
 
@@ -195,6 +198,12 @@ public class ContinuousPlanner
          LogTools.warn("Footstep Planner is Busy!");
          return;
       }
+
+      // Sync the swing time to always be the same whether its obstacle avoidance or not
+      swingFootPlannerParameters.setMinimumSwingTime(continuousPlanningParameters.getSwingTime());
+      swingFootPlannerParameters.setMaximumSwingTime(continuousPlanningParameters.getSwingTime());
+
+      footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 
       FootstepPlannerRequest request = createFootstepPlannerRequest(startingStancePose, goalStancePose);
       request.setRequestedInitialStanceSide(imminentFootstepSide);
