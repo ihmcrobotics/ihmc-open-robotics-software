@@ -5,7 +5,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -49,7 +48,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    {
       Point3D newPosition = new Point3D();
       newPosition.add(position, action);
-      return MonteCarloPlannerTools.isWithinGridBoundaries(new Point2D(newPosition.getX() + (double) gridWidth / 2, newPosition.getY() + (double) gridWidth / 2), gridWidth);
+      return true;
+      //return MonteCarloPlannerTools.isWithinGridBoundaries(new Point2D(newPosition.getX() + (double) gridWidth / 2, newPosition.getY() + (double) gridWidth / 2), gridWidth);
    }
 
    private MonteCarloFootstepNode computeActionResult(Vector3DReadOnly action)
@@ -73,11 +73,10 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    @Override
    public boolean equals(Object obj)
    {
-      if (obj instanceof MonteCarloFootstepNode other)
+      if (obj instanceof MonteCarloFootstepNode)
       {
-         LogTools.info("Position: {}, Other Position: {}", position, other.position);
-         //return position.equals(other.position) && robotSide == other.robotSide;
-         return (int) (position.getX()) == (int) (other.position.getX()) && (int) (position.getY()) == (int) (other.position.getY());
+         MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
+         return position.equals(other.position) && robotSide == other.robotSide;
       }
       else
       {

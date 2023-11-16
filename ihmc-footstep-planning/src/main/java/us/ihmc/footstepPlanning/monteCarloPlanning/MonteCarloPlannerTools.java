@@ -297,7 +297,7 @@ public class MonteCarloPlannerTools
       {
          for (int j = 20; j <= 40; j+=2)
          {
-            actions.add(new Vector3D(i * side, j * side, 0));
+            actions.add(new Vector3D(i, j * side, 0));
          }
       }
    }
