@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.communication.crdt.Freezable;
 import us.ihmc.tools.Destroyable;
 
@@ -13,44 +13,44 @@ import us.ihmc.tools.Destroyable;
 public class BehaviorTreeTopologyOperations
 {
 
-   public static void detachAndDestroySubtree(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
+   public static void detachAndDestroySubtree(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
    {
       detachAndDestroySubtreeBasic(node);
-      if (node.getExtendsState())
+      if (node.isLayerOverState())
          detachAndDestroySubtreeBasic(node.getState());
       detachAndDestroySubtreeBasic(node.getDefinition());
    }
 
-   public static void clearChildren(BehaviorTreeNodeExtension<?, ?, ?, ?> node)
+   public static void clearChildren(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
    {
       clearChildrenBasic(node);
-      if (node.getExtendsState())
+      if (node.isLayerOverState())
          clearChildrenBasic(node.getState());
       clearChildrenBasic(node.getDefinition());
    }
 
-   public static <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void addAndFreezeChild(T nodeToAdd, T parent)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void addAndFreezeChild(T nodeToAdd, T parent)
    {
       insertAndFreezeChild(nodeToAdd, parent, parent.getChildren().size());
    }
 
-   public static <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void addChild(T nodeToAdd, T parent)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void addChild(T nodeToAdd, T parent)
    {
       insertChild(nodeToAdd, parent, parent.getChildren().size());
    }
 
-   public static <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void insertAndFreezeChild(T nodeToAdd, T parent, int insertionIndex)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insertAndFreezeChild(T nodeToAdd, T parent, int insertionIndex)
    {
       insertChildAndFreezeBasic(nodeToAdd, parent, insertionIndex);
-      if (nodeToAdd.getExtendsState())
+      if (nodeToAdd.isLayerOverState())
          insertChildAndFreezeBasic(nodeToAdd.getState(), parent.getState(), insertionIndex);
       insertChildAndFreezeBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
    }
 
-   public static <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void insertChild(T nodeToAdd, T parent, int insertionIndex)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insertChild(T nodeToAdd, T parent, int insertionIndex)
    {
       insertChildBasic(nodeToAdd, parent, insertionIndex);
-      if (nodeToAdd.getExtendsState())
+      if (nodeToAdd.isLayerOverState())
          insertChildBasic(nodeToAdd.getState(), parent.getState(), insertionIndex);
       insertChildBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
    }

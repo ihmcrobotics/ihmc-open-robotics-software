@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                                D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeExtension<BehaviorTreeNodeExecutor<?, ?>, S, S, D>
+      implements BehaviorTreeNodeLayer<BehaviorTreeNodeExecutor<?, ?>, S, S, D>
 {
    private final List<BehaviorTreeNodeExecutor<?, ?>> children = new ArrayList<>();
    private transient BehaviorTreeNodeExecutor<?, ?> parent;
@@ -58,7 +58,7 @@ public abstract class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D
    }
 
    @Override
-   public S getExtendedNode()
+   public S getNextLowerLayer()
    {
       return getState();
    }

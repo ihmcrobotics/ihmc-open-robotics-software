@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.communication.crdt.Freezable;
 
 import java.util.LinkedList;
@@ -31,7 +31,7 @@ public class BehaviorTreeTopologyOperationQueue
       return atLeastOneOperationPerformed;
    }
 
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueInsertNode(BehaviorTreeNodeInsertionDefinition<T> insertionDefinition)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueInsertNode(BehaviorTreeNodeInsertionDefinition<T> insertionDefinition)
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
@@ -47,14 +47,14 @@ public class BehaviorTreeTopologyOperationQueue
       }
    }
 
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueSetRootNode(T node, Consumer<T> setter)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetRootNode(T node, Consumer<T> setter)
    {
       topologyOperationQueue.add(() -> setter.accept(node));
    }
 
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueSetAndFreezeRootNode(T node,
-                                                                                           Consumer<T> setter,
-                                                                                           Freezable freezableRootHolder)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetAndFreezeRootNode(T node,
+                                                                                       Consumer<T> setter,
+                                                                                       Freezable freezableRootHolder)
    {
       topologyOperationQueue.add(() ->
       {
@@ -63,17 +63,17 @@ public class BehaviorTreeTopologyOperationQueue
       });
    }
 
-   public void queueDestroySubtree(BehaviorTreeNodeExtension<?, ?, ?, ?> subtree)
+   public void queueDestroySubtree(BehaviorTreeNodeLayer<?, ?, ?, ?> subtree)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.detachAndDestroySubtree(subtree));
    }
 
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddNode(T nodeToAdd, T parent)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddNode(T nodeToAdd, T parent)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addChild(nodeToAdd, parent));
    }
 
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent, int insertionIndex)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent, int insertionIndex)
    {
       topologyOperationQueue.add(() ->
       {
@@ -81,7 +81,7 @@ public class BehaviorTreeTopologyOperationQueue
       });
    }
 
-   public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreezeChild(nodeToAdd, parent));
    }

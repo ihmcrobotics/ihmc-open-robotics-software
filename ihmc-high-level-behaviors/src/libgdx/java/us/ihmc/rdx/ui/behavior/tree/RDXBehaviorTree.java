@@ -8,7 +8,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
@@ -253,7 +253,7 @@ public class RDXBehaviorTree
       return behaviorTreeState;
    }
 
-   public void setRootNode(BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode)
+   public void setRootNode(BehaviorTreeNodeLayer<?, ?, ?, ?> rootNode)
    {
       this.rootNode = (RDXBehaviorTreeNode<?, ?>) rootNode;
    }

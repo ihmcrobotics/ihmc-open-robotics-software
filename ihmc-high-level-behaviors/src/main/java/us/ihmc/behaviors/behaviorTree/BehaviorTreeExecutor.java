@@ -74,7 +74,7 @@ public class BehaviorTreeExecutor
       behaviorTreeState.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
    }
 
-   public void setRootNode(BehaviorTreeNodeExtension<?, ?, ?, ?> rootNode)
+   public void setRootNode(BehaviorTreeNodeLayer<?, ?, ?, ?> rootNode)
    {
       this.rootNode = (BehaviorTreeNodeExecutor<?, ?>) rootNode;
    }

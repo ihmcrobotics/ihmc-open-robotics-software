@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The core interface of a Behavior Tree: the node that can be ticked.
+ * A behavior tree node layer that sits over the Definition layer.
+ * The state layer is the layer that gets synchronized over the network.
  */
 public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       extends RequestConfirmFreezable
-      implements BehaviorTreeNodeExtension<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
+      implements BehaviorTreeNodeLayer<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
 {
    private final D definition;
 
@@ -104,7 +105,7 @@ public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition
    }
 
    @Override
-   public D getExtendedNode()
+   public D getNextLowerLayer()
    {
       return getDefinition();
    }
