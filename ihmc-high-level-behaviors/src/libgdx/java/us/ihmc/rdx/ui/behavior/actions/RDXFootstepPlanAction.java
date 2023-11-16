@@ -91,7 +91,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             RDXFootstepPlanActionFootstep addedFootstep = footsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             FramePose3D newFootstepPose = new FramePose3D();
-            if (!footsteps.isEmpty())
+            if (footsteps.size() > 1)
             {
                RDXFootstepPlanActionFootstep previousFootstep = footsteps.get(footsteps.size() - 1);
                newFootstepPose.setToZero(previousFootstep.getFootstepFrame());
