@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class RDXBehaviorTreeNodesMenu
+public class RDXBehaviorTreeNodeCreationMenu
 {
    private final RDXBehaviorTree tree;
    private final WorkspaceResourceDirectory treeFilesDirectory;
@@ -28,7 +28,7 @@ public class RDXBehaviorTreeNodesMenu
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
 
-   public RDXBehaviorTreeNodesMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.tree = tree;
       this.treeFilesDirectory = treeFilesDirectory;
@@ -38,23 +38,11 @@ public class RDXBehaviorTreeNodesMenu
       reindexDirectory();
    }
 
-   private void reindexDirectory()
-   {
-      indexedTreeFiles.clear();
-      for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
-      {
-         indexedTreeFiles.add(new RDXAvailableBehaviorTreeFile(queryContainedFile));
-      }
-
-      // Keep them in alphabetical order
-      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
-   }
-
    /**
     * This method assumes that the insertion is valid for the relative node.
     * For example, if the insertion requires modifying a parent, we assume it is not null.
     */
-   public void renderNodeCreationWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
+   public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("From file:");
@@ -163,5 +151,17 @@ public class RDXBehaviorTreeNodesMenu
             ImGui.closeCurrentPopup();
          }
       }
+   }
+
+   private void reindexDirectory()
+   {
+      indexedTreeFiles.clear();
+      for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
+      {
+         indexedTreeFiles.add(new RDXAvailableBehaviorTreeFile(queryContainedFile));
+      }
+
+      // Keep them in alphabetical order
+      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
    }
 }
