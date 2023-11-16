@@ -23,10 +23,13 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
+   /** Empty string if not the root of a JSON file */
+   private final CRDTUnidirectionalString jsonFileName;
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo)
    {
       description = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+      jsonFileName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
    }
 
    /**
@@ -60,11 +63,13 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    {
       message.setDescription(description.toMessage());
       message.setNumberOfChildren(children.size());
+      message.setJsonFileName(jsonFileName.toMessage());
    }
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
       description.fromMessage(message.getDescriptionAsString());
+      jsonFileName.fromMessage(message.getJsonFileNameAsString());
    }
 
    /**
@@ -79,6 +84,16 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    public String getDescription()
    {
       return description.getValue();
+   }
+
+   public void setJSONFileName(String jsonFileName)
+   {
+      this.jsonFileName.setValue(jsonFileName);
+   }
+
+   public String getJSONFilename()
+   {
+      return jsonFileName.getValue();
    }
 
    @Override

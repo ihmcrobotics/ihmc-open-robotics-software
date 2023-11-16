@@ -10,4 +10,7 @@ string description
 # Number of children
 uint16 number_of_children
 
+# JSON file name if this node is the root of a JSON file
+string json_file_name
+
 

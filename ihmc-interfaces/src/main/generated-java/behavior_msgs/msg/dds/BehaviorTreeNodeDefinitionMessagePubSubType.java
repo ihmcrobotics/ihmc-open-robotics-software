@@ -15,7 +15,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8bdd51b4d51420bfdefbfdf76d23fb1e7a7a09b1d33592b9847f2dc4b6851f60";
+   		return "664a2d13de78599aa23f11f8b027e662e37d442c2ae0b378089f5440894a47fc";
    }
    
    @Override
@@ -55,6 +55,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +74,8 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJsonFileName().length() + 1;
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +88,10 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
 
       cdr.write_type_3(data.getNumberOfChildren());
 
+      if(data.getJsonFileName().length() <= 255)
+      cdr.write_type_d(data.getJsonFileName());else
+          throw new RuntimeException("json_file_name field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -92,6 +99,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       cdr.read_type_d(data.getDescription());	
       data.setNumberOfChildren(cdr.read_type_3());
       	
+      cdr.read_type_d(data.getJsonFileName());	
 
    }
 
@@ -100,6 +108,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    {
       ser.write_type_d("description", data.getDescription());
       ser.write_type_3("number_of_children", data.getNumberOfChildren());
+      ser.write_type_d("json_file_name", data.getJsonFileName());
    }
 
    @Override
@@ -107,6 +116,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    {
       ser.read_type_d("description", data.getDescription());
       data.setNumberOfChildren(ser.read_type_3("number_of_children"));
+      ser.read_type_d("json_file_name", data.getJsonFileName());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage dest)
