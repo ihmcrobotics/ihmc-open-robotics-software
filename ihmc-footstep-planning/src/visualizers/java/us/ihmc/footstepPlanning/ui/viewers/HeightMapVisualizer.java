@@ -95,6 +95,11 @@ public class HeightMapVisualizer extends AnimationTimer
       double gridResolutionXY = heightMapMessage.getXyResolution();
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
 
+      if (Double.isNaN(heightMapMessage.getEstimatedGroundHeight()))
+      {
+         heightMapMessage.setEstimatedGroundHeight(heights.min());
+      }
+
       for (int i = 0; i < heights.size(); i++)
       {
          int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getKeys().get(i), centerIndex);
