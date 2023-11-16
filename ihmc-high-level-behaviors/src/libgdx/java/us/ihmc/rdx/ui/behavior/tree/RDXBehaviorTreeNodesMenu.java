@@ -2,18 +2,22 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WalkActionDefinition;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -47,7 +51,11 @@ public class RDXBehaviorTreeNodesMenu
       indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
    }
 
-   public void renderNodeCreationWidgets(RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeNodeInsertionType insertionType)
+   /**
+    * This method assumes that the insertion is valid for the relative node.
+    * For example, if the insertion requires modifying a parent, we assume it is not null.
+    */
+   public void renderNodeCreationWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("From file:");
@@ -65,8 +73,12 @@ public class RDXBehaviorTreeNodesMenu
 
             if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
             {
-               BehaviorTreeNodeExtension<?, ?, ?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, modificationQueue);
-               modificationQueue.queueInsertNode(tree.getBehaviorTreeState(), loadedNode, parentNode, tree::setRootNode, insertionType);
+               RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, modificationQueue);
+
+               BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                   = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+
+               modificationQueue.queueInsertNode(insertionDefinition);
                ImGui.closeCurrentPopup();
             }
          }
@@ -86,7 +98,7 @@ public class RDXBehaviorTreeNodesMenu
       ImGui.popFont();
       ImGui.indent();
 
-      createNode(parentNode, insertionType, "Action Sequence", ActionSequenceDefinition.class);
+      renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
 
       ImGui.unindent();
       ImGui.separator();
@@ -96,13 +108,21 @@ public class RDXBehaviorTreeNodesMenu
       ImGui.popFont();
       ImGui.indent();
 
-      createNode(parentNode, insertionType, "Walk Action", WalkActionDefinition.class);
-      createNode(parentNode, insertionType, "Hand Pose", HandPoseActionDefinition.class);
+      renderNodeCreationClickable(relativeNode, insertionType, "Walk Action", WalkActionDefinition.class, null);
+      ImGui.text("Hand Pose: ");
+      for (RobotSide side : RobotSide.values)
+      {
+         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+      }
 
       ImGui.unindent();
    }
 
-   private void createNode(RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeNodeInsertionType insertionType, String nodeTypeName, Class<?> nodeType)
+   private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,
+                                            BehaviorTreeNodeInsertionType insertionType,
+                                            String nodeTypeName,
+                                            Class<?> nodeType,
+                                            @Nullable RobotSide side)
    {
       ImGui.text(nodeTypeName);
       if (ImGui.isItemHovered())
@@ -115,8 +135,18 @@ public class RDXBehaviorTreeNodesMenu
                                                     .createNode(nodeType,
                                                                 tree.getBehaviorTreeState().getAndIncrementNextID(),
                                                                 tree.getBehaviorTreeState().getCRDTInfo());
-            tree.getNodeBuilder().initializeNewNode(newNode);
-            modificationQueue.queueInsertNode(tree.getBehaviorTreeState(), newNode, parentNode, tree::setRootNode, insertionType);
+
+
+            BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                  = BehaviorTreeNodeInsertionDefinition.build(newNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+
+            if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction
+             && insertionDefinition.getParent() instanceof RDXActionSequence actionSequence)
+            {
+               tree.getNodeBuilder().initializeActionNode(actionSequence, newAction, insertionDefinition.getInsertionIndex(), side);
+            }
+
+            modificationQueue.queueInsertNode(insertionDefinition);
             ImGui.closeCurrentPopup();
          }
       }

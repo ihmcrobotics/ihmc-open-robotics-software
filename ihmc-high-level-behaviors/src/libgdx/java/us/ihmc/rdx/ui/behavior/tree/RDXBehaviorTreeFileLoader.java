@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.behavior.tree;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
 import us.ihmc.log.LogTools;
@@ -22,7 +21,7 @@ public class RDXBehaviorTreeFileLoader
       this.nodeBuilder = nodeBuilder;
    }
 
-   public BehaviorTreeNodeExtension<?, ?, ?, ?> loadFromFile(RDXAvailableBehaviorTreeFile fileToLoad, BehaviorTreeModificationQueue modificationQueue)
+   public RDXBehaviorTreeNode<?, ?> loadFromFile(RDXAvailableBehaviorTreeFile fileToLoad, BehaviorTreeModificationQueue modificationQueue)
    {
       MutableObject<RDXBehaviorTreeNode<?, ?>> loadedNode = new MutableObject<>();
 

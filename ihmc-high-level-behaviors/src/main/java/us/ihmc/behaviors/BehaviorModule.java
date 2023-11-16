@@ -11,7 +11,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.Destroyable;
 
 /**
  * Manages a behavior tree based process on the real robot and syncs it
@@ -52,8 +51,7 @@ public class BehaviorModule
    {
       statusLogger.info("Shutting down...");
       behaviorHelper.destroy();
-      if (rootNode instanceof Destroyable destroyable)
-         destroyable.destroy();
+      rootNode.destroy();
    }
 
    // API created here from build

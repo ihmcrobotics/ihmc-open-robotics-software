@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.tools.Destroyable;
+
 /**
  * @param <T> This node's type. It will be a State, RDX, or Executor type.
  *            This is so we can extend BehaviorTreeNode and provide the appropriate
@@ -12,8 +14,11 @@ public interface BehaviorTreeNodeExtension<T extends BehaviorTreeNode<T>,
                                            E extends BehaviorTreeNode<?>,
                                            S extends BehaviorTreeNodeState<D>,
                                            D extends BehaviorTreeNodeDefinition>
-      extends BehaviorTreeNode<T>
+      extends BehaviorTreeNode<T>, Destroyable
 {
+   /**
+    * @return A node of type State or Definition
+    */
    E getExtendedNode();
 
    S getState();
@@ -23,9 +28,12 @@ public interface BehaviorTreeNodeExtension<T extends BehaviorTreeNode<T>,
    default void update()
    {
       // Update state only if this instance extends State
-      if (getState() == getExtendedNode())
+      if (getExtendsState())
          getState().update();
    }
 
-   void destroy();
+   default boolean getExtendsState()
+   {
+      return getState() == getExtendedNode();
+   }
 }

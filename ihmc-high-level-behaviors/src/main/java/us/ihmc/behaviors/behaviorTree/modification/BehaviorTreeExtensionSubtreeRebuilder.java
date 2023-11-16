@@ -57,7 +57,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
                clearChildren((BehaviorTreeNodeExtension<?, ?, ?, ?>) child);
             }
 
-            BehaviorTreeNodeExtensionClear.clearChildren(localNode);
+            BehaviorTreeTopologyOperations.clearChildren(localNode);
          }
          else
          {
