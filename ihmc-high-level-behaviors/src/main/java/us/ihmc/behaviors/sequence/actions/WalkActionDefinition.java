@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WalkActionDefinition extends ActionNodeDefinition
 {
@@ -22,9 +23,9 @@ public class WalkActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<CRDTUnidirectionalRigidBodyTransform> goalFootstepToGoalTransforms;
 
-   public WalkActionDefinition(CRDTInfo crdtInfo)
+   public WalkActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
       transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);

@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
  * This is currently around to keep older behavior tree nodes
@@ -13,7 +14,7 @@ public class LocalOnlyBehaviorTreeNodeState extends BehaviorTreeNodeState<Behavi
 
    public LocalOnlyBehaviorTreeNodeState(CRDTInfo crdtInfo)
    {
-      super(0, new BehaviorTreeNodeDefinition(crdtInfo), crdtInfo);
+      super(0, new BehaviorTreeNodeDefinition(crdtInfo, new WorkspaceResourceDirectory(LocalOnlyBehaviorTreeNodeState.class)), crdtInfo);
    }
 
    public void setStatus(BehaviorTreeNodeStatus status)

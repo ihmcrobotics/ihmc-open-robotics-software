@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
 import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
@@ -25,9 +26,9 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalDoubleArray jointAngles;
 
-   public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo)
+   public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       preset = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, PresetArmConfiguration.HOME);
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);

@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionDefinition extends ActionNodeDefinition
 {
@@ -17,9 +18,9 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalRigidBodyTransform chestToParentTransform;
 
-   public ChestOrientationActionDefinition(CRDTInfo crdtInfo)
+   public ChestOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
       holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);

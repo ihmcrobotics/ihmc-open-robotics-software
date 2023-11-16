@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
@@ -21,9 +22,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    private final CRDTUnidirectionalRigidBodyTransform goalPelvisToWorldTransform;
    private final ReferenceFrame goalPelvisFrame;
 
-   public ChestOrientationActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new ChestOrientationActionDefinition(crdtInfo), crdtInfo);
+      super(id, new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       chestFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getChestToParentTransform().getValueReadOnly());
       goalPelvisToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);

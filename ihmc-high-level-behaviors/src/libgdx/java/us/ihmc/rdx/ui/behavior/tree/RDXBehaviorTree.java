@@ -31,6 +31,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXBehaviorTree
 {
    private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
+   private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState behaviorTreeState;
@@ -57,6 +58,8 @@ public class RDXBehaviorTree
                           ReferenceFrameLibrary referenceFrameLibrary,
                           FootstepPlannerParametersBasics footstepPlannerParametersBasics)
    {
+      this.treeFilesDirectory = treeFilesDirectory;
+
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel,
                                                    syncedRobot,
                                                    selectionCollisionModel,
@@ -67,7 +70,7 @@ public class RDXBehaviorTree
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
 
-      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo);
+      behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, treeFilesDirectory);
       fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
@@ -276,5 +279,10 @@ public class RDXBehaviorTree
    public RDXBehaviorTreeNodeBuilder getNodeBuilder()
    {
       return nodeBuilder;
+   }
+
+   public WorkspaceResourceDirectory getTreeFilesDirectory()
+   {
+      return treeFilesDirectory;
    }
 }

@@ -29,6 +29,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
 
    public RDXPelvisHeightPitchAction(long id,
                                      CRDTInfo crdtInfo,
+                                     WorkspaceResourceDirectory saveFileDirectory,
                                      RDX3DPanel panel3D,
                                      DRCRobotModel robotModel,
                                      FullHumanoidRobotModel syncedFullRobotModel,
@@ -64,7 +66,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    {
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      state = new PelvisHeightPitchActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       getDefinition().setDescription("Pelvis height and pitch");
 

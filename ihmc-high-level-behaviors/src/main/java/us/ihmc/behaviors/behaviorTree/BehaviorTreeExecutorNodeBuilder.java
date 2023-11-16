@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBuilder
 {
@@ -49,24 +50,25 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    }
 
    @Override
-   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo)
+   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       if (nodeType == ActionSequenceDefinition.class)
       {
-         return new ActionSequenceExecutor(id, crdtInfo);
+         return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(id, crdtInfo, robotModel, ros2ControllerHelper);
+         return new ArmJointAnglesActionExecutor(id, crdtInfo, saveFileDirectory, robotModel, ros2ControllerHelper);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
-         return new ChestOrientationActionExecutor(id, crdtInfo, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+         return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
          return new FootstepPlanActionExecutor(id,
                                                crdtInfo,
+                                               saveFileDirectory,
                                                ros2ControllerHelper,
                                                syncedRobot,
                                                footstepTracker,
@@ -75,28 +77,29 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
-         return new HandPoseActionExecutor(id, crdtInfo, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
+         return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculators);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
-         return new HandWrenchActionExecutor(id, crdtInfo, ros2ControllerHelper);
+         return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
-         return new PelvisHeightPitchActionExecutor(id, crdtInfo, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+         return new PelvisHeightPitchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
-         return new SakeHandCommandActionExecutor(id, crdtInfo, ros2ControllerHelper);
+         return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {
-         return new WaitDurationActionExecutor(id, crdtInfo);
+         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == WalkActionDefinition.class)
       {
          return new WalkActionExecutor(id,
                                        crdtInfo,
+                                       saveFileDirectory,
                                        ros2ControllerHelper,
                                        syncedRobot,
                                        footstepTracker,

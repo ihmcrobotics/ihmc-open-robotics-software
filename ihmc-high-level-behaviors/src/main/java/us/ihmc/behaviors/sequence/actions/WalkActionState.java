@@ -7,6 +7,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 {
@@ -14,9 +15,9 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
    private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
 
-   public WalkActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
+   public WalkActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new WalkActionDefinition(crdtInfo), crdtInfo);
+      super(id, new WalkActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getGoalToParentTransform().getValueReadOnly());
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);

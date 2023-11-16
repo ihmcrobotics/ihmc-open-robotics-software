@@ -10,6 +10,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionDefinition extends ActionNodeDefinition implements SidedObject
 {
@@ -17,9 +18,9 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalDouble force;
 
-   public HandWrenchActionDefinition(CRDTInfo crdtInfo)
+   public HandWrenchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1000.0);

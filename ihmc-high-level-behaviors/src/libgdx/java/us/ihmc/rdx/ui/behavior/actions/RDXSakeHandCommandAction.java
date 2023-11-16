@@ -11,6 +11,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
 import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
@@ -28,9 +29,9 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
    private final ImBooleanWrapper executeWithNextActionWrapper;
 
-   public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo)
+   public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new SakeHandCommandActionState(id, crdtInfo);
+      state = new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory);
 
       getDefinition().setDescription("Hand configuration");
 

@@ -5,14 +5,15 @@ import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPitchActionDefinition>
 {
    private final DetachableReferenceFrame pelvisFrame;
 
-   public PelvisHeightPitchActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
+   public PelvisHeightPitchActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new PelvisHeightPitchActionDefinition(crdtInfo), crdtInfo);
+      super(id, new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       pelvisFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPelvisToParentTransform().getValueReadOnly());
    }

@@ -10,17 +10,18 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActionState, HandWrenchActionDefinition>
 {
    private final HandWrenchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
 
-   public HandWrenchActionExecutor(long id, CRDTInfo crdtInfo, ROS2ControllerHelper ros2ControllerHelper)
+   public HandWrenchActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      state = new HandWrenchActionState(id, crdtInfo);
+      state = new HandWrenchActionState(id, crdtInfo, saveFileDirectory);
    }
 
    @Override

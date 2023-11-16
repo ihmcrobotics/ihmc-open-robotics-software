@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.log.LogTools;
@@ -32,7 +33,9 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean treeWidgetExpanded = false;
    private boolean isDescriptionBeingEdited = false;
    private transient final ImString imDescriptionText = new ImString();
+   private transient final ImString imJSONFileNameText = new ImString();
    private transient final ImVec2 descriptionTextSize = new ImVec2();
+   private transient final ImBoolean isJSONFileRoot = new ImBoolean();
    private final String nodePopupID = labels.get("Node popup");
    private final String modalPopupID = labels.get("Create Node");
    private boolean nodeContextMenuShowing = false;
@@ -111,11 +114,51 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
    }
 
-   public void enterEditDescriptionMode()
+   public void renderContextMenuItems()
    {
-      RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
-      isDescriptionBeingEdited = true;
-      imDescriptionText.set(getDefinition().getDescription());
+      nodeContextMenuShowing = true;
+
+      if (ImGui.menuItem(labels.get("Rename...")))
+      {
+         RDXBehaviorTreeTools.runForSubtreeNodes(RDXBehaviorTreeTools.findRootNode(this), node -> node.setDescriptionBeingEdited(false));
+         isDescriptionBeingEdited = true;
+         imDescriptionText.set(getDefinition().getDescription());
+      }
+
+      ImGui.separator();
+
+      if (ImGui.beginMenu(labels.get("File")))
+      {
+         isJSONFileRoot.set(getDefinition().isJSONRoot());
+
+         if (ImGui.checkbox(labels.get("Is JSON File Root"), isJSONFileRoot))
+         {
+            if (isJSONFileRoot.get())
+            {
+               getDefinition().setJSONFileName(getClass().getSimpleName() + ".json");
+            }
+            else
+            {
+               getDefinition().setJSONFileName("");
+            }
+         }
+         if (getDefinition().isJSONRoot())
+         {
+            imJSONFileNameText.set(getDefinition().getJSONFilename().replaceAll("\\.json$", ""));
+            ImGui.text("File name:");
+            ImGui.sameLine();
+            ImGui.setNextItemWidth(ImGuiTools.calcTextSizeX(imJSONFileNameText.get()) + 10.0f);
+            if (ImGui.inputText(labels.get(".json"), imJSONFileNameText))
+            {
+               getDefinition().setJSONFileName(imJSONFileNameText.get() + ".json");
+            }
+            if (ImGui.menuItem(labels.get("Save to File")))
+            {
+               getDefinition().saveToFile();
+            }
+         }
+         ImGui.endMenu();
+      }
    }
 
    public void renderImGuiWidgets()
@@ -168,11 +211,6 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public String getModalPopupID()
    {
       return modalPopupID;
-   }
-
-   public void setNodeContextMenuShowing(boolean nodeContextMenuShowing)
-   {
-      this.nodeContextMenuShowing = nodeContextMenuShowing;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()

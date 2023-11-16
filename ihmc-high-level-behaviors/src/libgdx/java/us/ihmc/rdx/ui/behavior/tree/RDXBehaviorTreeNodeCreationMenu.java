@@ -131,7 +131,8 @@ public class RDXBehaviorTreeNodeCreationMenu
             RDXBehaviorTreeNode<?, ?> newNode = tree.getNodeBuilder()
                                                     .createNode(nodeType,
                                                                 tree.getBehaviorTreeState().getAndIncrementNextID(),
-                                                                tree.getBehaviorTreeState().getCRDTInfo());
+                                                                tree.getBehaviorTreeState().getCRDTInfo(),
+                                                                tree.getBehaviorTreeState().getSaveFileDirectory());
 
 
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition

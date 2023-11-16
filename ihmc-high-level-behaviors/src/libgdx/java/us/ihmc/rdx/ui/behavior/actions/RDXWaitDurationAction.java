@@ -7,6 +7,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState, WaitDurationActionDefinition>
 {
@@ -14,9 +15,9 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitDurationWidget;
 
-   public RDXWaitDurationAction(long id, CRDTInfo crdtInfo)
+   public RDXWaitDurationAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new WaitDurationActionState(id, crdtInfo);
+      state = new WaitDurationActionState(id, crdtInfo, saveFileDirectory);
 
       getDefinition().setDescription("Wait");
 

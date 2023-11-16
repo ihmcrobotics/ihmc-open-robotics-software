@@ -13,6 +13,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
@@ -21,9 +22,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalString parentFrameName;
    private final RecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
 
-   public FootstepPlanActionDefinition(CRDTInfo crdtInfo)
+   public FootstepPlanActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
       transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);

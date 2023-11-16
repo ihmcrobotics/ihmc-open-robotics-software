@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionDefinition extends ActionNodeDefinition
 {
@@ -16,9 +17,9 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble goalPosition;
    private final CRDTUnidirectionalDouble goalTorque;
 
-   public SakeHandCommandActionDefinition(CRDTInfo crdtInfo)
+   public SakeHandCommandActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       handConfigurationIndex = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandCommandOption.GOTO.ordinal());

@@ -27,6 +27,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,13 +56,14 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
    public RDXChestOrientationAction(long id,
                                     CRDTInfo crdtInfo,
+                                    WorkspaceResourceDirectory saveFileDirectory,
                                     RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,
                                     FullHumanoidRobotModel syncedFullRobotModel,
                                     RobotCollisionModel selectionCollisionModel,
                                     ReferenceFrameLibrary referenceFrameLibrary)
    {
-      state = new ChestOrientationActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary);
 
       getDefinition().setDescription("Chest orientation");
 
