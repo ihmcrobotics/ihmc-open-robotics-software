@@ -142,6 +142,11 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       return executorChildren;
    }
 
+   public List<ActionNodeExecutor<?, ?>> getCurrentlyExecutingActions()
+   {
+      return currentlyExecutingActions;
+   }
+
    public int getLastIndexOfConcurrentSetToExecute()
    {
       return lastIndexOfConcurrentSetToExecute;
