@@ -10,7 +10,6 @@ import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -28,16 +27,13 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
 
    private static final double EPSILON = 1.0e-12;
 
-   public ConvexPolytopeTerrainObject(Vector3D normal, ConvexPolytope3D convexPolytope)
+   public ConvexPolytopeTerrainObject(ConvexPolytope3D convexPolytope)
    {
-      this(normal, convexPolytope, YoAppearance.StoneTexture());
+      this(convexPolytope, YoAppearance.StoneTexture());
    }
 
-   public ConvexPolytopeTerrainObject(Vector3D normal, ConvexPolytope3D convexPolytope, AppearanceDefinition appearance)
+   public ConvexPolytopeTerrainObject(ConvexPolytope3D convexPolytope, AppearanceDefinition appearance)
    {
-      if (normal.getZ() <= 0.0)
-         throw new RuntimeException("Top surface normal must have a positive z-value. Normal.z = " + normal.getZ());
-
       this.convexPolytope = new ConvexPolytope3D(convexPolytope);
       this.boundingBox = new BoundingBox3D(convexPolytope.getBoundingBox().getMinPoint(), convexPolytope.getBoundingBox().getMaxPoint());
       this.linkGraphics = new Graphics3DObject();

@@ -11,9 +11,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.conversion.VisualsConversionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.SimulationConstructionSet2;
@@ -35,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * can be added later
  * </p>
  * 
- * @author Khizar Mohammed Amjed Mohamed
+ * @author KhizarMohammed AmjedMohamed
  */
 public class MeshTerrainObjectViewer
 {
@@ -44,7 +41,7 @@ public class MeshTerrainObjectViewer
    private final YoInteger maximumVoxelResolution;
    private final YoDouble maximumVolumetricPercentError;
 
-   private final YoBoolean showOriginalMeshGraphics;
+   private final YoBoolean showRawMeshGraphics;
    private final YoBoolean showDecomposedMeshGraphics;
    private final YoBoolean doConvexDecomposition;
 
@@ -67,17 +64,17 @@ public class MeshTerrainObjectViewer
 
       maximumNumberOfHulls = new YoInteger("maximumNumberOfHulls", registry);
       maximumNumberOfHulls.setVariableBounds(0, 0);
-      
+
       maximumNumberOfVerticesPerHull = new YoInteger("maximumNumberOfVerticesPerHull", registry);
       maximumNumberOfVerticesPerHull.setVariableBounds(0, 0);
-      
+
       maximumVoxelResolution = new YoInteger("maximumVoxelResolution", registry);
-      maximumNumberOfVerticesPerHull.setVariableBounds(100000 , 10000000);
-      
+      maximumNumberOfVerticesPerHull.setVariableBounds(100000, 10000000);
+
       maximumVolumetricPercentError = new YoDouble("maximumVolumetricPercentError", registry);
       maximumNumberOfVerticesPerHull.setVariableBounds(0, 0);
 
-      showOriginalMeshGraphics = new YoBoolean("showOriginalMeshGraphics", registry);
+      showRawMeshGraphics = new YoBoolean("showRawMeshGraphics", registry);
       showDecomposedMeshGraphics = new YoBoolean("showDecomposedMeshGraphics", registry);
       doConvexDecomposition = new YoBoolean("doConvexDecomposition", registry);
 
@@ -90,7 +87,7 @@ public class MeshTerrainObjectViewer
 
       maximumVolumetricPercentError.set(parameters.getMaxVolumePercentError());
 
-      showOriginalMeshGraphics.set(parameters.isShowUndecomposedMeshGraphics());
+      showRawMeshGraphics.set(parameters.isShowUndecomposedMeshGraphics());
       showDecomposedMeshGraphics.set(parameters.isShowDecomposedMeshGraphics());
       doConvexDecomposition.set(parameters.isDoConvexDecomposition());
 
@@ -160,7 +157,7 @@ public class MeshTerrainObjectViewer
          generator.writeNumberField(maximumVoxelResolution.getName(), maximumVoxelResolution.getValue());
 
          generator.writeBooleanField(showDecomposedMeshGraphics.getName(), showDecomposedMeshGraphics.getValue());
-         generator.writeBooleanField(showOriginalMeshGraphics.getName(), showOriginalMeshGraphics.getValue());
+         generator.writeBooleanField(showRawMeshGraphics.getName(), showRawMeshGraphics.getValue());
          generator.writeBooleanField(doConvexDecomposition.getName(), doConvexDecomposition.getValue());
 
          generator.writeEndObject();
@@ -183,7 +180,7 @@ public class MeshTerrainObjectViewer
    {
       if (pathToMesh == null)
          return;
-      
+
       meshTerrainObject = new MeshTerrainObject(pathToMesh, parameters);
    }
 
@@ -194,6 +191,7 @@ public class MeshTerrainObjectViewer
       visuals = VisualsConversionTools.toVisualDefinitions(meshTerrainObject.getLinkGraphics());
       scs.addStaticVisuals(visuals);
    }
+
    private MeshTerrainObjectParameters getParameters()
    {
       return this.parameters;
@@ -208,7 +206,7 @@ public class MeshTerrainObjectViewer
       this.parameters.setMaxVolumePercentError(maximumVolumetricPercentError.getValue());
 
       this.parameters.setShowDecomposedMeshGraphics(showDecomposedMeshGraphics.getValue());
-      this.parameters.setShowUndecomposedMeshGraphics(showOriginalMeshGraphics.getValue());
+      this.parameters.setShowUndecomposedMeshGraphics(showRawMeshGraphics.getValue());
       this.parameters.setDoConvexDecomposition(doConvexDecomposition.getValue());
    }
 
@@ -221,7 +219,7 @@ public class MeshTerrainObjectViewer
       this.maximumVolumetricPercentError.set(this.parameters.getMaxVolumePercentError());
 
       this.showDecomposedMeshGraphics.set(this.parameters.isShowDecomposedMeshGraphics());
-      this.showOriginalMeshGraphics.set(this.parameters.isShowUndecomposedMeshGraphics());
+      this.showRawMeshGraphics.set(this.parameters.isShowUndecomposedMeshGraphics());
       this.doConvexDecomposition.set(this.parameters.isDoConvexDecomposition());
    }
 

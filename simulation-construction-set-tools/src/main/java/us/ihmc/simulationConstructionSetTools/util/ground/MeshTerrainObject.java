@@ -34,7 +34,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -59,6 +58,7 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
    private final BoundingBox3D boundingBox = new BoundingBox3D();
    private final List<ConvexPolytope3D> convexPolytopes = new ArrayList<>();
    private final Graphics3DObject linkGraphics;
+   private final RigidBodyTransformReadOnly pose;
 
    private final MeshTerrainObjectParameters parameters;
 
@@ -80,7 +80,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
    public MeshTerrainObject(String filePath, MeshTerrainObjectParameters vhacdParameters, RigidBodyTransformReadOnly transform)
    {
 
-      RigidBodyTransformReadOnly pose;
       if (transform == null)
       {
          pose = new RigidBodyTransform();
@@ -95,7 +94,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
       doDecomposition(filePath);
 
-      convexPolytopes.forEach(polytope -> polytope.applyTransform(pose));
       boundingBox.setToNaN();
       convexPolytopes.forEach(polytope -> boundingBox.combine(polytope.getBoundingBox()));
 
@@ -155,14 +153,14 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       if (inputStream == null)
       {
          // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
-         LogTools.info("VHACD Tuned parameters JSON file was not found");
+         LogTools.info(jsonFilePath + " was not found. Using defualt parameters istead");
       }
       else
       {
          JSONFileTools.load(inputStream, rootNode ->
          {
             parameters.setShowDecomposedMeshGraphics(rootNode.get("showDecomposedMeshGraphics").asBoolean());
-            parameters.setShowUndecomposedMeshGraphics(rootNode.get("showOriginalMeshGraphics").asBoolean());
+            parameters.setShowUndecomposedMeshGraphics(rootNode.get("showRawMeshGraphics").asBoolean());
             parameters.setDoConvexDecomposition(rootNode.get("doConvexDecomposition").asBoolean());
 
             parameters.setMaxNoOfHulls(rootNode.get("maximumNumberOfHulls").asInt());
@@ -202,6 +200,7 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
       for (int vertexID = 0; vertexID < hullVertices.length; vertexID += 3)
       {
          Point3D vertex = new Point3D(hullVertices[vertexID], hullVertices[vertexID + 1], hullVertices[vertexID + 2]);
+         vertex.applyTransform(pose);
          verticesList.add(vertex);
       }
 
@@ -350,20 +349,6 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
       return (z < heightAt);
    }
-
-   /**
-    * This method finds the closest face to the point by looping through all the faces of all the
-    * convex hulls
-    * <p>
-    * This method was based on {@link AbstractConvexPolytope3D#getClosestFace(Point3DReadOnly)}
-    * </p>
-    *
-    * @param A   combined list of all faces in all the decomposed convex hulls
-    * @param The point that is being queried
-    * @return The closest face
-    * @see AbstractConvexPolytope3D#getClosestFace()
-    * @author Khizar
-    */
 
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
