@@ -3,6 +3,7 @@ package us.ihmc.behaviors.sequence;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +16,9 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private int lastIndexOfConcurrentSetToExecute;
 
-   public ActionSequenceExecutor(long id, CRDTInfo crdtInfo)
+   public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new ActionSequenceState(id, crdtInfo);
+      state = new ActionSequenceState(id, crdtInfo, saveFileDirectory);
    }
 
    @Override

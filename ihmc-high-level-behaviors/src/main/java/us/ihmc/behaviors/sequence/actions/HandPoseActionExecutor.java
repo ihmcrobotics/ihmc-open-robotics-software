@@ -20,6 +20,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
 {
@@ -43,6 +44,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
+                                 WorkspaceResourceDirectory saveFileDirectory,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,
                                  DRCRobotModel robotModel,
@@ -53,7 +55,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculators = handWrenchCalculators;
 
-      state = new HandPoseActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {

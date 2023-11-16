@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
@@ -15,12 +16,12 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
 
-   public ArmJointAnglesActionExecutor(long id, CRDTInfo crdtInfo, DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
+   public ArmJointAnglesActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      state = new ArmJointAnglesActionState(id, crdtInfo);
+      state = new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory);
    }
 
    @Override

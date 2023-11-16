@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
@@ -26,9 +27,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private final CRDTUnidirectionalDoubleArray jointAngles;
    private final CRDTUnidirectionalDouble solutionQuality;
 
-   public HandPoseActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
+   public HandPoseActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new HandPoseActionDefinition(crdtInfo), crdtInfo);
+      super(id, new HandPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       palmFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getPalmTransformToParent().getValueReadOnly());
       goalChestToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);

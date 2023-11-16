@@ -3,15 +3,16 @@ package us.ihmc.behaviors.sequence.actions;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationActionState, WaitDurationActionDefinition>
 {
    private final WaitDurationActionState state;
    private final Timer executionTimer = new Timer();
 
-   public WaitDurationActionExecutor(long id, CRDTInfo crdtInfo)
+   public WaitDurationActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new WaitDurationActionState(id, crdtInfo);
+      state = new WaitDurationActionState(id, crdtInfo, saveFileDirectory);
    }
 
    @Override

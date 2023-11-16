@@ -26,6 +26,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefinition>
 {
@@ -43,12 +44,13 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
 
    public RDXWalkAction(long id,
                         CRDTInfo crdtInfo,
+                        WorkspaceResourceDirectory saveFileDirectory,
                         RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
                         ReferenceFrameLibrary referenceFrameLibrary,
                         FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      state = new WalkActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       getDefinition().setDescription("Walk");
 

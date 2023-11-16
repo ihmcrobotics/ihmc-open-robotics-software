@@ -7,6 +7,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
@@ -16,9 +17,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private int totalNumberOfFootsteps;
    private int numberOfIncompleteFootsteps;
 
-   public FootstepPlanActionState(long id, CRDTInfo crdtInfo, ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new FootstepPlanActionDefinition(crdtInfo), crdtInfo);
+      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 

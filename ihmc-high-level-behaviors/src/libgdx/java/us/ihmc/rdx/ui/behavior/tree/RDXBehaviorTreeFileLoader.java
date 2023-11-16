@@ -30,6 +30,8 @@ public class RDXBehaviorTreeFileLoader
          loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue));
       });
 
+      loadedNode.getValue().getDefinition().setJSONFileName(fileToLoad.getTreeFile().getFileName());
+
       return loadedNode.getValue();
    }
 
@@ -41,7 +43,8 @@ public class RDXBehaviorTreeFileLoader
 
       RDXBehaviorTreeNode<?, ?> node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
                                                               behaviorTreeState.getAndIncrementNextID(),
-                                                              behaviorTreeState.getCRDTInfo());
+                                                              behaviorTreeState.getCRDTInfo(),
+                                                              behaviorTreeState.getSaveFileDirectory());
       node.getDefinition().loadFromFile(jsonNode);
       LogTools.info("Creating node: {}:{}", node.getDefinition().getDescription(), node.getState().getID());
 

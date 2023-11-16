@@ -7,6 +7,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -23,13 +27,26 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
+   private final WorkspaceResourceDirectory saveFileDirectory;
    /** Empty string if not the root of a JSON file */
    private final CRDTUnidirectionalString jsonFileName;
 
-   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo)
+   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
+      this.saveFileDirectory = saveFileDirectory;
+
       description = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
       jsonFileName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+   }
+
+   /** Save as JSON file root node. */
+   public void saveToFile()
+   {
+      if (!isJSONRoot())
+         LogTools.error("Cannot save. Can only be called for JSON roots.");
+
+      WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, jsonFileName.getValue());
+      JSONFileTools.save(saveFile, this::saveToFile);
    }
 
    /**
@@ -46,7 +63,15 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
       for (BehaviorTreeNodeDefinition child : children)
       {
          ObjectNode childJsonNode = childrenArrayJsonNode.addObject();
-         child.saveToFile(childJsonNode);
+         if (child.isJSONRoot())
+         {
+            childJsonNode.put("file", child.getJSONFilename());
+            child.saveToFile();
+         }
+         else
+         {
+            child.saveToFile(childJsonNode);
+         }
       }
    }
 
@@ -94,6 +119,11 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    public String getJSONFilename()
    {
       return jsonFileName.getValue();
+   }
+
+   public boolean isJSONRoot()
+   {
+      return !jsonFileName.getValue().isEmpty();
    }
 
    @Override

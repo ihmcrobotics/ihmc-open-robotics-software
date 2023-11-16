@@ -7,14 +7,15 @@ import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WaitDurationActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalDouble waitDuration;
 
-   public WaitDurationActionDefinition(CRDTInfo crdtInfo)
+   public WaitDurationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       waitDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
    }

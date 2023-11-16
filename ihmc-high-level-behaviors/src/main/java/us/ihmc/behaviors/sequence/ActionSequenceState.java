@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
@@ -12,9 +13,9 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private final CRDTBidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
-   public ActionSequenceState(long id, CRDTInfo crdtInfo)
+   public ActionSequenceState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(id, new ActionSequenceDefinition(crdtInfo), crdtInfo);
+      super(id, new ActionSequenceDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       automaticExecution = new CRDTBidirectionalBoolean(this, false);
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);

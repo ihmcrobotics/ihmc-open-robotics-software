@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
  * Interface for a definition of an action with
@@ -22,9 +23,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    // TODO: Is every action concurrent-able?
    private final CRDTUnidirectionalBoolean executeWithNextAction;
 
-   public ActionNodeDefinition(CRDTInfo crdtInfo)
+   public ActionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       executeWithNextAction = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
    }

@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
 {
@@ -33,6 +34,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
 
    public PelvisHeightPitchActionExecutor(long id,
                                           CRDTInfo crdtInfo,
+                                          WorkspaceResourceDirectory saveFileDirectory,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
@@ -40,8 +42,8 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      definition = new PelvisHeightPitchActionDefinition(crdtInfo);
-      state = new PelvisHeightPitchActionState(id, crdtInfo, referenceFrameLibrary);
+      definition = new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory);
+      state = new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
    }
 
    @Override

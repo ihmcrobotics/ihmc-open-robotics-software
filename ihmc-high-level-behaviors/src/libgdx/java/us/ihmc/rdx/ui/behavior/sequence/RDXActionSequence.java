@@ -14,6 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,9 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXMultipleActionProgressBars multipleActionProgressBars = new RDXMultipleActionProgressBars();
 
-   public RDXActionSequence(long id, CRDTInfo crdtInfo)
+   public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new ActionSequenceState(id, crdtInfo);
+      state = new ActionSequenceState(id, crdtInfo, saveFileDirectory);
 
       getDefinition().setDescription("ActionSequence");
 

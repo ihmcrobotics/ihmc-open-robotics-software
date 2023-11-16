@@ -94,7 +94,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
                        subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getDescription(),
                        nodeID,
                        behaviorTreeState.getCRDTInfo().getActorDesignation().name());
-         localNode = (T) behaviorTreeState.getNodeStateBuilder().createNode(nodeTypeClass, nodeID, behaviorTreeState.getCRDTInfo());
+         localNode = (T) behaviorTreeState.getNodeStateBuilder()
+                                          .createNode(nodeTypeClass, nodeID, behaviorTreeState.getCRDTInfo(), behaviorTreeState.getSaveFileDirectory());
       }
 
       return localNode;

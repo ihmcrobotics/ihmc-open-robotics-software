@@ -40,27 +40,23 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       if (ImGui.beginPopup(node.getNodePopupID()))
       {
-         node.setNodeContextMenuShowing(true);
+         node.renderContextMenuItems();
 
-         if (ImGui.menuItem("Rename..."))
-         {
-            node.enterEditDescriptionMode();
-         }
          ImGui.separator();
          if (!node.isRootNode())
          {
-            if (ImGui.menuItem("Insert Node Before..."))
+            if (ImGui.menuItem(labels.get("Insert Node Before...")))
             {
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_BEFORE));
             }
-            if (ImGui.menuItem("Insert Node After..."))
+            if (ImGui.menuItem(labels.get("Insert Node After...")))
             {
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
             }
          }
          if (node.getChildren().isEmpty())
          {
-            if (ImGui.menuItem("Add Child Node..."))
+            if (ImGui.menuItem(labels.get("Add Child Node...")))
             {
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AS_CHILD));
             }
@@ -72,12 +68,12 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
          if (node.getParent() != null)
          {
-            if (ImGui.beginMenu("Move to Before"))
+            if (ImGui.beginMenu(labels.get("Move to Before")))
             {
                renderMoveRelativeItems(node, BehaviorTreeNodeInsertionType.INSERT_BEFORE);
                ImGui.endMenu();
             }
-            if (ImGui.beginMenu("Move to After"))
+            if (ImGui.beginMenu(labels.get("Move to After")))
             {
                renderMoveRelativeItems(node, BehaviorTreeNodeInsertionType.INSERT_AFTER);
                ImGui.endMenu();
@@ -87,7 +83,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          }
 
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
-         if (ImGui.menuItem("Delete Node"))
+         if (ImGui.menuItem(labels.get("Delete Node")))
          {
             topologyOperationQueue.queueDestroySubtree(node);
 
@@ -100,7 +96,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          ImGui.popStyleColor();
 
          ImGui.separator();
-         if (ImGui.menuItem("Cancel"))
+         if (ImGui.menuItem(labels.get("Cancel")))
             ImGui.closeCurrentPopup();
 
          ImGui.endPopup();
@@ -143,7 +139,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          tree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
 
          ImGui.separator();
-         if (ImGui.button("Cancel"))
+         if (ImGui.button(labels.get("Cancel")))
          {
             ImGui.closeCurrentPopup();
          }

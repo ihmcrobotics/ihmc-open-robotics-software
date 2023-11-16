@@ -23,6 +23,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
@@ -42,6 +43,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public RDXFootstepPlanAction(long id,
                                 CRDTInfo crdtInfo,
+                                WorkspaceResourceDirectory saveFileDirectory,
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
@@ -51,7 +53,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      state = new FootstepPlanActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       getDefinition().setDescription("Footstep plan");
 

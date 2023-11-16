@@ -20,6 +20,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.UUID;
 
@@ -47,6 +48,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
    public FootstepPlanActionExecutor(long id,
                                      CRDTInfo crdtInfo,
+                                     WorkspaceResourceDirectory saveFileDirectory,
                                      ROS2ControllerHelper ros2ControllerHelper,
                                      ROS2SyncedRobotModel syncedRobot,
                                      WalkingFootstepTracker footstepTracker,
@@ -59,7 +61,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      state = new FootstepPlanActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
    }
 
    @Override

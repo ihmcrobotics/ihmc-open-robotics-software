@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
@@ -32,6 +33,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
    public ChestOrientationActionExecutor(long id,
                                          CRDTInfo crdtInfo,
+                                         WorkspaceResourceDirectory saveFileDirectory,
                                          ROS2ControllerHelper ros2ControllerHelper,
                                          ROS2SyncedRobotModel syncedRobot,
                                          ReferenceFrameLibrary referenceFrameLibrary)
@@ -39,7 +41,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = new ChestOrientationActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new ChestOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
    }
 
    @Override

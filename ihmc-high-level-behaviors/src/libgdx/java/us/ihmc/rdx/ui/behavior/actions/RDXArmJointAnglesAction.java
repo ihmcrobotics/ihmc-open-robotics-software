@@ -11,6 +11,7 @@ import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
@@ -23,11 +24,11 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
    private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
    private final ImDoubleWrapper trajectoryDurationWidget;
 
-   public RDXArmJointAnglesAction(long id, CRDTInfo crdtInfo, DRCRobotModel robotModel)
+   public RDXArmJointAnglesAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
 
-      state = new ArmJointAnglesActionState(id, crdtInfo);
+      state = new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory);
 
       getDefinition().setDescription("Arm joint angles");
 

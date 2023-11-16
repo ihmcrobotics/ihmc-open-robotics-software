@@ -6,6 +6,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebui
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -24,19 +25,22 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier;
+   private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
    private int numberOfFrozenNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
                             Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier,
-                            CRDTInfo crdtInfo)
+                            CRDTInfo crdtInfo,
+                            WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo);
 
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;
       this.rootNodeSupplier = rootNodeSupplier;
+      this.saveFileDirectory = saveFileDirectory;
    }
 
    public void update()
@@ -119,6 +123,11 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    public BehaviorTreeExtensionSubtreeRebuilder getTreeRebuilder()
    {
       return treeRebuilder;
+   }
+
+   public WorkspaceResourceDirectory getSaveFileDirectory()
+   {
+      return saveFileDirectory;
    }
 
    public BehaviorTreeTopologyOperationQueue getTopologyChangeQueue()

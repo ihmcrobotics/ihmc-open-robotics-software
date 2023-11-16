@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
@@ -17,11 +18,11 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
 
-   public SakeHandCommandActionExecutor(long id, CRDTInfo crdtInfo, ROS2ControllerHelper ros2ControllerHelper)
+   public SakeHandCommandActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
 
-      state = new SakeHandCommandActionState(id, crdtInfo);
+      state = new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory);
    }
 
    @Override

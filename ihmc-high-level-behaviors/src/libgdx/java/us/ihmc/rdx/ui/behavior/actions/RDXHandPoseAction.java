@@ -48,6 +48,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.wholeBodyController.HandTransformTools;
 
 import java.util.ArrayList;
@@ -82,13 +83,14 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
    public RDXHandPoseAction(long id,
                             CRDTInfo crdtInfo,
+                            WorkspaceResourceDirectory saveFileDirectory,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
                             FullHumanoidRobotModel syncedFullRobotModel,
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
-      state = new HandPoseActionState(id, crdtInfo, referenceFrameLibrary);
+      state = new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       getDefinition().setDescription("Hand pose");
 

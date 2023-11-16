@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandPoseActionDefinition extends ActionNodeDefinition implements SidedObject
 {
@@ -20,9 +21,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalString palmParentFrameName;
    private final CRDTUnidirectionalRigidBodyTransform palmTransformToParent;
 
-   public HandPoseActionDefinition(CRDTInfo crdtInfo)
+   public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
+      super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
