@@ -65,12 +65,8 @@ public class RDXBehaviorTreeNodesMenu
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
          String fileName = indexedTreeFile.getTreeFile().getFileName();
-         ImGui.text(fileName);
-
-         if (ImGui.isItemHovered())
+         if (ImGuiTools.textWithUnderlineOnHover(fileName))
          {
-            ImGuiTools.addTextUnderline(fileName);
-
             if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
@@ -112,6 +108,7 @@ public class RDXBehaviorTreeNodesMenu
       ImGui.text("Hand Pose: ");
       for (RobotSide side : RobotSide.values)
       {
+         ImGui.sameLine();
          renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
       }
 
@@ -124,11 +121,8 @@ public class RDXBehaviorTreeNodesMenu
                                             Class<?> nodeType,
                                             @Nullable RobotSide side)
    {
-      ImGui.text(nodeTypeName);
-      if (ImGui.isItemHovered())
+      if (ImGuiTools.textWithUnderlineOnHover(nodeTypeName))
       {
-         ImGuiTools.addTextUnderline(nodeTypeName);
-
          if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
          {
             RDXBehaviorTreeNode<?, ?> newNode = tree.getNodeBuilder()
@@ -140,10 +134,13 @@ public class RDXBehaviorTreeNodesMenu
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                   = BehaviorTreeNodeInsertionDefinition.build(newNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
 
-            if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction
-             && insertionDefinition.getParent() instanceof RDXActionSequence actionSequence)
+            if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
-               tree.getNodeBuilder().initializeActionNode(actionSequence, newAction, insertionDefinition.getInsertionIndex(), side);
+               // We want to to best effort initialization
+               RDXActionSequence actionSequenceOrNull = null;
+               if (insertionDefinition.getParent() instanceof RDXActionSequence actionSequence)
+                  actionSequenceOrNull = actionSequence;
+               tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 
             topologyOperationQueue.queueInsertNode(insertionDefinition);

@@ -17,6 +17,8 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import javax.annotation.Nullable;
+
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
 {
    private final DRCRobotModel robotModel;
@@ -108,8 +110,16 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
    }
 
-   public void initializeActionNode(RDXActionSequence actionSequence, RDXActionNode<?, ?> newAction, int insertionIndex, RobotSide sideOfNewAction)
+   // This method is in this class because we have a syncedRobot here.
+   public void initializeActionNode(@Nullable RDXActionSequence actionSequence,
+                                    RDXActionNode<?, ?> newAction,
+                                    int insertionIndex,
+                                    RobotSide sideOfNewAction)
    {
-      ActionNodeInitialization.initializeAction(actionSequence.getState(), newAction.getState(), insertionIndex, sideOfNewAction, syncedRobot);
+      ActionNodeInitialization.initializeAction(actionSequence == null ? null : actionSequence.getState(),
+                                                newAction.getState(),
+                                                insertionIndex,
+                                                sideOfNewAction,
+                                                syncedRobot);
    }
 }

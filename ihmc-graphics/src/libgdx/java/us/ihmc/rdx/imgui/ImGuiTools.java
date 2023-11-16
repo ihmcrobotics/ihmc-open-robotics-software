@@ -328,18 +328,35 @@ public class ImGuiTools
    }
 
    /** ImGui doesn't support underlined text so this is the best we can do. */
-   public static void addTextUnderline(String text)
+   public static boolean textWithUnderlineOnHover(String text)
    {
       ImGui.calcTextSize(calcTextSize, text);
 
-      float cursorPosXInWidgetFrame = ImGui.getCursorPosX() + ImGui.getWindowPosX() - ImGui.getScrollX();
-      float cursorPosYInWidgetFrame = ImGui.getCursorPosY() + ImGui.getWindowPosY() - ImGui.getScrollY();
-      float adjustment = 3.0f;
-      ImGui.getWindowDrawList().addRectFilled(cursorPosXInWidgetFrame,
-                                              cursorPosYInWidgetFrame - 1.0f - adjustment,
-                                              cursorPosXInWidgetFrame + calcTextSize.x,
-                                              cursorPosYInWidgetFrame - adjustment,
-                                              ImGui.getColorU32(ImGuiCol.Text));
+      // We must store the cursor position before rendering the text
+      float cursorPosXInDesktopFrame = ImGui.getCursorScreenPosX();
+      float cursorPosYInDesktopFrame = ImGui.getCursorScreenPosY();
+
+      ImGui.text(text);
+
+      boolean isHovered = ImGui.isItemHovered();
+
+      if (isHovered)
+      {
+         ImGui.getWindowDrawList()
+              .addRectFilled(cursorPosXInDesktopFrame,
+                             cursorPosYInDesktopFrame + calcTextSize.y,
+                             cursorPosXInDesktopFrame + calcTextSize.x,
+                             cursorPosYInDesktopFrame + calcTextSize.y + 1.0f,
+                             ImGui.getColorU32(ImGuiCol.Text));
+      }
+
+      return isHovered;
+   }
+
+   public static float calcTextSizeX(String text)
+   {
+      ImGui.calcTextSize(calcTextSize, text);
+      return calcTextSize.x;
    }
 
    /** @deprecated Use ImGuiUniqueLabelMap instead. */

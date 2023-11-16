@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 
 public class ActionNodeInitialization
 {
-   public static void initializeAction(ActionSequenceState actionSequence,
+   public static void initializeAction(@Nullable ActionSequenceState actionSequence,
                                        ActionNodeState<?> newAction,
                                        int indexOfInsertion,
                                        @Nullable RobotSide sideOfNewAction,
@@ -66,7 +66,7 @@ public class ActionNodeInitialization
     *         This helps the authoring process by initializing new actions with
     *         spatially consistent values.
     */
-   private static String findConvenientParentFrameName(ActionSequenceState actionSequence,
+   private static String findConvenientParentFrameName(@Nullable ActionSequenceState actionSequence,
                                                        ActionNodeState<?> action,
                                                        int indexOfInsertion,
                                                        @Nullable RobotSide side)
@@ -89,24 +89,27 @@ public class ActionNodeInitialization
       return ReferenceFrame.getWorldFrame().getName();
    }
 
-   private static <T extends ActionNodeState<?>> T findNextPreviousAction(ActionSequenceState actionSequence,
+   private static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable ActionSequenceState actionSequence,
                                                                           Class<T> actionClass,
                                                                           int indexOfInsertion,
                                                                           @Nullable RobotSide side)
    {
       T previousAction = null;
 
-      for (int i = indexOfInsertion - 1; i >= 0; i--)
+      if (actionSequence != null)
       {
-         BehaviorTreeNodeState<?> action = actionSequence.getChildren().get(i);
-         if (actionClass.isInstance(action))
+         for (int i = indexOfInsertion - 1; i >= 0; i--)
          {
-            boolean match = side == null;
-            match |= action.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
-
-            if (match)
+            BehaviorTreeNodeState<?> action = actionSequence.getChildren().get(i);
+            if (actionClass.isInstance(action))
             {
-               previousAction = actionClass.cast(action);
+               boolean match = side == null;
+               match |= action.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
+
+               if (match)
+               {
+                  previousAction = actionClass.cast(action);
+               }
             }
          }
       }
