@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.behaviorTree.modification;
+package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;

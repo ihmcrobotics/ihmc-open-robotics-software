@@ -2,8 +2,8 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 
@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public class BehaviorTreeState extends RequestConfirmFreezable
 {
    private final MutableLong nextID = new MutableLong(0);
-   private final BehaviorTreeModificationQueue modificationQueue = new BehaviorTreeModificationQueue();
+   private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeExtension<?, ?, ?, ?>> rootNodeSupplier;
@@ -64,18 +64,18 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    /**
     * Convenience method.
     */
-   public void modifyTree(Consumer<BehaviorTreeModificationQueue> modifier)
+   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue> modifier)
    {
-      modifier.accept(modificationQueue);
-      modifyTree();
+      modifier.accept(topologyChangeQueue);
+      modifyTreeTopology();
    }
 
    /**
-    * Use with {@link #getModificationQueue()}.
+    * Use with {@link #getTopologyChangeQueue()}.
     */
-   public void modifyTree()
+   public void modifyTreeTopology()
    {
-      boolean atLeastOnePerformed = modificationQueue.performModifications();
+      boolean atLeastOnePerformed = topologyChangeQueue.performAllQueuedOperations();
 
       if (atLeastOnePerformed)
          update();
@@ -121,9 +121,9 @@ public class BehaviorTreeState extends RequestConfirmFreezable
       return treeRebuilder;
    }
 
-   public BehaviorTreeModificationQueue getModificationQueue()
+   public BehaviorTreeTopologyOperationQueue getTopologyChangeQueue()
    {
-      return modificationQueue;
+      return topologyChangeQueue;
    }
 
    public int getNumberOfFrozenNodes()

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.JSONFileTools;
@@ -21,19 +21,21 @@ public class RDXBehaviorTreeFileLoader
       this.nodeBuilder = nodeBuilder;
    }
 
-   public RDXBehaviorTreeNode<?, ?> loadFromFile(RDXAvailableBehaviorTreeFile fileToLoad, BehaviorTreeModificationQueue modificationQueue)
+   public RDXBehaviorTreeNode<?, ?> loadFromFile(RDXAvailableBehaviorTreeFile fileToLoad, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
       MutableObject<RDXBehaviorTreeNode<?, ?>> loadedNode = new MutableObject<>();
 
       JSONFileTools.load(fileToLoad.getTreeFile(), jsonNode ->
       {
-         loadedNode.setValue(loadFromFile(jsonNode, null, modificationQueue));
+         loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue));
       });
 
       return loadedNode.getValue();
    }
 
-   private RDXBehaviorTreeNode<?, ?> loadFromFile(JsonNode jsonNode, RDXBehaviorTreeNode<?, ?> parentNode, BehaviorTreeModificationQueue modificationQueue)
+   private RDXBehaviorTreeNode<?, ?> loadFromFile(JsonNode jsonNode,
+                                                  RDXBehaviorTreeNode<?, ?> parentNode,
+                                                  BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -45,12 +47,12 @@ public class RDXBehaviorTreeFileLoader
 
       if (parentNode != null)
       {
-         modificationQueue.queueAddAndFreezeNode(node, parentNode);
+         topologyOperationQueue.queueAddAndFreezeNode(node, parentNode);
       }
 
       JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
       {
-         loadFromFile(childJsonNode, node, modificationQueue);
+         loadFromFile(childJsonNode, node, topologyOperationQueue);
       });
 
       return node;
