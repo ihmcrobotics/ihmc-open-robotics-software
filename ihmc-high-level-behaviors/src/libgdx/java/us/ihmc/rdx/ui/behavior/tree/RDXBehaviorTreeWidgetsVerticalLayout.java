@@ -40,6 +40,8 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       if (ImGui.beginPopup(node.getNodePopupID()))
       {
+         node.setNodeContextMenuShowing(true);
+
          if (ImGui.menuItem("Rename..."))
          {
             node.enterEditDescriptionMode();
@@ -65,6 +67,22 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          }
          if (!(node.isRootNode() && !node.getChildren().isEmpty()))
          {
+            ImGui.separator();
+         }
+
+         if (node.getParent() != null)
+         {
+            if (ImGui.beginMenu("Move to Before"))
+            {
+               renderMoveRelativeItems(node, BehaviorTreeNodeInsertionType.INSERT_BEFORE);
+               ImGui.endMenu();
+            }
+            if (ImGui.beginMenu("Move to After"))
+            {
+               renderMoveRelativeItems(node, BehaviorTreeNodeInsertionType.INSERT_AFTER);
+               ImGui.endMenu();
+            }
+
             ImGui.separator();
          }
 
@@ -130,6 +148,20 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             ImGui.closeCurrentPopup();
          }
          ImGui.endPopup();
+      }
+   }
+
+   private void renderMoveRelativeItems(RDXBehaviorTreeNode<?, ?> nodeToMove, BehaviorTreeNodeInsertionType insertionType)
+   {
+      for (RDXBehaviorTreeNode<?, ?> child : nodeToMove.getParent().getChildren())
+      {
+         if (child != nodeToMove)
+         {
+            if (ImGui.menuItem(child.getDefinition().getDescription()))
+            {
+               topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), child, insertionType);
+            }
+         }
       }
    }
 }
