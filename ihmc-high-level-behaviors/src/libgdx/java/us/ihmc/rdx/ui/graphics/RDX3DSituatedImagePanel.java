@@ -67,8 +67,8 @@ public class RDX3DSituatedImagePanel
 
    @Nullable
    private final RDXVRModeManager vrModeManager;
-   private final MutableReferenceFrame floatingPanelFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
-   private final FramePose3D floatingPanelFramePose = new FramePose3D();
+   private MutableReferenceFrame floatingPanelFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private FramePose3D floatingPanelFramePose = new FramePose3D();
    private double panelDistanceFromHeadset = 0.5;
    private boolean isShowing = false;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
@@ -188,6 +188,8 @@ public class RDX3DSituatedImagePanel
       FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
       hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
                                                boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
+
+      updatePoses();
 
       for (RobotSide side : RobotSide.values)
          vrPickResult.get(side).setPickedObjectID(this, "3D Situated Image Panel");
@@ -329,6 +331,15 @@ public class RDX3DSituatedImagePanel
          LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), modelInstance.transform);
       if (hoverBoxMesh != null)
          LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), hoverBoxMesh.transform);
+   }
+
+   public void changeFrameToPanel(RDX3DSituatedImagePanel panel)
+   {
+//      floatingPanelFrame.changeFrame(panel.floatingPanelFrame.getReferenceFrame());
+//      floatingPanelFramePose.set(panel.floatingPanelFramePose);
+      floatingPanelFrame = panel.floatingPanelFrame;
+      floatingPanelFramePose = panel.floatingPanelFramePose;
+      updatePoses();
    }
 
    public ModelInstance getModelInstance()
