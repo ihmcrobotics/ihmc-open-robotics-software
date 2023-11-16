@@ -79,23 +79,40 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          ChestOrientationActionExecutor concurrentChestOrientationAction = null;
          PelvisHeightPitchActionExecutor concurrentPelvisHeightPitchAction = null;
-         if (state.getIsToBeExecutedConcurrently() && getParent() instanceof ActionSequenceExecutor parentSequence)
-         {
-            int concurrentSetIndex = parentSequence.getState().getExecutionNextIndex();
 
-            while (concurrentSetIndex <= parentSequence.getLastIndexOfConcurrentSetToExecute())
+         if (getParent() instanceof ActionSequenceExecutor parentSequence)
+         {
+            if (state.getIsToBeExecutedConcurrently())
             {
-               if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof ChestOrientationActionExecutor chestOrientationAction)
+               int concurrentSetIndex = parentSequence.getState().getExecutionNextIndex();
+
+               while (concurrentSetIndex <= parentSequence.getLastIndexOfConcurrentSetToExecute())
+               {
+                  if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof ChestOrientationActionExecutor chestOrientationAction)
+                  {
+                     concurrentChestOrientationAction = chestOrientationAction;
+                  }
+                  if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+                  {
+                     concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
+                  }
+                  ++concurrentSetIndex;
+               }
+            }
+
+            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : parentSequence.getCurrentlyExecutingActions())
+            {
+               if (currentlyExecutingAction instanceof ChestOrientationActionExecutor chestOrientationAction)
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+               if (currentlyExecutingAction instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
-               ++concurrentSetIndex;
             }
          }
+
          if (concurrentChestOrientationAction == null && concurrentPelvisHeightPitchAction == null)
          {
             state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
