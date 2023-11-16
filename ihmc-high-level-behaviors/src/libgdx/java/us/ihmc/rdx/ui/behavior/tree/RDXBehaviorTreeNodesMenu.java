@@ -6,8 +6,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueu
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.sequence.actions.WalkActionDefinition;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -67,7 +66,7 @@ public class RDXBehaviorTreeNodesMenu
          String fileName = indexedTreeFile.getTreeFile().getFileName();
          if (ImGuiTools.textWithUnderlineOnHover(fileName))
          {
-            if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+            if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
                RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
 
@@ -105,11 +104,28 @@ public class RDXBehaviorTreeNodesMenu
       ImGui.indent();
 
       renderNodeCreationClickable(relativeNode, insertionType, "Walk Action", WalkActionDefinition.class, null);
+      renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
       ImGui.text("Hand Pose: ");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
          renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+      }
+      ImGui.text("Sake Hand Command: ");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
+      }
+      renderNodeCreationClickable(relativeNode, insertionType, "Arm Joint Angles", ArmJointAnglesActionDefinition.class, null);
+      renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
+      renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightPitchActionDefinition.class, null);
+      renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+      ImGui.textDisabled("Hand Wrench: ");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
       }
 
       ImGui.unindent();
@@ -123,7 +139,7 @@ public class RDXBehaviorTreeNodesMenu
    {
       if (ImGuiTools.textWithUnderlineOnHover(nodeTypeName))
       {
-         if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+         if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
             RDXBehaviorTreeNode<?, ?> newNode = tree.getNodeBuilder()
                                                     .createNode(nodeType,
