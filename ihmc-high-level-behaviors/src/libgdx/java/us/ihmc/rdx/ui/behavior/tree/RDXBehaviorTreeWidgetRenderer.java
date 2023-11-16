@@ -2,8 +2,8 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.*;
@@ -12,7 +12,7 @@ public class RDXBehaviorTreeWidgetRenderer
 {
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTree tree;
-   private final BehaviorTreeModificationQueue modificationQueue;
+   private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BehaviorTreeNodeInsertionType insertionType = null;
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
@@ -22,7 +22,7 @@ public class RDXBehaviorTreeWidgetRenderer
    {
       this.tree = tree;
 
-      modificationQueue = tree.getBehaviorTreeState().getModificationQueue();
+      topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
    }
 
    public void render(RDXBehaviorTreeNode<?, ?> node)
@@ -66,7 +66,7 @@ public class RDXBehaviorTreeWidgetRenderer
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
          if (ImGui.menuItem("Delete Node"))
          {
-            modificationQueue.queueDestroySubtree(node);
+            topologyOperationQueue.queueDestroySubtree(node);
 
             if (node.isRootNode()) // Root node
             {

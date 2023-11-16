@@ -10,8 +10,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeExtensionSubtreeRebuilder;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -85,7 +85,7 @@ public class RDXBehaviorTree
    public void update()
    {
       // Perform any modifications we made in the last tick.
-      behaviorTreeState.modifyTree();
+      behaviorTreeState.modifyTreeTopology();
 
       idToNodeMap.clear();
 

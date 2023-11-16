@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.behaviorTree.modification;
+package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
@@ -13,14 +13,14 @@ public class BehaviorTreeExtensionSubtreeRebuilder
    private final HashMap<Long, BehaviorTreeNodeExtension<?, ?, ?, ?>> idToNodesMap = new HashMap<>();
    private final CRDTInfo crdtInfo;
 
-   private final BehaviorTreeModification clearSubtreeModification;
-   private final BehaviorTreeModification destroyLeftoversModification;
+   private final BehaviorTreeTopologyOperation clearSubtreeOperation;
+   private final BehaviorTreeTopologyOperation destroyLeftoversOperation;
 
    public BehaviorTreeExtensionSubtreeRebuilder(BehaviorTreeNodeExtensionSupplier subtreeNodeSupplier, CRDTInfo crdtInfo)
    {
       this.crdtInfo = crdtInfo;
 
-      clearSubtreeModification = () ->
+      clearSubtreeOperation = () ->
       {
          if (!idToNodesMap.isEmpty())
          {
@@ -30,7 +30,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
          clearChildren(subtreeNodeSupplier.getNodeExtension());
       };
 
-      destroyLeftoversModification = () ->
+      destroyLeftoversOperation = () ->
       {
          for (BehaviorTreeNodeExtension<?, ?, ?, ?> leftover : idToNodesMap.values())
          {
@@ -74,14 +74,14 @@ public class BehaviorTreeExtensionSubtreeRebuilder
       return idToNodesMap.remove(id);
    }
 
-   public BehaviorTreeModification getClearSubtreeModification()
+   public BehaviorTreeTopologyOperation getClearSubtreeOperation()
    {
-      return clearSubtreeModification;
+      return clearSubtreeOperation;
    }
 
-   public BehaviorTreeModification getDestroyLeftoversModification()
+   public BehaviorTreeTopologyOperation getDestroyLeftoversOperation()
    {
-      return destroyLeftoversModification;
+      return destroyLeftoversOperation;
    }
 }
 

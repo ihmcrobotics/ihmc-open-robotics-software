@@ -2,9 +2,9 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionDefinition;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WalkActionDefinition;
@@ -25,7 +25,7 @@ public class RDXBehaviorTreeNodesMenu
 {
    private final RDXBehaviorTree tree;
    private final WorkspaceResourceDirectory treeFilesDirectory;
-   private final BehaviorTreeModificationQueue modificationQueue;
+   private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
 
@@ -34,7 +34,7 @@ public class RDXBehaviorTreeNodesMenu
       this.tree = tree;
       this.treeFilesDirectory = treeFilesDirectory;
 
-      modificationQueue = tree.getBehaviorTreeState().getModificationQueue();
+      topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
 
       reindexDirectory();
    }
@@ -73,12 +73,12 @@ public class RDXBehaviorTreeNodesMenu
 
             if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
             {
-               RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, modificationQueue);
+               RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
 
                BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                    = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
 
-               modificationQueue.queueInsertNode(insertionDefinition);
+               topologyOperationQueue.queueInsertNode(insertionDefinition);
                ImGui.closeCurrentPopup();
             }
          }
@@ -146,7 +146,7 @@ public class RDXBehaviorTreeNodesMenu
                tree.getNodeBuilder().initializeActionNode(actionSequence, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 
-            modificationQueue.queueInsertNode(insertionDefinition);
+            topologyOperationQueue.queueInsertNode(insertionDefinition);
             ImGui.closeCurrentPopup();
          }
       }

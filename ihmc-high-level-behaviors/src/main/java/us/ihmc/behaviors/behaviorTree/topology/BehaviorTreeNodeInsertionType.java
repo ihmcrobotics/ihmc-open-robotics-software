@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.behaviorTree.modification;
+package us.ihmc.behaviors.behaviorTree.topology;
 
 public enum BehaviorTreeNodeInsertionType
 {

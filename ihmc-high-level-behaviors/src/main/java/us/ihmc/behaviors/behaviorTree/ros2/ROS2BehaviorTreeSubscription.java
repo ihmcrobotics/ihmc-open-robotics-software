@@ -5,7 +5,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.modification.BehaviorTreeModificationQueue;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -55,11 +55,11 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeExtension<T,
          if (!behaviorTreeState.isFrozen())
          {
             // Clears all unfrozen nodes
-            behaviorTreeState.modifyTree(modificationQueue ->
-                                   modificationQueue.queueModification(behaviorTreeState.getTreeRebuilder().getClearSubtreeModification()));
+            behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
+                                   topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
          }
 
-         behaviorTreeState.modifyTree(modificationQueue ->
+         behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
          {
             // When the root node is swapped out, we freeze the reference to the new one
             boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
@@ -71,14 +71,14 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeExtension<T,
             if (rootNode != null)
             {
                // The root node's parent is "null"
-               updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, modificationQueue, treeRootReferenceFrozen);
+               updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, topologyOperationQueue, treeRootReferenceFrozen);
             }
             else if (!treeRootReferenceFrozen)
             {
                rootNodeSetter.accept(null);
             }
 
-            modificationQueue.queueModification(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversModification());
+            topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversOperation());
          });
       }
    }
@@ -103,16 +103,16 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeExtension<T,
    private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
                                                 T localNode,
                                                 T localParentNode,
-                                                BehaviorTreeModificationQueue modificationQueue,
+                                                BehaviorTreeTopologyOperationQueue topologyOperationQueue,
                                                 boolean anAncestorIsFrozen)
    {
       // We just add nodes if they would not be part of a frozen subtree.
       if (!anAncestorIsFrozen)
       {
          if (localParentNode == null)
-            modificationQueue.queueSetRootNode(localNode, rootNodeSetter);
+            topologyOperationQueue.queueSetRootNode(localNode, rootNodeSetter);
          else
-            modificationQueue.queueAddNode(localNode, localParentNode);
+            topologyOperationQueue.queueAddNode(localNode, localParentNode);
       }
 
       for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
@@ -139,7 +139,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeExtension<T,
 
          if (localChildNode != null)
          {
-            updateLocalTreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, localNode, modificationQueue, anAncestorIsFrozen);
+            updateLocalTreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, localNode, topologyOperationQueue, anAncestorIsFrozen);
          }
       }
 

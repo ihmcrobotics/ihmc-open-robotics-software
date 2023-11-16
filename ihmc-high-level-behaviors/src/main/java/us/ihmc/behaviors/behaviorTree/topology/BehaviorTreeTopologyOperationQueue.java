@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.behaviorTree.modification;
+package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExtension;
 import us.ihmc.communication.crdt.Freezable;
@@ -14,21 +14,21 @@ import java.util.function.Consumer;
  * We are intentionally not checking the types in this class, because it gets
  * to complicated to use and doesn't add much value.
  */
-public class BehaviorTreeModificationQueue
+public class BehaviorTreeTopologyOperationQueue
 {
-   private final Queue<BehaviorTreeModification> modificationQueue = new LinkedList<>();
+   private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();
 
-   public boolean performModifications()
+   public boolean performAllQueuedOperations()
    {
-      boolean modified = !modificationQueue.isEmpty();
+      boolean atLeastOneOperationPerformed = !topologyOperationQueue.isEmpty();
 
-      while (!modificationQueue.isEmpty())
+      while (!topologyOperationQueue.isEmpty())
       {
-         BehaviorTreeModification modification = modificationQueue.poll();
-         modification.performOperation();
+         BehaviorTreeTopologyOperation topologyOperation = topologyOperationQueue.poll();
+         topologyOperation.performOperation();
       }
 
-      return modified;
+      return atLeastOneOperationPerformed;
    }
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueInsertNode(BehaviorTreeNodeInsertionDefinition<T> insertionDefinition)
@@ -49,14 +49,14 @@ public class BehaviorTreeModificationQueue
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueSetRootNode(T node, Consumer<T> setter)
    {
-      modificationQueue.add(() -> setter.accept(node));
+      topologyOperationQueue.add(() -> setter.accept(node));
    }
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueSetAndFreezeRootNode(T node,
                                                                                            Consumer<T> setter,
                                                                                            Freezable freezableRootHolder)
    {
-      modificationQueue.add(() ->
+      topologyOperationQueue.add(() ->
       {
          setter.accept(node);
          freezableRootHolder.freeze();
@@ -65,17 +65,17 @@ public class BehaviorTreeModificationQueue
 
    public void queueDestroySubtree(BehaviorTreeNodeExtension<?, ?, ?, ?> subtree)
    {
-      modificationQueue.add(() -> BehaviorTreeTopologyOperations.detachAndDestroySubtree(subtree));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.detachAndDestroySubtree(subtree));
    }
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddNode(T nodeToAdd, T parent)
    {
-      modificationQueue.add(() -> BehaviorTreeTopologyOperations.addChild(nodeToAdd, parent));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addChild(nodeToAdd, parent));
    }
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent, int insertionIndex)
    {
-      modificationQueue.add(() ->
+      topologyOperationQueue.add(() ->
       {
          BehaviorTreeTopologyOperations.insertAndFreezeChild(nodeToAdd, parent, insertionIndex);
       });
@@ -83,11 +83,11 @@ public class BehaviorTreeModificationQueue
 
    public <T extends BehaviorTreeNodeExtension<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
    {
-      modificationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreezeChild(nodeToAdd, parent));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreezeChild(nodeToAdd, parent));
    }
 
-   public void queueModification(BehaviorTreeModification modification)
+   public void queueOperation(BehaviorTreeTopologyOperation topologyOperation)
    {
-      modificationQueue.add(modification);
+      topologyOperationQueue.add(topologyOperation);
    }
 }
