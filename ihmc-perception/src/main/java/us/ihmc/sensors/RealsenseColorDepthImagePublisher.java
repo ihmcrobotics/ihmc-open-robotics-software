@@ -144,7 +144,6 @@ public class RealsenseColorDepthImagePublisher
       }
    }
 
-
    private void publishColorImage(RawImage colorImageToPublish)
    {
       // Redundant safety checks

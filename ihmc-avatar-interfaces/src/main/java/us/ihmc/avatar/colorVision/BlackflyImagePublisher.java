@@ -1,17 +1,12 @@
 package us.ihmc.avatar.colorVision;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.*;
-import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -36,8 +31,6 @@ public class BlackflyImagePublisher
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
    private final IHMCROS2Publisher<ImageMessage> ros2DistoredImagePublisher;
 
-   private final BlackflyLensProperties lensProperties;
-
    private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
 
    private long lastImageSequenceNumber = -1L;
@@ -49,13 +42,13 @@ public class BlackflyImagePublisher
 
    public BlackflyImagePublisher(BlackflyLensProperties lensProperties, ROS2Topic<ImageMessage> distortedImageTopic)
    {
-      this.lensProperties = lensProperties;
       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
       ros2DistoredImagePublisher = ROS2Tools.createPublisher(ros2Node, distortedImageTopic, ROS2QosProfile.BEST_EFFORT());
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
-                                                                        DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS, ousterFisheyeColoringIntrinsics);
+                                                                        DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
+                                                                        ousterFisheyeColoringIntrinsics);
 
       publishDistoredColorThread = new RestartableThread("BlackflyDistortedImagePublisher", this::distortedImagePublisherThreadFunction);
    }
