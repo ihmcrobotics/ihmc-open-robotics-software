@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -214,6 +215,18 @@ public class ContactStateExamples
       rightHandPose.getOrientation().setToRollOrientation(Math.toRadians(20.0));
       rightHandPose.getOrientation().appendPitchRotation(Math.toRadians(5.0));
       addContactPoint(contactPointFrame, rightHandPose, input, null);
+
+      int numberOfActuationConstraints = 1;
+      int numberOfContactPoints = input.getNumberOfContactPoints();
+
+      DMatrixRMaj actuationConstraintMatrix = input.getActuationConstraintMatrix();
+      DMatrixRMaj actuationConstraintVector = input.getActuationConstraintVector();
+
+      actuationConstraintMatrix.reshape(numberOfActuationConstraints, 3 * numberOfContactPoints);
+      actuationConstraintVector.reshape(numberOfActuationConstraints, 1);
+
+      actuationConstraintMatrix.set(0, 0, 1.0);
+      actuationConstraintVector.set(0, 0, 10.0);
 
       return input;
    }

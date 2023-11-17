@@ -18,6 +18,8 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -35,6 +37,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -59,6 +62,7 @@ import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -68,10 +72,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -163,6 +164,10 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private WalkingMessageHandler walkingMessageHandler;
    private WalkingTrajectoryPath walkingTrajectoryPath;
+
+   private final CenterOfMassStaticStabilityRegionCalculator multiContactRegionCalculator;
+   private final WholeBodyContactState wholeBodyContactState;
+   private final YoFrameConvexPolygon2D multiContactCoMFeasibileRegion;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -333,6 +338,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
+      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(fullRobotModel.getTotalMass());
+      wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
+      multiContactCoMFeasibileRegion = new YoFrameConvexPolygon2D("multiContactCoMRegion", ReferenceFrame.getWorldFrame(), multiContactRegionCalculator.getNumberOfVertices(), registry);
+      multiContactCoMFeasibileRegion.setToNaN();
+
       String graphicListName = getClass().getSimpleName();
       if (yoGraphicsListRegistry != null)
       {
@@ -343,6 +353,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                             Color.BLACK,
                                                             0.005);
          yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
+
+         YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon("Multi-Contact CoM Region", multiContactCoMFeasibileRegion, Color.BLACK, true);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, multiContactCoMRegionArtifact);
       }
       yoCenterOfPressure.setToNaN();
 
@@ -1023,6 +1036,33 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return walkingMessageHandler;
    }
 
+   public void resetMultiContactCoMRegion()
+   {
+      multiContactRegionCalculator.clear();
+   }
+
+   public WholeBodyContactState getWholeBodyContactState()
+   {
+      return wholeBodyContactState;
+   }
+
+   public CenterOfMassStaticStabilityRegionCalculator getMultiContactRegionCalculator()
+   {
+      return multiContactRegionCalculator;
+   }
+
+   public void updateMultiContactCoMRegion()
+   {
+      // Update basis vector transforms and actuation constraints
+      wholeBodyContactState.update();
+      // Update LP solver constraints based on contact state
+      multiContactRegionCalculator.updateContactState(wholeBodyContactState);
+      // Queries new direction and updates support region
+      multiContactRegionCalculator.update();
+      // Update polygon graphic
+      multiContactCoMFeasibileRegion.set(multiContactRegionCalculator.getSupportRegion());
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
@@ -1041,6 +1081,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                                     0.01,
                                                                     ColorDefinitions.Black(),
                                                                     DefaultPoint2DGraphic.DIAMOND));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Multi-Contact CoM Region", multiContactCoMFeasibileRegion, ColorDefinitions.Black(), false));
 
       return group;
    }

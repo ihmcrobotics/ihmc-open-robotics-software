@@ -147,6 +147,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
                graphicsList.add(basisVectorGraphic);
             }
          }
+
          graphicsList.add(new YoGraphicPosition("optimizedCoMGraphic", yoOptimizedCoM, 0.03, YoAppearance.Red()));
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
       }

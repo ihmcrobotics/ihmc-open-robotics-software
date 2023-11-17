@@ -8,11 +8,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -396,5 +400,20 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
+   }
+
+   public FramePoint3DReadOnly getContactPoint()
+   {
+      return contactPoint;
+   }
+
+   public FrameVector3DReadOnly getContactNormal()
+   {
+      return contactNormal;
+   }
+
+   public void updateWholeBodyContactState(WholeBodyContactState wholeBodyContactStateToUpdate)
+   {
+      wholeBodyContactStateToUpdate.addContactPoint(planeContactStateCommand.getContactingRigidBody(), contactPointInWorld, contactNormal);
    }
 }
