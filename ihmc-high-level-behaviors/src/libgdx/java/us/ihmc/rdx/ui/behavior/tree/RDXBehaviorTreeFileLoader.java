@@ -9,6 +9,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceFile;
+
+import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeFileLoader
 {
@@ -25,19 +28,19 @@ public class RDXBehaviorTreeFileLoader
    {
       MutableObject<RDXBehaviorTreeNode<?, ?>> loadedNode = new MutableObject<>();
 
+      LogTools.info("Loading {}", fileToLoad.getTreeFile().getFilesystemFile());
       JSONFileTools.load(fileToLoad.getTreeFile(), jsonNode ->
       {
-         loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue));
+         loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue, fileToLoad.getTreeFile().getFileName()));
       });
-
-      loadedNode.getValue().getDefinition().setJSONFileName(fileToLoad.getTreeFile().getFileName());
 
       return loadedNode.getValue();
    }
 
    private RDXBehaviorTreeNode<?, ?> loadFromFile(JsonNode jsonNode,
                                                   RDXBehaviorTreeNode<?, ?> parentNode,
-                                                  BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+                                                  BehaviorTreeTopologyOperationQueue topologyOperationQueue,
+                                                  @Nullable String jsonFileName)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -45,6 +48,8 @@ public class RDXBehaviorTreeFileLoader
                                                               behaviorTreeState.getAndIncrementNextID(),
                                                               behaviorTreeState.getCRDTInfo(),
                                                               behaviorTreeState.getSaveFileDirectory());
+      if (jsonFileName != null)
+         node.getDefinition().setJSONFileName(jsonFileName);
       node.getDefinition().loadFromFile(jsonNode);
       LogTools.info("Creating node: {}:{}", node.getDefinition().getDescription(), node.getState().getID());
 
@@ -55,7 +60,20 @@ public class RDXBehaviorTreeFileLoader
 
       JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
       {
-         loadFromFile(childJsonNode, node, topologyOperationQueue);
+         JsonNode fileNode = childJsonNode.get("file");
+         if (fileNode == null)
+         {
+            loadFromFile(childJsonNode, node, topologyOperationQueue, null);
+         }
+         else
+         {
+            WorkspaceResourceFile childFile = new WorkspaceResourceFile(behaviorTreeState.getSaveFileDirectory(), fileNode.asText());
+            LogTools.info("Loading {}", childFile.getFilesystemFile());
+            JSONFileTools.load(childFile, childJSONNode ->
+            {
+               loadFromFile(childJSONNode, node, topologyOperationQueue, childFile.getFileName());
+            });
+         }
       });
 
       return node;
