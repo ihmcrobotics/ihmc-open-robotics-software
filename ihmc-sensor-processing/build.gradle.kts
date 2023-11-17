@@ -27,7 +27,7 @@ mainDependencies {
    api("jgraph:jgraph:5.13.0.0")
    api("org.boofcv:boofcv-geo:0.36")
 
-   api("us.ihmc:euclid-frame:0.20.0")
+   api("us.ihmc:euclid-frame:0.21.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
