@@ -68,6 +68,9 @@ public class ExternalForceCommandHandler
 
    public void addToDesiredContactState(List<SettableContactStateProvider> contactStateProviders)
    {
+      if (trajectoryGenerator.isEmpty() || trajectoryGenerator.isDone())
+         return;
+
       double timeForCompute = yoTime.getValue();
       trajectoryGenerator.compute(timeForCompute);
       tempForce.setIncludingFrame(trajectoryGenerator.getPosition());
@@ -77,7 +80,7 @@ public class ExternalForceCommandHandler
 
       timeForCompute += contactStateProviders.get(0).getTimeInterval().getDuration();
       trajectoryGenerator.compute(timeForCompute);
-      tempForce.setAndScale(mass, trajectoryGenerator.getPosition());
+      tempForce.setAndScale(massInverse, trajectoryGenerator.getPosition());
 
       contactStateProviders.get(0).setExternalContactAccelerationEnd(tempForce);
 
@@ -87,7 +90,7 @@ public class ExternalForceCommandHandler
 
          timeForCompute += contactStateProviders.get(i).getTimeInterval().getDuration();
          trajectoryGenerator.compute(timeForCompute);
-         tempForce.setAndScale(mass, trajectoryGenerator.getPosition());
+         tempForce.setAndScale(massInverse, trajectoryGenerator.getPosition());
 
          contactStateProviders.get(1).setExternalContactAccelerationEnd(tempForce);
       }

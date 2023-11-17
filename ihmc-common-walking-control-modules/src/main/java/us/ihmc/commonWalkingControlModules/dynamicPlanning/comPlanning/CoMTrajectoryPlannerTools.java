@@ -183,7 +183,7 @@ public class CoMTrajectoryPlannerTools
       modifiedEnd.setToZero();
 
       boolean hasExternalForce = contactStateProvider.getExternalContactAccelerationStart() != null && contactStateProvider.getExternalContactAccelerationEnd() != null;
-      hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
+      hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && !contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
 
       if (hasExternalForce)
       {
