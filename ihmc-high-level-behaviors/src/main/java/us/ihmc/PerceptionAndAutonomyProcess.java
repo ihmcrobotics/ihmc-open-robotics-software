@@ -6,6 +6,7 @@ import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -520,6 +521,22 @@ public class PerceptionAndAutonomyProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
+      // To run a sensor without the UI, uncomment the sensor's heartbeat. Make sure to uncomment its destroy call too.
+//      ROS2Heartbeat zedHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+//      zedHeartbeat.setAlive(true);
+//
+//      ROS2Heartbeat realsenseHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+//      realsenseHeartbeat.setAlive(true);
+//
+//      ROS2Heartbeat ousterHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_OUSTER_DEPTH);
+//      ousterHeartbeat.setAlive(true);
+//
+//      ROS2Heartbeat leftBlackflyHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT));
+//      leftBlackflyHeartbeat.setAlive(true);
+//
+//      ROS2Heartbeat rightBlackflyHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
+//      rightBlackflyHeartbeat.setAlive(true);
+
       new PerceptionAndAutonomyProcess(ros2Helper,
                                        ReferenceFrame::getWorldFrame,
                                        ReferenceFrame::getWorldFrame,
@@ -528,5 +545,11 @@ public class PerceptionAndAutonomyProcess
                                        ReferenceFrame::getWorldFrame,
                                        ReferenceFrame::getWorldFrame,
                                        ReferenceFrame.getWorldFrame());
+
+//      zedHeartbeat.destroy();
+//      realsenseHeartbeat.destroy();
+//      ousterHeartbeat.destroy();
+//      leftBlackflyHeartbeat.destroy();
+//      rightBlackflyHeartbeat.destroy();
    }
 }
