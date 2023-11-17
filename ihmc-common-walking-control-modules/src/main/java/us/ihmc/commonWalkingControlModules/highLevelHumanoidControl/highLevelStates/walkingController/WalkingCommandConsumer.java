@@ -418,6 +418,7 @@ public class WalkingCommandConsumer
             WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
             wrenchTrajectory.setSequenceId(command.getSequenceId());
             handManager.handleWrenchTrajectoryCommand(wrenchTrajectory);
+            balanceManager.handleWrenchTrajectoryControllerCommand(command.getWrenchTrajectory());
          }
       }
       for (int i = 0; i < armTrajectoryCommands.size(); i++)

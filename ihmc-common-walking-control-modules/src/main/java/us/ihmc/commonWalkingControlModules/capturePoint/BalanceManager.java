@@ -63,6 +63,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -230,6 +231,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
    private final AngularMomentumHandler<SettableContactStateProvider> angularMomentumHandler;
+   private final ExternalForceCommandHandler externalForceCommandHandler;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
@@ -262,6 +264,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                             SettableContactStateProvider::new,
                                                             registry,
                                                             yoGraphicsListRegistry);
+      externalForceCommandHandler = new ExternalForceCommandHandler(yoTime, totalMass, registry);
 
       walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry, null);
       feedbackAlphaCalculator = walkingControllerParameters.getICPControllerParameters().getFeedbackAlphaCalculator();
@@ -424,6 +427,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public void setUseMomentumRecoveryModeForBalance(boolean useMomentumRecoveryModeForBalance)
    {
       this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
+   }
+
+   public void handleWrenchTrajectoryControllerCommand(WrenchTrajectoryControllerCommand command)
+   {
+      externalForceCommandHandler.addTrajectory(command);
    }
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
@@ -738,6 +746,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
          comTrajectoryPlanner.reset();
       }
       amPlanningTimerTimer.stopMeasurement();
+
+      externalForceCommandHandler.addToDesiredContactState(contactStateProviders);
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 

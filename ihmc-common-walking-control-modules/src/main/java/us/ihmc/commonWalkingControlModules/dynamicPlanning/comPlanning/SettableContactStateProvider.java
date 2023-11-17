@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.time.TimeInterval;
@@ -88,6 +89,16 @@ public class SettableContactStateProvider implements ContactStateBasics<Settable
    {
       this.endECMPPosition.checkReferenceFrameMatch(endECMPPosition);
       setEndECMPPosition((Point2DReadOnly) endECMPPosition, height);
+   }
+
+   public void setExternalContactAccelerationStart(FrameTuple3DReadOnly desiredAcceleration)
+   {
+      this.externalContactAccelerationStart.set(desiredAcceleration);
+   }
+
+   public void setExternalContactAccelerationEnd(FrameTuple3DReadOnly desiredAcceleration)
+   {
+      this.externalContactAccelerationEnd.set(desiredAcceleration);
    }
 
    public void setEndECMPPosition(Point2DReadOnly endECMPPosition, double height)
