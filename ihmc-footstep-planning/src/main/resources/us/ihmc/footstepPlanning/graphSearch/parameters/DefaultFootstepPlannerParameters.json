@@ -70,6 +70,8 @@
   "Shin heel clearance" : 0.0,
   "Shin height offet" : 0.05,
   "Check for path collisions" : true,
+  "Foot polygon scale factor" : 0.4,
+  "Cliff height" : 0.04,
   "Cliff bottom height to avoid" : 0.05,
   "Min distance from cliff bottoms" : 0.14,
   "Cliff top height to avoid" : 0.07,

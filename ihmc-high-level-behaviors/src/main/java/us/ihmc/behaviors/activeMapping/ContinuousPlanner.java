@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanner
 {
-   private static final boolean LOG_FOOTSTEP_PLANS = false;
+   private static final boolean LOG_FOOTSTEP_PLANS = true;
 
    public enum PlanningMode
    {
@@ -199,6 +199,9 @@ public class ContinuousPlanner
          return;
       }
 
+      PerceptionDebugTools.printHeightMap("Continuous Walking Planner:", heightMapData, 25);
+
+
       // Sync the swing time to always be the same whether its obstacle avoidance or not
       swingFootPlannerParameters.setMinimumSwingTime(continuousPlanningParameters.getSwingTime());
       swingFootPlannerParameters.setMaximumSwingTime(continuousPlanningParameters.getSwingTime());
@@ -213,12 +216,9 @@ public class ContinuousPlanner
 
       if (useReferencePlan)
       {
-         // Sets the previous footstep plan to be a reference for the current plan
-         FootstepPlan previousFootstepPlan = plannerOutput.getFootstepPlan();
-
-         if (previousFootstepPlan.getNumberOfSteps() < continuousPlanningParameters.getNumberOfStepsToSend())
+         if (previouslySentPlanForReference.getNumberOfSteps() < continuousPlanningParameters.getNumberOfStepsToSend())
          {
-            LogTools.error("Previous Plan for Reference: Not Enough Steps: {}!", previousFootstepPlan.getNumberOfSteps());
+            LogTools.error("Previous Plan for Reference: Not Enough Steps: {}!", previouslySentPlanForReference.getNumberOfSteps());
          }
          else
          {

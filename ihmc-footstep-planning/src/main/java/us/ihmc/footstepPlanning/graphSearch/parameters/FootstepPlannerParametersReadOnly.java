@@ -749,6 +749,22 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
       return get(checkForPathCollisions);
    }
 
+   /**
+    * The foot polygon is scaled by this factor to check if it close to cliffs
+    */
+   default double getFootPolygonScaleFactor()
+   {
+      return get(footPolygonScaleFactor);
+   }
+
+   /**
+    * Defined how the height map detects a cliff. The value will be the up or down centimeter value of what a cliff is defined as.
+    * If part of the foot polygon is detected to be off the height map up or down by this value then a cliff is detected.
+    */
+   default double getCliffHeight()
+   {
+      return get(cliffHeight);
+   }
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region

@@ -103,7 +103,7 @@ public class HeightMapVisualizer extends AnimationTimer
 
       if (Double.isNaN(heightMapMessage.getEstimatedGroundHeight()))
       {
-         heightMapMessage.setEstimatedGroundHeight(heights.min());
+         heightMapMessage.setEstimatedGroundHeight(0.0);
       }
 
       ConvexPolygon2D heightMapCell = new ConvexPolygon2D();

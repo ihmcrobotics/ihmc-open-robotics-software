@@ -100,6 +100,8 @@ public class FootstepPlannerParameterKeys
 
    // Other collision-related checks
    public static final BooleanStoredPropertyKey checkForPathCollisions                       = keys.addBooleanKey("Check for path collisions", true);
+   public static final DoubleStoredPropertyKey  footPolygonScaleFactor                       = keys.addDoubleKey("Foot polygon scale factor", 0.4);
+   public static final DoubleStoredPropertyKey  cliffHeight                                  = keys.addDoubleKey("Cliff height", 0.04);
    public static final DoubleStoredPropertyKey  cliffBaseHeightToAvoid                       = keys.addDoubleKey ("Cliff bottom height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms              = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
    public static final DoubleStoredPropertyKey  cliffTopHeightToAvoid                        = keys.addDoubleKey ("Cliff top height to avoid", Double.MAX_VALUE);
