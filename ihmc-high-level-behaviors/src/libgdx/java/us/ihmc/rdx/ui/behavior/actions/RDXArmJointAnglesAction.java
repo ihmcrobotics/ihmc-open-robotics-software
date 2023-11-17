@@ -64,7 +64,14 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
       // Copy the preset values into the custom data fields so they can be tweaked
       // relatively when switching to custom angles.
       if (preset != null)
-         robotModel.getPresetArmConfiguration(getDefinition().getSide(), preset, getDefinition().getJointAngles().getValue());
+      {
+         // TODO: Would be great if there was a #getPresetArmConfiguration that accepts an array to pack
+         double[] jointAngles = robotModel.getPresetArmConfiguration(getDefinition().getSide(), preset);
+         for (int i = 0; i < jointAngles.length; i++)
+         {
+            getDefinition().getJointAngles().getValue()[i] = jointAngles[i];
+         }
+      }
    }
 
    @Override
