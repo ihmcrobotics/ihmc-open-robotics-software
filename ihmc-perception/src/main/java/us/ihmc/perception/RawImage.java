@@ -9,6 +9,22 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * This class represents a raw image, as taken from a sensor with no compression.
+ * It should contain all information needed to create and publish an ImageMessage,
+ * once the raw image is compressed.
+ * <p>
+ * When initialized, this class only needs either a Mat or a GpuMat. For convenience,
+ * when the missing version of the image matrix is requested this class will create
+ * the missing Mat or GpuMat objects by copying the existing image matrix to the CPU or GPU.
+ * </p>
+ * <p>
+ *  To ensure all Mat and GpuMat objects get deallocated properly, this class uses
+ *  a reference count. Whenever passing the image to another class, the
+ *  {@code RawImage::get()} method should be used instead of passing it directly.
+ *  Each class is responsible for releasing the image once it is done using the image.
+ * </p>
+ */
 public class RawImage
 {
    private final long sequenceNumber;
@@ -19,7 +35,7 @@ public class RawImage
    /*
     * Although both cpu & gpu image matrices are nullable,
     * at least one should be not null.
-    * */
+    */
    @Nullable
    private Mat cpuImageMatrix;
    @Nullable
@@ -32,7 +48,7 @@ public class RawImage
    private final FixedFramePoint3DBasics position;
    private final FixedFrameQuaternionBasics orientation;
 
-   private AtomicInteger numberOfReferences = new AtomicInteger(1);
+   private final AtomicInteger numberOfReferences = new AtomicInteger(1);
 
    public RawImage(long sequenceNumber,
                    Instant acquisitionTime,
