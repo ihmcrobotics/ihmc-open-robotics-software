@@ -12,9 +12,12 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
@@ -35,9 +38,11 @@ public class RDXSphericalImageProjectionDemo
    private final ImDouble sphereRadius = new ImDouble(20.0);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
-   private final ImDouble projectionScaleX = new ImDouble(0.02);
-   private final ImDouble projectionScaleY = new ImDouble(0.02);
+   private final ImBoolean syncProjectionScales = new ImBoolean(true);
+   private final ImDouble projectionScaleX = new ImDouble(0.45);
+   private final ImDouble projectionScaleY = new ImDouble(0.45);
    private Model model;
+   private final Point3D normalizedVertex = new Point3D();
 
    public RDXSphericalImageProjectionDemo()
    {
@@ -57,8 +62,18 @@ public class RDXSphericalImageProjectionDemo
                ImGuiTools.volatileInputDouble(labels.get("Sphere radius"), sphereRadius);
                ImGuiTools.volatileInputInt(labels.get("Sphere latitude vertices"), sphereLatitudeVertices);
                ImGuiTools.volatileInputInt(labels.get("Sphere longitude vertices"), sphereLongitudeVertices);
-               ImGuiTools.sliderDouble(labels.get("Projection scale X"), projectionScaleX, 0.005, 0.05);
-               ImGuiTools.sliderDouble(labels.get("Projection scale Y"), projectionScaleY, 0.005, 0.05);
+               ImGui.checkbox(labels.get("Sync projection scales"), syncProjectionScales);
+               ImGuiTools.sliderDouble(labels.get("Projection scale X"), projectionScaleX, 0.01, 2.0);
+               if (syncProjectionScales.get())
+               {
+                  ImGui.beginDisabled();
+                  projectionScaleY.set(projectionScaleX.get());
+               }
+               ImGuiTools.sliderDouble(labels.get("Projection scale Y"), projectionScaleY, 0.01, 2.0);
+               if (syncProjectionScales.get())
+               {
+                  ImGui.endDisabled();
+               }
             });
          }
 
@@ -74,17 +89,22 @@ public class RDXSphericalImageProjectionDemo
                Point3D32 vertex = sphereMeshDataHolder.getVertices()[i];
                TexCoord2f texturePoint = sphereMeshDataHolder.getTexturePoints()[i];
 
+
                // TODO: Magical function
-               double wrappedY = vertex.getY();
+               normalizedVertex.set(vertex);
+               normalizedVertex.scale(1.0 / sphereRadius.get());
+
+
+               double wrappedY = normalizedVertex.getY();
                if (vertex.getX() < 0.0)
                {
-                  if (vertex.getY() > 0.0)
-                     wrappedY += vertex.getY() - sphereRadius.get();
+                  if (normalizedVertex.getY() > 0.0)
+                     wrappedY += normalizedVertex.getY() - sphereRadius.get();
                   else
-                     wrappedY -= vertex.getY() - sphereRadius.get();
+                     wrappedY -= normalizedVertex.getY() - sphereRadius.get();
                }
                texturePoint.setX((projectionScaleX.get() * wrappedY) + 0.5);
-               texturePoint.setY((-projectionScaleY.get() * vertex.getZ()) + 0.5);
+               texturePoint.setY((-projectionScaleY.get() * normalizedVertex.getZ()) + 0.5);
             }
 
             ModelBuilder modelBuilder = new ModelBuilder();
