@@ -15,6 +15,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 
 import javax.annotation.Nullable;
@@ -154,6 +155,7 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             }
             if (ImGui.menuItem(labels.get("Save to File")))
             {
+               RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Saving %s".formatted(getDefinition().getJSONFilename()));
                getDefinition().saveToFile();
             }
          }
