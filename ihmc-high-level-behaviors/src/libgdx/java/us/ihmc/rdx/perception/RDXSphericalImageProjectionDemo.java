@@ -17,8 +17,9 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -28,6 +29,7 @@ import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
 import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 public class RDXSphericalImageProjectionDemo
 {
@@ -39,10 +41,12 @@ public class RDXSphericalImageProjectionDemo
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
    private final ImBoolean syncProjectionScales = new ImBoolean(true);
-   private final ImDouble projectionScaleX = new ImDouble(0.45);
-   private final ImDouble projectionScaleY = new ImDouble(0.45);
+   private final ImDouble focalLengthX = new ImDouble(0.45);
+   private final ImDouble focalLengthY = new ImDouble(0.45);
+   private final ImDouble principlePointX = new ImDouble(0.0);
+   private final ImDouble principlePointY = new ImDouble(0.0);
    private Model model;
-   private final Point3D normalizedVertex = new Point3D();
+   private final Vector3D vertexRay = new Vector3D();
 
    public RDXSphericalImageProjectionDemo()
    {
@@ -63,17 +67,19 @@ public class RDXSphericalImageProjectionDemo
                ImGuiTools.volatileInputInt(labels.get("Sphere latitude vertices"), sphereLatitudeVertices);
                ImGuiTools.volatileInputInt(labels.get("Sphere longitude vertices"), sphereLongitudeVertices);
                ImGui.checkbox(labels.get("Sync projection scales"), syncProjectionScales);
-               ImGuiTools.sliderDouble(labels.get("Projection scale X"), projectionScaleX, 0.01, 2.0);
+               ImGuiTools.sliderDouble(labels.get("Projection scale X"), focalLengthX, 0.01, 2.0);
                if (syncProjectionScales.get())
                {
                   ImGui.beginDisabled();
-                  projectionScaleY.set(projectionScaleX.get());
+                  focalLengthY.set(focalLengthX.get());
                }
-               ImGuiTools.sliderDouble(labels.get("Projection scale Y"), projectionScaleY, 0.01, 2.0);
+               ImGuiTools.sliderDouble(labels.get("Projection scale Y"), focalLengthY, 0.01, 2.0);
                if (syncProjectionScales.get())
                {
                   ImGui.endDisabled();
                }
+               ImGuiTools.volatileInputDouble(labels.get("Priciple point X (Cx)"), principlePointX);
+               ImGuiTools.volatileInputDouble(labels.get("Priciple point Y (Cy)"), principlePointY);
             });
          }
 
@@ -89,22 +95,17 @@ public class RDXSphericalImageProjectionDemo
                Point3D32 vertex = sphereMeshDataHolder.getVertices()[i];
                TexCoord2f texturePoint = sphereMeshDataHolder.getTexturePoints()[i];
 
-
                // TODO: Magical function
-               normalizedVertex.set(vertex);
-               normalizedVertex.scale(1.0 / sphereRadius.get());
+               vertexRay.set(vertex);
 
+               double angleOfIncidence = EuclidCoreMissingTools.angleFromFirstToSecondVector3D(Axis3D.X, vertexRay);
+               double azimuthalAngle = Math.atan2(-vertex.getZ(), -vertex.getY());
 
-               double wrappedY = normalizedVertex.getY();
-               if (vertex.getX() < 0.0)
-               {
-                  if (normalizedVertex.getY() > 0.0)
-                     wrappedY += normalizedVertex.getY() - sphereRadius.get();
-                  else
-                     wrappedY -= normalizedVertex.getY() - sphereRadius.get();
-               }
-               texturePoint.setX((projectionScaleX.get() * wrappedY) + 0.5);
-               texturePoint.setY((-projectionScaleY.get() * normalizedVertex.getZ()) + 0.5);
+               double imageX = principlePointX.get() + focalLengthX.get() * angleOfIncidence * Math.cos(azimuthalAngle);
+               double imageY = principlePointY.get() + focalLengthY.get() * angleOfIncidence * Math.sin(azimuthalAngle);
+
+               texturePoint.setX(imageX + 0.5);
+               texturePoint.setY(imageY + 0.5);
             }
 
             ModelBuilder modelBuilder = new ModelBuilder();
