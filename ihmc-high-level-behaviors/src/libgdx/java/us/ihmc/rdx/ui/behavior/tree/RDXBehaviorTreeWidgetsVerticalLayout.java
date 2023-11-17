@@ -139,7 +139,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          tree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
 
          ImGui.separator();
-         if (ImGui.button(labels.get("Cancel")))
+         if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
          {
             ImGui.closeCurrentPopup();
          }
