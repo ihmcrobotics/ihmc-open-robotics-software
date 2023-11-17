@@ -50,11 +50,11 @@ public class RDXSphericalImageProjectionDemo
          {
             if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
             {
-               baseUI.getPrimaryScene().addRenderableProvider(projectionSpheres.get(RobotSide.RIGHT)::getRenderables);
+               projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
             }
             else
             {
-               baseUI.getPrimaryScene().addRenderableProvider(projectionSpheres.get(RobotSide.LEFT)::getRenderables);
+               projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
             }
          }
 
