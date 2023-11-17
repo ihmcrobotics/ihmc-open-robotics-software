@@ -97,6 +97,11 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       return jointAngles;
    }
 
+   public void setJointAngles(double[] jointAngles)
+   {
+      this.jointAngles = jointAngles;
+   }
+
    @Nullable
    public PresetArmConfiguration getPreset()
    {
