@@ -41,4 +41,14 @@ public interface ContactStateProvider<T extends ContactStateProvider<T>> extends
     * Specifies whether the current state is in contact or not.
     */
    ContactState getContactState();
+
+   default FrameVector3DReadOnly getExternalContactAccelerationStart()
+   {
+      return null;
+   }
+
+   default FrameVector3DReadOnly getExternalContactAccelerationEnd()
+   {
+      return null;
+   }
 }

@@ -110,6 +110,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> modifiedStartVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> modifiedEndVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
    private final YoFramePoint3D finalDCMPosition = new YoFramePoint3D("goalDCMPosition", worldFrame, registry);
 
@@ -233,6 +235,12 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                                                     startVRPPositions,
                                                     endVRPPositions,
                                                     true);
+      CoMTrajectoryPlannerTools.offsetVRPWaypointsWithExternalForces(omega.getValue(),
+                                                                     startVRPPositions,
+                                                                     endVRPPositions,
+                                                                     contactSequence,
+                                                                     modifiedStartVRPPositions,
+                                                                     modifiedEndVRPPositions);
 
       solveForCoefficientConstraintMatrix(contactSequence);
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
@@ -307,7 +315,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
-      finalDCMPosition.set(endVRPPositions.getLast());
+      finalDCMPosition.set(modifiedEndVRPPositions.getLast());
       double finalDuration = lastContactPhase.getTimeInterval().getDuration();
       setDCMPositionConstraint(numberOfPhases - 1, finalDuration, finalDCMPosition);
       setDynamicsFinalConstraint(contactSequence, numberOfPhases - 1);
@@ -709,7 +717,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       ContactState contactState = contactStateProvider.getContactState();
       if (contactState.isLoadBearing())
       {
-         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
+         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, modifiedStartVRPPositions.get(sequenceId));
          constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, contactSequence.get(sequenceId).getECMPStartVelocity());
       }
       else
@@ -732,7 +740,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       double duration = contactStateProvider.getTimeInterval().getDuration();
       if (contactState.isLoadBearing())
       {
-         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
+         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, modifiedEndVRPPositions.get(sequenceId));
          constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, contactSequence.get(sequenceId).getECMPEndVelocity());
       }
       else

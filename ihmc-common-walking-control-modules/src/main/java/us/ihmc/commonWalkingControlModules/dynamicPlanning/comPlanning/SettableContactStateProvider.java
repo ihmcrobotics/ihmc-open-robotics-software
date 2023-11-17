@@ -10,9 +10,6 @@ import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * This is the most basic implementation fo a contact state provider for the {@link CoMTrajectoryPlannerInterface}. This is really useful for visualizing
  * what will happen for certain sequences, as it allows the user to directly specify where the start and end ECMP positions are and the contact time intervals.
@@ -26,14 +23,12 @@ public class SettableContactStateProvider implements ContactStateBasics<Settable
    private final FrameVector3D endECMPVelocity = new FrameVector3D();
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
-   private final List<String> bodiesInContact = new ArrayList<>();
+   private final FrameVector3D externalContactAccelerationStart = new FrameVector3D();
+   private final FrameVector3D externalContactAccelerationEnd = new FrameVector3D();
 
    public SettableContactStateProvider()
    {
-      startECMPPosition.setToNaN();
-      endECMPPosition.setToNaN();
-      startECMPVelocity.setToNaN();
-      endECMPVelocity.setToNaN();
+      reset();
    }
 
    public SettableContactStateProvider(SettableContactStateProvider other)
@@ -42,14 +37,15 @@ public class SettableContactStateProvider implements ContactStateBasics<Settable
       set(other);
    }
 
-
    public void reset()
    {
       startECMPPosition.setToNaN();
       startECMPVelocity.setToNaN();
       endECMPPosition.setToNaN();
       endECMPVelocity.setToNaN();
-      bodiesInContact.clear();
+
+      externalContactAccelerationStart.setToNaN();
+      externalContactAccelerationEnd.setToNaN();
    }
 
    public void set(SettableContactStateProvider other)
@@ -116,11 +112,6 @@ public class SettableContactStateProvider implements ContactStateBasics<Settable
       this.contactState = contactState;
    }
 
-   public void addBodyInContact(String name)
-   {
-      bodiesInContact.add(name);
-   }
-
    public FramePoint3DReadOnly getECMPStartPosition()
    {
       return startECMPPosition;
@@ -176,8 +167,13 @@ public class SettableContactStateProvider implements ContactStateBasics<Settable
       setStartECMPPosition(previousContactState.getECMPEndPosition());
    }
 
-   public List<String> getBodiesInContact()
+   public FrameVector3DReadOnly getExternalContactAccelerationStart()
    {
-      return bodiesInContact;
+      return externalContactAccelerationStart;
+   }
+
+   public FrameVector3DReadOnly getExternalContactAccelerationEnd()
+   {
+      return externalContactAccelerationEnd;
    }
 }

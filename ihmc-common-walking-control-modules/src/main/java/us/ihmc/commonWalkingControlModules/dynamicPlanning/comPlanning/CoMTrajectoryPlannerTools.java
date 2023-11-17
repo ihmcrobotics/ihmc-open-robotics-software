@@ -129,6 +129,74 @@ public class CoMTrajectoryPlannerTools
       end.addZ(nominalCoMHeight);
    }
 
+   public static void offsetVRPWaypointsWithExternalForces(double omega,
+                                                           List<FramePoint3D> startVRPPositions,
+                                                           List<FramePoint3D> endVRPPositions,
+                                                           List<? extends ContactStateProvider> contactSequence,
+                                                           RecyclingArrayList<FramePoint3D> modifiedStartVRPPositionsToPack,
+                                                           RecyclingArrayList<FramePoint3D> modifiedEndVRPPositionsToPack)
+   {
+      modifiedStartVRPPositionsToPack.clear();
+      modifiedEndVRPPositionsToPack.clear();
+
+      int sequenceIndex = 0;
+      double denominator = -1.0 / (omega * omega);
+      for (int i = 0; i < contactSequence.size() - 1; i++)
+      {
+         ContactStateProvider contactStateProvider = contactSequence.get(i);
+
+         FramePoint3D start = startVRPPositions.get(sequenceIndex);
+         FramePoint3D end = endVRPPositions.get(sequenceIndex);
+
+         FramePoint3D modifiedStart = modifiedStartVRPPositionsToPack.add();
+         FramePoint3D modifiedEnd = modifiedEndVRPPositionsToPack.add();
+
+         modifiedStart.setToZero();
+         modifiedEnd.setToZero();
+
+         boolean hasExternalForce = contactStateProvider.getExternalContactAccelerationStart() != null && contactStateProvider.getExternalContactAccelerationEnd() != null;
+         hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
+
+         if (hasExternalForce)
+         {
+            modifiedStart.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationStart(), start);
+            modifiedEnd.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
+         }
+         else
+         {
+            modifiedStart.set(start);
+            modifiedEnd.set(end);
+         }
+
+         sequenceIndex++;
+      }
+
+      ContactStateProvider contactStateProvider = contactSequence.get(contactSequence.size() - 1);
+
+      FramePoint3D start = startVRPPositions.get(sequenceIndex);
+      FramePoint3D end = endVRPPositions.get(sequenceIndex);
+
+      FramePoint3D modifiedStart = modifiedStartVRPPositionsToPack.add();
+      FramePoint3D modifiedEnd = modifiedEndVRPPositionsToPack.add();
+
+      modifiedStart.setToZero();
+      modifiedEnd.setToZero();
+
+      boolean hasExternalForce = contactStateProvider.getExternalContactAccelerationStart() != null && contactStateProvider.getExternalContactAccelerationEnd() != null;
+      hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
+
+      if (hasExternalForce)
+      {
+         modifiedStart.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationStart(), start);
+         modifiedEnd.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
+      }
+      else
+      {
+         modifiedStart.set(start);
+         modifiedEnd.set(end);
+      }
+   }
+
    public static void computeVRPVelocites(List<? extends ContactStateProvider<?>> contactSequence,
                                           RecyclingArrayList<FrameVector3D> startVRPVelocitiesToPack,
                                           RecyclingArrayList<FrameVector3D> endVRPVelocitiesToPack)
