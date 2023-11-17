@@ -71,7 +71,6 @@ public class RDXHandConfigurationManager
    {
       for (RobotSide side : sakeHandInfo.sides())
       {
-         sakeHandInfo.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandInfo.get(side));
       }
    }

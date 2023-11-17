@@ -141,7 +141,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
          case FULLY_OPEN -> fullyOpenGripper();
          case OPEN -> openGripper();
          case CLOSE -> closeGripper();
-         case GRIP_HARD -> crushGripper();
+         case GRIP -> crushGripper();
       }
    }
 
@@ -197,7 +197,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CRUSH[i]);
-      sakeHandConfiguration = SakeHandCommandOption.GRIP_HARD;
+      sakeHandConfiguration = SakeHandCommandOption.GRIP;
    }
 
    private void closeGripper()

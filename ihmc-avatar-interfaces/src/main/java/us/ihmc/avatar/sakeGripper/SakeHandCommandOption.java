@@ -7,14 +7,12 @@ public enum SakeHandCommandOption
    A goal value of -1.0 indicates the command is not associated with that goal value
    e.g. RESET does not change goal position; The hand remains in same position.
    */
-   CALIBRATE(0, 0.0, 0.3),
-   RESET(1, -1.0, 0.0),
-   FULLY_OPEN(2, 1.0, 0.3),
-   CLOSE(3, 0.1, 0.3),
-   RELEASE(4, -1.0, 0.0),
-   GOTO(5, -1.0, -1.0),
-   GRIP(6, 0.0, 0.3),
-   GRIP_HARD(7, 0.0, 1.0),
+   FULLY_OPEN(0, 1.0, 0.3),
+   CLOSE(1, 0.1, 0.3),
+   GRIP(2, 0.0, 0.3),
+   SET_GOAL_POSITION(3, -1.0, -1.0),
+   SET_GOAL_TORQUE(4, -1.0, -1.0),
+   CALIBRATE(5, 0.0, 0.3),
 
    // Below commands are custom defined commands that map to the GOTO command (commandNumber = 5)
    OPEN(5, 0.5, 0.3);

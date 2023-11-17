@@ -62,11 +62,11 @@ public class RDXHandQuickAccessButtons
 
    public void update(RDXSakeHandInformation sakeHandInfo)
    {
-      openHandCalibrateButton.setIconTexture(sakeHandInfo.getCalibrated() ? openIcon : calibrateIcon);
-      openHandCalibrateButton.setOnPressed(sakeHandInfo.getCalibrated() ? openHand : calibrateHand);
-      openHandCalibrateButton.setTooltipText(sakeHandInfo.getCalibrated() ? openHandText : calibrateHandText);
-      closeHandResetButton.setIconTexture(sakeHandInfo.getNeedsReset() ? resetIcon : closeIcon);
-      closeHandResetButton.setOnPressed(sakeHandInfo.getNeedsReset() ? resetHand : closeHand);
-      closeHandResetButton.setTooltipText(sakeHandInfo.getNeedsReset() ? resetHandText : closeHandText);
+      openHandCalibrateButton.setIconTexture(openIcon);
+      openHandCalibrateButton.setOnPressed(openHand);
+      openHandCalibrateButton.setTooltipText(openHandText);
+      closeHandResetButton.setIconTexture(resetIcon);
+      closeHandResetButton.setOnPressed(resetHand);
+      closeHandResetButton.setTooltipText(resetHandText);
    }
 }

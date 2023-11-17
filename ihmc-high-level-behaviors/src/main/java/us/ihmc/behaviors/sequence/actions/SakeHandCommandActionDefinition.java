@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class SakeHandCommandActionDefinition extends BehaviorActionDefinition
 {
    private RobotSide side = RobotSide.LEFT;
-   private int handConfigurationIndex = SakeHandCommandOption.GOTO.ordinal();
+   private int handConfigurationIndex = SakeHandCommandOption.SET_GOAL_POSITION.ordinal();
    private double goalPosition = 1.0;  // default to open
    private double goalTorque = 0.0;    // default to none
    private boolean executeWitNextAction = false;

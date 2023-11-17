@@ -38,8 +38,8 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
    {
       SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
       message.setRobotSide(definition.getSide().toByte());
-      message.setDesiredHandConfiguration((byte) SakeHandCommandOption.values[definition.getHandConfigurationIndex()].getCommandNumber());
-      message.setPostionRatio(definition.getGoalPosition());
+      message.setDesiredCommandOption((byte) SakeHandCommandOption.values[definition.getHandConfigurationIndex()].getCommandNumber());
+      message.setPositionRatio(definition.getGoalPosition());
       message.setTorqueRatio(definition.getGoalTorque());
 
       ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);

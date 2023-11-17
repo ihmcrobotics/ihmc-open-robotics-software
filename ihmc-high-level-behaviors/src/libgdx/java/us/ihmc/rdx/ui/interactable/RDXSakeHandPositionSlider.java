@@ -74,8 +74,8 @@ public class RDXSakeHandPositionSlider
 
             SakeHandDesiredCommandMessage message = new SakeHandDesiredCommandMessage();
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
-            message.setPostionRatio(positionRatio);
+            message.setDesiredCommandOption((byte) SakeHandCommandOption.SET_GOAL_POSITION.getCommandNumber());
+            message.setPositionRatio(1.0 - positionRatio);
             message.setTorqueRatio(-1.0);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
@@ -83,7 +83,7 @@ public class RDXSakeHandPositionSlider
       }
       else
       {
-         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * presentGoalPosition);
+         sliderValue[0] = (float) (Math.toRadians(MAX_ANGLE_BETWEEN_FINGERS) * (1.0 - presentGoalPosition));
       }
 
       receiveRobotConfigurationData();

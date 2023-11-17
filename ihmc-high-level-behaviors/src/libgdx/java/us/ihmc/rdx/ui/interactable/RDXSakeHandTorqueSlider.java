@@ -71,8 +71,8 @@ public class RDXSakeHandTorqueSlider
 
             // This attempts to keep the hand's position identical when sending a new goal torque
             message.setRobotSide(handSide.toByte());
-            message.setDesiredHandConfiguration((byte) SakeHandCommandOption.GOTO.getCommandNumber());
-            message.setPostionRatio(-1.0);
+            message.setDesiredCommandOption((byte) SakeHandCommandOption.SET_GOAL_TORQUE.getCommandNumber());
+            message.setPositionRatio(-1.0);
             message.setTorqueRatio(sliderValue[0]);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);

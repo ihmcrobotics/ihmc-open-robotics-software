@@ -18,10 +18,8 @@ public class RDXSakeHandInformation
    private final CommunicationHelper communicationHelper;
    private final IHMCROS2Input<SakeHandStatusMessage> statusInput;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
-   private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
-   private boolean calibrated = true;
-   private boolean needsReset = false;
+   private final ImGuiFlashingText presentTemperatureText = new ImGuiFlashingText(ImGuiTools.RED);
+   private final ImGuiFlashingText errorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
    public RDXSakeHandInformation(RobotSide side, CommunicationHelper communicationHelper)
    {
@@ -32,50 +30,38 @@ public class RDXSakeHandInformation
                                                   message -> message.getRobotSide() == side.toByte());
    }
 
-   public void update()
-   {
-      calibrated = statusInput.getLatest().getCalibrated();
-      needsReset = statusInput.getLatest().getNeedsReset();
-   }
-
    public void renderImGuiWidgets()
    {
       ImGui.text(side.getPascalCaseName() + ":");
       ImGui.sameLine();
       if (statusInput.hasReceivedFirstMessage())
       {
-         ImGui.text("Calibrated:");
+         double temperature = 100 * statusInput.getLatest().getTemperature();
+         boolean error = statusInput.getLatest().getIsInErrorState();
+
+         if (temperature < 55.0)
+         {
+            ImGui.textColored(ImGuiTools.greenToRedGradiatedColor(temperature, 45.0, 55.0, 60.0),
+                              "Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C  |");
+         }
+         else
+         {
+            presentTemperatureText.renderText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C  |", true);
+         }
          ImGui.sameLine();
-         calibrateStatusText.renderText(Boolean.toString(calibrated), !calibrated);
-         ImGui.sameLine();
-         ImGui.text("Needs reset:");
-         ImGui.sameLine();
-         needResetStatusText.renderText(Boolean.toString(needsReset), needsReset);
-         ImGui.sameLine();
-         ImGui.text("Temperature: " + FormattingTools.getFormattedDecimal1D(statusInput.getLatest().getTemperature()));
+
+         if (!error)
+         {
+            ImGui.textColored(ImGuiTools.GREEN, "Status: all good");
+         }
+         else
+         {
+            errorStatusText.renderText("Status: ERROR", true);
+         }
       }
       else
       {
          ImGui.text("No status received.");
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Reset", side.getCamelCaseName())))
-      {
-         SakeHandDesiredCommandMessage sakeCommand = new SakeHandDesiredCommandMessage();
-         sakeCommand.setRobotSide(side.toByte());
-         sakeCommand.setDesiredHandConfiguration(SakeHandDesiredCommandMessage.HAND_CONFIGURATION_RESET);
-         communicationHelper.publish(ROS2Tools.getControllerInputTopic(communicationHelper.getRobotName()).withTypeName(SakeHandDesiredCommandMessage.class),
-                                     sakeCommand);
-      }
-   }
-
-   public boolean getCalibrated()
-   {
-      return calibrated;
-   }
-
-   public boolean getNeedsReset()
-   {
-      return needsReset;
    }
 }
