@@ -57,8 +57,8 @@ public class RDXSphericalImageProjectionDemo
                ImGuiTools.volatileInputDouble(labels.get("Sphere radius"), sphereRadius);
                ImGuiTools.volatileInputInt(labels.get("Sphere latitude vertices"), sphereLatitudeVertices);
                ImGuiTools.volatileInputInt(labels.get("Sphere longitude vertices"), sphereLongitudeVertices);
-               ImGuiTools.volatileInputDouble(labels.get("Projection scale X"), projectionScaleX);
-               ImGuiTools.volatileInputDouble(labels.get("Projection scale Y"), projectionScaleY);
+               ImGuiTools.sliderDouble(labels.get("Projection scale X"), projectionScaleX, 0.005, 0.05);
+               ImGuiTools.sliderDouble(labels.get("Projection scale Y"), projectionScaleY, 0.005, 0.05);
             });
          }
 
@@ -75,7 +75,15 @@ public class RDXSphericalImageProjectionDemo
                TexCoord2f texturePoint = sphereMeshDataHolder.getTexturePoints()[i];
 
                // TODO: Magical function
-               texturePoint.setX((projectionScaleX.get() * vertex.getY()) + 0.5);
+               double wrappedY = vertex.getY();
+               if (vertex.getX() < 0.0)
+               {
+                  if (vertex.getY() > 0.0)
+                     wrappedY += vertex.getY() - sphereRadius.get();
+                  else
+                     wrappedY -= vertex.getY() - sphereRadius.get();
+               }
+               texturePoint.setX((projectionScaleX.get() * wrappedY) + 0.5);
                texturePoint.setY((-projectionScaleY.get() * vertex.getZ()) + 0.5);
             }
 
