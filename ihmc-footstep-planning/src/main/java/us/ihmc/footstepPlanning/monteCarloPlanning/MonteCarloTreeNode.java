@@ -6,9 +6,10 @@ import java.util.PriorityQueue;
 
 public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNode>
 {
+   private static final int MAX_NUMBER_OF_CHILDREN = 10;
 
    private final ArrayList<MonteCarloTreeNode> parents;
-   private final ArrayList<MonteCarloTreeNode> children;
+   //private final ArrayList<MonteCarloTreeNode> children;
    private final PriorityQueue<MonteCarloTreeNode> maxQueue = new PriorityQueue<>();
 
    protected int id = 0;
@@ -23,7 +24,7 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
 
       this.level = 0;
       this.parents = new ArrayList<>();
-      this.children = new ArrayList<>();
+      //this.children = new ArrayList<>();
 
       if (parent != null)
       {
@@ -54,9 +55,14 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       return upperConfidenceBound;
    }
 
+   //public List<MonteCarloTreeNode> getChildren()
+   //{
+   //   return children;
+   //}
+
    public List<MonteCarloTreeNode> getChildren()
    {
-      return children;
+      return maxQueue.stream().toList();
    }
 
    public int getVisits()
@@ -121,13 +127,13 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
 
    public void addChild(MonteCarloTreeNode child)
    {
-      children.add(child);
+      //children.add(child);
       maxQueue.add(child);
    }
 
    public void removeChild(MonteCarloTreeNode child)
    {
-      children.remove(child);
+      //children.remove(child);
       maxQueue.remove(child);
    }
 
@@ -139,11 +145,6 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
    public void removeParent(MonteCarloTreeNode parent)
    {
       parents.remove(parent);
-   }
-
-   public MonteCarloTreeNode getChild(int index)
-   {
-      return children.get(index);
    }
 
    public int compareTo(MonteCarloTreeNode other)
@@ -159,6 +160,20 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       else
       {
          return 0;
+      }
+   }
+
+   public void prune()
+   {
+      if (maxQueue.size() >= MAX_NUMBER_OF_CHILDREN)
+      {
+         PriorityQueue<MonteCarloTreeNode> prunedQueue = new PriorityQueue<>();
+         for (int i = 0; i < MAX_NUMBER_OF_CHILDREN; i++)
+         {
+            prunedQueue.add(maxQueue.poll());
+         }
+         maxQueue.clear();
+         maxQueue.addAll(prunedQueue);
       }
    }
 }

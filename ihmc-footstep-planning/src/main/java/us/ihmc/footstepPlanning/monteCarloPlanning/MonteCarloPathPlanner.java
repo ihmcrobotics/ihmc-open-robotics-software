@@ -70,10 +70,9 @@ public class MonteCarloPathPlanner
       // Select the best node based on the Upper Confidence Bound
       for (MonteCarloTreeNode node : root.getChildren())
       {
-         node.updateUpperConfidenceBound();
-         if (node.getUpperConfidenceBound() > bestScore)
+         if (node.getValue() > bestScore)
          {
-            bestScore = node.getUpperConfidenceBound();
+            bestScore = node.getValue();
             bestNode = (MonteCarloWaypointNode) node;
          }
       }

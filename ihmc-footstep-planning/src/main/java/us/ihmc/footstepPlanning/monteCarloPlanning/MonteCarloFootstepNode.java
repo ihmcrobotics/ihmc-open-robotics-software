@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MonteCarloFootstepNode extends MonteCarloTreeNode
 {
@@ -70,17 +71,37 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       return robotSide;
    }
 
+   //@Override
+   //public boolean equals(Object obj)
+   //{
+   //   if (obj instanceof MonteCarloFootstepNode)
+   //   {
+   //      MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
+   //      return position.equals(other.position) && robotSide == other.robotSide;
+   //   }
+   //   else
+   //   {
+   //      return false;
+   //   }
+   //}
+
    @Override
-   public boolean equals(Object obj)
-   {
-      if (obj instanceof MonteCarloFootstepNode)
-      {
-         MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
-         return position.equals(other.position) && robotSide == other.robotSide;
+   public boolean equals(Object obj) {
+      if (this == obj) {
+         return true;
       }
-      else
-      {
+      if (obj == null || getClass() != obj.getClass()) {
          return false;
       }
+      MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
+      return Double.compare(other.position.getX(), position.getX()) == 0 &&
+             Double.compare(other.position.getY(), position.getY()) == 0 &&
+             Double.compare(other.position.getZ(), position.getZ()) == 0 &&
+             robotSide == other.robotSide;
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(position.getX(), position.getY(), position.getZ(), robotSide);
    }
 }

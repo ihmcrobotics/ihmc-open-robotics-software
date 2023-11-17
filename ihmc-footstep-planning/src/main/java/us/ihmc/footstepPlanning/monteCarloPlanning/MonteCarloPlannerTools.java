@@ -270,7 +270,7 @@ public class MonteCarloPlannerTools
          output.append(", ");
       }
 
-      LogTools.debug("Layer Counts: {}", output.toString());
+      LogTools.info("Layer Counts: {}", output.toString());
    }
 
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root)
@@ -309,10 +309,9 @@ public class MonteCarloPlannerTools
 
       for (MonteCarloTreeNode node : root.getChildren())
       {
-         node.updateUpperConfidenceBound();
-         if (node.getUpperConfidenceBound() > bestScore)
+         if (node.getValue() > bestScore)
          {
-            bestScore = node.getUpperConfidenceBound();
+            bestScore = node.getValue();
             bestNode = node;
          }
       }

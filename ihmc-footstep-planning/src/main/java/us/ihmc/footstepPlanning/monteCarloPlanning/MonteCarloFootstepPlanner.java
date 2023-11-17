@@ -63,7 +63,9 @@ public class MonteCarloFootstepPlanner
          return;
       }
 
-      if (node.getLevel() < 3)
+      node.prune();
+
+      if (node.getVisits() <= 1 || node.getChildren().isEmpty())
       {
          MonteCarloFootstepNode childNode = expand(node, request);
          double score = simulate(childNode, request);
@@ -96,11 +98,10 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
          double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request);
 
-         if (score > 0.5)
+         if (node.getLevel() < 8)
          {
             if (visitedNodes.getOrDefault(newState, null) != null)
             {
-               LogTools.warn("Hit Hash Map");
                MonteCarloFootstepNode existingNode = visitedNodes.get(newState);
                node.addChild(existingNode);
                existingNode.getParents().add(node);
@@ -114,7 +115,7 @@ public class MonteCarloFootstepPlanner
          }
       }
 
-      return (MonteCarloFootstepNode) node.getChild((int) (Math.random() * node.getChildren().size()));
+      return (MonteCarloFootstepNode) node.getMaxQueueNode();
    }
 
    public double simulate(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
