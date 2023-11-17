@@ -161,18 +161,18 @@ public class RDXBehaviorTree
    {
       ImGui.endMenuBar();
 
-      if (expandCollapseAllRenderer.render(false, true))
-         expandCollapseAll(true, rootNode);
-      if (expandCollapseAllRenderer.getIsHovered())
-         ImGui.setTooltip("Expand all nodes");
-      ImGui.sameLine();
-      if (expandCollapseAllRenderer.render(true, true))
-         expandCollapseAll(false, rootNode);
-      if (expandCollapseAllRenderer.getIsHovered())
-         ImGui.setTooltip("Collapse all nodes");
-
       if (rootNode != null)
       {
+         if (expandCollapseAllRenderer.render(false, true))
+            expandCollapseAll(true, rootNode);
+         if (expandCollapseAllRenderer.getIsHovered())
+            ImGui.setTooltip("Expand all nodes");
+         ImGui.sameLine();
+         if (expandCollapseAllRenderer.render(true, true))
+            expandCollapseAll(false, rootNode);
+         if (expandCollapseAllRenderer.getIsHovered())
+            ImGui.setTooltip("Collapse all nodes");
+
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
       }
       else
