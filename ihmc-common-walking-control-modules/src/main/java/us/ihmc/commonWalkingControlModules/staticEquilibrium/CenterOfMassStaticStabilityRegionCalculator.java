@@ -127,6 +127,11 @@ public class CenterOfMassStaticStabilityRegionCalculator
       return hasSolvedWholeRegion.getValue();
    }
 
+   public int getNumberOfVertices()
+   {
+      return directionsToOptimize;
+   }
+
    public boolean hasSolvedWholeRegion()
    {
       return hasSolvedWholeRegion.getValue();

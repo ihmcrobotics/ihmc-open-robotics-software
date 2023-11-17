@@ -280,12 +280,14 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    @Override
    public DMatrixRMaj getActuationConstraintMatrix()
    {
+//      return new DMatrixRMaj(0);
       return stackedConstraintMatrix;
    }
 
    @Override
    public DMatrixRMaj getActuationConstraintVector()
    {
+//      return new DMatrixRMaj(0);
       return stackedConstraintVector;
    }
 

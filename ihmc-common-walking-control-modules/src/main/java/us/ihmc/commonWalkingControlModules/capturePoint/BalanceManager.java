@@ -9,6 +9,7 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYo
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPointcloud2D;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPointcloud3D;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -42,12 +43,11 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajector
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -58,6 +58,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
@@ -67,6 +68,9 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -82,10 +86,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint2DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPointcloud3DDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -559,10 +560,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
    }
 
-   public void compute(RobotSide supportLeg,
-                       FeedbackControlCommand<?> heightControlCommand,
-                       boolean keepCoPInsideSupportPolygon,
-                       boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean isUpperBodyLoadBearing, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -649,7 +647,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
       perfectCoP2d.setIncludingFrame(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
-      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(!isUpperBodyLoadBearing);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
