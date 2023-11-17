@@ -132,4 +132,9 @@ public class RDXProjectionSphere
    {
       modelInstance.getRenderables(renderables, pool);
    }
+
+   public ModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
 }
