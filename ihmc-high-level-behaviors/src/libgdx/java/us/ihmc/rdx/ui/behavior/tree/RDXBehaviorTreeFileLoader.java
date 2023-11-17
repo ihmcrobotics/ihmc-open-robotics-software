@@ -6,6 +6,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
@@ -29,6 +30,7 @@ public class RDXBehaviorTreeFileLoader
       MutableObject<RDXBehaviorTreeNode<?, ?>> loadedNode = new MutableObject<>();
 
       LogTools.info("Loading {}", fileToLoad.getTreeFile().getFilesystemFile());
+      RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Loading %s".formatted(fileToLoad.getTreeFile().getFileName()));
       JSONFileTools.load(fileToLoad.getTreeFile(), jsonNode ->
       {
          loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue, fileToLoad.getTreeFile().getFileName()));
@@ -69,6 +71,7 @@ public class RDXBehaviorTreeFileLoader
          {
             WorkspaceResourceFile childFile = new WorkspaceResourceFile(behaviorTreeState.getSaveFileDirectory(), fileNode.asText());
             LogTools.info("Loading {}", childFile.getFilesystemFile());
+            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Loading %s".formatted(childFile.getFileName()));
             JSONFileTools.load(childFile, childJSONNode ->
             {
                loadFromFile(childJSONNode, node, topologyOperationQueue, childFile.getFileName());
