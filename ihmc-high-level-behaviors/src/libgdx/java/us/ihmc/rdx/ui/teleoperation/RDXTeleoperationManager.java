@@ -655,6 +655,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       desiredRobot.destroy();
       locomotionManager.destroy();
+      armManager.destroy();
    }
 
    public ImBoolean getInteractablesEnabled()
