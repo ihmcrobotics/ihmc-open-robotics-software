@@ -5,6 +5,9 @@ import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -22,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
@@ -32,6 +36,8 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
+
+import java.util.Set;
 
 /**
  * This class manages the UI for operating the arms of a humanoid robot.
@@ -66,6 +72,8 @@ public class RDXArmManager
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
    private final RDXHandConfigurationManager handManager;
+   private final RDXIKStreamer ikStreamer;
+   private final ImBoolean ikStreamerCollapsedHeader = new ImBoolean(true);
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -109,6 +117,7 @@ public class RDXArmManager
       }
 
       handManager = new RDXHandConfigurationManager();
+      ikStreamer = new RDXIKStreamer(robotModel, communicationHelper, interactableHands);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -121,11 +130,14 @@ public class RDXArmManager
       });
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
+      ikStreamer.create(baseUI.getVRManager().getContext());
+      baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables);
    }
 
    public void update()
    {
       handManager.update();
+      ikStreamer.update(armControlMode == RDXArmControlMode.IK_STREAMING);
 
       boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
@@ -221,6 +233,12 @@ public class RDXArmManager
          armControlMode = RDXArmControlMode.JOINTSPACE;
       }
       ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("IK Streaming"), armControlMode == RDXArmControlMode.IK_STREAMING))
+      {
+         armControlMode = RDXArmControlMode.IK_STREAMING;
+      }
+      ImGui.text("Hand pose only:");
+      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Taskspace"), armControlMode == RDXArmControlMode.TASKSPACE))
       {
          armControlMode = RDXArmControlMode.TASKSPACE;
@@ -244,6 +262,13 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+
+      if (ImGui.collapsingHeader(labels.get("IK Streaming Options"), ikStreamerCollapsedHeader))
+      {
+         ImGui.indent();
+         ikStreamer.renderImGuiWidgets();
+         ImGui.unindent();
+      }
 
       // Pop up warning if notification is set
       if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
@@ -376,6 +401,19 @@ public class RDXArmManager
             }
          }
       };
+   }
+
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      if (armControlMode == RDXArmControlMode.IK_STREAMING)
+      {
+         ikStreamer.getVirtualRenderables(renderables, pool, sceneLevels);
+      }
+   }
+
+   public void destroy()
+   {
+      ikStreamer.destroy();
    }
 
    public RDXHandConfigurationManager getHandManager()
