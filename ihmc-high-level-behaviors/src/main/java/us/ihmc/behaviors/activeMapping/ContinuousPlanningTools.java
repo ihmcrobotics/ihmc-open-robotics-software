@@ -1,4 +1,4 @@
-package us.ihmc.perception.tools;
+package us.ihmc.behaviors.activeMapping;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -152,15 +152,5 @@ public class ContinuousPlanningTools
          LogTools.info("Start Poses: {} {}", startPoseToPack.get(RobotSide.LEFT).getPosition(), startPoseToPack.get(RobotSide.RIGHT).getPosition());
          LogTools.info("Goal Poses: {} {}", goalPoseToPack.get(RobotSide.LEFT).getPosition(), goalPoseToPack.get(RobotSide.RIGHT).getPosition());
       }
-   }
-
-   public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)
-   {
-      return (int) (coordinate * resolution + offset);
-   }
-
-   public static double getCoordinateFromIndex(int index, double resolution, int offset)
-   {
-      return (index - offset) / resolution;
    }
 }

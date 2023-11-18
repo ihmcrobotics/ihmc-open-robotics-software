@@ -3,12 +3,15 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MonteCarloFootstepPlanningDebugger
 {
@@ -47,16 +50,36 @@ public class MonteCarloFootstepPlanningDebugger
                                    request.getContactMap().cols()));
 
       PerceptionDebugTools.convertDepthCopyToColor(request.getHeightMap(), heightMapColorImage);
-      heightMapColorImage.copyTo(left);
 
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
 
       //MonteCarloPlannerTools.plotFootstepNodeList(planner.getVisitedNodes(), contactHeatMapColorImage);
-      plotFootsteps(contactHeatMapColorImage, plan);
 
+      plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
+      plotFootPoses(heightMapColorImage, request.getStartFootPoses(), 2);
+
+      plotFootsteps(contactHeatMapColorImage, plan);
+      plotFootsteps(heightMapColorImage, plan);
+
+      plotFootPoses(contactHeatMapColorImage, request.getGoalFootPoses(), 3);
+      plotFootPoses(heightMapColorImage, request.getGoalFootPoses(), 3);
+
+      heightMapColorImage.copyTo(left);
       contactHeatMapColorImage.copyTo(right);
 
       PerceptionDebugTools.display("Display", stacked, delay, 1000);
+   }
+
+   private void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         Pose3D pose = new Pose3D(poses.get(side));
+         PerceptionDebugTools.plotTiltedRectangle(image,
+                                                  new Point2D(pose.getX(), pose.getY()),
+                                                  (float) pose.getYaw(),
+                                                  2, mode);
+      }
    }
 
    private void plotFootsteps(Mat image, FootstepPlan plan)
@@ -66,8 +89,12 @@ public class MonteCarloFootstepPlanningDebugger
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         Point3D position = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
-         PerceptionDebugTools.plotTiltedRectangle(image, position, 1, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+         Point3D pose = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
+         PerceptionDebugTools.plotTiltedRectangle(image,
+                                                  new Point2D(pose.getX(), pose.getY()),
+                                                  pose.getZ32(),
+                                                  2,
+                                                  plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
       }
    }
 

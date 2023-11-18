@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.continuousWalking;
+package us.ihmc.behaviors.activeMapping;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;

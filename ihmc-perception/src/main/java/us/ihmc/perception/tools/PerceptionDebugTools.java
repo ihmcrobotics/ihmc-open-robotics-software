@@ -258,7 +258,7 @@ public class PerceptionDebugTools
             if (image.type() == opencv_core.CV_8UC1)
                matString.append(image.ptr(i, j).get() & 0xFF).append(" ");
             if (image.type() == opencv_core.CV_16UC1)
-               matString.append(((int)image.ptr(i, j).getShort()) & 0xFFFF).append("\t");
+               matString.append(((int) image.ptr(i, j).getShort()) & 0xFFFF).append("\t");
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
             if (image.type() == opencv_core.CV_32FC1)
@@ -404,25 +404,44 @@ public class PerceptionDebugTools
       // just like plotFootsteps
       Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
-                                 new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
-                                 new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
                                color,
                                -1,
                                opencv_imgproc.LINE_4,
                                0);
    }
 
-   public static void plotTiltedRectangle(Mat displayImage, Point3D point, int size, int side)
+   public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
    {
-      LogTools.debug("Footstep: {} {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2), side);
+      LogTools.debug("Footstep Plotted: {} {} {}", (int) (origin.getY() * 50 + displayImage.rows() / 2), (int) (origin.getX() * 50 + displayImage.cols() / 2), side);
 
-      Scalar color = side == 1 ? new Scalar(0, 0, 255, 0) : new Scalar(255, 255, 0, 0);
+      Scalar color;
+
+      switch (side)
+      {
+         case 1: // right foot is red
+            color = new Scalar(0, 100, 255, 0);
+            break;
+         case -1: // left foot is blue
+            color = new Scalar(255, 100, 0, 0);
+            break;
+         case 2: // start poses are black
+            color = new Scalar(0, 0, 0, 0);
+            break;
+         case 3: // goal poses are white
+            color = new Scalar(255, 255, 255, 0);
+            break;
+         default:
+            color = new Scalar(255, 255, 255, 255);
+            break;
+      }
 
       // just like plotFootsteps
-      Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
-                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
-                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size * 2),
+                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size * 2),
                                color,
                                -1,
                                opencv_imgproc.LINE_4,

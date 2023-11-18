@@ -67,7 +67,7 @@ public class MonteCarloWaypointNode extends MonteCarloTreeNode
       return actionResult;
    }
 
-   public Point2D getPosition()
+   public Point2D getState()
    {
       return position;
    }

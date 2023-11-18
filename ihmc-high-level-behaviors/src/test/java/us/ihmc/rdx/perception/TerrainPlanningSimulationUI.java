@@ -36,7 +36,7 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.neural.FootstepPredictor;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.tools.ContinuousPlanningTools;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;

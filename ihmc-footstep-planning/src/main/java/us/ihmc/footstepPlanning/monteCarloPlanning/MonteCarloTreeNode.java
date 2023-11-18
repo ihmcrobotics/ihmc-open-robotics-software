@@ -6,7 +6,7 @@ import java.util.PriorityQueue;
 
 public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNode>
 {
-   private static final int MAX_NUMBER_OF_CHILDREN = 10;
+   private static final int MAX_NUMBER_OF_CHILDREN = 20;
 
    private final ArrayList<MonteCarloTreeNode> parents;
    //private final ArrayList<MonteCarloTreeNode> children;
@@ -110,7 +110,7 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       return level;
    }
 
-   public Object getPosition()
+   public Object getState()
    {
       return null;
    }

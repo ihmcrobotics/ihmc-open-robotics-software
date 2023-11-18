@@ -134,7 +134,7 @@ public class MonteCarloPathPlanner
       for (Object newStateObj : availableStates)
       {
          MonteCarloWaypointNode newState = (MonteCarloWaypointNode) newStateObj;
-         MonteCarloWaypointNode postNode = new MonteCarloWaypointNode(newState.getPosition(), node, uniqueNodeId++);
+         MonteCarloWaypointNode postNode = new MonteCarloWaypointNode(newState.getState(), node, uniqueNodeId++);
 
          node.addChild(postNode);
       }
@@ -146,7 +146,7 @@ public class MonteCarloPathPlanner
    {
       double score = 0;
 
-      MonteCarloWaypointNode randomState = new MonteCarloWaypointNode(node.getPosition(), null, 0);
+      MonteCarloWaypointNode randomState = new MonteCarloWaypointNode(node.getState(), null, 0);
 
       for (int i = 0; i < simulationIterations; i++)
       {
@@ -156,30 +156,30 @@ public class MonteCarloPathPlanner
          randomState = availableActions.get((int) (Math.random() * availableActions.size()));
          score -= 1;
 
-         if (!MonteCarloPlannerTools.isWithinGridBoundaries(randomState.getPosition(), world.getGridWidth()))
+         if (!MonteCarloPlannerTools.isWithinGridBoundaries(randomState.getState(), world.getGridWidth()))
          {
             score -= MonteCarloPlannerConstants.PENALTY_COLLISION_BOUNDARY;
          }
 
-         if (randomState.getPosition().distanceSquared(world.getGoal()) < world.getGoalMarginSquared())
+         if (randomState.getState().distanceSquared(world.getGoal()) < world.getGoalMarginSquared())
          {
             score += MonteCarloPlannerConstants.REWARD_GOAL;
          }
 
-         if (world.getGrid().ptr((int) randomState.getPosition().getX(), (int) randomState.getPosition().getY()).get() == MonteCarloPlannerConstants.OCCUPIED)
+         if (world.getGrid().ptr((int) randomState.getState().getX(), (int) randomState.getState().getY()).get() == MonteCarloPlannerConstants.OCCUPIED)
          {
             score -= MonteCarloPlannerConstants.PENALTY_COLLISION_OBSTACLE;
          }
 
-         ArrayList<Point2DReadOnly> scanPoints = agent.getRangeScanner().scan(randomState.getPosition(), world);
+         ArrayList<Point2DReadOnly> scanPoints = agent.getRangeScanner().scan(randomState.getState(), world);
 
-         score += agent.getAveragePosition().distanceSquared(randomState.getPosition()) * MonteCarloPlannerConstants.REWARD_DISTANCE_FROM_AVERAGE_POSITION;
+         score += agent.getAveragePosition().distanceSquared(randomState.getState()) * MonteCarloPlannerConstants.REWARD_DISTANCE_FROM_AVERAGE_POSITION;
 
          for (Point2DReadOnly point : scanPoints)
          {
             if (MonteCarloPlannerTools.isWithinGridBoundaries(point, world.getGridWidth()))
             {
-               if (point.distanceSquared(randomState.getPosition()) < agent.getRangeScanner().getMaxRangeSquared())
+               if (point.distanceSquared(randomState.getState()) < agent.getRangeScanner().getMaxRangeSquared())
                {
                   score -= MonteCarloPlannerConstants.PENALTY_PROXIMITY_OBSTACLE;
                }
@@ -238,12 +238,12 @@ public class MonteCarloPathPlanner
 
    public void updateWorld(MonteCarloTreeNode newState)
    {
-      MonteCarloPlannerTools.updateGrid(world, (Point2DReadOnly) newState.getPosition(), agent.getRangeScanner().getMaxRange());
+      MonteCarloPlannerTools.updateGrid(world, (Point2DReadOnly) newState.getState(), agent.getRangeScanner().getMaxRange());
    }
 
    public void updateAgent(MonteCarloTreeNode newState)
    {
-      agent.changeStateTo((Point2DReadOnly) newState.getPosition());
+      agent.changeStateTo((Point2DReadOnly) newState.getState());
    }
 
    public void setParameters(int simulationIterations, int searchIterations, int stepLength)

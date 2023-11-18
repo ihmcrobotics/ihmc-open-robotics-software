@@ -11,11 +11,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.*;
@@ -44,7 +44,7 @@ public class MonteCarloPlannerTools
       LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
                node.getId(),
                level,
-               node.getPosition().toString(),
+               node.getState().toString(),
                node.getChildren().size()));
 
       for (MonteCarloTreeNode child : node.getChildren())
@@ -237,7 +237,7 @@ public class MonteCarloPlannerTools
       for (MonteCarloTreeNode node : path)
       {
          MonteCarloWaypointNode waypointNode = (MonteCarloWaypointNode) node;
-         Point2DReadOnly position = waypointNode.getPosition();
+         Point2DReadOnly position = waypointNode.getState();
 
          // check bounds of the grid
          if (isWithinGridBoundaries(position, gridColor.cols()))
@@ -273,7 +273,7 @@ public class MonteCarloPlannerTools
       LogTools.info("Layer Counts: {}", output.toString());
    }
 
-   public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root)
+   public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, path);
@@ -282,20 +282,36 @@ public class MonteCarloPlannerTools
       for (MonteCarloTreeNode node : path)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
-         Point3D position = footstepNode.getPosition();
-         position.scale(1/50.0f);
-         FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(position), new Quaternion(position.getZ(), 0, 0));
+
+         int xIndex = (int) footstepNode.getState().getX();
+         int yIndex = (int) footstepNode.getState().getY();
+
+         int height = ((int) request.getHeightMap().ptr(xIndex, yIndex).getShort() & 0xFFFF);
+         FramePose3D footstepPose = getFramePose3D(height, xIndex, yIndex);
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
+
+         LogTools.info("Footstep Node: {}", footstepNode.getState());
       }
       return footstepPlan;
+   }
+
+   private static FramePose3D getFramePose3D(int height, int xIndex, int yIndex)
+   {
+      float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
+                         - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+
+      Point3D position = new Point3D(xIndex, yIndex, cellHeight);
+      Quaternion orientation = new Quaternion(position.getZ(), 0, 0);
+      position.scale(1/50.0f);
+      return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }
 
    public static void getFootstepActionGrid(ArrayList<Vector3D> actions, Point3D origin, int side)
    {
       actions.clear();
-      for (int i = 20; i <= 40; i+=2)
+      for (int i = 10; i <= 30; i+=2)
       {
-         for (int j = 20; j <= 40; j+=2)
+         for (int j = 10; j <= 30; j+=2)
          {
             actions.add(new Vector3D(i, j * side, 0));
          }
@@ -323,7 +339,7 @@ public class MonteCarloPlannerTools
    {
       for (MonteCarloFootstepNode node : nodes)
       {
-         Point3D position = node.getPosition();
+         Point3D position = node.getState();
          position.add((double) gridColor.cols() / 2, (double) gridColor.rows() / 2, 0);
 
          double score = node.getValue();
@@ -342,18 +358,23 @@ public class MonteCarloPlannerTools
    {
       //(randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
 
-      double edgeCost = Math.abs(0.5f - oldNode.getPosition().distance(newNode.getPosition())) * 0.01f;
+      double edgeCost = Math.abs(0.5f - oldNode.getState().distance(newNode.getState())) * 0.01f;
 
-      int rIndex = (int) (newNode.getPosition().getX() + request.getContactMap().rows() / 2);
-      int cIndex = (int) (newNode.getPosition().getY() + request.getContactMap().cols() / 2);
+      int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2);
+      int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2);
 
-      Point3D goalPosition = request.getGoalFootPoses().get(RobotSide.LEFT).getPosition();
+      Point3D goalPosition = new Point3D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       goalPosition.scale(50.0f);
       goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2, 0);
 
-      double score = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0;
-      score += 1.0f / newNode.getPosition().distance(goalPosition);
+      double score = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 * 1000.0;
+
+      double distanceFromGoal = newNode.getState().distance(goalPosition);
+      if (distanceFromGoal < 5.0)
+         score += 1000;
+
       //score -= edgeCost;
+
       return score;
    }
 }

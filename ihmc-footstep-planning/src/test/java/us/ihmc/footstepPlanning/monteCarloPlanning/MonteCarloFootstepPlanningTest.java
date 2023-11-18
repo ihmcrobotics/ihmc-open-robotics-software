@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -14,6 +15,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MonteCarloFootstepPlanningTest
@@ -38,14 +40,9 @@ public class MonteCarloFootstepPlanningTest
       // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
-      // set a rectangle of size 50x50 to 1 in the center
-      for (int i = 75; i < 125; i++)
-      {
-         for (int j = 75; j < 125; j++)
-         {
-            heightMap.ptr(i, j).putShort((short) (32768 + 0.35 * 32768));
-         }
-      }
+      PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.35f, false);
+      PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.7f, false);
+      PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 1.5f, false);
 
       heightMapExtractor.getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
       heightMapExtractor.populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(), cameraIntrinsics, new Point3D());
@@ -55,10 +52,10 @@ public class MonteCarloFootstepPlanningTest
       Mat contactMap = heightMapExtractor.getGlobalContactImage();
 
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-      request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-0.5, -0.3, 0.0), new Quaternion()));
-      request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-0.5, -0.1, 0.0), new Quaternion()));
-      request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(2.5, -0.3, 0.0), new Quaternion()));
-      request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(2.5, -0.1, 0.0), new Quaternion()));
+      request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.3, 0.0), new Quaternion()));
+      request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.1, 0.0), new Quaternion()));
+      request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(1.5, -0.3, 0.0), new Quaternion()));
+      request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(1.5, -0.1, 0.0), new Quaternion()));
       request.setContactMap(contactMap);
       request.setHeightMap(heightMap);
 

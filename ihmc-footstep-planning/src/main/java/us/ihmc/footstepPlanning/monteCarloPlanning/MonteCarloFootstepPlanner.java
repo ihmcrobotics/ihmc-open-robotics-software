@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
@@ -35,11 +36,19 @@ public class MonteCarloFootstepPlanner
       this.debugger = new MonteCarloFootstepPlanningDebugger(this);
       this.plannerParameters = plannerParameters;
       this.world = new MonteCarloPlanningWorld(goalMargin, worldHeight, worldWidth);
-      root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
    }
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
    {
+      if (root == null)
+      {
+         Point2D position = new Point2D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * 50,
+                                        request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * 50);
+         float yaw = (float) request.getStartFootPoses().get(RobotSide.LEFT).getYaw();
+         Point3D state = new Point3D(position.getX(), position.getY(), yaw);
+         root = new MonteCarloFootstepNode(state, null, RobotSide.LEFT, uniqueNodeId++);
+      }
+
       planning = true;
       debugger.setRequest(request);
 
@@ -49,7 +58,7 @@ public class MonteCarloFootstepPlanner
       }
 
       MonteCarloPlannerTools.printLayerCounts(root);
-      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root);
+      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request);
 
       planning = false;
       return plan;
@@ -108,7 +117,7 @@ public class MonteCarloFootstepPlanner
             }
             else
             {
-               MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getPosition(), node, newState.getRobotSide(), uniqueNodeId++);
+               MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getState(), node, newState.getRobotSide(), uniqueNodeId++);
                visitedNodes.put(newState, postNode);
                node.addChild(postNode);
             }
@@ -122,7 +131,7 @@ public class MonteCarloFootstepPlanner
    {
       double score = 0;
 
-      MonteCarloFootstepNode simulationState = new MonteCarloFootstepNode(node.getPosition(), null, node.getRobotSide().getOppositeSide(), 0);
+      MonteCarloFootstepNode simulationState = new MonteCarloFootstepNode(node.getState(), null, node.getRobotSide().getOppositeSide(), 0);
 
       for (int i = 0; i < simulationIterations; i++)
       {
