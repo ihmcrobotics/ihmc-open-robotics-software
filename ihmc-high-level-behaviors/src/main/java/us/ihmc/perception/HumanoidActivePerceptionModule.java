@@ -17,6 +17,7 @@ import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class HumanoidActivePerceptionModule
 {
@@ -59,10 +60,10 @@ public class HumanoidActivePerceptionModule
    {
       if (activePlaneMappingRemoteThread == null)
       {
-         int gridX = ContinuousPlanningTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
-                                                                     perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                                     70);
-         int gridY = ContinuousPlanningTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
+         int gridX = HeightMapTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
+                                                            perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                            70);
+         int gridY = HeightMapTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
                                                                      perceptionConfigurationParameters.getOccupancyGridResolution(),
                                                                      70);
 
