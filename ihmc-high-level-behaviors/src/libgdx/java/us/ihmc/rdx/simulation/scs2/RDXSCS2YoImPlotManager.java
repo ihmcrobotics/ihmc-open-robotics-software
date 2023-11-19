@@ -22,6 +22,7 @@ public class RDXSCS2YoImPlotManager
 {
    private RDXImGuiLayoutManager layoutManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
+   private final ArrayList<RDXLinkedYoBooleanWidget> variableWidgets = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private RDXPanel parentPanel;
@@ -159,6 +160,11 @@ public class RDXSCS2YoImPlotManager
 
    public void renderImGuiWidgets()
    {
+      for (RDXLinkedYoBooleanWidget variableWidget : variableWidgets)
+      {
+         variableWidget.renderImGuiWidgets();
+      }
+
       ImGui.pushItemWidth(150);
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
@@ -199,5 +205,10 @@ public class RDXSCS2YoImPlotManager
       {
          removePlotPanel(plotPanel);
       }
+   }
+
+   public void addVariableWidget(String variableName)
+   {
+      variableWidgets.add(new RDXLinkedYoBooleanWidget(yoManager, variableName));
    }
 }

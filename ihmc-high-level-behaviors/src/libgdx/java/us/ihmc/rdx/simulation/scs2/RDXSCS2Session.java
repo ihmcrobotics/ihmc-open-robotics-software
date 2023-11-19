@@ -409,6 +409,11 @@ public class RDXSCS2Session
       return yoManager;
    }
 
+   public RDXSCS2YoImPlotManager getPlotManager()
+   {
+      return plotManager;
+   }
+
    public HashMap<String, ImBoolean> getShowRobotMap()
    {
       return showRobotMap;
