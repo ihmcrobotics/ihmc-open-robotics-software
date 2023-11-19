@@ -24,4 +24,59 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(timeoutDuration);
    }
+
+   default double getFeasibleContactReward()
+   {
+      return get(feasibleContactReward);
+   }
+
+   default double getGoalReward()
+   {
+      return get(goalReward);
+   }
+
+   default int getMaxNumberOfVisitedNodes()
+   {
+      return get(maxNumberOfVisitedNodes);
+   }
+
+   default int getMaxNumberOfChildNodes()
+   {
+      return get(maxNumberOfChildNodes);
+   }
+
+   default double getMaxTransferHeight()
+   {
+      return get(maxTransferHeight);
+   }
+
+   default double getMaxTransferDepth()
+   {
+      return get(maxTransferDepth);
+   }
+
+   default double getMaxTransferDistance()
+   {
+      return get(maxTransferDistance);
+   }
+
+   default double getMinTransferDistance()
+   {
+      return get(minTransferDistance);
+   }
+
+   default double getMaxTransferYaw()
+   {
+      return get(maxTransferYaw);
+   }
+
+   default int getGoalMargin()
+   {
+      return get(goalMargin);
+   }
+
+   default double getFeasibleContactCutoff()
+   {
+      return get(feasibleContactCutoff);
+   }
 }

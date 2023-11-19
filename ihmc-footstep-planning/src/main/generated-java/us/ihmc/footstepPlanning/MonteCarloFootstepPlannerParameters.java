@@ -21,6 +21,17 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final IntegerStoredPropertyKey numberOfIterations = keys.addIntegerKey("Number of iterations");
    public static final IntegerStoredPropertyKey numberOfSimulations = keys.addIntegerKey("Number of simulations");
    public static final DoubleStoredPropertyKey timeoutDuration = keys.addDoubleKey("Timeout duration");
+   public static final DoubleStoredPropertyKey feasibleContactReward = keys.addDoubleKey("Feasible Contact Reward");
+   public static final DoubleStoredPropertyKey goalReward = keys.addDoubleKey("Goal Reward");
+   public static final IntegerStoredPropertyKey maxNumberOfVisitedNodes = keys.addIntegerKey("Max number of visited nodes");
+   public static final IntegerStoredPropertyKey maxNumberOfChildNodes = keys.addIntegerKey("Max number of child nodes");
+   public static final DoubleStoredPropertyKey maxTransferHeight = keys.addDoubleKey("Max transfer height");
+   public static final DoubleStoredPropertyKey maxTransferDepth = keys.addDoubleKey("Max transfer depth");
+   public static final DoubleStoredPropertyKey maxTransferDistance = keys.addDoubleKey("Max transfer distance");
+   public static final DoubleStoredPropertyKey minTransferDistance = keys.addDoubleKey("Min transfer distance");
+   public static final DoubleStoredPropertyKey maxTransferYaw = keys.addDoubleKey("Max transfer yaw");
+   public static final IntegerStoredPropertyKey goalMargin = keys.addIntegerKey("Goal margin");
+   public static final DoubleStoredPropertyKey feasibleContactCutoff = keys.addDoubleKey("Feasible contact cutoff");
 
    /**
     * Loads this property set.

@@ -10,6 +10,7 @@
     "Depth Image" : false,
     "Internal Height Map" : false,
     "Local Height Map" : false,
+    "Planner Parameters (Monte-Carlo)" : true,
     "Terrain Cost Image" : false,
     "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : false,
     "Stepping L515 Color###GlobalWidgetIndex:1:Stepping L515 Color" : false,

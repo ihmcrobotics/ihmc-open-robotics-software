@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerLoggingTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -46,6 +47,7 @@ import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -73,9 +75,6 @@ public class TerrainPlanningSimulationUI
    private HumanoidActivePerceptionModule activePerceptionModule;
 
    private ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-
-   private final TypedNotification<FootstepPlan> footstepPlanToRenderNotificaiton = new TypedNotification<>();
-   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private PerceptionDataLogger perceptionDataLogger;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
@@ -90,10 +89,13 @@ public class TerrainPlanningSimulationUI
    private FootstepPredictor footstepPredictor;
    private FootstepPlanningModule footstepPlanningModule;
    private HeightMapData latestHeightMapData;
-
    private final FootstepPlannerLogger footstepPlannerLogger;
-   private final MonteCarloFootstepPlannerParameters plannerParameters = new MonteCarloFootstepPlannerParameters();
-   private final MonteCarloFootstepPlanner monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(plannerParameters);
+   private final MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
+   private final MonteCarloFootstepPlanner monteCarloFootstepPlanner;
+
+   private final RDXStoredPropertySetTuner monteCarloPlannerParametersTuner = new RDXStoredPropertySetTuner("Planner Parameters (Monte-Carlo)");
+   private final TypedNotification<FootstepPlan> footstepPlanToRenderNotificaiton = new TypedNotification<>();
+   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic(PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
@@ -120,9 +122,10 @@ public class TerrainPlanningSimulationUI
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "height_map_simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
 
+      monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloPlannerParameters);
       footstepPlanningModule = new FootstepPlanningModule("HeightMapFootstepPlanner");
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
-
       footstepPredictor = new FootstepPredictor();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -132,6 +135,7 @@ public class TerrainPlanningSimulationUI
          {
             baseUI.create();
 
+            openCLManager = new OpenCLManager();
             navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
@@ -163,37 +167,10 @@ public class TerrainPlanningSimulationUI
          {
             if (!initialized)
             {
-               openCLManager = new OpenCLManager();
-
-               steppingL515Simulator = RDXSimulatedSensorFactory.createRealsenseL515(l515PoseGizmo.getGizmoFrame(), () -> 0L);
-               baseUI.getImGuiPanelManager().addPanel(steppingL515Simulator);
-               steppingL515Simulator.setSensorEnabled(true);
-               steppingL515Simulator.setPublishPointCloudROS2(false);
-               steppingL515Simulator.setRenderPointCloudDirectly(false);
-               steppingL515Simulator.setPublishDepthImageROS1(false);
-               steppingL515Simulator.setDebugCoordinateFrame(false);
-               steppingL515Simulator.setRenderColorVideoDirectly(false);
-               steppingL515Simulator.setRenderDepthVideoDirectly(false);
-               steppingL515Simulator.setPublishColorImageROS1(false);
-               steppingL515Simulator.setPublishColorImageROS2(false);
-               baseUI.getPrimaryScene().addRenderableProvider(steppingL515Simulator::getRenderables);
-
-               bytedecoDepthImage = new BytedecoImage(steppingL515Simulator.getLowLevelSimulator().getImageWidth(),
-                                                      steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
-                                                      opencv_core.CV_16UC1);
-               bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-
-               humanoidPerception = new HumanoidPerceptionModule(openCLManager);
-               humanoidPerception.initializeRealsenseDepthImage(steppingL515Simulator.getCopyOfCameraParameters().getHeight(),
-                                                                steppingL515Simulator.getCopyOfCameraParameters().getWidth());
-               humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
-
-               humanoidPerceptionUI = new RDXHumanoidPerceptionUI(humanoidPerception, ros2Helper);
-               humanoidPerceptionUI.initializeHeightMapVisualizer(ros2Helper);
-               humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
-
-               baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI);
-               baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
+               initializeDepthSimulator();
+               initializeDepthImage();
+               initializePerceptionModule();
+               initializePerceptionUI();
 
                baseUI.getLayoutManager().reloadLayout();
 
@@ -420,7 +397,7 @@ public class TerrainPlanningSimulationUI
 
          public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform)
          {
-            //monteCarloFootstepPlanner.reset();
+            monteCarloFootstepPlanner.reset();
 
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
             request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-0.5, -0.3, 0.0), new Quaternion()));
@@ -434,9 +411,13 @@ public class TerrainPlanningSimulationUI
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();
 
-            LogTools.info("Total Time: {} ms, Plan Size: {}, Visited: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps(), monteCarloFootstepPlanner.getVisitedNodes().size());
+            LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
+                                        (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps(), monteCarloFootstepPlanner.getVisitedNodes().size(),
+                                        MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
 
-            monteCarloFootstepPlanner.getDebugger().display(plan, 1);
+            monteCarloFootstepPlanner.getDebugger().refresh();
+            monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(plan);
+            monteCarloFootstepPlanner.getDebugger().display(1);
 
             return plan;
          }
@@ -540,6 +521,51 @@ public class TerrainPlanningSimulationUI
                footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
                footstepPlanGraphic.update();
             }
+         }
+
+         private void initializeDepthSimulator()
+         {
+            steppingL515Simulator = RDXSimulatedSensorFactory.createRealsenseL515(l515PoseGizmo.getGizmoFrame(), () -> 0L);
+            baseUI.getImGuiPanelManager().addPanel(steppingL515Simulator);
+            steppingL515Simulator.setSensorEnabled(true);
+            steppingL515Simulator.setPublishPointCloudROS2(false);
+            steppingL515Simulator.setRenderPointCloudDirectly(false);
+            steppingL515Simulator.setPublishDepthImageROS1(false);
+            steppingL515Simulator.setDebugCoordinateFrame(false);
+            steppingL515Simulator.setRenderColorVideoDirectly(false);
+            steppingL515Simulator.setRenderDepthVideoDirectly(false);
+            steppingL515Simulator.setPublishColorImageROS1(false);
+            steppingL515Simulator.setPublishColorImageROS2(false);
+            baseUI.getPrimaryScene().addRenderableProvider(steppingL515Simulator::getRenderables);
+         }
+
+         private void initializeDepthImage()
+         {
+            bytedecoDepthImage = new BytedecoImage(steppingL515Simulator.getLowLevelSimulator().getImageWidth(),
+                                                   steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
+                                                   opencv_core.CV_16UC1);
+            bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         }
+
+         private void initializePerceptionModule()
+         {
+            humanoidPerception = new HumanoidPerceptionModule(openCLManager);
+            humanoidPerception.initializeRealsenseDepthImage(steppingL515Simulator.getCopyOfCameraParameters().getHeight(),
+                                                             steppingL515Simulator.getCopyOfCameraParameters().getWidth());
+            humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
+         }
+
+         private void initializePerceptionUI()
+         {
+            humanoidPerceptionUI = new RDXHumanoidPerceptionUI(humanoidPerception, ros2Helper);
+            humanoidPerceptionUI.initializeHeightMapVisualizer(ros2Helper);
+            humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
+            baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI);
+            baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
+
+            LogTools.info("Planner Parameters Save File " + monteCarloPlannerParameters.findSaveFileDirectory().getFileName().toString());
+            monteCarloPlannerParametersTuner.create(monteCarloPlannerParameters, false);
+            humanoidPerceptionUI.addChild(monteCarloPlannerParametersTuner);
          }
 
          public void logInternalHeightMap()

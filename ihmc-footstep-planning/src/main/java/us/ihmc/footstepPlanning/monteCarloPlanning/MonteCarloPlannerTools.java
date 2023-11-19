@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -273,6 +274,21 @@ public class MonteCarloPlannerTools
       LogTools.info("Layer Counts: {}", output.toString());
    }
 
+   public static String getLayerCountsString(MonteCarloTreeNode root)
+   {
+      HashMap<Integer, Integer> layerCounts = new HashMap<>();
+      MonteCarloPlannerTools.getLayerCounts(root, layerCounts);
+
+      StringBuilder output = new StringBuilder("{");
+      for (Integer key : layerCounts.keySet())
+      {
+         output.append("(").append(key - root.getLevel()).append(":").append(layerCounts.get(key)).append(")");
+         output.append(", ");
+      }
+
+      return output.toString();
+   }
+
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
@@ -290,7 +306,7 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(height, xIndex, yIndex);
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
-         LogTools.info("Footstep Node: {}", footstepNode.getState());
+         LogTools.debug("Footstep Node: {}", footstepNode.getState());
       }
       return footstepPlan;
    }
@@ -354,7 +370,8 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static double scoreFootstepNode(MonteCarloFootstepNode oldNode, MonteCarloFootstepNode newNode, MonteCarloFootstepPlannerRequest request)
+   public static double scoreFootstepNode(MonteCarloFootstepNode oldNode, MonteCarloFootstepNode newNode, MonteCarloFootstepPlannerRequest request,
+                                          MonteCarloFootstepPlannerParameters plannerParameters)
    {
       //(randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
 
@@ -367,11 +384,15 @@ public class MonteCarloPlannerTools
       goalPosition.scale(50.0f);
       goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2, 0);
 
-      double score = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 * 10000.0;
+      double score = 0.0;
+
+      double contactScore = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0;
+      if (contactScore > plannerParameters.getFeasibleContactCutoff())
+         score += plannerParameters.getFeasibleContactReward();
 
       double distanceFromGoal = newNode.getState().distance(goalPosition);
-      if (distanceFromGoal < 5.0)
-         score += 100000;
+      if (distanceFromGoal < plannerParameters.getGoalMargin())
+         score += plannerParameters.getGoalReward();
 
       //score -= edgeCost;
 

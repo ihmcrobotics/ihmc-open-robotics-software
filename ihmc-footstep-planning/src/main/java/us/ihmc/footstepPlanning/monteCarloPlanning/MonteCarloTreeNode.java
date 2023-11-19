@@ -6,8 +6,6 @@ import java.util.PriorityQueue;
 
 public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNode>
 {
-   private static final int MAX_NUMBER_OF_CHILDREN = 20;
-
    private final ArrayList<MonteCarloTreeNode> parents;
    //private final ArrayList<MonteCarloTreeNode> children;
    private final PriorityQueue<MonteCarloTreeNode> maxQueue = new PriorityQueue<>();
@@ -163,12 +161,12 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       }
    }
 
-   public void prune()
+   public void prune(int maxNumberOfChildren)
    {
-      if (maxQueue.size() >= MAX_NUMBER_OF_CHILDREN)
+      if (maxQueue.size() >= maxNumberOfChildren)
       {
          PriorityQueue<MonteCarloTreeNode> prunedQueue = new PriorityQueue<>();
-         for (int i = 0; i < MAX_NUMBER_OF_CHILDREN; i++)
+         for (int i = 0; i < maxNumberOfChildren; i++)
          {
             prunedQueue.add(maxQueue.poll());
          }

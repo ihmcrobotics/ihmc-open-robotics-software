@@ -10,6 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class MonteCarloFootstepPlanner
 {
@@ -22,12 +23,15 @@ public class MonteCarloFootstepPlanner
 
    private HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
 
-   private int searchIterations = 100;
-   private int simulationIterations = 8;
+   Random random = new Random();
+
+   //private int searchIterations = 100;
+   //private int simulationIterations = 8;
+   //private int goalMargin = 5;
+
    private int uniqueNodeId = 0;
    private int worldHeight = 200;
    private int worldWidth = 200;
-   private int goalMargin = 5;
 
    private boolean planning = false;
 
@@ -35,7 +39,7 @@ public class MonteCarloFootstepPlanner
    {
       this.debugger = new MonteCarloFootstepPlanningDebugger(this);
       this.plannerParameters = plannerParameters;
-      this.world = new MonteCarloPlanningWorld(goalMargin, worldHeight, worldWidth);
+      this.world = new MonteCarloPlanningWorld(plannerParameters.getGoalMargin(), worldHeight, worldWidth);
    }
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
@@ -52,12 +56,11 @@ public class MonteCarloFootstepPlanner
       planning = true;
       debugger.setRequest(request);
 
-      for (int i = 0; i < searchIterations; i++)
+      for (int i = 0; i < plannerParameters.getNumberOfIterations(); i++)
       {
          updateTree(root, request);
       }
 
-      MonteCarloPlannerTools.printLayerCounts(root);
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request);
 
       planning = false;
@@ -72,7 +75,7 @@ public class MonteCarloFootstepPlanner
          return;
       }
 
-      node.prune();
+      node.prune(plannerParameters.getMaxNumberOfChildNodes());
 
       if (node.getVisits() <= 1 || node.getChildren().isEmpty())
       {
@@ -105,7 +108,7 @@ public class MonteCarloFootstepPlanner
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
-         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request);
+         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, plannerParameters);
 
          if (node.getLevel() < 8)
          {
@@ -137,14 +140,14 @@ public class MonteCarloFootstepPlanner
 
       MonteCarloFootstepNode simulationState = new MonteCarloFootstepNode(node.getState(), null, node.getRobotSide().getOppositeSide(), 0);
 
-      for (int i = 0; i < simulationIterations; i++)
+      for (int i = 0; i < plannerParameters.getNumberOfSimulations(); i++)
       {
          ArrayList<MonteCarloFootstepNode> nextStates = simulationState.getAvailableStates(world, request);
-         int actionIndex = (int) (Math.random() * nextStates.size());
+         int actionIndex = random.nextInt(0, nextStates.size() - 1);
          simulationState = nextStates.get(actionIndex);
 
          //LogTools.info(String.format("Simulation %d, Random State: %s, Actions: %d, Side:%s", i, randomState.getPosition(), nextStates.size(), randomState.getRobotSide()));
-         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request);
+         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, plannerParameters);
          //LogTools.info("Action Taken: {}, Score: {}", actionIndex, score);
       }
 
@@ -167,6 +170,7 @@ public class MonteCarloFootstepPlanner
 
    public void reset()
    {
+      random.setSeed(100);
       uniqueNodeId = 0;
       visitedNodes.clear();
       root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
