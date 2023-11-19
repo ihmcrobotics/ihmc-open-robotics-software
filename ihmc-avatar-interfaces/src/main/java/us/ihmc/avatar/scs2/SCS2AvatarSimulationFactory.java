@@ -223,11 +223,6 @@ public class SCS2AvatarSimulationFactory
 
       robotDefinition = robotModel.getRobotDefinition();
 
-      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
-      {
-         bulletCollisionMutator.get().accept(robotDefinition);
-      }
-
       if (!enableSimulatedRobotDamping.get())
       {
          for (JointDefinition joint : robotDefinition.getAllJoints())
@@ -245,6 +240,11 @@ public class SCS2AvatarSimulationFactory
          if (collisionModel != null)
             RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                                 robotDefinition);
+      }
+
+      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
+      {
+         bulletCollisionMutator.get().accept(robotDefinition);
       }
 
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
