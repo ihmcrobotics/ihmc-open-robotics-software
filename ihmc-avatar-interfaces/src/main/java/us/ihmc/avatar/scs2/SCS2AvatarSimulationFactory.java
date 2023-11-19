@@ -77,6 +77,7 @@ import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
@@ -238,8 +239,14 @@ public class SCS2AvatarSimulationFactory
       {
          RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
          if (collisionModel != null)
+         {
+            // Clear all existing collidables that may be present
+            for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
+               rigidBody.getCollisionShapeDefinitions().clear();
+
             RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                                 robotDefinition);
+         }
       }
 
       if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
