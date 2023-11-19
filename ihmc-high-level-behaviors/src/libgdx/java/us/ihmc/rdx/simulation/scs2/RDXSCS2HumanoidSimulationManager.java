@@ -15,6 +15,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.StatelessNotification;
@@ -109,57 +110,55 @@ public class RDXSCS2HumanoidSimulationManager
    public void buildSimulation(boolean waitForDestroy)
    {
       starting = true;
-      ThreadTools.startAsDaemon(() ->
+      if (waitForDestroy)
+         destroyedNotification.blockingWait();
+
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
+                                                          "flat_ground_walking_track_simulation");
+
+      SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
+      avatarSimulationFactory.setRobotModel(robotModel);
+      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
+      avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
+      for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
       {
-         if (waitForDestroy)
-            destroyedNotification.blockingWait();
+         avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
+      }
+      for (Function<ReferenceFrame, Robot> secondaryRobot : secondaryRobots)
+      {
+         // FIXME Technically the inertial frame could be different here
+         avatarSimulationFactory.addSecondaryRobot(secondaryRobot.apply(SimulationSession.DEFAULT_INERTIAL_FRAME));
+      }
+      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+      avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
+      avatarSimulationFactory.setCreateYoVariableServer(true);
+      avatarSimulationFactory.setUseBulletPhysicsEngine(true);
+      avatarSimulationFactory.setUseRobotDefinitionCollisions(false);
+      avatarSimulationFactory.setShowGUI(false);
+      if (externalFactorySetup != null)
+         externalFactorySetup.accept(avatarSimulationFactory);
 
-         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(),
-                                                             "flat_ground_walking_track_simulation");
+      avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+      avatarSimulation.setSystemExitOnDestroy(false);
 
-         SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
-         avatarSimulationFactory.setRobotModel(robotModel);
-         avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
-         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
-         for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
-         {
-            avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
-         }
-         for (Function<ReferenceFrame, Robot> secondaryRobot : secondaryRobots)
-         {
-            avatarSimulationFactory.addSecondaryRobot(secondaryRobot.apply(scs2SimulationSession.getSession().getInertialFrame()));
-         }
-         avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
-         avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
-         avatarSimulationFactory.setCreateYoVariableServer(true);
-         avatarSimulationFactory.setUseBulletPhysicsEngine(true);
-         avatarSimulationFactory.setUseRobotDefinitionCollisions(true);
-         avatarSimulationFactory.setShowGUI(false);
-         if (externalFactorySetup != null)
-            externalFactorySetup.accept(avatarSimulationFactory);
+      scs2SimulationSession = new RDXSCS2SimulationSession();
+      scs2SimulationSession.create(baseUI, managerPanel);
+      scs2SimulationSession.startSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
+      scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
-         avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-         avatarSimulation.setSystemExitOnDestroy(false);
-
-         scs2SimulationSession = new RDXSCS2SimulationSession();
-         scs2SimulationSession.create(baseUI, managerPanel);
-         scs2SimulationSession.startSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
-         scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
-
-         avatarSimulation.beforeSessionThreadStart();
+      avatarSimulation.beforeSessionThreadStart();
 
 
-         for (String robotToHide : robotsToHide)
-         {
-            scs2SimulationSession.getShowRobotMap().get(robotToHide).set(false);
-         }
+      for (String robotToHide : robotsToHide)
+      {
+         scs2SimulationSession.getShowRobotMap().get(robotToHide).set(false);
+      }
 
-         avatarSimulation.afterSessionThreadStart();
+      avatarSimulation.afterSessionThreadStart();
 
-         scs2SimulationSession.getControlPanel().getIsShowing().set(true);
-         starting = false;
-         started = true;
-      }, getClass().getSimpleName() + "Build");
+      scs2SimulationSession.getControlPanel().getIsShowing().set(true);
+      starting = false;
+      started = true;
    }
 
    public void update()
