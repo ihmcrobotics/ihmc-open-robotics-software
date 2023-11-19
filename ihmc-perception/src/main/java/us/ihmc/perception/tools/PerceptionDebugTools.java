@@ -21,6 +21,15 @@ import java.util.HashMap;
 
 public class PerceptionDebugTools
 {
+   public static final Scalar COLOR_RED = new Scalar(0, 0, 255, 255);
+   public static final Scalar COLOR_GREEN = new Scalar(0, 255, 0, 255);
+   public static final Scalar COLOR_BLUE = new Scalar(255, 0, 0, 255);
+   public static final Scalar COLOR_YELLOW = new Scalar(0, 255, 255, 255);
+   public static final Scalar COLOR_BLACK = new Scalar(0, 0, 0, 255);
+   public static final Scalar COLOR_WHITE = new Scalar(255, 255, 255, 255);
+   public static final Scalar COLOR_GRAY = new Scalar(128, 128, 128, 255);
+   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 255, 255);
+
    public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, boolean debug)
    {
       if (!debug)
@@ -399,10 +408,25 @@ public class PerceptionDebugTools
 
    public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
    {
-      LogTools.debug("Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
+      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
 
       // just like plotFootsteps
       Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      opencv_imgproc.rectangle(displayImage,
+                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
+                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
+                               color,
+                               -1,
+                               opencv_imgproc.LINE_4,
+                               0);
+   }
+
+   public static void plotRectangleNoScale(Mat displayImage, Point2D point, int size, Scalar color)
+   {
+      LogTools.debug("Plotting Node: Footstep: {} {}", (int) (point.getY() + displayImage.rows() / 2), (int) (point.getX() + displayImage.cols() / 2));
+
+      // just like plotFootsteps
+      Point2D positionOnMap = new Point2D(point.getY() + displayImage.rows() / 2, point.getX() + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
                                new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
                                new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
@@ -446,6 +470,14 @@ public class PerceptionDebugTools
                                -1,
                                opencv_imgproc.LINE_4,
                                0);
+   }
+
+   public static void plotCircle(Mat displayImage, Point2D origin, int radius)
+   {
+      Scalar color = new Scalar(0, 255, 255, 255);
+
+      Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
+      opencv_imgproc.circle(displayImage, new Point((int) positionOnMap.getX(), (int) positionOnMap.getY()), radius, color, -1, opencv_imgproc.LINE_4, 0);
    }
 
    public static void convertDepthCopyToColor(Mat depthImage16UC1Copy, Mat colorImage8UC3)

@@ -66,7 +66,11 @@ public class MonteCarloFootstepPlanningTest
       LogTools.info("Total Time: {} ms, Plan Size: {}", (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps());
 
       if (displayPlots)
-         planner.getDebugger().display(plan, 0);
+      {
+         planner.getDebugger().refresh();
+         planner.getDebugger().plotFootstepPlan(plan);
+         planner.getDebugger().display( 0);
+      }
 
       Assertions.assertEquals(0.0, 0.0 - 0.0001, 1e-3);
    }

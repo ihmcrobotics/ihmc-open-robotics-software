@@ -309,9 +309,9 @@ public class MonteCarloPlannerTools
    public static void getFootstepActionGrid(ArrayList<Vector3D> actions, Point3D origin, int side)
    {
       actions.clear();
-      for (int i = 10; i <= 30; i+=2)
+      for (int i = 10; i <= 30; i+=4)
       {
-         for (int j = 10; j <= 30; j+=2)
+         for (int j = 10; j <= 30; j+=4)
          {
             actions.add(new Vector3D(i, j * side, 0));
          }
@@ -360,18 +360,18 @@ public class MonteCarloPlannerTools
 
       double edgeCost = Math.abs(0.5f - oldNode.getState().distance(newNode.getState())) * 0.01f;
 
-      int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2);
+      int rIndex = (int) (-newNode.getState().getX() + request.getContactMap().rows() / 2);
       int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2);
 
       Point3D goalPosition = new Point3D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       goalPosition.scale(50.0f);
       goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2, 0);
 
-      double score = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 * 1000.0;
+      double score = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 * 10000.0;
 
       double distanceFromGoal = newNode.getState().distance(goalPosition);
       if (distanceFromGoal < 5.0)
-         score += 1000;
+         score += 100000;
 
       //score -= edgeCost;
 

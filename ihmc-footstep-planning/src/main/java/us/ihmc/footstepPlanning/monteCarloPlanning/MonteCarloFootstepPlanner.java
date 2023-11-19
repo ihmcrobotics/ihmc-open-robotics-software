@@ -120,6 +120,10 @@ public class MonteCarloFootstepPlanner
                MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getState(), node, newState.getRobotSide(), uniqueNodeId++);
                visitedNodes.put(newState, postNode);
                node.addChild(postNode);
+
+               // plot the newest node on debugger
+               //debugger.plotNode(postNode);
+               //debugger.display(30);
             }
          }
       }
