@@ -145,7 +145,6 @@ public class TerrainPlanningSimulationUI
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated_1.json");
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
@@ -567,6 +566,7 @@ public class TerrainPlanningSimulationUI
             humanoidPerception = new HumanoidPerceptionModule(openCLManager);
             humanoidPerception.initializeRealsenseDepthImage(steppingL515Simulator.getCopyOfCameraParameters().getHeight(),
                                                              steppingL515Simulator.getCopyOfCameraParameters().getWidth());
+            humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
 
             if (external)
             {
@@ -578,9 +578,9 @@ public class TerrainPlanningSimulationUI
                // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
                Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
-               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.35f, false);
-               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.7f, false);
-               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 1.5f, false);
+               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.25f, false);
+               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.5f, false);
+               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 0.75f, false);
 
                humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
                humanoidPerception.getRapidHeightMapExtractor()
@@ -594,7 +594,7 @@ public class TerrainPlanningSimulationUI
             }
             else
             {
-               humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
+               environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated_1.json");
             }
          }
 

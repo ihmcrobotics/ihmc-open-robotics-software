@@ -25,6 +25,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -198,19 +199,24 @@ public class HumanoidPerceptionModule
 
    public void publishExternalHeightMapImage(ROS2Helper ros2Helper)
    {
-      Instant acquisitionTime = Instant.now();
-      Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-      OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
-      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
-                                                         PerceptionAPI.HEIGHT_MAP_CROPPED,
-                                                         croppedHeightMapImageMessage,
-                                                         ros2Helper,
-                                                         lidarPose,
-                                                         acquisitionTime,
-                                                         rapidHeightMapExtractor.getSequenceNumber(),
-                                                         croppedHeightMapImage.rows(),
-                                                         croppedHeightMapImage.cols(),
-                                                         (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+      executorService.clearTaskQueue();
+      executorService.submit(() ->
+        {
+           Instant acquisitionTime = Instant.now();
+           Mat heightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+           OpenCVTools.compressImagePNG(heightMapImage, compressedInternalHeightMapPointer);
+           //PerceptionDebugTools.displayDepth("Published Global Height Map", heightMapImage, 1);
+           PerceptionMessageTools.publishCompressedDepthImage(compressedInternalHeightMapPointer,
+                                                              PerceptionAPI.HEIGHT_MAP_CROPPED,
+                                                              croppedHeightMapImageMessage,
+                                                              ros2Helper,
+                                                              cameraPose,
+                                                              acquisitionTime,
+                                                              rapidHeightMapExtractor.getSequenceNumber(),
+                                                              heightMapImage.rows(),
+                                                              heightMapImage.cols(),
+                                                              (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+        });
    }
 
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
