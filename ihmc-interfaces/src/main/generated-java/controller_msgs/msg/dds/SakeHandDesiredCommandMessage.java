@@ -17,9 +17,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    public static final byte COMMAND_OPTION_OPEN = (byte) 0;
    public static final byte COMMAND_OPTION_CLOSE = (byte) 1;
    public static final byte COMMAND_OPTION_GRIP = (byte) 2;
-   public static final byte COMMAND_OPTION_GOAL_POSITION = (byte) 3;
-   public static final byte COMMAND_OPTION_SET_GOAL_TORQUE = (byte) 4;
-   public static final byte COMMAND_OPTION_CALIBRATE = (byte) 5;
+   public static final byte COMMAND_OPTION_CUSTOM = (byte) 3;
+   public static final byte COMMAND_OPTION_CALIBRATE = (byte) 4;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */

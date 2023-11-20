@@ -10,9 +10,8 @@ public enum SakeHandCommandOption
    FULLY_OPEN(0, 1.0, 0.3),
    CLOSE(1, 0.1, 0.3),
    GRIP(2, 0.0, 0.3),
-   SET_GOAL_POSITION(3, -1.0, -1.0),
-   SET_GOAL_TORQUE(4, -1.0, -1.0),
-   CALIBRATE(5, 0.0, 0.3),
+   CUSTOM(3, -1.0, -1.0),
+   CALIBRATE(4, 0.0, 0.3),
 
    // Below commands are custom defined commands that map to the GOTO command (commandNumber = 5)
    OPEN(5, 0.5, 0.3);

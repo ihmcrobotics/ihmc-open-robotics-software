@@ -89,7 +89,7 @@ public class RDXSakeHandCommandAction extends RDXBehaviorAction
       // if user moved slider, set command to GOTO
       if (positionValue[0] != lastPositionValue || torqueValue[0] != lastTorqueValue)
       {
-         definition.setHandConfigurationIndex(SakeHandCommandOption.SET_GOAL_POSITION.ordinal());
+         definition.setHandConfigurationIndex(SakeHandCommandOption.CUSTOM.ordinal());
       }
    }
 
