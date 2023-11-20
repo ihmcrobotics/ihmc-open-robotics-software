@@ -32,6 +32,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey maxTransferYaw = keys.addDoubleKey("Max transfer yaw");
    public static final IntegerStoredPropertyKey goalMargin = keys.addIntegerKey("Goal margin");
    public static final DoubleStoredPropertyKey feasibleContactCutoff = keys.addDoubleKey("Feasible contact cutoff");
+   public static final DoubleStoredPropertyKey explorationConstant = keys.addDoubleKey("Exploration constant");
 
    /**
     * Loads this property set.

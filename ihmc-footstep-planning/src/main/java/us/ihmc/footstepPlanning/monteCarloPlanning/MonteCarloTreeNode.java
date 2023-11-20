@@ -31,7 +31,7 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       }
    }
 
-   public void updateUpperConfidenceBound()
+   public void updateUpperConfidenceBound(double explorationAlpha)
    {
       if (visits == 0)
       {
@@ -40,7 +40,7 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       }
 
       double totalParentVists = parents.stream().mapToInt(MonteCarloTreeNode::getVisits).sum();
-      upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(totalParentVists) / visits));
+      upperConfidenceBound = (value / visits) + ((float) explorationAlpha * (float) Math.sqrt(Math.log(totalParentVists) / visits));
    }
 
    public ArrayList<?> getAvailableStates(MonteCarloPlanningWorld world)

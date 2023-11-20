@@ -77,4 +77,9 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.feasibleContactCutoff, feasibleContactCutoff);
    }
+
+   default void setExplorationConstant(double explorationConstant)
+   {
+      set(MonteCarloFootstepPlannerParameters.explorationConstant, explorationConstant);
+   }
 }

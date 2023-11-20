@@ -90,7 +90,7 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode bestNode = null;
          for (MonteCarloTreeNode child : node.getChildren())
          {
-            child.updateUpperConfidenceBound();
+            child.updateUpperConfidenceBound(plannerParameters.getExplorationConstant());
             if (child.getUpperConfidenceBound() >= bestScore)
             {
                bestScore = child.getUpperConfidenceBound();

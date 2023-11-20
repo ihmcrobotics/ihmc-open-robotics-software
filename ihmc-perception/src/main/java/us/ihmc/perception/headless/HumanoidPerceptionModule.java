@@ -196,6 +196,23 @@ public class HumanoidPerceptionModule
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
    }
 
+   public void publishExternalHeightMapImage(ROS2Helper ros2Helper)
+   {
+      Instant acquisitionTime = Instant.now();
+      Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
+      OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
+      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
+                                                         PerceptionAPI.HEIGHT_MAP_CROPPED,
+                                                         croppedHeightMapImageMessage,
+                                                         ros2Helper,
+                                                         lidarPose,
+                                                         acquisitionTime,
+                                                         rapidHeightMapExtractor.getSequenceNumber(),
+                                                         croppedHeightMapImage.rows(),
+                                                         croppedHeightMapImage.cols(),
+                                                         (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+   }
+
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
    {
       long begin = System.nanoTime();

@@ -113,7 +113,7 @@ public class MonteCarloPathPlanner
          MonteCarloWaypointNode bestNode = null;
          for (MonteCarloTreeNode child : node.getChildren())
          {
-            child.updateUpperConfidenceBound();
+            child.updateUpperConfidenceBound(2.0f);
             if (child.getUpperConfidenceBound() >= bestScore)
             {
                bestScore = child.getUpperConfidenceBound();

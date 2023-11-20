@@ -1,73 +1,78 @@
 {
   "title" : "MonteCarloFootstepPlannerParameters",
   "Number of iterations" : {
-    "value" : 20,
+    "value" : 68,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-      "value" : 100,
-      "lowerBound" : 1,
-      "upperBound" : 400
+    "value" : 100,
+    "lowerBound" : 1,
+    "upperBound" : 400
   },
   "Timeout duration" : {
-      "value" : 0.1,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.1,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-      "value" : 100.0,
-      "lowerBound" : 0.0,
-      "upperBound" : 1000.0
+    "value" : 100.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 1000.0
   },
   "Goal Reward" : {
-      "value" : 10000.0,
-      "lowerBound" : 0.0,
-      "upperBound" : 100000.0
+    "value" : 10000.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 100000.0
   },
   "Max number of visited nodes" : {
-      "value" : 100000,
-      "lowerBound" : 1000,
-      "upperBound" : 1000000
+    "value" : 100000,
+    "lowerBound" : 1000,
+    "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-      "value" : 20,
-      "lowerBound" : 5,
-      "upperBound" : 1000
+    "value" : 16,
+    "lowerBound" : 5,
+    "upperBound" : 1000
   },
   "Max transfer height" : {
-      "value" : 0.3,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.3,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   },
   "Max transfer depth" : {
-      "value" : 0.3,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.3,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   },
   "Max transfer distance" : {
-      "value" : 0.3,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.3,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   },
   "Min transfer distance" : {
-      "value" : 0.1,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.1,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   },
   "Max transfer yaw" : {
-      "value" : 0.3,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.249195,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   },
   "Goal margin" : {
-      "value" : 5,
-      "lowerBound" : 1,
-      "upperBound" : 100
+    "value" : 15,
+    "lowerBound" : 1,
+    "upperBound" : 100
   },
   "Feasible contact cutoff" : {
-      "value" : 0.5,
-      "lowerBound" : 0.01,
-      "upperBound" : 1.0
+    "value" : 0.33459,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Exploration constant" : {
+    "value" : 1.061579,
+    "lowerBound" : 0.01,
+    "upperBound" : 10.0
   }
 }

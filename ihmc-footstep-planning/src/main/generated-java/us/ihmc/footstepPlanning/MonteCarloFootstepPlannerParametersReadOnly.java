@@ -79,4 +79,9 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(feasibleContactCutoff);
    }
+
+   default double getExplorationConstant()
+   {
+      return get(explorationConstant);
+   }
 }

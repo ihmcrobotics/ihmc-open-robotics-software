@@ -10,6 +10,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -38,6 +39,7 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.neural.FootstepPredictor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
+import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -116,6 +118,7 @@ public class TerrainPlanningSimulationUI
    private boolean sidednessBit = false;
    private boolean enableLogging = false;
    private boolean heightMapCaptured = false;
+   private boolean external = true;
 
    public TerrainPlanningSimulationUI()
    {
@@ -209,12 +212,19 @@ public class TerrainPlanningSimulationUI
             Pose3D groundPoseInSensorFrame = new Pose3D(groundToSensorTransform);
             cameraZUpFrame.setPoseAndUpdate(groundPoseInSensorFrame);
 
-            humanoidPerception.updateTerrain(ros2Helper,
-                                             steppingL515Simulator.getLowLevelSimulator().getMetersDepthOpenCVMat(),
-                                             cameraFrame,
-                                             cameraZUpFrame,
-                                             initialized,
-                                             true);
+            if (external)
+            {
+               humanoidPerception.publishExternalHeightMapImage(ros2Helper);
+            }
+            else
+            {
+               humanoidPerception.updateTerrain(ros2Helper,
+                                                steppingL515Simulator.getLowLevelSimulator().getMetersDepthOpenCVMat(),
+                                                cameraFrame,
+                                                cameraZUpFrame,
+                                                initialized,
+                                                true);
+            }
 
             if (enableMonteCarloPlanner.get())
             {
@@ -318,13 +328,15 @@ public class TerrainPlanningSimulationUI
             {
                executorService.clearTaskQueue();
                executorService.submit(() ->
-                 {
-                    FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
-                                                                humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(),
-                                                                cameraZUpFrame.getTransformToWorldFrame());
+                                      {
+                                         FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor()
+                                                                                                       .getCroppedGlobalHeightMapImage(),
+                                                                                     humanoidPerception.getRapidHeightMapExtractor()
+                                                                                                       .getCroppedContactMapImage(),
+                                                                                     cameraZUpFrame.getTransformToWorldFrame());
 
-                     footstepPlanToRenderNotificaiton.set(plan);
-                 });
+                                         footstepPlanToRenderNotificaiton.set(plan);
+                                      });
             }
 
             if (footstepPlanToRenderNotificaiton.poll())
@@ -412,7 +424,9 @@ public class TerrainPlanningSimulationUI
             long timeEnd = System.nanoTime();
 
             LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
-                                        (timeEnd - timeStart) / 1e6, plan.getNumberOfSteps(), monteCarloFootstepPlanner.getVisitedNodes().size(),
+                                        (timeEnd - timeStart) / 1e6,
+                                        plan.getNumberOfSteps(),
+                                        monteCarloFootstepPlanner.getVisitedNodes().size(),
                                         MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
 
             monteCarloFootstepPlanner.getDebugger().refresh();
@@ -549,10 +563,39 @@ public class TerrainPlanningSimulationUI
 
          private void initializePerceptionModule()
          {
+
             humanoidPerception = new HumanoidPerceptionModule(openCLManager);
             humanoidPerception.initializeRealsenseDepthImage(steppingL515Simulator.getCopyOfCameraParameters().getHeight(),
                                                              steppingL515Simulator.getCopyOfCameraParameters().getWidth());
-            humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
+
+            if (external)
+            {
+               RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalWidthInMeters(4.0);
+               RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
+               humanoidPerception.getRapidHeightMapExtractor().initialize();
+               humanoidPerception.getRapidHeightMapExtractor().reset();
+
+               // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
+               Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+
+               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.35f, false);
+               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.7f, false);
+               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 1.5f, false);
+
+               humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
+               humanoidPerception.getRapidHeightMapExtractor()
+                                 .populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(),
+                                                          steppingL515Simulator.getCopyOfCameraParameters(),
+                                                          new Point3D());
+               humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
+               humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
+
+               Mat contactMap = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
+            }
+            else
+            {
+               humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
+            }
          }
 
          private void initializePerceptionUI()
