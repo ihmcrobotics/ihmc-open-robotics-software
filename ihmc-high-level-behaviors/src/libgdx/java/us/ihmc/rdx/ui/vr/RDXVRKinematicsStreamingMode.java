@@ -172,6 +172,7 @@ public class RDXVRKinematicsStreamingMode
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         // TODO: Extract preset configuration to robot model
          initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.5);
          initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.0));
          initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(-0.5));
