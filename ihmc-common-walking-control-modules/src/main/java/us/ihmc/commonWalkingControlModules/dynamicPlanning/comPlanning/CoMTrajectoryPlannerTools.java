@@ -134,10 +134,15 @@ public class CoMTrajectoryPlannerTools
                                                            List<FramePoint3D> endVRPPositions,
                                                            List<? extends ContactStateProvider> contactSequence,
                                                            RecyclingArrayList<FramePoint3D> modifiedStartVRPPositionsToPack,
-                                                           RecyclingArrayList<FramePoint3D> modifiedEndVRPPositionsToPack)
+                                                           RecyclingArrayList<FramePoint3D> modifiedEndVRPPositionsToPack,
+                                                           RecyclingArrayList<FrameVector3D> modifiedStartVRPVelocitiesToPack,
+                                                           RecyclingArrayList<FrameVector3D> modifiedEndVRPVelocitiesToPack)
    {
       modifiedStartVRPPositionsToPack.clear();
       modifiedEndVRPPositionsToPack.clear();
+
+      modifiedStartVRPVelocitiesToPack.clear();
+      modifiedEndVRPVelocitiesToPack.clear();
 
       int sequenceIndex = 0;
       double denominator = -1.0 / (omega * omega);
@@ -148,24 +153,40 @@ public class CoMTrajectoryPlannerTools
          FramePoint3D start = startVRPPositions.get(sequenceIndex);
          FramePoint3D end = endVRPPositions.get(sequenceIndex);
 
-         FramePoint3D modifiedStart = modifiedStartVRPPositionsToPack.add();
-         FramePoint3D modifiedEnd = modifiedEndVRPPositionsToPack.add();
+         FramePoint3D modifiedStartPosition = modifiedStartVRPPositionsToPack.add();
+         FramePoint3D modifiedEndPosition = modifiedEndVRPPositionsToPack.add();
 
-         modifiedStart.setToZero();
-         modifiedEnd.setToZero();
+         FrameVector3D modifiedStartVelocity = modifiedStartVRPVelocitiesToPack.add();
+         FrameVector3D modifiedEndVelocity = modifiedEndVRPVelocitiesToPack.add();
+
+         modifiedStartPosition.setToZero();
+         modifiedEndPosition.setToZero();
+         modifiedStartVelocity.setToZero();
+         modifiedEndVelocity.setToZero();
 
          boolean hasExternalForce = contactStateProvider.getExternalContactAccelerationStart() != null && contactStateProvider.getExternalContactAccelerationEnd() != null;
-         hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
+         hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && !contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
 
          if (hasExternalForce)
          {
-            modifiedStart.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationStart(), start);
-            modifiedEnd.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
+            modifiedStartPosition.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationStart(), start);
+            modifiedEndPosition.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
+
+            // compute the force velocity, using a temporary variable.
+            modifiedStartVelocity.sub(contactStateProvider.getExternalContactAccelerationEnd(), contactStateProvider.getExternalContactAccelerationStart());
+            modifiedStartVelocity.scale(denominator);
+
+            // augment the VRP velocity with the force
+            modifiedEndVelocity.add(modifiedStartVelocity, contactStateProvider.getECMPEndPosition());
+            modifiedStartVelocity.add(contactStateProvider.getECMPStartVelocity());
          }
          else
          {
-            modifiedStart.set(start);
-            modifiedEnd.set(end);
+            modifiedStartPosition.set(start);
+            modifiedEndPosition.set(end);
+
+            modifiedStartVelocity.set(contactStateProvider.getECMPStartVelocity());
+            modifiedEndVelocity.set(contactStateProvider.getECMPEndVelocity());
          }
 
          sequenceIndex++;
@@ -176,24 +197,40 @@ public class CoMTrajectoryPlannerTools
       FramePoint3D start = startVRPPositions.get(sequenceIndex);
       FramePoint3D end = endVRPPositions.get(sequenceIndex);
 
-      FramePoint3D modifiedStart = modifiedStartVRPPositionsToPack.add();
-      FramePoint3D modifiedEnd = modifiedEndVRPPositionsToPack.add();
+      FramePoint3D modifiedStartPosition = modifiedStartVRPPositionsToPack.add();
+      FramePoint3D modifiedEndPosition = modifiedEndVRPPositionsToPack.add();
 
-      modifiedStart.setToZero();
-      modifiedEnd.setToZero();
+      FrameVector3D modifiedStartVelocity = modifiedStartVRPVelocitiesToPack.add();
+      FrameVector3D modifiedEndVelocity = modifiedEndVRPVelocitiesToPack.add();
+
+      modifiedStartPosition.setToZero();
+      modifiedEndPosition.setToZero();
+      modifiedStartVelocity.setToZero();
+      modifiedEndVelocity.setToZero();
 
       boolean hasExternalForce = contactStateProvider.getExternalContactAccelerationStart() != null && contactStateProvider.getExternalContactAccelerationEnd() != null;
       hasExternalForce &= !contactStateProvider.getExternalContactAccelerationStart().containsNaN() && !contactStateProvider.getExternalContactAccelerationEnd().containsNaN();
 
       if (hasExternalForce)
       {
-         modifiedStart.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationStart(), start);
-         modifiedEnd.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
+         modifiedStartPosition.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationStart(), start);
+         modifiedEndPosition.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
+
+         // compute the force velocity, using a temporary variable.
+         modifiedStartVelocity.sub(contactStateProvider.getExternalContactAccelerationEnd(), contactStateProvider.getExternalContactAccelerationStart());
+         modifiedStartVelocity.scale(denominator);
+
+         // augment the VRP velocity with the force
+         modifiedEndVelocity.add(modifiedStartVelocity, contactStateProvider.getECMPEndPosition());
+         modifiedStartVelocity.add(contactStateProvider.getECMPStartVelocity());
       }
       else
       {
-         modifiedStart.set(start);
-         modifiedEnd.set(end);
+         modifiedStartPosition.set(start);
+         modifiedEndPosition.set(end);
+
+         modifiedStartVelocity.set(contactStateProvider.getECMPStartVelocity());
+         modifiedEndVelocity.set(contactStateProvider.getECMPEndVelocity());
       }
    }
 
