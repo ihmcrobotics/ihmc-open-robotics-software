@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -46,6 +42,10 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 {
@@ -364,13 +364,15 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (jointOfflineManager != null)
          return jointOfflineManager;
 
-      if (!hasHighLevelHumanoidControllerToolbox(JointOfflineManager.class))
-         return null;
-      if (!hasWalkingControllerParameters(JointOfflineManager.class))
-         return null;
-
-      if (!walkingControllerParameters.enableJointOfflineControl())
-         return null;
+      // TODO: (AM) Don't check if offline joints are enabled in walking controller parameters,
+      //  the manager is only constructed through this function when a joint offline state is added to the high level controller
+      //      if (!hasHighLevelHumanoidControllerToolbox(JointOfflineManager.class))
+      //         return null;
+      //      if (!hasWalkingControllerParameters(JointOfflineManager.class))
+      //         return null;
+      //
+      //      if (!walkingControllerParameters.enableJointOfflineControl())
+      //         return null;
 
       jointOfflineManager = new JointOfflineManager(controllerToolbox, walkingControllerParameters, registry);
       return jointOfflineManager;
