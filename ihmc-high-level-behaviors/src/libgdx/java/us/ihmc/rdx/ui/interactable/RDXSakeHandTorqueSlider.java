@@ -75,7 +75,7 @@ public class RDXSakeHandTorqueSlider
             message.setPositionRatio(-1.0);
             message.setTorqueRatio(sliderValue[0]);
 
-            communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+            communicationHelper.publish(ROS2Tools::getSakeHandCommandTopic, message);
          }
       }
       else

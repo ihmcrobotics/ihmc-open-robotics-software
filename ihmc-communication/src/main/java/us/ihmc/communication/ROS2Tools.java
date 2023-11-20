@@ -92,7 +92,7 @@ public class ROS2Tools
    private static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
    private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput()
                                                                                                            .withTypeName(HandDesiredConfigurationMessage.class);
-   private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
+   private static final ROS2Topic<SakeHandDesiredCommandMessage> SAKE_HAND_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
                                                                                                                 .withTypeName(SakeHandDesiredCommandMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
@@ -110,9 +110,9 @@ public class ROS2Tools
       return HAND_CONFIGURATION.withRobot(robotName);
    }
 
-   public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName)
+   public static ROS2Topic<SakeHandDesiredCommandMessage> getSakeHandCommandTopic(String robotName)
    {
-      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName);
+      return SAKE_HAND_DESIRED_COMMAND.withRobot(robotName);
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)

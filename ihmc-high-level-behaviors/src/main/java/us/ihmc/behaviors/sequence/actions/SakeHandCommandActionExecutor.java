@@ -42,7 +42,7 @@ public class SakeHandCommandActionExecutor extends BehaviorActionExecutor
       message.setPositionRatio(definition.getGoalPosition());
       message.setTorqueRatio(definition.getGoalTorque());
 
-      ros2ControllerHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
+      ros2ControllerHelper.publish(ROS2Tools::getSakeHandCommandTopic, message);
 
       executionTimer.reset();
    }
