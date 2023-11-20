@@ -176,7 +176,7 @@ public class BlackflyImageRetriever
    public void destroy()
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
-      stop();
+      imageGrabThread.blockingStop();
       if (blackfly != null)
          blackfly.stopAcquiringImages();
       if (blackflyManager != null)
