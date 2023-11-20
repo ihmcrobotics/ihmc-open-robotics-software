@@ -63,77 +63,80 @@ public class BlackflyImageRetriever
 
    private void grabImage()
    {
-      while (blackfly == null || numberOfFailedReads > 30)
+      if (blackfly == null || numberOfFailedReads > 30)
       {
          if (!initializeBlackfly())
             ThreadTools.sleep(3000);
       }
-      // grab image
-      spinImage spinImage = new spinImage();
-      if (blackfly.getNextImage(spinImage))
-      {
-         Instant acquisitionTime = Instant.now();
-         cameraPose.setToZero(cameraFrameSupplier.get());
-         cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         // Initialize image dimensions from first image
-         if (imageWidth == 0 || imageHeight == 0)
-         {
-            this.imageWidth = blackfly.getWidth(spinImage);
-            this.imageHeight = blackfly.getHeight(spinImage);
-         }
-
-         // Get image data
-         BytePointer spinImageData = new BytePointer((long) imageWidth * imageHeight);
-         blackfly.setPointerToSpinImageData(spinImage, spinImageData);
-         BytedecoImage sourceByedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-         sourceByedecoImage.changeAddress(spinImageData.address());
-
-         // Upload image to GPU
-         GpuMat deviceSourceImage = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC1);
-         deviceSourceImage.upload(sourceByedecoImage.getBytedecoOpenCVMat());
-
-         // Convert from BayerRG8 to BGR
-         GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-         opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
-
-         newImageLock.lock();
-         try
-         {
-            if (distortedImage != null)
-               distortedImage.release();
-            distortedImage = new RawImage(sequenceNumber++,
-                                          acquisitionTime,
-                                          imageWidth,
-                                          imageHeight,
-                                          0,
-                                          null,
-                                          sourceImageBGR.clone(),
-                                          opencv_core.CV_8UC3,
-                                          (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
-                                          (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
-                                          (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
-                                          (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
-                                          cameraPose.getPosition(),
-                                          cameraPose.getOrientation());
-
-            newImageAvailable.signal();
-         }
-         finally
-         {
-            newImageLock.unlock();
-         }
-
-         // close stuff
-         spinImageData.close();
-         deviceSourceImage.close();
-         sourceImageBGR.close();
-      }
       else
       {
-         numberOfFailedReads++;
+         // grab image
+         spinImage spinImage = new spinImage();
+         if (blackfly.getNextImage(spinImage))
+         {
+            Instant acquisitionTime = Instant.now();
+            cameraPose.setToZero(cameraFrameSupplier.get());
+            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+            // Initialize image dimensions from first image
+            if (imageWidth == 0 || imageHeight == 0)
+            {
+               this.imageWidth = blackfly.getWidth(spinImage);
+               this.imageHeight = blackfly.getHeight(spinImage);
+            }
+
+            // Get image data
+            BytePointer spinImageData = new BytePointer((long) imageWidth * imageHeight);
+            blackfly.setPointerToSpinImageData(spinImage, spinImageData);
+            BytedecoImage sourceByedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+            sourceByedecoImage.changeAddress(spinImageData.address());
+
+            // Upload image to GPU
+            GpuMat deviceSourceImage = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+            deviceSourceImage.upload(sourceByedecoImage.getBytedecoOpenCVMat());
+
+            // Convert from BayerRG8 to BGR
+            GpuMat sourceImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+            opencv_cudaimgproc.cvtColor(deviceSourceImage, sourceImageBGR, opencv_imgproc.COLOR_BayerBG2BGR);
+
+            newImageLock.lock();
+            try
+            {
+               if (distortedImage != null)
+                  distortedImage.release();
+               distortedImage = new RawImage(sequenceNumber++,
+                                             acquisitionTime,
+                                             imageWidth,
+                                             imageHeight,
+                                             0,
+                                             null,
+                                             sourceImageBGR.clone(),
+                                             opencv_core.CV_8UC3,
+                                             (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
+                                             (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
+                                             (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
+                                             (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
+                                             cameraPose.getPosition(),
+                                             cameraPose.getOrientation());
+
+               newImageAvailable.signal();
+            }
+            finally
+            {
+               newImageLock.unlock();
+            }
+
+            // close stuff
+            spinImageData.close();
+            deviceSourceImage.close();
+            sourceImageBGR.close();
+         }
+         else
+         {
+            numberOfFailedReads++;
+         }
+         blackfly.releaseImage(spinImage);
       }
-      blackfly.releaseImage(spinImage);
    }
 
    public RawImage getLatestRawImage()

@@ -62,13 +62,12 @@ public class RealsenseColorDepthImageRetriever
 
    private void updateImages()
    {
-      while (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
+      if (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
       {
          if (!startRealsense())
             ThreadTools.sleep(3000);
       }
-
-      if (realsense.readFrameData())
+      else if (realsense.readFrameData())
       {
          realsense.updateDataBytePointers();
          Instant acquisitionTime = Instant.now();
