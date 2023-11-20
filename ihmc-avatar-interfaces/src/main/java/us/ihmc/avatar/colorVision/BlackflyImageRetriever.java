@@ -174,8 +174,10 @@ public class BlackflyImageRetriever
    {
       System.out.println("Destroying " + this.getClass().getSimpleName());
       stop();
-      blackfly.stopAcquiringImages();
-      blackflyManager.destroy();
+      if (blackfly != null)
+         blackfly.stopAcquiringImages();
+      if (blackflyManager != null)
+         blackflyManager.destroy();
       System.out.println("Destroyed " + this.getClass().getSimpleName());
    }
 
