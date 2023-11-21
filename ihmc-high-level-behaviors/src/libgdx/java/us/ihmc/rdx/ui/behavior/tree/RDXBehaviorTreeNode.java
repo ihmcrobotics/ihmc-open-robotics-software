@@ -56,6 +56,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       D definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
+
+      getDefinition().setDescription("BasicNode");
    }
 
    @Override

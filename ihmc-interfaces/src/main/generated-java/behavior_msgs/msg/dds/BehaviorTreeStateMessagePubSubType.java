@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d43f5bdc72ca1af7810fea802029ee4749e322bdfc7ada04d942032a1286f9a5";
+   		return "5bbe6dc756b45975dfa59b34a49c3dc6d48bfe58a46978be06df8e6295839150";
    }
    
    @Override
@@ -60,6 +60,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -115,6 +118,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getBehaviorTreeIndices().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getBasicNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getCdrSerializedSize(data.getBasicNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getActionSequences().size(); ++i0)
@@ -183,6 +191,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getBehaviorTreeIndices());else
           throw new RuntimeException("behavior_tree_indices field exceeds the maximum length");
 
+      if(data.getBasicNodes().size() <= 200)
+      cdr.write_type_e(data.getBasicNodes());else
+          throw new RuntimeException("basic_nodes field exceeds the maximum length");
+
       if(data.getActionSequences().size() <= 200)
       cdr.write_type_e(data.getActionSequences());else
           throw new RuntimeException("action_sequences field exceeds the maximum length");
@@ -232,6 +244,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       cdr.read_type_e(data.getBehaviorTreeTypes());	
       cdr.read_type_e(data.getBehaviorTreeIndices());	
+      cdr.read_type_e(data.getBasicNodes());	
       cdr.read_type_e(data.getActionSequences());	
       cdr.read_type_e(data.getArmJointAnglesActions());	
       cdr.read_type_e(data.getChestOrientationActions());	
@@ -253,6 +266,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.write_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.write_type_e("basic_nodes", data.getBasicNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
       ser.write_type_e("arm_joint_angles_actions", data.getArmJointAnglesActions());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
@@ -273,6 +287,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.read_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.read_type_e("basic_nodes", data.getBasicNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
       ser.read_type_e("arm_joint_angles_actions", data.getArmJointAnglesActions());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());

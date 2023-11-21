@@ -52,6 +52,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    @Override
    public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
+      if (nodeType == BehaviorTreeNodeDefinition.class)
+      {
+         return new BehaviorTreeNodeExecutor<>(id, crdtInfo, saveFileDirectory);
+      }
       if (nodeType == ActionSequenceDefinition.class)
       {
          return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);

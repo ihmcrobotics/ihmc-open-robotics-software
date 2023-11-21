@@ -16,6 +16,7 @@ public class ROS2BehaviorTreeMessageTools
    {
       treeStateMessage.getBehaviorTreeTypes().clear();
       treeStateMessage.getBehaviorTreeIndices().clear();
+      treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
       treeStateMessage.getArmJointAnglesActions().clear();
       treeStateMessage.getChestOrientationActions().clear();
@@ -36,7 +37,7 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
          actionSequenceState.toMessage(treeStateMessage.getActionSequences().add());
       }
-      if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
+      else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getArmJointAnglesActions().size());
@@ -90,6 +91,14 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWalkActions().size());
          walkActionState.toMessage(treeStateMessage.getWalkActions().add());
       }
+      else
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BASIC_NODE);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getBasicNodes().size());
+         BasicNodeStateMessage basicNodeMessage = treeStateMessage.getBasicNodes().add();
+         nodeState.toMessage(basicNodeMessage.getState());
+         nodeState.getDefinition().toMessage(basicNodeMessage.getDefinition());
+      }
    }
 
    public static void fromMessage(ROS2BehaviorTreeSubscriptionNode subscriptionNode, BehaviorTreeNodeState<?> nodeState)
@@ -98,7 +107,7 @@ public class ROS2BehaviorTreeMessageTools
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
       }
-      if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
+      else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
       {
          armJointAnglesActionState.fromMessage(subscriptionNode.getArmJointAnglesActionStateMessage());
       }
@@ -134,6 +143,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          walkActionState.fromMessage(subscriptionNode.getWalkActionStateMessage());
       }
+      else
+      {
+         nodeState.fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
+      }
    }
 
    public static void packSubscriptionNode(byte nodeType,
@@ -143,6 +156,12 @@ public class ROS2BehaviorTreeMessageTools
    {
       switch (nodeType)
       {
+         case BehaviorTreeStateMessage.BASIC_NODE ->
+         {
+            BasicNodeStateMessage basicNodeStateMessage = treeStateMessage.getBasicNodes().get(indexInTypesList);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(basicNodeStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(basicNodeStateMessage.getDefinition());
+         }
          case BehaviorTreeStateMessage.ACTION_SEQUENCE ->
          {
             ActionSequenceStateMessage actionSequenceStateMessage = treeStateMessage.getActionSequences().get(indexInTypesList);

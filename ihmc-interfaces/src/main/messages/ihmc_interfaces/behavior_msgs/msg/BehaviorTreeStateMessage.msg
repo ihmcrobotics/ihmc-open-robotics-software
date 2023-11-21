@@ -3,7 +3,8 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-byte ACTION_SEQUENCE = 0
+byte BASIC_NODE = 0
+byte ACTION_SEQUENCE = 1
 
 byte ARM_JOINT_ANGLES_ACTION = 10
 byte CHEST_ORIENTATION_ACTION = 11
@@ -28,6 +29,8 @@ byte[<=1000] behavior_tree_types
 # The index is of that node in it's respective list for
 # it's type.
 uint32[<=1000] behavior_tree_indices
+
+behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 
