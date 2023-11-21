@@ -7,7 +7,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -117,7 +116,12 @@ public class CenterOfMassStaticStabilityRegionCalculator implements SCS2YoGraphi
       optimizationModule.updateContactState(contactState);
    }
 
-   public boolean update()
+   public int getQueryCounter()
+   {
+      return queryCounter.getValue();
+   }
+
+   public boolean performCoMRegionQuery()
    {
       int queryIndex = vertexOrder[queryCounter.getValue()];
 

@@ -44,7 +44,7 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
 
       while (!calculator.hasSolvedWholeRegion())
       {
-         calculator.update();
+         calculator.performCoMRegionQuery();
          scs2.simulateNow(1);
       }
 
