@@ -545,13 +545,6 @@ public class RDXAffordanceTemplateEditorUI
          for (int i = 1; i < postGraspFrames.getIndex() + 1; i++)
          {
             postGraspFrames.updateInternal(side, i);
-//            RigidBodyTransform objectPose = postGraspFrames.getObjectTransforms().get(i - 1);
-//            postGraspFrames.getObjectTransforms()
-//                           .get(i - 1)
-//                           .getTranslation()
-//                           .set(objectScale[0] * objectPose.getTranslation().getX(),
-//                                objectScale[1] * objectPose.getTranslation().getY(),
-//                                objectScale[2] * objectPose.getTranslation().getZ());
          }
       }
 
