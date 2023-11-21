@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
 #include "behavior_msgs/msg/./ArmJointAnglesActionStateMessage_.idl"
+#include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
@@ -18,8 +19,11 @@ module behavior_msgs
   {
     module dds
     {
-      const octet ACTION_SEQUENCE =
+      const octet BASIC_NODE =
       0;
+
+      const octet ACTION_SEQUENCE =
+      1;
 
       const octet ARM_JOINT_ANGLES_ACTION =
       10;
@@ -76,6 +80,7 @@ module behavior_msgs
          * it's type.
          */
         sequence<unsigned long, 1000> behavior_tree_indices;
+        sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
         sequence<behavior_msgs::msg::dds::ArmJointAnglesActionStateMessage, 200> arm_joint_angles_actions;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;

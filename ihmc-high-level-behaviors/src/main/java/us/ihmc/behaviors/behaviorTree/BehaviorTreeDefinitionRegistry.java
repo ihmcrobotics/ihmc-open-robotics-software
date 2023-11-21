@@ -10,6 +10,7 @@ public class BehaviorTreeDefinitionRegistry
 
    private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
    {
+      new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
       new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
 
       new RegistryRecord(ArmJointAnglesActionDefinition.class, BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION),

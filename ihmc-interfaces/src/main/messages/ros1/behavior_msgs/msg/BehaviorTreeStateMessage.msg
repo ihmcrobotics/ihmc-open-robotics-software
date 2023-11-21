@@ -3,7 +3,9 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-int8 ACTION_SEQUENCE=0
+int8 BASIC_NODE=0
+
+int8 ACTION_SEQUENCE=1
 
 int8 ARM_JOINT_ANGLES_ACTION=10
 
@@ -36,6 +38,8 @@ int8[] behavior_tree_types
 # The index is of that node in it's respective list for
 # it's type.
 uint32[] behavior_tree_indices
+
+behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
