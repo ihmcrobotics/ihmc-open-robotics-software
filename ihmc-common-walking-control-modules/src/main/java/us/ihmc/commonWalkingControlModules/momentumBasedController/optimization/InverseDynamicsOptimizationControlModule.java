@@ -58,6 +58,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -114,6 +115,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
+
+   private final YoVector3D sumOfExternalTorques = new YoVector3D("sumOfExternalTorques", registry);
+   private final YoVector3D sumOfExternalForces = new YoVector3D("sumOfExternalForces", registry);
 
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
@@ -433,6 +437,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       DMatrixRMaj rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       DMatrixRMaj convectiveTerm = motionQPInputCalculator.getCentroidalMomentumConvectiveTerm();
       DMatrixRMaj additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      sumOfExternalTorques.set(additionalExternalWrench);
+      sumOfExternalForces.set(3, additionalExternalWrench);
       DMatrixRMaj gravityWrench = externalWrenchHandler.getGravitationalWrench();
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
    }

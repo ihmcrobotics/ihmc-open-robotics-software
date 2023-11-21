@@ -434,6 +434,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                                 vrpPositionToPack,
                                 desiredVRPVelocity);
 
+      // TODO subtract out the external force
+
       ecmpPositionToPack.set(vrpPositionToPack);
       ecmpPositionToPack.subZ(comHeight.getDoubleValue());
    }

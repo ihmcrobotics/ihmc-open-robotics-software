@@ -55,20 +55,27 @@ public class ExternalForceCommandHandler
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          double trajectoryTime = command.getTrajectoryPointTime(i);
+         double currentTime = trajectoryTime + executionTime;
 
          tempWrench.setIncludingFrame(command.getTrajectoryPoint(i));
          tempWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
          tempForce.set(tempWrench.getLinearPart());
+         if (!trajectoryGenerator.isEmpty())
+         {
+            trajectoryGenerator.compute(currentTime);
+
+            tempForce.add(trajectoryGenerator.getPosition());
+         }
 
          // FIXME make this linear
-         trajectoryGenerator.appendWaypoint(trajectoryTime + executionTime, tempForce, new FrameVector3D());
+         trajectoryGenerator.appendWaypoint(currentTime, tempForce, new FrameVector3D());
       }
    }
 
    public void addToDesiredContactState(List<SettableContactStateProvider> contactStateProviders)
    {
-      if (trajectoryGenerator.isEmpty() || trajectoryGenerator.isDone())
+      if (trajectoryGenerator.isEmpty())
          return;
 
       double timeForCompute = yoTime.getValue();
@@ -92,7 +99,7 @@ public class ExternalForceCommandHandler
          trajectoryGenerator.compute(timeForCompute);
          tempForce.setAndScale(massInverse, trajectoryGenerator.getPosition());
 
-         contactStateProviders.get(1).setExternalContactAccelerationEnd(tempForce);
+         contactStateProviders.get(i).setExternalContactAccelerationEnd(tempForce);
       }
    }
 }

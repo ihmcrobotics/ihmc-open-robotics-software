@@ -145,7 +145,7 @@ public class CoMTrajectoryPlannerTools
       modifiedEndVRPVelocitiesToPack.clear();
 
       int sequenceIndex = 0;
-      double denominator = -1.0 / (omega * omega);
+      double denominator = 1.0 / (omega * omega);
       for (int i = 0; i < contactSequence.size() - 1; i++)
       {
          ContactStateProvider contactStateProvider = contactSequence.get(i);
