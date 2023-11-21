@@ -50,8 +50,6 @@ public class CenterOfMassStabilityMarginOptimizationModule
 {
    static final double GRAVITY = 9.81;
    static final int NUM_BASIS_VECTORS = 4;
-   static final double COEFFICIENT_OF_FRICTION = 0.7;
-   static final double BASIS_VEC_ANGLE = Math.atan(COEFFICIENT_OF_FRICTION);
    static final int MAX_CONTACT_POINTS = 12;
 
    static final int CoM_DIMENSIONS = 2;
@@ -171,12 +169,13 @@ public class CenterOfMassStabilityMarginOptimizationModule
          tempPoint.setToZero(contactFrame);
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPointPositions.get(contactIdx).set(tempPoint);
+         double basisVectorAngle = Math.atan(contactState.getCoefficientOfFriction(contactIdx));
 
          for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
          {
             tempVector.setIncludingFrame(contactFrame, Axis3D.Z);
             double axisPolarCoordinate = basisIdx * 2.0 * Math.PI / NUM_BASIS_VECTORS;
-            tempAxisAngle.set(Math.cos(axisPolarCoordinate), Math.sin(axisPolarCoordinate), 0.0, BASIS_VEC_ANGLE);
+            tempAxisAngle.set(Math.cos(axisPolarCoordinate), Math.sin(axisPolarCoordinate), 0.0, basisVectorAngle);
             tempAxisAngle.transform(tempVector);
 
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
