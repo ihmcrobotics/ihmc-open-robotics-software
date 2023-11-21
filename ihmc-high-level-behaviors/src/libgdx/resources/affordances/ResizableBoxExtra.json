@@ -82,9 +82,9 @@
   "numberPreGraspFrames" : 2,
   "numberPostGraspFrames" : 2,
   "resizablePrimitiveShape" : "BOX",
-  "xLength" : 0.35,
-  "yLength" : 0.35,
-  "zLength" : 0.35,
+  "xLength" : 0.31,
+  "yLength" : 0.394,
+  "zLength" : 0.265,
   "xRadius" : 0.1,
   "yRadius" : 0.1,
   "zRadius" : 0.1
