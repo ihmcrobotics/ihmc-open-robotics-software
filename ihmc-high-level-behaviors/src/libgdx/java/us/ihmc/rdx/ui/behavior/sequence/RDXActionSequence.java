@@ -30,7 +30,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
-   private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXMultipleActionProgressBars multipleActionProgressBars = new RDXMultipleActionProgressBars();
 
@@ -52,18 +51,24 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       super.update();
 
-      actionChildren.clear();
       currentlyExecutingActions.clear();
-      for (int i = 0; i < getChildren().size(); i++)
+      updateActionSubtree(this);
+   }
+
+   public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
+   {
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
-         if (getChildren().get(i) instanceof RDXActionNode<?, ?> actionNode)
+         if (child instanceof RDXActionNode<?, ?> actionNode)
          {
-            actionNode.getState().setActionIndex(i);
-            actionChildren.add(actionNode);
             if (actionNode.getState().getIsExecuting())
             {
                currentlyExecutingActions.add(actionNode);
             }
+         }
+         else
+         {
+            updateActionSubtree(child);
          }
       }
    }

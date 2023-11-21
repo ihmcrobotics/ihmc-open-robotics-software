@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -148,7 +147,7 @@ public class ActionNodeInitialization
       {
          for (int i = indexOfInsertion - 1; i >= 0; i--)
          {
-            BehaviorTreeNodeState<?> action = actionSequence.getChildren().get(i);
+            ActionNodeState<?> action = actionSequence.getActionChildren().get(i);
             if (actionClass.isInstance(action))
             {
                boolean match = side == null;

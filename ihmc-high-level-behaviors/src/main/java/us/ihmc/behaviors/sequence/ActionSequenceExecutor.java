@@ -40,18 +40,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
       executorChildren.clear();
       currentlyExecutingActions.clear();
-      for (int i = 0; i < getChildren().size(); i++)
-      {
-         if (getChildren().get(i) instanceof ActionNodeExecutor<?, ?> actionNodeExecutor)
-         {
-            actionNodeExecutor.getState().setActionIndex(i);
-            executorChildren.add(actionNodeExecutor);
-            if (actionNodeExecutor.getState().getIsExecuting())
-            {
-               currentlyExecutingActions.add(actionNodeExecutor);
-            }
-         }
-      }
+      updateActionSubtree(this);
 
       lastIndexOfConcurrentSetToExecute = findLastIndexOfConcurrentSetToExecute(executorChildren, getState().getExecutionNextIndex());
       for (int i = 0; i < executorChildren.size(); i++)
@@ -92,6 +81,25 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
             executeNextAction();
          }
          while (!isEndOfSequence() && getLastExecutingAction().getDefinition().getExecuteWithNextAction());
+      }
+   }
+
+   public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
+   {
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
+      {
+         if (child instanceof ActionNodeExecutor<?, ?> actionNode)
+         {
+            executorChildren.add(actionNode);
+            if (actionNode.getState().getIsExecuting())
+            {
+               currentlyExecutingActions.add(actionNode);
+            }
+         }
+         else
+         {
+            updateActionSubtree(child);
+         }
       }
    }
 

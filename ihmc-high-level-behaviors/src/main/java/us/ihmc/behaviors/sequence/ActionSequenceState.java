@@ -1,10 +1,14 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
@@ -12,6 +16,9 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTBidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalString nextActionRejectionTooltip;
+
+   private transient final MutableInt actionIndex = new MutableInt();
+   private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
 
    public ActionSequenceState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -21,6 +28,31 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);
       manualExecutionRequested = new CRDTBidirectionalNotification(this);
       nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
+
+      actionIndex.setValue(0);
+      updateActionSubtree(this, actionIndex);
+   }
+
+   public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
+   {
+      for (BehaviorTreeNodeState<?> child : node.getChildren())
+      {
+         if (child instanceof ActionNodeState<?> actionNode)
+         {
+            actionNode.setActionIndex(actionIndex.getAndIncrement());
+            actionChildren.add(actionNode);
+         }
+         else
+         {
+            updateActionSubtree(child, actionIndex);
+         }
+      }
    }
 
    public void toMessage(ActionSequenceStateMessage message)
@@ -55,7 +87,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public void stepForwardNextExecutionIndex()
    {
-      if (executionNextIndex.getValue() < getChildren().size())
+      if (executionNextIndex.getValue() < actionChildren.size())
          executionNextIndex.increment();
    }
 
@@ -102,5 +134,10 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    public void setManualExecutionRequested()
    {
       manualExecutionRequested.set();
+   }
+
+   public List<ActionNodeState<?>> getActionChildren()
+   {
+      return actionChildren;
    }
 }
