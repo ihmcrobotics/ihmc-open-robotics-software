@@ -34,10 +34,27 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       if (hollowArrowRenderer.render(getState().getIsNextForExecution()))
       {
-         if (getParent() instanceof RDXActionSequence actionSequence)
+         RDXActionSequence actionSequence = findSequenceParent(this);
+         if (actionSequence != null)
          {
             actionSequence.getState().setExecutionNextIndex(getState().getActionIndex());
          }
+      }
+   }
+
+   private RDXActionSequence findSequenceParent(RDXBehaviorTreeNode<?, ?> node)
+   {
+      if (node.getParent() == null)
+      {
+         return null;
+      }
+      else if (node.getParent() instanceof RDXActionSequence actionSequence)
+      {
+         return actionSequence;
+      }
+      else
+      {
+         return findSequenceParent(node.getParent());
       }
    }
 
