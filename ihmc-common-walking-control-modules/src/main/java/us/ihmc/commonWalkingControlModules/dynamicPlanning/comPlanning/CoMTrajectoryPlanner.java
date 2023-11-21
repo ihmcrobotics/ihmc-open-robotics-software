@@ -261,7 +261,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       solveForCoefficientConstraintMatrix(contactSequence);
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
-      if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null && contactSequence.size() > 1)
+      if (false && maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null && contactSequence.size() > 1)
       {
          int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
 
@@ -307,6 +307,19 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       }
    }
 
+   private boolean hasExternalForceObjective()
+   {
+      for (int i = 0; i < externalForceEnd.size(); i++)
+      {
+         if (externalForceEnd.get(i).containsNaN())
+            return false;
+         if (externalForceStart.get(i).containsNaN())
+            return false;
+      }
+
+      return true;
+   }
+
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
    {
       int numberOfPhases = contactSequence.size();
@@ -314,8 +327,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       numberOfConstraints = 0;
 
+      boolean hasExternalForce = hasExternalForceObjective();
       // set initial constraint
-      setCoMPositionConstraint(currentCoMPosition);
+//      if (!hasExternalForce)
+         setCoMPositionConstraint(0, 0.0, currentCoMPosition);
       setDynamicsInitialConstraint(contactSequence, 0);
 
       // add transition continuity constraints
@@ -333,7 +348,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
       finalDCMPosition.set(modifiedEndVRPPositions.getLast());
       double finalDuration = lastContactPhase.getTimeInterval().getDuration();
-      setDCMPositionConstraint(numberOfPhases - 1, finalDuration, finalDCMPosition);
+      if (hasExternalForce)
+         setCoMPositionConstraint(numberOfPhases - 1, finalDuration, finalDCMPosition);
+      else
+         setDCMPositionConstraint(numberOfPhases - 1, finalDuration, finalDCMPosition);
+
       setDynamicsFinalConstraint(contactSequence, numberOfPhases - 1);
 
       sparseSolver.setA(coefficientMultipliersSparse);
@@ -449,11 +468,15 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                                 desiredVRPVelocity);
 
       // TODO subtract out the external force
-      double denominator = 1.0 / (omega.getValue() * omega.getValue());
-      double alpha = timeInPhase / trajectoryHandler.getVrpTrajectories().get(segmentId).getDuration();
+      double denominator = -1.0 / (omega.getValue() * omega.getValue());
+      double duration = Math.min(trajectoryHandler.getVrpTrajectories().get(segmentId).getDuration(), sufficientlyLongTime);
+      double alpha = timeInPhase / duration;
       desiredExternalAcceleration.interpolate(externalForceStart.get(segmentId), externalForceEnd.get(segmentId), alpha);
-//      if (!desiredExternalAcceleration.containsNaN())
-//         vrpPositionToPack.scaleAdd(denominator, desiredExternalAcceleration, vrpPositionToPack); // FIXME should this be negative?
+      desiredExternalAccelerationRate.sub(externalForceEnd.get(segmentId), externalForceStart.get(segmentId));
+      desiredExternalAccelerationRate.scale(1.0 / duration);
+
+      if (!desiredExternalAcceleration.containsNaN())
+         vrpPositionToPack.scaleAdd(denominator, desiredExternalAcceleration, vrpPositionToPack); // FIXME should this be negative?
       // TODO do VRP velocity
 
       ecmpPositionToPack.set(vrpPositionToPack);
@@ -624,12 +647,12 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     *
     * @param centerOfMassLocationForConstraint x<sub>d</sub> in the above equations
     */
-   private void setCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint)
+   private void setCoMPositionConstraint(int sequenceId, double time, FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
       CoMTrajectoryPlannerTools.addCoMPositionConstraint(centerOfMassLocationForConstraint,
                                                          omega.getValue(),
-                                                         0.0,
-                                                         0,
+                                                         time,
+                                                         sequenceId,
                                                          numberOfConstraints,
                                                          coefficientMultipliersSparse,
                                                          xConstants,

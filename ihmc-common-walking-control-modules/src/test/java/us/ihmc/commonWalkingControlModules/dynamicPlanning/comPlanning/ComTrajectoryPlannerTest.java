@@ -13,6 +13,7 @@ import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.robotics.Assert.assertEquals;
 
 public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
@@ -229,4 +230,141 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(contactPosition, postTouchdownCMPPosition, 1e-4);
    }
 
+   @Test
+   public void testWithExternalForceWhileStanding()
+   {
+      CoMTrajectoryPlanner planner = (CoMTrajectoryPlanner) createComTrajectoryPlanner();
+
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
+
+      FrameVector3D externalAcceleration = new FrameVector3D();
+      externalAcceleration.setX(0.5);
+
+      double initialDuration = 0.25;
+      double finalDuration = 1.0;
+      FramePoint3D contactPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.0, 0.0, 0.0);
+      firstContact.setTimeInterval(new TimeInterval(0.0, initialDuration));
+      firstContact.setStartECMPPosition(contactPosition);
+      firstContact.setEndECMPPosition(contactPosition);
+      firstContact.setLinearECMPVelocity();
+
+      secondContact.setTimeInterval(new TimeInterval(initialDuration, initialDuration + finalDuration));
+      secondContact.setStartECMPPosition(contactPosition);
+      secondContact.setEndECMPPosition(contactPosition);
+      secondContact.setLinearECMPVelocity();
+      secondContact.setExternalContactAccelerationStart(externalAcceleration);
+      secondContact.setExternalContactAccelerationEnd(externalAcceleration);
+
+      contactSequence.add(firstContact);
+      contactSequence.add(secondContact);
+
+      FramePoint3D initialCoMPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.05, 0.05, nominalHeight + 0.05);
+      FrameVector3D comVelocity = new FrameVector3D();
+      planner.setInitialCenterOfMassState(initialCoMPosition, comVelocity);
+
+
+      planner.solveForTrajectory(contactSequence);
+
+      // test initial
+      planner.compute(0.0);
+      EuclidCoreTestTools.assertEquals(contactPosition, planner.getDesiredECMPPosition(), 1e-4);
+
+      // test at the end
+      planner.compute(100.0);
+
+
+      EuclidCoreTestTools.assertEquals(contactPosition, planner.getDesiredECMPPosition(), 1e-4);
+      assertTrue(planner.getDesiredCoMPosition().getX() > contactPosition.getX()); // we know we want it to be leaning forward to push against the wall.
+
+      FrameVector3D forceFromContactAtEnd = new FrameVector3D(planner.getDesiredCoMPosition());
+      forceFromContactAtEnd.sub(planner.getDesiredECMPPosition());
+      forceFromContactAtEnd.scale(omega.getDoubleValue() * omega.getDoubleValue());
+      EuclidCoreTestTools.assertEquals(forceFromContactAtEnd, externalAcceleration, 1e-4);
+   }
+
+   @Test
+   public void testWithExternalForceWhileStandingSimple()
+   {
+      double height = 1.0;
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(gravityZ, height, registry);
+
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+
+      FrameVector3D externalAcceleration = new FrameVector3D();
+      externalAcceleration.setX(1.0);
+
+      FramePoint3D contactPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), height, 0.0, 0.0);
+
+      firstContact.setTimeInterval(new TimeInterval(0.0, 30.0));
+      firstContact.setStartECMPPosition(contactPosition);
+      firstContact.setEndECMPPosition(contactPosition);
+      firstContact.setExternalContactAccelerationStart(externalAcceleration);
+      firstContact.setExternalContactAccelerationEnd(externalAcceleration);
+      firstContact.setLinearECMPVelocity();
+
+      contactSequence.add(firstContact);
+
+
+      FramePoint3D equilibriumPosition = new FramePoint3D(contactPosition);
+      equilibriumPosition.setZ(height);
+      equilibriumPosition.addX(externalAcceleration.getX() / gravityZ); // this is the point of static equilibrium
+      FramePoint3D comPosition = new FramePoint3D(equilibriumPosition);
+
+      FrameVector3D comVelocity = new FrameVector3D();
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
+
+      // From like triangles, we know that the neutral position is x = f / g
+
+      planner.solveForTrajectory(contactSequence);
+
+      // test initial
+      planner.compute(0.0);
+
+      EuclidCoreTestTools.assertEquals(contactPosition, planner.getDesiredECMPPosition(), 1e-4);
+      EuclidCoreTestTools.assertEquals(comPosition, planner.getDesiredCoMPosition(), 1e-4);
+
+      planner.compute(10.0);
+
+      EuclidCoreTestTools.assertEquals(contactPosition, planner.getDesiredECMPPosition(), 1e-4);
+      EuclidCoreTestTools.assertEquals(comPosition, planner.getDesiredCoMPosition(), 1e-4);
+
+      // check that the pushing force from the GRFs matches the external acceleration.
+      FrameVector3D acceleration = new FrameVector3D(planner.getDesiredCoMPosition());
+      acceleration.sub(planner.getDesiredECMPPosition());
+      acceleration.subZ(height);
+      acceleration.scale(gravityZ / height);
+
+      EuclidCoreTestTools.assertEquals(externalAcceleration, acceleration, epsilon);
+
+
+
+      comPosition = new FramePoint3D(contactPosition);
+      comPosition.setZ(height);
+      comPosition.addX(0.5 * externalAcceleration.getX() / gravityZ); // make it so that it has to move
+      planner.setInitialCenterOfMassState(comPosition, comVelocity);
+
+      // From like triangles, we know that the neutral position is x = f / g
+
+      planner.solveForTrajectory(contactSequence);
+
+      // test initial
+      planner.compute(0.0);
+
+      EuclidCoreTestTools.assertEquals(contactPosition, planner.getDesiredECMPPosition(), 1e-4);
+      EuclidCoreTestTools.assertEquals(comPosition, planner.getDesiredCoMPosition(), 1e-4);
+
+      planner.compute(10.0);
+
+      EuclidCoreTestTools.assertEquals(contactPosition, planner.getDesiredECMPPosition(), 1e-4);
+      EuclidCoreTestTools.assertEquals(equilibriumPosition, planner.getDesiredCoMPosition(), 1e-4); // it should move to the equilibrium position with time.
+
+      // check that the pushing force from the GRFs matches the external acceleration.
+      acceleration = new FrameVector3D(planner.getDesiredCoMPosition());
+      acceleration.sub(planner.getDesiredECMPPosition());
+      acceleration.subZ(height);
+      acceleration.scale(gravityZ / height);
+
+      EuclidCoreTestTools.assertEquals(externalAcceleration, acceleration, epsilon);
+   }
 }

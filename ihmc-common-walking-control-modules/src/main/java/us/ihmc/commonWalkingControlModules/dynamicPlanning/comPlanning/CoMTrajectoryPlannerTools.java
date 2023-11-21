@@ -173,11 +173,12 @@ public class CoMTrajectoryPlannerTools
             modifiedEndPosition.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
 
             // compute the force velocity, using a temporary variable.
+            double duration = Math.min(contactStateProvider.getTimeInterval().getDuration(), sufficientlyLongTime);
             modifiedStartVelocity.sub(contactStateProvider.getExternalContactAccelerationEnd(), contactStateProvider.getExternalContactAccelerationStart());
-            modifiedStartVelocity.scale(denominator);
+            modifiedStartVelocity.scale(denominator / duration);
 
             // augment the VRP velocity with the force
-            modifiedEndVelocity.add(modifiedStartVelocity, contactStateProvider.getECMPEndPosition());
+            modifiedEndVelocity.add(modifiedStartVelocity, contactStateProvider.getECMPEndVelocity());
             modifiedStartVelocity.add(contactStateProvider.getECMPStartVelocity());
          }
          else
@@ -217,11 +218,12 @@ public class CoMTrajectoryPlannerTools
          modifiedEndPosition.scaleAdd(denominator, contactStateProvider.getExternalContactAccelerationEnd(), end);
 
          // compute the force velocity, using a temporary variable.
+         double duration = Math.min(contactStateProvider.getTimeInterval().getDuration(), sufficientlyLongTime);
          modifiedStartVelocity.sub(contactStateProvider.getExternalContactAccelerationEnd(), contactStateProvider.getExternalContactAccelerationStart());
-         modifiedStartVelocity.scale(denominator);
+         modifiedStartVelocity.scale(denominator / duration);
 
          // augment the VRP velocity with the force
-         modifiedEndVelocity.add(modifiedStartVelocity, contactStateProvider.getECMPEndPosition());
+         modifiedEndVelocity.add(modifiedStartVelocity, contactStateProvider.getECMPEndVelocity());
          modifiedStartVelocity.add(contactStateProvider.getECMPStartVelocity());
       }
       else
