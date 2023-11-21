@@ -55,13 +55,15 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      WalkingControllerParameters walkingControllerParameters)
    {
+      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.walkingControllerParameters = walkingControllerParameters;
-
-      state = new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
    }
 
    @Override
@@ -177,11 +179,5 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                            + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
       state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-   }
-
-   @Override
-   public FootstepPlanActionState getState()
-   {
-      return state;
    }
 }

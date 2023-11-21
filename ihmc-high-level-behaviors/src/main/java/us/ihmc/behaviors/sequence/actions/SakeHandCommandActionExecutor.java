@@ -20,9 +20,11 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
    public SakeHandCommandActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
    {
-      this.ros2ControllerHelper = ros2ControllerHelper;
+      super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
 
-      state = new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory);
+      state = getState();
+
+      this.ros2ControllerHelper = ros2ControllerHelper;
    }
 
    @Override
@@ -52,11 +54,5 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       state.setNominalExecutionDuration(WAIT_TIME);
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public SakeHandCommandActionState getState()
-   {
-      return state;
    }
 }

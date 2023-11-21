@@ -13,7 +13,7 @@ import java.util.List;
  * A behavior tree node layer that sits over the Definition layer.
  * The state layer is the layer that gets synchronized over the network.
  */
-public abstract class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
+public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       extends RequestConfirmFreezable
       implements BehaviorTreeNodeLayer<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
 {

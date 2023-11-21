@@ -36,7 +36,9 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new ActionSequenceState(id, crdtInfo, saveFileDirectory);
+      super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
 
       getDefinition().setDescription("ActionSequence");
 
@@ -160,11 +162,5 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          actionProgressBars.setAction(currentlyExecutingAction);
       }
       multipleActionProgressBars.render();
-   }
-
-   @Override
-   public ActionSequenceState getState()
-   {
-      return state;
    }
 }

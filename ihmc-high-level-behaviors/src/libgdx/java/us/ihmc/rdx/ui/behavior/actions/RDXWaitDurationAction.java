@@ -17,7 +17,9 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
 
    public RDXWaitDurationAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new WaitDurationActionState(id, crdtInfo, saveFileDirectory);
+      super(new WaitDurationActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
 
       getDefinition().setDescription("Wait");
 
@@ -38,11 +40,5 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
    public String getActionTypeTitle()
    {
       return String.format("Wait %.1f s", getDefinition().getWaitDuration());
-   }
-
-   @Override
-   public WaitDurationActionState getState()
-   {
-      return state;
    }
 }

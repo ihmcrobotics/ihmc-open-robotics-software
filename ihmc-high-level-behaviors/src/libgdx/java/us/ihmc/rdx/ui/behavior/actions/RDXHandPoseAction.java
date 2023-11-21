@@ -90,7 +90,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
-      state = new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
+      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
 
       getDefinition().setDescription("Hand pose");
 
@@ -325,11 +327,5 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    public ReferenceFrame getReferenceFrame()
    {
       return poseGizmo.getPoseGizmo().getGizmoFrame();
-   }
-
-   @Override
-   public HandPoseActionState getState()
-   {
-      return state;
    }
 }

@@ -51,11 +51,13 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  ROS2SyncedRobotModel syncedRobot,
                                  SideDependentList<ROS2HandWrenchCalculator> handWrenchCalculators)
    {
+      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.handWrenchCalculators = handWrenchCalculators;
-
-      state = new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -268,11 +270,5 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                                                                                   jointAngles);
       armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
-   }
-
-   @Override
-   public HandPoseActionState getState()
-   {
-      return state;
    }
 }

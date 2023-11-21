@@ -12,7 +12,9 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
 
    public WaitDurationActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new WaitDurationActionState(id, crdtInfo, saveFileDirectory);
+      super(new WaitDurationActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
    }
 
    @Override
@@ -34,11 +36,5 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
 
       state.setNominalExecutionDuration(getDefinition().getWaitDuration());
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public WaitDurationActionState getState()
-   {
-      return state;
    }
 }

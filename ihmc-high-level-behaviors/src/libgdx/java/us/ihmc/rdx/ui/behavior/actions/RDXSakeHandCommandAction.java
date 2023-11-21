@@ -31,7 +31,9 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
    public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory);
+      super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
 
       getDefinition().setDescription("Hand configuration");
 
@@ -103,11 +105,5 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    public String getActionTypeTitle()
    {
       return "Hand Configuration";
-   }
-
-   @Override
-   public SakeHandCommandActionState getState()
-   {
-      return state;
    }
 }

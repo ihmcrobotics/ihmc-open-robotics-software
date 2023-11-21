@@ -50,7 +50,9 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                         ReferenceFrameLibrary referenceFrameLibrary,
                         FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      state = new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
+      super(new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
 
       getDefinition().setDescription("Walk");
 
@@ -245,11 +247,5 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    public String getActionTypeTitle()
    {
       return "Walk Goal";
-   }
-
-   @Override
-   public WalkActionState getState()
-   {
-      return state;
    }
 }

@@ -64,9 +64,11 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
                                      RobotCollisionModel selectionCollisionModel,
                                      ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.syncedFullRobotModel = syncedFullRobotModel;
+      super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
-      state = new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
+      state = getState();
+
+      this.syncedFullRobotModel = syncedFullRobotModel;
 
       getDefinition().setDescription("Pelvis height and pitch");
 
@@ -233,11 +235,5 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    public String getActionTypeTitle()
    {
       return "Pelvis Height and Pitch";
-   }
-
-   @Override
-   public PelvisHeightPitchActionState getState()
-   {
-      return state;
    }
 }

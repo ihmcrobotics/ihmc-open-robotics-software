@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
@@ -51,6 +52,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       // Control nodes:
+      if (nodeType == BehaviorTreeNodeDefinition.class)
+      {
+         return new RDXBehaviorTreeNode<>(id, crdtInfo, saveFileDirectory);
+      }
       if (nodeType == ActionSequenceDefinition.class)
       {
          return new RDXActionSequence(id, crdtInfo, saveFileDirectory);

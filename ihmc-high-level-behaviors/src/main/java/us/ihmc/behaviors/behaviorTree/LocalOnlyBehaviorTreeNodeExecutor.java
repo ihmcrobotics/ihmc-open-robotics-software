@@ -12,11 +12,13 @@ import java.util.List;
  */
 public abstract class LocalOnlyBehaviorTreeNodeExecutor extends BehaviorTreeNodeExecutor<LocalOnlyBehaviorTreeNodeState, BehaviorTreeNodeDefinition>
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, 5);
-   private final LocalOnlyBehaviorTreeNodeState state = new LocalOnlyBehaviorTreeNodeState(crdtInfo);
-
    // TODO: Fix
    private final List<LocalOnlyBehaviorTreeNodeExecutor> children = new ArrayList<>();
+
+   public LocalOnlyBehaviorTreeNodeExecutor()
+   {
+      super(new LocalOnlyBehaviorTreeNodeState(new CRDTInfo(ROS2ActorDesignation.ROBOT, 5)));
+   }
 
    @Override
    public void tick()
@@ -34,21 +36,9 @@ public abstract class LocalOnlyBehaviorTreeNodeExecutor extends BehaviorTreeNode
 
    public abstract BehaviorTreeNodeStatus determineStatus();
 
-   @Override
-   public LocalOnlyBehaviorTreeNodeState getState()
-   {
-      return state;
-   }
-
    // TODO: Fix
    public List<LocalOnlyBehaviorTreeNodeExecutor> getLocalOnlyChildren()
    {
       return children;
-   }
-
-   @Override
-   public BehaviorTreeNodeDefinition getDefinition()
-   {
-      return state.getDefinition();
    }
 }

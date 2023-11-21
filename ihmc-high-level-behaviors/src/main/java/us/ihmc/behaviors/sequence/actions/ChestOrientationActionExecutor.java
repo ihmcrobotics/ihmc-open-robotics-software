@@ -38,10 +38,12 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                          ROS2SyncedRobotModel syncedRobot,
                                          ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(new ChestOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-
-      state = new ChestOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
    }
 
    @Override
@@ -127,11 +129,5 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
       ros2ControllerHelper.publishToController(message);
-   }
-
-   @Override
-   public ChestOrientationActionState getState()
-   {
-      return state;
    }
 }
