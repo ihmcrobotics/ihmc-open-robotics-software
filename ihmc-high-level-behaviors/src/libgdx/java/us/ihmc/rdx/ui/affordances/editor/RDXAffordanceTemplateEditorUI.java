@@ -556,7 +556,9 @@ public class RDXAffordanceTemplateEditorUI
          case BOX, PRISM:
             if (objectScale[0] != 1.0f || objectScale[1] != 1.0f || objectScale[2] != 1.0f)
             {
-               framePose3D.set(1, 0, 0, 0, 0, 0);
+               framePose3D.setTranslationAndIdentityRotation(objectScale[0]*framePose3D.getPosition().getX(),
+                                                             objectScale[1]*framePose3D.getPosition().getY(),
+                                                             objectScale[2]*framePose3D.getPosition().getZ());
             }
             break;
       }
