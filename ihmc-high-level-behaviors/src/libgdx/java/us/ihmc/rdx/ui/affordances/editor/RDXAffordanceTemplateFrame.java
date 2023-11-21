@@ -165,7 +165,6 @@ public class RDXAffordanceTemplateFrame
 
    public void setFrame(FramePose3D poseReference, RobotSide side)
    {
-//      poses.replace(side, new FramePose3D(poseReference.getReferenceFrame(), poseReference));
       poses.replace(side, poseReference);
       updateInternal(side);
    }
