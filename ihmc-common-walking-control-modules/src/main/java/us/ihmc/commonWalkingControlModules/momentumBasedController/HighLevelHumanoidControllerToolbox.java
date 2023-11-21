@@ -165,8 +165,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final CenterOfMassStaticStabilityRegionCalculator multiContactRegionCalculator;
+   private final YoBoolean updateWholeBodyContactState = new YoBoolean("updateWholeBodyContactState", registry);
    private final WholeBodyContactState wholeBodyContactState;
-   private final ExecutionTimer multiContactCoMTimer = new ExecutionTimer("multiContactCoMTimer", registry);
+
+   private final ExecutionTimer multiContactCoMTimer = new ExecutionTimer("multiContactCoMTotalTimer", registry);
+   private final ExecutionTimer contactStateUpdateTimer = new ExecutionTimer("contactStateUpdateTimer", registry);
+   private final ExecutionTimer multiContactRegionLPUpdateTimer = new ExecutionTimer("multiContactRegionLPUpdateTimer", registry);
+   private final ExecutionTimer multiContactRegionLPSolveTimer = new ExecutionTimer("multiContactRegionLPSolveTimer", registry);
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -1033,6 +1038,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void resetMultiContactCoMRegion()
    {
       multiContactRegionCalculator.clear();
+
+      // Update whole body contact state on next solve tick
+      updateWholeBodyContactState.set(true);
    }
 
    public WholeBodyContactState getWholeBodyContactState()
@@ -1049,12 +1057,29 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    {
       multiContactCoMTimer.startMeasurement();
 
-      // Update basis vector transforms and actuation constraints
-      wholeBodyContactState.update();
-      // Update LP solver constraints based on contact state
-      multiContactRegionCalculator.updateContactState(wholeBodyContactState);
-      // Queries new direction and updates support region
-      multiContactRegionCalculator.update();
+      if (updateWholeBodyContactState.getValue())
+      {
+         // Update basis vector transforms and actuation constraints
+         contactStateUpdateTimer.startMeasurement();
+         wholeBodyContactState.update();
+         contactStateUpdateTimer.stopMeasurement();
+
+         // Update LP solver constraints based on contact state
+         multiContactRegionLPUpdateTimer.startMeasurement();
+         multiContactRegionCalculator.updateContactState(wholeBodyContactState);
+         multiContactRegionLPUpdateTimer.stopMeasurement();
+
+         updateWholeBodyContactState.set(false);
+      }
+      else
+      {
+         // Queries new direction and updates support region
+         multiContactRegionLPSolveTimer.startMeasurement();
+         multiContactRegionCalculator.performCoMRegionQuery();
+         multiContactRegionLPSolveTimer.stopMeasurement();
+
+         updateWholeBodyContactState.set(multiContactRegionCalculator.getQueryCounter() == 0);
+      }
 
       multiContactCoMTimer.stopMeasurement();
    }
