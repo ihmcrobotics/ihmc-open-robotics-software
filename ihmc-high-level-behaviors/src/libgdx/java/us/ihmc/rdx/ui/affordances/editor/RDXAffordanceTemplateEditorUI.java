@@ -487,17 +487,30 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
-            calculateAffordanceTemplateScale();
-            rescaleAffordanceTemplate();
-            for (RobotSide side : RobotSide.values())
+            if (objectBuilder.getSelectedObject().getShape() != null)
             {
-               for (int i = 1; i < preGraspFrames.getIndex()+1; i++)
-                  preGraspFrames.updateInternal(side, i);
+               calculateAffordanceTemplateScale();
 
-               graspFrame.updateInternal(side);
+               rescaleAffordanceTemplate();
+               for (RobotSide side : RobotSide.values())
+               {
+                  for (int i = 1; i < preGraspFrames.getIndex() + 1; i++)
+                     preGraspFrames.updateInternal(side, i);
 
-               for (int i = 1; i < postGraspFrames.getIndex()+1; i++)
-                  postGraspFrames.updateInternal(side, i);
+                  graspFrame.updateInternal(side);
+
+                  for (int i = 1; i < postGraspFrames.getIndex() + 1; i++)
+                  {
+                     postGraspFrames.updateInternal(side, i);
+                     RigidBodyTransform objectPose = postGraspFrames.getObjectTransforms().get(i - 1);
+                     postGraspFrames.getObjectTransforms()
+                                    .get(i - 1)
+                                    .getTranslation()
+                                    .set(objectScale[0] * objectPose.getTranslation().getX(),
+                                         objectScale[1] * objectPose.getTranslation().getY(),
+                                         objectScale[2] * objectPose.getTranslation().getZ());
+                  }
+               }
             }
          }
       }
@@ -555,11 +568,9 @@ public class RDXAffordanceTemplateEditorUI
       {
          case BOX, PRISM:
             if (objectScale[0] != 1.0f || objectScale[1] != 1.0f || objectScale[2] != 1.0f)
-            {
-               framePose3D.setTranslationAndIdentityRotation(objectScale[0]*framePose3D.getPosition().getX(),
-                                                             objectScale[1]*framePose3D.getPosition().getY(),
-                                                             objectScale[2]*framePose3D.getPosition().getZ());
-            }
+               framePose3D.getTranslation().set(objectScale[0]*framePose3D.getPosition().getX(),
+                                                objectScale[1]*framePose3D.getPosition().getY(),
+                                                objectScale[2]*framePose3D.getPosition().getZ());
             break;
       }
    }
