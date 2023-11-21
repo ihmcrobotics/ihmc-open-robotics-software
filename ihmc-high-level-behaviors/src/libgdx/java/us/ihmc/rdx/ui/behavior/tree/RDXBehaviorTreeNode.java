@@ -10,6 +10,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -17,20 +18,22 @@ import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
-                                          D extends BehaviorTreeNodeDefinition>
+public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
+                                 D extends BehaviorTreeNodeDefinition>
       implements BehaviorTreeNodeLayer<RDXBehaviorTreeNode<?, ?>, S, S, D>
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImStringWrapper descriptionWrapper;
-
+   private final S state;
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
    private transient RDXBehaviorTreeNode<?, ?> parent;
+
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private ImStringWrapper descriptionWrapper;
    private boolean treeWidgetExpanded = false;
    private boolean isDescriptionBeingEdited = false;
    private transient final ImString imDescriptionText = new ImString();
@@ -40,6 +43,20 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final String nodePopupID = labels.get("Node popup");
    private final String modalPopupID = labels.get("Create Node");
    private boolean nodeContextMenuShowing = false;
+
+   /** For extending types. */
+   public RDXBehaviorTreeNode(S state)
+   {
+      this.state = state;
+   }
+
+   /** For creating a basic node. */
+   @SuppressWarnings("unchecked")
+   public RDXBehaviorTreeNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   {
+      D definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
+      this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
+   }
 
    @Override
    public void update()
@@ -243,5 +260,11 @@ public abstract class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public D getDefinition()
    {
       return getState().getDefinition();
+   }
+
+   @Override
+   public S getState()
+   {
+      return state;
    }
 }

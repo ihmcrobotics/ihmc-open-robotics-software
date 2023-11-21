@@ -63,7 +63,9 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
                                     RobotCollisionModel selectionCollisionModel,
                                     ReferenceFrameLibrary referenceFrameLibrary)
    {
-      state = new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary);
+      super(new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
 
       getDefinition().setDescription("Chest orientation");
 
@@ -224,11 +226,5 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    public String getActionTypeTitle()
    {
       return "Chest Orientation";
-   }
-
-   @Override
-   public ChestOrientationActionState getState()
-   {
-      return state;
    }
 }

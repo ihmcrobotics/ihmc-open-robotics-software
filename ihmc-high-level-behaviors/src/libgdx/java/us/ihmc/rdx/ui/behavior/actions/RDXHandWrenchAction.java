@@ -18,7 +18,9 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
 
    public RDXHandWrenchAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new HandWrenchActionState(id, crdtInfo, saveFileDirectory);
+      super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
 
       getDefinition().setDescription("Hand wrench");
 
@@ -43,11 +45,5 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    public String getActionTypeTitle()
    {
       return getDefinition().getSide().getPascalCaseName() + " Hand Wrench";
-   }
-
-   @Override
-   public HandWrenchActionState getState()
-   {
-      return state;
    }
 }

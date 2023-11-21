@@ -39,11 +39,14 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           ROS2SyncedRobotModel syncedRobot)
    {
+      super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      definition = new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory);
-      state = new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
+      definition = getDefinition();
    }
 
    @Override
@@ -119,11 +122,5 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-   }
-
-   @Override
-   public PelvisHeightPitchActionState getState()
-   {
-      return state;
    }
 }

@@ -26,9 +26,11 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
 
    public RDXArmJointAnglesAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
    {
-      this.robotModel = robotModel;
+      super(new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory));
 
-      state = new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory);
+      state = getState();
+
+      this.robotModel = robotModel;
 
       getDefinition().setDescription("Arm joint angles");
 
@@ -104,11 +106,5 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
    public String getActionTypeTitle()
    {
       return "Arm Joint Angles";
-   }
-
-   @Override
-   public ArmJointAnglesActionState getState()
-   {
-      return state;
    }
 }

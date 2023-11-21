@@ -24,9 +24,9 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    private final ImString rejectionTooltip = new ImString();
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
 
-   public RDXActionNode()
+   public RDXActionNode(S state)
    {
-
+      super(state);
    }
 
    @Override

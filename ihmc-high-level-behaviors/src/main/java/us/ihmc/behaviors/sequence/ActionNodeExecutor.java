@@ -9,6 +9,11 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
                                          D extends ActionNodeDefinition>
       extends BehaviorTreeNodeExecutor<S, D>
 {
+   public ActionNodeExecutor(S state)
+   {
+      super(state);
+   }
+
    /** Trigger the action to begin executing. Called once per execution. */
    public void triggerActionExecution()
    {

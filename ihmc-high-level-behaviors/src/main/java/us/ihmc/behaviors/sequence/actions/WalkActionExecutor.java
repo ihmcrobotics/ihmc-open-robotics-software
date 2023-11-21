@@ -62,14 +62,16 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                              WalkingControllerParameters walkingControllerParameters,
                              ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
+
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepTracker = footstepTracker;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-
-      state = new WalkActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
    }
 
    @Override
@@ -236,11 +238,5 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       }
-   }
-
-   @Override
-   public WalkActionState getState()
-   {
-      return state;
    }
 }

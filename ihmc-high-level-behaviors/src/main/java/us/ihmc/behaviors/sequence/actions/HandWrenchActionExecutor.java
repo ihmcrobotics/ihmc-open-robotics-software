@@ -19,9 +19,11 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
 
    public HandWrenchActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
    {
-      this.ros2ControllerHelper = ros2ControllerHelper;
+      super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
 
-      state = new HandWrenchActionState(id, crdtInfo, saveFileDirectory);
+      state = getState();
+
+      this.ros2ControllerHelper = ros2ControllerHelper;
    }
 
    @Override
@@ -60,11 +62,5 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
                                  .setY(getDefinition().getSide() == RobotSide.RIGHT ? -handCenterOffset : handCenterOffset);
 
       ros2ControllerHelper.publishToController(handWrenchTrajectoryMessage);
-   }
-
-   @Override
-   public HandWrenchActionState getState()
-   {
-      return state;
    }
 }

@@ -49,11 +49,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                 ROS2SyncedRobotModel syncedRobot,
                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
+      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+
+      state = getState();
+
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
-
-      state = new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
 
       getDefinition().setDescription("Footstep plan");
 
@@ -204,11 +206,5 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public String getActionTypeTitle()
    {
       return "Footstep Plan";
-   }
-
-   @Override
-   public FootstepPlanActionState getState()
-   {
-      return state;
    }
 }

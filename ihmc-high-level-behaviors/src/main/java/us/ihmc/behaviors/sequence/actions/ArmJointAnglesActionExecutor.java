@@ -16,12 +16,18 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
 
-   public ArmJointAnglesActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
+   public ArmJointAnglesActionExecutor(long id,
+                                       CRDTInfo crdtInfo,
+                                       WorkspaceResourceDirectory saveFileDirectory,
+                                       DRCRobotModel robotModel,
+                                       ROS2ControllerHelper ros2ControllerHelper)
    {
+      super(new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
+
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
-
-      state = new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory);
    }
 
    @Override
@@ -59,11 +65,5 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
       state.setIsExecuting(executionTimer.isRunning(getDefinition().getTrajectoryDuration()));
       state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
-   }
-
-   @Override
-   public ArmJointAnglesActionState getState()
-   {
-      return state;
    }
 }

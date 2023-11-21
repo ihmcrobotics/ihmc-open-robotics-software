@@ -11,14 +11,15 @@ import java.util.List;
 public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSequenceState, ActionSequenceDefinition>
 {
    private final ActionSequenceState state;
-
    private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private int lastIndexOfConcurrentSetToExecute;
 
    public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      state = new ActionSequenceState(id, crdtInfo, saveFileDirectory);
+      super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
    }
 
    @Override
@@ -150,11 +151,5 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    public int getLastIndexOfConcurrentSetToExecute()
    {
       return lastIndexOfConcurrentSetToExecute;
-   }
-
-   @Override
-   public ActionSequenceState getState()
-   {
-      return state;
    }
 }

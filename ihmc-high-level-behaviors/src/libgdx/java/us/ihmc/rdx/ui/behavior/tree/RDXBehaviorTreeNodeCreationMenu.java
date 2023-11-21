@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
@@ -80,6 +81,7 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.popFont();
       ImGui.indent();
 
+      renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
       renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
 
       ImGui.unindent();
