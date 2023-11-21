@@ -131,8 +131,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final LegElasticityDebuggator legElasticityDebuggator;
 
    private final YoBoolean isUpperBodyLoadBearing = new YoBoolean("isUpperBodyLoadBearing", registry);
-   private final FramePoint3D tempContactPosition = new FramePoint3D();
-   private final FrameVector3D tempContactNormal = new FrameVector3D();
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -804,28 +802,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       // Set feet contact points
       for (RobotSide robotSide : RobotSide.values)
-      {
-         if (controllerToolbox.getFootContactState(robotSide).inContact())
-         {
-            FrameConvexPolygon2DReadOnly footPolygonInSoleFrame = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
-            ReferenceFrame soleFrame = controllerToolbox.getContactableFeet().get(robotSide).getSoleFrame();
-            RigidBodyBasics foot = controllerToolbox.getContactableFeet().get(robotSide).getRigidBody();
-
-            for (int i = 0; i < footPolygonInSoleFrame.getNumberOfVertices(); i++)
-            {
-               tempContactPosition.setIncludingFrame(footPolygonInSoleFrame.getReferenceFrame(), footPolygonInSoleFrame.getVertex(i), 0.0);
-               tempContactNormal.setIncludingFrame(soleFrame, Axis3D.Z);
-
-               wholeBodyContactState.addContactPoint(foot, tempContactPosition, tempContactNormal);
-            }
-         }
-      }
+         wholeBodyContactState.addContactPoints(controllerToolbox.getFootContactState(robotSide));
 
       // Set upper body contact points
       for (int i = 0; i < bodyManagers.size(); i++)
-      {
          bodyManagers.get(i).updateWholeBodyContactState(wholeBodyContactState);
-      }
    }
 
    private void reportStatusMessages()

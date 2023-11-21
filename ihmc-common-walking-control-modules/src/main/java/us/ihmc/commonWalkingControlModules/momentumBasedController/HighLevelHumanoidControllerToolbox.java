@@ -37,7 +37,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -62,7 +61,7 @@ import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -167,7 +166,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final CenterOfMassStaticStabilityRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final YoFrameConvexPolygon2D multiContactCoMFeasibileRegion;
+   private final ExecutionTimer multiContactCoMTimer = new ExecutionTimer("multiContactCoMTimer", registry);
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -338,10 +337,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(fullRobotModel.getTotalMass());
+      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(fullRobotModel.getTotalMass(), 18, registry, yoGraphicsListRegistry);
       wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
-      multiContactCoMFeasibileRegion = new YoFrameConvexPolygon2D("multiContactCoMRegion", ReferenceFrame.getWorldFrame(), multiContactRegionCalculator.getNumberOfVertices(), registry);
-      multiContactCoMFeasibileRegion.setToNaN();
 
       String graphicListName = getClass().getSimpleName();
       if (yoGraphicsListRegistry != null)
@@ -353,9 +350,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                             Color.BLACK,
                                                             0.005);
          yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
-
-         YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon("Multi-Contact CoM Region", multiContactCoMFeasibileRegion, Color.BLACK, true);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, multiContactCoMRegionArtifact);
       }
       yoCenterOfPressure.setToNaN();
 
@@ -1053,14 +1047,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void updateMultiContactCoMRegion()
    {
+      multiContactCoMTimer.startMeasurement();
+
       // Update basis vector transforms and actuation constraints
       wholeBodyContactState.update();
       // Update LP solver constraints based on contact state
       multiContactRegionCalculator.updateContactState(wholeBodyContactState);
       // Queries new direction and updates support region
       multiContactRegionCalculator.update();
-      // Update polygon graphic
-      multiContactCoMFeasibileRegion.set(multiContactRegionCalculator.getSupportRegion());
+
+      multiContactCoMTimer.stopMeasurement();
    }
 
    @Override
@@ -1081,8 +1077,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                                     0.01,
                                                                     ColorDefinitions.Black(),
                                                                     DefaultPoint2DGraphic.DIAMOND));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Multi-Contact CoM Region", multiContactCoMFeasibileRegion, ColorDefinitions.Black(), false));
-
+      group.addChild(multiContactRegionCalculator.getSCS2YoGraphics());
       return group;
    }
 }

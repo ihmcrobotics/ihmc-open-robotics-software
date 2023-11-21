@@ -414,6 +414,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    public void updateWholeBodyContactState(WholeBodyContactState wholeBodyContactStateToUpdate)
    {
-      wholeBodyContactStateToUpdate.addContactPoint(planeContactStateCommand.getContactingRigidBody(), contactPointInWorld, contactNormal);
+      wholeBodyContactStateToUpdate.addContactPoints(planeContactStateCommand);
    }
 }

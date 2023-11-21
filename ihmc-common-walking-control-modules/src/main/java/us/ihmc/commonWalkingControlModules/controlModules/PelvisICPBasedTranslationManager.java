@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -91,6 +92,7 @@ public class PelvisICPBasedTranslationManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2DReadOnly supportPolygon;
+   private final CenterOfMassStaticStabilityRegionCalculator multiContactCoMRegionCalculator;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
@@ -128,6 +130,7 @@ public class PelvisICPBasedTranslationManager
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
       soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
+      multiContactCoMRegionCalculator = controllerToolbox.getMultiContactRegionCalculator();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -162,7 +165,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg)
+   public void compute(RobotSide supportLeg, boolean isUpperBodyLoadBearing)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
@@ -175,7 +178,12 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (supportLeg == null)
+      if (isUpperBodyLoadBearing && multiContactCoMRegionCalculator.getFeasibleCoMRegion().getNumberOfVertices() >= 3)
+      {
+         supportFrame = multiContactCoMRegionCalculator.getFeasibleCoMRegion().getReferenceFrame();
+         supportPolygon = multiContactCoMRegionCalculator.getFeasibleCoMRegion();
+      }
+      else if (supportLeg == null)
       {
          supportFrame = midFeetZUpFrame;
          supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
