@@ -491,9 +491,13 @@ public class RDXAffordanceTemplateEditorUI
             rescaleAffordanceTemplate();
             for (RobotSide side : RobotSide.values())
             {
-//               preGraspFrames.updateInternal(side);
+               for (int i = 1; i < preGraspFrames.getIndex()+1; i++)
+                  preGraspFrames.updateInternal(side, i);
+
                graspFrame.updateInternal(side);
-//               postGraspFrames.updateInternal(side);
+
+               for (int i = 1; i < postGraspFrames.getIndex()+1; i++)
+                  postGraspFrames.updateInternal(side, i);
             }
          }
       }
@@ -527,8 +531,8 @@ public class RDXAffordanceTemplateEditorUI
    {
       switch (frameType)
       {
-//         case PRE_GRASP:
-//            return preGraspFrames.getPoses();
+         case PRE_GRASP:
+            return preGraspFrames.getPoses();
          case GRASP:
             SideDependentList<List<FramePose3D>> framePose3DList = new SideDependentList<List<FramePose3D>>();
             for (RobotSide side : RobotSide.values())
@@ -538,8 +542,8 @@ public class RDXAffordanceTemplateEditorUI
                framePose3DList.put(side, sidePoses);
             }
             return framePose3DList;
-//         case POST_GRASP:
-//            return postGraspFrames.getPoses();
+         case POST_GRASP:
+            return postGraspFrames.getPoses();
          default:
             return null;
       }

@@ -259,12 +259,11 @@ public class RDXAffordanceTemplateFrames
       // Update pose reference frame
       poseReference.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // Create a new PoseReferenceFrame
-      PoseReferenceFrame frame = new PoseReferenceFrame(side.getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
-      frame.setPoseAndUpdate(poseReference);
-
-      // Add pose reference and frame to respective lists
+      // Add pose reference to respective list
       poses.get(side).add(poseReference);
+
+      // Create a new PoseReferenceFrame and Add pose frame to respective list
+      PoseReferenceFrame frame = new PoseReferenceFrame(side.getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
       poseFrames.get(side).add(frame);
 
       updateInternal(side, index);
@@ -272,6 +271,8 @@ public class RDXAffordanceTemplateFrames
 
    public void updateInternal(RobotSide side, int index)
    {
+      poseFrames.get(side).get(index-1).setPoseAndUpdate(poses.get(side).get(index-1));
+
       // Check if frame has been set at least once
       boolean hasFrameBeenSetOnce = arePosesSet.get(side).stream().anyMatch(Boolean::booleanValue);
 
@@ -401,6 +402,16 @@ public class RDXAffordanceTemplateFrames
    {
       selectedIndex--;
       selectFrame(selectedIndex);
+   }
+
+   public int getIndex()
+   {
+      return index;
+   }
+
+   public List<Integer> getPoseIndices()
+   {
+      return poseIndices;
    }
 
    public void resetSelectedIndex()
