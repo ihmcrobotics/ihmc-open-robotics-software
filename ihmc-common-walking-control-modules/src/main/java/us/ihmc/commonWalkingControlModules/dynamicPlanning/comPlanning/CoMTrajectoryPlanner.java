@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import com.esotericsoftware.minlog.Log;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -114,6 +115,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final RecyclingArrayList<FramePoint3D> modifiedEndVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FrameVector3D> modifiedStartVRPVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> modifiedEndVRPVelocities = new RecyclingArrayList<>(FrameVector3D::new);
+   private final RecyclingArrayList<FrameVector3D> externalForceStart = new RecyclingArrayList<>(FrameVector3D::new);
+   private final RecyclingArrayList<FrameVector3D> externalForceEnd = new RecyclingArrayList<>(FrameVector3D::new);
 
 
    private final YoFramePoint3D finalDCMPosition = new YoFramePoint3D("goalDCMPosition", worldFrame, registry);
@@ -246,6 +249,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                                                                      modifiedEndVRPPositions,
                                                                      modifiedStartVRPVelocities,
                                                                      modifiedEndVRPVelocities);
+
+      externalForceStart.clear();
+      externalForceEnd.clear();
+      for (int i = 0; i < contactSequence.size(); i++)
+      {
+         externalForceStart.add().set(contactSequence.get(i).getExternalContactAccelerationStart());
+         externalForceEnd.add().set(contactSequence.get(i).getExternalContactAccelerationEnd());
+      }
 
       solveForCoefficientConstraintMatrix(contactSequence);
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
@@ -410,6 +421,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       }
    }
 
+   private final FrameVector3D desiredExternalAcceleration = new FrameVector3D();
+   private final FrameVector3D desiredExternalAccelerationRate = new FrameVector3D();
+
    @Override
    public void compute(int segmentId,
                        double timeInPhase,
@@ -435,6 +449,12 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                                 desiredVRPVelocity);
 
       // TODO subtract out the external force
+      double denominator = 1.0 / (omega.getValue() * omega.getValue());
+      double alpha = timeInPhase / trajectoryHandler.getVrpTrajectories().get(segmentId).getDuration();
+      desiredExternalAcceleration.interpolate(externalForceStart.get(segmentId), externalForceEnd.get(segmentId), alpha);
+//      if (!desiredExternalAcceleration.containsNaN())
+//         vrpPositionToPack.scaleAdd(denominator, desiredExternalAcceleration, vrpPositionToPack); // FIXME should this be negative?
+      // TODO do VRP velocity
 
       ecmpPositionToPack.set(vrpPositionToPack);
       ecmpPositionToPack.subZ(comHeight.getDoubleValue());
@@ -877,6 +897,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       if (!hasTrajectories())
          throw new RuntimeException("VRP Trajectories are not calculated");
 
+      // FIXME these are wrong
       return trajectoryHandler.getVrpTrajectories();
    }
 

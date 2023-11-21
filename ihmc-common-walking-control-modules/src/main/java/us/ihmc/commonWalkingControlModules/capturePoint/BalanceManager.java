@@ -610,7 +610,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoDesiredCoMPosition.set(desiredCoM2d, comTrajectoryPlanner.getDesiredCoMPosition().getZ());
       yoPerfectCoPVelocity.set(comTrajectoryPlanner.getDesiredVRPVelocity());
 
+      // TODO need to include the feedforward terms
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
+      perfectCMP2d.set(comTrajectoryPlanner.getDesiredECMPPosition());
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
 
       // This guy relies on the desired ICP being updated.
