@@ -327,15 +327,15 @@ public class TerrainPlanningSimulationUI
             {
                executorService.clearTaskQueue();
                executorService.submit(() ->
-                                      {
-                                         FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor()
-                                                                                                       .getCroppedGlobalHeightMapImage(),
-                                                                                     humanoidPerception.getRapidHeightMapExtractor()
-                                                                                                       .getCroppedContactMapImage(),
-                                                                                     cameraZUpFrame.getTransformToWorldFrame());
+                 {
+                    FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor()
+                                                                                  .getInternalGlobalHeightMapImage()
+                                                                                  .getBytedecoOpenCVMat(),
+                                                                humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
+                                                                cameraZUpFrame.getTransformToWorldFrame());
 
-                                         footstepPlanToRenderNotificaiton.set(plan);
-                                      });
+                    footstepPlanToRenderNotificaiton.set(plan);
+                 });
             }
 
             if (footstepPlanToRenderNotificaiton.poll())
@@ -411,8 +411,8 @@ public class TerrainPlanningSimulationUI
             monteCarloFootstepPlanner.reset();
 
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-            request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-0.5, -0.3, 0.0), new Quaternion()));
-            request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-0.5, -0.1, 0.0), new Quaternion()));
+            request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.3, 0.0), new Quaternion()));
+            request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.1, 0.0), new Quaternion()));
             request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(2.5, -0.3, 0.0), new Quaternion()));
             request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(2.5, -0.1, 0.0), new Quaternion()));
             request.setContactMap(contactMapImage);

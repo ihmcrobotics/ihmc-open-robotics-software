@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -45,15 +44,21 @@ public class MonteCarloFootstepPlanningDebugger
 
    public void refresh()
    {
-      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getContactMap());
-      PerceptionDebugTools.convertDepthCopyToColor(request.getHeightMap(), heightMapColorImage);
+      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getContactMap().clone());
+      PerceptionDebugTools.convertDepthCopyToColor(request.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
    }
 
    public void plotNode(MonteCarloFootstepNode node)
    {
-      PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage, new Point2D((int) node.getState().getX(), (int) node.getState().getY()), 1, PerceptionDebugTools.COLOR_PURPLE);
-      PerceptionDebugTools.plotRectangleNoScale(heightMapColorImage, new Point2D((int) node.getState().getX(), (int) node.getState().getY()), 1, PerceptionDebugTools.COLOR_PURPLE);
+      PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage,
+                                                new Point2D((int) node.getState().getX(), (int) node.getState().getY()),
+                                                1,
+                                                PerceptionDebugTools.COLOR_PURPLE);
+      PerceptionDebugTools.plotRectangleNoScale(heightMapColorImage,
+                                                new Point2D((int) node.getState().getX(), (int) node.getState().getY()),
+                                                1,
+                                                PerceptionDebugTools.COLOR_PURPLE);
    }
 
    public void plotFootstepPlan(FootstepPlan plan)
@@ -89,10 +94,7 @@ public class MonteCarloFootstepPlanningDebugger
       for (RobotSide side : RobotSide.values)
       {
          Pose3D pose = new Pose3D(poses.get(side));
-         PerceptionDebugTools.plotTiltedRectangle(image,
-                                                  new Point2D(pose.getX(), pose.getY()),
-                                                  (float) pose.getYaw(),
-                                                  2, mode);
+         PerceptionDebugTools.plotTiltedRectangle(image, new Point2D(pose.getX(), pose.getY()), (float) pose.getYaw(), 2, mode);
       }
    }
 

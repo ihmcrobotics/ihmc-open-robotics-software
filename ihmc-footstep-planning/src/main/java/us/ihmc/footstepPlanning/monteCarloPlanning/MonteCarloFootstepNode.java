@@ -70,20 +70,6 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       return robotSide;
    }
 
-   //@Override
-   //public boolean equals(Object obj)
-   //{
-   //   if (obj instanceof MonteCarloFootstepNode)
-   //   {
-   //      MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
-   //      return position.equals(other.position) && robotSide == other.robotSide;
-   //   }
-   //   else
-   //   {
-   //      return false;
-   //   }
-   //}
-
    @Override
    public boolean equals(Object obj) {
       if (this == obj) {

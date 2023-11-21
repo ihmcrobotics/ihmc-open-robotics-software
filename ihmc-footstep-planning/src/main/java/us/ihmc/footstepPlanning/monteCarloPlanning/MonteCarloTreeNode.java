@@ -1,14 +1,14 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
 public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNode>
 {
    private final ArrayList<MonteCarloTreeNode> parents;
-   //private final ArrayList<MonteCarloTreeNode> children;
-   private final PriorityQueue<MonteCarloTreeNode> maxQueue = new PriorityQueue<>();
+   private final ArrayList<MonteCarloTreeNode> children;
 
    protected int id = 0;
    protected float upperConfidenceBound = 0;
@@ -22,7 +22,7 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
 
       this.level = 0;
       this.parents = new ArrayList<>();
-      //this.children = new ArrayList<>();
+      this.children = new ArrayList<>();
 
       if (parent != null)
       {
@@ -60,7 +60,7 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
 
    public List<MonteCarloTreeNode> getChildren()
    {
-      return maxQueue.stream().toList();
+      return children;
    }
 
    public int getVisits()
@@ -113,26 +113,19 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       return null;
    }
 
-   public PriorityQueue<MonteCarloTreeNode> getMaxQueue()
-   {
-      return maxQueue;
-   }
-
    public MonteCarloTreeNode getMaxQueueNode()
    {
-      return maxQueue.poll();
+      return children.stream().max(Comparator.comparing(MonteCarloTreeNode::getValue)).get();
    }
 
    public void addChild(MonteCarloTreeNode child)
    {
-      //children.add(child);
-      maxQueue.add(child);
+      children.add(child);
    }
 
    public void removeChild(MonteCarloTreeNode child)
    {
-      //children.remove(child);
-      maxQueue.remove(child);
+      children.remove(child);
    }
 
    public void addParent(MonteCarloTreeNode parent)
@@ -161,17 +154,23 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       }
    }
 
+   public void sortChildren()
+   {
+      // sort the children by value from highest to lowest
+      children.sort(Comparator.comparing(MonteCarloTreeNode::getValue).reversed());
+   }
+
    public void prune(int maxNumberOfChildren)
    {
-      if (maxQueue.size() >= maxNumberOfChildren)
+      if (children.size() >= maxNumberOfChildren)
       {
-         PriorityQueue<MonteCarloTreeNode> prunedQueue = new PriorityQueue<>();
+         ArrayList<MonteCarloTreeNode> prunedQueue = new ArrayList<>();
          for (int i = 0; i < maxNumberOfChildren; i++)
          {
-            prunedQueue.add(maxQueue.poll());
+            prunedQueue.add(children.get(i));
          }
-         maxQueue.clear();
-         maxQueue.addAll(prunedQueue);
+         children.clear();
+         children.addAll(prunedQueue);
       }
    }
 }

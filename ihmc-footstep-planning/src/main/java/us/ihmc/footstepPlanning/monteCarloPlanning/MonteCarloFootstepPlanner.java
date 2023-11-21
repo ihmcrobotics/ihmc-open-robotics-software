@@ -75,9 +75,10 @@ public class MonteCarloFootstepPlanner
          return;
       }
 
-      node.prune(plannerParameters.getMaxNumberOfChildNodes());
+      //node.sortChildren();
+      //node.prune(plannerParameters.getMaxNumberOfChildNodes());
 
-      if (node.getVisits() <= 1 || node.getChildren().isEmpty())
+      if (node.getChildren().isEmpty())
       {
          MonteCarloFootstepNode childNode = expand(node, request);
          double score = simulate(childNode, request);
@@ -110,7 +111,19 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
          double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, plannerParameters);
 
-         if (node.getLevel() < 8)
+         //if (node.getLevel() == 0)
+         //{
+         //   LogTools.info(String.format("Previous: %d, %d, Node: %d, %d, Action: %d, %d, Score: %.2f",
+         //                               (int) node.getState().getX(),
+         //                               (int) node.getState().getY(),
+         //                               (int) newState.getState().getX(),
+         //                               (int) newState.getState().getY(),
+         //                               (int) (newState.getState().getX() - node.getState().getX()),
+         //                               (int) (newState.getState().getY() - node.getState().getY()),
+         //                               score));
+         //}
+
+         if (node.getLevel() < plannerParameters.getMaxTreeDepth() && score > plannerParameters.getInitialValueCutoff())
          {
             if (visitedNodes.getOrDefault(newState, null) != null)
             {
@@ -121,6 +134,7 @@ public class MonteCarloFootstepPlanner
             else
             {
                MonteCarloFootstepNode postNode = new MonteCarloFootstepNode(newState.getState(), node, newState.getRobotSide(), uniqueNodeId++);
+               postNode.setValue((float) score);
                visitedNodes.put(newState, postNode);
                node.addChild(postNode);
 
@@ -156,7 +170,7 @@ public class MonteCarloFootstepPlanner
 
    public void backPropagate(MonteCarloFootstepNode node, float score)
    {
-      node.addValue(score);
+      node.setValue(Math.max(score, node.getValue()));
       node.incrementVisits();
 
       if (!node.getParents().isEmpty())

@@ -66,13 +66,23 @@
     "upperBound" : 100
   },
   "Feasible contact cutoff" : {
-    "value" : 0.33459,
-    "lowerBound" : 0.01,
+    "value" : 0.6,
+    "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Exploration constant" : {
     "value" : 1.061579,
     "lowerBound" : 0.01,
     "upperBound" : 10.0
+  },
+  "Initial value cutoff" : {
+    "value" : 50,
+    "lowerBound" : -1000,
+    "upperBound" : 1000
+  },
+  "Max tree depth" : {
+    "value" : 6,
+    "lowerBound" : 2,
+    "upperBound" : 12
   }
 }

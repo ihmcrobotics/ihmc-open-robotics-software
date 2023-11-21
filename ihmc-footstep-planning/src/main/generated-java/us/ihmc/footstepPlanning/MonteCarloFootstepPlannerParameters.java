@@ -33,6 +33,8 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final IntegerStoredPropertyKey goalMargin = keys.addIntegerKey("Goal margin");
    public static final DoubleStoredPropertyKey feasibleContactCutoff = keys.addDoubleKey("Feasible contact cutoff");
    public static final DoubleStoredPropertyKey explorationConstant = keys.addDoubleKey("Exploration constant");
+   public static final IntegerStoredPropertyKey initialValueCutoff = keys.addIntegerKey("Initial value cutoff");
+   public static final IntegerStoredPropertyKey maxTreeDepth = keys.addIntegerKey("Max tree depth");
 
    /**
     * Loads this property set.

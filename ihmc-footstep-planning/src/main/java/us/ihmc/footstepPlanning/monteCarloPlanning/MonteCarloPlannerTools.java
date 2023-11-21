@@ -299,26 +299,28 @@ public class MonteCarloPlannerTools
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
 
-         int xIndex = (int) footstepNode.getState().getX();
-         int yIndex = (int) footstepNode.getState().getY();
+         int nodeX = (int) footstepNode.getState().getX();
+         int nodeY = (int) footstepNode.getState().getY();
 
-         int height = ((int) request.getHeightMap().ptr(xIndex, yIndex).getShort() & 0xFFFF);
-         FramePose3D footstepPose = getFramePose3D(height, xIndex, yIndex);
+         int rIndex = nodeX + request.getContactMap().rows() / 2;
+         int cIndex = nodeY + request.getContactMap().cols() / 2;
+
+         int height = ((int) request.getHeightMap().ptr(rIndex, cIndex).getShort() & 0xFFFF);
+         FramePose3D footstepPose = getFramePose3D(height, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
-         LogTools.debug("Footstep Node: {}", footstepNode.getState());
+         LogTools.info("Footstep Node: {}", footstepPose.getPosition());
       }
       return footstepPlan;
    }
 
-   private static FramePose3D getFramePose3D(int height, int xIndex, int yIndex)
+   private static FramePose3D getFramePose3D(int height, double xPosition, double yPosition, double yaw)
    {
       float cellHeight = (float) ((float) height / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
                          - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
-      Point3D position = new Point3D(xIndex, yIndex, cellHeight);
-      Quaternion orientation = new Quaternion(position.getZ(), 0, 0);
-      position.scale(1/50.0f);
+      Point3D position = new Point3D(xPosition, yPosition, cellHeight);
+      Quaternion orientation = new Quaternion(yaw, 0, 0);
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }
 
@@ -377,25 +379,36 @@ public class MonteCarloPlannerTools
 
       double edgeCost = Math.abs(0.5f - oldNode.getState().distance(newNode.getState())) * 0.01f;
 
-      int rIndex = (int) (-newNode.getState().getX() + request.getContactMap().rows() / 2);
+      int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2);
       int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2);
 
-      Point3D goalPosition = new Point3D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
+      Point2D goalPosition = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       goalPosition.scale(50.0f);
-      goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2, 0);
+      goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2);
 
       double score = 0.0;
 
-      double contactScore = ((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0;
-      if (contactScore > plannerParameters.getFeasibleContactCutoff())
-         score += plannerParameters.getFeasibleContactReward();
+      double contactScore = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff()) * 100.0;
+      score += contactScore;
 
-      double distanceFromGoal = newNode.getState().distance(goalPosition);
-      if (distanceFromGoal < plannerParameters.getGoalMargin())
-         score += plannerParameters.getGoalReward();
+      Point2D currentPosition = new Point2D(newNode.getState());
+      double distanceFromGoal = currentPosition.distance(goalPosition);
+      score += 10000.0f / (distanceFromGoal);
 
       //score -= edgeCost;
 
       return score;
+   }
+
+   public static MonteCarloTreeNode getOptimalNode(MonteCarloTreeNode root, int layer)
+   {
+      if (root.getLevel() == layer - 1)
+      {
+         return root.getMaxQueueNode();
+      }
+      else
+      {
+         return getOptimalNode(root.getMaxQueueNode(), layer);
+      }
    }
 }

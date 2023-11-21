@@ -82,4 +82,14 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.explorationConstant, explorationConstant);
    }
+
+   default void setInitialValueCutoff(int initialValueCutoff)
+   {
+      set(MonteCarloFootstepPlannerParameters.initialValueCutoff, initialValueCutoff);
+   }
+
+   default void setMaxTreeDepth(int maxTreeDepth)
+   {
+      set(MonteCarloFootstepPlannerParameters.maxTreeDepth, maxTreeDepth);
+   }
 }

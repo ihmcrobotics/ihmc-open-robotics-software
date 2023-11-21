@@ -84,4 +84,14 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(explorationConstant);
    }
+
+   default int getInitialValueCutoff()
+   {
+      return get(initialValueCutoff);
+   }
+
+   default int getMaxTreeDepth()
+   {
+      return get(maxTreeDepth);
+   }
 }
