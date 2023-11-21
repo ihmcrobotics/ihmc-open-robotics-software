@@ -182,12 +182,21 @@ public class MonteCarloFootstepPlanner
       }
    }
 
-   public void reset()
+   public void reset(MonteCarloFootstepPlannerRequest request)
    {
       random.setSeed(100);
       uniqueNodeId = 0;
       visitedNodes.clear();
-      root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
+
+      if (request == null)
+         root = new MonteCarloFootstepNode(new Point3D(), null, RobotSide.LEFT, uniqueNodeId++);
+      else
+         root = new MonteCarloFootstepNode(new Point3D(request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getX() * 50,
+                                                       request.getStartFootPoses().get(RobotSide.LEFT).getPosition().getY() * 50,
+                                                       request.getStartFootPoses().get(RobotSide.LEFT).getYaw()),
+                                           null,
+                                           RobotSide.LEFT,
+                                           uniqueNodeId++);
    }
 
    public MonteCarloPlanningWorld getWorld()

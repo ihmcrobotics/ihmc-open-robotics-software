@@ -309,7 +309,7 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(height, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
-         LogTools.info("Footstep Node: {}", footstepPose.getPosition());
+         LogTools.debug("Footstep Node: {}", footstepPose.getPosition());
       }
       return footstepPlan;
    }

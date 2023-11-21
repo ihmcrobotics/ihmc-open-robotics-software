@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -110,6 +111,14 @@ public class TerrainPlanningSimulationUI
    private final Random random = new Random(System.currentTimeMillis());
    private final Pose3D cameraPose = new Pose3D();
    private final ImBoolean enableMonteCarloPlanner = new ImBoolean(false);
+
+   private ImFloat startMidX = new ImFloat(-1.5f);
+   private ImFloat startMidY = new ImFloat(-0.2f);
+   private ImFloat startYaw = new ImFloat(0.0f);
+
+   private ImFloat goalMidX = new ImFloat(1.5f);
+   private ImFloat goalMidY = new ImFloat(-0.2f);
+   private ImFloat goalYaw = new ImFloat(0.0f);
 
    private int autoIncrementCounter = 0;
    private int plansLoggedSoFar = 0;
@@ -318,7 +327,14 @@ public class TerrainPlanningSimulationUI
                l515PoseGizmo.getTransformToParent().prependTranslation(0.1, 0.0, 0.0);
                l515PoseGizmo.update();
             }
+            ImGui.separator();
             ImGui.checkbox("Enable Monte Carlo Planning", enableMonteCarloPlanner);
+            ImGui.sliderFloat("Start Mid X", startMidX.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
+            ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
+            ImGui.sliderFloat("Goal Yaw", goalYaw.getData(), (float) -Math.PI, (float) Math.PI);
          }
 
          public void updateMonteCarloPlanner()
@@ -408,17 +424,17 @@ public class TerrainPlanningSimulationUI
 
          public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform)
          {
-            monteCarloFootstepPlanner.reset();
 
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-            request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.3, 0.0), new Quaternion()));
-            request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.1, 0.0), new Quaternion()));
-            request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(2.5, -0.3, 0.0), new Quaternion()));
-            request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(2.5, -0.1, 0.0), new Quaternion()));
+            request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(startMidX.get(), startMidY.get() - 0.1, 0.0), new Quaternion()));
+            request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(startMidX.get(), startMidY.get() + 0.1, 0.0), new Quaternion()));
+            request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(goalMidX.get(), goalMidY.get() - 0.1, 0.0), new Quaternion()));
+            request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(goalMidX.get(), goalMidY.get() + 0.1, 0.0), new Quaternion()));
             request.setContactMap(contactMapImage);
             request.setHeightMap(heightMapImage);
 
             long timeStart = System.nanoTime();
+            monteCarloFootstepPlanner.reset(request);
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();
 
