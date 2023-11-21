@@ -26,7 +26,6 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -34,6 +33,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class RDXAffordanceTemplateEditorUI
 {
@@ -214,29 +214,9 @@ public class RDXAffordanceTemplateEditorUI
 
       mirror.update();
 
-      rescaleAffordanceTemplate();
-
       graspFrame.update();
       preGraspFrames.update();
       postGraspFrames.update();
-   }
-
-   public void rescaleAffordanceTemplate()
-   {
-      var poseFrames = preGraspFrames.getPoseFrames();
-      for (RobotSide side : handPoses.keySet())
-      {
-         for (int i = 0; i < poseFrames.get(side).size(); ++i)
-            PoseReferenceFrame newpose = poseFrames.get(side).get(i);
-      }
-//      switch (objectBuilder.getSelectedObject().getShape()) {
-//         case BOX, PRISM -> {
-//            if (objectScale[0]>1.0f || objectScale[1]>1.0f || objectScale[2]>1.0f)
-//            {
-//
-//            }
-//         }
-//      }
    }
 
    public void renderImGuiWidgets()
@@ -508,6 +488,13 @@ public class RDXAffordanceTemplateEditorUI
             reset();
             fileManager.load();
             calculateAffordanceTemplateScale();
+            rescaleAffordanceTemplate();
+            for (RobotSide side : RobotSide.values())
+            {
+//               preGraspFrames.updateInternal(side);
+               graspFrame.updateInternal(side);
+//               postGraspFrames.updateInternal(side);
+            }
          }
       }
       else
@@ -517,6 +504,58 @@ public class RDXAffordanceTemplateEditorUI
          ImGui.popStyleColor();
       }
 
+   }
+
+   public void rescaleAffordanceTemplate()
+   {
+      for (RDXActiveAffordanceMenu frameType : RDXActiveAffordanceMenu.values())
+      {
+         SideDependentList<List<FramePose3D>> framePose3DList = getFramePose3DList(frameType);
+         if (framePose3DList == null) continue;
+
+         for (RobotSide side : RobotSide.values())
+         {
+            for (FramePose3D framePose3D : framePose3DList.get(side))
+            {
+               updateFramePose3D(framePose3D);
+            }
+         }
+      }
+   }
+
+   private SideDependentList<List<FramePose3D>> getFramePose3DList(RDXActiveAffordanceMenu frameType)
+   {
+      switch (frameType)
+      {
+//         case PRE_GRASP:
+//            return preGraspFrames.getPoses();
+         case GRASP:
+            SideDependentList<List<FramePose3D>> framePose3DList = new SideDependentList<List<FramePose3D>>();
+            for (RobotSide side : RobotSide.values())
+            {
+               List<FramePose3D> sidePoses = new ArrayList<FramePose3D>();
+               sidePoses.add(graspFrame.getPoses().get(side));
+               framePose3DList.put(side, sidePoses);
+            }
+            return framePose3DList;
+//         case POST_GRASP:
+//            return postGraspFrames.getPoses();
+         default:
+            return null;
+      }
+   }
+
+   private void updateFramePose3D(FramePose3D framePose3D)
+   {
+      switch (objectBuilder.getSelectedObject().getShape())
+      {
+         case BOX, PRISM:
+            if (objectScale[0] != 1.0f || objectScale[1] != 1.0f || objectScale[2] != 1.0f)
+            {
+               framePose3D.set(1, 0, 0, 0, 0, 0);
+            }
+            break;
+      }
    }
 
    private void calculateAffordanceTemplateScale()
