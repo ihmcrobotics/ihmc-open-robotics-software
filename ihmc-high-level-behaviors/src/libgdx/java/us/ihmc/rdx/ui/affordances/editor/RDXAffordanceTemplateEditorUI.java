@@ -9,6 +9,7 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -26,6 +27,7 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -487,31 +489,14 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
-            if (objectBuilder.getSelectedObject().getShape() != null)
-            {
-               calculateAffordanceTemplateScale();
+         }
+         ImGui.separator();
 
+         if (objectBuilder.getSelectedObject().getShape() != null)
+         {
+            ImGui.text("Rescaling Affordance Template only works for Primitive shapes.");
+            if (ImGui.button(labels.get("Rescale Affordance Template")))
                rescaleAffordanceTemplate();
-               for (RobotSide side : RobotSide.values())
-               {
-                  for (int i = 1; i < preGraspFrames.getIndex() + 1; i++)
-                     preGraspFrames.updateInternal(side, i);
-
-                  graspFrame.updateInternal(side);
-
-                  for (int i = 1; i < postGraspFrames.getIndex() + 1; i++)
-                  {
-                     postGraspFrames.updateInternal(side, i);
-                     RigidBodyTransform objectPose = postGraspFrames.getObjectTransforms().get(i - 1);
-                     postGraspFrames.getObjectTransforms()
-                                    .get(i - 1)
-                                    .getTranslation()
-                                    .set(objectScale[0] * objectPose.getTranslation().getX(),
-                                         objectScale[1] * objectPose.getTranslation().getY(),
-                                         objectScale[2] * objectPose.getTranslation().getZ());
-                  }
-               }
-            }
          }
       }
       else
@@ -525,6 +510,8 @@ public class RDXAffordanceTemplateEditorUI
 
    public void rescaleAffordanceTemplate()
    {
+      calculateAffordanceTemplateScale();
+
       for (RDXActiveAffordanceMenu frameType : RDXActiveAffordanceMenu.values())
       {
          SideDependentList<List<FramePose3D>> framePose3DList = getFramePose3DList(frameType);
@@ -532,12 +519,42 @@ public class RDXAffordanceTemplateEditorUI
 
          for (RobotSide side : RobotSide.values())
          {
-            for (FramePose3D framePose3D : framePose3DList.get(side))
+            for (int i = 0; i < framePose3DList.get(side).size(); i++)
             {
-               updateFramePose3D(framePose3D);
+               if (frameType == RDXActiveAffordanceMenu.POST_GRASP)
+               {
+                  ReferenceFrame olfFrame = framePose3DList.get(side).get(i).getReferenceFrame();
+                  ReferenceFrame objectFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("ObjectFrame", ReferenceFrame.getWorldFrame(), postGraspFrames.getObjectTransforms().get(i));
+                  framePose3DList.get(side).get(i).changeFrame(objectFrame);
+                  updateFramePose3D(framePose3DList.get(side).get(i));
+                  framePose3DList.get(side).get(i).changeFrame(olfFrame);
+               }
+               else
+                  updateFramePose3D(framePose3DList.get(side).get(i));
             }
          }
       }
+
+      for (RobotSide side : RobotSide.values())
+      {
+         for (int i = 1; i < preGraspFrames.getIndex() + 1; i++)
+            preGraspFrames.updateInternal(side, i);
+
+         graspFrame.updateInternal(side);
+
+         for (int i = 1; i < postGraspFrames.getIndex() + 1; i++)
+         {
+            postGraspFrames.updateInternal(side, i);
+//            RigidBodyTransform objectPose = postGraspFrames.getObjectTransforms().get(i - 1);
+//            postGraspFrames.getObjectTransforms()
+//                           .get(i - 1)
+//                           .getTranslation()
+//                           .set(objectScale[0] * objectPose.getTranslation().getX(),
+//                                objectScale[1] * objectPose.getTranslation().getY(),
+//                                objectScale[2] * objectPose.getTranslation().getZ());
+         }
+      }
+
    }
 
    private SideDependentList<List<FramePose3D>> getFramePose3DList(RDXActiveAffordanceMenu frameType)
@@ -579,9 +596,7 @@ public class RDXAffordanceTemplateEditorUI
    {
       objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
       for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
-      {
          objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i)/objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
-      }
    }
 
    private void reset()
