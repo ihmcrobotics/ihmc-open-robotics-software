@@ -55,9 +55,9 @@ public class PerceptionAndAutonomyProcess
    private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
 
    private final Supplier<ReferenceFrame> zedFrameSupplier;
-   private final ROS2HeartbeatMonitor zedPointCloudHeartbeat;
-   private final ROS2HeartbeatMonitor zedColorHeartbeat;
-   private final ROS2HeartbeatMonitor zedDepthHeartbeat;
+   private final ROS2HeartbeatMonitor zedPointCloudHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor zedColorHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor zedDepthHeartbeatMonitor;
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
    private ZEDColorDepthImageRetriever zedImageRetriever;
@@ -65,7 +65,7 @@ public class PerceptionAndAutonomyProcess
    private RestartableThread zedProcessAndPublishThread;
 
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
-   private final ROS2HeartbeatMonitor realsenseHeartbeat;
+   private final ROS2HeartbeatMonitor realsenseHeartbeatMonitor;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
    private RealsenseColorDepthImageRetriever realsenseImageRetriever;
@@ -73,9 +73,9 @@ public class PerceptionAndAutonomyProcess
    private RestartableThread realsenseProcessAndPublishThread;
 
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
-   private final ROS2HeartbeatMonitor ousterDepthHeartbeat;
-   private final ROS2HeartbeatMonitor lidarScanHeartbeat;
-   private final ROS2HeartbeatMonitor heightMapHeartbeat;
+   private final ROS2HeartbeatMonitor ousterDepthHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor lidarScanHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor heightMapHeartbeatMonitor;
    private OusterNetServer ouster;
    private RawImage ousterDepthImage;
    private OusterDepthImageRetriever ousterDepthImageRetriever;
@@ -83,7 +83,7 @@ public class PerceptionAndAutonomyProcess
    private RestartableThread ousterProcessAndPublishThread;
 
    private final SideDependentList<Supplier<ReferenceFrame>> blackflyFrameSuppliers = new SideDependentList<>();
-   private final SideDependentList<ROS2HeartbeatMonitor> blackflyImageHeartbeats = new SideDependentList<>();
+   private final SideDependentList<ROS2HeartbeatMonitor> blackflyImageHeartbeatMonitors = new SideDependentList<>();
    private final SideDependentList<RawImage> blackflyImages = new SideDependentList<>();
    private final SideDependentList<BlackflyImageRetriever> blackflyImageRetrievers = new SideDependentList<>();
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
@@ -92,11 +92,18 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
    private RestartableThrottledThread sceneGraphUpdateThread;
-   private final ROS2HeartbeatMonitor arUcoDetectionHeartbeat;
+   private final ROS2HeartbeatMonitor arUcoDetectionHeartbeatMonitor;
    private final ArUcoUpdateProcess arUcoUpdater;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
-   private final ROS2HeartbeatMonitor centerposeUpdateHeartbeat;
+   private final ROS2HeartbeatMonitor centerposeUpdateHeartbeatMonitor;
+
+   // Sensor heartbeats to run main method without UI
+   private ROS2Heartbeat zedHeartbeat;
+   private ROS2Heartbeat realsenseHeartbeat;
+   private ROS2Heartbeat ousterHeartbeat;
+   private ROS2Heartbeat leftBlackflyHeartbeat;
+   private ROS2Heartbeat rightBlackflyHeartbeat;
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
@@ -108,25 +115,25 @@ public class PerceptionAndAutonomyProcess
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
       this.zedFrameSupplier = zedFrameSupplier;
-      zedPointCloudHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
-      zedColorHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
-      zedDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
+      zedPointCloudHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+      zedColorHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
+      zedDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
       initializeZEDHeartbeatCallbacks();
 
       this.realsenseFrameSupplier = realsenseFrameSupplier;
-      realsenseHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+      realsenseHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
       initializeRealsenseHearbeatCallbacks();
 
       this.ousterFrameSupplier = ousterFrameSupplier;
-      ousterDepthHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
-      lidarScanHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
-      heightMapHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      ousterDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
+      lidarScanHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
+      heightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
       initializeOusterHeartbeatCallbacks();
 
       blackflyFrameSuppliers.put(RobotSide.LEFT, leftBlackflyFrameSupplier);
       blackflyFrameSuppliers.put(RobotSide.RIGHT, rightBlackflyFrameSupplier);
-      blackflyImageHeartbeats.put(RobotSide.LEFT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT)));
-      blackflyImageHeartbeats.put(RobotSide.RIGHT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT)));
+      blackflyImageHeartbeatMonitors.put(RobotSide.LEFT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT)));
+      blackflyImageHeartbeatMonitors.put(RobotSide.RIGHT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT)));
       initializeBlackflyHeartbeatCallbacks();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
@@ -134,11 +141,11 @@ public class PerceptionAndAutonomyProcess
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
 
       arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
-      arUcoDetectionHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ARUCO);
+      arUcoDetectionHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ARUCO);
       initializeArUcoHeartbeatCallbacks();
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
-      centerposeUpdateHeartbeat = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
+      centerposeUpdateHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
       initializeCenterposeHeartbeatCallbacks();
 
       sceneGraphUpdateThread.start(); // scene graph runs at all times
@@ -184,6 +191,17 @@ public class PerceptionAndAutonomyProcess
             blackflyImageRetrievers.get(side).destroy();
       }
       LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+
+      if (zedHeartbeat != null)
+         zedHeartbeat.destroy();
+      if (realsenseHeartbeat != null)
+         realsenseHeartbeat.destroy();
+      if (ousterHeartbeat != null)
+         ousterHeartbeat.destroy();
+      if (leftBlackflyHeartbeat != null)
+         leftBlackflyHeartbeat.destroy();
+      if (rightBlackflyHeartbeat != null)
+         rightBlackflyHeartbeat.destroy();
    }
 
    private void processAndPublishZED()
@@ -250,9 +268,9 @@ public class PerceptionAndAutonomyProcess
    private void updateSceneGraph()
    {
       sceneGraph.updateSubscription();
-      if (arUcoDetectionHeartbeat.isAlive() && arUcoUpdater.isInitialized())
+      if (arUcoDetectionHeartbeatMonitor.isAlive() && arUcoUpdater.isInitialized())
          arUcoUpdater.updateArUcoDetection();
-      if (centerposeUpdateHeartbeat.isAlive())
+      if (centerposeUpdateHeartbeatMonitor.isAlive())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
@@ -268,7 +286,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeZEDHeartbeatCallbacks()
    {
-      zedPointCloudHeartbeat.setAlivenessChangedCallback(isAlive ->
+      zedPointCloudHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -279,18 +297,18 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (!zedColorHeartbeat.isAlive() && !zedDepthHeartbeat.isAlive())
+            if (!zedColorHeartbeatMonitor.isAlive() && !zedDepthHeartbeatMonitor.isAlive())
                zedImageRetriever.stop();
 
-            if (!zedColorHeartbeat.isAlive() && !centerposeUpdateHeartbeat.isAlive())
+            if (!zedColorHeartbeatMonitor.isAlive() && !centerposeUpdateHeartbeatMonitor.isAlive())
                zedImagePublisher.stopColor();
 
-            if (!zedDepthHeartbeat.isAlive())
+            if (!zedDepthHeartbeatMonitor.isAlive())
                zedImagePublisher.stopDepth();
          }
       });
 
-      zedColorHeartbeat.setAlivenessChangedCallback(isAlive ->
+      zedColorHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -301,19 +319,19 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (!zedPointCloudHeartbeat.isAlive() && !zedDepthHeartbeat.isAlive())
+            if (!zedPointCloudHeartbeatMonitor.isAlive() && !zedDepthHeartbeatMonitor.isAlive())
             {
                zedImageRetriever.stop();
                zedImagePublisher.stopAll();
             }
-            else if (!zedPointCloudHeartbeat.isAlive() && !centerposeUpdateHeartbeat.isAlive())
+            else if (!zedPointCloudHeartbeatMonitor.isAlive() && !centerposeUpdateHeartbeatMonitor.isAlive())
             {
                zedImagePublisher.stopColor();
             }
          }
       });
 
-      zedDepthHeartbeat.setAlivenessChangedCallback(isAlive ->
+      zedDepthHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -324,12 +342,12 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (!zedPointCloudHeartbeat.isAlive() && !zedColorHeartbeat.isAlive() && !centerposeUpdateHeartbeat.isAlive())
+            if (!zedPointCloudHeartbeatMonitor.isAlive() && !zedColorHeartbeatMonitor.isAlive() && !centerposeUpdateHeartbeatMonitor.isAlive())
             {
                zedImageRetriever.stop();
                zedImagePublisher.stopAll();
             }
-            else if (!zedPointCloudHeartbeat.isAlive())
+            else if (!zedPointCloudHeartbeatMonitor.isAlive())
             {
                zedImagePublisher.stopDepth();
             }
@@ -350,7 +368,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeRealsenseHearbeatCallbacks()
    {
-      realsenseHeartbeat.setAlivenessChangedCallback(isAlive ->
+      realsenseHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -370,7 +388,10 @@ public class PerceptionAndAutonomyProcess
    private void initializeOuster()
    {
       ouster = new OusterNetServer();
-      ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster, ousterFrameSupplier, lidarScanHeartbeat::isAlive, heightMapHeartbeat::isAlive);
+      ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster,
+                                                                ousterFrameSupplier,
+                                                                lidarScanHeartbeatMonitor::isAlive,
+                                                                heightMapHeartbeatMonitor::isAlive);
       ousterDepthImagePublisher = new OusterDepthImagePublisher(ouster, OUSTER_DEPTH_TOPIC);
       ousterProcessAndPublishThread = new RestartableThread("OusterProcessAndPublish", this::processAndPublishOuster);
       ousterProcessAndPublishThread.start();
@@ -378,7 +399,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeOusterHeartbeatCallbacks()
    {
-      ousterDepthHeartbeat.setAlivenessChangedCallback(isAlive ->
+      ousterDepthHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -417,7 +438,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeBlackflyHeartbeatCallbacks()
    {
-      blackflyImageHeartbeats.get(RobotSide.LEFT).setAlivenessChangedCallback(isAlive ->
+      blackflyImageHeartbeatMonitors.get(RobotSide.LEFT).setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -439,7 +460,7 @@ public class PerceptionAndAutonomyProcess
          }
       });
 
-      blackflyImageHeartbeats.get(RobotSide.RIGHT).setAlivenessChangedCallback(isAlive ->
+      blackflyImageHeartbeatMonitors.get(RobotSide.RIGHT).setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -458,7 +479,7 @@ public class PerceptionAndAutonomyProcess
             {
                blackflyImagePublishers.get(RobotSide.RIGHT).stopImagePublishing();
 
-               if (!arUcoDetectionHeartbeat.isAlive())
+               if (!arUcoDetectionHeartbeatMonitor.isAlive())
                   blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
             }
          }
@@ -467,7 +488,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeArUcoHeartbeatCallbacks()
    {
-      arUcoDetectionHeartbeat.setAlivenessChangedCallback(isAlive ->
+      arUcoDetectionHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -486,7 +507,7 @@ public class PerceptionAndAutonomyProcess
             {
                arUcoUpdater.stopArUcoDetection();
 
-               if (!blackflyImageHeartbeats.get(RobotSide.RIGHT).isAlive())
+               if (!blackflyImageHeartbeatMonitors.get(RobotSide.RIGHT).isAlive())
                   blackflyImageRetrievers.get(RobotSide.RIGHT).stop();
             }
          }
@@ -495,7 +516,7 @@ public class PerceptionAndAutonomyProcess
 
    private void initializeCenterposeHeartbeatCallbacks()
    {
-      centerposeUpdateHeartbeat.setAlivenessChangedCallback(isAlive ->
+      centerposeUpdateHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
          {
@@ -507,7 +528,7 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (!zedPointCloudHeartbeat.isAlive() && !zedColorHeartbeat.isAlive() && !zedDepthHeartbeat.isAlive())
+            if (!zedPointCloudHeartbeatMonitor.isAlive() && !zedColorHeartbeatMonitor.isAlive() && !zedDepthHeartbeatMonitor.isAlive())
             {
                zedImagePublisher.stopColor();
                zedImageRetriever.stop();
@@ -516,40 +537,44 @@ public class PerceptionAndAutonomyProcess
       });
    }
 
+   /*
+    * This method is used to enable sensors without needing to run the UI.
+    * Unneeded sensors can be commented out.
+    */
+   private void forceEnableAllSensors(ROS2PublishSubscribeAPI ros2)
+   {
+      zedHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+      zedHeartbeat.setAlive(true);
+
+      realsenseHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+      realsenseHeartbeat.setAlive(true);
+
+      ousterHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
+      ousterHeartbeat.setAlive(true);
+
+      leftBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT));
+      leftBlackflyHeartbeat.setAlive(true);
+
+      rightBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
+      rightBlackflyHeartbeat.setAlive(true);
+   }
+
    public static void main(String[] args)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      // To run a sensor without the UI, uncomment the sensor's heartbeat. Make sure to uncomment its destroy call too.
-//      ROS2Heartbeat zedHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
-//      zedHeartbeat.setAlive(true);
-//
-//      ROS2Heartbeat realsenseHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
-//      realsenseHeartbeat.setAlive(true);
-//
-//      ROS2Heartbeat ousterHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_OUSTER_DEPTH);
-//      ousterHeartbeat.setAlive(true);
-//
-//      ROS2Heartbeat leftBlackflyHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT));
-//      leftBlackflyHeartbeat.setAlive(true);
-//
-//      ROS2Heartbeat rightBlackflyHeartbeat = new ROS2Heartbeat(ros2Helper, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
-//      rightBlackflyHeartbeat.setAlive(true);
+      PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame.getWorldFrame());
 
-      new PerceptionAndAutonomyProcess(ros2Helper,
-                                       ReferenceFrame::getWorldFrame,
-                                       ReferenceFrame::getWorldFrame,
-                                       ReferenceFrame::getWorldFrame,
-                                       ReferenceFrame::getWorldFrame,
-                                       ReferenceFrame::getWorldFrame,
-                                       ReferenceFrame::getWorldFrame,
-                                       ReferenceFrame.getWorldFrame());
-
-//      zedHeartbeat.destroy();
-//      realsenseHeartbeat.destroy();
-//      ousterHeartbeat.destroy();
-//      leftBlackflyHeartbeat.destroy();
-//      rightBlackflyHeartbeat.destroy();
+      // To run a sensor without the UI, uncomment the below line.
+      // perceptionAndAutonomyProcess.forceEnableAllSensors(ros2Helper);
+      Runtime.getRuntime().addShutdownHook(new Thread(perceptionAndAutonomyProcess::destroy, "PerceptionAutonomyProcessShutdown"));
    }
 }
