@@ -50,7 +50,7 @@ public class RDXArmManager
        |        | <-  palm -> |        |
        |________|             |________|
     */
-   private final static double SAKE_HAND_SAFEE_FINGER_ANGLE = 15.0;
+   private final static double SAKE_HAND_SAFE_FINGER_ANGLE = 15.0;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
@@ -284,7 +284,7 @@ public class RDXArmManager
       // i.e. when the fingers are more than 30 degrees apart from each other
       // This is an arbitrary value
       if (syncedRobot.getRobotModel().getHandModels().toString().contains("SakeHand") &&
-           syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
+           syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFE_FINGER_ANGLE))
       {
          showWarningNotification.set(side);
       }
