@@ -41,8 +41,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final double[] jointsHomeConfiguration;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final BooleanParameter defaultDirectPositionControlMode;
-   private final YoBoolean directPositionControlMode;
+   private final BooleanParameter defaultBypassAccelerationIntegration;
+   private final YoBoolean bypassAccelerationIntegration;
    private final JointAccelerationIntegrationCommand disableAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
    private final InverseDynamicsOptimizationSettingsCommand activateJointsCommand = new InverseDynamicsOptimizationSettingsCommand();
    private final InverseDynamicsOptimizationSettingsCommand deactivateJointsCommand = new InverseDynamicsOptimizationSettingsCommand();
@@ -58,8 +58,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
 
-      defaultDirectPositionControlMode = new BooleanParameter(bodyName + "DefaultDirectPositionControlMode", parentRegistry, false);
-      directPositionControlMode = new YoBoolean(bodyName + "DirectPositionControlMode", parentRegistry);
+      defaultBypassAccelerationIntegration = new BooleanParameter(bodyName + "DefaultBypassAccelerationIntegration", parentRegistry, false);
+      bypassAccelerationIntegration = new YoBoolean(bodyName + "BypassAccelerationIntegration", parentRegistry);
 
       jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
@@ -96,7 +96,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
-      if (directPositionControlMode.getValue())
+      if (bypassAccelerationIntegration.getValue())
       {
          for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
          {
@@ -122,7 +122,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
                desiredVelocity = EuclidCoreTools.clamp(desiredVelocity, joint.getQd() - maxVelocityError, joint.getQd() + maxVelocityError);
             }
 
-            lowLevelJointData.setControlMode(JointDesiredControlMode.POSITION);
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(desiredVelocity);
             lowLevelJointData.setStiffness(lowLevelJointGain.getKp());
@@ -253,7 +252,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public void onEntry()
    {
-      setEnableDirectJointPositionControl(defaultDirectPositionControlMode.getValue() && jointControlHelper.hasLowLevelJointGains());
+      setEnableDirectJointPositionControl(defaultBypassAccelerationIntegration.getValue() && jointControlHelper.hasLowLevelJointGains());
    }
 
    @Override
@@ -266,7 +265,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       inverseDynamicsCommandList.clear();
 
-      if (directPositionControlMode.getValue())
+      if (bypassAccelerationIntegration.getValue())
       {
          inverseDynamicsCommandList.addCommand(deactivateJointsCommand);
          inverseDynamicsCommandList.addCommand(disableAccelerationIntegrationCommand);
@@ -293,7 +292,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public void setEnableDirectJointPositionControl(boolean enable)
    {
-      directPositionControlMode.set(enable && jointControlHelper.hasLowLevelJointGains());
+      bypassAccelerationIntegration.set(enable && jointControlHelper.hasLowLevelJointGains());
    }
 
    @Override
