@@ -44,6 +44,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private FootstepDataListMessage footstepDataListMessage;
+   private final Object footstepMessageSynchronizer = new Object();
    private final Timer executionTimer = new Timer();
    private final WalkingFootstepTracker footstepTracker;
    private double nominalExecutionDuration;
@@ -97,89 +98,98 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
     */
    private void plan()
    {
-      FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
-      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      footstepPlannerParameters.setFinalTurnProximity(1.0);
-
-      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-      footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setStartFootPoses(leftFootPose, rightFootPose);
-      // TODO: Set start footholds!!
-      for (RobotSide side : RobotSide.values)
+      ThreadTools.startAsDaemon(() ->
       {
-         footstepPlannerRequest.setGoalFootPose(side, goalFeetPoses.get(side));
-         goalFeetPoses.get(side).get(commandedGoalFeetTransformToWorld.get(side));
-      }
+         FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+         FramePose3D rightFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+         leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      //      footstepPlannerRequest.setPlanarRegionsList(...);
-      footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
+         footstepPlannerParameters.setFinalTurnProximity(1.0);
 
-      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      double idealFootstepLength = 0.5;
-      footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
-      footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
-      LogTools.info("Planning footsteps...");
-      FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-      FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
-      LogTools.info("Footstep planner completed with {}, {} step(s)",
-                    footstepPlannerOutput.getFootstepPlanningResult(),
-                    footstepPlan.getNumberOfSteps());
-
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
-      footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(FootstepPlannerLogger::deleteOldLogs, "FootstepPlanLogDeletion");
-
-      if (footstepPlan.getNumberOfSteps() < 1) // failed
-      {
-         FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
-         rejectionReasonReport.update();
-         for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
-         {
-            double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-            LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-         }
-         LogTools.info("Footstep planning failure...");
-         footstepDataListMessage = null;
-      }
-      else
-      {
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-         {
-            if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
-               footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
-            else
-               footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
-
-            footstepPlan.getFootstep(i).setSwingDuration(getDefinition().getSwingDuration());
-         }
-
-         footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
-                                                                                               getDefinition().getSwingDuration(),
-                                                                                               getDefinition().getTransferDuration());
-         footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-         footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-
-         startPositionDistanceToGoal = 0;
-         startOrientationDistanceToGoal = 0;
+         FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+         footstepPlannerRequest.setPlanBodyPath(false);
+         footstepPlannerRequest.setStartFootPoses(leftFootPose, rightFootPose);
+         // TODO: Set start footholds!!
          for (RobotSide side : RobotSide.values)
          {
-            startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(goalFeetPoses.get(side).getTranslation());
-            startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(goalFeetPoses.get(side).getRotation(), true);
+            footstepPlannerRequest.setGoalFootPose(side, goalFeetPoses.get(side));
+            goalFeetPoses.get(side).get(commandedGoalFeetTransformToWorld.get(side));
          }
-      }
 
-      nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
-                                                                                         getDefinition().getSwingDuration(),
-                                                                                         walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                         getDefinition().getTransferDuration(),
-                                                                                         walkingControllerParameters.getDefaultFinalTransferTime());
-      for (RobotSide side : RobotSide.values)
-      {
-         syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-      }
+         //      footstepPlannerRequest.setPlanarRegionsList(...);
+         footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
+
+         footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+         double idealFootstepLength = 0.5;
+         footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
+         footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
+         LogTools.info("Planning footsteps...");
+         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+         FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
+         LogTools.info("Footstep planner completed with {}, {} step(s)",
+                       footstepPlannerOutput.getFootstepPlanningResult(),
+                       footstepPlan.getNumberOfSteps());
+
+         FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
+         footstepPlannerLogger.logSession();
+         ThreadTools.startAThread(FootstepPlannerLogger::deleteOldLogs, "FootstepPlanLogDeletion");
+
+         if (footstepPlan.getNumberOfSteps() < 1) // failed
+         {
+            FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
+            rejectionReasonReport.update();
+            for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
+            {
+               double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
+               LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+            }
+            LogTools.info("Footstep planning failure...");
+            synchronized (footstepMessageSynchronizer)
+            {
+               footstepDataListMessage = null;
+            }
+         }
+         else
+         {
+            for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+            {
+               if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
+                  footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
+               else
+                  footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
+
+               footstepPlan.getFootstep(i).setSwingDuration(getDefinition().getSwingDuration());
+            }
+
+            synchronized (footstepMessageSynchronizer)
+            {
+               footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
+                                                                                                     getDefinition().getSwingDuration(),
+                                                                                                     getDefinition().getTransferDuration());
+               footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+               footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+            }
+
+            startPositionDistanceToGoal = 0;
+            startOrientationDistanceToGoal = 0;
+            for (RobotSide side : RobotSide.values)
+            {
+               startPositionDistanceToGoal += syncedFeetPoses.get(side).getTranslation().differenceNorm(goalFeetPoses.get(side).getTranslation());
+               startOrientationDistanceToGoal += syncedFeetPoses.get(side).getRotation().distance(goalFeetPoses.get(side).getRotation(), true);
+            }
+         }
+
+         nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
+                                                                                            getDefinition().getSwingDuration(),
+                                                                                            walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                                            getDefinition().getTransferDuration(),
+                                                                                            walkingControllerParameters.getDefaultFinalTransferTime());
+         for (RobotSide side : RobotSide.values)
+         {
+            syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+         }
+      }, "WalkActionPlanner");
    }
 
    @Override
@@ -188,11 +198,6 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       if (state.getGoalFrame().isChildOfWorld())
       {
          plan();
-         if (footstepDataListMessage != null)
-         {
-            ros2ControllerHelper.publishToController(footstepDataListMessage);
-            executionTimer.reset();
-         }
       }
       else
       {
@@ -205,6 +210,16 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    {
       if (state.getGoalFrame().isChildOfWorld())
       {
+         synchronized (footstepMessageSynchronizer)
+         {
+            if (footstepDataListMessage != null)
+            {
+               ros2ControllerHelper.publishToController(footstepDataListMessage);
+               executionTimer.reset();
+               footstepDataListMessage = null;
+            }
+         }
+
          boolean isComplete = true;
          for (RobotSide side : RobotSide.values)
          {
