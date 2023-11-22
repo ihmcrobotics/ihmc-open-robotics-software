@@ -41,6 +41,7 @@ public class RDXSCS2HumanoidSimulationManager
    private final ArrayList<Function<ReferenceFrame, Robot>> secondaryRobots = new ArrayList<>();
    private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
+   private final ArrayList<String> variableWidgets = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
@@ -146,6 +147,11 @@ public class RDXSCS2HumanoidSimulationManager
       scs2SimulationSession.startSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
       scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
+      for (String yoVariableName : variableWidgets)
+      {
+         scs2SimulationSession.getPlotManager().addVariableWidget(yoVariableName);
+      }
+
       avatarSimulation.beforeSessionThreadStart();
 
 
@@ -219,5 +225,10 @@ public class RDXSCS2HumanoidSimulationManager
    public SCS2AvatarSimulation getAvatarSimulation()
    {
       return avatarSimulation;
+   }
+
+   public void addVariableWidget(String yoVariableName)
+   {
+      variableWidgets.add(yoVariableName);
    }
 }
