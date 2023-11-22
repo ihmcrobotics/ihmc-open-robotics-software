@@ -277,11 +277,16 @@ public class RDXAffordanceTemplateFrames
       boolean hasFrameBeenSetOnce = arePosesSet.get(side).stream().anyMatch(Boolean::booleanValue);
 
       // Determine graphics based on conditions
-      if (!hasFrameBeenSetOnce) {
+      if (!hasFrameBeenSetOnce)
+      {
          frameGraphics.get(side).add(null);
-      } else if (!arePosesSet.get(side).get(index - 1)) {
+      }
+      else if (!arePosesSet.get(side).get(index - 1))
+      {
          frameGraphics.get(side).add(new RDXReferenceFrameGraphic(0.1, Color.RED));
-      } else {
+      }
+      else
+      {
          frameGraphics.get(side).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
       }
       colorIndex++;
