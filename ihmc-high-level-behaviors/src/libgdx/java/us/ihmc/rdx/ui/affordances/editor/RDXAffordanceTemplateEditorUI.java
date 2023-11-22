@@ -489,14 +489,21 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
+            objectBuilder.getSelectedObject().setNewScale(true);
          }
          ImGui.separator();
 
-         if (objectBuilder.getSelectedObject().getShape() != null)
+         if (objectBuilder.getSelectedObject().getShape() != null && objectBuilder.getSelectedObject().isNewScale())
          {
             ImGui.text("Rescaling Affordance Template only works for Primitive shapes.");
             if (ImGui.button(labels.get("Rescale Affordance Template")))
+            {
+               reset();
+               fileManager.load();
+
                rescaleAffordanceTemplate();
+               objectBuilder.getSelectedObject().setNewScale(false);
+            }
          }
       }
       else

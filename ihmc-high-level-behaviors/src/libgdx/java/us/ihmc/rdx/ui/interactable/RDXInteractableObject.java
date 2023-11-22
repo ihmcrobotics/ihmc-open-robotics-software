@@ -52,6 +52,7 @@ public class RDXInteractableObject implements RenderableProvider
    private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
    private List<Float> readResizablePrimitiveSize;
+   private boolean newScale;
 
    public RDXInteractableObject(RDXBaseUI baseUI)
    {
@@ -108,6 +109,7 @@ public class RDXInteractableObject implements RenderableProvider
                 ImGuiTools.volatileInputFloat(labels.get("width"), yLength) ||
                 ImGuiTools.volatileInputFloat(labels.get("height"), zLength)) {
                createVisuals();
+               newScale = true;
             }
          }
          case CYLINDER, CONE -> {
@@ -124,6 +126,16 @@ public class RDXInteractableObject implements RenderableProvider
             }
          }
       }
+   }
+
+   public boolean isNewScale()
+   {
+      return newScale;
+   }
+
+   public void setNewScale(boolean newScale)
+   {
+      this.newScale = newScale;
    }
 
    public PrimitiveRigidBodyShape getShape()
