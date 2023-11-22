@@ -35,11 +35,11 @@ import java.util.List;
 public class RDXInteractableObject implements RenderableProvider
 {
    private RDXModelInstance modelInstance;
-   private RigidBodyTransform objectTransform = new RigidBodyTransform();
+   private final RigidBodyTransform objectTransform = new RigidBodyTransform();
    private final FramePose3D initialObjectPose = new FramePose3D();
    private final ReferenceFrame objectFrame;
    private ReferenceFrame modelInstanceFrame;
-   private RDXSelectablePose3DGizmo selectablePose3DGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), objectTransform);
+   private final RDXSelectablePose3DGizmo selectablePose3DGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), objectTransform);
    private static final float DEFAULT_DIMENSION = 0.1F;
    protected static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.6);
    private PrimitiveRigidBodyShape shape;
