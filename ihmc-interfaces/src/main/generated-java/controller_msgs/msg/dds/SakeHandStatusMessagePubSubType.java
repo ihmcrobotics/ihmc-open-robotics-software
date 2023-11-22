@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2fc302fba6c9f5eeb4531248b8bcc3d59b8edc004c8444515d0b0afa1f5b2444";
+   		return "4b4ad4d0d684b0bedf83957d6339d4795c5a6950dc1e1cfb9ba787e35f536a44";
    }
    
    @Override
@@ -118,7 +118,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_6(data.getGoalTorqueRatio());
 
-      cdr.write_type_7(data.getIsInErrorState());
+      cdr.write_type_9(data.getErrorStatus());
 
    }
 
@@ -136,7 +136,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setGoalTorqueRatio(cdr.read_type_6());
       	
-      data.setIsInErrorState(cdr.read_type_7());
+      data.setErrorStatus(cdr.read_type_9());
       	
 
    }
@@ -150,7 +150,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_6("present_torque_ratio", data.getPresentTorqueRatio());
       ser.write_type_6("postion_ratio", data.getPostionRatio());
       ser.write_type_6("goal_torque_ratio", data.getGoalTorqueRatio());
-      ser.write_type_7("is_in_error_state", data.getIsInErrorState());
+      ser.write_type_9("error_status", data.getErrorStatus());
    }
 
    @Override
@@ -162,7 +162,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setPresentTorqueRatio(ser.read_type_6("present_torque_ratio"));
       data.setPostionRatio(ser.read_type_6("postion_ratio"));
       data.setGoalTorqueRatio(ser.read_type_6("goal_torque_ratio"));
-      data.setIsInErrorState(ser.read_type_7("is_in_error_state"));
+      data.setErrorStatus(ser.read_type_9("error_status"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SakeHandStatusMessage src, controller_msgs.msg.dds.SakeHandStatusMessage dest)

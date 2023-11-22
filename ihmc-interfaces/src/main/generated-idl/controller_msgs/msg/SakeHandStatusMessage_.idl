@@ -39,7 +39,10 @@ module controller_msgs
          * 0.0 min, 1.0 max
          */
         double goal_torque_ratio;
-        boolean is_in_error_state;
+        /**
+         * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+         */
+        octet error_status;
       };
     };
   };

@@ -31,7 +31,10 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
             * 0.0 min, 1.0 max
             */
    public double goal_torque_ratio_;
-   public boolean is_in_error_state_;
+   /**
+            * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public byte error_status_;
 
    public SakeHandStatusMessage()
    {
@@ -57,7 +60,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       goal_torque_ratio_ = other.goal_torque_ratio_;
 
-      is_in_error_state_ = other.is_in_error_state_;
+      error_status_ = other.error_status_;
 
    }
 
@@ -139,13 +142,19 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return goal_torque_ratio_;
    }
 
-   public void setIsInErrorState(boolean is_in_error_state)
+   /**
+            * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public void setErrorStatus(byte error_status)
    {
-      is_in_error_state_ = is_in_error_state;
+      error_status_ = error_status;
    }
-   public boolean getIsInErrorState()
+   /**
+            * error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public byte getErrorStatus()
    {
-      return is_in_error_state_;
+      return error_status_;
    }
 
 
@@ -178,7 +187,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_torque_ratio_, other.goal_torque_ratio_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_in_error_state_, other.is_in_error_state_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.error_status_, other.error_status_, epsilon)) return false;
 
 
       return true;
@@ -205,7 +214,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.goal_torque_ratio_ != otherMyClass.goal_torque_ratio_) return false;
 
-      if(this.is_in_error_state_ != otherMyClass.is_in_error_state_) return false;
+      if(this.error_status_ != otherMyClass.error_status_) return false;
 
 
       return true;
@@ -229,8 +238,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append(this.postion_ratio_);      builder.append(", ");
       builder.append("goal_torque_ratio=");
       builder.append(this.goal_torque_ratio_);      builder.append(", ");
-      builder.append("is_in_error_state=");
-      builder.append(this.is_in_error_state_);
+      builder.append("error_status=");
+      builder.append(this.error_status_);
       builder.append("}");
       return builder.toString();
    }

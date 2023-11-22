@@ -21,6 +21,7 @@ float64 postion_ratio
 # 0.0 min, 1.0 max
 float64 goal_torque_ratio
 
-bool is_in_error_state
+# error status as reported by Dynamixel. See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+int8 error_status
 
 
