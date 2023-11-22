@@ -222,9 +222,9 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       userControlState.setWeights(userModeWeights);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains, Map<String, PIDGainsReadOnly> jointspaceLowLevelGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains)
    {
-      jointspaceControlState.setGains(jointspaceHighLevelGains, jointspaceLowLevelGains);
+      jointspaceControlState.setGains(jointspaceHighLevelGains);
    }
 
    /**

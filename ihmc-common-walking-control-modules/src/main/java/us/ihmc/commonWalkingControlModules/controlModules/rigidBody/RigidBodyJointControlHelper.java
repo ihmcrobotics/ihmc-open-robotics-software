@@ -16,7 +16,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -52,12 +51,10 @@ public class RigidBodyJointControlHelper
    private final List<YoDouble> currentWeights = new ArrayList<>();
    private final List<YoDouble> messageWeights = new ArrayList<>();
    private final List<PIDGainsReadOnly> highLevelGains = new ArrayList<>();
-   private final List<PIDGainsReadOnly> lowLevelGains = new ArrayList<>();
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
 
    private final YoBoolean hasWeights;
    private final YoBoolean hasHighLevelGains;
-   private final YoBoolean hasLowLevelGains;
 
    private final OneDoFTrajectoryPoint lastPointAdded = new OneDoFTrajectoryPoint();
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
@@ -80,7 +77,6 @@ public class RigidBodyJointControlHelper
       String prefix = bodyName + "Jointspace";
       hasWeights = new YoBoolean(prefix + "HasWeights", registry);
       hasHighLevelGains = new YoBoolean(prefix + "HasHighLevelGains", registry);
-      hasLowLevelGains = new YoBoolean(prefix + "HasLowLevelGains", registry);
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
@@ -150,7 +146,7 @@ public class RigidBodyJointControlHelper
       setWeightsToDefaults();
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> highLevelGains, Map<String, PIDGainsReadOnly> lowLevelGains)
+   public void setGains(Map<String, PIDGainsReadOnly> highLevelGains)
    {
       hasHighLevelGains.set(true);
       this.highLevelGains.clear();
@@ -165,26 +161,6 @@ public class RigidBodyJointControlHelper
          {
             this.highLevelGains.clear();
             hasHighLevelGains.set(false);
-            return;
-         }
-      }
-
-      hasLowLevelGains.set(lowLevelGains != null);
-      if (lowLevelGains == null)
-         return;
-
-      this.lowLevelGains.clear();
-      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-      {
-         OneDoFJointBasics joint = joints[jointIdx];
-         if (lowLevelGains.containsKey(joint.getName()))
-         {
-            this.lowLevelGains.add(lowLevelGains.get(joint.getName()));
-         }
-         else
-         {
-            this.lowLevelGains.clear();
-            hasLowLevelGains.set(false);
             return;
          }
       }
@@ -601,7 +577,15 @@ public class RigidBodyJointControlHelper
 
    public double getJointDesiredPosition(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(jointIdx).getValue();
+      double desiredPosition = jointTrajectoryGenerators.get(jointIdx).getValue();
+
+      if (!functionGenerators.isEmpty())
+      {
+         functionGenerators.get(jointIdx).update();
+         desiredPosition += functionGenerators.get(jointIdx).getValue();
+      }
+
+      return desiredPosition;
    }
 
    public void queueInitialPointsAtCurrentDesired()
@@ -614,7 +598,15 @@ public class RigidBodyJointControlHelper
 
    public double getJointDesiredVelocity(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(jointIdx).getVelocity();
+      double desiredVelocity = jointTrajectoryGenerators.get(jointIdx).getVelocity();
+
+      if (!functionGenerators.isEmpty())
+      {
+         functionGenerators.get(jointIdx).update();
+         desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
+      }
+
+      return desiredVelocity;
    }
 
    public JointspaceFeedbackControlCommand getJointspaceCommand()
@@ -629,15 +621,5 @@ public class RigidBodyJointControlHelper
          OneDoFJointBasics joint = joints[jointIdx];
          queueInitialPoint(joint.getQ(), jointIdx);
       }
-   }
-
-   public boolean hasLowLevelJointGains()
-   {
-      return hasLowLevelGains.getValue();
-   }
-   
-   public PIDGainsReadOnly getLowLevelJointGain(int jointIdx)
-   {
-      return lowLevelGains.get(jointIdx);
    }
 }

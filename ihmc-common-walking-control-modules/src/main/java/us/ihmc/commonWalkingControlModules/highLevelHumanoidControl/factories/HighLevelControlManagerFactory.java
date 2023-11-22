@@ -77,7 +77,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointspaceHighLevelGainMap = new HashMap<>();
-   private final Map<String, PIDGainsReadOnly> jointspaceLowLevelGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
@@ -117,7 +116,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 
       // Transform weights and gains to their parameterized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getLowLevelJointSpaceControlGains(), jointspaceLowLevelGainMap, jointGainRegistry);
       ParameterTools.extract3DGainMap("Orientation",
                                       walkingControllerParameters.getTaskspaceOrientationControlGains(),
                                       taskspaceOrientationGainMap,
@@ -260,7 +258,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     yoTime,
                                                                     graphicsListRegistry,
                                                                     registry);
-      manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
+      manager.setGains(jointspaceHighLevelGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
