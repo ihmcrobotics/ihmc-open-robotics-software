@@ -116,6 +116,7 @@ public class RDXInteractableObject implements RenderableProvider
             if (ImGuiTools.volatileInputFloat(labels.get("radius"), xRadius) ||
                 ImGuiTools.volatileInputFloat(labels.get("height"), zLength)) {
                createVisuals();
+               newScale = true;
             }
          }
          case ELLIPSOID -> {
@@ -123,6 +124,7 @@ public class RDXInteractableObject implements RenderableProvider
                 ImGuiTools.volatileInputFloat(labels.get("yRadius"), yRadius) ||
                 ImGuiTools.volatileInputFloat(labels.get("zRadius"), zRadius)) {
                createVisuals();
+               newScale = true;
             }
          }
       }
