@@ -16,7 +16,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = "Object Panel";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXInteractableObject selectedObject;
+   private final RDXInteractableObject selectedObject;
    private final SortedMap<String, PredefinedRigidBodySceneNode> nameToNodesMap = new TreeMap<>();
    private final SortedMap<String, PrimitiveRigidBodySceneNode> nameToPrimitiveNodesMap = new TreeMap<>();
    private String selectedObjectName = "";
