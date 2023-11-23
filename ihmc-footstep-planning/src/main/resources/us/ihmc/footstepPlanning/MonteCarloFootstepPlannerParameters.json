@@ -1,12 +1,12 @@
 {
   "title" : "MonteCarloFootstepPlannerParameters",
   "Number of iterations" : {
-    "value" : 101,
+    "value" : 157,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 99,
+    "value" : 126,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -16,22 +16,22 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 152.777776,
+    "value" : 208.333328,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 3044.496477,
+    "value" : 46370.023489,
     "lowerBound" : 0.0,
     "upperBound" : 100000.0
   },
   "Max number of visited nodes" : {
-    "value" : 138587,
+    "value" : 60820,
     "lowerBound" : 1000,
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 63,
+    "value" : 8,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
@@ -56,22 +56,22 @@
     "upperBound" : 1.0
   },
   "Max transfer yaw" : {
-    "value" : 0.329275,
+    "value" : 0.245125,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Goal margin" : {
-    "value" : 39,
+    "value" : 23,
     "lowerBound" : 1,
     "upperBound" : 100
   },
   "Feasible contact cutoff" : {
-    "value" : 0.648794,
+    "value" : 0.823056,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Exploration constant" : {
-    "value" : 1.061579,
+    "value" : 10.0,
     "lowerBound" : 0.01,
     "upperBound" : 10.0
   },

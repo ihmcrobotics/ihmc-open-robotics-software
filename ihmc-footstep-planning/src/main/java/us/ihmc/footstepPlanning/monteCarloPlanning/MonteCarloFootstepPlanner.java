@@ -76,8 +76,8 @@ public class MonteCarloFootstepPlanner
          return;
       }
 
-      //node.sortChildren();
-      //node.prune(plannerParameters.getMaxNumberOfChildNodes());
+      node.sortChildren();
+      node.prune(parameters.getMaxNumberOfChildNodes());
 
       if (node.getChildren().isEmpty())
       {
@@ -165,7 +165,10 @@ public class MonteCarloFootstepPlanner
          return null;
       }
 
-      return (MonteCarloFootstepNode) node.getMaxQueueNode();
+      //return (MonteCarloFootstepNode) node.getMaxQueueNode();
+
+      // return a random node
+      return (MonteCarloFootstepNode) node.getChildren().get(random.nextInt(0, node.getChildren().size() - 1));
    }
 
    public double simulate(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)

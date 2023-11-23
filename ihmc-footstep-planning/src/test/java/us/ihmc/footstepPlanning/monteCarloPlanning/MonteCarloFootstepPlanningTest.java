@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -40,9 +41,7 @@ public class MonteCarloFootstepPlanningTest
       // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
-      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.35f, false);
-      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.7f, false);
-      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 1.5f, false);
+      HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
 
       heightMapExtractor.getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
       heightMapExtractor.populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(), cameraIntrinsics, new Point3D());
