@@ -111,7 +111,6 @@ public class MonteCarloFootstepPlanner
       ArrayList<?> availableStates = node.getAvailableStates(request, parameters);
 
       //LogTools.info("Total Available States: {}", availableStates.size());
-      debugger.plotNodes(availableStates);
 
       for (Object newStateObj : availableStates)
       {
@@ -120,6 +119,7 @@ public class MonteCarloFootstepPlanner
 
          if (node.getLevel() == 0)
          {
+            debugger.plotNodes(availableStates);
             //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
             //                            (int) node.getState().getX(),
             //                            (int) node.getState().getY(),
