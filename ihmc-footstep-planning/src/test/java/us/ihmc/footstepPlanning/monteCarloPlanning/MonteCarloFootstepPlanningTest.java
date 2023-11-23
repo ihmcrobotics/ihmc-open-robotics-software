@@ -40,9 +40,9 @@ public class MonteCarloFootstepPlanningTest
       // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
-      PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.35f, false);
-      PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.7f, false);
-      PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 1.5f, false);
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.35f, false);
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.7f, false);
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 1.5f, false);
 
       heightMapExtractor.getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
       heightMapExtractor.populateParameterBuffer(RapidHeightMapExtractor.getHeightMapParameters(), cameraIntrinsics, new Point3D());

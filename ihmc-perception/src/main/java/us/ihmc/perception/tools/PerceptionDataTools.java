@@ -44,18 +44,21 @@ public class PerceptionDataTools
       return depthData;
    }
 
-   public static void fillSquareInHeightMap(Mat heightMap, int rStart, int cStart, int rEnd, int cEnd, float height)
+   public static void fillStepInHeightMap(Mat heightMap, int rStart, int cStart, int rEnd, int cEnd, float height)
    {
       for (int i = rStart; i < rEnd; i++)
       {
          for (int j = cStart; j < cEnd; j++)
          {
-            heightMap.ptr(i, j).putShort((short) (32768 + height * 10000));
+            if (i >= 0 && i < heightMap.rows() && j >= 0 && j < heightMap.cols())
+            {
+               heightMap.ptr(i, j).putShort((short) (32768 + height * 10000));
+            }
          }
       }
    }
 
-   public static void fillSquareInHeightMap(Mat heightMap, Point2D origin, Point2D dimensions, float height, boolean flipRows)
+   public static void fillStepInHeightMap(Mat heightMap, Point2D origin, Point2D dimensions, float height, boolean flipRows)
    {
       int rCenter = (int) (origin.getX() * 50 + heightMap.rows() / 2);
       int cCenter = (int) (origin.getY() * 50 + heightMap.cols() / 2);
@@ -73,6 +76,6 @@ public class PerceptionDataTools
 
       LogTools.debug(String.format("rStart: %d, cStart: %d, rEnd: %d, cEnd: %d, rCenter: %d, cCenter: %d", rStart, cStart, rEnd, cEnd, rCenter, cCenter));
 
-      fillSquareInHeightMap(heightMap, rStart, cStart, rEnd, cEnd, height);
+      fillStepInHeightMap(heightMap, rStart, cStart, rEnd, cEnd, height);
    }
 }

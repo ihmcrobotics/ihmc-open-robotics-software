@@ -112,4 +112,9 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.searchOuterRadius, searchOuterRadius);
    }
+
+   default void setSearchSkipSize(int searchSkipSize)
+   {
+      set(MonteCarloFootstepPlannerParameters.searchSkipSize, searchSkipSize);
+   }
 }

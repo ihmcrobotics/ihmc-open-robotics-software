@@ -11,7 +11,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -28,6 +27,7 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequ
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerLoggingTools;
+import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -40,7 +40,6 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.neural.FootstepPredictor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
-import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -594,9 +593,7 @@ public class TerrainPlanningSimulationUI
                // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
                Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
-               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(-0.5, 0), new Point2D(0.5, 1.5), 0.25f, false);
-               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.0, 0), new Point2D(0.5, 1.5), 0.5f, false);
-               PerceptionDataTools.fillSquareInHeightMap(heightMap, new Point2D(0.5, 0), new Point2D(0.5, 1.5), 0.75f, false);
+               HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f,0.3f, 0.25f, 3);
 
                humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
                humanoidPerception.getRapidHeightMapExtractor()

@@ -1,12 +1,12 @@
 {
   "title" : "MonteCarloFootstepPlannerParameters",
   "Number of iterations" : {
-    "value" : 68,
+    "value" : 101,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 100,
+    "value" : 99,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -16,22 +16,22 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 100.0,
+    "value" : 152.777776,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 10000.0,
+    "value" : 3044.496477,
     "lowerBound" : 0.0,
     "upperBound" : 100000.0
   },
   "Max number of visited nodes" : {
-    "value" : 100000,
+    "value" : 138587,
     "lowerBound" : 1000,
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 16,
+    "value" : 63,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
@@ -56,17 +56,17 @@
     "upperBound" : 1.0
   },
   "Max transfer yaw" : {
-    "value" : 0.249195,
+    "value" : 0.329275,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Goal margin" : {
-    "value" : 15,
+    "value" : 39,
     "lowerBound" : 1,
     "upperBound" : 100
   },
   "Feasible contact cutoff" : {
-    "value" : 0.6,
+    "value" : 0.648794,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -76,7 +76,7 @@
     "upperBound" : 10.0
   },
   "Initial value cutoff" : {
-    "value" : 50,
+    "value" : 48,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
@@ -86,23 +86,28 @@
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.3,
+    "value" : 0.742463,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.1,
+    "value" : 0.523333,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search inner radius" : {
-    "value" : 0.2,
+    "value" : 0.202057,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.8,
+    "value" : 0.649485,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
+  },
+  "Search skip size" : {
+    "value" : 4,
+    "lowerBound" : 0,
+    "upperBound" : 10
   }
 }

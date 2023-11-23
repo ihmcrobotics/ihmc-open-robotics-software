@@ -39,6 +39,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey searchYawBand = keys.addDoubleKey("Search yaw band");
    public static final DoubleStoredPropertyKey searchInnerRadius = keys.addDoubleKey("Search inner radius");
    public static final DoubleStoredPropertyKey searchOuterRadius = keys.addDoubleKey("Search outer radius");
+   public static final IntegerStoredPropertyKey searchSkipSize = keys.addIntegerKey("Search skip size");
 
    /**
     * Loads this property set.

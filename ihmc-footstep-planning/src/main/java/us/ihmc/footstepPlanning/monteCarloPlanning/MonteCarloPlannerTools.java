@@ -341,9 +341,9 @@ public class MonteCarloPlannerTools
       float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
       float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
       float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
-      for (int i = -30; i <= 30; i += 4)
+      for (int i = -30; i <= 30; i += parameters.getSearchSkipSize())
       {
-         for (int j = -30; j <= 30; j += 4)
+         for (int j = -30; j <= 30; j += parameters.getSearchSkipSize())
          {
             float radius = (float) Math.sqrt(i * i + j * j);
             float yaw = (float) Math.atan2(-j, i);
@@ -416,12 +416,13 @@ public class MonteCarloPlannerTools
 
       double score = 0.0;
 
-      double contactScore = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff()) * 100.0;
+      double contactScore = (((int) request.getContactMap().ptr(rIndex, cIndex).get() & 0xFF) / 255.0 - plannerParameters.getFeasibleContactCutoff())
+                            * plannerParameters.getFeasibleContactReward();
       score += contactScore;
 
       Point2D currentPosition = new Point2D(newNode.getState());
       double distanceFromGoal = currentPosition.distance(goalPosition);
-      score += 10000.0f / (distanceFromGoal);
+      score += plannerParameters.getGoalReward() / (distanceFromGoal);
 
       //LogTools.info("Old Node: {}, New Node: {}, {}",
       //              oldNode.getState(),

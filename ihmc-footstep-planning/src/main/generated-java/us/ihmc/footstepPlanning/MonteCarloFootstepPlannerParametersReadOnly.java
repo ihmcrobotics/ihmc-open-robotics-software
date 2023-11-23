@@ -114,4 +114,9 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(searchOuterRadius);
    }
+
+   default int getSearchSkipSize()
+   {
+      return get(searchSkipSize);
+   }
 }
