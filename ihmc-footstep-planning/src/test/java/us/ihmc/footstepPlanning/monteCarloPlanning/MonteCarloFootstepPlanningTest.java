@@ -62,9 +62,10 @@ public class MonteCarloFootstepPlanningTest
       FootstepPlan plan = planner.generateFootstepPlan(request);
       long timeEnd = System.nanoTime();
 
-      LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, %s",
+      LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
                                   (timeEnd - timeStart) / 1e6,
                                   plan.getNumberOfSteps(),
+                                  planner.getVisitedNodes().size(),
                                   MonteCarloPlannerTools.getLayerCountsString(planner.getRoot())));
 
       if (displayPlots)

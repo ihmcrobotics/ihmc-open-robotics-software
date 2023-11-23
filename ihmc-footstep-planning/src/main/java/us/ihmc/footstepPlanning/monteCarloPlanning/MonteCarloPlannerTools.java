@@ -412,7 +412,7 @@ public class MonteCarloPlannerTools
 
       Point2D goalPosition = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       goalPosition.scale(50.0f);
-      goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2);
+      //goalPosition.add((double) request.getContactMap().rows() / 2, (double) request.getContactMap().cols() / 2);
 
       double score = 0.0;
 
@@ -421,7 +421,7 @@ public class MonteCarloPlannerTools
       score += contactScore;
 
       Point2D currentPosition = new Point2D(newNode.getState());
-      double distanceFromGoal = currentPosition.distance(goalPosition);
+      double distanceFromGoal = currentPosition.distanceSquared(goalPosition);
       score += plannerParameters.getGoalReward() / (distanceFromGoal);
 
       //LogTools.info("Old Node: {}, New Node: {}, {}",

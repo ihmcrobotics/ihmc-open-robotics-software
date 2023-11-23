@@ -165,10 +165,13 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       if (children.size() >= maxNumberOfChildren)
       {
          ArrayList<MonteCarloTreeNode> prunedQueue = new ArrayList<>();
+         //System.out.println("Retaining Children: ");
          for (int i = 0; i < maxNumberOfChildren; i++)
          {
             prunedQueue.add(children.get(i));
+            //System.out.print(children.get(i).getValue() + ", ");
          }
+         //System.out.println();
          children.clear();
          children.addAll(prunedQueue);
       }
