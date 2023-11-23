@@ -84,5 +84,25 @@
     "value" : 6,
     "lowerBound" : 2,
     "upperBound" : 12
+  },
+  "Sided yaw offset" : {
+    "value" : 0.3,
+    "lowerBound" : 0.0,
+    "upperBound" : 3.14
+  },
+  "Search yaw band" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 3.14
+  },
+  "Search inner radius" : {
+    "value" : 0.2,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.3
+  },
+  "Search outer radius" : {
+    "value" : 0.8,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   }
 }

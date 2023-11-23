@@ -4,6 +4,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -27,17 +29,20 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    /**
     * Back propagates the given score to the root node.
     */
-   public ArrayList<MonteCarloFootstepNode> getAvailableStates(MonteCarloPlanningWorld world, MonteCarloFootstepPlannerRequest request)
+   public ArrayList<MonteCarloFootstepNode> getAvailableStates(MonteCarloFootstepPlannerRequest request,
+                                                               MonteCarloFootstepPlannerParameters parameters)
    {
       ArrayList<MonteCarloFootstepNode> availableStates = new ArrayList<>();
 
-      MonteCarloPlannerTools.getFootstepActionGrid(actions, state, robotSide == RobotSide.LEFT ? -1 : 1);
+      //MonteCarloPlannerTools.getFootstepActionGrid(actions, robotSide == RobotSide.LEFT ? -1 : 1);
+      MonteCarloPlannerTools.getFootstepRadialActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
 
       for (Vector3D action : actions)
       {
          if (checkActionBoundaries(action, request.getHeightMap().rows()))
          {
-            availableStates.add(computeActionResult(action));
+            MonteCarloFootstepNode nodeToInsert = computeActionResult(action);
+            availableStates.add(nodeToInsert);
          }
       }
 
@@ -71,22 +76,24 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    }
 
    @Override
-   public boolean equals(Object obj) {
-      if (this == obj) {
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+      {
          return true;
       }
-      if (obj == null || getClass() != obj.getClass()) {
+      if (obj == null || getClass() != obj.getClass())
+      {
          return false;
       }
       MonteCarloFootstepNode other = (MonteCarloFootstepNode) obj;
-      return Double.compare(other.state.getX(), state.getX()) == 0 &&
-             Double.compare(other.state.getY(), state.getY()) == 0 &&
-             Double.compare(other.state.getZ(), state.getZ()) == 0 &&
-             robotSide == other.robotSide;
+      return Double.compare(other.state.getX(), state.getX()) == 0 && Double.compare(other.state.getY(), state.getY()) == 0
+             && Double.compare(other.state.getZ(), state.getZ()) == 0 && robotSide == other.robotSide;
    }
 
    @Override
-   public int hashCode() {
+   public int hashCode()
+   {
       return Objects.hash(state.getX(), state.getY(), state.getZ(), robotSide);
    }
 }

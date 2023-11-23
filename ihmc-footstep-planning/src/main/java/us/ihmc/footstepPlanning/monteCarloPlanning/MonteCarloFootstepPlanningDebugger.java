@@ -13,6 +13,8 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
+
 public class MonteCarloFootstepPlanningDebugger
 {
    private int height = 201;
@@ -59,6 +61,14 @@ public class MonteCarloFootstepPlanningDebugger
                                                 new Point2D((int) node.getState().getX(), (int) node.getState().getY()),
                                                 1,
                                                 PerceptionDebugTools.COLOR_PURPLE);
+   }
+
+   public void plotNodes(ArrayList<?> nodes)
+   {
+      for (Object node : nodes)
+      {
+         plotNode((MonteCarloFootstepNode) node);
+      }
    }
 
    public void plotFootstepPlan(FootstepPlan plan)

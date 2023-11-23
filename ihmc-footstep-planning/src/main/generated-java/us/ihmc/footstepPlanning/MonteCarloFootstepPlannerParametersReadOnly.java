@@ -94,4 +94,24 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(maxTreeDepth);
    }
+
+   default double getSidedYawOffset()
+   {
+      return get(sidedYawOffset);
+   }
+
+   default double getSearchYawBand()
+   {
+      return get(searchYawBand);
+   }
+
+   default double getSearchInnerRadius()
+   {
+      return get(searchInnerRadius);
+   }
+
+   default double getSearchOuterRadius()
+   {
+      return get(searchOuterRadius);
+   }
 }

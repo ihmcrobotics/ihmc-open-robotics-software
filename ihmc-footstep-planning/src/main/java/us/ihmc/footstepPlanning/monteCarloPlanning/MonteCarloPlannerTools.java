@@ -42,11 +42,7 @@ public class MonteCarloPlannerTools
    public static void printTree(MonteCarloWaypointNode node, int level)
    {
       // TODO: Make this write to a string and then print the combined string with LogTools.info()
-      LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
-               node.getId(),
-               level,
-               node.getState().toString(),
-               node.getChildren().size()));
+      LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n", node.getId(), level, node.getState().toString(), node.getChildren().size()));
 
       for (MonteCarloTreeNode child : node.getChildren())
       {
@@ -99,7 +95,7 @@ public class MonteCarloPlannerTools
    /**
     * Fills the obstacles in the grid given a list of rectangular obstacles
     * in the form (center_x, center_y, width, height) using OpenCV rectangular drawing function.
-    * */
+    */
    public static void fillObstacles(ArrayList<Vector4D32> obstacles, Mat gridColor)
    {
       for (Vector4D32 obstacle : obstacles)
@@ -122,7 +118,6 @@ public class MonteCarloPlannerTools
       }
    }
 
-
    public static boolean isPointOccupied(Point2DReadOnly point, Mat grid)
    {
       return grid.ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerConstants.OCCUPIED;
@@ -137,10 +132,10 @@ public class MonteCarloPlannerTools
       Point2D currentPoint = new Point2D();
 
       Point2D[] neighbors = new Point2D[8];
-      for (int i = 0; i<neighbors.length; i++)
+      for (int i = 0; i < neighbors.length; i++)
          neighbors[i] = new Point2D();
 
-      for (int i = 0; i<samples; i++)
+      for (int i = 0; i < samples; i++)
       {
          double alpha = i / (double) samples;
          currentPoint.setToZero();
@@ -149,7 +144,7 @@ public class MonteCarloPlannerTools
          updateNeighborsList(neighbors, currentPoint);
 
          // check if a 3x3 square around the current point is occupied
-         if ( isPointOccupied(currentPoint, grid) || Arrays.stream(neighbors).anyMatch(neighbor -> isPointOccupied(neighbor, grid)))
+         if (isPointOccupied(currentPoint, grid) || Arrays.stream(neighbors).anyMatch(neighbor -> isPointOccupied(neighbor, grid)))
          {
             // If the current point is occupied, return the closest point
             closestPoint.set(currentPoint);
@@ -324,14 +319,44 @@ public class MonteCarloPlannerTools
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }
 
-   public static void getFootstepActionGrid(ArrayList<Vector3D> actions, Point3D origin, int side)
+   public static void getFootstepActionGrid(ArrayList<Vector3D> actions, int side)
    {
       actions.clear();
-      for (int i = 10; i <= 30; i+=4)
+      for (int i = 10; i <= 30; i += 4)
       {
-         for (int j = 10; j <= 30; j+=4)
+         for (int j = 10; j <= 30; j += 4)
          {
             actions.add(new Vector3D(i, j * side, 0));
+         }
+      }
+   }
+
+   public static void getFootstepRadialActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actions, float yawPrevious, int side)
+   {
+      actions.clear();
+
+      float sidedYawOffset = -side * (float) parameters.getSidedYawOffset();
+      float adjustedPreviousYaw = yawPrevious + sidedYawOffset;
+      float yawMin = adjustedPreviousYaw - (float) parameters.getSearchYawBand();
+      float yawMax = adjustedPreviousYaw + (float) parameters.getSearchYawBand();
+      float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
+      float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
+      for (int i = -30; i <= 30; i += 4)
+      {
+         for (int j = -30; j <= 30; j += 4)
+         {
+            float radius = (float) Math.sqrt(i * i + j * j);
+            float yaw = (float) Math.atan2(-j, i);
+
+            //LogTools.info(String.format("(%d, %d) Radius: %.2f (%.2f, %.2f), Yaw: %.2f (%.2f, %.2f)", i, j, radius,
+            //                            parameters.getSearchInnerRadius(), parameters.getSearchOuterRadius(), yaw, yawMin, yawMax));
+
+            if (radius >= minRadius && radius <= maxRadius && yaw >= yawMin && yaw <= yawMax)
+            {
+               actions.add(new Vector3D(i, j, -0.1));
+               actions.add(new Vector3D(i, j, 0));
+               actions.add(new Vector3D(i, j, 0.1));
+            }
          }
       }
    }
@@ -367,12 +392,15 @@ public class MonteCarloPlannerTools
          }
          else if (isWithinGridBoundaries(new Point2D(position), gridColor.cols()) && node.getRobotSide() == RobotSide.RIGHT)
          {
-            gridColor.ptr((int) position.getX32(), (int) position.getY32()).put(new byte[] {(byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255});
+            gridColor.ptr((int) position.getX32(), (int) position.getY32())
+                     .put(new byte[] {(byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255});
          }
       }
    }
 
-   public static double scoreFootstepNode(MonteCarloFootstepNode oldNode, MonteCarloFootstepNode newNode, MonteCarloFootstepPlannerRequest request,
+   public static double scoreFootstepNode(MonteCarloFootstepNode oldNode,
+                                          MonteCarloFootstepNode newNode,
+                                          MonteCarloFootstepPlannerRequest request,
                                           MonteCarloFootstepPlannerParameters plannerParameters)
    {
       //(randomState.getPosition().distanceSquared(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition()) < world.getGoalMarginSquared())
@@ -394,6 +422,11 @@ public class MonteCarloPlannerTools
       Point2D currentPosition = new Point2D(newNode.getState());
       double distanceFromGoal = currentPosition.distance(goalPosition);
       score += 10000.0f / (distanceFromGoal);
+
+      //LogTools.info("Old Node: {}, New Node: {}, {}",
+      //              oldNode.getState(),
+      //              newNode.getState(),
+      //              String.format("Contact Score: %.2f, Distance Score: %.2f", contactScore, 10000.0f / (distanceFromGoal)));
 
       //score -= edgeCost;
 

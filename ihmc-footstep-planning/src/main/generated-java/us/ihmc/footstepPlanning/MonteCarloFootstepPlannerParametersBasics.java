@@ -92,4 +92,24 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.maxTreeDepth, maxTreeDepth);
    }
+
+   default void setSidedYawOffset(double sidedYawOffset)
+   {
+      set(MonteCarloFootstepPlannerParameters.sidedYawOffset, sidedYawOffset);
+   }
+
+   default void setSearchYawBand(double searchYawBand)
+   {
+      set(MonteCarloFootstepPlannerParameters.searchYawBand, searchYawBand);
+   }
+
+   default void setSearchInnerRadius(double searchInnerRadius)
+   {
+      set(MonteCarloFootstepPlannerParameters.searchInnerRadius, searchInnerRadius);
+   }
+
+   default void setSearchOuterRadius(double searchOuterRadius)
+   {
+      set(MonteCarloFootstepPlannerParameters.searchOuterRadius, searchOuterRadius);
+   }
 }

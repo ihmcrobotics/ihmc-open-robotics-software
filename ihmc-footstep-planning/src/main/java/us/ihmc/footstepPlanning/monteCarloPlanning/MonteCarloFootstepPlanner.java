@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class MonteCarloFootstepPlanner
 {
-   private MonteCarloFootstepPlannerParameters plannerParameters;
+   private MonteCarloFootstepPlannerParameters parameters;
    private MonteCarloFootstepPlanningDebugger debugger;
 
    private MonteCarloPlanningWorld world;
@@ -35,11 +35,11 @@ public class MonteCarloFootstepPlanner
 
    private boolean planning = false;
 
-   public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters plannerParameters)
+   public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters)
    {
       this.debugger = new MonteCarloFootstepPlanningDebugger(this);
-      this.plannerParameters = plannerParameters;
-      this.world = new MonteCarloPlanningWorld(plannerParameters.getGoalMargin(), worldHeight, worldWidth);
+      this.parameters = parameters;
+      this.world = new MonteCarloPlanningWorld(parameters.getGoalMargin(), worldHeight, worldWidth);
    }
 
    public FootstepPlan generateFootstepPlan(MonteCarloFootstepPlannerRequest request)
@@ -55,8 +55,9 @@ public class MonteCarloFootstepPlanner
 
       planning = true;
       debugger.setRequest(request);
+      debugger.refresh();
 
-      for (int i = 0; i < plannerParameters.getNumberOfIterations(); i++)
+      for (int i = 0; i < parameters.getNumberOfIterations(); i++)
       {
          updateTree(root, request);
       }
@@ -71,7 +72,7 @@ public class MonteCarloFootstepPlanner
    {
       if (node == null)
       {
-         LogTools.warn("Node is null");
+         LogTools.debug("Node is null");
          return;
       }
 
@@ -81,9 +82,12 @@ public class MonteCarloFootstepPlanner
       if (node.getChildren().isEmpty())
       {
          MonteCarloFootstepNode childNode = expand(node, request);
-         double score = simulate(childNode, request);
-         childNode.setValue((float) score);
-         backPropagate(node, (float) score);
+         if (childNode != null)
+         {
+            double score = simulate(childNode, request);
+            childNode.setValue((float) score);
+            backPropagate(node, (float) score);
+         }
       }
       else
       {
@@ -91,7 +95,7 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode bestNode = null;
          for (MonteCarloTreeNode child : node.getChildren())
          {
-            child.updateUpperConfidenceBound(plannerParameters.getExplorationConstant());
+            child.updateUpperConfidenceBound(parameters.getExplorationConstant());
             if (child.getUpperConfidenceBound() >= bestScore)
             {
                bestScore = child.getUpperConfidenceBound();
@@ -104,26 +108,32 @@ public class MonteCarloFootstepPlanner
 
    public MonteCarloFootstepNode expand(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
-      ArrayList<?> availableStates = node.getAvailableStates(world, request);
+      ArrayList<?> availableStates = node.getAvailableStates(request, parameters);
+
+      //LogTools.info("Total Available States: {}", availableStates.size());
+      debugger.plotNodes(availableStates);
 
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
-         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, plannerParameters);
+         double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, parameters);
 
-         //if (node.getLevel() == 0)
-         //{
-         //   LogTools.info(String.format("Previous: %d, %d, Node: %d, %d, Action: %d, %d, Score: %.2f",
-         //                               (int) node.getState().getX(),
-         //                               (int) node.getState().getY(),
-         //                               (int) newState.getState().getX(),
-         //                               (int) newState.getState().getY(),
-         //                               (int) (newState.getState().getX() - node.getState().getX()),
-         //                               (int) (newState.getState().getY() - node.getState().getY()),
-         //                               score));
-         //}
+         if (node.getLevel() == 0)
+         {
+            //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
+            //                            (int) node.getState().getX(),
+            //                            (int) node.getState().getY(),
+            //                            node.getState().getZ(),
+            //                            (int) newState.getState().getX(),
+            //                            (int) newState.getState().getY(),
+            //                            newState.getState().getZ(),
+            //                            (int) (newState.getState().getX() - node.getState().getX()),
+            //                            (int) (newState.getState().getY() - node.getState().getY()),
+            //                            newState.getState().getZ() - node.getState().getZ(),
+            //                            score));
+         }
 
-         if (node.getLevel() < plannerParameters.getMaxTreeDepth() && score > plannerParameters.getInitialValueCutoff())
+         if (node.getLevel() < parameters.getMaxTreeDepth() && score > parameters.getInitialValueCutoff())
          {
             if (visitedNodes.getOrDefault(newState, null) != null)
             {
@@ -143,6 +153,16 @@ public class MonteCarloFootstepPlanner
                //debugger.display(30);
             }
          }
+         //else
+         //{
+         //   LogTools.warn("Not Inserting Action: {}, Score: {}", newState.getState(), score);
+         //}
+      }
+
+      if (node.getChildren().isEmpty())
+      {
+         LogTools.debug("No Children");
+         return null;
       }
 
       return (MonteCarloFootstepNode) node.getMaxQueueNode();
@@ -154,14 +174,18 @@ public class MonteCarloFootstepPlanner
 
       MonteCarloFootstepNode simulationState = new MonteCarloFootstepNode(node.getState(), null, node.getRobotSide().getOppositeSide(), 0);
 
-      for (int i = 0; i < plannerParameters.getNumberOfSimulations(); i++)
+      for (int i = 0; i < parameters.getNumberOfSimulations(); i++)
       {
-         ArrayList<MonteCarloFootstepNode> nextStates = simulationState.getAvailableStates(world, request);
+         ArrayList<MonteCarloFootstepNode> nextStates = simulationState.getAvailableStates(request, parameters);
+         //LogTools.info("Number of next states: {}", nextStates.size());
+         if (nextStates.isEmpty())
+            break;
+
          int actionIndex = random.nextInt(0, nextStates.size() - 1);
          simulationState = nextStates.get(actionIndex);
 
          //LogTools.info(String.format("Simulation %d, Random State: %s, Actions: %d, Side:%s", i, randomState.getPosition(), nextStates.size(), randomState.getRobotSide()));
-         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, plannerParameters);
+         score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, parameters);
          //LogTools.info("Action Taken: {}, Score: {}", actionIndex, score);
       }
 

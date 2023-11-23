@@ -35,6 +35,10 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey explorationConstant = keys.addDoubleKey("Exploration constant");
    public static final IntegerStoredPropertyKey initialValueCutoff = keys.addIntegerKey("Initial value cutoff");
    public static final IntegerStoredPropertyKey maxTreeDepth = keys.addIntegerKey("Max tree depth");
+   public static final DoubleStoredPropertyKey sidedYawOffset = keys.addDoubleKey("Sided yaw offset");
+   public static final DoubleStoredPropertyKey searchYawBand = keys.addDoubleKey("Search yaw band");
+   public static final DoubleStoredPropertyKey searchInnerRadius = keys.addDoubleKey("Search inner radius");
+   public static final DoubleStoredPropertyKey searchOuterRadius = keys.addDoubleKey("Search outer radius");
 
    /**
     * Loads this property set.

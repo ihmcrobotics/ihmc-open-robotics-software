@@ -435,6 +435,7 @@ public class TerrainPlanningSimulationUI
 
             long timeStart = System.nanoTime();
             monteCarloFootstepPlanner.reset(request);
+
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();
 
@@ -444,7 +445,6 @@ public class TerrainPlanningSimulationUI
                                         monteCarloFootstepPlanner.getVisitedNodes().size(),
                                         MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
 
-            monteCarloFootstepPlanner.getDebugger().refresh();
             monteCarloFootstepPlanner.getDebugger().plotFootstepPlan(plan);
             monteCarloFootstepPlanner.getDebugger().display(1);
 
