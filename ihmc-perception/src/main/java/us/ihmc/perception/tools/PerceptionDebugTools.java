@@ -1,14 +1,21 @@
 package us.ihmc.perception.tools;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.ejml.data.FMatrixRMaj;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint3f;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -438,7 +445,10 @@ public class PerceptionDebugTools
 
    public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
    {
-      LogTools.debug("Footstep Plotted: {} {} {}", (int) (origin.getY() * 50 + displayImage.rows() / 2), (int) (origin.getX() * 50 + displayImage.cols() / 2), side);
+      LogTools.debug("Footstep Plotted: {} {} {}",
+                     (int) (origin.getY() * 50 + displayImage.rows() / 2),
+                     (int) (origin.getX() * 50 + displayImage.cols() / 2),
+                     side);
 
       Scalar color;
 
@@ -462,14 +472,62 @@ public class PerceptionDebugTools
       }
 
       // just like plotFootsteps
-      Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
-      opencv_imgproc.rectangle(displayImage,
-                               new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size * 2),
-                               new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size * 2),
-                               color,
-                               -1,
-                               opencv_imgproc.LINE_4,
-                               0);
+      //Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
+      //opencv_imgproc.rectangle(displayImage,
+      //                         new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size * 2),
+      //                         new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size * 2),
+      //                         color,
+      //                         -1,
+      //                         opencv_imgproc.LINE_4,
+      //                         0);
+
+      plotFootstepWithYaw(displayImage, new Point3D(origin.getX(), origin.getY(), yaw), color, -1, size, size * 2);
+   }
+
+   public static void plotFootstepWithYaw(Mat display, Point3D pose, Scalar color, int index, double width, double length)
+   {
+      double[] positionOnMap = {pose.getX() * 50 + display.rows() / 2, pose.getY() * 50 + display.cols() / 2};
+      double yaw = pose.getZ();
+
+      // Create the footstep rectangle using the position and orientation
+      Point3D[] points = {new Point3D(-length, -width, 0),
+                          new Point3D(-length, width, 0),
+                          new Point3D(length, width, 0),
+                          new Point3D(length, -width, 0)};
+
+      Quaternion quat = new Quaternion();
+      quat.setYawPitchRoll(yaw + Math.PI / 2, 0, 0);
+
+      Vector3D translation = new Vector3D(positionOnMap[1], positionOnMap[0], 0);
+
+      RigidBodyTransform transform = new RigidBodyTransform(quat, translation);
+
+      // Rotate the points
+      for (Point3D point : points)
+      {
+         point.applyTransform(transform);
+      }
+
+      Mat matOfPoints = new Mat(4, 2, opencv_core.CV_32SC1);
+
+      for (int i = 0; i < 4; i++)
+      {
+         matOfPoints.ptr(i, 0).putInt((int) points[i].getX());
+         matOfPoints.ptr(i, 1).putInt((int) points[i].getY());
+      }
+
+      // Draw the polyline on the image
+      opencv_imgproc.fillConvexPoly(display, matOfPoints, color);
+
+      // Plot text on the footstep which is the index of the footstep (size 0.1)
+      if (index != -1)
+      {
+         String text = String.valueOf(index);
+         Size textsize = opencv_imgproc.getTextSize(text, opencv_imgproc.FONT_HERSHEY_SIMPLEX, 0.1, 1, new IntPointer());
+         int textX = (int) (positionOnMap[0] - textsize.width() / 2) + 2;
+         int textY = (int) (positionOnMap[1] + textsize.height() / 2);
+         opencv_imgproc.putText(display, text, new Point(textX, textY), opencv_imgproc.FONT_HERSHEY_SIMPLEX, 0.1, color, 1, 0, false);
+      }
    }
 
    public static void plotCircle(Mat displayImage, Point2D origin, int radius)
