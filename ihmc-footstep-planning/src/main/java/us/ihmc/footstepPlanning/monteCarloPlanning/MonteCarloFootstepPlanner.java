@@ -69,7 +69,7 @@ public class MonteCarloFootstepPlanner
 
       statistics.stopTotalTime();
       statistics.setNodesPerLayerString(MonteCarloPlannerTools.getLayerCountsString(root));
-      statistics.logToFile();
+      statistics.logToFile(false, false);
 
       planning = false;
       return plan;
@@ -242,6 +242,15 @@ public class MonteCarloFootstepPlanner
                                            null,
                                            RobotSide.LEFT,
                                            uniqueNodeId++);
+   }
+
+   public void transitionToOptimal()
+   {
+      for (MonteCarloTreeNode child : root.getChildren())
+      {
+         child.getParents().remove(root);
+      }
+      root = (MonteCarloFootstepNode) root.getMaxQueueNode();
    }
 
    public MonteCarloPlanningWorld getWorld()

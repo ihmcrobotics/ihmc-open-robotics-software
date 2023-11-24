@@ -1,7 +1,9 @@
 package us.ihmc.rdx.perception;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import imgui.ImColor;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.opencl.global.OpenCL;
@@ -235,7 +237,15 @@ public class TerrainPlanningSimulationUI
 
             if (enableMonteCarloPlanner.get())
             {
-               updateMonteCarloPlanner();
+               updateMonteCarloPlanner(true);
+            }
+
+            if (footstepPlanToRenderNotificaiton.poll())
+            {
+               FootstepPlan generatedPlan = footstepPlanToRenderNotificaiton.read();
+               FootstepDataListMessage footstepsMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(generatedPlan, 2.0, 1.0);
+               footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
+               footstepPlanGraphic.update();
             }
 
             humanoidPerceptionUI.update();
@@ -327,16 +337,29 @@ public class TerrainPlanningSimulationUI
                l515PoseGizmo.update();
             }
             ImGui.separator();
-            ImGui.checkbox("Enable Monte Carlo Planning", enableMonteCarloPlanner);
             ImGui.sliderFloat("Start Mid X", startMidX.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Start Mid Y", startMidY.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Start Yaw", startYaw.getData(), (float) -Math.PI, (float) Math.PI);
             ImGui.sliderFloat("Goal Mid X", goalMidX.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Goal Mid Y", goalMidY.getData(), -2.0f, 2.0f);
             ImGui.sliderFloat("Goal Yaw", goalYaw.getData(), (float) -Math.PI, (float) Math.PI);
+            ImGui.separator();
+            if (ImGui.button("Plan Steps"))
+            {
+               updateMonteCarloPlanner(false);
+            }
+            ImGui.sameLine();
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.5f, 0.5f, 0.5f, 0.5f);
+            if (ImGui.button("Next Step"))
+            {
+               monteCarloFootstepPlanner.transitionToOptimal();
+               updateMonteCarloPlanner(false);
+            }
+            ImGui.popStyleColor();
+            ImGui.checkbox("Enable Monte Carlo Planning", enableMonteCarloPlanner);
          }
 
-         public void updateMonteCarloPlanner()
+         public void updateMonteCarloPlanner(boolean reset)
          {
             if (!monteCarloFootstepPlanner.isPlanning())
             {
@@ -347,18 +370,10 @@ public class TerrainPlanningSimulationUI
                                                                                   .getInternalGlobalHeightMapImage()
                                                                                   .getBytedecoOpenCVMat(),
                                                                 humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
-                                                                cameraZUpFrame.getTransformToWorldFrame());
+                                                                cameraZUpFrame.getTransformToWorldFrame(), reset);
 
                     footstepPlanToRenderNotificaiton.set(plan);
                  });
-            }
-
-            if (footstepPlanToRenderNotificaiton.poll())
-            {
-               FootstepPlan generatedPlan = footstepPlanToRenderNotificaiton.read();
-               FootstepDataListMessage footstepsMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(generatedPlan, 2.0, 1.0);
-               footstepPlanGraphic.generateMeshesAsync(footstepsMessage, "Height Map Simulation");
-               footstepPlanGraphic.update();
             }
          }
 
@@ -421,7 +436,7 @@ public class TerrainPlanningSimulationUI
             return plannerOutput;
          }
 
-         public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform)
+         public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform, boolean reset)
          {
 
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
@@ -433,7 +448,9 @@ public class TerrainPlanningSimulationUI
             request.setHeightMap(heightMapImage);
 
             long timeStart = System.nanoTime();
-            monteCarloFootstepPlanner.reset(request);
+
+            if (reset)
+               monteCarloFootstepPlanner.reset(request);
 
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();

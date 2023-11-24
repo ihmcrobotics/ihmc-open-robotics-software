@@ -61,27 +61,32 @@ public class MonteCarloFootstepPlannerStatistics
       }
    }
 
-   public void logToFile()
+   public void logToFile(boolean logToFile, boolean printToConsole)
    {
-      StringBuilder log = new StringBuilder();
+      if (logToFile || printToConsole)
+      {
+         StringBuilder log = new StringBuilder();
 
-      log.append("{");
-      log.append("TotalTime: ").append(totalTime).append(", ");
-      log.append("SimulationTime: ").append(simulationTime).append(", ");
-      log.append("ExpansionTime: ").append(expansionTime).append(", ");
-      log.append("PruningTime: ").append(pruningTime).append(", ");
-      log.append("PropagationTime: ").append(propagationTime).append(", ");
-      log.append("Visited: ").append(numberOfNodesVisited).append(", ");
-      log.append("Pruned: ").append(numberOfNodesPruned).append(", ");
-      log.append("TotalReward: ").append(totalReward).append(", ");
-      log.append("ContactReward: ").append(contactReward).append(", ");
-      log.append("GoalReward: ").append(goalReward).append(", ");
-      log.append("NodesPerLayer: ").append(nodesPerLayerString).append(", ");
-      log.append("}\n");
+         log.append("{");
+         log.append("TotalTime: ").append(totalTime).append(", ");
+         log.append("SimulationTime: ").append(simulationTime).append(", ");
+         log.append("ExpansionTime: ").append(expansionTime).append(", ");
+         log.append("PruningTime: ").append(pruningTime).append(", ");
+         log.append("PropagationTime: ").append(propagationTime).append(", ");
+         log.append("Visited: ").append(numberOfNodesVisited).append(", ");
+         log.append("Pruned: ").append(numberOfNodesPruned).append(", ");
+         log.append("TotalReward: ").append(totalReward).append(", ");
+         log.append("ContactReward: ").append(contactReward).append(", ");
+         log.append("GoalReward: ").append(goalReward).append(", ");
+         log.append("NodesPerLayer: ").append(nodesPerLayerString).append(", ");
+         log.append("}\n");
 
-      FileTools.write(file.getAbsoluteFile().toPath(), log.toString().getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         if (printToConsole)
+            System.out.println(log);
 
-      System.out.println(log);
+         if (logToFile)
+            FileTools.write(file.getAbsoluteFile().toPath(), log.toString().getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      }
    }
 
    public void startTotalTime()
