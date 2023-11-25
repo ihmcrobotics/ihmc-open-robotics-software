@@ -22,19 +22,7 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
-import us.ihmc.scs2.definition.geometry.Box3DDefinition;
-import us.ihmc.scs2.definition.geometry.Capsule3DDefinition;
-import us.ihmc.scs2.definition.geometry.ConvexPolytope3DDefinition;
-import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
-import us.ihmc.scs2.definition.geometry.GeometryDefinition;
-import us.ihmc.scs2.definition.geometry.Point3DDefinition;
-import us.ihmc.scs2.definition.geometry.Ramp3DDefinition;
-import us.ihmc.scs2.definition.geometry.STPBox3DDefinition;
-import us.ihmc.scs2.definition.geometry.STPCapsule3DDefinition;
-import us.ihmc.scs2.definition.geometry.STPConvexPolytope3DDefinition;
-import us.ihmc.scs2.definition.geometry.STPCylinder3DDefinition;
-import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
-import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.geometry.*;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -151,7 +139,7 @@ public class TerrainObjectDefinitionTools
       else if (shape instanceof FrameCylinder3DReadOnly)
       {
          FrameCylinder3DReadOnly cylinder3D = (FrameCylinder3DReadOnly) shape;
-         geometry = new Capsule3DDefinition(cylinder3D.getLength(), cylinder3D.getRadius());
+         geometry = new Cylinder3DDefinition(cylinder3D.getLength(), cylinder3D.getRadius());
          pose.getTranslation().set(cylinder3D.getPosition());
          EuclidGeometryTools.orientation3DFromZUpToVector3D(cylinder3D.getAxis(), pose.getRotation());
       }
