@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,10 +20,13 @@ public class MonteCarloFootstepPlanningDebugger
 {
    private int height = 201;
    private int width = 201;
+   private int scale = 7;
+   private int scaledHeight = scale * height;
+   private int scaledWidth = scale * width;
 
-   private final Mat stacked = new Mat(height, width * 2, opencv_core.CV_8UC3);
-   private final Mat heightMapColorImage = new Mat(height, width, opencv_core.CV_8UC3);
-   private final Mat contactHeatMapColorImage = new Mat(height, width, opencv_core.CV_8UC3);
+   private final Mat stacked = new Mat(scaledHeight, scaledWidth * 2, opencv_core.CV_8UC3);
+   private final Mat heightMapColorImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC3);
+   private final Mat contactHeatMapColorImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC3);
 
    Mat left = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0, 0, heightMapColorImage.cols(), heightMapColorImage.rows()));
    Mat right = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(heightMapColorImage.cols(), 0, heightMapColorImage.cols(), heightMapColorImage.rows()));
@@ -46,20 +50,23 @@ public class MonteCarloFootstepPlanningDebugger
 
    public void refresh()
    {
-      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getContactMap().clone());
       PerceptionDebugTools.convertDepthCopyToColor(request.getHeightMap().clone(), heightMapColorImage);
+      this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(request.getContactMap().clone());
       opencv_imgproc.cvtColor(contactHeatMapImage, contactHeatMapColorImage, opencv_imgproc.COLOR_BGRA2BGR);
+
+      opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
+      opencv_imgproc.resize(contactHeatMapColorImage, contactHeatMapColorImage, new Size(scaledWidth, scaledHeight));
    }
 
    public void plotNode(MonteCarloFootstepNode node)
    {
       PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage,
-                                                new Point2D((int) node.getState().getX(), (int) node.getState().getY()),
-                                                1,
+                                                new Point2D((int) node.getState().getX() * scale, (int) node.getState().getY() * scale),
+                                                1 * scale,
                                                 PerceptionDebugTools.COLOR_PURPLE);
       PerceptionDebugTools.plotRectangleNoScale(heightMapColorImage,
-                                                new Point2D((int) node.getState().getX(), (int) node.getState().getY()),
-                                                1,
+                                                new Point2D((int) node.getState().getX() * scale, (int) node.getState().getY() * scale),
+                                                1 * scale,
                                                 PerceptionDebugTools.COLOR_PURPLE);
    }
 
@@ -76,8 +83,8 @@ public class MonteCarloFootstepPlanningDebugger
       plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
       plotFootPoses(heightMapColorImage, request.getStartFootPoses(), 2);
 
-      plotFootsteps(contactHeatMapColorImage, plan);
-      plotFootsteps(heightMapColorImage, plan);
+      plotFootstepPlan(contactHeatMapColorImage, plan);
+      plotFootstepPlan(heightMapColorImage, plan);
 
       plotFootPoses(contactHeatMapColorImage, request.getGoalFootPoses(), 3);
       plotFootPoses(heightMapColorImage, request.getGoalFootPoses(), 3);
@@ -96,7 +103,7 @@ public class MonteCarloFootstepPlanningDebugger
       heightMapColorImage.copyTo(left);
       contactHeatMapColorImage.copyTo(right);
 
-      PerceptionDebugTools.display("Display", stacked, delay, 1000);
+      PerceptionDebugTools.display("Display", stacked, delay, -1);
    }
 
    private void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
@@ -104,11 +111,11 @@ public class MonteCarloFootstepPlanningDebugger
       for (RobotSide side : RobotSide.values)
       {
          Pose3D pose = new Pose3D(poses.get(side));
-         PerceptionDebugTools.plotTiltedRectangle(image, new Point2D(pose.getX(), pose.getY()), (float) pose.getYaw(), 2, mode);
+         PerceptionDebugTools.plotTiltedRectangle(image, new Point2D(pose.getX() * scale, pose.getY() * scale), (float) pose.getYaw(), 2 * scale, mode);
       }
    }
 
-   private void plotFootsteps(Mat image, FootstepPlan plan)
+   private void plotFootstepPlan(Mat image, FootstepPlan plan)
    {
       if (plan == null)
          return;
@@ -117,9 +124,9 @@ public class MonteCarloFootstepPlanningDebugger
       {
          Point3D pose = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
          PerceptionDebugTools.plotTiltedRectangle(image,
-                                                  new Point2D(pose.getX(), pose.getY()),
+                                                  new Point2D(pose.getX() * scale, pose.getY() * scale),
                                                   pose.getZ32(),
-                                                  2,
+                                                  2 * scale,
                                                   plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
       }
    }
