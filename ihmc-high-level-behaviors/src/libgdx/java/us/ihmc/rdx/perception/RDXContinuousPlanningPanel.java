@@ -14,6 +14,7 @@ import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.video.ContinuousPlanningAPI;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,11 +27,13 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXSwingTrajectoryGraphic;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -101,11 +104,11 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
       //swingTrajectoryGraphic.updateFromPlan(plan);
    }
 
-   public void generateSwingGraphics(FootstepPlannerOutput plannerOutput)
+   public void generateSwingGraphics(FootstepPlan plan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
-      if (plannerOutput != null)
+      if (plan != null)
       {
-         swingTrajectoryGraphic.updateFromPlan(plannerOutput.getFootstepPlan(), plannerOutput.getSwingTrajectories());
+         swingTrajectoryGraphic.updateFromPlan(plan, swingTrajectories);
       }
    }
 
@@ -113,7 +116,8 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    {
       if (activePerceptionModule != null)
       {
-         generateSwingGraphics(activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getPlannerOutput());
+         generateSwingGraphics(activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getLatestFootstepPlan(),
+                               activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getLatestSwingTrajectories());
       }
 
       generateStartAndGoalFootstepGraphics();
