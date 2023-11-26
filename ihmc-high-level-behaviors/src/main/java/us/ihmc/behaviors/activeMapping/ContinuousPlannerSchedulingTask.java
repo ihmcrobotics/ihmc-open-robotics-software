@@ -2,6 +2,7 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -47,6 +48,8 @@ public class ContinuousPlannerSchedulingTask
 
    private ROS2PublisherMap publisherMap;
    private HeightMapData latestHeightMapData;
+   private Mat heightMapImage;
+   private Mat contactMapImage;
 
    private final ROS2Topic controllerFootstepDataTopic;
    private final ContinuousWalkingParameters continuousPlanningParameters;
@@ -136,7 +139,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
-      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, false);
+      continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, false);
 
       if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
          state = ContinuousWalkingState.PLAN_AVAILABLE;
@@ -152,7 +155,7 @@ public class ContinuousPlannerSchedulingTask
          continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
          publishForVisualization();
          continuousPlanner.setGoalWaypointPoses(continuousPlanningParameters);
-         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, state != ContinuousWalkingState.PLANNING_FAILED);
+         continuousPlanner.planToGoalWithHeightMap(latestHeightMapData, heightMapImage, contactMapImage, state != ContinuousWalkingState.PLANNING_FAILED);
 
          if (continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION || continuousPlanner.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
             state = ContinuousWalkingState.PLAN_AVAILABLE;
@@ -169,7 +172,7 @@ public class ContinuousPlannerSchedulingTask
 
          state = ContinuousWalkingState.WAITING_TO_LAND;
          continuousPlanner.setPlanAvailable(false);
-         continuousPlanner.setPreviouslySentPlanForReference();
+         continuousPlanner.transitionCallback();
 
          continuousPlannerStatistics.startWaitingTime();
       }
@@ -227,6 +230,16 @@ public class ContinuousPlannerSchedulingTask
    public void setLatestHeightMapData(HeightMapData heightMapData)
    {
       this.latestHeightMapData = new HeightMapData(heightMapData);
+   }
+
+   public void setHeightMapImage(Mat heightMapImage)
+   {
+      this.heightMapImage = heightMapImage.clone();
+   }
+
+   public void setContactMapImage(Mat contactMapImage)
+   {
+      this.contactMapImage = contactMapImage.clone();
    }
 
    public ContinuousPlanner getContinuousPlanner()

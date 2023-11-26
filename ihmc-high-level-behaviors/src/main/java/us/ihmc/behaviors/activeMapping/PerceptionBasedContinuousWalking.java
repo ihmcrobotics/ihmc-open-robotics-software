@@ -75,6 +75,8 @@ public class PerceptionBasedContinuousWalking
       {
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(true);
          activePerceptionModule.getContinuousMappingRemoteThread().setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
+         activePerceptionModule.getContinuousMappingRemoteThread().setHeightMapImage(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
+         activePerceptionModule.getContinuousMappingRemoteThread().setContactMapImage(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor().getCroppedContactMapImage());
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(false);
       }
    }
