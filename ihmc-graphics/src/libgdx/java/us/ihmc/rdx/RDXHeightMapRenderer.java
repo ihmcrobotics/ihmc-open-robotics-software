@@ -23,6 +23,7 @@ import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
+import java.util.stream.IntStream;
 
 public class RDXHeightMapRenderer implements RenderableProvider
 {
@@ -96,11 +97,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      float maxHeight = 2.0f;
-      float minHeight = 0.0f;
-
       Point3D spritePoint = new Point3D();
-
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
@@ -112,10 +109,10 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor);
-            zPosition = (float) MathTools.clamp(zPosition, minHeight, maxHeight);
-            if (zPosition > maxHeight - 0.01f)
-               zPosition = 0.0f;
+            int height = heightMapPointer.getShort(heightIndex * 2L) & 0xFFFF;
+            float zPosition = ((float) height / heightScalingFactor);
+
+            zPosition -= 3.2768f;
 
             spritePoint.set(xPosition, yPosition, zPosition);
             //spritePoint.applyTransform(zUpFrameToWorld);
@@ -143,6 +140,49 @@ public class RDXHeightMapRenderer implements RenderableProvider
             intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
          }
       }
+
+//      IntStream.range(0, cellsPerAxis).parallel().forEach(xIndex ->
+//      {
+//         IntStream.range(0, cellsPerAxis).parallel().forEach(yIndex ->
+//         {
+//            spritePoint.setToZero();
+//
+//            double xPosition = indexToCoordinate(xIndex, gridCenterX, cellSizeXYInMeters, centerIndex); // + 1.5f
+//            double yPosition = indexToCoordinate(yIndex, gridCenterY, cellSizeXYInMeters, centerIndex);
+//
+//            int heightIndex = xIndex * cellsPerAxis + yIndex;
+//            int vertexIndex = heightIndex * FLOATS_PER_CELL;
+//            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / heightScalingFactor);
+//            zPosition = (float) MathTools.clamp(zPosition, minHeight, maxHeight);
+//            if (zPosition > maxHeight - 0.01f)
+//               zPosition = 0.0f;
+//
+//            spritePoint.set(xPosition, yPosition, zPosition);
+//            //spritePoint.applyTransform(zUpFrameToWorld);
+//
+//            //            spritePoint.setZ(zPosition);
+//
+//            // Position
+//            intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();
+//            intermediateVertexBuffer[vertexIndex + 1] = (float) spritePoint.getY();
+//            intermediateVertexBuffer[vertexIndex + 2] = (float) spritePoint.getZ();
+//
+//            Color color = computeColorFromHeight(zPosition);
+//
+//            /* For the brighter ones */
+//            //float heightRatio = (zPosition / maxHeight);
+//            //color.set(Math.abs(1.0f - heightRatio), Math.max(100.0f * heightRatio, 1.0f), Math.abs(1.0f - heightRatio), Math.abs(0.3f + 10.0f * heightRatio));
+//
+//            // Color (0.0 to 1.0)
+//            intermediateVertexBuffer[vertexIndex + 3] = color.r;
+//            intermediateVertexBuffer[vertexIndex + 4] = color.g;
+//            intermediateVertexBuffer[vertexIndex + 5] = color.b;
+//            intermediateVertexBuffer[vertexIndex + 6] = color.a;
+//
+//            // Size
+//            intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
+//         });
+//      });
 
       renderable.meshPart.size = totalCells;
       renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);

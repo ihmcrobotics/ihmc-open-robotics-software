@@ -87,9 +87,4 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
    {
       set(PerceptionConfigurationParameters.shadowFilter, shadowFilter);
    }
-
-   default void setActiveMapping(boolean activeMapping)
-   {
-      set(PerceptionConfigurationParameters.activeMapping, activeMapping);
-   }
 }
