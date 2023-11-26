@@ -62,6 +62,7 @@ public class RDXSCS2Session
    private boolean sessionStartedHandled = false;
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private final ArrayList<Runnable> additionalImGuiWidgets = new ArrayList<>();
 
    public void create(RDXBaseUI baseUI)
    {
@@ -174,6 +175,11 @@ public class RDXSCS2Session
       plotManager.setupForSession(yoManager);
 
       session.startSessionThread(); // TODO: Need start/stop controls?
+
+      for (Runnable onSessionStartedRunnable : onSessionStartedRunnables)
+      {
+         onSessionStartedRunnable.run();
+      }
    }
 
    public void update()
@@ -341,6 +347,11 @@ public class RDXSCS2Session
    protected void renderImGuiWidgetsPartTwo()
    {
       plotManager.renderImGuiWidgets();
+
+      for (Runnable additionalImGuiWidget : additionalImGuiWidgets)
+      {
+         additionalImGuiWidget.run();
+      }
    }
 
    public void setBufferRecordTickPeriod(int bufferRecordTickPeriod)
@@ -442,5 +453,10 @@ public class RDXSCS2Session
    public int getBufferRecordTickPeriod()
    {
       return bufferRecordTickPeriod.get();
+   }
+
+   public ArrayList<Runnable> getAdditionalImGuiWidgets()
+   {
+      return additionalImGuiWidgets;
    }
 }

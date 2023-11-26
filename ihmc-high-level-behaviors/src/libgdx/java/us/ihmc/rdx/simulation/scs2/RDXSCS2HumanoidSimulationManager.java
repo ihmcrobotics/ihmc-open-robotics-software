@@ -143,9 +143,9 @@ public class RDXSCS2HumanoidSimulationManager
       avatarSimulation.setSystemExitOnDestroy(false);
 
       scs2SimulationSession = new RDXSCS2SimulationSession();
+      scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
       scs2SimulationSession.create(baseUI, managerPanel);
       scs2SimulationSession.startSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
-      scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
       for (String yoVariableName : variableWidgets)
       {
