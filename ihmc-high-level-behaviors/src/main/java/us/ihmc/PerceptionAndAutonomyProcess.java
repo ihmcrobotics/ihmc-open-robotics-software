@@ -3,6 +3,7 @@ package us.ihmc;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -15,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
+import us.ihmc.perception.ouster.OusterHeightMapUpdater;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
@@ -22,6 +24,9 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoUpdateProcess;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.steppableRegions.RemoteSteppableRegionsUpdater;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -73,10 +78,13 @@ public class PerceptionAndAutonomyProcess
    private RestartableThread realsenseProcessAndPublishThread;
 
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
+   private final Supplier<ReferenceFrame> midFeetZUpFrameSupplier;
    private final ROS2HeartbeatMonitor ousterDepthHeartbeatMonitor;
    private final ROS2HeartbeatMonitor lidarScanHeartbeatMonitor;
-   private final ROS2HeartbeatMonitor heightMapHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor ousterHeightMapHeartbeatMonitor;
    private OusterNetServer ouster;
+   private OusterHeightMapUpdater ousterHeightMapUpdater;
+   private RemoteSteppableRegionsUpdater steppableRegionsUpdater;
    private RawImage ousterDepthImage;
    private OusterDepthImageRetriever ousterDepthImageRetriever;
    private OusterDepthImagePublisher ousterDepthImagePublisher;
@@ -106,12 +114,14 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat rightBlackflyHeartbeat;
 
    public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
+                                       ROS2ControllerHelper ros2ControllerHelper,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
+                                       Supplier<ReferenceFrame> midFeetZUpFrameSupplier,
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
       this.zedFrameSupplier = zedFrameSupplier;
@@ -125,9 +135,20 @@ public class PerceptionAndAutonomyProcess
       initializeRealsenseHearbeatCallbacks();
 
       this.ousterFrameSupplier = ousterFrameSupplier;
+      this.midFeetZUpFrameSupplier = midFeetZUpFrameSupplier;
       ousterDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
       lidarScanHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
-      heightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      ousterHeightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      // TODO: Uncommnt this when Ouster height map is needed again (should probably work)
+//      if (ros2ControllerHelper != null)
+//      {
+//         ousterHeightMapUpdater = new OusterHeightMapUpdater(ros2ControllerHelper);
+//         ROS2HeartbeatMonitor ousterSteppableRegionsHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
+//         steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2,
+//                                                                     new SteppableRegionCalculatorParameters(),
+//                                                                     ousterSteppableRegionsHeartbeatMonitor::isAlive);
+//         ousterHeightMapUpdater.attachHeightMapConsumer(steppableRegionsUpdater::submitLatestHeightMapMessage);
+//      }
       initializeOusterHeartbeatCallbacks();
 
       blackflyFrameSuppliers.put(RobotSide.LEFT, leftBlackflyFrameSupplier);
@@ -177,6 +198,13 @@ public class PerceptionAndAutonomyProcess
          ousterDepthImagePublisher.destroy();
          ousterDepthImageRetriever.destroy();
       }
+      if (ousterHeightMapUpdater != null)
+      {
+         steppableRegionsUpdater.stop();
+         ousterHeightMapUpdater.stop();
+         steppableRegionsUpdater.destroy();
+         ousterHeightMapUpdater.destroy();
+      }
 
       sceneGraphUpdateThread.stop();
       arUcoUpdater.stopArUcoDetection();
@@ -190,7 +218,18 @@ public class PerceptionAndAutonomyProcess
          if (blackflyImageRetrievers.get(side) != null)
             blackflyImageRetrievers.get(side).destroy();
       }
-      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
+
+
+      zedPointCloudHeartbeatMonitor.destroy();
+      zedColorHeartbeatMonitor.destroy();
+      zedDepthHeartbeatMonitor.destroy();
+      realsenseHeartbeatMonitor.destroy();
+      ousterDepthHeartbeatMonitor.destroy();
+      lidarScanHeartbeatMonitor.destroy();
+      ousterHeightMapHeartbeatMonitor.destroy();
+      blackflyImageHeartbeatMonitors.forEach(ROS2HeartbeatMonitor::destroy);
+      arUcoDetectionHeartbeatMonitor.destroy();
+      centerposeUpdateHeartbeatMonitor.destroy();
 
       if (zedHeartbeat != null)
          zedHeartbeat.destroy();
@@ -202,6 +241,8 @@ public class PerceptionAndAutonomyProcess
          leftBlackflyHeartbeat.destroy();
       if (rightBlackflyHeartbeat != null)
          rightBlackflyHeartbeat.destroy();
+
+      LogTools.info("Destroyed {}", this.getClass().getSimpleName());
    }
 
    private void processAndPublishZED()
@@ -241,6 +282,13 @@ public class PerceptionAndAutonomyProcess
    private void processAndPublishOuster()
    {
       ousterDepthImage = ousterDepthImageRetriever.getLatestRawDepthImage();
+
+      if (ousterHeightMapUpdater != null && ousterHeightMapHeartbeatMonitor.isAlive())
+         ousterHeightMapUpdater.updateWithDataBuffer(midFeetZUpFrameSupplier.get(),
+                                                     ousterFrameSupplier.get(),
+                                                     ousterDepthImageRetriever.getPointCloudInWorldFrame(),
+                                                     ouster.getImageHeight() * ouster.getImageWidth(),
+                                                     ouster.getAquisitionInstant());
 
       ousterDepthImagePublisher.setNextDepthImage(ousterDepthImage.get());
 
@@ -391,7 +439,7 @@ public class PerceptionAndAutonomyProcess
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster,
                                                                 ousterFrameSupplier,
                                                                 lidarScanHeartbeatMonitor::isAlive,
-                                                                heightMapHeartbeatMonitor::isAlive);
+                                                                ousterHeightMapHeartbeatMonitor::isAlive);
       ousterDepthImagePublisher = new OusterDepthImagePublisher(ouster, OUSTER_DEPTH_TOPIC);
       ousterProcessAndPublishThread = new RestartableThread("OusterProcessAndPublish", this::processAndPublishOuster);
       ousterProcessAndPublishThread.start();
@@ -411,11 +459,39 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            ouster.stop();
-            ousterDepthImageRetriever.stop();
+            if (!ousterHeightMapHeartbeatMonitor.isAlive())
+            {
+               ouster.stop();
+               ousterDepthImageRetriever.stop();
+            }
             ousterDepthImagePublisher.stopDepth();
          }
       });
+
+      if (ousterHeightMapUpdater != null)
+      {
+         ousterHeightMapHeartbeatMonitor.setAlivenessChangedCallback(isAlive ->
+         {
+            if (isAlive)
+            {
+               if (ouster == null)
+                  initializeOuster();
+
+               ousterHeightMapUpdater.start();
+               ousterDepthImageRetriever.start();
+               steppableRegionsUpdater.start();
+            }
+            else
+            {
+               if (!ousterDepthHeartbeatMonitor.isAlive())
+               {
+                  ouster.stop();
+                  ousterDepthImageRetriever.stop();
+               }
+               steppableRegionsUpdater.stop();
+            }
+         });
+      }
    }
 
    private void initializeBlackfly(RobotSide side)
@@ -565,6 +641,8 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   null,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
