@@ -365,15 +365,16 @@ public class TerrainPlanningSimulationUI
             {
                executorService.clearTaskQueue();
                executorService.submit(() ->
-                 {
-                    FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor()
-                                                                                  .getInternalGlobalHeightMapImage()
-                                                                                  .getBytedecoOpenCVMat(),
-                                                                humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
-                                                                cameraZUpFrame.getTransformToWorldFrame(), reset);
+                                      {
+                                         FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor()
+                                                                                                       .getInternalGlobalHeightMapImage()
+                                                                                                       .getBytedecoOpenCVMat(),
+                                                                                     humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
+                                                                                     cameraZUpFrame.getTransformToWorldFrame(),
+                                                                                     reset);
 
-                    footstepPlanToRenderNotificaiton.set(plan);
-                 });
+                                         footstepPlanToRenderNotificaiton.set(plan);
+                                      });
             }
          }
 
@@ -438,12 +439,23 @@ public class TerrainPlanningSimulationUI
 
          public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform, boolean reset)
          {
-
             MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-            request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(startMidX.get(), startMidY.get() - 0.1, 0.0), new Quaternion()));
-            request.setStartFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(startMidX.get(), startMidY.get() + 0.1, 0.0), new Quaternion()));
-            request.setGoalFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(goalMidX.get(), goalMidY.get() - 0.1, 0.0), new Quaternion()));
-            request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(goalMidX.get(), goalMidY.get() + 0.1, 0.0), new Quaternion()));
+            request.setStartFootPose(RobotSide.LEFT,
+                                     new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                     new Point3D(startMidX.get(), startMidY.get() + 0.1, 0.0),
+                                                     new Quaternion(startYaw.get(), 0, 0)));
+            request.setStartFootPose(RobotSide.RIGHT,
+                                     new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                     new Point3D(startMidX.get(), startMidY.get() - 0.1, 0.0),
+                                                     new Quaternion()));
+            request.setGoalFootPose(RobotSide.LEFT,
+                                    new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                    new Point3D(goalMidX.get(), goalMidY.get() + 0.1, 0.0),
+                                                    new Quaternion(goalYaw.get(), 0, 0)));
+            request.setGoalFootPose(RobotSide.RIGHT,
+                                    new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                    new Point3D(goalMidX.get(), goalMidY.get() - 0.1, 0.0),
+                                                    new Quaternion(goalYaw.get(), 0, 0)));
             request.setContactMap(contactMapImage);
             request.setHeightMap(heightMapImage);
 
@@ -610,7 +622,7 @@ public class TerrainPlanningSimulationUI
                // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
                Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
 
-               HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f,0.3f, 0.25f, 3);
+               HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
 
                humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
                humanoidPerception.getRapidHeightMapExtractor()

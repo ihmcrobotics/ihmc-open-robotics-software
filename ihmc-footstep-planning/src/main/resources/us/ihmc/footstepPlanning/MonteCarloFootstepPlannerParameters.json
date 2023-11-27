@@ -71,7 +71,7 @@
     "upperBound" : 1.0
   },
   "Exploration constant" : {
-    "value" : 10.0,
+    "value" : 1.0,
     "lowerBound" : 0.01,
     "upperBound" : 10.0
   },
@@ -86,17 +86,17 @@
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 0.371232,
+    "value" : 1.075025,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search yaw band" : {
-    "value" : 0.398358,
+    "value" : 0.367114,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
   "Search inner radius" : {
-    "value" : 0.202057,
+    "value" : 0.205913,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },

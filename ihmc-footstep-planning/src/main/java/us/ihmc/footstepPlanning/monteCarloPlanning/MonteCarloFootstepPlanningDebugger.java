@@ -111,7 +111,11 @@ public class MonteCarloFootstepPlanningDebugger
       for (RobotSide side : RobotSide.values)
       {
          Pose3D pose = new Pose3D(poses.get(side));
-         PerceptionDebugTools.plotTiltedRectangle(image, new Point2D(pose.getX() * scale, pose.getY() * scale), (float) pose.getYaw(), 2 * scale, mode);
+         PerceptionDebugTools.plotTiltedRectangle(image,
+                                                  new Point2D(pose.getX() * scale, pose.getY() * scale),
+                                                  (float) pose.getYaw(),
+                                                  2 * scale,
+                                                  side == RobotSide.LEFT ? -1 : 1);
       }
    }
 
