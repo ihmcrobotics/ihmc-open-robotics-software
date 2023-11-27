@@ -9,6 +9,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -20,6 +21,13 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+/**
+ * Extracts height map and some other cost metric maps on the GPU using OpenCL kernels
+ *
+ * There are two each of height map, terrain cost map, and contact map, corresponding to global and local (cropped) versions.
+ * The terrain cost map is the single footstep steppability value, and the contact map is the distance transform map
+ * which computes the distance to closest unsteppable cell for each cell.
+ * */
 public class RapidHeightMapExtractor
 {
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
@@ -377,7 +385,7 @@ public class RapidHeightMapExtractor
       return contactMapImage.getBytedecoOpenCVMat();
    }
 
-   public Mat getCroppedImage(Point3D origin, int globalCenterIndex, Mat imageToCrop)
+   public Mat getCroppedImage(Point3DReadOnly origin, int globalCenterIndex, Mat imageToCrop)
    {
       int xIndex = HeightMapTools.coordinateToIndex(origin.getX(), 0, RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(), globalCenterIndex);
       int yIndex = HeightMapTools.coordinateToIndex(origin.getY(), 0, RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(), globalCenterIndex);
