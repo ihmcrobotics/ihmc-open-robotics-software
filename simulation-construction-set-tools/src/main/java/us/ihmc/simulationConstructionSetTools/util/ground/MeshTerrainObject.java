@@ -353,9 +353,20 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      checkIfInside(x, y, z, null, normalToPack);
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
 
-      return heightAt(x, y, z);
+      double heightAt;
+
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         heightAt = result.highestIntersection.getZ();
+      else
+         heightAt = Double.NEGATIVE_INFINITY;
+      if (normalToPack != null && heightAt > Double.NEGATIVE_INFINITY)
+      {
+         normalToPack.set(result.highestFace.getNormal());
+      }
+
+      return heightAt;
    }
 
    @Override
