@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.nadia.inertialParameterEstimation.InertialParameterEstimator;
+import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
