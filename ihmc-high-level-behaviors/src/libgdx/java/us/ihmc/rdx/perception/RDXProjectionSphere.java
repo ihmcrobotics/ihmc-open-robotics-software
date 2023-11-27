@@ -122,6 +122,8 @@ public class RDXProjectionSphere
 
    public void updateTexture(Texture texture)
    {
+      if (this.latestTexture != null)
+         this.latestTexture.dispose();
       this.latestTexture = texture;
       Material material = model.nodes.get(0).parts.get(0).material;
       material.set(TextureAttribute.createDiffuse(texture));
@@ -130,7 +132,8 @@ public class RDXProjectionSphere
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      modelInstance.getRenderables(renderables, pool);
+      if (modelInstance != null)
+         modelInstance.getRenderables(renderables, pool);
    }
 
    public ModelInstance getModelInstance()
