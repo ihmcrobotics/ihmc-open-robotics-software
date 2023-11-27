@@ -7,6 +7,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 
+import java.nio.FloatBuffer;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -111,6 +112,14 @@ public class OusterDepthImageRetriever
       }
 
       return depthImage.get();
+   }
+
+   public FloatBuffer getPointCloudInWorldFrame()
+   {
+      if (depthExtractionKernel != null)
+         return depthExtractionKernel.getPointCloudInWorldFrame();
+
+      return null;
    }
 
    public void start()
