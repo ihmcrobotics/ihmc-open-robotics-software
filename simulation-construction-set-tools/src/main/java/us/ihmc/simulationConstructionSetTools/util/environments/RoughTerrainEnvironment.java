@@ -246,7 +246,7 @@ public class RoughTerrainEnvironment implements CommonAvatarEnvironmentInterface
          ConvexPolytope3D convexPolytope = new ConvexPolytope3D(Vertex3DSupplier.asVertex3DSupplier(vertexPoints));
 
          convexPolytope.applyTransform(rockRotation);
-         ConvexPolytopeTerrainObject rock = new ConvexPolytopeTerrainObject(normal, convexPolytope, rockAppearance);
+         ConvexPolytopeTerrainObject rock = new ConvexPolytopeTerrainObject(convexPolytope, rockAppearance);
          combinedTerrainObject.addTerrainObject(rock);
       }
 
