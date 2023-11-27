@@ -56,7 +56,7 @@ public class RDXIterativeClosestPointBasicDemo
    private final ReferenceFrame envReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), envTransform);
    private final FramePoint3D pointB = new FramePoint3D(envReferenceFrame);
 
-   private final int envSize = 200;
+   private final int envSize = 1000;
 
    private final DMatrixRMaj objectCentroid = new DMatrixRMaj(1, 3);
    private final DMatrixRMaj envCentroid = new DMatrixRMaj(1, 3);
@@ -85,7 +85,8 @@ public class RDXIterativeClosestPointBasicDemo
             envPointCloudRenderer.create(envSize);
 
             // Create Shape
-            createICPPointCloudBox();
+//            createICPPointCloudBox();
+            createICPPointCloudCone();
 
             // Create Renderables for Object
             baseUI.getPrimaryScene().addRenderableProvider(objectPointCloudRenderer, RDXSceneLevel.VIRTUAL);
@@ -111,7 +112,6 @@ public class RDXIterativeClosestPointBasicDemo
             Random random = new Random(0);
             float boxSize = 0.35f;
             float boxHalfSize = boxSize/2;
-            random.nextDouble(-boxHalfSize, boxHalfSize);
             float halfBoxWidth = (float) RigidBodySceneObjectDefinitions.BOX_WIDTH/2.0f;
             float halfBoxDepth = (float)RigidBodySceneObjectDefinitions.BOX_DEPTH/2.0f;
             float halfBoxHeight = (float)RigidBodySceneObjectDefinitions.BOX_HEIGHT/2.0f;
@@ -137,6 +137,33 @@ public class RDXIterativeClosestPointBasicDemo
                if (j==0 | j==1) {x = (-(j&1)*halfBoxDepth*2.0f)+halfBoxDepth;}
                if (j==2 | j==3) {y = (-(j&1)*halfBoxWidth*2.0f)+halfBoxWidth;}
                if (j==4 | j==5) {z = (-(j&1)*halfBoxHeight*2.0f)+halfBoxHeight;}
+               pointB.setToZero(envReferenceFrame);
+               pointB.set(x,y,z);
+               FramePoint3D envFramePoint = envModelPoints.add();
+               envFramePoint.setIncludingFrame(pointB);
+            }
+         }
+
+         // Create Box Object
+         private void createICPPointCloudCone(){
+            Random random = new Random(0);
+            float coneLength = 0.4f;
+            float coneRadius = 0.2f;
+            for (int i = 0; i < envSize; i++) {
+               float z = (float)random.nextDouble(0, coneLength);
+               double phi = random.nextDouble(0, 2*Math.PI);
+               float x = (float)Math.cos(phi)*z;
+               float y =(float)Math.sin(phi)*z;
+               pointA.setToZero(objectReferenceFrame);
+               pointA.set(x,y,z);
+               FramePoint3D worldFramePoint = objectModelPointCloud.add();
+               worldFramePoint.setIncludingFrame(pointA);
+            }
+            for (int i = 0; i < envSize; i++) {
+               float z = (float)random.nextDouble(0, coneLength);
+               double phi = random.nextDouble(0, Math.PI);
+               float x = (float)Math.cos(phi)*z;
+               float y =(float)Math.sin(phi)*z;
                pointB.setToZero(envReferenceFrame);
                pointB.set(x,y,z);
                FramePoint3D envFramePoint = envModelPoints.add();
