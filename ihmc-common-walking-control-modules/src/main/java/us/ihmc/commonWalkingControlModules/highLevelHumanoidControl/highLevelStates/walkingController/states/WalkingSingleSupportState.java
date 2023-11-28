@@ -131,7 +131,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       ContactableFoot contactableSwingFoot = controllerToolbox.getContactableFeet().get(getSwingSide());
       copCommand.setContactingRigidBody(contactableSwingFoot.getRigidBody());
       copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getSoleFrame());
-      swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, 10.0);
+      swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
    }
 
    int stepsToAdd;
@@ -164,10 +164,13 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
          }
 
-         copCommand.getWeight()
-                   .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getSoleFrame(),
-                                      swingFootCoPWeight.getValue(),
-                                      swingFootCoPWeight.getValue());
+         if (Double.isFinite(swingFootCoPWeight.getValue()))
+         {
+            copCommand.getWeight()
+                      .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getSoleFrame(),
+                                         swingFootCoPWeight.getValue(),
+                                         swingFootCoPWeight.getValue());
+         }
       }
       else if (resubmitStepsInSwingEveryTick.getBooleanValue())
       {
