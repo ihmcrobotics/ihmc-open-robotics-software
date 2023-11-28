@@ -73,6 +73,11 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform WORK_PLATFORM_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    public static final String WORK_PLATFORM_VISUAL_MODEL_FILE_PATH = "environmentObjects/workPlatform/workPlatform.obj";
    public static final RigidBodyTransform WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().set(-0.882828, 1.4983275, 0.0);
+      WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation().setToYawOrientation(-Math.PI / 2.0);
+   }
 
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
