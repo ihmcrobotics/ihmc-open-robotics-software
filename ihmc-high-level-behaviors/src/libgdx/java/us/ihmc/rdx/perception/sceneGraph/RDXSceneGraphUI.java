@@ -143,6 +143,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(twoByFour);
                   }
+                  if (ImGui.button(labels.get("Add Work Platform")))
+                  {
+                     RDXPredefinedRigidBodySceneNode box = predefinedRigidBodySceneNodeBuilder.build("WorkPlatform");
+                     modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(box);
+                  }
                   ImGui.endTable();
                }
                if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())
