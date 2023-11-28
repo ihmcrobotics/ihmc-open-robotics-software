@@ -24,14 +24,10 @@ public class MeshTerrainEnvironment implements CommonAvatarEnvironmentInterface
       this(MeshTerrainObjectFactory.createWalkwayObject());
    }
 
-   public MeshTerrainEnvironment(TerrainObject3D terrainObject)
+   public MeshTerrainEnvironment(TerrainObject3D... terrainObjects)
    {
-      this(Collections.singletonList(terrainObject));
-   }
-
-   public MeshTerrainEnvironment(List<TerrainObject3D> terrainObjects)
-   {
-      terrainObjects.forEach(meshTerrain::addTerrainObject);
+      for (TerrainObject3D terrainObject : terrainObjects)
+         meshTerrain.addTerrainObject(terrainObject);
    }
 
    public void addEnvironmentRobot(Robot robot)
