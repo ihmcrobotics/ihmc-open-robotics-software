@@ -55,7 +55,7 @@ public class MeshTerrainObjectFactory
    {
       RigidBodyTransform configuration = new RigidBodyTransform(orientation, translation);
 
-      MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters("C:/Users/Khizar/Downloads/workPlatForm/workPlatForm.obj");
+      MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters("models/workPlatform/workPlatform.obj");
       parameters.setMaxNoOfHulls(100);
       parameters.setMaxNoOfVertices(20);
       parameters.setVoxelResolution(8000000);
