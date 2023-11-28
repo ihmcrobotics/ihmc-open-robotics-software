@@ -114,12 +114,12 @@ public class TerrainPlanningSimulationUI
    private final Pose3D cameraPose = new Pose3D();
    private final ImBoolean enableMonteCarloPlanner = new ImBoolean(false);
 
-   private ImFloat startMidX = new ImFloat(-1.5f);
-   private ImFloat startMidY = new ImFloat(-0.2f);
+   private ImFloat startMidX = new ImFloat(0.0f);
+   private ImFloat startMidY = new ImFloat(0.0f);
    private ImFloat startYaw = new ImFloat(0.0f);
 
    private ImFloat goalMidX = new ImFloat(1.5f);
-   private ImFloat goalMidY = new ImFloat(-0.2f);
+   private ImFloat goalMidY = new ImFloat(0.0f);
    private ImFloat goalYaw = new ImFloat(0.0f);
 
    private int autoIncrementCounter = 0;
@@ -365,16 +365,22 @@ public class TerrainPlanningSimulationUI
             {
                executorService.clearTaskQueue();
                executorService.submit(() ->
-                                      {
-                                         FootstepPlan plan = planFootstepsMonteCarlo(humanoidPerception.getRapidHeightMapExtractor()
-                                                                                                       .getInternalGlobalHeightMapImage()
-                                                                                                       .getBytedecoOpenCVMat(),
-                                                                                     humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage(),
-                                                                                     cameraZUpFrame.getTransformToWorldFrame(),
-                                                                                     reset);
+                 {
+                    Mat heightMapToUse, contactMapToUse;
+                    if (USE_EXTERNAL_HEIGHT_MAP)
+                    {
+                       heightMapToUse = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+                       contactMapToUse = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
+                    }
+                    else
+                    {
+                       heightMapToUse = humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage();
+                       contactMapToUse = humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage();
+                    }
 
-                                         footstepPlanToRenderNotificaiton.set(plan);
-                                      });
+                    FootstepPlan plan = planFootstepsMonteCarlo(heightMapToUse, contactMapToUse, cameraZUpFrame.getTransformToWorldFrame(), reset);
+                    footstepPlanToRenderNotificaiton.set(plan);
+                 });
             }
          }
 
