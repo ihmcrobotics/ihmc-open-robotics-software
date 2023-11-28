@@ -1,14 +1,42 @@
 package us.ihmc.behaviors.activeMapping;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.tools.IHMCCommonPaths;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 public class ContinuousPlannerStatistics
 {
    private boolean lock = false;
+
+   private File file;
    private HashMap<String, Float> statistics = new HashMap<>();
 
    public ContinuousPlannerStatistics()
    {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      String filePath = IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY.resolve(logFileName).toString();
+
+      try
+      {
+         Files.createFile(Paths.get(filePath));
+         file = new File(filePath);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
       // convert to snake case
       statistics.put("total_length_completed", 0.0f);
       statistics.put("total_steps_completed", 0.0f);
@@ -24,6 +52,18 @@ public class ContinuousPlannerStatistics
       statistics.put("last_waiting_time", 0.0f);
 
       statistics.put("last_footstep_queue_length", 0.0f);
+   }
+
+   public void logToFile(boolean logToFile, boolean printToConsole)
+   {
+      if (logToFile || printToConsole)
+      {
+         if (printToConsole)
+            System.out.println(this);
+
+         if (logToFile)
+            FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      }
    }
 
    public void setLastPlanningTime(float lastPlanningTime)
@@ -89,7 +129,7 @@ public class ContinuousPlannerStatistics
       {
          builder.append(key).append(":").append(statistics.get(key)).append(", ");
       }
-      builder.append("]");
+      builder.append("]\n");
       return builder.toString();
    }
 }

@@ -199,7 +199,7 @@ public class ContinuousPlannerSchedulingTask
          continuousPlannerStatistics.setLastLengthCompleted((float) distance);
          continuousPlannerStatistics.setLastFootstepQueueLength(controllerQueueSize);
 
-         LogTools.info(continuousPlannerStatistics.toString());
+         continuousPlannerStatistics.logToFile(true, true);
       }
 
       this.footstepStatusMessage.set(footstepStatusMessage);

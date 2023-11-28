@@ -85,7 +85,7 @@ public class MonteCarloFootstepPlannerStatistics
             System.out.println(log);
 
          if (logToFile)
-            FileTools.write(file.getAbsoluteFile().toPath(), log.toString().getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            FileTools.write(file.getAbsoluteFile().toPath(), log.toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
    }
 
