@@ -84,11 +84,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final double totalRobotMass;
    private final boolean computeIntegralTerm;
 
-   private final WholeBodyControlCoreToolbox toolbox;
-
    public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox, YoRegistry parentRegistry)
    {
-      this.toolbox = toolbox;
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       centroidalMomentumHandler = toolbox.getCentroidalMomentumRateCalculator();
       totalRobotMass = toolbox.getTotalRobotMass();
@@ -250,7 +247,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(toolbox.getTotalRobotMass());
+      desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);
       inverseDynamicsOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
