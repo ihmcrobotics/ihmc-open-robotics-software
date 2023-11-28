@@ -70,6 +70,7 @@ import java.util.Random;
 
 public class TerrainPlanningSimulationUI
 {
+   private final boolean USE_EXTERNAL_HEIGHT_MAP = false;
    private final double MAXIMUM_NUMBER_OF_ITERATIONS = 100000;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -128,7 +129,6 @@ public class TerrainPlanningSimulationUI
    private boolean sidednessBit = false;
    private boolean enableLogging = false;
    private boolean heightMapCaptured = false;
-   private boolean external = true;
 
    public TerrainPlanningSimulationUI()
    {
@@ -221,7 +221,7 @@ public class TerrainPlanningSimulationUI
             Pose3D groundPoseInSensorFrame = new Pose3D(groundToSensorTransform);
             cameraZUpFrame.setPoseAndUpdate(groundPoseInSensorFrame);
 
-            if (external)
+            if (USE_EXTERNAL_HEIGHT_MAP)
             {
                humanoidPerception.publishExternalHeightMapImage(ros2Helper);
             }
@@ -612,7 +612,7 @@ public class TerrainPlanningSimulationUI
                                                              steppingL515Simulator.getCopyOfCameraParameters().getWidth());
             humanoidPerception.initializeHeightMapExtractor(steppingL515Simulator.getLowLevelSimulator().getCameraIntrinsics());
 
-            if (external)
+            if (USE_EXTERNAL_HEIGHT_MAP)
             {
                RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalWidthInMeters(4.0);
                RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
