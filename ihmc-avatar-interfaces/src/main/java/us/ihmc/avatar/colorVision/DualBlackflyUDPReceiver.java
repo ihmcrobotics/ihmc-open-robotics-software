@@ -13,8 +13,7 @@ import java.nio.ByteBuffer;
 public class DualBlackflyUDPReceiver
 {
    private final SideDependentList<Thread> receiveThreads = new SideDependentList<>();
-   private DualBlackflyFragmentedUDPImage latestCompleteLeftImage;
-   private DualBlackflyFragmentedUDPImage latestCompleteRightImage;
+   private final SideDependentList<DualBlackflyFragmentedUDPImage> latestCompletedImages = new SideDependentList<>();
    private volatile boolean running;
 
    public void start()
@@ -27,7 +26,7 @@ public class DualBlackflyUDPReceiver
          {
             FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
 
-            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "192.1.0.1" : "192.2.0.1",
+            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1",
                                                                 side == RobotSide.LEFT ?
                                                                       DualBlackflyUDPSender.BLACKFLY_LEFT_UDP_PORT :
                                                                       DualBlackflyUDPSender.BLACKFLY_RIGHT_UDP_PORT);
@@ -43,22 +42,18 @@ public class DualBlackflyUDPReceiver
                return;
             }
 
-            System.out.println(socketAddress);
+            LogTools.info("Connecting to: " + socketAddress);
 
             byte[] buffer = new byte[(int) ((Math.pow(2, 16)) - 1)];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
             DualBlackflyFragmentedUDPImage fragmentedUDPImage = null;
 
-            System.out.println(socket.isBound());
-
             while (running)
             {
                try
                {
                   socket.receive(packet);
-
-                  frequencyStatisticPrinter.ping();
                }
                catch (IOException e)
                {
@@ -77,7 +72,7 @@ public class DualBlackflyUDPReceiver
                byte[] fragmentDataBytes = new byte[fragmentDataLength];
 
                for (int i = 0; i < fragmentDataLength; i++)
-               { // TODO: +1 ?
+               {
                   fragmentDataBytes[i] = datagramBuffer.get(fragmentHeaderLength + i);
                }
 
@@ -91,13 +86,9 @@ public class DualBlackflyUDPReceiver
                   else
                   {
                      fragmentedUDPImage.complete();
-                     System.out.println("complete");
 
-                     switch (sideFromDatagram)
-                     {
-                        case LEFT -> latestCompleteLeftImage = fragmentedUDPImage.clone();
-                        case RIGHT -> latestCompleteRightImage = fragmentedUDPImage.clone();
-                     }
+                     latestCompletedImages.put(side, fragmentedUDPImage.clone());
+                     frequencyStatisticPrinter.ping();
 
                      fragmentedUDPImage.reset();
                      fragmentedUDPImage.setRobotSide(sideFromDatagram);
@@ -140,14 +131,9 @@ public class DualBlackflyUDPReceiver
       }
    }
 
-   public DualBlackflyFragmentedUDPImage getLatestCompleteLeftImage()
+   public SideDependentList<DualBlackflyFragmentedUDPImage> getLatestCompletedImages()
    {
-      return latestCompleteLeftImage;
-   }
-
-   public DualBlackflyFragmentedUDPImage getLatestCompleteRightImage()
-   {
-      return latestCompleteRightImage;
+      return latestCompletedImages;
    }
 
    public static void main(String[] args)

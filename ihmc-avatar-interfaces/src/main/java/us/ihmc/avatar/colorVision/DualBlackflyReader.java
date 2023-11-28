@@ -81,7 +81,7 @@ public class DualBlackflyReader
    public class SpinnakerBlackflyReaderThread extends Thread
    {
       private final SpinnakerBlackfly spinnakerBlackfly;
-      private final AtomicReference<BytePointer> latestImageDataPointer = new AtomicReference<>();
+      private AtomicReference<BytePointer> latestImageReference = new AtomicReference<>();
       private int width;
       private int height;
       private Object notify;
@@ -95,8 +95,6 @@ public class DualBlackflyReader
       @Override
       public void run()
       {
-         latestImageDataPointer.set(new BytePointer());
-
          while (running)
          {
             spinImage spinImage = new spinImage();
@@ -112,7 +110,7 @@ public class DualBlackflyReader
             BytePointer spinImageData = new BytePointer(imageFrameSize);
             spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
 
-            latestImageDataPointer.set(spinImageData);
+            latestImageReference.set(spinImageData);
 
             if (notify != null)
             {
@@ -138,9 +136,9 @@ public class DualBlackflyReader
          return height;
       }
 
-      public AtomicReference<BytePointer> getLatestImageDataPointer()
+      public AtomicReference<BytePointer> getLatestImageReference()
       {
-         return latestImageDataPointer;
+         return latestImageReference;
       }
 
       public void setNotify(Object notify)

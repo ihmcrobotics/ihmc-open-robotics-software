@@ -2,11 +2,14 @@ package us.ihmc.avatar.colorVision;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 public class DualBlackflyFragmentedUDPImage
 {
    private ByteBuffer buffer;
+   @Nullable
+   private byte[] completeImageData;
 
    private RobotSide robotSide;
    private int width;
@@ -22,6 +25,7 @@ public class DualBlackflyFragmentedUDPImage
 
    private DualBlackflyFragmentedUDPImage()
    {
+
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -102,6 +106,11 @@ public class DualBlackflyFragmentedUDPImage
    public void complete()
    {
       complete = true;
+      completeImageData = new byte[buffer.limit()];
+      for (int i = 0; i < buffer.limit(); i++)
+      {
+         completeImageData[i] = buffer.get(i);
+      }
    }
 
    public boolean isComplete()
@@ -115,21 +124,25 @@ public class DualBlackflyFragmentedUDPImage
       buffer.rewind();
    }
 
-   public ByteBuffer getBuffer()
+   @Nullable
+   public byte[] getCompleteImageData()
    {
-      return buffer;
+      return completeImageData;
    }
 
    public DualBlackflyFragmentedUDPImage clone()
    {
-      DualBlackflyFragmentedUDPImage clone = new DualBlackflyFragmentedUDPImage();
-      clone.buffer = buffer.asReadOnlyBuffer();
-      clone.robotSide = robotSide;
-      clone.width = width;
-      clone.height = height;
-      clone.frameNumber = frameNumber;
-      clone.fragment = fragment;
-      clone.complete = complete;
-      return clone;
+      if (!complete)
+      {
+         throw new RuntimeException("complete() has not been called");
+      }
+      DualBlackflyFragmentedUDPImage dualBlackflyFragmentedUDPImage = new DualBlackflyFragmentedUDPImage();
+      dualBlackflyFragmentedUDPImage.completeImageData = completeImageData;
+      dualBlackflyFragmentedUDPImage.width = width;
+      dualBlackflyFragmentedUDPImage.height = height;
+      dualBlackflyFragmentedUDPImage.frameNumber = frameNumber;
+      dualBlackflyFragmentedUDPImage.fragment = fragment;
+      dualBlackflyFragmentedUDPImage.complete = complete;
+      return dualBlackflyFragmentedUDPImage;
    }
 }

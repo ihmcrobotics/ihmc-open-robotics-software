@@ -10,6 +10,7 @@ import us.ihmc.tools.time.FrequencyStatisticPrinter;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DualBlackflyUDPSender
 {
@@ -30,6 +31,7 @@ public class DualBlackflyUDPSender
 
       for (RobotSide side : RobotSide.values())
       {
+         if (side == RobotSide.RIGHT) return;
          Thread publishThread = new Thread(() ->
          {
             DatagramSocket socket;
@@ -45,7 +47,7 @@ public class DualBlackflyUDPSender
             InetAddress address;
             try
             {
-               address = InetAddress.getByName(side == RobotSide.LEFT ? "192.1.0.1" : "192.2.0.1");
+               address = InetAddress.getByName(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1");
             }
             catch (UnknownHostException e)
             {
@@ -75,19 +77,25 @@ public class DualBlackflyUDPSender
                   }
                }
 
-               BytePointer imagePointer = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getLatestImageDataPointer().get();
+               AtomicReference<BytePointer> imagePointerReference = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getLatestImageReference();
+               BytePointer latestImageData = imagePointerReference.get();
 
-               ByteBuffer datagramBuffer = ByteBuffer.allocate(DATAGRAM_MAX_LENGTH);
+               if (latestImageData == null) continue;
 
-               int imageBytes = (int) imagePointer.limit();
-               int numberOfDatagramFragments = (int) Math.ceil((double) imageBytes / DATAGRAM_MAX_LENGTH);
+               ByteBuffer latestImageDataBuffer = latestImageData.asBuffer();
+               int latestImageDataLength = (int) latestImageData.limit();
+
+               int numberOfDatagramFragments = (int) Math.ceil((double) latestImageDataLength / DATAGRAM_MAX_LENGTH);
 
                for (int fragment = 0; fragment < numberOfDatagramFragments; fragment++)
                {
+                  // TODO: move up
+                  ByteBuffer datagramBuffer = ByteBuffer.allocate(DATAGRAM_MAX_LENGTH);
+
                   int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
                   int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
                   int fragmentDataOffset = fragment * maxFragmentDataLength;
-                  int fragmentDataLength = Math.min(maxFragmentDataLength, imageBytes - fragmentDataOffset);
+                  int fragmentDataLength = Math.min(maxFragmentDataLength, latestImageDataLength - fragmentDataOffset);
                   int datagramLength = fragmentHeaderLength + fragmentDataLength;
 
                   // Sanity check
@@ -99,7 +107,7 @@ public class DualBlackflyUDPSender
                      datagramBuffer.put(side.toByte());
                      datagramBuffer.putInt(dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getWidth());
                      datagramBuffer.putInt(dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getHeight());
-                     datagramBuffer.putInt(imageBytes);
+                     datagramBuffer.putInt(latestImageDataLength);
                      datagramBuffer.putInt(frameNumber);
                      datagramBuffer.putInt(fragment);
                      datagramBuffer.putInt(fragmentDataLength);
@@ -107,15 +115,16 @@ public class DualBlackflyUDPSender
 
                   // Write fragment data
                   {
-                     ByteBuffer imageDataBuffer = imagePointer.asBuffer();
-                     byte[] fragmentDataBytes = new byte[fragmentDataLength];
+                     datagramBuffer.put(datagramBuffer.position(), latestImageDataBuffer, fragmentDataOffset, fragmentDataLength);
 
-                     for (int i = 0; i < fragmentDataLength; i++)
-                     {
-                        fragmentDataBytes[i] = imageDataBuffer.get(fragmentDataOffset + i);
-                     }
-
-                     datagramBuffer.put(fragmentDataBytes);
+//                     byte[] fragmentDataBytes = new byte[fragmentDataLength];
+//
+//                     for (int i = 0; i < fragmentDataLength; i++)
+//                     {
+//                        fragmentDataBytes[i] = latestImageDataBuffer.get();
+//                     }
+//
+//                     datagramBuffer.put(fragmentDataBytes);
                   }
 
                   byte[] datagramBytes = new byte[datagramLength];
@@ -134,8 +143,6 @@ public class DualBlackflyUDPSender
                   {
                      LogTools.error(e);
                   }
-
-                  datagramBuffer.clear();
                }
 
                frameNumber++;
