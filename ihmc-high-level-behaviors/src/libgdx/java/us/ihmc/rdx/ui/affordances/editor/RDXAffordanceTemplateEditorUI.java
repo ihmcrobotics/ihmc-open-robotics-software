@@ -57,7 +57,6 @@ public class RDXAffordanceTemplateEditorUI
    private final RDXInteractableObjectBuilder objectBuilder;
    private String currentObjectName = "";
    private final float[] gripperClosure = new float[1];
-   private float[] objectScale = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
    // affordance poses
    private final RDXAffordanceTemplateFrame graspFrame;
@@ -516,8 +515,6 @@ public class RDXAffordanceTemplateEditorUI
 
    public void rescaleAffordanceTemplate()
    {
-      calculateAffordanceTemplateScale();
-
       for (RDXActiveAffordanceMenu frameType : RDXActiveAffordanceMenu.values())
       {
          SideDependentList<List<FramePose3D>> framePose3DList = getFramePose3DList(frameType);
@@ -580,22 +577,31 @@ public class RDXAffordanceTemplateEditorUI
 
    private void updateFramePose3D(FramePose3D framePose3D)
    {
+      float[] objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
+      for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
+         objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i) / objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
+
       switch (objectBuilder.getSelectedObject().getShape())
       {
          case BOX, PRISM:
             if (objectScale[0] != 1.0f || objectScale[1] != 1.0f || objectScale[2] != 1.0f)
-               framePose3D.getTranslation().set(objectScale[0]*framePose3D.getPosition().getX(),
-                                                objectScale[1]*framePose3D.getPosition().getY(),
-                                                objectScale[2]*framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(objectScale[0] * framePose3D.getPosition().getX(),
+                                                objectScale[1] * framePose3D.getPosition().getY(),
+                                                objectScale[2] * framePose3D.getPosition().getZ());
+            break;
+         case CYLINDER, CONE:
+            if (objectScale[2] != 1.0f || objectScale[3] != 1.0f)
+               framePose3D.getTranslation().set(objectScale[3] * framePose3D.getPosition().getX(),
+                                                objectScale[3] * framePose3D.getPosition().getY(),
+                                                objectScale[2] * framePose3D.getPosition().getZ());
+            break;
+         case ELLIPSOID:
+            if (objectScale[3] != 1.0f || objectScale[4] != 1.0f || objectScale[5] != 1.0f)
+               framePose3D.getTranslation().set(objectScale[0] * framePose3D.getPosition().getX(),
+                                                objectScale[1] * framePose3D.getPosition().getY(),
+                                                objectScale[2] * framePose3D.getPosition().getZ());
             break;
       }
-   }
-
-   private void calculateAffordanceTemplateScale()
-   {
-      objectScale = new float[objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size()];
-      for (int i = 0; i < objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().size(); i++)
-         objectScale[i] = objectBuilder.getSelectedObject().getResizablePrimitiveSize().get(i)/objectBuilder.getSelectedObject().getReadResizablePrimitiveSize().get(i);
    }
 
    private void reset()
