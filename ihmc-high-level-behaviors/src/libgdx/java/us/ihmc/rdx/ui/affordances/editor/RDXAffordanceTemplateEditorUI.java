@@ -597,9 +597,9 @@ public class RDXAffordanceTemplateEditorUI
             break;
          case ELLIPSOID:
             if (objectScale[3] != 1.0f || objectScale[4] != 1.0f || objectScale[5] != 1.0f)
-               framePose3D.getTranslation().set(objectScale[0] * framePose3D.getPosition().getX(),
-                                                objectScale[1] * framePose3D.getPosition().getY(),
-                                                objectScale[2] * framePose3D.getPosition().getZ());
+               framePose3D.getTranslation().set(objectScale[3] * framePose3D.getPosition().getX(),
+                                                objectScale[4] * framePose3D.getPosition().getY(),
+                                                objectScale[5] * framePose3D.getPosition().getZ());
             break;
       }
    }
