@@ -238,9 +238,6 @@ public class RDXInteractableObject implements RenderableProvider
 
    public void switchGizmoVisualization()
    {
-      if (selectablePose3DGizmo.getSelected().get())
-         selectablePose3DGizmo.getSelected().set(false);
-      else
-         selectablePose3DGizmo.getSelected().set(true);
+      selectablePose3DGizmo.getSelected().set(!selectablePose3DGizmo.getSelected().get());
    }
 }
