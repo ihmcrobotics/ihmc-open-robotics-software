@@ -591,6 +591,14 @@ public class SCS2AvatarSimulationFactory
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                  stepGeneratorThread.getYoVariableRegistry()));
+
+         if (handControlTask != null)
+         {
+            yoVariableServer.addRegistry(handControlThread.getYoVariableRegistry(), null, null);
+            AvatarSimulatedHandControlThread finalHandControlThread = handControlThread;
+            handControlTask.addCallbackPostTask(() -> yoVariableServer.update(finalHandControlThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                              finalHandControlThread.getYoVariableRegistry()));
+         }
       }
 
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
