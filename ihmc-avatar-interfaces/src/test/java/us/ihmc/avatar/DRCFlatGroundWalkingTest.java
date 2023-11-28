@@ -22,7 +22,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainEnvironment.TerrainDifficulty;
+import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainObjectFactory;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -103,7 +103,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
-      MeshTerrainEnvironment meshTerrainEnvironment = new MeshTerrainEnvironment(TerrainDifficulty.WORK_PLATFORM);
+      MeshTerrainEnvironment meshTerrainEnvironment = new MeshTerrainEnvironment(MeshTerrainObjectFactory.createWorkPlatformObject());
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              meshTerrainEnvironment,
