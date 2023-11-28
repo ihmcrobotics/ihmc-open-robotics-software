@@ -1,15 +1,23 @@
 package us.ihmc.rdx.simulation.scs2;
 
+import imgui.ImGui;
+import imgui.type.ImDouble;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.behaviors.simulation.FlatGroundDefinition;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimSixDoFJoint;
 
 /**
  * An SCS 2 simulation of a door hinged on a frame with a lever handle.
@@ -17,7 +25,12 @@ import us.ihmc.scs2.simulation.robot.Robot;
 public class RDXSCS2DoorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private RDXSCS2Session visualOnlySession;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImDouble hingeTorque = new ImDouble();
+   private RDXSCS2SimulationSession rdxSimulationSession;
+   private RDXSelectablePose3DGizmo doorRootPoseGizmo;
+   private SimSixDoFJoint doorRootJoint;
+   private SimRevoluteJoint doorHingeJoint;
 
    public RDXSCS2DoorDemo()
    {
@@ -28,8 +41,10 @@ public class RDXSCS2DoorDemo
          {
             baseUI.create();
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+            baseUI.getPrimary3DPanel().getCamera3D().setCameraFocusPoint(new Point3D(0.7, 0.0, 0.4));
+            baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, -4.0, 4.0);
 
-            visualOnlySession = new RDXSCS2Session();
+            rdxSimulationSession = new RDXSCS2SimulationSession();
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
             DoorDefinition doorDefinition = new DoorDefinition();
@@ -41,22 +56,69 @@ public class RDXSCS2DoorDemo
 
             // Push door
             doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
-            doorDefinition.getInitialHingeState().setEffort(15.0);
             Robot doorRobot = simulationSession.addRobot(doorDefinition);
             doorDefinition.applyPDController(doorRobot);
 
+            doorRootJoint = (SimSixDoFJoint) doorRobot.getJoint("doorRootJoint");
+            doorRootPoseGizmo = new RDXSelectablePose3DGizmo();
+            doorRootPoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint("doorHingeJoint");
+
+            doorRobot.addController(() -> doorHingeJoint.setTau(hingeTorque.get()));
+
+
+            doorRobot.addController(() ->
+                                    {
+
+                                       if (doorRootPoseGizmo.isSelected())
+                                       {
+                                          doorRootJoint.getJointPose().set(doorRootPoseGizmo.getPoseGizmo().getTransformToParent());
+                                       }
+                                       else
+                                       {
+                                          doorRootPoseGizmo.getPoseGizmo().getTransformToParent().set(doorRootJoint.getJointPose());
+                                       }
+                                    });
+
             simulationSession.addTerrainObject(new FlatGroundDefinition());
 
-            visualOnlySession.create(baseUI);
-            visualOnlySession.startSession(simulationSession);
-            baseUI.getPrimaryScene().addRenderableProvider(visualOnlySession::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel(visualOnlySession.getControlPanel());
+//            simulationSession.addBeforePhysicsCallback(this::afterPhysics);
+//            simulationSession.addAfterPhysicsCallback(this::afterPhysics);
+
+            rdxSimulationSession.getOnSessionStartedRunnables().add(() ->
+            {
+               rdxSimulationSession.getAdditionalImGuiWidgets().add(() ->
+               {
+                  ImGui.checkbox(labels.get("Move root joint"), doorRootPoseGizmo.getSelected());
+                  ImGuiTools.sliderDouble(labels.get("Hinge effort"), hingeTorque, -100.0, 100.0);
+               });
+
+//               rdxSimulationSession.getYoManager().newLinkedYoVariable();
+            });
+
+            rdxSimulationSession.create(baseUI);
+            rdxSimulationSession.startSession(simulationSession);
+            rdxSimulationSession.getSession().setSessionMode(SessionMode.RUNNING);
+            baseUI.getPrimaryScene().addRenderableProvider(rdxSimulationSession::getRenderables);
+            baseUI.getImGuiPanelManager().addPanel(rdxSimulationSession.getControlPanel());
+         }
+
+         private void afterPhysics(double time)
+         {
+            if (doorRootPoseGizmo.isSelected())
+            {
+               doorRootJoint.getJointPose().set(doorRootPoseGizmo.getPoseGizmo().getTransformToParent());
+            }
+            else
+            {
+               doorRootPoseGizmo.getPoseGizmo().getTransformToParent().set(doorRootJoint.getJointPose());
+            }
          }
 
          @Override
          public void render()
          {
-            visualOnlySession.update();
+            rdxSimulationSession.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
