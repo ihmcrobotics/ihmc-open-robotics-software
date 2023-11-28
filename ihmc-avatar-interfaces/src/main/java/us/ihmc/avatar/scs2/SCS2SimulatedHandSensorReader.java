@@ -26,6 +26,10 @@ public class SCS2SimulatedHandSensorReader implements SimulatedHandSensorReader
          OneDoFJointReadOnly joint = simJoints.get(i);
          double q = joint.getQ();
          sensorDataContext.getMeasuredJointState(joint.getName()).setPosition(q);
+         double qd = joint.getQd();
+         sensorDataContext.getMeasuredJointState(joint.getName()).setVelocity(qd);
+         double qdd = joint.getQdd();
+         sensorDataContext.getMeasuredJointState(joint.getName()).setAcceleration(qdd);
       }
    }
 }
