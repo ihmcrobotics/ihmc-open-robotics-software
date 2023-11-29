@@ -1,8 +1,11 @@
 package us.ihmc.avatar.colorVision;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
+import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
@@ -10,16 +13,16 @@ import us.ihmc.tools.time.FrequencyStatisticPrinter;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DualBlackflyUDPSender
 {
+   private static final String BLACKFLY_SERIAL_LEFT = "22206802";
+   private static final String BLACKFLY_SERIAL_RIGHT = "22206798";
    public static final int BLACKFLY_LEFT_UDP_PORT = 9200;
    public static final int BLACKFLY_RIGHT_UDP_PORT = 9201;
    private static final int IPV4_HEADER_LENGTH = 28;
-   private static final int DATAGRAM_MAX_LENGTH = (int) (Math.pow(2, 16) - 1) - IPV4_HEADER_LENGTH;
+   public static final int DATAGRAM_MAX_LENGTH = (int) (Math.pow(2, 16) - 1) - IPV4_HEADER_LENGTH;
 
-   private final DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
    private final SideDependentList<Thread> publishThreads = new SideDependentList<>();
    private volatile boolean running;
 
@@ -27,13 +30,15 @@ public class DualBlackflyUDPSender
    {
       running = true;
 
-      dualBlackflyReader.start();
+      SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
 
       for (RobotSide side : RobotSide.values())
       {
-         if (side == RobotSide.RIGHT) return;
          Thread publishThread = new Thread(() ->
          {
+            SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
+                  side == RobotSide.LEFT ? BLACKFLY_SERIAL_LEFT : BLACKFLY_SERIAL_RIGHT);
+
             DatagramSocket socket;
             try
             {
@@ -55,48 +60,39 @@ public class DualBlackflyUDPSender
                return;
             }
 
-            Object notify = new Object();
-
-            dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).setNotify(notify);
-
             FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
 
             int frameNumber = 0;
 
             while (running)
             {
-               synchronized (notify)
-               {
-                  try
-                  {
-                     notify.wait();
-                  }
-                  catch (InterruptedException e)
-                  {
-                     LogTools.error(e);
-                  }
-               }
+               spinImage spinImage = new spinImage();
 
-               AtomicReference<BytePointer> imagePointerReference = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getLatestImageReference();
-               BytePointer latestImageData = imagePointerReference.get();
+               spinnakerBlackfly.getNextImage(spinImage);
 
-               if (latestImageData == null) continue;
+               int width = spinnakerBlackfly.getWidth(spinImage);
+               int height = spinnakerBlackfly.getHeight(spinImage);
+               int imageFrameSize = width * height;
 
-               ByteBuffer latestImageDataBuffer = latestImageData.asBuffer();
-               int latestImageDataLength = (int) latestImageData.limit();
+               BytePointer spinImageData = new BytePointer(imageFrameSize);
+               spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
+
+               int latestImageDataLength = (int) spinImageData.limit();
+               byte[] imageData = new byte[latestImageDataLength];
+               spinImageData.get(imageData, 0, latestImageDataLength);
 
                int numberOfDatagramFragments = (int) Math.ceil((double) latestImageDataLength / DATAGRAM_MAX_LENGTH);
 
                for (int fragment = 0; fragment < numberOfDatagramFragments; fragment++)
                {
-                  // TODO: move up
-                  ByteBuffer datagramBuffer = ByteBuffer.allocate(DATAGRAM_MAX_LENGTH);
-
                   int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
                   int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
                   int fragmentDataOffset = fragment * maxFragmentDataLength;
                   int fragmentDataLength = Math.min(maxFragmentDataLength, latestImageDataLength - fragmentDataOffset);
                   int datagramLength = fragmentHeaderLength + fragmentDataLength;
+
+                  byte[] datagramData = new byte[DATAGRAM_MAX_LENGTH];
+                  ByteBuffer datagramBuffer = ByteBuffer.wrap(datagramData);
 
                   // Sanity check
                   if (datagramLength > DATAGRAM_MAX_LENGTH)
@@ -105,8 +101,8 @@ public class DualBlackflyUDPSender
                   // Write header data
                   {
                      datagramBuffer.put(side.toByte());
-                     datagramBuffer.putInt(dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getWidth());
-                     datagramBuffer.putInt(dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side).getHeight());
+                     datagramBuffer.putInt(width);
+                     datagramBuffer.putInt(height);
                      datagramBuffer.putInt(latestImageDataLength);
                      datagramBuffer.putInt(frameNumber);
                      datagramBuffer.putInt(fragment);
@@ -115,23 +111,13 @@ public class DualBlackflyUDPSender
 
                   // Write fragment data
                   {
-                     datagramBuffer.put(datagramBuffer.position(), latestImageDataBuffer, fragmentDataOffset, fragmentDataLength);
-
-//                     byte[] fragmentDataBytes = new byte[fragmentDataLength];
-//
-//                     for (int i = 0; i < fragmentDataLength; i++)
-//                     {
-//                        fragmentDataBytes[i] = latestImageDataBuffer.get();
-//                     }
-//
-//                     datagramBuffer.put(fragmentDataBytes);
+                     for (int i = 0; i < fragmentDataLength; i++)
+                     {
+                        datagramBuffer.put(imageData[fragmentDataOffset + i]);
+                     }
                   }
 
-                  byte[] datagramBytes = new byte[datagramLength];
-                  datagramBuffer.rewind();
-                  datagramBuffer.get(datagramBytes, 0, datagramLength);
-
-                  DatagramPacket packet = new DatagramPacket(datagramBytes,
+                  DatagramPacket packet = new DatagramPacket(datagramData,
                                                              datagramLength,
                                                              address,
                                                              side == RobotSide.LEFT ? BLACKFLY_LEFT_UDP_PORT : BLACKFLY_RIGHT_UDP_PORT);
@@ -145,10 +131,14 @@ public class DualBlackflyUDPSender
                   }
                }
 
+               spinnakerBlackfly.releaseImage(spinImage);
+
                frameNumber++;
 
                frequencyStatisticPrinter.ping();
             }
+
+            spinnakerBlackfly.stopAcquiringImages();
 
             socket.close();
          });
@@ -174,8 +164,6 @@ public class DualBlackflyUDPSender
             LogTools.error(e);
          }
       }
-
-      dualBlackflyReader.stop();
    }
 
    public static void main(String[] args)
