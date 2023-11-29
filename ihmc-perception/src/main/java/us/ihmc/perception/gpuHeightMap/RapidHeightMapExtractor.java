@@ -9,17 +9,25 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-//import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+/**
+ * Extracts height map and some other cost metric maps on the GPU using OpenCL kernels
+ *
+ * There are two each of height map, terrain cost map, and contact map, corresponding to global and local (cropped) versions.
+ * The terrain cost map is the single footstep steppability value, and the feasible contact map is the distance transform map
+ * which computes the distance to closest unsteppable cell for each cell. Feasible contact map (16-bit scalar for distance transform of the terrain cost map, represents safety score
+ * for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
+ * https://en.wikipedia.org/wiki/Distance_transform
+ * */
 public class RapidHeightMapExtractor
 {
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
@@ -31,7 +39,7 @@ public class RapidHeightMapExtractor
    public int sequenceNumber = 0;
 
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
-   private RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
    private final Point3D sensorOrigin = new Point3D();
 
 //   private HeightMapAutoencoder denoiser;
@@ -210,7 +218,6 @@ public class RapidHeightMapExtractor
 
    public void populateParameterBuffer(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter)
    {
-      //// Fill parameters buffer
       parametersBuffer.setParameter((float) parameters.getLocalCellSizeInMeters());
       parametersBuffer.setParameter(centerIndex);
       parametersBuffer.setParameter((float) cameraIntrinsics.getHeight());
@@ -377,7 +384,7 @@ public class RapidHeightMapExtractor
       return contactMapImage.getBytedecoOpenCVMat();
    }
 
-   public Mat getCroppedImage(Point3D origin, int globalCenterIndex, Mat imageToCrop)
+   public Mat getCroppedImage(Point3DReadOnly origin, int globalCenterIndex, Mat imageToCrop)
    {
       int xIndex = HeightMapTools.coordinateToIndex(origin.getX(), 0, RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(), globalCenterIndex);
       int yIndex = HeightMapTools.coordinateToIndex(origin.getY(), 0, RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(), globalCenterIndex);

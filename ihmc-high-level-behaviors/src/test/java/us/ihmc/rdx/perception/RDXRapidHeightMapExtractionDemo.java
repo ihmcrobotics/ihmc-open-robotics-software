@@ -246,8 +246,7 @@ public class RDXRapidHeightMapExtractionDemo
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
       groundToSensorTransform.invert();
 
-      Pose3D groundPoseInSensorFrame = new Pose3D(groundToSensorTransform);
-      cameraZUpFrame.setPoseAndUpdate(groundPoseInSensorFrame);
+      cameraZUpFrame.setPoseAndUpdate(groundToSensorTransform);
 
       humanoidPerception.updateTerrain(ros2Helper,
                                        humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat(),
