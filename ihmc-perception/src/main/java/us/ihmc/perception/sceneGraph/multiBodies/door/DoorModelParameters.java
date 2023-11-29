@@ -35,11 +35,14 @@ public class DoorModelParameters
    public static final double DOOR_OPENER_FROM_BOTTOM_OF_PANEL = 0.915;
    /** Mount the panel up off the ground a little so it's not dragging. */
    public static final double DOOR_PANEL_GROUND_GAP_HEIGHT = 0.02;
-   /** Place the panel away from the hinge a little.
-    *  TODO: Rethink this, it's not very realistic. */
+   /** Place the panel away from the hinge a little. */
    public static final double DOOR_PANEL_HINGE_OFFSET = 0.002;
    /** Distance from the frame post to the frame model's origin. */
    public static final double DOOR_FRAME_HINGE_OFFSET = 0.006;
+   /** Frame post X size. */
+   public static final double DOOR_FRAME_PILLAR_SIZE_X = 0.0889;
+   /** Frame post Z size. */
+   public static final double DOOR_FRAME_PILLAR_SIZE_Z = 2.159;
 
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
    public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
