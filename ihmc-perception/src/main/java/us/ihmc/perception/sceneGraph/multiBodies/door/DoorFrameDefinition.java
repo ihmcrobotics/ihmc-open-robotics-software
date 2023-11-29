@@ -43,56 +43,63 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       frameModelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(frameModelVisualDefinition);
 
-      Point3D latchSidePostOffset = new Point3D();
-      latchSidePostOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
-      latchSidePostOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
-      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, latchSidePostOffset);
+      Point3D hingeSidePostOffset = new Point3D();
+      hingeSidePostOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
+      hingeSidePostOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
 
       double flatboardSizeX = 0.63;
       double flatboardSizeY = 0.39;
       double flatboardSizeZ = 0.02;
       double twoX4Width = 0.0381;
-      if (ENABLE_SUPPORT_BOARD_COLLISIONS)
-      {
-         Point3D hingeSideSupportBoardOffset = new Point3D();
-         hingeSideSupportBoardOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
-         hingeSideSupportBoardOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X, 0.0);
-         hingeSideSupportBoardOffset.add(0.0, -twoX4Width / 2.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0f);
-         double twoX4Length = 1.016;
-         addCollisionShape(twoX4Length, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, hingeSideSupportBoardOffset);
+      Point3D hingeSideSupportBoardOffset = new Point3D();
+      hingeSideSupportBoardOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
+      hingeSideSupportBoardOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X, 0.0);
+      hingeSideSupportBoardOffset.add(0.0, -twoX4Width / 2.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0f);
+      double twoX4Length = 1.016;
 
-         Point3D hingeSideSupportWeightBaseOffset = new Point3D();
-         hingeSideSupportWeightBaseOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
-         hingeSideSupportWeightBaseOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X, 0.0);
-         hingeSideSupportWeightBaseOffset.add(0.0, -twoX4Width, 0.0);
-         hingeSideSupportWeightBaseOffset.add(0.0, -flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
-         addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, hingeSideSupportWeightBaseOffset);
-      }
+      Point3D hingeSideSupportWeightBaseOffset = new Point3D();
+      hingeSideSupportWeightBaseOffset.add(0.0, -DOOR_FRAME_HINGE_OFFSET, 0.0);
+      hingeSideSupportWeightBaseOffset.add(0.0, -DOOR_FRAME_PILLAR_SIZE_X, 0.0);
+      hingeSideSupportWeightBaseOffset.add(0.0, -twoX4Width, 0.0);
+      hingeSideSupportWeightBaseOffset.add(0.0, -flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
 
-      Point3D hingeSidePostOffset = new Point3D();
+      Point3D latchSidePostOffset = new Point3D();
       double toLatchPillarY = 0.93415;
-      hingeSidePostOffset.add(0.0, toLatchPillarY, 0.0);
-      hingeSidePostOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
-      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, hingeSidePostOffset);
+      latchSidePostOffset.add(0.0, toLatchPillarY, 0.0);
+      latchSidePostOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0, DOOR_FRAME_PILLAR_SIZE_Z / 2.0);
 
+      double stopColumnSizeX = 0.03;
+      double stopColumnSizeY = 0.02;
+      double stopColumnSizeZ = pillarSizeZ;
+      double initialSpaceBetweenStopAndPanel = 0.005;
+      Point3D stopColumnOffset = new Point3D();
+      stopColumnOffset.add(0.0, toLatchPillarY, 0.0);
+      stopColumnOffset.add((stopColumnSizeX / 2.0) + initialSpaceBetweenStopAndPanel, -stopColumnSizeY / 2.0, stopColumnSizeZ / 2.0);
+
+      // shortened: 0.881195 long
+      // short edge 0.372505 from center
+      // scootch 0.0680925
+      Point3D latchSideSupportBoardOffset = new Point3D();
+      latchSideSupportBoardOffset.add(0.0, toLatchPillarY, 0.0);
+      latchSideSupportBoardOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X, 0.0);
+      latchSideSupportBoardOffset.add(0.0680925, twoX4Width / 2.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0f);
+      double sideFloorBoardLength = 0.881195;
+
+      Point3D latchSideSupportWeightBaseOffset = new Point3D();
+      latchSideSupportWeightBaseOffset.add(0.0, toLatchPillarY, 0.0);
+      latchSideSupportWeightBaseOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X, 0.0);
+      latchSideSupportWeightBaseOffset.add(0.0, twoX4Width, 0.0);
+      latchSideSupportWeightBaseOffset.add(0.0, flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
+
+      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, hingeSidePostOffset);
+      addCollisionShape(pillarSizeX, pillarSizeY, pillarSizeZ, latchSidePostOffset);
+      addCollisionShape(stopColumnSizeX, stopColumnSizeY, stopColumnSizeZ, stopColumnOffset);
       if (ENABLE_SUPPORT_BOARD_COLLISIONS)
       {
-         // shortened: 0.881195 long
-         // short edge 0.372505 from center
-         // scootch 0.0680925
-         Point3D latchSideSupportBoardOffset = new Point3D();
-         latchSideSupportBoardOffset.add(0.0, toLatchPillarY, 0.0);
-         latchSideSupportBoardOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X, 0.0);
-         latchSideSupportBoardOffset.add(0.0680925, twoX4Width / 2.0, DOOR_FRAME_PILLAR_SIZE_X / 2.0f);
-         double sideFloorBoardLength = 0.881195;
-         addCollisionShape(sideFloorBoardLength, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, latchSideSupportBoardOffset);
-
-         Point3D hingeSideSupportWeightBaseOffset = new Point3D();
-         hingeSideSupportWeightBaseOffset.add(0.0, toLatchPillarY, 0.0);
-         hingeSideSupportWeightBaseOffset.add(0.0, DOOR_FRAME_PILLAR_SIZE_X, 0.0);
-         hingeSideSupportWeightBaseOffset.add(0.0, twoX4Width, 0.0);
-         hingeSideSupportWeightBaseOffset.add(0.0, flatboardSizeY / 2.0, flatboardSizeZ / 2.0);
          addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, hingeSideSupportWeightBaseOffset);
+         addCollisionShape(flatboardSizeX, flatboardSizeY, 0.02, latchSideSupportWeightBaseOffset);
+         addCollisionShape(twoX4Length, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, hingeSideSupportBoardOffset);
+         addCollisionShape(sideFloorBoardLength, twoX4Width, DOOR_FRAME_PILLAR_SIZE_X, latchSideSupportBoardOffset);
       }
    }
 

@@ -32,18 +32,19 @@ public class DoorPanelDefinition extends RigidBodyDefinition
    public void build()
    {
       double sizeX = DOOR_PANEL_THICKNESS; // centered on X
-      double sizeY = DOOR_PANEL_WIDTH;
+      double physicalPanelSizeY = DOOR_PANEL_WIDTH;
       double sizeZ = DOOR_PANEL_HEIGHT;
-      Point3D centerOfMassOffset = new Point3D(sizeY / 2.0, sizeY / 2.0, sizeZ / 2.0);
+      Point3D centerOfMassOffset = new Point3D(physicalPanelSizeY / 2.0, physicalPanelSizeY / 2.0, sizeZ / 2.0);
 
-      double simulationY = sizeY - 0.05; // prevent door hinge self collision
+      double hingeAvoidanceOffset = 0.05;
+      double panelCollisionSizeY = physicalPanelSizeY - hingeAvoidanceOffset; // prevent door hinge self collision
 
       double mass = 70.0;
       setMass(mass);
       double radiusOfGyrationPercent = 0.8;
       setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(getMass(),
                                                                            radiusOfGyrationPercent * sizeX,
-                                                                           radiusOfGyrationPercent * sizeY,
+                                                                           radiusOfGyrationPercent * physicalPanelSizeY,
                                                                            radiusOfGyrationPercent * sizeZ));
 
       getInertiaPose().getTranslation().set(centerOfMassOffset);
@@ -64,11 +65,17 @@ public class DoorPanelDefinition extends RigidBodyDefinition
          addVisualDefinition(fiducialModelVisualDefinition);
       }
 
-      Point3D collisionShapeOffset = new Point3D(DOOR_PANEL_THICKNESS / 2.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
+      Point3D collisionShapeOffset = new Point3D(DOOR_PANEL_THICKNESS / 2.0, panelCollisionSizeY / 2.0 + hingeAvoidanceOffset, sizeZ / 2.0);
+      addCollisionShape(sizeX, panelCollisionSizeY, sizeZ, collisionShapeOffset);
+   }
+
+   private void addCollisionShape(double sizeX, double sizeY, double sizeZ, Point3D offset)
+   {
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
-      Box3DDefinition boxCollisionDefinition = new Box3DDefinition(sizeX, simulationY, sizeZ);
+      Box3DDefinition boxCollisionDefinition = new Box3DDefinition();
+      boxCollisionDefinition.setSize(sizeX, sizeY, sizeZ);
       collisionShapeDefinition.setGeometryDefinition(boxCollisionDefinition);
-      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(), collisionShapeOffset);
+      collisionShapeDefinition.getOriginPose().set(new YawPitchRoll(), offset);
       addCollisionShapeDefinition(collisionShapeDefinition);
    }
 }
