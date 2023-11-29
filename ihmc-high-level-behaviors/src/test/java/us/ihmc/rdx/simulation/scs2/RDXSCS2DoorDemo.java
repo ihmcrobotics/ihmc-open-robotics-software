@@ -2,6 +2,10 @@ package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
 import imgui.type.ImDouble;
+import org.bytedeco.bullet.BulletCollision.btCollisionObject;
+import org.bytedeco.bullet.BulletDynamics.btMultiBody;
+import org.bytedeco.bullet.BulletDynamics.btMultiBodyLinkCollider;
+import org.bytedeco.bullet.global.BulletCollision;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -11,15 +15,13 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.behaviors.simulation.FlatGroundDefinition;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.sharedMemory.LinkedYoDouble;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimSixDoFJoint;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * An SCS 2 simulation of a door hinged on a frame with a lever handle.
@@ -30,10 +32,8 @@ public class RDXSCS2DoorDemo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDouble hingeTorque = new ImDouble();
    private RDXSCS2SimulationSession rdxSimulationSession;
-   private RDXSelectablePose3DGizmo doorRootPoseGizmo;
-   private SimSixDoFJoint doorRootJoint;
+   private RDXSCS2SixDoFJointGizmo doorRootGizmo;
    private SimRevoluteJoint doorHingeJoint;
-   private LinkedYoDouble doorX;
 
    public RDXSCS2DoorDemo()
    {
@@ -62,9 +62,12 @@ public class RDXSCS2DoorDemo
             Robot doorRobot = simulationSession.addRobot(doorDefinition);
             doorDefinition.applyPDController(doorRobot);
 
-            doorRootJoint = (SimSixDoFJoint) doorRobot.getJoint("doorRootJoint");
-            doorRootPoseGizmo = new RDXSelectablePose3DGizmo();
-            doorRootPoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
+            BulletRobot bulletRobot = (BulletRobot) bulletPhysicsEngine.getBulletRobots().get(0);
+
+
+            doorRootGizmo = new RDXSCS2SixDoFJointGizmo(baseUI.getPrimary3DPanel(),
+                                                        (SimSixDoFJoint) doorRobot.getJoint("doorRootJoint"));
             doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint("doorHingeJoint");
 
             doorRobot.addController(() -> doorHingeJoint.setTau(hingeTorque.get()));
@@ -75,12 +78,46 @@ public class RDXSCS2DoorDemo
             {
                rdxSimulationSession.getAdditionalImGuiWidgets().add(() ->
                {
-                  ImGui.checkbox(labels.get("Move root joint"), doorRootPoseGizmo.getSelected());
+                  doorRootGizmo.renderMoveJointCheckbox();
                   ImGuiTools.sliderDouble(labels.get("Hinge effort"), hingeTorque, -100.0, 100.0);
+
+                  if (ImGui.button("Make kinematic"))
+                  {
+                     btMultiBody btMultiBody = bulletRobot.getBulletMultiBodyRobot().getBtMultiBody();
+                     btMultiBodyLinkCollider baseCollider = btMultiBody.getBaseCollider();
+                     baseCollider.setCollisionFlags(baseCollider.getCollisionFlags() | btCollisionObject.CF_KINEMATIC_OBJECT);
+//                     baseCollider.setActivationState(BulletCollision.DISABLE_DEACTIVATION);
+                     for (int i = 0; i < btMultiBody.getNumLinks(); i++)
+                     {
+                        btMultiBodyLinkCollider collider = btMultiBody.getLink(i).m_collider();
+                        if (!collider.isNull())
+                        {
+                           collider.setCollisionFlags(collider.getCollisionFlags() | btCollisionObject.CF_KINEMATIC_OBJECT);
+                           collider.setActivationState(BulletCollision.DISABLE_DEACTIVATION);
+                        }
+                     }
+                  }
+                  if (ImGui.button("Make not kinematic"))
+                  {
+                     btMultiBody btMultiBody = bulletRobot.getBulletMultiBodyRobot().getBtMultiBody();
+                     btMultiBodyLinkCollider baseCollider = btMultiBody.getBaseCollider();
+                     baseCollider.setCollisionFlags(baseCollider.getCollisionFlags() & ~btCollisionObject.CF_KINEMATIC_OBJECT);
+//                     baseCollider.setActivationState(BulletCollision.ACTIVE_TAG);
+                     for (int i = 0; i < btMultiBody.getNumLinks(); i++)
+                     {
+                        btMultiBodyLinkCollider collider = btMultiBody.getLink(i).m_collider();
+                        if (!collider.isNull())
+                        {
+                           collider.setCollisionFlags(collider.getCollisionFlags() & ~btCollisionObject.CF_KINEMATIC_OBJECT);
+//                           collider.setActivationState(BulletCollision.ACTIVE_TAG);
+//                           collider.activate(true);
+                        }
+                     }
+                  }
                });
 
-               YoDouble q_x = (YoDouble) rdxSimulationSession.getYoManager().getRootRegistry().findVariable("root.door.q_doorRootJoint_x");
-               doorX = (LinkedYoDouble) rdxSimulationSession.getYoManager().newLinkedYoVariable(q_x);
+               doorRootGizmo.linkVariables(rdxSimulationSession.getYoManager().getRootRegistry(),
+                                           rdxSimulationSession.getYoManager().getLinkedYoVariableFactory());
             });
 
             rdxSimulationSession.create(baseUI);
@@ -90,36 +127,12 @@ public class RDXSCS2DoorDemo
             baseUI.getImGuiPanelManager().addPanel(rdxSimulationSession.getControlPanel());
          }
 
-         private void afterPhysics(double time)
-         {
-            if (doorRootPoseGizmo.isSelected())
-            {
-               doorRootJoint.getJointPose().set(doorRootPoseGizmo.getPoseGizmo().getTransformToParent());
-            }
-            else
-            {
-               doorRootPoseGizmo.getPoseGizmo().getTransformToParent().set(doorRootJoint.getJointPose());
-            }
-         }
-
          @Override
          public void render()
          {
             rdxSimulationSession.update();
 
-            if (doorX != null)
-            {
-               doorX.pull();
-               if (doorRootPoseGizmo.isSelected())
-               {
-                  doorX.getLinkedYoVariable().set(doorRootPoseGizmo.getPoseGizmo().getPose().getX());
-               }
-               else
-               {
-                  doorRootPoseGizmo.getPoseGizmo().getTransformToParent().getTranslation().setX(doorX.getLinkedYoVariable().getValue());
-               }
-               doorX.push();
-            }
+            doorRootGizmo.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
