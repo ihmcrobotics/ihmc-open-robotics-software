@@ -90,7 +90,7 @@ public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
     */
    private void updateActiveMappingPlan()
    {
-      if (configurationParameters.getActiveMapping())
+      if (configurationParameters.getSLAMEnabled())
       {
          if (walkingStatusMessage.get() != null)
          {
