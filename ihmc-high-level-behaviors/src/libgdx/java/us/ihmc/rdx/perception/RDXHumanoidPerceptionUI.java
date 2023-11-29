@@ -50,6 +50,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    /* Image panel to display the internal (full) height map */
    private RDXBytedecoImagePanel internalHeightMapPanel;
 
+   /* Image panel to display the steppable height map */
+   private RDXBytedecoImagePanel steppableHeightMapPanel;
+
    /* Image panel to display the internal (cropped) height map */
    private RDXBytedecoImagePanel croppedHeightMapPanel;
 
@@ -162,6 +165,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
+//         steppableHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getBytedecoOpenCVMat());
          terrainCostImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
          contactMapImagePanel.drawColorImage(contactHeatMapImage);
       }
@@ -309,6 +313,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
                                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageWidth(),
                                                             humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getImageHeight(),
                                                             RDXImagePanel.DO_NOT_FLIP_Y);
+         steppableHeightMapPanel = new RDXBytedecoImagePanel("Steppable Height Map",
+                                                            humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getImageWidth(),
+                                                            humanoidPerception.getRapidHeightMapExtractor().getSteppableHeightMapImage().getImageHeight(),
+                                                            RDXImagePanel.DO_NOT_FLIP_Y);
          depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
                                                      humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().cols(),
                                                      humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat().rows(),
@@ -338,6 +346,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          //addChild(sensorCroppedHeightMapPanel.getImagePanel());
          addChild(depthImagePanel.getImagePanel());
          addChild(internalHeightMapPanel.getImagePanel());
+         addChild(steppableHeightMapPanel.getImagePanel());
          addChild(terrainCostImagePanel.getImagePanel());
          addChild(contactMapImagePanel.getImagePanel());
       }
