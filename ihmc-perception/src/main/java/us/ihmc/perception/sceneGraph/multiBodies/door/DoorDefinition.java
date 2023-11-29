@@ -65,8 +65,9 @@ public class DoorDefinition extends RobotDefinition
                     .add(-DOOR_PANEL_THICKNESS, DOOR_PANEL_HINGE_OFFSET, DOOR_PANEL_GROUND_GAP_HEIGHT);
       initialHingeState = new OneDoFJointState();
       doorHingeJoint.setInitialJointState(initialHingeState);
-      doorHingeJoint.setPositionLowerLimit(-1.7);
-      doorHingeJoint.setPositionUpperLimit(1.7);
+      double hingeJointLimit = 1.7;
+      doorHingeJoint.setPositionLowerLimit(-hingeJointLimit);
+      doorHingeJoint.setPositionUpperLimit(hingeJointLimit);
 
       doorPanelDefinition.build();
       doorHingeJoint.setSuccessor(doorPanelDefinition);
