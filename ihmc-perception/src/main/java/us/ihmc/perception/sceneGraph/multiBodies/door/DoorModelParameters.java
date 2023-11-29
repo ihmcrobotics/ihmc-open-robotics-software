@@ -28,7 +28,7 @@ public class DoorModelParameters
    /** The vertical length of the panel. */
    public static final double DOOR_PANEL_HEIGHT = 2.033;
    /** The horizontal length of the panel. */
-   public static final double DOOR_PANEL_WIDTH = 0.914;
+   public static final double DOOR_PANEL_WIDTH = 0.924;
    /** Distance the handle joint in from the edge of the panel. */
    public static final double DOOR_OPENER_INSET = 0.062;
    /** We place the lever handle up from the bottom of the panel as measured on our lab door. */
@@ -37,7 +37,7 @@ public class DoorModelParameters
    public static final double DOOR_PANEL_GROUND_GAP_HEIGHT = 0.02;
    /** Place the panel away from the hinge a little.
     *  TODO: Rethink this, it's not very realistic. */
-   public static final double DOOR_PANEL_HINGE_OFFSET = 0.005;
+   public static final double DOOR_PANEL_HINGE_OFFSET = 0.002;
    /** Distance from the frame post to the frame model's origin. */
    public static final double DOOR_FRAME_HINGE_OFFSET = 0.006;
 
