@@ -540,15 +540,13 @@ public class RDXAffordanceTemplateEditorUI
 
       for (RobotSide side : RobotSide.values())
       {
-         for (int i = 1; i < preGraspFrames.getIndex() + 1; i++)
+         for (int i = 1; i < preGraspFrames.getPoses().get(side).size() + 1; i++)
             preGraspFrames.updateInternal(side, i);
 
          graspFrame.updateInternal(side);
 
-         for (int i = 1; i < postGraspFrames.getIndex() + 1; i++)
-         {
+         for (int i = 1; i < postGraspFrames.getPoses().get(side).size() + 1; i++)
             postGraspFrames.updateInternal(side, i);
-         }
       }
 
    }
