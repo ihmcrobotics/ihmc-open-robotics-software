@@ -12,9 +12,9 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.colorVision.DualBlackflyFragmentedUDPImage;
 import us.ihmc.avatar.colorVision.DualBlackflyUDPReceiver;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.ImageDimensions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -34,7 +34,6 @@ public class RDXDualBlackflySphericalProjectionDemo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
 
-   //   private final DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    public RDXDualBlackflySphericalProjectionDemo()
@@ -44,7 +43,6 @@ public class RDXDualBlackflySphericalProjectionDemo
          @Override
          public void create()
          {
-            //            dualBlackflyReader.start();
             dualBlackflyUDPReceiver.start();
 
             baseUI.create();
@@ -84,16 +82,16 @@ public class RDXDualBlackflySphericalProjectionDemo
          {
             for (RobotSide side : RobotSide.values)
             {
-               DualBlackflyFragmentedUDPImage latestCompleteImage = dualBlackflyUDPReceiver.getLatestCompletedImages().get(side);
+               byte[] imageBytes = dualBlackflyUDPReceiver.getImageBuffers().get(side);
 
-//               DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
+               ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
 
-//               AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
-               if (latestCompleteImage != null && latestCompleteImage.isComplete())
+               if (imageBytes != null)
                {
-                  BytePointer latestImageData = new BytePointer(latestCompleteImage.getCompleteImageData());
+                  BytePointer latestImageData = new BytePointer(imageBytes);
 
-                  Mat mat = new Mat(latestCompleteImage.getHeight(), latestCompleteImage.getWidth(), opencv_core.CV_8UC1, latestImageData, true);
+                  Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
+                  mat.data(latestImageData);
 
                   Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
                   BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
@@ -105,12 +103,12 @@ public class RDXDualBlackflySphericalProjectionDemo
 
                   rgba8Mat.close();
                   pixmap.dispose();
-//                  mat.close();
+                  mat.close();
+
+                  leftEyePose.getTranslation().setY(pupillaryDistance.get());
+                  LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
                }
             }
-
-            leftEyePose.getTranslation().setY(pupillaryDistance.get());
-            LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -119,7 +117,6 @@ public class RDXDualBlackflySphericalProjectionDemo
          @Override
          public void dispose()
          {
-            //            dualBlackflyReader.stop();
             dualBlackflyUDPReceiver.stop();
             baseUI.dispose();
          }

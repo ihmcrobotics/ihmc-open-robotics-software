@@ -2,19 +2,23 @@ package us.ihmc.avatar.colorVision;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.ImageDimensions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 
+import static us.ihmc.avatar.colorVision.DualBlackflyUDPSender.DATAGRAM_MAX_LENGTH;
+
 public class DualBlackflyUDPReceiver
 {
    private final SideDependentList<Thread> receiveThreads = new SideDependentList<>();
-   private final SideDependentList<DualBlackflyFragmentedUDPImage> latestCompletedImages = new SideDependentList<>();
    private volatile boolean running;
+
+   private final SideDependentList<byte[]> imageBuffers = new SideDependentList<>();
+   private final SideDependentList<ImageDimensions> imageDimensions = new SideDependentList<>(ImageDimensions::new);
 
    public void start()
    {
@@ -24,8 +28,6 @@ public class DualBlackflyUDPReceiver
       {
          Thread receiveThread = new Thread(() ->
          {
-            FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
-
             SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1",
                                                                 side == RobotSide.LEFT ?
                                                                       DualBlackflyUDPSender.BLACKFLY_LEFT_UDP_PORT :
@@ -46,8 +48,6 @@ public class DualBlackflyUDPReceiver
 
             byte[] buffer = new byte[(int) ((Math.pow(2, 16)) - 1)];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-            DualBlackflyFragmentedUDPImage fragmentedUDPImage = null;
 
             while (running)
             {
@@ -70,37 +70,23 @@ public class DualBlackflyUDPReceiver
                int fragment = datagramBuffer.getInt();
                int fragmentDataLength = datagramBuffer.getInt();
                byte[] fragmentDataBytes = new byte[fragmentDataLength];
+               int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
+               int fragmentDataOffset = fragment * maxFragmentDataLength;
+
+               byte[] imageBuffer = imageBuffers.get(sideFromDatagram);
+
+               if (imageBuffer == null || imageBuffer.length != imageBytes)
+               {
+                  imageBuffer = new byte[imageBytes];
+                  imageBuffers.put(sideFromDatagram, imageBuffer);
+               }
+
+               imageDimensions.get(sideFromDatagram).setImageWidth(width);
+               imageDimensions.get(sideFromDatagram).setImageHeight(height);
 
                for (int i = 0; i < fragmentDataLength; i++)
                {
-                  fragmentDataBytes[i] = datagramBuffer.get(fragmentHeaderLength + i);
-               }
-
-               if (fragment == 0)
-               {
-                  // Should only happen once
-                  if (fragmentedUDPImage == null)
-                  {
-                     fragmentedUDPImage = new DualBlackflyFragmentedUDPImage(imageBytes);
-                  }
-                  else
-                  {
-                     fragmentedUDPImage.complete();
-
-                     latestCompletedImages.put(side, fragmentedUDPImage.clone());
-                     frequencyStatisticPrinter.ping();
-
-                     fragmentedUDPImage.reset();
-                     fragmentedUDPImage.setRobotSide(sideFromDatagram);
-                     fragmentedUDPImage.setWidth(width);
-                     fragmentedUDPImage.setHeight(height);
-                     fragmentedUDPImage.setFrameNumber(frameNumber);
-                  }
-               }
-               else
-               {
-                  if (fragmentedUDPImage != null)
-                     fragmentedUDPImage.nextFragment(fragment, fragmentDataLength, fragmentDataBytes);
+                  imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
                }
             }
 
@@ -131,9 +117,14 @@ public class DualBlackflyUDPReceiver
       }
    }
 
-   public SideDependentList<DualBlackflyFragmentedUDPImage> getLatestCompletedImages()
+   public SideDependentList<byte[]> getImageBuffers()
    {
-      return latestCompletedImages;
+      return imageBuffers;
+   }
+
+   public SideDependentList<ImageDimensions> getImageDimensions()
+   {
+      return imageDimensions;
    }
 
    public static void main(String[] args)

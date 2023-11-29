@@ -16,6 +16,11 @@ public class ImageDimensions
       this.imageHeight = imageHeight;
    }
 
+   public ImageDimensions()
+   {
+
+   }
+
    public int getImageWidth()
    {
       return imageWidth;
