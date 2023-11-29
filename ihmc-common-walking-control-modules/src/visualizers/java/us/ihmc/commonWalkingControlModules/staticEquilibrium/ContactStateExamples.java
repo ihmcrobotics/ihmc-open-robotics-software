@@ -13,26 +13,26 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class MultiContactSupportRegionSolverInputExamples
+public class ContactStateExamples
 {
-   public static MultiContactFrictionBasedSupportRegionSolverInput createTriangleFlatGround()
+   public static MutableWholeBodyContactState createTriangleFlatGround()
    {
       return createTriangleInput(0.0, 0.0, 0.0);
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createTriangleTiltedOutSlightly()
+   public static MutableWholeBodyContactState createTriangleTiltedOutSlightly()
    {
       double angle = Math.toRadians(30.0);
       return createTriangleInput(angle, angle, angle);
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createTriangleTiltedOutALot()
+   public static MutableWholeBodyContactState createTriangleTiltedOutALot()
    {
       double angle = Math.toRadians(50.0);
       return createTriangleInput(angle, angle, angle);
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createTriangleOneTiltedFullyOut()
+   public static MutableWholeBodyContactState createTriangleOneTiltedFullyOut()
    {
       double theta0 = Math.toRadians(90.0);
       double theta2 = Math.toRadians(0.0);
@@ -40,7 +40,7 @@ public class MultiContactSupportRegionSolverInputExamples
       return createTriangleInput(theta0, theta1, theta2);
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createTriangleOneTiltedFullyIn()
+   public static MutableWholeBodyContactState createTriangleOneTiltedFullyIn()
    {
       double theta0 = Math.toRadians(-90.0);
       double theta2 = Math.toRadians(0.0);
@@ -48,26 +48,26 @@ public class MultiContactSupportRegionSolverInputExamples
       return createTriangleInput(theta0, theta1, theta2);
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createFlatSquare()
+   public static MutableWholeBodyContactState createFlatSquare()
    {
-      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
-      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, -0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
-      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, 0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
-      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(),  0.5, -0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
-      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(),  0.5, 0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      MutableWholeBodyContactState input = new MutableWholeBodyContactState();
+      input.addContactPoint(new Point3D(-0.5, -0.5, 0.0), new Vector3D(Axis3D.Z));
+      input.addContactPoint(new Point3D(-0.5, 0.5, 0.0), new Vector3D(Axis3D.Z));
+      input.addContactPoint(new Point3D( 0.5, -0.5, 0.0), new Vector3D(Axis3D.Z));
+      input.addContactPoint(new Point3D( 0.5, 0.5, 0.0), new Vector3D(Axis3D.Z));
       return input;
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createSingleFlatContactPoint(double x, double y)
+   public static MutableWholeBodyContactState createSingleFlatContactPoint(double x, double y)
    {
-      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
-      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), x, y, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      MutableWholeBodyContactState input = new MutableWholeBodyContactState();
+      input.addContactPoint(new Point3D(x, y, 0.0), new Vector3D(Axis3D.Z));
       return input;
    }
 
-   private static MultiContactFrictionBasedSupportRegionSolverInput createTriangleInput(double... angles)
+   private static MutableWholeBodyContactState createTriangleInput(double... angles)
    {
-      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
+      MutableWholeBodyContactState input = new MutableWholeBodyContactState();
 
       double distance = 1.0;
       for (int i = 0; i < 3; i++)
@@ -89,14 +89,14 @@ public class MultiContactSupportRegionSolverInputExamples
       return input;
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createBipedFeet()
+   public static MutableWholeBodyContactState createBipedFeet()
    {
       return createBipedFeet(0.0, 0.0, 0.0);
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createBipedFeet(double dx, double dy, double dz)
+   public static MutableWholeBodyContactState createBipedFeet(double dx, double dy, double dz)
    {
-      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
+      MutableWholeBodyContactState input = new MutableWholeBodyContactState();
 
       double footWidth = 0.1;
       double footLength = 0.2;
@@ -130,9 +130,9 @@ public class MultiContactSupportRegionSolverInputExamples
       return input;
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createBipedFeetWithSingleHandhold()
+   public static MutableWholeBodyContactState createBipedFeetWithSingleHandhold()
    {
-      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
+      MutableWholeBodyContactState input = new MutableWholeBodyContactState();
 
       double footWidth = 0.1;
       double footLength = 0.2;
@@ -171,9 +171,9 @@ public class MultiContactSupportRegionSolverInputExamples
       return input;
    }
 
-   public static MultiContactFrictionBasedSupportRegionSolverInput createBipedFeetWithTwoHandholds()
+   public static MutableWholeBodyContactState createBipedFeetWithTwoHandholds()
    {
-      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
+      MutableWholeBodyContactState input = new MutableWholeBodyContactState();
 
       double footWidth = 0.1;
       double footLength = 0.2;
@@ -218,7 +218,7 @@ public class MultiContactSupportRegionSolverInputExamples
       return input;
    }
 
-   private static void addContactPoint(PoseReferenceFrame contactFrame, FramePose3D contactPose, MultiContactFrictionBasedSupportRegionSolverInput input, Point3D contactPointInLocal)
+   private static void addContactPoint(PoseReferenceFrame contactFrame, FramePose3D contactPose, MutableWholeBodyContactState input, Point3D contactPointInLocal)
    {
       contactFrame.setPoseAndUpdate(contactPose);
 
