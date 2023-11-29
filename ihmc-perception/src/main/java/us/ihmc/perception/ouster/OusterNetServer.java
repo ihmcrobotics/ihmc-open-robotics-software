@@ -308,6 +308,7 @@ public class OusterNetServer
          InputStream input = socket.getInputStream();
          BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
+         // TODO: Ask Dex about setting a timeout to this
          jsonResponse = reader.readLine();
       }
       catch (UnknownHostException unknownHostException)
@@ -321,6 +322,7 @@ public class OusterNetServer
       }
       finally
       {
+         // TODO: ask Dex whether this unbinds the TCP port?
          LogTools.info("Unbound from TCP port: " + TCP_PORT);
       }
 

@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
@@ -188,6 +189,14 @@ public class RealsenseColorDepthImageRetriever
       }
 
       return colorImage.get();
+   }
+
+   public CameraIntrinsics getRealsenseDepthCameraIntrinsics()
+   {
+      if (realsense != null)
+         return realsense.getDepthCameraIntrinsics();
+
+      return null;
    }
 
    public void start()
