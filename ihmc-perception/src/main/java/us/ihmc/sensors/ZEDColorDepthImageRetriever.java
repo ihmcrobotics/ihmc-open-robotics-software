@@ -71,6 +71,8 @@ public class ZEDColorDepthImageRetriever
                                                                                                 newColorImageLocks.get(RobotSide.RIGHT).newCondition());
    private SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
 
+   private boolean initialized = false;
+
    public ZEDColorDepthImageRetriever(int cameraID, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.cameraID = cameraID;
@@ -79,27 +81,32 @@ public class ZEDColorDepthImageRetriever
 
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
-         while (!sl_is_opened(cameraID))
+         if (!initialized)
          {
-            if (!startZED())
+            if (startZED())
+               initialized = true;
+            else
                ThreadTools.sleep(3000);
          }
-
-         // sl_grab is blocking, and will wait for next frame available. No need to use throttler
-         checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
-
-         // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
-         for (RobotSide side : RobotSide.values)
+         else
          {
-            cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
-            cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
-            cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-         }
 
-         retrieveAndSaveDepthImage();
-         retrieveAndSaveColorImage(RobotSide.LEFT);
-         retrieveAndSaveColorImage(RobotSide.RIGHT);
-         grabSequenceNumber++;
+            // sl_grab is blocking, and will wait for next frame available. No need to use throttler
+            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+
+            // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
+            for (RobotSide side : RobotSide.values)
+            {
+               cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
+               cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
+               cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            }
+
+            retrieveAndSaveDepthImage();
+            retrieveAndSaveColorImage(RobotSide.LEFT);
+            retrieveAndSaveColorImage(RobotSide.RIGHT);
+            grabSequenceNumber++;
+         }
       });
    }
 
@@ -260,11 +267,13 @@ public class ZEDColorDepthImageRetriever
       System.out.println("Destroying " + this.getClass().getSimpleName());
       zedGrabThread.stop();
 
-      depthImagePointer.close();
+      if (depthImagePointer != null)
+         depthImagePointer.close();
       if (depthImage != null)
          depthImage.release();
 
-      colorImagePointer.close();
+      if (colorImagePointer != null)
+         colorImagePointer.close();
       for (RobotSide side : RobotSide.values)
       {
          if (colorImages.get(side) != null)
@@ -289,8 +298,6 @@ public class ZEDColorDepthImageRetriever
 
       // Create and initialize the camera
       success = sl_create_camera(cameraID);
-//      if (!success)
-//         return success;
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
 
