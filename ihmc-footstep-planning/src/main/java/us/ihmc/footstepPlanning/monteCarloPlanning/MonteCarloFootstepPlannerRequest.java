@@ -4,6 +4,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -60,6 +61,11 @@ public class MonteCarloFootstepPlannerRequest
     */
    private Mat contactMap;
 
+   /**
+    * Sensor origin that defines the center of the height map
+    */
+   private Point2D sensorOrigin;
+
    public MonteCarloFootstepPlannerRequest()
    {
       clear();
@@ -75,6 +81,7 @@ public class MonteCarloFootstepPlannerRequest
       goalYawProximity = -1.0;
       timeout = 5.0;
       maximumIterations = -1;
+      sensorOrigin = new Point2D();
    }
 
    public void setRequestId(int requestId)
@@ -215,6 +222,16 @@ public class MonteCarloFootstepPlannerRequest
    public Mat getContactMap()
    {
       return contactMap;
+   }
+
+   public void setSensorOrigin(double originX, double originY)
+   {
+      this.sensorOrigin.set(originX, originY);
+   }
+
+   public Point2D getSensorOrigin()
+   {
+      return sensorOrigin;
    }
 
    public void setPacket(MonteCarloFootstepPlannerRequest requestPacket)

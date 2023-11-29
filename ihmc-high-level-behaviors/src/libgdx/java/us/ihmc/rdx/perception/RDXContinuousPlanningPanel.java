@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
@@ -20,10 +19,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXSwingTrajectoryGraphic;
@@ -116,8 +113,8 @@ public class RDXContinuousPlanningPanel implements RenderableProvider
    {
       if (activePerceptionModule != null)
       {
-         generateSwingGraphics(activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getLatestFootstepPlan(),
-                               activePerceptionModule.getContinuousMappingRemoteThread().getContinuousPlanner().getLatestSwingTrajectories());
+         generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestFootstepPlan(),
+                               activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getLatestSwingTrajectories());
       }
 
       generateStartAndGoalFootstepGraphics();

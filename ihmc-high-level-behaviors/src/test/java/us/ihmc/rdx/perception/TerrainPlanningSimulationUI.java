@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -77,8 +78,6 @@ public class TerrainPlanningSimulationUI
    private final ROS2Helper ros2Helper;
    private final ROS2Node ros2Node;
 
-   private HumanoidActivePerceptionModule activePerceptionModule;
-
    private ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private PerceptionDataLogger perceptionDataLogger;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
@@ -105,22 +104,21 @@ public class TerrainPlanningSimulationUI
    private final SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame cameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", cameraFrame);
-   private final PoseReferenceFrame randomCameraFrame = new PoseReferenceFrame("CameraFrame", ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame randomCameraZUpFrame = new PoseReferenceFrame("CameraZUpFrame", randomCameraFrame);
    private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
+
    private final Random random = new Random(System.currentTimeMillis());
    private final Pose3D cameraPose = new Pose3D();
+
    private final ImBoolean enableMonteCarloPlanner = new ImBoolean(false);
+   private final ImFloat startMidX = new ImFloat(0.0f);
+   private final ImFloat startMidY = new ImFloat(0.0f);
+   private final ImFloat startYaw = new ImFloat(0.0f);
 
-   private ImFloat startMidX = new ImFloat(0.0f);
-   private ImFloat startMidY = new ImFloat(0.0f);
-   private ImFloat startYaw = new ImFloat(0.0f);
-
-   private ImFloat goalMidX = new ImFloat(1.5f);
-   private ImFloat goalMidY = new ImFloat(0.0f);
-   private ImFloat goalYaw = new ImFloat(0.0f);
+   private final ImFloat goalMidX = new ImFloat(1.5f);
+   private final ImFloat goalMidY = new ImFloat(0.0f);
+   private final ImFloat goalYaw = new ImFloat(0.0f);
 
    private int autoIncrementCounter = 0;
    private int plansLoggedSoFar = 0;
@@ -352,7 +350,8 @@ public class TerrainPlanningSimulationUI
             ImGui.pushStyleColor(ImGuiCol.Button, 0.5f, 0.5f, 0.5f, 0.5f);
             if (ImGui.button("Next Step"))
             {
-               monteCarloFootstepPlanner.transitionToOptimal();
+               Vector3D translation = monteCarloFootstepPlanner.transitionToOptimal();
+               l515PoseGizmo.getTransformToParent().prependTranslation(translation);
                updateMonteCarloPlanner(false);
             }
             ImGui.popStyleColor();
@@ -464,6 +463,7 @@ public class TerrainPlanningSimulationUI
                                                     new Quaternion(goalYaw.get(), 0, 0)));
             request.setContactMap(contactMapImage);
             request.setHeightMap(heightMapImage);
+            request.setSensorOrigin(zUpToWorldTransform.getTranslationX(), zUpToWorldTransform.getTranslationY());
 
             long timeStart = System.nanoTime();
 
@@ -547,29 +547,6 @@ public class TerrainPlanningSimulationUI
             }
          }
 
-         public void logRandomizedFootstepPlans(int numberOfPlans)
-         {
-            for (int i = 0; i < numberOfPlans; i++)
-            {
-               RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
-               zUpToWorldTransform.setTranslationAndIdentityRotation(0.0, 0.0, 0.0);
-               zUpToWorldTransform.getTranslation().setX(random.nextDouble() * 2.0);
-               zUpToWorldTransform.getTranslation().setY(random.nextDouble() * 2.0);
-               zUpToWorldTransform.getTranslation().setZ(0.0);
-               FootstepPlannerOutput plannerOutput = planFootsteps(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage(),
-                                                                   zUpToWorldTransform);
-               printStatusAndUpdateMeshes(plannerOutput);
-
-               if (plannerOutput != null)
-                  FootstepPlannerLoggingTools.logFootsteps(plannerOutput,
-                                                           perceptionDataLogger,
-                                                           l515PoseGizmo.getTransformToParent(),
-                                                           startPose,
-                                                           goalPose,
-                                                           sidednessBit);
-            }
-         }
-
          public void printStatusAndUpdateMeshes(FootstepPlannerOutput output)
          {
             if (output != null)
@@ -642,7 +619,7 @@ public class TerrainPlanningSimulationUI
             }
             else
             {
-               environmentBuilder.loadEnvironment("FootstepPlannerTrainingTerrainGenerated_1.json");
+               environmentBuilder.loadEnvironment("LookAndStepEasy.json");
             }
          }
 

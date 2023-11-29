@@ -300,7 +300,10 @@ public class PerceptionDebugTools
 
       if (screenSize != -1)
       {
-         opencv_highgui.resizeWindow(tag, screenSize / image.rows() * image.cols(), screenSize);
+         int finalRows = screenSize;
+         int finalCols = (int)((float) screenSize / (float) image.rows() * (float) image.cols());
+         LogTools.debug(String.format("Image Size: %d x %d Display Size: %d x %d", finalRows, finalCols, image.rows(), image.cols()));
+         opencv_highgui.resizeWindow(tag, finalCols, finalRows);
       }
 
       int code = opencv_highgui.waitKeyEx(delay);

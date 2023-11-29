@@ -289,6 +289,9 @@ public class MonteCarloPlannerTools
       List<MonteCarloTreeNode> path = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, path);
 
+      int offsetX = (int) (request.getSensorOrigin().getX() * 50);
+      int offsetY = (int) (request.getSensorOrigin().getY() * 50);
+
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
       {
@@ -297,8 +300,8 @@ public class MonteCarloPlannerTools
          int nodeX = (int) footstepNode.getState().getX();
          int nodeY = (int) footstepNode.getState().getY();
 
-         int rIndex = nodeX + request.getContactMap().rows() / 2;
-         int cIndex = nodeY + request.getContactMap().cols() / 2;
+         int rIndex = nodeX + request.getHeightMap().rows() / 2 - offsetX;
+         int cIndex = nodeY + request.getHeightMap().cols() / 2 - offsetY;
 
          int height = ((int) request.getHeightMap().ptr(rIndex, cIndex).getShort() & 0xFFFF);
          FramePose3D footstepPose = getFramePose3D(height, nodeX / 50.0f, nodeY / 50.0f, footstepNode.getState().getZ());
@@ -407,8 +410,11 @@ public class MonteCarloPlannerTools
 
       double edgeCost = Math.abs(0.5f - oldNode.getState().distance(newNode.getState())) * 0.01f;
 
-      int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2);
-      int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2);
+      int offsetX = (int) (request.getSensorOrigin().getX() * 50);
+      int offsetY = (int) (request.getSensorOrigin().getY() * 50);
+
+      int rIndex = (int) (newNode.getState().getX() + request.getContactMap().rows() / 2) - offsetX;
+      int cIndex = (int) (newNode.getState().getY() + request.getContactMap().cols() / 2) - offsetY;
 
       Point2D goalPosition = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       goalPosition.scale(50.0f);

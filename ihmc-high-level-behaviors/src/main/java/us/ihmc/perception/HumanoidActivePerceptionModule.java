@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -29,7 +28,7 @@ public class HumanoidActivePerceptionModule
    private final Mat gridColor = new Mat();
 
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
-   private ContinuousPlannerSchedulingTask continuousPlannerSchedulingThread;
+   private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private final ContinuousWalkingParameters continuousPlanningParameters;
@@ -51,9 +50,9 @@ public class HumanoidActivePerceptionModule
                                                                          ros2Node, referenceFrames, () -> {}, true);
    }
 
-   public void initializeContinuousElevationMappingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      continuousPlannerSchedulingThread = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -109,12 +108,12 @@ public class HumanoidActivePerceptionModule
       if (activePlaneMappingRemoteThread != null)
          activePlaneMappingRemoteThread.destroy();
 
-      if (continuousPlannerSchedulingThread != null)
-         continuousPlannerSchedulingThread.destroy();
+      if (continuousPlannerSchedulingTask != null)
+         continuousPlannerSchedulingTask.destroy();
    }
 
-   public ContinuousPlannerSchedulingTask getContinuousMappingRemoteThread()
+   public ContinuousPlannerSchedulingTask getContinuousPlannerSchedulingTask()
    {
-      return continuousPlannerSchedulingThread;
+      return continuousPlannerSchedulingTask;
    }
 }

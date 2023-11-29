@@ -24,12 +24,12 @@ public class MonteCarloFootstepPlanningDebugger
    private int scaledHeight = scale * height;
    private int scaledWidth = scale * width;
 
-   private final Mat stacked = new Mat(scaledHeight, scaledWidth * 2, opencv_core.CV_8UC3);
+   private final Mat stacked = new Mat(scaledHeight * 2, scaledWidth, opencv_core.CV_8UC3);
    private final Mat heightMapColorImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC3);
    private final Mat contactHeatMapColorImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC3);
 
-   Mat left = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0, 0, heightMapColorImage.cols(), heightMapColorImage.rows()));
-   Mat right = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(heightMapColorImage.cols(), 0, heightMapColorImage.cols(), heightMapColorImage.rows()));
+   Mat top = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0, 0, heightMapColorImage.cols(), heightMapColorImage.rows()));
+   Mat bottom = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0, heightMapColorImage.rows(), contactHeatMapColorImage.cols(), contactHeatMapColorImage.rows()));
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private MonteCarloFootstepPlanner planner;
@@ -100,10 +100,10 @@ public class MonteCarloFootstepPlanningDebugger
 
       //MonteCarloPlannerTools.plotFootstepNodeList(planner.getVisitedNodes(), contactHeatMapColorImage);
 
-      heightMapColorImage.copyTo(left);
-      contactHeatMapColorImage.copyTo(right);
+      heightMapColorImage.copyTo(top);
+      contactHeatMapColorImage.copyTo(bottom);
 
-      PerceptionDebugTools.display("Display", stacked, delay, -1);
+      PerceptionDebugTools.display("Display", stacked, delay, 1500);
    }
 
    private void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
@@ -143,5 +143,10 @@ public class MonteCarloFootstepPlanningDebugger
    public void printHeightMap()
    {
       PerceptionDebugTools.printMat("Height Map", request.getHeightMap(), 4);
+   }
+
+   public Mat getDisplayImage()
+   {
+      return stacked;
    }
 }

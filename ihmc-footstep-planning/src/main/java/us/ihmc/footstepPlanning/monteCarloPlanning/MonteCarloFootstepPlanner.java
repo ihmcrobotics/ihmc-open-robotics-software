@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
@@ -244,13 +245,19 @@ public class MonteCarloFootstepPlanner
                                            uniqueNodeId++);
    }
 
-   public void transitionToOptimal()
+   public Vector3D transitionToOptimal()
    {
       for (MonteCarloTreeNode child : root.getChildren())
       {
-         child.getParents().remove(root);
+         child.getParents().clear();
       }
-      root = (MonteCarloFootstepNode) root.getMaxQueueNode();
+      MonteCarloFootstepNode maxNode = (MonteCarloFootstepNode) root.getMaxQueueNode();
+      Vector3D action = new Vector3D(maxNode.getState());
+      action.sub(root.getState());
+      action.scale(1 / 50.0);
+
+      root = maxNode;
+      return action;
    }
 
    public MonteCarloPlanningWorld getWorld()

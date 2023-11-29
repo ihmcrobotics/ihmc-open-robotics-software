@@ -466,7 +466,8 @@ public class ContinuousPlanner
          index = 1;
       }
 
-      for (int i = index; i < parameters.getNumberOfStepsToSend(); i++)
+      int totalNumberOfSteps = Math.min(latestFootstepPlan.getNumberOfSteps(), parameters.getNumberOfStepsToSend());
+      for (int i = index; i < totalNumberOfSteps; i++)
       {
          PlannedFootstep footstep = latestFootstepPlan.getFootstep(i);
          footstep.limitFootholdVertices();
