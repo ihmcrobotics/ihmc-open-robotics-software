@@ -13,6 +13,10 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
+/**
+ * OpenCL based heat map generator for 16-bit grayscale images. Visualize any 16-bit grayscale image (scalars like steppability, traversability for each cell)
+ * as a colored image with any desired color scheme.
+ */
 public class HeatMapGenerator
 {
    private final _cl_program program;

@@ -64,21 +64,22 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    public MeshTerrainObject(String filePath)
    {
-      this(filePath, useTunedMeshTerrainObjectParametersIfItExists(filePath));
+      this(useTunedMeshTerrainObjectParametersIfItExists(filePath));
    }
 
-   public MeshTerrainObject(String filePath, MeshTerrainObjectParameters vhacdParameters)
+   public MeshTerrainObject(MeshTerrainObjectParameters vhacdParameters)
    {
-      this(filePath, vhacdParameters, new RigidBodyTransform());
+      this(vhacdParameters, new RigidBodyTransform());
    }
 
    public MeshTerrainObject(String filePath, RigidBodyTransformReadOnly transform)
    {
-      this(filePath, useTunedMeshTerrainObjectParametersIfItExists(filePath), transform);
+      this(useTunedMeshTerrainObjectParametersIfItExists(filePath), transform);
    }
 
-   public MeshTerrainObject(String filePath, MeshTerrainObjectParameters vhacdParameters, RigidBodyTransformReadOnly transform)
+   public MeshTerrainObject(MeshTerrainObjectParameters vhacdParameters, RigidBodyTransformReadOnly transform)
    {
+      String filePath = vhacdParameters.getModelDirectory();
 
       if (transform == null)
       {
@@ -128,7 +129,7 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    public static MeshTerrainObjectParameters useTunedMeshTerrainObjectParametersIfItExists(String filePath)
    {
-      MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters();
+      MeshTerrainObjectParameters parameters = new MeshTerrainObjectParameters(filePath);
       InputStream inputStream = null;
       String jsonFilePath = FilenameUtils.removeExtension(filePath) + VHACD_FILENAME_EXTENSION;
 
@@ -353,9 +354,20 @@ public class MeshTerrainObject implements TerrainObject3D, HeightMapWithNormals
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      checkIfInside(x, y, z, null, normalToPack);
+      IntersectionResult result = intersectionWithVerticalLine(x, y);
 
-      return heightAt(x, y, z);
+      double heightAt;
+
+      if (result.isHighestPointValid() && z >= result.lowestIntersection.getZ())
+         heightAt = result.highestIntersection.getZ();
+      else
+         heightAt = Double.NEGATIVE_INFINITY;
+      if (normalToPack != null && heightAt > Double.NEGATIVE_INFINITY)
+      {
+         normalToPack.set(result.highestFace.getNormal());
+      }
+
+      return heightAt;
    }
 
    @Override
