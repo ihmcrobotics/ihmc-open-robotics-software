@@ -47,7 +47,7 @@ public class OusterDriverAndDepthPublisher
 
       publishLidarScanMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
       publishSteppableRegionsMonitor = new ROS2HeartbeatMonitor(ros2, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
-      publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
 
       ouster = new OusterNetServer();
       ouster.start();

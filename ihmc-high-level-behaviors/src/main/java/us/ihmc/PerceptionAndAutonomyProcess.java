@@ -7,6 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -14,10 +15,15 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.headless.HumanoidPerceptionModule;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterHeightMapUpdater;
 import us.ihmc.perception.ouster.OusterNetServer;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoUpdateProcess;
@@ -25,8 +31,7 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.steppableRegions.RemoteSteppableRegionsUpdater;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -59,6 +64,9 @@ public class PerceptionAndAutonomyProcess
 
    private static final double SCENE_GRAPH_UPDATE_FREQUENCY = 10.0;
 
+   private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
+   private final ROS2Helper ros2Helper;
+
    private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final ROS2HeartbeatMonitor zedPointCloudHeartbeatMonitor;
    private final ROS2HeartbeatMonitor zedColorHeartbeatMonitor;
@@ -70,6 +78,7 @@ public class PerceptionAndAutonomyProcess
    private RestartableThread zedProcessAndPublishThread;
 
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
+   private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private final ROS2HeartbeatMonitor realsenseHeartbeatMonitor;
    private RawImage realsenseDepthImage;
    private RawImage realsenseColorImage;
@@ -106,6 +115,15 @@ public class PerceptionAndAutonomyProcess
    private final CenterposeDetectionManager centerposeDetectionManager;
    private final ROS2HeartbeatMonitor centerposeUpdateHeartbeatMonitor;
 
+   private HumanoidPerceptionModule humanoidPerceptionModule;
+   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final OpenCLManager openCLManager;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final CollisionBoxProvider collisionBoxProvider;
+   private final ROS2HeartbeatMonitor realsenseHeightmapHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor rapidRegionsHeartbeatMonitor;
+   private final ROS2HeartbeatMonitor mappingHeartbeatMonitor;
+
    // Sensor heartbeats to run main method without UI
    private ROS2Heartbeat zedHeartbeat;
    private ROS2Heartbeat realsenseHeartbeat;
@@ -113,10 +131,13 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat leftBlackflyHeartbeat;
    private ROS2Heartbeat rightBlackflyHeartbeat;
 
-   public PerceptionAndAutonomyProcess(ROS2PublishSubscribeAPI ros2,
+   public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       FullHumanoidRobotModel fullRobotModel,
+                                       CollisionBoxProvider collisionBoxProvider,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
+                                       Supplier<ReferenceFrame> realsenseZUpFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
@@ -124,21 +145,26 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> midFeetZUpFrameSupplier,
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
+      this.ros2Helper = ros2Helper;
+      this.fullRobotModel = fullRobotModel;
+      this.collisionBoxProvider = collisionBoxProvider;
+
       this.zedFrameSupplier = zedFrameSupplier;
-      zedPointCloudHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
-      zedColorHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
-      zedDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
+      zedPointCloudHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+      zedColorHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR);
+      zedDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH);
       initializeZEDHeartbeatCallbacks();
 
       this.realsenseFrameSupplier = realsenseFrameSupplier;
-      realsenseHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+      this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
+      realsenseHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
       initializeRealsenseHearbeatCallbacks();
 
       this.ousterFrameSupplier = ousterFrameSupplier;
       this.midFeetZUpFrameSupplier = midFeetZUpFrameSupplier;
-      ousterDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
-      lidarScanHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
-      ousterHeightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      ousterDepthHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_OUSTER_DEPTH);
+      lidarScanHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_LIDAR_SCAN);
+      ousterHeightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
       // TODO: Uncommnt this when Ouster height map is needed again (should probably work)
 //      if (ros2ControllerHelper != null)
 //      {
@@ -153,21 +179,26 @@ public class PerceptionAndAutonomyProcess
 
       blackflyFrameSuppliers.put(RobotSide.LEFT, leftBlackflyFrameSupplier);
       blackflyFrameSuppliers.put(RobotSide.RIGHT, rightBlackflyFrameSupplier);
-      blackflyImageHeartbeatMonitors.put(RobotSide.LEFT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT)));
-      blackflyImageHeartbeatMonitors.put(RobotSide.RIGHT, new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT)));
+      blackflyImageHeartbeatMonitors.put(RobotSide.LEFT, new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.LEFT)));
+      blackflyImageHeartbeatMonitors.put(RobotSide.RIGHT, new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT)));
       initializeBlackflyHeartbeatCallbacks();
 
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
-      sceneGraph = new ROS2SceneGraph(ros2);
+      sceneGraph = new ROS2SceneGraph(ros2Helper);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SCENE_GRAPH_UPDATE_FREQUENCY, this::updateSceneGraph);
 
       arUcoUpdater = new ArUcoUpdateProcess(sceneGraph, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
-      arUcoDetectionHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_ARUCO);
+      arUcoDetectionHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_ARUCO);
       initializeArUcoHeartbeatCallbacks();
 
-      centerposeDetectionManager = new CenterposeDetectionManager(ros2, zed2iLeftCameraFrame);
-      centerposeUpdateHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
+      centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper, zed2iLeftCameraFrame);
+      centerposeUpdateHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_CENTERPOSE);
       initializeCenterposeHeartbeatCallbacks();
+
+      openCLManager = new OpenCLManager();
+      realsenseHeightmapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_HEIGHT_MAP);
+      rapidRegionsHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_RAPID_REGIONS);
+      mappingHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2Helper, PerceptionAPI.REQUEST_MAPPING);
 
       sceneGraphUpdateThread.start(); // scene graph runs at all times
    }
@@ -219,6 +250,11 @@ public class PerceptionAndAutonomyProcess
             blackflyImageRetrievers.get(side).destroy();
       }
 
+      if (humanoidPerceptionModule != null)
+      {
+         humanoidPerceptionModule.destroy();
+      }
+      openCLManager.destroy();
 
       zedPointCloudHeartbeatMonitor.destroy();
       zedColorHeartbeatMonitor.destroy();
@@ -270,7 +306,27 @@ public class PerceptionAndAutonomyProcess
       realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
       realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
-      // Do processing on image
+      if (humanoidPerceptionModule == null && realsenseDepthImage.getImageHeight() != 0 && (realsenseHeightmapHeartbeatMonitor.isAlive()
+                                                                                            || rapidRegionsHeartbeatMonitor.isAlive()
+                                                                                            || mappingHeartbeatMonitor.isAlive()))
+      {
+         initializeHumanoidPerceptionModule();
+      }
+      else if (humanoidPerceptionModule != null)
+      {
+         humanoidPerceptionModule.setRapidRegionsEnabled(rapidRegionsHeartbeatMonitor.isAlive());
+         humanoidPerceptionModule.setHeightMapEnabled(realsenseHeightmapHeartbeatMonitor.isAlive());
+         humanoidPerceptionModule.setMappingEnabled(mappingHeartbeatMonitor.isAlive());
+
+         humanoidPerceptionModule.updateTerrain(ros2Helper,
+                                                realsenseDepthImage.getCpuImageMatrix(),
+                                                realsenseFrameSupplier.get(),
+                                                realsenseZUpFrameSupplier.get(),
+                                                true,
+                                                false);
+
+         ros2PropertySetGroup.update();
+      }
 
       realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
       realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
@@ -613,6 +669,25 @@ public class PerceptionAndAutonomyProcess
       });
    }
 
+   private void initializeHumanoidPerceptionModule()
+   {
+      humanoidPerceptionModule = new HumanoidPerceptionModule(openCLManager);
+      humanoidPerceptionModule.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
+      humanoidPerceptionModule.initializeRealsenseDepthImage(realsenseDepthImage.getImageHeight(), realsenseDepthImage.getImageWidth());
+      humanoidPerceptionModule.initializePerspectiveRapidRegionsExtractor(realsenseImageRetriever.getRealsenseDepthCameraIntrinsics());
+      humanoidPerceptionModule.initializeHeightMapExtractor(realsenseImageRetriever.getRealsenseDepthCameraIntrinsics());
+      humanoidPerceptionModule.getRapidRegionsExtractor().setEnabled(true);
+
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
+                                                     humanoidPerceptionModule.getRapidRegionsExtractor().getParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
+                                                     humanoidPerceptionModule.getRapidRegionsExtractor().getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
+                                                     humanoidPerceptionModule.getRapidRegionsExtractor().getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
+   }
+
    /*
     * This method is used to enable sensors without needing to run the UI.
     * Unneeded sensors can be commented out.
@@ -642,6 +717,9 @@ public class PerceptionAndAutonomyProcess
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
                                                                                                    null,
+                                                                                                   null,
+                                                                                                   null,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,

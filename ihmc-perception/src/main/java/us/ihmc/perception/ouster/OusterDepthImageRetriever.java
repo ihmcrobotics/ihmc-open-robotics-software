@@ -24,7 +24,7 @@ public class OusterDepthImageRetriever
 
    private final OusterNetServer ouster;
 
-   private OpenCLManager openCLManager;
+   private final OpenCLManager openCLManager;
    private OusterDepthExtractionKernel depthExtractionKernel;
 
    private boolean running = false;
