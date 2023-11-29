@@ -18,6 +18,8 @@ import java.util.ArrayList;
 
 public class MonteCarloFootstepPlanningDebugger
 {
+   private int offsetX = 0;
+   private int offsetY = 0;
    private int height = 201;
    private int width = 201;
    private int scale = 7;
@@ -45,6 +47,8 @@ public class MonteCarloFootstepPlanningDebugger
    public void setRequest(MonteCarloFootstepPlannerRequest request)
    {
       this.request = request;
+      this.offsetX = (int) (request.getSensorOrigin().getX() / 50.0f);
+      this.offsetY = (int) (request.getSensorOrigin().getY() / 50.0f);
       refresh();
    }
 
@@ -61,11 +65,13 @@ public class MonteCarloFootstepPlanningDebugger
    public void plotNode(MonteCarloFootstepNode node)
    {
       PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage,
-                                                new Point2D((int) node.getState().getX() * scale, (int) node.getState().getY() * scale),
+                                                new Point2D((int) (node.getState().getX() - offsetX) * scale,
+                                                            (int) (node.getState().getY() - offsetY) * scale),
                                                 1 * scale,
                                                 PerceptionDebugTools.COLOR_PURPLE);
       PerceptionDebugTools.plotRectangleNoScale(heightMapColorImage,
-                                                new Point2D((int) node.getState().getX() * scale, (int) node.getState().getY() * scale),
+                                                new Point2D((int) (node.getState().getX() - offsetX) * scale,
+                                                            (int) (node.getState().getY() - offsetY) * scale),
                                                 1 * scale,
                                                 PerceptionDebugTools.COLOR_PURPLE);
    }
@@ -112,10 +118,10 @@ public class MonteCarloFootstepPlanningDebugger
       {
          Pose3D pose = new Pose3D(poses.get(side));
          PerceptionDebugTools.plotTiltedRectangle(image,
-                                                  new Point2D(pose.getX() * scale, pose.getY() * scale),
+                                                  new Point2D((pose.getX() - offsetX) * scale, (pose.getY() - offsetY) * scale),
                                                   (float) pose.getYaw(),
                                                   2 * scale,
-                                                  side == RobotSide.LEFT ? -1 : 1);
+                                                  mode);
       }
    }
 
@@ -128,7 +134,7 @@ public class MonteCarloFootstepPlanningDebugger
       {
          Point3D pose = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
          PerceptionDebugTools.plotTiltedRectangle(image,
-                                                  new Point2D(pose.getX() * scale, pose.getY() * scale),
+                                                  new Point2D((pose.getX() - offsetX) * scale, (pose.getY() - offsetY) * scale),
                                                   pose.getZ32(),
                                                   2 * scale,
                                                   plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);

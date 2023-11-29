@@ -197,27 +197,8 @@ public class TerrainPlanningSimulationUI
 
             Point3D position = new Point3D(l515PoseGizmo.getGizmoFrame().getTransformToWorldFrame().getTranslation());
             Quaternion orientation = new Quaternion(l515PoseGizmo.getGizmoFrame().getTransformToWorldFrame().getRotation());
-            cameraPose.set(position, orientation);
-            cameraFrame.setPoseAndUpdate(cameraPose);
 
-            sensorToWorldTransform.set(orientation, position);
-
-            groundToWorldTransform.set(sensorToWorldTransform);
-            groundToWorldTransform.getRotation().setYawPitchRoll(sensorToWorldTransform.getRotation().getYaw(), 0, 0);
-            groundToWorldTransform.getTranslation().setZ(0);
-
-            sensorToGroundTransform.set(sensorToWorldTransform);
-            sensorToGroundTransform.getTranslation().setX(0.0f);
-            sensorToGroundTransform.getTranslation().setY(0.0f);
-            sensorToGroundTransform.getRotation()
-                                   .set(new Quaternion(0.0f,
-                                                       sensorToGroundTransform.getRotation().getPitch(),
-                                                       sensorToGroundTransform.getRotation().getRoll()));
-            RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
-            groundToSensorTransform.invert();
-
-            Pose3D groundPoseInSensorFrame = new Pose3D(groundToSensorTransform);
-            cameraZUpFrame.setPoseAndUpdate(groundPoseInSensorFrame);
+            updateCameraFrames(position, orientation);
 
             if (USE_EXTERNAL_HEIGHT_MAP)
             {
@@ -251,6 +232,30 @@ public class TerrainPlanningSimulationUI
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void updateCameraFrames(Point3D position, Quaternion orientation)
+         {
+            cameraPose.set(position, orientation);
+            cameraFrame.setPoseAndUpdate(cameraPose);
+
+            sensorToWorldTransform.set(orientation, position);
+
+            groundToWorldTransform.set(sensorToWorldTransform);
+            groundToWorldTransform.getRotation().setYawPitchRoll(sensorToWorldTransform.getRotation().getYaw(), 0, 0);
+            groundToWorldTransform.getTranslation().setZ(0);
+
+            sensorToGroundTransform.set(sensorToWorldTransform);
+            sensorToGroundTransform.getTranslation().setX(0.0f);
+            sensorToGroundTransform.getTranslation().setY(0.0f);
+            sensorToGroundTransform.getRotation()
+                                   .set(new Quaternion(0.0f,
+                                                       sensorToGroundTransform.getRotation().getPitch(),
+                                                       sensorToGroundTransform.getRotation().getRoll()));
+            RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
+            groundToSensorTransform.invert();
+
+            cameraZUpFrame.setPoseAndUpdate(groundToSensorTransform);
          }
 
          private void renderNavigationPanel()
@@ -352,7 +357,9 @@ public class TerrainPlanningSimulationUI
             {
                Vector3D translation = monteCarloFootstepPlanner.transitionToOptimal();
                l515PoseGizmo.getTransformToParent().prependTranslation(translation);
-               updateMonteCarloPlanner(false);
+               l515PoseGizmo.update();
+               updateCameraFrames(new Point3D(l515PoseGizmo.getGizmoFrame().getTransformToWorldFrame().getTranslation()),
+                                  new Quaternion(l515PoseGizmo.getGizmoFrame().getTransformToWorldFrame().getRotation()));
             }
             ImGui.popStyleColor();
             ImGui.checkbox("Enable Monte Carlo Planning", enableMonteCarloPlanner);
@@ -442,9 +449,8 @@ public class TerrainPlanningSimulationUI
             return plannerOutput;
          }
 
-         public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform, boolean reset)
+         private void setStartAndGoalFootPosesWithSliders(MonteCarloFootstepPlannerRequest request)
          {
-            MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
             request.setStartFootPose(RobotSide.LEFT,
                                      new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(startMidX.get(), startMidY.get() + 0.1, 0.0),
@@ -461,14 +467,44 @@ public class TerrainPlanningSimulationUI
                                     new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                     new Point3D(goalMidX.get(), goalMidY.get() - 0.1, 0.0),
                                                     new Quaternion(goalYaw.get(), 0, 0)));
+         }
+
+         private void setStartAndGoalFootPoses(MonteCarloFootstepPlannerRequest request, RigidBodyTransform transform)
+         {
+            Point3D startPosition = new Point3D(transform.getTranslation());
+            Point3D goalPosition = new Point3D(transform.getTranslation());
+            goalPosition.add(1.5, 0.0, 0.0);
+
+            request.setStartFootPoses(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                      new Point3D(startPosition.getX(), startPosition.getY() + 0.1, 0.0),
+                                                      new Quaternion(0, 0, 0)),
+                                      new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                      new Point3D(startPosition.getX(), startPosition.getY() - 0.1, 0.0),
+                                                      new Quaternion()));
+            request.setGoalFootPoses(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                       new Point3D(goalPosition.getX(), goalPosition.getY() + 0.1, 0.0),
+                                                       new Quaternion(0, 0, 0)),
+                                        new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                       new Point3D(goalPosition.getX(), goalPosition.getY() - 0.1, 0.0),
+                                                       new Quaternion()));
+         }
+
+         public FootstepPlan planFootstepsMonteCarlo(Mat heightMapImage, Mat contactMapImage, RigidBodyTransform zUpToWorldTransform, boolean reset)
+         {
+            MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
             request.setContactMap(contactMapImage);
             request.setHeightMap(heightMapImage);
             request.setSensorOrigin(zUpToWorldTransform.getTranslationX(), zUpToWorldTransform.getTranslationY());
+
+            //setStartAndGoalFootPosesWithSliders(request);
+            setStartAndGoalFootPoses(request, zUpToWorldTransform);
 
             long timeStart = System.nanoTime();
 
             if (reset)
                monteCarloFootstepPlanner.reset(request);
+
+            LogTools.warn("Start: {}, Goal: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT));
 
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();
