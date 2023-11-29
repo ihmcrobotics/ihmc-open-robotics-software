@@ -22,11 +22,11 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
-   api("us.ihmc:euclid-frame:0.20.0")
-   api("us.ihmc:euclid-shape:0.20.0")
-   api("us.ihmc:euclid-frame-shape:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
    api("us.ihmc:ihmc-realtime:1.6.0")
    api("us.ihmc:ihmc-ros-control:0.7.1")
    api("us.ihmc:ihmc-communication:source")
@@ -50,11 +50,11 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:euclid-geometry:0.20.0")
-   api("us.ihmc:euclid-frame:0.20.0")
-   api("us.ihmc:euclid-shape:0.20.0")
-   api("us.ihmc:euclid-frame-shape:0.20.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-shape:0.21.0")
+   api("us.ihmc:euclid-frame-shape:0.21.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }

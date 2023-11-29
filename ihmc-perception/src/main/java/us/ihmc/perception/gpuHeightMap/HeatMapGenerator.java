@@ -13,6 +13,10 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
+/**
+ * OpenCL based heat map generator for 16-bit grayscale images. Visualize any 16-bit grayscale image (scalars like steppability, traversability for each cell)
+ * as a colored image with any desired color scheme.
+ */
 public class HeatMapGenerator
 {
    private final _cl_program program;
@@ -45,29 +49,16 @@ public class HeatMapGenerator
       inputValueImage.copyTo(inputImage.getBytedecoOpenCVMat());
       inputImage.writeOpenCLImage(openCLManager);
 
-      //PerceptionDebugTools.printMat("Input Image", inputValueImage, 8);
-      //PerceptionDebugTools.printMat("Heat Map Buffer", inputImage.getBytedecoOpenCVMat(), 8);
-
-//      if (heatMapImage.getImageWidth() != inputValueImage.getImageWidth() || heatMapImage.getImageHeight() != inputValueImage.getImageHeight())
-//      {
-//         heatMapImage.destroy(openCLManager);
-//         heatMapImage = new BytedecoImage(inputValueImage.getImageWidth(), inputValueImage.getImageHeight(), opencv_core.CV_8UC4);
-//         heatMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-//      }
-
       parametersBuffer.setParameter(inputValueImage.cols());
       parametersBuffer.setParameter(inputValueImage.rows());
-
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
       openCLManager.setKernelArgument(heatMapKernel, 0, inputImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(heatMapKernel, 1, heatMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(heatMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
-
       openCLManager.execute2D(heatMapKernel, inputValueImage.rows(), inputValueImage.cols());
 
       heatMapImage.readOpenCLImage(openCLManager);
-
       return heatMapImage.getBytedecoOpenCVMat();
    }
 
