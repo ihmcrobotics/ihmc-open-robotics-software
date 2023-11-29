@@ -43,6 +43,11 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
             session.setSessionMode(SessionMode.PAUSE);
          }
       });
+
+      for (Runnable onSessionStartedRunnable : getOnSessionStartedRunnables())
+      {
+         onSessionStartedRunnable.run();
+      }
    }
 
    @Override
@@ -80,5 +85,10 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
    public SimulationSession getSimulationSession()
    {
       return (SimulationSession) session;
+   }
+
+   public RDXBulletPhysicsAsyncDebugger getBulletPhysicsDebugger()
+   {
+      return bulletPhysicsDebugger;
    }
 }

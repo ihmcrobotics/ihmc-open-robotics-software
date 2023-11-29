@@ -36,6 +36,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
       imagePanels.add(new RDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaNorth", false));
       imagePanels.add(new RDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaSouth", false));
+
+      for (Runnable onSessionStartedRunnable : getOnSessionStartedRunnables())
+      {
+         onSessionStartedRunnable.run();
+      }
    }
 
    public void createLogVideoLoader(String logVideoFilePath, String logVideoTimestampFilePath) throws IOException

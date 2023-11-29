@@ -149,7 +149,7 @@ public class RDXSCS2RestartableSimulationSession
       return terrainObjectDefinitions;
    }
 
-   public RDXSCS2Session getSCS2SimulationSession()
+   public RDXSCS2SimulationSession getSCS2SimulationSession()
    {
       return scs2SimulationSession;
    }
