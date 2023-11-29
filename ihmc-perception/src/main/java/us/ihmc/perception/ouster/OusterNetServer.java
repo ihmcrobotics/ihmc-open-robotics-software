@@ -301,6 +301,7 @@ public class OusterNetServer
       LogTools.info("Binding to TCP port: " + TCP_PORT);
       try (Socket socket = new Socket(sanitizededHostAddress, TCP_PORT))
       {
+         socket.setSoTimeout(RECEIVE_PACKET_TIMEOUT);
          OutputStream output = socket.getOutputStream();
          PrintWriter writer = new PrintWriter(output, true);
          writer.println(command);
