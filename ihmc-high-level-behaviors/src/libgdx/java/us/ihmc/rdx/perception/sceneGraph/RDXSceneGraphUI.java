@@ -149,6 +149,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(box);
                   }
+                  if (ImGui.button(labels.get("Add Short Stairs")))
+                  {
+                     RDXPredefinedRigidBodySceneNode box = predefinedRigidBodySceneNodeBuilder.build("ShortStairs");
+                     modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(box);
+                  }
                   ImGui.endTable();
                }
                if (!predefinedRigidBodySceneNodeBuilder.getRejectionTooltip().isEmpty())

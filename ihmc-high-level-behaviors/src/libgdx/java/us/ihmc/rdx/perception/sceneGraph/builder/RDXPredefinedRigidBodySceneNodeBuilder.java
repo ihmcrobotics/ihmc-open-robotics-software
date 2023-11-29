@@ -70,6 +70,17 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                          WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(workPlatform, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "ShortStairs" ->
+         {
+            PredefinedRigidBodySceneNode workPlatform = new PredefinedRigidBodySceneNode(nextID,
+                                                                                         name.get(),
+                                                                                         sceneGraph.getIDToNodeMap(),
+                                                                                         parent.getID(),
+                                                                                         SHORT_STAIRS_TRANSFORM_TO_MARKER,
+                                                                                         SHORT_STAIRS_VISUAL_MODEL_FILE_PATH,
+                                                                                         SHORT_STAIRS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(workPlatform, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }

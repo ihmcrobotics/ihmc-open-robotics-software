@@ -79,6 +79,16 @@ public class RigidBodySceneObjectDefinitions
       WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation().setToYawOrientation(-Math.PI / 2.0);
    }
 
+   public static final String SHORT_STAIRS_NAME = "ShortStairs";
+   public static final RigidBodyTransform SHORT_STAIRS_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   public static final String SHORT_STAIRS_VISUAL_MODEL_FILE_PATH = "environmentObjects/shortStairs/ShortStairs.obj";
+   public static final RigidBodyTransform SHORT_STAIRS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      SHORT_STAIRS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().set(-0.0254, 0.5, 0.0);
+      SHORT_STAIRS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation().setToYawOrientation(-Math.PI / 2.0);
+   }
+
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {
@@ -168,6 +178,21 @@ public class RigidBodySceneObjectDefinitions
                                                              WORK_PLATFORM_TRANSFORM_TO_MARKER,
                                                              WORK_PLATFORM_VISUAL_MODEL_FILE_PATH,
                                                              WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Work Platform to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
+   }
+   /**
+    * Represents short stairs
+    */
+   public static void ensureShortStairsAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode canOfSoup = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                             SHORT_STAIRS_NAME,
+                                                             sceneGraph.getIDToNodeMap(),
+                                                             parentNode.getID(),
+                                                             SHORT_STAIRS_TRANSFORM_TO_MARKER,
+                                                             SHORT_STAIRS_VISUAL_MODEL_FILE_PATH,
+                                                             SHORT_STAIRS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Work Platform to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
    }
