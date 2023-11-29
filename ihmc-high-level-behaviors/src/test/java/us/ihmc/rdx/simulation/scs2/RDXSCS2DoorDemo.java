@@ -81,6 +81,10 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
    {
       SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
+      BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
+
+      bulletPhysicsEngine.getGlobalBulletMultiBodyJointParameters().setJointDisableParentCollision(false);
+
       DoorDefinition doorDefinition = new DoorDefinition();
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
       doorDefinition.build();
@@ -90,10 +94,12 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
 
       // Push door
       doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
+
       Robot doorRobot = simulationSession.addRobot(doorDefinition);
       doorDefinition.applyPDController(doorRobot);
 
-      BulletPhysicsEngine bulletPhysicsEngine = (BulletPhysicsEngine) simulationSession.getPhysicsEngine();
+      bulletPhysicsEngine.getGlobalBulletMultiBodyJointParameters().setJointDisableParentCollision(true);
+
       bulletRobot = bulletPhysicsEngine.getBulletRobots().get(0);
 
       doorRobotMover = new RDXSCS2BulletRobotMover(baseUI.getPrimary3DPanel(), bulletRobot);
