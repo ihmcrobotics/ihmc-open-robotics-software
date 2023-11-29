@@ -118,15 +118,6 @@ public class ArUcoUpdateProcess
    public void stopArUcoDetection()
    {
       arUcoDetectionThread.stop();
-      arUcoLock.lock();
-      try
-      {
-         arUcoUpdateCondition.signal();
-      }
-      finally
-      {
-         arUcoLock.unlock();
-      }
    }
 
    public void destroy()

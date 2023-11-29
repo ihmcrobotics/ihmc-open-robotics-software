@@ -140,6 +140,7 @@ public class PerceptionAndAutonomyProcess
       lidarScanHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
       ousterHeightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
       // TODO: Uncommnt this when Ouster height map is needed again (should probably work)
+//      ousterHeightMapHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
 //      if (ros2ControllerHelper != null)
 //      {
 //         ousterHeightMapUpdater = new OusterHeightMapUpdater(ros2ControllerHelper);
@@ -226,7 +227,7 @@ public class PerceptionAndAutonomyProcess
       realsenseHeartbeatMonitor.destroy();
       ousterDepthHeartbeatMonitor.destroy();
       lidarScanHeartbeatMonitor.destroy();
-      ousterHeightMapHeartbeatMonitor.destroy();
+      //ousterHeightMapHeartbeatMonitor.destroy();
       blackflyImageHeartbeatMonitors.forEach(ROS2HeartbeatMonitor::destroy);
       arUcoDetectionHeartbeatMonitor.destroy();
       centerposeUpdateHeartbeatMonitor.destroy();
@@ -459,11 +460,11 @@ public class PerceptionAndAutonomyProcess
          }
          else
          {
-            if (!ousterHeightMapHeartbeatMonitor.isAlive())
-            {
+//            if (!ousterHeightMapHeartbeatMonitor.isAlive())
+//            {
                ouster.stop();
                ousterDepthImageRetriever.stop();
-            }
+//            }
             ousterDepthImagePublisher.stopDepth();
          }
       });
