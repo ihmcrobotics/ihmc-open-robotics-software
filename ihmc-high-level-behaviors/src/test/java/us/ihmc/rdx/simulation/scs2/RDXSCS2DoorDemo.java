@@ -95,10 +95,13 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
 
          doorRootGizmo.linkVariables(rdxSimulationSession.getSCS2SimulationSession().getYoManager().getRootRegistry(),
                                      rdxSimulationSession.getSCS2SimulationSession().getYoManager().getLinkedYoVariableFactory());
+
+         rdxSimulationSession.getSCS2SimulationSession().getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
+         rdxSimulationSession.getSCS2SimulationSession().getSession().runTick();
       });
 
       rdxSimulationSession.buildSimulation();
-      rdxSimulationSession.getSCS2SimulationSession().getSession().setSessionMode(SessionMode.RUNNING);
+
    }
 
    @Override

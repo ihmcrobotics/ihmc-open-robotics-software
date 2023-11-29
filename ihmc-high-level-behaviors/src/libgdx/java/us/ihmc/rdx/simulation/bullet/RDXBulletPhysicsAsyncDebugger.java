@@ -157,4 +157,9 @@ public class RDXBulletPhysicsAsyncDebugger
          }
       }
    }
+
+   public void setUpdateDebugDrawings(boolean updateDebugDrawings)
+   {
+      this.updateDebugDrawings.set(updateDebugDrawings);
+   }
 }

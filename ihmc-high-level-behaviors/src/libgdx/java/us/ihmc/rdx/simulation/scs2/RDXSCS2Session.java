@@ -175,11 +175,6 @@ public class RDXSCS2Session
       plotManager.setupForSession(yoManager);
 
       session.startSessionThread(); // TODO: Need start/stop controls?
-
-      for (Runnable onSessionStartedRunnable : onSessionStartedRunnables)
-      {
-         onSessionStartedRunnable.run();
-      }
    }
 
    public void update()
