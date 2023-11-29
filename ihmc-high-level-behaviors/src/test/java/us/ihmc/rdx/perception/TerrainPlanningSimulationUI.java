@@ -166,6 +166,7 @@ public class TerrainPlanningSimulationUI
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(30.0));
+            l515PoseGizmo.getTransformToParent().prependTranslation(1.0, 0.0, 0.0);
 
             baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic, RDXSceneLevel.MODEL);
 
@@ -504,7 +505,8 @@ public class TerrainPlanningSimulationUI
             if (reset)
                monteCarloFootstepPlanner.reset(request);
 
-            LogTools.warn("Start: {}, Goal: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT));
+            LogTools.warn("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
+                          request.getSensorOrigin());
 
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);
             long timeEnd = System.nanoTime();

@@ -47,8 +47,8 @@ public class MonteCarloFootstepPlanningDebugger
    public void setRequest(MonteCarloFootstepPlannerRequest request)
    {
       this.request = request;
-      this.offsetX = (int) (request.getSensorOrigin().getX() / 50.0f);
-      this.offsetY = (int) (request.getSensorOrigin().getY() / 50.0f);
+      this.offsetX = (int) (request.getSensorOrigin().getX() * 50.0f);
+      this.offsetY = (int) (request.getSensorOrigin().getY() * 50.0f);
       refresh();
    }
 
@@ -117,11 +117,14 @@ public class MonteCarloFootstepPlanningDebugger
       for (RobotSide side : RobotSide.values)
       {
          Pose3D pose = new Pose3D(poses.get(side));
-         PerceptionDebugTools.plotTiltedRectangle(image,
-                                                  new Point2D((pose.getX() - offsetX) * scale, (pose.getY() - offsetY) * scale),
-                                                  (float) pose.getYaw(),
-                                                  2 * scale,
-                                                  mode);
+         Point2D point = new Point2D((pose.getX() * 50 - offsetX) * scale, (pose.getY() * 50 - offsetY) * scale);
+
+         if (mode == 3)
+            LogTools.info(String.format("Goal: %d, %d", (int) point.getX(), (int) point.getY()));
+         else if (mode == 2)
+            LogTools.info(String.format("Start: %d, %d", (int) point.getX(), (int) point.getY()));
+
+         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) pose.getYaw(), 2 * scale, mode);
       }
    }
 
@@ -133,11 +136,8 @@ public class MonteCarloFootstepPlanningDebugger
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
          Point3D pose = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition());
-         PerceptionDebugTools.plotTiltedRectangle(image,
-                                                  new Point2D((pose.getX() - offsetX) * scale, (pose.getY() - offsetY) * scale),
-                                                  pose.getZ32(),
-                                                  2 * scale,
-                                                  plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+         Point2D point = new Point2D((pose.getX() * 50 - offsetX) * scale, (pose.getY() * 50 - offsetY) * scale);
+         PerceptionDebugTools.plotTiltedRectangle(image, point, pose.getZ32(), 2 * scale, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
       }
    }
 

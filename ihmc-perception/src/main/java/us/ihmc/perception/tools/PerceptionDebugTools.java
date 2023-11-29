@@ -487,10 +487,10 @@ public class PerceptionDebugTools
       plotFootstepWithYaw(displayImage, new Point3D(origin.getX(), origin.getY(), yaw), color, -1, size, size * 2);
    }
 
-   public static void plotFootstepWithYaw(Mat display, Point3D pose, Scalar color, int index, double width, double length)
+   public static void plotFootstepWithYaw(Mat display, Point3D imageCoordinatesWithYaw, Scalar color, int index, double width, double length)
    {
-      double[] positionOnMap = {pose.getX() * 50 + display.rows() / 2, pose.getY() * 50 + display.cols() / 2};
-      double yaw = pose.getZ();
+      double[] positionOnMap = {imageCoordinatesWithYaw.getX() + display.rows() / 2, imageCoordinatesWithYaw.getY() + display.cols() / 2};
+      double yaw = imageCoordinatesWithYaw.getZ();
 
       // Create the footstep rectangle using the position and orientation
       Point3D[] points = {new Point3D(-length, -width, 0),

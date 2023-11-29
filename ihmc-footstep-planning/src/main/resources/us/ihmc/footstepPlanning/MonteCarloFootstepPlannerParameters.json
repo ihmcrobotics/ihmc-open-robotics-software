@@ -61,7 +61,7 @@
     "upperBound" : 1.0
   },
   "Goal margin" : {
-    "value" : 24,
+    "value" : 19,
     "lowerBound" : 1,
     "upperBound" : 100
   },
@@ -71,12 +71,12 @@
     "upperBound" : 1.0
   },
   "Exploration constant" : {
-    "value" : 1.0,
+    "value" : 0.01,
     "lowerBound" : 0.01,
     "upperBound" : 10.0
   },
   "Initial value cutoff" : {
-    "value" : 48,
+    "value" : 63,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
