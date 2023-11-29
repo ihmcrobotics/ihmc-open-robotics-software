@@ -5,7 +5,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
 
@@ -14,8 +13,8 @@ public class HeightMapData
    /* Unordered list of the keys of all occupied cells */
    private TIntArrayList occupiedCells = new TIntArrayList();
    /* List of heights indexed by key */
-   private double[] heights;
-   private Vector3D[] normals;
+   private final double[] heights;
+   private final Vector3D[] normals;
 
    private final int centerIndex;
    private final int cellsPerAxis;

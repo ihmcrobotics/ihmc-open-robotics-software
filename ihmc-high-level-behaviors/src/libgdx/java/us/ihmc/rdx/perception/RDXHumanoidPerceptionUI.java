@@ -44,12 +44,25 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
 
+   /* Image panel to display the local height map */
    private RDXBytedecoImagePanel localHeightMapPanel;
+
+   /* Image panel to display the internal (full) height map */
    private RDXBytedecoImagePanel internalHeightMapPanel;
+
+   /* Image panel to display the internal (cropped) height map */
    private RDXBytedecoImagePanel croppedHeightMapPanel;
-   private RDXBytedecoImagePanel sensorCroppedHeightMapPanel;
+
+   /* Image panel to display the depth image */
    private RDXBytedecoImagePanel depthImagePanel;
+
+   /* Image panel to display the terrain cost map (16-bit scalar metric for steppability cost per cell,
+   *  computed based on terrain inclination and continuity) */
    private RDXBytedecoImagePanel terrainCostImagePanel;
+
+   /* Image panel to display the feasible contact map (16-bit scalar for distance transform of the terrain cost map, represents safety score
+   *  for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
+   *  https://en.wikipedia.org/wiki/Distance_transform */
    private RDXBytedecoImagePanel contactMapImagePanel;
 
    private final ImBoolean rapidRegionsCollapsedHeader = new ImBoolean(true);
@@ -143,18 +156,13 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
       if (humanoidPerception != null)
       {
-         //PerceptionDebugTools.printMat("Contact Map", humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage(), 4);
-
          Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(humanoidPerception.getRapidHeightMapExtractor().getCroppedContactMapImage());
 
          depthImagePanel.drawDepthImage(humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
-
          localHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat());
          croppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedGlobalHeightMapImage());
-         //sensorCroppedHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage());
          internalHeightMapPanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat());
          terrainCostImagePanel.drawDepthImage(humanoidPerception.getRapidHeightMapExtractor().getCroppedTerrainCostImage());
-
          contactMapImagePanel.drawColorImage(contactHeatMapImage);
       }
 
