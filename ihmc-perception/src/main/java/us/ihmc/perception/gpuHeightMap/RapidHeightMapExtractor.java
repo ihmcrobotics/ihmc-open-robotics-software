@@ -11,10 +11,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-//import us.ihmc.perception.neural.HeightMapAutoencoder;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -221,7 +219,6 @@ public class RapidHeightMapExtractor
    public void populateParameterBuffer(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter)
    {
       //// Fill parameters buffer
-      parametersBuffer.setParameter((float) parameters.getLocalCellSizeInMeters());
       parametersBuffer.setParameter((float) parameters.getLocalCellSizeInMeters());
       parametersBuffer.setParameter(centerIndex);
       parametersBuffer.setParameter((float) cameraIntrinsics.getHeight());
