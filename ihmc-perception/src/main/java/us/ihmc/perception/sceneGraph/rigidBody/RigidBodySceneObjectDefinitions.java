@@ -69,13 +69,13 @@ public class RigidBodySceneObjectDefinitions
    public static final String DEBRIS_VISUAL_MODEL_FILE_PATH = "environmentObjects/debris/2x4.g3dj";
    public static final RigidBodyTransform DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
-
+   public static final String WORK_PLATFORM_NAME = "WorkPlatform";
    public static final RigidBodyTransform WORK_PLATFORM_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    public static final String WORK_PLATFORM_VISUAL_MODEL_FILE_PATH = "environmentObjects/workPlatform/workPlatform.obj";
    public static final RigidBodyTransform WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    static
    {
-      WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().set(-0.882828, 1.4983275, 0.0);
+      WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().set(-0.882828, 1.5983275, 0.0);
       WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation().setToYawOrientation(-Math.PI / 2.0);
    }
 
@@ -153,6 +153,22 @@ public class RigidBodySceneObjectDefinitions
                                                              DEBRIS_VISUAL_MODEL_FILE_PATH,
                                                              DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Debris to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
+   }
+
+   /**
+    * Represents a work platform
+    */
+   public static void ensureWorkPlatformAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode canOfSoup = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                             WORK_PLATFORM_NAME,
+                                                             sceneGraph.getIDToNodeMap(),
+                                                             parentNode.getID(),
+                                                             WORK_PLATFORM_TRANSFORM_TO_MARKER,
+                                                             WORK_PLATFORM_VISUAL_MODEL_FILE_PATH,
+                                                             WORK_PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Work Platform to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
    }
 }
