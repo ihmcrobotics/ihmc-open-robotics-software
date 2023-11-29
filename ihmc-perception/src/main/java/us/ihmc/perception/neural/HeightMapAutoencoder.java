@@ -2,14 +2,10 @@ package us.ihmc.perception.neural;
 
 import ai.onnxruntime.*;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.ejml.data.FMatrixRMaj;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -19,13 +15,16 @@ import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
+/**
+ * Autoencoder for denoise height maps, trained on simulated height map data. Loads the ONNX model from file (.onnx) and runs inference on the height map.
+ * The input and output are both 201x201 16UC1 images. Used for recreating the height map without noise.
+ */
 public class HeightMapAutoencoder
 {
    private static final int IMAGE_HEIGHT = 201;
@@ -34,27 +33,28 @@ public class HeightMapAutoencoder
    private WorkspaceResourceDirectory modelDirectory = new WorkspaceResourceDirectory(this.getClass(), "/weights/");
    private WorkspaceFile onnxFile = new WorkspaceFile(modelDirectory, "height_map_autoencoder.onnx");
 
-   private OrtEnvironment environment = OrtEnvironment.getEnvironment();
-   private OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
-   private OrtSession session;
+   // the following fields are used for model loading and inference using the ONNX runtime library and PyTorch trained model stored as .onnx file
+   private OrtEnvironment onnxRuntimeEnvironment = OrtEnvironment.getEnvironment();
+   private OrtSession.SessionOptions onnxRuntimeSessionOptions = new OrtSession.SessionOptions();
+   private OrtSession onnxRuntimeSession;
 
    public HeightMapAutoencoder()
    {
       try
       {
-         session = environment.createSession(onnxFile.getFilesystemFile().toString(), sessionOptions);
+         onnxRuntimeSession = onnxRuntimeEnvironment.createSession(onnxFile.getFilesystemFile().toString(), onnxRuntimeSessionOptions);
 
-         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getInputInfo().entrySet())
+         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : onnxRuntimeSession.getInputInfo().entrySet())
          {
             LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
          }
-         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getOutputInfo().entrySet())
+         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : onnxRuntimeSession.getOutputInfo().entrySet())
          {
             LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
          }
 
          //print all input names and sizes
-         for (Map.Entry<String, NodeInfo> entry : session.getInputInfo().entrySet())
+         for (Map.Entry<String, NodeInfo> entry : onnxRuntimeSession.getInputInfo().entrySet())
          {
             String inputName = entry.getKey();
             NodeInfo nodeInfo = entry.getValue();
@@ -78,8 +78,7 @@ public class HeightMapAutoencoder
          denoisedHeightMapImage = predict(heightMap, offset);
 
          long endTime = System.nanoTime();
-         LogTools.debug("Inference time: {} ms", (endTime - startTime) / 1000000.0);
-
+         LogTools.debug("Inference time: {} ms", Conversions.nanosecondsToMilliseconds(endTime - startTime));
       }
       catch (OrtException e)
       {
@@ -98,69 +97,53 @@ public class HeightMapAutoencoder
 
       Mat heightMapImage = imageInput.clone();
 
-      //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 4);
-
       Mat heightMapInput = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
-
       heightMapImage.convertTo(heightMapInput, opencv_core.CV_32FC1, 1, 0);
-      //opencv_core.convertScaleAbs(heightMapInput, heightMapInput, 1.0 / 10000.0, 0);
-
-      //PerceptionDebugTools.printMat("Input Image", heightMapInput, 4);
-
       FloatBuffer inputFloatBuffer = FloatBuffer.allocate(IMAGE_HEIGHT * IMAGE_WIDTH);
 
       for (int i = 0; i < IMAGE_HEIGHT; i++)
       {
          for (int j = 0; j < IMAGE_WIDTH; j++)
          {
-            //LogTools.info("Reading pixel: {} {} {}", i, j, heightMapInput.ptr(i, j).getFloat());
             inputFloatBuffer.put(heightMapInput.ptr(i, j).getFloat() / 10000.0f - offset);
          }
       }
       inputFloatBuffer.rewind();
 
-      //PerceptionDebugTools.printBuffer2D("Input Buffer", inputFloatBuffer, IMAGE_HEIGHT, IMAGE_WIDTH, 4);
-
       // set the image to be in the first input
-      String inputName = (String) session.getInputNames().toArray()[0];
+      String inputName = (String) onnxRuntimeSession.getInputNames().toArray()[0];
       long[] tensorInputShape = {1, 1, heightMapInput.rows(), heightMapInput.cols()};
 
       // create a map to store the input tensors
       Map<String, OnnxTensor> inputs = new HashMap<>();
-      inputs.put(inputName, OnnxTensor.createTensor(environment, inputFloatBuffer, tensorInputShape));
+      inputs.put(inputName, OnnxTensor.createTensor(onnxRuntimeEnvironment, inputFloatBuffer, tensorInputShape));
 
       // run the inference
-      OrtSession.Result output = session.run(inputs);
+      OrtSession.Result output = onnxRuntimeSession.run(inputs);
 
       Mat outputImage = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
-      for (Map.Entry<String, OnnxValue> stringOnnxValueEntry : output)
+
+      Map.Entry<String, OnnxValue> stringOnnxValueEntry = output.iterator().next();
+      LogTools.debug("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
+      OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
+
+      float[][][][] outputArray = (float[][][][]) outputTensor.getValue();
+      LogTools.debug("Output: {}", outputTensor.getInfo());
+
+      if (outputArray[0][0].length != IMAGE_HEIGHT && outputArray[0][0][0].length != IMAGE_WIDTH)
       {
-         LogTools.debug("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
-
-         OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
-         float[][][][] outputArray = (float[][][][]) outputTensor.getValue();
-
-         LogTools.debug("Output: {}", outputTensor.getInfo());
-
-         if (outputArray[0][0].length != IMAGE_HEIGHT && outputArray[0][0][0].length != IMAGE_WIDTH)
-         {
-            throw new RuntimeException("Output size must be " + IMAGE_HEIGHT * IMAGE_WIDTH);
-         }
-
-         for (int i = 0; i < IMAGE_HEIGHT; i++)
-         {
-            for (int j = 0; j < IMAGE_WIDTH; j++)
-            {
-               outputImage.ptr(i, j).putFloat((outputArray[0][0][i][j] + offset) * 10000.0f);
-            }
-         }
-
-         //PerceptionDebugTools.printMat("Output Image", outputImage, 4);
-
-         // scale up the output image and convert to 16UC1
-         outputImage.convertTo(outputImage, opencv_core.CV_16UC1, 1, 0);
+         throw new RuntimeException("Output size must be " + IMAGE_HEIGHT * IMAGE_WIDTH);
       }
 
+      for (int i = 0; i < IMAGE_HEIGHT; i++)
+      {
+         for (int j = 0; j < IMAGE_WIDTH; j++)
+         {
+            outputImage.ptr(i, j).putFloat((outputArray[0][0][i][j] + offset) * 10000.0f);
+         }
+      }
+      // scale up the output image and convert to 16UC1
+      outputImage.convertTo(outputImage, opencv_core.CV_16UC1, 1, 0);
       return outputImage;
    }
 
@@ -189,7 +172,7 @@ public class HeightMapAutoencoder
          long endTime = System.nanoTime();
 
          // Print time difference in ms
-         LogTools.info("Inference time: {} ms", (endTime - startTime) / 1000000.0);
+         LogTools.info("Inference time: {} ms", Conversions.nanosecondsToMilliseconds(endTime - startTime));
 
          // create display image for output image
          Mat outputImage16UC1 = outputHeightMap16UC1.clone();
