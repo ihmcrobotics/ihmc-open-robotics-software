@@ -11,6 +11,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyLinkCollider;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -55,6 +56,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
          });
 
          hingeTorque.set(0.0);
+         leverTorque.set(0.0);
          rdxSimulationSession.getSCS2SimulationSession().getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
          rdxSimulationSession.getSCS2SimulationSession().getSession().runTick();
       });
@@ -104,6 +106,10 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
       bulletPhysicsEngine.getGlobalBulletMultiBodyJointParameters().setJointDisableParentCollision(true);
 
       bulletRobot = bulletPhysicsEngine.getBulletRobots().get(0);
+
+      // The bolt should be slippery
+      BulletMultiBodyLinkCollider boltLinkCollider = bulletRobot.getBulletMultiBodyRobot().getBulletMultiBodyLinkCollider(3);
+      boltLinkCollider.setFriction(0.001);
 
       doorRobotMover = new RDXSCS2BulletRobotMover(baseUI.getPrimary3DPanel(), bulletRobot);
       doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint("doorHingeJoint");
