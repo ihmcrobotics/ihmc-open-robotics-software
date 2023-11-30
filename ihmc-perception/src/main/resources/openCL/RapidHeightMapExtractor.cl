@@ -408,7 +408,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
 
    if ( finalHeight > 0.01f)
    {
-    printf("Found a height at %d, %d = %f\n", yIndex, xIndex, finalHeight);
+    // printf("Found a height at %d, %d = %f\n", yIndex, xIndex, finalHeight);
    }
    finalHeight += params[HEIGHT_OFFSET];
 
