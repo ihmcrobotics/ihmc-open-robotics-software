@@ -228,6 +228,26 @@ public class MonteCarloPlannerTools
       }
    }
 
+   public static void getOptimalPathByVisits(MonteCarloTreeNode root, List<MonteCarloTreeNode> path)
+   {
+      float maxVisits = -1e10f;
+      MonteCarloTreeNode maxNode = null;
+      for (MonteCarloTreeNode node : root.getChildren())
+      {
+         if (node.getVisits() > maxVisits)
+         {
+            maxVisits = node.getVisits();
+            maxNode = node;
+         }
+      }
+
+      if (maxNode != null)
+      {
+         path.add(maxNode);
+         getOptimalPathByVisits(maxNode, path);
+      }
+   }
+
    public static void plotPath(List<MonteCarloTreeNode> path, Mat gridColor)
    {
       for (MonteCarloTreeNode node : path)
@@ -442,6 +462,24 @@ public class MonteCarloPlannerTools
       else
       {
          return getOptimalNode(root.getMaxQueueNode(), layer);
+      }
+   }
+
+   public static void resetNodeVisits(MonteCarloTreeNode root)
+   {
+      root.setVisits(0);
+      for (MonteCarloTreeNode child : root.getChildren())
+      {
+         resetNodeVisits(child);
+      }
+   }
+
+   public static void resetNodeLevels(MonteCarloTreeNode root, int level)
+   {
+      root.setLevel(0);
+      for (MonteCarloTreeNode child : root.getChildren())
+      {
+         resetNodeLevels(child, level + 1);
       }
    }
 

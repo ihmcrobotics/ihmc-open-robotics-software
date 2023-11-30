@@ -108,6 +108,11 @@ public abstract class MonteCarloTreeNode implements Comparable<MonteCarloTreeNod
       return level;
    }
 
+   public void setLevel(int level)
+   {
+      this.level = level;
+   }
+
    public Object getState()
    {
       return null;
