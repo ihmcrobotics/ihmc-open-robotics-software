@@ -563,11 +563,7 @@ public class PerceptionDataLogger
 
    public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int rows, int columns)
    {
-      LogTools.info("Storing Floats From Pointer: {}", namespace);
-      //executorService.submit(() ->
-      //                       {
-      //                          synchronized (hdf5Manager)
-      //                          {
+      LogTools.debug("Storing Floats From Pointer: {}", namespace);
       Group group = hdf5Manager.createOrGetGroup(namespace);
 
       int count = channels.get(namespace).getCount();
@@ -576,8 +572,6 @@ public class PerceptionDataLogger
       hdf5Tools.storeFloatArray2D(group, count, floatPointer, rows, columns);
       floatPointer.position(0);
       floatPointer.limit(0);
-      //   }
-      //});
    }
 
    public void storeLongsFromPointer(String namespace, LongPointer longPointer, int columns)
@@ -605,7 +599,7 @@ public class PerceptionDataLogger
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit() == channels.get(namespace).getBlockSize())
+      if (pointer.limit()>= channels.get(namespace).getBlockSize())
       {
          storeLongsFromPointer(namespace, pointer, channels.get(namespace).getFrameSize());
       }
@@ -617,7 +611,7 @@ public class PerceptionDataLogger
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit() == channels.get(namespace).getBlockSize())
+      if (pointer.limit() >= channels.get(namespace).getBlockSize())
       {
          storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
       }
@@ -633,9 +627,9 @@ public class PerceptionDataLogger
 
       int blockUsed = (int) (pointer.limit() / channels.get(namespace).getFrameSize());
 
-      LogTools.info("Pointer Limit: {}, Block Used: {}, Block Size: {}", pointer.limit(), blockUsed, channels.get(namespace).getBlockSize());
+      LogTools.debug("Pointer Limit: {}, Block Used: {}, Block Size: {}", pointer.limit(), blockUsed, channels.get(namespace).getBlockSize());
 
-      if (blockUsed > channels.get(namespace).getBlockSize())
+      if (blockUsed >= channels.get(namespace).getBlockSize())
       {
          storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
       }
@@ -650,7 +644,7 @@ public class PerceptionDataLogger
       PerceptionMessageTools.copyToFloatPointer(orientation, pointer, startIndex);
 
       int blockUsed = (int) pointer.limit() / channels.get(namespace).getFrameSize();
-      if (blockUsed > channels.get(namespace).getBlockSize())
+      if (blockUsed >= channels.get(namespace).getBlockSize())
       {
          storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
       }
