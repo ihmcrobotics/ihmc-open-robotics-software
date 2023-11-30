@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -85,10 +86,10 @@ public class DoorDefinition extends RobotDefinition
 
       PrismaticJointDefinition doorBoltJoint = new PrismaticJointDefinition("doorBoltJoint");
       doorBoltJoint.setAxis(Axis3D.Y);
-      doorBoltJoint.setPositionLimits(-0.015, 0.0);
+      doorBoltJoint.setPositionLimits(-DOOR_BOLT_TRAVEL, 0.0);
       doorPanelDefinition.addChildJoint(doorBoltJoint);
       doorBoltJoint.getTransformToParent().getTranslation().add(0.01,
-                                                                DOOR_PANEL_WIDTH + 0.015 / 2.0,
+                                                                DOOR_PANEL_WIDTH + DOOR_BOLT_TRAVEL / 2.0,
                                                                 DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
       initialBoltState = new OneDoFJointState();
       doorBoltJoint.setInitialJointState(initialBoltState);
@@ -113,9 +114,18 @@ public class DoorDefinition extends RobotDefinition
 
          doorLeverJoint.setTau(-p * errorQ - d * errorQd);
 
-         d = 0.5;
+         double angleOfFullPull = 0.4 * Math.PI / 2.0;
+         double pullAmountQ = -Math.abs(doorLeverJoint.getQ()) * DOOR_BOLT_TRAVEL / angleOfFullPull;
 
-         errorQ = 8.0 * doorBoltJoint.getQ() + 0.3 * Math.abs(doorLeverJoint.getQ());
+         double boltFromPullAmountQ = doorBoltJoint.getQ() - pullAmountQ;
+         if (boltFromPullAmountQ < 0.0)
+            boltFromPullAmountQ = 0.0;
+
+         d = 5.0;
+
+         double springK = 8.0;
+         double mechanismK = 50.0;
+         errorQ = springK * doorBoltJoint.getQ() + mechanismK * boltFromPullAmountQ;
          errorQd = doorBoltJoint.getQd();
 
          doorBoltJoint.setTau(-errorQ - d * errorQd);
