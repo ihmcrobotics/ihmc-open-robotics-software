@@ -29,8 +29,7 @@ public class RDXSCS2FourBarLinkageTest
             baseUI.create();
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
-            scs2SimulationSession = new RDXSCS2SimulationSession();
-            scs2SimulationSession.create(baseUI);
+            scs2SimulationSession = new RDXSCS2SimulationSession(baseUI);
 
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
             CrossFourBarLinkageRobotDefinition robotDefinition = new CrossFourBarLinkageRobotDefinition();
@@ -38,7 +37,6 @@ public class RDXSCS2FourBarLinkageTest
 
             scs2SimulationSession.startSession(simulationSession);
             scs2SimulationSession.changeBufferDuration(20.0);
-            baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }
 
          @Override

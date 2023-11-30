@@ -21,11 +21,9 @@ public class RDXSCS2FlyingBallOrbitalEnergyTest
             baseUI.create();
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
-            scs2SimulationSession = new RDXSCS2SimulationSession();
-            scs2SimulationSession.create(baseUI);
+            scs2SimulationSession = new RDXSCS2SimulationSession(baseUI);
             scs2SimulationSession.startSession(new BulletFlyingBallSimulationTest().createSession());
             scs2SimulationSession.changeBufferDuration(20.0);
-            baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }
 
          @Override

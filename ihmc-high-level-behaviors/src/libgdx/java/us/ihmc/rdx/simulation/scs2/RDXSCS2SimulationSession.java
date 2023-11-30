@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.bullet.RDXBulletPhysicsAsyncDebugger;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
@@ -16,6 +17,11 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
 {
    private PhysicsEngine physicsEngine;
    private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
+
+   public RDXSCS2SimulationSession(RDXBaseUI baseUI)
+   {
+      super(baseUI);
+   }
 
    /**
     * Bring your own session.
@@ -82,7 +88,8 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
       super.renderImGuiWidgetsPartTwo();
    }
 
-   public SimulationSession getSimulationSession()
+   @Override
+   public SimulationSession getSession()
    {
       return (SimulationSession) session;
    }
