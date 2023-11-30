@@ -215,7 +215,8 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
          if (distanceFromBestFitPlane > cliffThreshold)
          {
             cliffDetected.set(true);
-            return cliffCost;
+            //Hack to not use this edge, fix later TODO
+            return 10.0;
          }
       }
 
