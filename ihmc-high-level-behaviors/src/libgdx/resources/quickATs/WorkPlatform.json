@@ -1,0 +1,52 @@
+{
+  "name" : "WorkPlatform",
+  "footsteps" : [ {
+    "side" : "right",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : -0.004,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -0.02,
+    "yawInDegrees" : 180.0
+  }, {
+    "side" : "left",
+    "x" : 0.2595,
+    "y" : 0.36,
+    "z" : -0.004,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -0.02,
+    "yawInDegrees" : -180.0
+  }, {
+    "side" : "right",
+    "x" : -0.2085,
+    "y" : 0.55,
+    "z" : -0.004,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -0.02,
+    "yawInDegrees" : -180.0
+  }, {
+    "side" : "left",
+    "x" : -0.613,
+    "y" : 0.3835,
+    "z" : -0.004,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -0.02,
+    "yawInDegrees" : -180.0
+  }, {
+    "side" : "right",
+    "x" : -0.842,
+    "y" : 0.6685,
+    "z" : -0.004,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -0.02,
+    "yawInDegrees" : -180.0
+  }, {
+    "side" : "left",
+    "x" : -0.8435,
+    "y" : 0.3605,
+    "z" : -0.004,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : -0.02,
+    "yawInDegrees" : 180.0
+  } ]
+}

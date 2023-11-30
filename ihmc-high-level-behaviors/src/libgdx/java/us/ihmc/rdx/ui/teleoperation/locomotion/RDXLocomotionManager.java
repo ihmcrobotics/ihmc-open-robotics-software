@@ -527,4 +527,9 @@ public class RDXLocomotionManager
    {
       return locomotionParameters;
    }
+
+   public RDXInteractableFootstepPlan getInteractableFootstepPlan()
+   {
+      return interactableFootstepPlan;
+   }
 }

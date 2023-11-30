@@ -82,4 +82,9 @@ public class ImGuiPanelManager
          panel.save(anchorJSON);
       }
    }
+
+   public TreeSet<RDXPanel> getPanels()
+   {
+      return panels;
+   }
 }

@@ -461,7 +461,7 @@ public class RDXAffordanceTemplateEditorUI
             fileManager.saveToFile(textInput.getString() + currentObjectName);
          ImGui.separator();
 
-         fileManagerDirectory.renderImGuiWidgets();
+         fileManagerDirectory.renderImGuiWidgetsAsDropDownMenu();
          ImGui.text("Click on radio button and then on Load");
          if (ImGui.button(labels.get("Load")))
          {
