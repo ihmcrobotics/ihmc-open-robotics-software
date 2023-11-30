@@ -45,20 +45,20 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
       baseUI.getPrimary3DPanel().getCamera3D().setCameraFocusPoint(new Point3D(0.7, 0.0, 0.4));
       baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, -4.0, 4.0);
 
-      rdxSimulationSession = new RDXSCS2RestartableSimulationSession(baseUI, this::buildSession);
+      rdxSimulationSession = new RDXSCS2RestartableSimulationSession(baseUI);
+      rdxSimulationSession.setSessionSupplier(this::buildSession);
+      rdxSimulationSession.getAdditionalImGuiWidgets().add(() ->
+      {
+         doorRobotMover.renderMoveJointCheckbox();
+         ImGuiTools.sliderDouble(labels.get("Hinge torque"), hingeTorque, -100.0, 100.0);
+         ImGuiTools.sliderDouble(labels.get("Lever torque"), leverTorque, -2.0, 2.0);
+      });
       rdxSimulationSession.getOnSessionStartedRunnables().add(() ->
       {
-         rdxSimulationSession.getSCS2SimulationSession().getAdditionalImGuiWidgets().add(() ->
-         {
-            doorRobotMover.renderMoveJointCheckbox();
-            ImGuiTools.sliderDouble(labels.get("Hinge torque"), hingeTorque, -100.0, 100.0);
-            ImGuiTools.sliderDouble(labels.get("Lever torque"), leverTorque, -2.0, 2.0);
-         });
-
          hingeTorque.set(0.0);
          leverTorque.set(0.0);
-         rdxSimulationSession.getSCS2SimulationSession().getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
-         rdxSimulationSession.getSCS2SimulationSession().getSession().runTick();
+         rdxSimulationSession.getBulletPhysicsDebugger().setUpdateDebugDrawings(true);
+         rdxSimulationSession.getSession().runTick();
       });
 
       rdxSimulationSession.buildSimulation();

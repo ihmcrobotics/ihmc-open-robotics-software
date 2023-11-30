@@ -1,51 +1,38 @@
 package us.ihmc.rdx.simulation.scs2;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class RDXSCS2RestartableSimulationSession
+public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSession
 {
-   private RDXSCS2SimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPanel managerPanel = new RDXPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
-   private final RDXBaseUI baseUI;
-   private final Supplier<SimulationSession> sessionSupplier;
-   private final ArrayList<Function<ReferenceFrame, Robot>> secondaryRobots = new ArrayList<>();
-   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
+   private Supplier<SimulationSession> sessionSupplier;
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private final ArrayList<String> variableWidgets = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
-   private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private final ArrayList<Runnable> destroyables = new ArrayList<>();
    private final StatelessNotification destroyedNotification = new StatelessNotification();
 
-   public RDXSCS2RestartableSimulationSession(RDXBaseUI baseUI, Supplier<SimulationSession> sessionSupplier)
+   public RDXSCS2RestartableSimulationSession(RDXBaseUI baseUI)
    {
-      this.baseUI = baseUI;
-      this.sessionSupplier = sessionSupplier;
-
-      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
-      baseUI.getImGuiPanelManager().addPanel(managerPanel);
+      super(baseUI);
    }
 
-   private void renderImGuiWidgets()
+   public void setSessionSupplier(Supplier<SimulationSession> sessionSupplier)
+   {
+      this.sessionSupplier = sessionSupplier;
+   }
+
+   @Override
+   public void renderImGuiWidgets()
    {
       if (!starting && !started)
       {
@@ -58,13 +45,13 @@ public class RDXSCS2RestartableSimulationSession
       {
          if (ImGui.button(labels.get("Rebuild simulation")))
          {
-            destroy();
+            destroySessionForRebuild();
             buildSimulation(true);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Destroy")))
          {
-            destroy();
+            destroySessionForRebuild();
          }
       }
       if (starting)
@@ -74,7 +61,7 @@ public class RDXSCS2RestartableSimulationSession
 
       if (started)
       {
-         scs2SimulationSession.renderImGuiWidgets();
+         super.renderImGuiWidgets();
       }
    }
 
@@ -89,22 +76,18 @@ public class RDXSCS2RestartableSimulationSession
       if (waitForDestroy)
          destroyedNotification.blockingWait();
 
-      scs2SimulationSession = new RDXSCS2SimulationSession();
-      scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
-      scs2SimulationSession.create(baseUI, managerPanel);
-      scs2SimulationSession.startSession(sessionSupplier.get());
+      startSession(sessionSupplier.get());
 
       for (String yoVariableName : variableWidgets)
       {
-         scs2SimulationSession.getPlotManager().addVariableWidget(yoVariableName);
+         getPlotManager().addVariableWidget(yoVariableName);
       }
 
       for (String robotToHide : robotsToHide)
       {
-         scs2SimulationSession.getShowRobotMap().get(robotToHide).set(false);
+         getShowRobotMap().get(robotToHide).set(false);
       }
 
-      scs2SimulationSession.getControlPanel().getIsShowing().set(true);
       starting = false;
       started = true;
    }
@@ -113,45 +96,27 @@ public class RDXSCS2RestartableSimulationSession
    {
       if (started)
       {
-         scs2SimulationSession.update();
+         super.update();
       }
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
-   {
-      if (scs2SimulationSession != null)
-      {
-         scs2SimulationSession.getRenderables(renderables, pool, sceneLevels);
-      }
-   }
-
-   public void destroy()
+   public void destroySessionForRebuild()
    {
       if (started)
       {
          started = false;
          ThreadTools.startAsDaemon(() ->
          {
-            scs2SimulationSession.destroy(baseUI);
-            scs2SimulationSession = null;
+            endSession();
+
+            for (Runnable destroyable : destroyables)
+            {
+               destroyable.run();
+            }
+
             destroyedNotification.notifyOtherThread();
          }, getClass().getSimpleName() + "Destroy");
       }
-   }
-
-   public ArrayList<Function<ReferenceFrame, Robot>> getSecondaryRobots()
-   {
-      return secondaryRobots;
-   }
-
-   public ArrayList<TerrainObjectDefinition> getTerrainObjectDefinitions()
-   {
-      return terrainObjectDefinitions;
-   }
-
-   public RDXSCS2SimulationSession getSCS2SimulationSession()
-   {
-      return scs2SimulationSession;
    }
 
    public ArrayList<String> getRobotsToHide()
@@ -159,13 +124,13 @@ public class RDXSCS2RestartableSimulationSession
       return robotsToHide;
    }
 
-   public ArrayList<Runnable> getOnSessionStartedRunnables()
-   {
-      return onSessionStartedRunnables;
-   }
-
    public void addVariableWidget(String yoVariableName)
    {
       variableWidgets.add(yoVariableName);
+   }
+
+   public ArrayList<Runnable> getDestroyables()
+   {
+      return destroyables;
    }
 }
