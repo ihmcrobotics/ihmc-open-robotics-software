@@ -16,11 +16,13 @@ import java.nio.ByteBuffer;
 
 public class DualBlackflyUDPSender
 {
-   private static final String BLACKFLY_SERIAL_LEFT = "22206802";
-   private static final String BLACKFLY_SERIAL_RIGHT = "22206798";
-   public static final int BLACKFLY_LEFT_UDP_PORT = 9200;
-   public static final int BLACKFLY_RIGHT_UDP_PORT = 9201;
-   private static final int IPV4_HEADER_LENGTH = 28;
+   private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
+   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
+   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "127.0.0.1");
+   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "127.0.0.1");
+   public static final int LEFT_UDP_PORT = 9200;
+   public static final int RIGHT_UDP_PORT = 9201;
+   public static final int IPV4_HEADER_LENGTH = 28;
    public static final int DATAGRAM_MAX_LENGTH = (int) (Math.pow(2, 16) - 1) - IPV4_HEADER_LENGTH;
 
    private final SideDependentList<Thread> publishThreads = new SideDependentList<>();
@@ -37,7 +39,7 @@ public class DualBlackflyUDPSender
          Thread publishThread = new Thread(() ->
          {
             SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
-                  side == RobotSide.LEFT ? BLACKFLY_SERIAL_LEFT : BLACKFLY_SERIAL_RIGHT);
+                  side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER);
 
             DatagramSocket socket;
             try
@@ -52,7 +54,7 @@ public class DualBlackflyUDPSender
             InetAddress address;
             try
             {
-               address = InetAddress.getByName(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1");
+               address = InetAddress.getByName(side == RobotSide.LEFT ? LEFT_DESTINATION_IP_ADDRESS : RIGHT_DESTINATION_IP_ADDRESS);
             }
             catch (UnknownHostException e)
             {
@@ -120,7 +122,7 @@ public class DualBlackflyUDPSender
                   DatagramPacket packet = new DatagramPacket(datagramData,
                                                              datagramLength,
                                                              address,
-                                                             side == RobotSide.LEFT ? BLACKFLY_LEFT_UDP_PORT : BLACKFLY_RIGHT_UDP_PORT);
+                                                             side == RobotSide.LEFT ? LEFT_UDP_PORT : RIGHT_UDP_PORT);
                   try
                   {
                      socket.send(packet);
