@@ -505,7 +505,7 @@ public class TerrainPlanningSimulationUI
             if (reset)
                monteCarloFootstepPlanner.reset(request);
 
-            LogTools.warn("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
+            LogTools.debug("Start: {}, Goal: {}, Origin: {}", request.getStartFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT),
                           request.getSensorOrigin());
 
             FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(request);

@@ -72,8 +72,8 @@
   },
   "Exploration constant" : {
     "value" : 0.01,
-    "lowerBound" : 0.01,
-    "upperBound" : 10.0
+    "lowerBound" : 0.0,
+    "upperBound" : 5.0
   },
   "Initial value cutoff" : {
     "value" : 63,
@@ -86,7 +86,7 @@
     "upperBound" : 12
   },
   "Sided yaw offset" : {
-    "value" : 1.075025,
+    "value" : 0.498879,
     "lowerBound" : 0.0,
     "upperBound" : 3.14
   },
@@ -96,12 +96,12 @@
     "upperBound" : 3.14
   },
   "Search inner radius" : {
-    "value" : 0.205913,
+    "value" : 0.3,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.649485,
+    "value" : 0.632653,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

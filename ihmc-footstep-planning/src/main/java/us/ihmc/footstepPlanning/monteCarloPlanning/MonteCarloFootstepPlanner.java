@@ -135,21 +135,21 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
          double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, parameters);
 
-         //if (node.getLevel() == 0)
-         //{
-         //   debugger.plotNodes(availableStates);
-         //   //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
-         //   //                            (int) node.getState().getX(),
-         //   //                            (int) node.getState().getY(),
-         //   //                            node.getState().getZ(),
-         //   //                            (int) newState.getState().getX(),
-         //   //                            (int) newState.getState().getY(),
-         //   //                            newState.getState().getZ(),
-         //   //                            (int) (newState.getState().getX() - node.getState().getX()),
-         //   //                            (int) (newState.getState().getY() - node.getState().getY()),
-         //   //                            newState.getState().getZ() - node.getState().getZ(),
-         //   //                            score));
-         //}
+         if (node.getLevel() == 0)
+         {
+            debugger.plotNodes(availableStates);
+            //LogTools.info(String.format("Previous: %d, %d, %.2f, Node: %d, %d, %.2f, Action: %d, %d, %.2f, Score: %.2f",
+            //                            (int) node.getState().getX(),
+            //                            (int) node.getState().getY(),
+            //                            node.getState().getZ(),
+            //                            (int) newState.getState().getX(),
+            //                            (int) newState.getState().getY(),
+            //                            newState.getState().getZ(),
+            //                            (int) (newState.getState().getX() - node.getState().getX()),
+            //                            (int) (newState.getState().getY() - node.getState().getY()),
+            //                            newState.getState().getZ() - node.getState().getZ(),
+            //                            score));
+         }
 
          if (node.getLevel() < parameters.getMaxTreeDepth() && score > parameters.getInitialValueCutoff())
          {

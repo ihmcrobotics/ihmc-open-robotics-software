@@ -120,9 +120,9 @@ public class MonteCarloFootstepPlanningDebugger
          Point2D point = new Point2D((pose.getX() * 50 - offsetX) * scale, (pose.getY() * 50 - offsetY) * scale);
 
          if (mode == 3)
-            LogTools.info(String.format("Goal: %d, %d", (int) point.getX(), (int) point.getY()));
+            LogTools.debug(String.format("Goal: %d, %d", (int) point.getX(), (int) point.getY()));
          else if (mode == 2)
-            LogTools.info(String.format("Start: %d, %d", (int) point.getX(), (int) point.getY()));
+            LogTools.debug(String.format("Start: %d, %d", (int) point.getX(), (int) point.getY()));
 
          PerceptionDebugTools.plotTiltedRectangle(image, point, (float) pose.getYaw(), 2 * scale, mode);
       }
