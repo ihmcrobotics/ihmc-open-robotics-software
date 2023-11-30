@@ -98,6 +98,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private RDXArmManager armManager;
    private final RDXLocomotionManager locomotionManager;
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
+   private RDXTeleoperationScriptedPoses scriptedPoses;
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final SideDependentList<RDXInteractableHand> interactableHands = new SideDependentList<>();
@@ -306,6 +307,9 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
+
+         scriptedPoses = new RDXTeleoperationScriptedPoses();
+         addChild(scriptedPoses);
       }
 
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
