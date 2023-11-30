@@ -307,7 +307,7 @@ public class MonteCarloPlannerTools
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPath(root, path);
+      MonteCarloPlannerTools.getOptimalPathByVisits(root, path);
 
       int offsetX = (int) (request.getSensorOrigin().getX() * 50);
       int offsetY = (int) (request.getSensorOrigin().getY() * 50);
@@ -481,6 +481,16 @@ public class MonteCarloPlannerTools
       {
          resetNodeLevels(child, level + 1);
       }
+   }
+
+   public static void pruneTree(MonteCarloTreeNode root, int numberOfChildrenToKeep)
+   {
+      for (MonteCarloTreeNode child : root.getChildren())
+      {
+         pruneTree(child, numberOfChildrenToKeep);
+      }
+      root.sortChildren();
+      root.prune(numberOfChildrenToKeep);
    }
 
    public static double getHeightAt(Mat heightMap, int rIndex, int cIndex)

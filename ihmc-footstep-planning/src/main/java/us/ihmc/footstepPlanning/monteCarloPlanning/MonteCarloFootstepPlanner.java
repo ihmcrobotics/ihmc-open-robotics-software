@@ -245,7 +245,7 @@ public class MonteCarloFootstepPlanner
       action.scale(1 / 50.0);
 
       root = maxNode;
-//      MonteCarloPlannerTools.resetNodeVisits(root);
+      MonteCarloPlannerTools.pruneTree(root, parameters.getMaxNumberOfChildNodes());
       MonteCarloPlannerTools.resetNodeLevels(root, 0);
 
       return action;
