@@ -228,7 +228,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   private void placeFootstep()
+   public void placeFootstep()
    {
       if (footstepBeingPlacedIsReachable)
       {
@@ -293,6 +293,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
+   public void setFootstepPose(FramePose3DReadOnly poseToSet)
+   {
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      footstepBeingPlaced.updatePose(poseToSet);
+   }
+
    public void squareUpFootstep()
    {
       footstepPlan.clear();
@@ -352,5 +358,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
+   }
+
+   public void forceFootstepPlacement()
+   {
+      footstepBeingPlacedIsReachable = true;
    }
 }

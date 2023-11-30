@@ -12,6 +12,7 @@ import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.affordances.quickATs.RDXQuickATManager;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -35,6 +36,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
    protected transient final FramePose3D visualModelPose = new FramePose3D();
 
    private transient final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
+   private final RDXQuickATManager quickATManager;
 
    public RDXRigidBodySceneNode(RigidBodySceneNode rigidBodySceneNode, RigidBodyTransform visualModelToNodeTransform, RDX3DPanel panel3D)
    {
@@ -50,6 +52,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       trackDetectedPoseWrapper = new ImBooleanWrapper(rigidBodySceneNode::getTrackingInitialParent,
                                                       trackDetectedPoseChanged::set,
                                                       imBoolean -> ImGui.checkbox(labels.get("Track " + initialParentName), imBoolean));
+      quickATManager = new RDXQuickATManager(rigidBodySceneNode);
    }
 
    public void update(SceneGraphModificationQueue modificationQueue)
@@ -105,6 +108,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
          rigidBodySceneNode.clearOffset();
          rigidBodySceneNode.freezeFromModification();
       }
+      quickATManager.renderImGuiWidgets();
    }
 
    @Override

@@ -20,7 +20,7 @@ public class ImGuiInputText extends ImGuiFancyWidget
       return valueChanged;
    }
 
-   public void setImString(double value)
+   public void setImString(String value)
    {
       imString.set(value);
    }
